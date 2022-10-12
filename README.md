@@ -15,3 +15,7 @@ Please file a issue on this repo, or contact us at <cellxgene@chanzuckerberg.com
 ### Security
 
 If you believe you have found a security issue, we would appreciate notification. Please send email to <security@chanzuckerberg.com>.
+
+### Code of Conduct
+
+This project adheres to the Contributor Covenant code of conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to <opensource@chanzuckerberg.com>.
