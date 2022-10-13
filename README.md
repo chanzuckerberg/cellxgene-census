@@ -6,7 +6,7 @@ The CZ Cell Census is an aggregation of all public single cell data available in
 
 ### Reuse
 
-The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the CZ Cell Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/2.0/).
+The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the CZ Cell Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
 
 ### For More Help
 
