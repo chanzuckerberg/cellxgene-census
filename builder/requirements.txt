@@ -1,0 +1,14 @@
+pyarrow
+pandas
+anndata
+numpy
+tiledb
+tiledbsoma
+scipy
+fsspec
+s3fs
+requests
+aiohttp
+Cython  # required by owlready2
+wheel  # required by owlready2
+owlready2

@@ -1,0 +1,35 @@
+name: Python Linting
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - run: pip install -U pip
+      - name: Python Black
+        run: |
+          python -m pip install black black[jupyter]
+          python -m black --check --diff .
+      - name: Python isort
+        run: |
+          python -m pip install isort
+          python -m isort --check --diff .
+      - name: Python style with flake8[bugbear]
+        run: |
+          python -m pip install flake8-bugbear
+          python -m flake8 .
+      - name: Check type annotations mypy
+        run: |
+          python -m pip install mypy==0.982 types-setuptools types-requests numpy
+          python -m mypy .
