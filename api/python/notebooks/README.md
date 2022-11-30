@@ -32,23 +32,23 @@ $ git clone https://github.com/chanzuckerberg/cell-census.git
 
 ## Step 2: Set up Python environment
 1. In your working directory, make and activate a virtual environment.
-```bash
+```shell
   $ python -m venv ./venv
   $ source ./venv/bin/activate
 ```
 2. Build and install SOMA into your virtual environment by following the instructions in `TileDB-SOMA/apis/python/README.md`
 3. Install the `cell_census` package:
-```bash
+```shell
   $ pip install -e cell-census/api/python/cell_census/
 ```
 4. Install packages needed to run notebooks:
-```bash
+```shell
   $ pip install scikit-misc
 ```
 
 ## Verify your installation
 Check that your installation works - this make take a few seconds, as it loads metadata from S3:
-```bash
+```shell
 $ python -c 'import cell_census; print(cell_census.open_soma().soma_type)'
 SOMACollection
 ```
