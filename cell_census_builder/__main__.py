@@ -262,7 +262,7 @@ def build_step3_create_X_layers(
 
 
 def create_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="make_cell_census")
+    parser = argparse.ArgumentParser(prog="cell_census_builder")
     parser.add_argument("uri", type=str, help="Census top-level URI")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
     parser.add_argument(

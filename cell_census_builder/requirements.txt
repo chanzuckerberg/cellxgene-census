@@ -3,7 +3,9 @@ pandas
 anndata
 numpy
 tiledb
-tiledbsoma
+# NOTE: Until tiledbsoma is available on PyPi, you will need to build this dependency
+# from source, per ./notebooks/README.md.
+# tiledbsoma
 scipy
 fsspec
 s3fs

@@ -32,7 +32,7 @@ b) creating a smaller "cell census" from a user-provided list of files (a "manif
 
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
 - To create an cell census at `<census_path>`, execute:
-  > $ python -m builder <census_path> -mp --max-workers 12
+  > $ python -m cell_census_builder <census_path> -mp --max-workers 12
 
 If you run out of memory, reduce `--max-workers`. You can also try a higher number if you have lots of CPU & memory.
 
@@ -46,7 +46,7 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
   ```
   You can specify a file system path or a URI in the second field
 - To create an cell census at `<census_path>`, execute:
-  > $ python -m builder <census_path> --manifest <the_manifest_file.csv>
+  > $ python -m cell_census_builder <census_path> --manifest <the_manifest_file.csv>
 
 ### Other info
 

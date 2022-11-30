@@ -13,9 +13,10 @@ You must be on a Linux or MacOS system, with the following installed:
 * git
 * Jupyter or some other means of running notebooks (e.g., vscode)
 
-For now, it is recommended that you do all this on an EC2 instance, and choose one 
-with sufficient memory and bandwidth (eg, m6i.16xlarge). If you do, it is recommended
-that you use the Ubuntu 20 or 22 AMI (AWS AMI should work fine, but has not been tested).
+For now, it is recommended that you do all this on an host with sufficient memory,
+and a high bandwidth connection to AWS S3 in the us-west-2 region, e.g., an m6i.16xlarge.
+If you utilize AWS, Ubuntu 20 or 22 AMI are recommended (AWS AMI should work fine, but has
+not been tested).
 
 I also recommend you use a `d` instance type, and mount all of the NVME drives as swap,
 as it will keep you from running out of RAM.

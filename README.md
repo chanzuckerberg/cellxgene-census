@@ -2,7 +2,7 @@
 
 **Status**: Unstable, under rapid development
 
-This repository contains documentation and example code related to the Chan Zuckerberg CELLxGENE Cell Census.
+This repository contains documentation and example code related to the Chan Zuckerberg CELLxGENE Cell Census, and a client (API) package to simplify accessing the Cell Census data.
 
 The CZ Cell Census is an aggregation of all public single cell data available in [CELLxGENE Discover](https://cellxgene.cziscience.com/), published in API-accessible formats, including the [SOMA API](https://github.com/single-cell-data/).
 
