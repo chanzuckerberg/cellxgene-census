@@ -5,7 +5,7 @@ numpy
 tiledb
 # NOTE: Until tiledbsoma is available on PyPi, you will need to build this dependency
 # from source, per ./notebooks/README.md.
-# tiledbsoma
+# tiledbsoma>=0.5.0
 scipy
 fsspec
 s3fs
