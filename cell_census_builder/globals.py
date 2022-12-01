@@ -1,3 +1,5 @@
+from typing import Set
+
 import pyarrow as pa
 import tiledb
 
@@ -104,7 +106,7 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 
 # Feature_reference values which are ignored (not considered) in
 # multi-organism filtering. Currently the null set.
-FEATURE_REFERENCE_IGNORE = set()
+FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
 
 """
