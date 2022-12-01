@@ -102,11 +102,9 @@ RNA_SEQ = [
 
 DONOR_ID_IGNORE = ["pooled", "unknown"]
 
-# Feature_reference values which are ignored (not considered) for
-# multi-organism filtering.
-SARS_COV_2 = "NCBITaxon:2697049"
-ERCC_SPIKE_INS = "NCBITaxon:32630"
-FEATURE_REFERENCE_IGNORE = {SARS_COV_2, ERCC_SPIKE_INS}
+# Feature_reference values which are ignored (not considered) in
+# multi-organism filtering. Currently the null set.
+FEATURE_REFERENCE_IGNORE = set()
 
 
 """
