@@ -1,4 +1,4 @@
-#Cell Census storage & release policy
+# Cell Census storage & release policy
 
 **Status**: Draft.
 
