@@ -35,16 +35,16 @@ The following terms are used throughout this document:
 The Cell Census Schema follows [Semver](https://semver.org/) for its versioning:
 
 * Major: any schema changes that make the Cell Census incompatible with public API(s) or SOMA. Examples:
-	* Column deletion in Cell Census obs
+	* Column deletion in Cell Census `obs`
 	* Addition of new modality
 * Minor: schema additions that are compatible with public API(s) and SOMA. Examples:
-	* New column to Cell Census obs is added
-	* Tissue-to-tissue_general mapping changes
+	* New column to Cell Census `obs` is added
+	* tissue/tissue_general mapping changes
 * Patch: schema fixes. Examples:
 	* Editorial schema changes
 
 
-Changes MUST be documented in the schema Changelog at the end of this document.
+Changes MUST be documented in the schema [Changelog](#changelog) at the end of this document.
 
 Cell Census data releases are versioned separately from the schema.
 
@@ -123,7 +123,7 @@ Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`]
     <td></td>
   </tr>
   <tr>
-    <td>0EFO:0008913</td>
+    <td>EFO:0008913</td>
     <td>single-cell RNA sequencing</td>
     <td>Refers to “TruDrop” from this <a href="https://cellxgene.cziscience.com/collections/a48f5033-3438-4550-8574-cdff3263fdfd">collection</a> which is not included in EFO at the moment.</td>
   </tr>
@@ -178,7 +178,7 @@ Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`]
     <td></td>
   </tr>
   <tr>
-    <td>1EFO:0010183</td>
+    <td>EFO:0010183</td>
     <td>single cell library construction</td>
     <td>Refers to “GEXSCOPE” from this <a href="https://cellxgene.cziscience.com/collections/edb893ee-4066-4128-9aec-5eb2b03f8287">collection</a> which is not included in EFO at the moment.</td>
   </tr>
@@ -225,9 +225,9 @@ Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`]
 </tbody>
 </table>
 
-**Additional Notes**
+Additional Notes:
 
-* EFO:0030026 “sci-Plex” is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks the proper context and thus may be misleading to include. 
+* EFO:0030026 “sci-Plex” is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include. 
 * EFO:0009920 and EFO:0030062 “Slide-seq” and “Slide-seqV2”, respectively, are not included as coverage is low compared to other assays and data lacks context without spatial metadata not included in CELLxGENE dataset schema.
 
 #### Data matrix types
@@ -236,19 +236,19 @@ Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read count
 
 #### Sample types
 
-Only data of cells from primary tissue MUST be included in the Cell Census. Thus any observations (cells) with [`tissue_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#tissue_ontology_term_id) value of  "ontology\_term\_id (organoid)" or "ontology\_term\_id (cell line)" MUST NOT be included.
+Only observations (cells) from primary tissue MUST be included in the Cell Census. Thus observations with a [`tissue_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#tissue_ontology_term_id) value of  "ontology\_term\_id (organoid)" or "ontology\_term\_id (cell line)" MUST NOT be included.
 
 #### Repeated data
 
-When a cell is represented multiple times in CELLxGENE Discover only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data). This information MUST be included in the Cell Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Cell Census.
+When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data). This information MUST be included in the Cell Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Cell Census.
 
 ### Data encoding and organization
 
-The Cell Census MUST be encoded as a SOMACollection which will be referenced  as `census_obj` in the following sections. `census_obj`  MUST have two keys “census\_info” and “census\_data”.
+The Cell Census MUST be encoded as a `SOMACollection` which will be referenced  as `census_obj` in the following sections. `census_obj`  MUST have two keys `“census_info”` and `“census_data”` whose contents are defined in the sections below.
 
 #### Cell Census information `census_obj[“census_info”]` - `SOMACollection`
 
-A series of summary and metadata tables MUST be included in this `SOMACollection` as described in this section.
+A series of summary and metadata tables MUST be included in this `SOMACollection`:
 
 ##### Cell Census metadata – `census_obj​​[“census_info”][“summary”]` – `SOMADataFrame`
 
@@ -276,7 +276,7 @@ Census metadata MUST be stored as a `SOMADataFrame` with two columns:
 </tbody>
 </table>
 
-This SOMADataFrame MUST have the following rows::
+This `SOMADataFrame` MUST have the following rows::
  
 1. Cell Census schema version:
 	1. label: `“cell_census_schema_version”`
@@ -288,7 +288,7 @@ This SOMADataFrame MUST have the following rows::
 	1. label: `“total_cell_count”`
 	1. value: Cell count
 1. Unique number of cells included in this Cell Census build (is_primary_data == True)
-	1. label: `“total_cell_count”`
+	1. label: `“unique_cell_count”`
 	1. value: Cell count
 1. Number of human donors included in this Cell Census build. Donors are guaranteed to be unique within datasets, not across all Cell Census.
 	1. label: `“number_donors_homo_sapiens”`
@@ -336,7 +336,7 @@ An example of this `SOMADataFrame` is shown below:
 
 #### Cell Census table of CELLxGENE Discover datasets – `census_obj[“census_info”][“datasets”]` – `SOMADataFrame`
 
-All datasets used to build the Cell Census MUST be modeled as a SOMADataFrame. Each row MUST correspond to an individual dataset with the following columns:
+All datasets used to build the Cell Census MUST be included in a table modeled as a `SOMADataFrame`. Each row MUST correspond to an individual dataset with the following columns:
 
 <table>
 <thead>
@@ -383,7 +383,7 @@ All datasets used to build the Cell Census MUST be modeled as a SOMADataFrame. E
 
 #### Cell Census summary cell counts  – `census_obj[“census_info”][“summary_cell_counts”]` – `SOMADataframe`
 
-Summary cell counts grouped by organism and relevant cell metadata MUST be modeled as a `SOMADataFrame` in `census_obj[“census_info”][“summary_cell_counts”]`. Each row of MUST correspond to a combination of organism and metadata variable with the following columns:
+Summary cell counts grouped by organism and relevant cell metadata MUST be modeled as a `SOMADataFrame` in `census_obj[“census_info”][“summary_cell_counts”]`. Each row of MUST correspond to a combination of organism and metadata variables with the following columns:
 
 <table>
 <thead>
@@ -655,9 +655,10 @@ Example of this `SOMADataFrame`:
 </tbody>
 </table>
 
-### Cell Census Data – census_obj[“census_data”][organism] – SOMAExperiment
+### Cell Census Data – `census_obj[“census_data”][organism]` – `SOMAExperiment`
 
 Data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj[“homo_sapiens”]`.
+
 Data for *Mus musculus* MUST be stored as a `SOMAExperiment` in `census_obj[“mus_musculus”]`.
 
 For each organism the `SOMAExperiment` MUST contain the following:
@@ -670,7 +671,7 @@ For each organism the `SOMAExperiment` MUST contain the following:
 	* Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence_matrix”]` – `SOMASparseNdArray`
 
 
-For each organism the SOMAExperiment SHOULD NOT contain the following:
+For each organism the `SOMAExperiment` SHOULD NOT contain the following:
 
 * Elements of `census_obj[“census_data”][organism].ms[“RNA”]`: 
 	* `var_ms`
@@ -722,7 +723,7 @@ The following columns MUST be included:
 
 In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, the Cell Census MUST include a presence matrix encoded as a `SOMASparseNdArray`.
 
-For all features included in the Cell Census, the “dataset presence” matrix MUST indicate what features are included in each dataset of the Cell Census. This information MUST be encoded as a boolean matrix, True indicates the feature was included in the dataset, False otherwise. This is a two-dimensional matrix and it MUST be N x M where N is the number of datasets and M is the number of features. The matrix is indexed by the `soma_joinid` value of  `census_obj[“census_info”][“datasets”]` and `census_obj[“census_data”][organism].ms[“RNA”].var`.
+For all features included in the Cell Census, the dataset presence matrix MUST indicate what features are included in each dataset of the Cell Census. This information MUST be encoded as a boolean matrix, `True` indicates the feature was included in the dataset, `False` otherwise. This is a two-dimensional matrix and it MUST be `N x M` where `N` is the number of datasets and `M` is the number of features. The matrix is indexed by the `soma_joinid` value of  `census_obj[“census_info”][“datasets”]` and `census_obj[“census_data”][organism].ms[“RNA”].var`.
 
 If the feature has at least one cell with a value greater than zero in the count data matrix X in the dataset of origin, the value MUST be `True`; otherwise, it MUST be `False`.
 
