@@ -8,7 +8,7 @@
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
--
+---
 
 The cell census MUST be stored in the following S3 root bucket:
 
@@ -22,7 +22,7 @@ The Cell Census SOMA-related files MUST be deposited within the release folder o
 
 `./cell-census/release-[counter]/soma/`
 
-All h5ads used to create the cell census MUST be copied within the release folder into a folder named `h5ads`:	
+All h5ads used to create the Cell Census MUST be copied within the release folder into a folder named `h5ads`:	
 `./cell-census/release-[counter]/h5ads/`
 
 Any dataset changes, additions, or deletions per release MUST be documented in the following human-readable changelog file name `changelog.txt`:

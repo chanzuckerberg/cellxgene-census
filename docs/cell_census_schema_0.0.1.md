@@ -10,7 +10,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Cell Census overview
 
-The Cell Census is a versioned container for the single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/). The Cell Census utilizes [SOMA](https://cellxgene.cziscience.com/) powered by [TileDB](https://tiledb.com/products/tiledb-embedded) for storing, accessing, and efficiently filtering data.
+The Cell Census is a versioned container for the single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/). The Cell Census utilizes [SOMA](https://github.com/single-cell-data/TileDB-SOMA) powered by [TileDB](https://tiledb.com/products/tiledb-embedded) for storing, accessing, and efficiently filtering data.
 
 The main goals of the Cell Census are:
 
@@ -25,8 +25,8 @@ The following terms are used throughout this document:
 
 * adata – generic variable name that refers to an [`AnnData`](https://anndata.readthedocs.io/) object.
 * CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Cell Census schema: [CELLxGENE dataset schema version is 3.0.X](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md)
-* census\_obj – the cell census root object, a SOMACollection.
-* Cell census release – a Cell Census deposited in a public bucket and accessible by APIs.
+* census\_obj – the Cell Census root object, a SOMACollection.
+* Cell Census release – a Cell Census deposited in a public bucket and accessible by APIs.
 * tissue – original tissue annotation.
 * tissue\_general – high-level mapping of a tissue, e.g. “Heart” is the tissue_general of “Heart left ventricle” .
 
@@ -77,18 +77,18 @@ For a given multi-species dataset, the table below shows all possible combinatio
 </thead>
 <tbody>
   <tr>
-    <td>"NCBITaxon:9606" for Homo sapiens AND "NCBITaxon:10090" for Mus musculus</td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
     <td>"NCBITaxon:9606" for Homo sapiens</td>
-    <td>Only observations from "NCBITaxon:9606" for Homo sapiens MUST be included</td>
+    <td>Only observations from "NCBITaxon:9606" for <i>Homo sapiens</i> MUST be included</td>
   </tr>
   <tr>
-    <td>"NCBITaxon:9606" for Homo sapiens AND "NCBITaxon:10090" for Mus musculus</td>
-    <td>"NCBITaxon:10090" for Mus musculus</td>
-    <td>Only observations from "NCBITaxon:10090" for Mus musculus MUST be included</td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>Only observations from "NCBITaxon:10090" for <i>Mus musculus</i> MUST be included</td>
   </tr>
   <tr>
-    <td>"NCBITaxon:9606" for Homo sapiens AND "NCBITaxon:10090" for Mus musculus</td>
-    <td>"NCBITaxon:9606" for Homo sapiens AND "NCBITaxon:10090" for Mus musculus</td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
     <td>All observations MUST NOT be included</td>
   </tr>
 </tbody>
