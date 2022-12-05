@@ -6,7 +6,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
