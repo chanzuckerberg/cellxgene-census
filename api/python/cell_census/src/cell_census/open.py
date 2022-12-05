@@ -71,7 +71,7 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
     return _open_soma(description)
 
 
-def get_source_h5ad_uri(dataset_id: str, *, census_version: Optional[str] = "latest") -> CensusLocator:
+def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
     """
     Open the named version of the census, and return the URI for the dataset_id.
     This does not guarantee that the H5AD exists or is accessible to the user.
