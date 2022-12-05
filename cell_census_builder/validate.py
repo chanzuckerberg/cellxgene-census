@@ -231,7 +231,9 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
 
-    Currently implements a weak test: that nnz is correct.
+    Currently implements weak tests:
+    * the nnz is correct
+    * there are no zeros explicitly saved (this is mandated by cell census schema)
     """
     assets_path, soma_path, dataset, experiment_builders = args
     census = soma.Collection(soma_path, ctx=TileDB_Ctx())
@@ -258,8 +260,9 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
             raw_nnz = count_elements(se.ms["RNA"].X["raw"], soma_joinids)
 
         def nnz(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
+            """Return _actual_ non-zero count, NOT the stored value count."""
             if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
-                return cast(int, arr.nnz)
+                return np.count_nonzero(arr.data)
             return np.count_nonzero(arr)
 
         if ad.raw is None:
