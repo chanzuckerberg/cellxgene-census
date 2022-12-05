@@ -31,9 +31,34 @@ def _open_soma(description: CensusReleaseDescription) -> soma.Collection:
 def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = None) -> soma.Collection:
     """
     Open the Cell Census by version (name) or URI, returning a soma.Collection containing
-    the top-level census.
+    the top-level census.  Raises error if census_versio is specified and unknown, or if
+    neither ``uri`` or ``census_version`` are specified.
 
     TODO: add platform_config hook when it is further defined, allowing config overrides.
+
+    Parameters
+    ----------
+    census_version : Optional[str]
+        The tag/name of the Census, e.g., "latest"
+    uri : Optional[str]
+        The URI containing the Census SOMA objects. If specified, will take precedence
+        over ``census_version`` parameter.
+
+    Returns
+    -------
+    soma.Collection : returns a SOMA Collection object.
+
+    Examples
+    --------
+    Open the default Cell Census version:
+
+    >>> census = cell_census.open_soma()
+
+    Open a specific Cell Census version by tag name:
+    >>> census = cell_census.open_soma("2022-12-31")
+
+    Open a Cell Census by URI, rather than by version name:
+    >>> census = cell_census.open_soma(uri="cell-census")
     """
 
     if uri is not None:
@@ -46,13 +71,28 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
     return _open_soma(description)
 
 
-def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
+def get_source_h5ad_uri(dataset_id: str, *, census_version: Optional[str] = "latest") -> CensusLocator:
     """
     Open the named version of the census, and return the URI for the dataset_id.
-
     This does not guarantee that the H5AD exists or is accessible to the user.
+    Raises an error if dataset_id or census_version are unknown.
 
-    Raises if dataset_id or census_version are unknown.
+    Parameters
+    ----------
+    dataset_id : str
+        The dataset_id of interest
+    census_version : Optional[str]
+        The census version
+
+    Returns
+    -------
+    CensusLocator : the URI and optional S3 region for the sorce H5AD
+
+    Examples
+    --------
+    >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
+    {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d.h5ad',
+    's3_region': 'us-west-2'}
     """
     description = get_release_description(census_version)  # raises
     census = _open_soma(description)
