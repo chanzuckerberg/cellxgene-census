@@ -6,7 +6,7 @@ import s3fs
 import tiledb
 import tiledbsoma as soma
 
-from .release_directory import CensusLocator, CensusReleaseDescription, get_release_description
+from .release_directory import CensusLocator, CensusVersionDescription, get_census_version_description
 from .util import uri_join
 
 # TODO: temporary work-around for lack of contenxt/config in tiledbsoma.  Replace with soma
@@ -19,7 +19,7 @@ DEFAULT_TILEDB_CONFIGURATION = {
 }
 
 
-def _open_soma(description: CensusReleaseDescription) -> soma.Collection:
+def _open_soma(description: CensusVersionDescription) -> soma.Collection:
     locator = description["soma"]
     tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
     s3_region = locator.get("s3_region", None)
@@ -30,10 +30,40 @@ def _open_soma(description: CensusReleaseDescription) -> soma.Collection:
 
 def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = None) -> soma.Collection:
     """
-    Open the Cell Census by version (name) or URI, returning a soma.Collection containing
-    the top-level census.
+    Open the Cell Census by version or URI, returning a soma.Collection containing
+    the top-level census.  Raises error if census_version is specified and unknown, or if
+    neither ``uri`` or ``census_version`` are specified, or if the ``uri`` can not be
+    opened.
 
     TODO: add platform_config hook when it is further defined, allowing config overrides.
+
+    Parameters
+    ----------
+    census_version : Optional[str]
+        The version of the Census, e.g., "latest"
+    uri : Optional[str]
+        The URI containing the Census SOMA objects. If specified, will take precedence
+        over ``census_version`` parameter. An exception will be raised if the URI can
+        not be opened.
+
+    Returns
+    -------
+    soma.Collection : returns a SOMA Collection object.
+
+    Examples
+    --------
+    Open the default Cell Census version:
+
+    >>> census = cell_census.open_soma()
+
+    Open a specific Cell Census by version:
+    >>> census = cell_census.open_soma("2022-12-31")
+
+    Open a Cell Census by S3 URI, rather than by version.
+    >>> census = cell_census.open_soma(uri="s3://bucket/path")
+
+    Open a Cell Census by path (file:// URI), rather than by version.
+    >>> census = cell_census.open_soma(uri="/tmp/census")
     """
 
     if uri is not None:
@@ -42,19 +72,34 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
     if census_version is None:
         raise ValueError("Must specify either a cell census version or an explicit URI.")
 
-    description = get_release_description(census_version)  # raises
+    description = get_census_version_description(census_version)  # raises
     return _open_soma(description)
 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
     """
     Open the named version of the census, and return the URI for the dataset_id.
-
     This does not guarantee that the H5AD exists or is accessible to the user.
+    Raises an error if dataset_id or census_version are unknown.
 
-    Raises if dataset_id or census_version are unknown.
+    Parameters
+    ----------
+    dataset_id : str
+        The dataset_id of interest
+    census_version : Optional[str]
+        The census version
+
+    Returns
+    -------
+    CensusLocator : the URI and optional S3 region for the source H5AD
+
+    Examples
+    --------
+    >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
+    {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d.h5ad',
+    's3_region': 'us-west-2'}
     """
-    description = get_release_description(census_version)  # raises
+    description = get_census_version_description(census_version)  # raises
     census = _open_soma(description)
     dataset = census["census_info"]["datasets"].read_as_pandas_all(value_filter=f"dataset_id == '{dataset_id}'")
     if len(dataset) == 0:
@@ -82,7 +127,7 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     to_path : str
         The file name where the downloaded H5AD will be written.  Must not already exist.
     census_version : str
-        The census version tag. Defaults to ``latest``.
+        The census version name. Defaults to ``latest``.
 
     Returns
     -------

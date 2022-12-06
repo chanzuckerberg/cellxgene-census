@@ -6,7 +6,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -231,7 +231,9 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
 
-    Currently implements a weak test: that nnz is correct.
+    Currently implements weak tests:
+    * the nnz is correct
+    * there are no zeros explicitly saved (this is mandated by cell census schema)
     """
     assets_path, soma_path, dataset, experiment_builders = args
     census = soma.Collection(soma_path, ctx=TileDB_Ctx())
@@ -257,17 +259,20 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
 
             raw_nnz = count_elements(se.ms["RNA"].X["raw"], soma_joinids)
 
-        def nnz(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
+        def count_nonzero(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
+            """Return _actual_ non-zero count, NOT the stored value count."""
             if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
-                return cast(int, arr.nnz)
+                return np.count_nonzero(arr.data)
             return np.count_nonzero(arr)
 
         if ad.raw is None:
-            assert raw_nnz == nnz(ad.X), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {nnz(ad.X)}"
+            assert raw_nnz == count_nonzero(
+                ad.X
+            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.X)}"
         else:
-            assert raw_nnz == nnz(
+            assert raw_nnz == count_nonzero(
                 ad.raw.X
-            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {nnz(ad.raw.X)}"
+            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.raw.X)}"
 
     return True
 

@@ -166,7 +166,8 @@ class ExperimentQuery:
         var_joinids = self._joinids["var"]
 
         if len(obs_joinids) == 0 or len(var_joinids) == 0:
-            return pa.Table.from_pylist([], schema=X.schema)
+            yield pa.Table.from_pylist([], schema=X.schema)
+            return
 
         if not prefetch:
             # yield for clarity
