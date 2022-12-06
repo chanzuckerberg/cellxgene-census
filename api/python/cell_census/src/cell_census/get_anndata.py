@@ -26,6 +26,8 @@ ObsQuery = TypedDict(
         "suspension_type": Optional[Union[str, List[str]]],
         "tissue": Optional[Union[str, List[str]]],
         "tissue_ontology_term_id": Optional[Union[str, List[str]]],
+        "tissue_general": Optional[Union[str, List[str]]],
+        "tissue_general_ontology_term_id": Optional[Union[str, List[str]]],
     },
 )
 
