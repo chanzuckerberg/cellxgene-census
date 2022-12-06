@@ -64,16 +64,69 @@ CENSUS_OBS_TERM_COLUMNS = {
     "tissue_general_ontology_term_id": pa.large_string(),
 }
 
+_RepetativeStringLabelObs = [
+    # these columns are highly repetative string lables and will have appropriate filter
+    "assay",
+    "assay_ontology_term_id",
+    "cell_type",
+    "cell_type_ontology_term_id",
+    "dataset_id",
+    "development_stage",
+    "development_stage_ontology_term_id",
+    "disease",
+    "disease_ontology_term_id",
+    "donor_id",
+    "self_reported_ethnicity",
+    "self_reported_ethnicity_ontology_term_id",
+    "sex",
+    "sex_ontology_term_id",
+    "suspension_type",
+    "tissue",
+    "tissue_ontology_term_id",
+    "tissue_general",
+    "tissue_general_ontology_term_id",
+]
+CENSUS_OBS_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "capacity": 2**18,
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", "ZstdFilter"]}},
+            "attrs": {
+                **{k: {"filters": ["DictionaryFilter", "ZstdFilter"]} for k in _RepetativeStringLabelObs},
+            },
+        }
+    }
+}
+
 CENSUS_VAR_TERM_COLUMNS = {
     "soma_joinid": pa.int64(),
     "feature_id": pa.large_string(),
     "feature_name": pa.large_string(),
     "feature_length": pa.int64(),
 }
+CENSUS_VAR_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", "ZstdFilter"]}},
+        }
+    }
+}
 
-X_LAYERS = [
+CENSUS_X_LAYERS = [
     "raw",
 ]
+CENSUS_X_LAYERS_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "capacity": 2**18,
+            "dims": {
+                "soma_dim_0": {"filters": ["ByteShuffleFilter", "ZstdFilter"]},
+                "soma_dim_1": {"filters": ["ByteShuffleFilter", "ZstdFilter"]},
+            },
+            "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", "ZstdFilter"]}},
+        }
+    }
+}
 
 # list of EFO terms that correspond to RNA seq modality/measurement
 RNA_SEQ = [

@@ -17,11 +17,14 @@ from scipy import sparse
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .globals import (
+    CENSUS_OBS_PLATFORM_CONFIG,
     CENSUS_OBS_TERM_COLUMNS,
+    CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TERM_COLUMNS,
+    CENSUS_X_LAYERS,
+    CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
-    X_LAYERS,
     TileDB_Ctx,
 )
 from .mp import create_process_pool_executor
@@ -142,7 +145,11 @@ class ExperimentBuilder:
         obs_schema = pa.schema(list(CENSUS_OBS_TERM_COLUMNS.items()))
         se.set(
             "obs",
-            soma.DataFrame(uricat(se.uri, "obs")).create(obs_schema, index_column_names=["soma_joinid"]),
+            soma.DataFrame(uricat(se.uri, "obs")).create(
+                obs_schema,
+                index_column_names=["soma_joinid"],
+                platform_config=CENSUS_OBS_PLATFORM_CONFIG,
+            ),
             relative=True,
         )
 
@@ -154,7 +161,11 @@ class ExperimentBuilder:
         var_schema = pa.schema(list(CENSUS_VAR_TERM_COLUMNS.items()))
         measurement.set(
             "var",
-            soma.DataFrame(uricat(measurement.uri, "var")).create(var_schema, index_column_names=["soma_joinid"]),
+            soma.DataFrame(uricat(measurement.uri, "var")).create(
+                var_schema,
+                index_column_names=["soma_joinid"],
+                platform_config=CENSUS_VAR_PLATFORM_CONFIG,
+            ),
             relative=True,
         )
 
@@ -275,9 +286,12 @@ class ExperimentBuilder:
         if self.n_obs > 0:
             assert self.n_var > 0
             measurement = se.ms["RNA"]
-            for layer_name in X_LAYERS:
-                snda = soma.SparseNdArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx())
-                snda.create(pa.float32(), (self.n_obs, self.n_var))
+            for layer_name in CENSUS_X_LAYERS:
+                snda = soma.SparseNdArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx()).create(
+                    pa.float32(),
+                    (self.n_obs, self.n_var),
+                    platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG,
+                )
                 measurement.X.set(layer_name, snda, relative=True)
 
             presence_matrix = soma.SparseNdArray(

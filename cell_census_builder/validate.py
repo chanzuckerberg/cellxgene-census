@@ -26,9 +26,9 @@ from .globals import (
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
     CENSUS_SUMMARY_NAME,
     CENSUS_VAR_TERM_COLUMNS,
+    CENSUS_X_LAYERS,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
-    X_LAYERS,
     TileDB_Ctx,
 )
 from .mp import create_process_pool_executor
@@ -108,7 +108,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         rna = e.ms["RNA"]
         assert "var" in rna and rna["var"].exists() and rna["var"].soma_type == "SOMADataFrame"
         assert "X" in rna and rna["X"].exists() and rna["X"].soma_type == "SOMACollection"
-        for lyr in X_LAYERS:
+        for lyr in CENSUS_X_LAYERS:
             # layers only exist if there are cells in the measurement
             if lyr in rna.X:
                 assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNdArray"
@@ -298,7 +298,7 @@ def validate_X_layers(
         n_vars = len(census_var_df)
 
         if n_obs > 0:
-            for lyr in X_LAYERS:
+            for lyr in CENSUS_X_LAYERS:
                 assert se.ms["RNA"].X[lyr].exists()
                 X = se.ms["RNA"].X[lyr]
                 assert X.schema.field("soma_dim_0").type == pa.int64()
