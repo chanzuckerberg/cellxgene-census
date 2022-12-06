@@ -14,9 +14,18 @@ The cell census MUST be stored in the following S3 root bucket:
 
 `s3://cellxgene-data-public/`
 
-Each release MUST be deposited in a folder under the root that follows this naming convention. `counter` MUST be an integer indicating the release number starting on `1`:
+All contents of a Cell Census build data MUST be deposited in a folder named `cell-census`: 
 
-`./cell-census/release-[counter]/`
+`./cell-census/`
+
+This folder MUST contain all public builds and releases defined as:
+
+* Census "build" is a SOMA collection / container containing cell data.
+* Census "RELEASE" is a "build" which has been officially blessed and released in a formal manner.
+* A "build" is named with a `tag`, which is a string of printable ASCII (eg, "foo", "2022-11-01", "1-rc2.9"):
+   `./cell-census/[tag]/`
+* a RELEASE is named with a tag following the conventional format `release-[counter]`:
+   `./cell-census/release-[counter]/`
 
 The Cell Census SOMA-related files MUST be deposited within the release folder on a folder named `soma`:
 
@@ -36,22 +45,24 @@ The publication date along with the full URI paths for the `soma` folder and the
 
 This file MUST have the following `json` schema:
 
+
+
 ```
 {
-     [release_alias]: [release_name|release_alias],
-     [release_name]: {	#defines a given release
-		“release_date”: [yyyy-mm-dd]  #optional, ISO 8601 date, may be null
-		“release_build”: [yyyy-mm-dd] #required, ISO 8601 date, date of census build
-		“soma”: {
-			“uri”: [uri] #URI of top-level SOMA collection
-				“s3_region”: [s3_region] #optional, S3 region if uri is s3://…
-			},
-			“h5ads”: {
-				“uri”: [uri] #base URI of H5AD location
-				“s3_region”: [region] #optional, S3 region if uri is s3://…
-			}
-	},
-	...
+   [release_alias]: [release_name|release_alias],
+   [release_name]: {	#defines a given release
+      “release_date”: [yyyy-mm-dd]  #optional, ISO 8601 date, may be null
+      “release_build”: [yyyy-mm-dd] #required, ISO 8601 date, date of census build
+      “soma”: {
+         “uri”: [uri] #URI of top-level SOMA collection
+         “s3_region”: [s3_region] #optional, S3 region if uri is s3://…
+      },
+      “h5ads”: {
+         “uri”: [uri] #base URI of H5AD location
+         “s3_region”: [region] #optional, S3 region if uri is s3://…
+      }
+   },
+   ...
 }
 ```
 
@@ -59,24 +70,23 @@ An example of this file is shown below:
 
 ```
 {
-	"latest": "release-1"
-	"release-1": {
-		"release_date": "2023-06-12”,
-		"release_build": "2023-05-15”,
-		"soma": {
-			"uri": "s3://cellxgene-data-public/cell-census/release-1/soma/",
-			"s3_region": "us-west-2"
-		},
-		"h5ads": {
-			"uri": "s3://cellxgene-data-public/cell-census/release-1/h5ads/",
-			"s3_region": "us-west-2"
-		}
-	},
-	"pre-release-weekly-build-2023-07-15": {
-		...
-	},
-	...
+   "latest": "release-1"
+   "release-1": {
+      "release_date": "2023-06-12”,
+      "release_build": "2023-05-15”,
+      "soma": {
+         "uri": "s3://cellxgene-data-public/cell-census/release-1/soma/",
+         "s3_region": "us-west-2"
+      },
+      "h5ads": {
+         "uri": "s3://cellxgene-data-public/cell-census/release-1/h5ads/",
+         "s3_region": "us-west-2"
+      }
+   },
+   "pre-release-weekly-build-2023-07-15": {
+      ...
+   },
+   ...
 }
-
 ```
 

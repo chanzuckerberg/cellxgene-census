@@ -57,9 +57,9 @@ All datasets included in the Cell Census MUST be of [CELLxGENE dataset schema ve
 
 #### Species
 
-Only observations (cells) with an  [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id) value of either “NCBITaxon:10090” for *Mus musculus* or “NCBITaxon:9606” for *Homo sapiens* MUST be included.
+The Cell Census MUST only contain observations (cells) with an  [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id) value of either “NCBITaxon:10090” for *Mus musculus* or “NCBITaxon:9606” for *Homo sapiens* MUST be included.
 
-Only features (genes) with a [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference) value of either “NCBITaxon:10090” for *Mus musculus* or “NCBITaxon:9606” for *Homo sapiens* MUST be included
+The Cell Census MUST only contain features (genes) with a [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference) value of either “NCBITaxon:10090” for *Mus musculus* or “NCBITaxon:9606” for *Homo sapiens* MUST be included
 
 #### Multi-species data constraints
 
@@ -79,12 +79,12 @@ For a given multi-species dataset, the table below shows all possible combinatio
   <tr>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
     <td>"NCBITaxon:9606" for Homo sapiens</td>
-    <td>Only observations from "NCBITaxon:9606" for <i>Homo sapiens</i> MUST be included</td>
+    <td>The Cell Census MUST only contain observations from "NCBITaxon:9606" for <i>Homo sapiens</i></td>
   </tr>
   <tr>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
     <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>Only observations from "NCBITaxon:10090" for <i>Mus musculus</i> MUST be included</td>
+    <td>The Cell Census MUST only contain observations from <i>Mus musculus</i></td>
   </tr>
   <tr>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
