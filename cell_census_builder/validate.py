@@ -259,18 +259,20 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
 
             raw_nnz = count_elements(se.ms["RNA"].X["raw"], soma_joinids)
 
-        def nnz(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
+        def count_nonzero(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
             """Return _actual_ non-zero count, NOT the stored value count."""
             if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
                 return np.count_nonzero(arr.data)
             return np.count_nonzero(arr)
 
         if ad.raw is None:
-            assert raw_nnz == nnz(ad.X), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {nnz(ad.X)}"
+            assert raw_nnz == count_nonzero(
+                ad.X
+            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.X)}"
         else:
-            assert raw_nnz == nnz(
+            assert raw_nnz == count_nonzero(
                 ad.raw.X
-            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {nnz(ad.raw.X)}"
+            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.raw.X)}"
 
     return True
 

@@ -6,7 +6,7 @@ import requests
 The following types describe the expected directory of Cell Census builds, used
 to bootstrap all data location requests.
 """
-CensusReleaseTag = str  # name or version of census, eg, "release-99" or "2022-10-01-test"
+CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
 CensusLocator = TypedDict(
     "CensusLocator",
     {
@@ -14,8 +14,8 @@ CensusLocator = TypedDict(
         "s3_region": Optional[str],  # if an S3 URI, has optional region
     },
 )
-CensusReleaseDescription = TypedDict(
-    "CensusReleaseDescription",
+CensusVersionDescription = TypedDict(
+    "CensusVersionDescription",
     {
         "release_date": Optional[str],  # date of release, optional
         "release_build": str,  # date of build
@@ -23,22 +23,22 @@ CensusReleaseDescription = TypedDict(
         "h5ads": CensusLocator,  # source H5ADs locator
     },
 )
-CensusDirectory = Dict[CensusReleaseTag, Union[CensusReleaseTag, CensusReleaseDescription]]
+CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 
 # URL for the default top-level directory of all public data, formatted as a CensusDirectory
 CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgene-data-public/cell-census/release.json"
 
 
-def get_release_description(tag: str) -> CensusReleaseDescription:
+def get_census_version_description(census_version: str) -> CensusVersionDescription:
     """
-    Get release description for given tag from the Cell Census release directory.
-    Raises KeyError if unknown tag value.
+    Get release description for given census version, from the Cell Census release directory.
+    Raises KeyError if unknown census_version value.
 
     Parameters
     ----------
-    tag : str
-        The release tag or name.
+    census_version : str
+        The census version name.
 
     Returns
     -------
@@ -47,11 +47,11 @@ def get_release_description(tag: str) -> CensusReleaseDescription:
 
     See Also
     --------
-    get_directory : returns the entire directory as a dict.
+    get_census_version_directory : returns the entire directory as a dict.
 
     Examples
     --------
-    >>> cell_census.get_release_description("latest")
+    >>> cell_census.get_census_version_description("latest")
     {'release_date': None,
     'release_build': '2022-12-01',
     'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
@@ -59,14 +59,14 @@ def get_release_description(tag: str) -> CensusReleaseDescription:
     'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
     's3_region': 'us-west-2'}}
     """
-    census_directory = get_directory()
-    description = census_directory.get(tag, None)
+    census_directory = get_census_version_directory()
+    description = census_directory.get(census_version, None)
     if description is None:
-        raise KeyError(f"Unable to locate cell census version: {tag}.")
+        raise KeyError(f"Unable to locate cell census version: {census_version}.")
     return description
 
 
-def get_directory() -> Dict[CensusReleaseTag, CensusReleaseDescription]:
+def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of cell census releases currently available.
 
@@ -76,17 +76,17 @@ def get_directory() -> Dict[CensusReleaseTag, CensusReleaseDescription]:
 
     Returns
     -------
-    Dict[CensusReleaseTag, CensusReleaseDescription]
-        Dictionary of release tags (names) and their corresponding
+    Dict[CensusReleaseName, CensusReleaseDescription]
+        Dictionary of release names and their corresponding
         release description.
 
     See Also
     --------
-    get_release_description : get release description by tag.
+    get_census_version_description : get description by census_version.
 
     Examples
     --------
-    >>> cell_census.get_directory()
+    >>> cell_census.get_census_version_directory()
     {'latest': {'release_date': None,
     'release_build': '2022-12-01',
     'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
@@ -111,20 +111,20 @@ def get_directory() -> Dict[CensusReleaseTag, CensusReleaseDescription]:
     directory: CensusDirectory = cast(CensusDirectory, response.json())
 
     # Resolve all aliases for easier use
-    for tag in list(directory.keys()):
-        # Strings are aliases for other tags
-        points_at = directory[tag]
+    for census_version in list(directory.keys()):
+        # Strings are aliases for other census_version
+        points_at = directory[census_version]
         while isinstance(points_at, str):
             # resolve aliases
             if points_at not in directory:
-                # oops, dangling pointer -- drop original tag
-                directory.pop(tag)
+                # oops, dangling pointer -- drop original census_version
+                directory.pop(census_version)
                 break
 
             points_at = directory[points_at]
 
         if isinstance(points_at, dict):
-            directory[tag] = points_at
+            directory[census_version] = points_at
 
-    # Cast is safe, as we have removed all tag aliases
-    return cast(Dict[CensusReleaseTag, CensusReleaseDescription], directory)
+    # Cast is safe, as we have removed all aliases
+    return cast(Dict[CensusVersionName, CensusVersionDescription], directory)

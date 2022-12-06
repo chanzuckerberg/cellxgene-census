@@ -39,8 +39,8 @@ def directory_mock(requests_mock: rm.Mocker) -> Any:
     return requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=DIRECTORY_JSON)
 
 
-def test_get_directory(directory_mock: Any) -> None:
-    directory = cell_census.get_directory()
+def test_get_census_version_directory(directory_mock: Any) -> None:
+    directory = cell_census.get_census_version_directory()
 
     assert isinstance(directory, dict)
     assert len(directory) > 0
@@ -55,4 +55,4 @@ def test_get_directory(directory_mock: Any) -> None:
     assert directory["latest"] == directory["2022-11-01"]
 
     for tag in directory:
-        assert directory[tag] == cell_census.get_release_description(tag)
+        assert directory[tag] == cell_census.get_census_version_description(tag)
