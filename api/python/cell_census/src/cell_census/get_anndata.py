@@ -1,3 +1,4 @@
+import numbers
 import re
 from typing import List, Optional, TypedDict, Union
 
@@ -51,6 +52,8 @@ def _build_query(query_defn: Optional[Union[ObsQuery, VarQuery]] = None) -> Opti
     for name, val in query_defn.items():
         if isinstance(val, str):
             query_conditions.append(f"{name} == '{val}'")
+        elif isinstance(val, numbers.Number):
+            query_conditions.append(f"{name} == {val}")
         elif isinstance(val, list):
             query_conditions.append(f"{name} in {val}")
         else:
