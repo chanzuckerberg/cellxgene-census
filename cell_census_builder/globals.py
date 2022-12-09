@@ -89,11 +89,15 @@ _RepetativeStringLabelObs = [
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
-            "capacity": 2**18,
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", "ZstdFilter"]}},
+            "capacity": 2**16,
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 5}]}},
             "attrs": {
-                **{k: {"filters": ["DictionaryFilter", "ZstdFilter"]} for k in _RepetativeStringLabelObs},
+                **{
+                    k: {"filters": ["DictionaryFilter", {"_type": "ZstdFilter", "level": 5}]}
+                    for k in _RepetativeStringLabelObs
+                },
             },
+            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 5}],
         }
     }
 }
@@ -107,7 +111,9 @@ CENSUS_VAR_TERM_COLUMNS = {
 CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", "ZstdFilter"]}},
+            "capacity": 2**16,
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 5}]}},
+            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 5}],
         }
     }
 }
@@ -116,14 +122,17 @@ CENSUS_X_LAYERS = [
     "raw",
 ]
 CENSUS_X_LAYERS_PLATFORM_CONFIG = {
+    # This should be configured per layer, once there is >1 layer
     "tiledb": {
         "create": {
-            "capacity": 2**18,
+            "capacity": 2**16,
             "dims": {
-                "soma_dim_0": {"filters": ["ByteShuffleFilter", "ZstdFilter"]},
-                "soma_dim_1": {"filters": ["ByteShuffleFilter", "ZstdFilter"]},
+                "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
+                "soma_dim_1": {"tile": 2048, "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]},
             },
-            "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", "ZstdFilter"]}},
+            "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
+            "cell_order": "row-major",
+            "tile_order": "row-major",
         }
     }
 }
