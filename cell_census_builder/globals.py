@@ -118,21 +118,22 @@ CENSUS_VAR_PLATFORM_CONFIG = {
     }
 }
 
-CENSUS_X_LAYERS = [
-    "raw",
-]
+CENSUS_X_LAYERS = {
+    "raw": pa.float32(),
+}
 CENSUS_X_LAYERS_PLATFORM_CONFIG = {
-    # This should be configured per layer, once there is >1 layer
-    "tiledb": {
-        "create": {
-            "capacity": 2**16,
-            "dims": {
-                "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
-                "soma_dim_1": {"tile": 2048, "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]},
-            },
-            "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
-            "cell_order": "row-major",
-            "tile_order": "row-major",
+    "raw": {
+        "tiledb": {
+            "create": {
+                "capacity": 2**16,
+                "dims": {
+                    "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
+                    "soma_dim_1": {"tile": 2048, "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]},
+                },
+                "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
+                "cell_order": "row-major",
+                "tile_order": "row-major",
+            }
         }
     }
 }

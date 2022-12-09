@@ -308,7 +308,7 @@ def validate_X_layers(
                 X = se.ms["RNA"].X[lyr]
                 assert X.schema.field("soma_dim_0").type == pa.int64()
                 assert X.schema.field("soma_dim_1").type == pa.int64()
-                assert X.schema.field("soma_data").type == pa.float32()
+                assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                 assert X.shape == (n_obs, n_vars)
 
     if args.multi_process:
