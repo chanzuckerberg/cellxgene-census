@@ -136,7 +136,7 @@ def build(
     create_census_summary(top_level_collection["census_info"], experiment_builders, args.build_tag)
 
     if args.consolidate:
-        consolidate(top_level_collection.uri)
+        consolidate(args, top_level_collection.uri)
 
     return 0
 
