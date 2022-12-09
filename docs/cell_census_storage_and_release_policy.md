@@ -43,8 +43,7 @@ The publication date along with the full URI paths for the `soma` folder and the
 
 `./cell-census/releases.json`
 
-This file MUST have the following `json` schema:
-
+This file MUST be in `json` formats where the parent keys are release identifiers (alias or name). The alias `"latest"` MUST be present. This `json` file MUST follow this schema:
 
 
 ```

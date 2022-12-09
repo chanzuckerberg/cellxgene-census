@@ -10,7 +10,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Cell Census overview
 
-The Cell Census is a versioned container for the single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/). The Cell Census utilizes [SOMA](https://github.com/single-cell-data/TileDB-SOMA) powered by [TileDB](https://tiledb.com/products/tiledb-embedded) for storing, accessing, and efficiently filtering data.
+The Cell Census is a versioned container for most of the single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/). The Cell Census utilizes [SOMA](https://github.com/single-cell-data/TileDB-SOMA) powered by [TileDB](https://tiledb.com/products/tiledb-embedded) for storing, accessing, and efficiently filtering data.
 
 The main goals of the Cell Census are:
 
@@ -96,7 +96,8 @@ For a given multi-species dataset, the table below shows all possible combinatio
 
 #### Assays
 
-Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#assay_ontology_term_id). Only data from the following assays that sample RNA molecules from individual cells MUST be included in the Cell Census:
+Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#assay_ontology_term_id). The Cell Census MUST only contain cells with
+an `assay_ontology_term_id` value from the list below:
 
 <table>
 <thead>
@@ -371,7 +372,7 @@ All datasets used to build the Cell Census MUST be included in a table modeled a
   <tr>
     <td>dataset_h5ad_path</td>
     <td>string</td>
-    <td>Source h5ad file in the Cell Census storage bucket.</td>
+    <td>Relative path to the source h5ad file in the Cell Census storage bucket.</td>
   </tr>
   <tr>
     <td>dataset_total_cell_count</td>
@@ -681,12 +682,12 @@ For each organism the `SOMAExperiment` SHOULD NOT contain the following:
 
 #### Matrix Data, count (raw) matrix – `census_obj[“census_data”][organism].ms[“RNA”].X[“raw”]` – `SOMASparseNdArray`
 
-Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNdArray`. `0` values in datasets with sparse matrices MUST NOT be explicitly encoded as `0`, they MUST be properly stored in sparse format. 
+Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNdArray` with a fill value of zero (0), and no explicitly stored zero values.
 
 
 #### Feature metadata – `census_obj[“census_data”][organism].ms[“RNA”].var` – `SOMADataFrame`
 
-Only features with [`adata.var.feature_biotype == “gene”`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_biotype) (as defined the CELLxGENE dataset schema) MUST be included.
+The Cell Census MUST only contain features with a [`feature_biotype`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_biotype) value of "gene".
 
 The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema. 
 
