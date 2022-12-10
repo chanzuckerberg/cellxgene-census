@@ -1,7 +1,5 @@
 # CELLxGENE Cell Census Schema 
 
-**Status**: Draft.
-
 **Version**: 0.0.1.
 
 **Last edited**: Dec, 2022.
