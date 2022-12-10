@@ -290,7 +290,7 @@ class ExperimentBuilder:
                 snda = soma.SparseNdArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx()).create(
                     CENSUS_X_LAYERS[layer_name],
                     (self.n_obs, self.n_var),
-                    platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG,
+                    platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
                 measurement.X.set(layer_name, snda, relative=True)
 
