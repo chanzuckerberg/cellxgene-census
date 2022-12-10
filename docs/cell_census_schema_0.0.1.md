@@ -24,7 +24,7 @@ The following terms are used throughout this document:
 * adata – generic variable name that refers to an [`AnnData`](https://anndata.readthedocs.io/) object.
 * CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Cell Census schema: [CELLxGENE dataset schema version is 3.0.X](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md)
 * census\_obj – the Cell Census root object, a SOMACollection.
-* Cell Census release – a Cell Census deposited in a public bucket and accessible by APIs.
+* Cell Census release – a versioned Cell Census, deposited in a public bucket and accessible by APIs.
 * tissue – original tissue annotation.
 * tissue\_general – high-level mapping of a tissue, e.g. “Heart” is the tissue_general of “Heart left ventricle” .
 
