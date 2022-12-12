@@ -65,7 +65,7 @@ CENSUS_OBS_TERM_COLUMNS = {
 }
 
 _RepetativeStringLabelObs = [
-    # these columns are highly repetative string lables and will have appropriate filter
+    # these columns are highly repetative string labels and will have appropriate filter
     "assay",
     "assay_ontology_term_id",
     "cell_type",
