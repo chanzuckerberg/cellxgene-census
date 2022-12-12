@@ -64,16 +64,96 @@ CENSUS_OBS_TERM_COLUMNS = {
     "tissue_general_ontology_term_id": pa.large_string(),
 }
 
+"""
+Materialization of obs/var schema in TileDB is tuned with the following, largely informed by empirical testing:
+* string columns with repeating labels use DictionaryFilter, which efficiently encodes these highly repetative strings.
+  Columns with non-repetative values (e.g., var.feature_id) are NOT dictionary coded.
+* obs/var DataFrame show significant improvement in on-disk size and read performance at high Zstd compression level,
+  making it worth the extra build/write compute time. Level set to highest value that does not require additional
+  resources at decompression (nb. 20+ requres additional memory).
+* int64 index columns (soma_joinid, soma_dim_0, etc) empirically show wins from ByteShuffle followed by Zstd.
+  First dimension of axis dataframes are always monotonically increasing, and also beneit from DoubleDelta.
+* Benchmarking X slicing (using lung demo notebook) used to tune X[raw]. Read / query performance did not benefit from
+  higher Zstd compression beyond level=5, so the level was not increased further (and level=5 is still reasonable for
+  writes)
+"""
+
+_RepetativeStringLabelObs = [
+    # these columns are highly repetative string labels and will have appropriate filter
+    "assay",
+    "assay_ontology_term_id",
+    "cell_type",
+    "cell_type_ontology_term_id",
+    "dataset_id",
+    "development_stage",
+    "development_stage_ontology_term_id",
+    "disease",
+    "disease_ontology_term_id",
+    "donor_id",
+    "self_reported_ethnicity",
+    "self_reported_ethnicity_ontology_term_id",
+    "sex",
+    "sex_ontology_term_id",
+    "suspension_type",
+    "tissue",
+    "tissue_ontology_term_id",
+    "tissue_general",
+    "tissue_general_ontology_term_id",
+]
+CENSUS_OBS_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "capacity": 2**16,
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
+            "attrs": {
+                **{
+                    k: {"filters": ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]}
+                    for k in _RepetativeStringLabelObs
+                },
+            },
+            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+        }
+    }
+}
+
 CENSUS_VAR_TERM_COLUMNS = {
     "soma_joinid": pa.int64(),
     "feature_id": pa.large_string(),
     "feature_name": pa.large_string(),
     "feature_length": pa.int64(),
 }
+CENSUS_VAR_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "capacity": 2**16,
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
+            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+        }
+    }
+}
 
-X_LAYERS = [
-    "raw",
-]
+CENSUS_X_LAYERS = {
+    "raw": pa.float32(),
+}
+CENSUS_X_LAYERS_PLATFORM_CONFIG = {
+    "raw": {
+        "tiledb": {
+            "create": {
+                "capacity": 2**16,
+                "dims": {
+                    "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
+                    "soma_dim_1": {
+                        "tile": 2048,
+                        "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}],
+                    },
+                },
+                "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
+                "cell_order": "row-major",
+                "tile_order": "row-major",
+            },
+        }
+    }
+}
 
 # list of EFO terms that correspond to RNA seq modality/measurement
 RNA_SEQ = [

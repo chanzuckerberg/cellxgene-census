@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterator, List, Optional, Protocol, TypedDict, Union
+from typing import Any, Iterator, List, Optional, Protocol, Tuple, TypedDict, Union
 
 import anndata
 import numpy as np
@@ -20,7 +20,7 @@ AnnDataFilterSpec = TypedDict(
 
 def open_anndata(
     base_path: str, datasets: Union[List[Dataset], Dataset], *args: Any, **kwargs: Any
-) -> Iterator[tuple[Dataset, anndata.AnnData]]:
+) -> Iterator[Tuple[Dataset, anndata.AnnData]]:
     """
     Generator to open anndata in a given mode, and filter out those H5ADs which do not match our base
     criteria for inclusion in the census.

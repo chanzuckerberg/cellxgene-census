@@ -1,6 +1,7 @@
-from typing import Dict, Optional, TypedDict, Union, cast
+from typing import Dict, Optional, Union, cast
 
 import requests
+from typing_extensions import TypedDict
 
 """
 The following types describe the expected directory of Cell Census builds, used

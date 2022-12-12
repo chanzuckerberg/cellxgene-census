@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numba
 import numpy as np
 import numpy.typing as npt
@@ -25,7 +27,7 @@ class OnlineMatrixMeanVariance:
     def update(self, coord_vec: npt.NDArray[np.int64], value_vec: npt.NDArray[np.float32]) -> None:
         _mean_variance_update(coord_vec, value_vec, self.n_a, self.u_a, self.M2_a)
 
-    def finalize(self) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         """
         Returns tuple containing mean and variance
         """
@@ -63,7 +65,7 @@ def _mean_variance_update(
 @numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _mean_variance_finalize(
     n_samples: int, n_a: npt.NDArray[np.int32], u_a: npt.NDArray[np.float64], M2_a: npt.NDArray[np.float64]
-) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """
     Finalize incremental values, acconting for missing elements (due to sparse input).
     Non-sparse and sparse combined using Chan's parallel adaptation of Welford's.
