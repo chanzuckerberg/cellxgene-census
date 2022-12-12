@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple, TypedDict, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 import pyarrow as pa
+from typing_extensions import TypedDict
 
 # Type declaration/helpers local to this file
 #

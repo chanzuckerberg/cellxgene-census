@@ -1,9 +1,10 @@
 import numbers
 import re
-from typing import List, Optional, TypedDict, Union
+from typing import List, Optional, Union
 
 import anndata
 import tiledbsoma as soma
+from typing_extensions import TypedDict
 
 from .experiment_query import AxisColumnNames, AxisQuery, experiment_query
 

@@ -8,6 +8,7 @@ CAVEATS (READ THIS):
 
 1. The code is written to the still-rapidly-evolving and **pre-release** Python SOMA API, _and will be subject to change_ as the SOMA API and `tiledbsoma` evolve and stabilize.
 2. The schema implemented by this code is still evolving and subject to change.
+3. The `cell_census_builder` package requires Python 3.9 or later.
 
 ## Usage
 
