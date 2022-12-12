@@ -68,13 +68,14 @@ CENSUS_OBS_TERM_COLUMNS = {
 Materialization of obs/var schema in TileDB is tuned with the following, largely informed by empirical testing:
 * string columns with repeating labels use DictionaryFilter, which efficiently encodes these highly repetative strings.
   Columns with non-repetative values (e.g., var.feature_id) are NOT dictionary coded.
-* obs/var DataFrame show significant improvement in on-disk size and read performance at high Zstd compression level, 
-  making it worth the extra build/write compute time. Level set to highest value that does not require additional resources
-  at decompression (nb. 20+ requres additional memory).
+* obs/var DataFrame show significant improvement in on-disk size and read performance at high Zstd compression level,
+  making it worth the extra build/write compute time. Level set to highest value that does not require additional
+  resources at decompression (nb. 20+ requres additional memory).
 * int64 index columns (soma_joinid, soma_dim_0, etc) empirically show wins from ByteShuffle followed by Zstd.
   First dimension of axis dataframes are always monotonically increasing, and also beneit from DoubleDelta.
-* Benchmarking X slicing (using lung demo notebook) used to tune X[raw]. Read / query performance did not benefit from 
-  higher Zstd compression beyond level=5, so the level was not increased further (and level=5 is still reasonable for writes)
+* Benchmarking X slicing (using lung demo notebook) used to tune X[raw]. Read / query performance did not benefit from
+  higher Zstd compression beyond level=5, so the level was not increased further (and level=5 is still reasonable for
+  writes)
 """
 
 _RepetativeStringLabelObs = [
