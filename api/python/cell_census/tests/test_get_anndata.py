@@ -1,12 +1,15 @@
 import cell_census
+from cell_census.get_anndata import ObsQuery
 
 
-def test_get_anndata():
+def test_get_anndata() -> None:
     census = cell_census.open_soma(census_version="latest")
+    obs_query: ObsQuery = {"tissue_general": "vasculature"}
     ad = cell_census.get_anndata(
         census,
         organism="Mus musculus",
-        obs_query={"tissue_general": "vasculature"},
+        # obs_query={"tissue_general": "vasculature"},
+        obs_query=obs_query,
         var_query={"feature_name": ["Gm53058", "0610010K14Rik"]},
         column_names={
             "obs": ["cell_type", "tissue", "tissue_general", "assay"],

@@ -6,7 +6,7 @@ import numpy as np
 import tiledbsoma as soma
 
 
-def test_open_soma_latest():
+def test_open_soma_latest() -> None:
     # There should _always_ be a 'latest'
     census = cell_census.open_soma(census_version="latest")
     assert census is not None
@@ -16,7 +16,7 @@ def test_open_soma_latest():
     assert cell_census.open_soma().uri == census.uri
 
 
-def test_get_source_h5ad_uri():
+def test_get_source_h5ad_uri() -> None:
     rng = np.random.default_rng()
     census = cell_census.open_soma(census_version="latest")
     census_datasets = census["census_info"]["datasets"].read_as_pandas_all()
@@ -28,7 +28,7 @@ def test_get_source_h5ad_uri():
         assert locator["uri"].endswith(a_dataset.dataset_h5ad_path)
 
 
-def test_download_source_h5ad(tmp_path: pathlib.Path):
+def test_download_source_h5ad(tmp_path: pathlib.Path) -> None:
     census = cell_census.open_soma(census_version="latest")
     census_datasets = census["census_info"]["datasets"].read_as_pandas_all()
     small_dataset = census_datasets.nsmallest(1, "dataset_total_cell_count").iloc[0]
