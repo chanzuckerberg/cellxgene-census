@@ -41,7 +41,7 @@ if __name__ == '__main__':
             var_df = query.var().to_pandas().set_index("soma_joinid")
             obs_df = query.obs(column_names=["soma_joinid"] + cube_dims_obs).to_pandas().set_index("soma_joinid")
 
-            X_stats: pd.DataFrame = None
+            X_stats_all: pd.DataFrame = None
             for X_tbl in query.X("raw"):
                 print(f"Processing X batch size={X_tbl.shape[0]}")
 
@@ -52,25 +52,25 @@ if __name__ == '__main__':
 
                 # This is the slow step.
                 # TODO: Parallelize X batch processing, while ensuring thread-safe accumulation step
-                X_aggs = (
+                X_stats_batch = (
                     X_with_obs_var_df
                     .groupby(cube_dims, sort=False)  # no sorting, for performance
                     .agg(['size', 'sum'])
                 )
-                X_aggs.columns = ['n_cells', 'sum']
+                X_stats_batch.columns = ['n_cells', 'sum']
 
                 # Accumulate all summary stats in-memory, using a DataFrame
-                if X_stats is None:
+                if X_stats_all is None:
                     # first iteration, initialize accumulator
-                    X_stats = X_aggs
-                    X_stats['sum'] = X_stats['sum'].sparse.to_dense()
+                    X_stats_all = X_stats_batch
+                    X_stats_all['sum'] = X_stats_all['sum'].sparse.to_dense()
                 else:
                     # Series.add() requires dense array, but maybe there's a better way to do this
-                    X_aggs['sum'] = X_aggs['sum'].sparse.to_dense()
-                    X_stats = X_stats.add(X_aggs, fill_value=0)
+                    X_stats_batch['sum'] = X_stats_batch['sum'].sparse.to_dense()
+                    X_stats_all = X_stats_all.add(X_stats_batch, fill_value=0)
 
-                print(f"Batch agg rows={X_aggs.shape[0]}")
-                print(f"Total agg rows={X_stats.shape[0]}")
+                print(f"Batch agg rows={X_stats_batch.shape[0]}")
+                print(f"Total agg rows={X_stats_all.shape[0]}")
 
-            X_stats.to_pickle('census_cube.pkl')
-            print(X_stats)
+            X_stats_all.to_pickle('census_cube.pkl')
+            print(X_stats_all)
