@@ -7,11 +7,9 @@
 
 import sys
 
-import pandas as pd
-
 import cell_census
-from cell_census.experiment_query import experiment_query
-from cell_census.experiment_query import X_as_series
+import pandas as pd
+from cell_census.experiment_query import X_as_series, experiment_query
 
 cube_dims_obs = [
     "tissue_ontology_term_id",
