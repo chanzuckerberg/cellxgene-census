@@ -44,7 +44,6 @@ def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     >>> cell_census.get_experiment(census, 'Homo sapiens')
 
     >>> cell_census.get_experiment(census, 'homo_sapiens')
-
     """
     # lower/snake case the organism name to find the experiment name
     exp_name = re.sub(r"[ ]+", "_", organism).lower()
