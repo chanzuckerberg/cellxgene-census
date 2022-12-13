@@ -26,10 +26,10 @@ cube_dims_obs = [
 ]
 cube_dims = ["gene_ontology_term_id"] + cube_dims_obs
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     census_soma = cell_census.open_soma(uri=sys.argv[1] if len(sys.argv) > 1 else None)
 
-    organisms_to_process = census_soma['census_data'].keys()
+    organisms_to_process = census_soma["census_data"].keys()
     # For each organism
     for organism_label in organisms_to_process:
         organism_census = census_soma["census_data"][organism_label]
@@ -45,32 +45,31 @@ if __name__ == '__main__':
             for X_tbl in query.X("raw"):
                 print(f"Processing X batch size={X_tbl.shape[0]}")
 
-                X_df = X_as_series(X_tbl).to_frame(name='raw_count')
+                X_df = X_as_series(X_tbl).to_frame(name="raw_count")
                 X_with_obs_df = X_df.join(obs_df[cube_dims_obs], on="soma_dim_0")
-                X_with_obs_var_df = X_with_obs_df.join(var_df['feature_id'], on="soma_dim_1")\
-                    .rename(columns={'feature_id': 'gene_ontology_term_id'})
+                X_with_obs_var_df = X_with_obs_df.join(var_df["feature_id"], on="soma_dim_1").rename(
+                    columns={"feature_id": "gene_ontology_term_id"}
+                )
 
                 # This is the slow step.
                 # TODO: Parallelize X batch processing, while ensuring thread-safe accumulation step
-                X_stats_batch = (
-                    X_with_obs_var_df
-                    .groupby(cube_dims, sort=False)  # no sorting, for performance
-                    .agg(['size', 'sum'])
+                X_stats_batch = X_with_obs_var_df.groupby(cube_dims, sort=False).agg(  # no sorting, for performance
+                    ["size", "sum"]
                 )
-                X_stats_batch.columns = ['n_cells', 'sum']
+                X_stats_batch.columns = ["n_cells", "sum"]
 
                 # Accumulate all summary stats in-memory, using a DataFrame
                 if X_stats_all is None:
                     # first iteration, initialize accumulator
                     X_stats_all = X_stats_batch
-                    X_stats_all['sum'] = X_stats_all['sum'].sparse.to_dense()
+                    X_stats_all["sum"] = X_stats_all["sum"].sparse.to_dense()
                 else:
                     # Series.add() requires dense array, but maybe there's a better way to do this
-                    X_stats_batch['sum'] = X_stats_batch['sum'].sparse.to_dense()
+                    X_stats_batch["sum"] = X_stats_batch["sum"].sparse.to_dense()
                     X_stats_all = X_stats_all.add(X_stats_batch, fill_value=0)
 
                 print(f"Batch agg rows={X_stats_batch.shape[0]}")
                 print(f"Total agg rows={X_stats_all.shape[0]}")
 
-            X_stats_all.to_pickle('census_cube.pkl')
+            X_stats_all.to_pickle("census_cube.pkl")
             print(X_stats_all)
