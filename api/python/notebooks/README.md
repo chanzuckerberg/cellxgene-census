@@ -13,7 +13,7 @@ You must be on a Linux or MacOS system, with the following installed:
 * git
 * Jupyter or some other means of running notebooks (e.g., vscode)
 
-For now, it is recommended that you do all this on an host with sufficient memory,
+For now, it is recommended that you do all this on a host with sufficient memory,
 and a high bandwidth connection to AWS S3 in the us-west-2 region, e.g., an m6i.16xlarge.
 If you utilize AWS, Ubuntu 20 or 22 AMI are recommended (AWS AMI should work fine, but has
 not been tested).
