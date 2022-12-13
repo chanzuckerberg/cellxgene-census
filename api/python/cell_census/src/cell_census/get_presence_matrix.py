@@ -9,7 +9,7 @@ def get_presence_matrix(
     census: soma.Collection,
     organism: str,
     measurement_name: str = "RNA",
-) -> sparse.csr_array:
+) -> sparse.csr_matrix:
     """
     Read the gene presence matrix and return as a SciPy sparse CSR array (scipy.sparse.csr_array).
 
@@ -48,7 +48,7 @@ def get_presence_matrix(
     flat_arrays = [t.to_numpy() for t in arrow_sparse_tensors]
     data = np.concatenate(tuple(t[0] for t in flat_arrays))
     coords = np.concatenate(tuple(t[1] for t in flat_arrays))
-    presence_matrix = sparse.coo_array(
+    presence_matrix = sparse.coo_matrix(
         (data.flatten(), (coords.T[0].flatten(), coords.T[1].flatten())), shape=presence.shape
     ).tocsr()
     return presence_matrix
