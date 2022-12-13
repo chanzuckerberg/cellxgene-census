@@ -5,8 +5,8 @@ import anndata
 import tiledbsoma as soma
 from typing_extensions import TypedDict
 
+from .experiment import get_experiment
 from .experiment_query import AxisColumnNames, AxisQuery, experiment_query
-from .util import get_experiment
 
 ObsQuery = TypedDict(
     "ObsQuery",
@@ -42,9 +42,7 @@ VarQuery = TypedDict(
 )
 
 
-def _build_query(
-    query_defn: Optional[Union[ObsQuery, VarQuery]] = None
-) -> Optional[AxisQuery]:
+def _build_query(query_defn: Optional[Union[ObsQuery, VarQuery]] = None) -> Optional[AxisQuery]:
     """
     Build a AxisQuery value filter from the user-defined query parameters.
     """
