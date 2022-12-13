@@ -12,7 +12,7 @@ from .util import fetch_json
 CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 
 
-def parse_manifest_file(manifest_fp: io.TextIOBase) -> list[Dataset]:
+def parse_manifest_file(manifest_fp: io.TextIOBase) -> List[Dataset]:
     """
     return manifest as list of tuples, (dataset_id, URI/path), read from the text stream
     """
@@ -30,7 +30,7 @@ def dedup_datasets(datasets: List[Dataset]) -> List[Dataset]:
     return datasets
 
 
-def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> list[Dataset]:
+def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
     logging.info("Loading manifest from file")
     all_datasets = parse_manifest_file(manifest_fp)
     datasets = [
@@ -49,7 +49,7 @@ def null_to_empty_str(val: Union[None, str]) -> str:
     return val
 
 
-def load_manifest_from_CxG() -> list[Dataset]:
+def load_manifest_from_CxG() -> List[Dataset]:
     logging.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
@@ -132,7 +132,7 @@ def load_manifest_from_CxG() -> list[Dataset]:
     return [Dataset(**d) for d in datasets.values()]
 
 
-def load_manifest(manifest_fp: Optional[io.TextIOBase] = None) -> list[Dataset]:
+def load_manifest(manifest_fp: Optional[io.TextIOBase] = None) -> List[Dataset]:
     """
     Load dataset manifest from the file pointer if provided, else bootstrap
     the load rom the CELLxGENE REST API.

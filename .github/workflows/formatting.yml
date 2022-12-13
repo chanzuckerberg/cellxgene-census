@@ -34,4 +34,7 @@ jobs:
           python -m flake8 .
       - name: Check type annotations mypy
         run: |
-          python -m mypy .
+          # cell_census_builder is Python 3.9+
+          # cell_census package is Python 3.7+
+          python -m mypy --python-version 3.9 ./cell_census_builder
+          python -m mypy --python-version 3.7 ./api

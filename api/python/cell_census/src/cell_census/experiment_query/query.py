@@ -7,13 +7,13 @@ from contextlib import contextmanager
 from typing import (
     AsyncIterator,
     Callable,
+    Dict,
     Generator,
     Iterator,
     List,
-    Literal,
     Optional,
     Sequence,
-    TypedDict,
+    Tuple,
     TypeVar,
     Union,
     cast,
@@ -25,7 +25,7 @@ import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
-from typing_extensions import ParamSpec
+from typing_extensions import Literal, ParamSpec, TypedDict
 
 from .anndata import make_anndata
 from .axis import AxisQuery, MatrixAxisQuery
@@ -278,7 +278,7 @@ class ExperimentQuery:
         query_result = self.read(X_name, column_names=column_names, X_layers=X_layers, use_position_indexing=True)
         return make_anndata(query_result)
 
-    def _rewrite_X_for_positional_indexing(self, X_tables: dict[str, pa.Table]) -> dict[str, pa.Table]:
+    def _rewrite_X_for_positional_indexing(self, X_tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
         """
         This is a private convenience function to convert axis dataframe to X matrix joins
         from `soma_joinid`-based joins to positionally indexed joins (like AnnData uses).
@@ -391,7 +391,7 @@ async def async_iter(gen: Generator[T, None, None]) -> AsyncIterator[T]:
         yield value
 
 
-def wrap_generator(gen: Generator[T, None, None]) -> Callable[[], tuple[Optional[T], bool]]:
+def wrap_generator(gen: Generator[T, None, None]) -> Callable[[], Tuple[Optional[T], bool]]:
     """
     Wrap a generator, making it a "normal" function that is amenable
     to running in a thread. Each time it is called, it returns a
@@ -401,7 +401,7 @@ def wrap_generator(gen: Generator[T, None, None]) -> Callable[[], tuple[Optional
     """
     assert inspect.isgenerator(gen)
 
-    def _next() -> tuple[Optional[T], bool]:
+    def _next() -> Tuple[Optional[T], bool]:
         try:
             value = next(gen)
             return value, False
