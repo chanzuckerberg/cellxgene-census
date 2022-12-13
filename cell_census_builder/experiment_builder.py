@@ -225,7 +225,7 @@ class ExperimentBuilder:
         for pa_batch in pa_table.to_batches():
             se.obs.write(pa_batch)
 
-        # Accmulate the union of all var ids/names (for raw and processed), to be later persisted.
+        # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
         # but may need to evolve this logic if that assumption is not scalable.
         tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name"]]

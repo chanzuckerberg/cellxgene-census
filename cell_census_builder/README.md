@@ -32,8 +32,12 @@ b) creating a smaller "cell census" from a user-provided list of files (a "manif
 ### Mode (a) - creating the full cell census from the entire CELLxGENE (public) corpus:
 
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
-- To create an cell census at `<census_path>`, execute:
-  > $ python -m cell_census_builder <census_path> -mp --max-workers 12
+- To create a cell census at `<census_path>`, execute:
+  > $ python -m cell_census_builder -mp --max-workers 12 build <census_path>
+- Tips: 
+    - `-v` to view info-level logging during run
+    - `--test-first-n <#>` to test build on a subset of datasets
+    - `--build-tag $(date +'%Y%m%d_%H%M%S')` to produce non-conflicting census build directories during testing
 
 If you run out of memory, reduce `--max-workers`. You can also try a higher number if you have lots of CPU & memory.
 
@@ -46,7 +50,7 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
   5b93b8fc-7c9a-45bd-ad3f-dc883137de30, /files/5b93b8fc-7c9a-45bd-ad3f-dc883137de30.h5ad
   ```
   You can specify a file system path or a URI in the second field
-- To create an cell census at `<census_path>`, execute:
+- To create a cell census at `<census_path>`, execute:
   > $ python -m cell_census_builder <census_path> --manifest <the_manifest_file.csv>
 
 ### Other info
@@ -56,7 +60,7 @@ There are more options discoverable via the `--help` command line option.
 Note on required host resources:
 
 - all H5AD files not on the local disk will be downloaded/cached locally. There must be
-  suffiicent local file system space. Location of cache can be controlled with the
+  sufficient local file system space. Location of cache can be controlled with the
   environment variable `FSSPEC_CACHE_DIR`
 - each H5AD will be read into memory, in its entirety. Sufficient RAM must be present to
   allow for this (and to do so for multiple H5ADs concurrently if you use the `--multi-process` option)
