@@ -35,7 +35,7 @@ b) creating a smaller "cell census" from a user-provided list of files (a "manif
 - To create a cell census at `<census_path>`, execute:
   > $ python -m cell_census_builder -mp --max-workers 12 build <census_path>
 - Tips: 
-    - `-v` to view info-level logging during run
+    - `-v` to view info-level logging during run, or `-v -v` for debug-level logging
     - `--test-first-n <#>` to test build on a subset of datasets
     - `--build-tag $(date +'%Y%m%d_%H%M%S')` to produce non-conflicting census build directories during testing
 
