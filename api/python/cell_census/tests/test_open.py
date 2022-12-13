@@ -3,9 +3,11 @@ import pathlib
 import anndata
 import cell_census
 import numpy as np
+import pytest
 import tiledbsoma as soma
 
 
+@pytest.mark.live_corpus
 def test_open_soma_latest() -> None:
     # There should _always_ be a 'latest'
     census = cell_census.open_soma(census_version="latest")
@@ -16,6 +18,7 @@ def test_open_soma_latest() -> None:
     assert cell_census.open_soma().uri == census.uri
 
 
+@pytest.mark.live_corpus
 def test_get_source_h5ad_uri() -> None:
     rng = np.random.default_rng()
     census = cell_census.open_soma(census_version="latest")
@@ -28,6 +31,7 @@ def test_get_source_h5ad_uri() -> None:
         assert locator["uri"].endswith(a_dataset.dataset_h5ad_path)
 
 
+@pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path) -> None:
     census = cell_census.open_soma(census_version="latest")
     census_datasets = census["census_info"]["datasets"].read_as_pandas_all()

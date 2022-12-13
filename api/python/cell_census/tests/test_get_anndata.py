@@ -1,6 +1,8 @@
 import cell_census
+import pytest
 
 
+@pytest.mark.live_corpus
 def test_get_anndata() -> None:
     census = cell_census.open_soma(census_version="latest")
     ad = cell_census.get_anndata(
