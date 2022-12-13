@@ -1,5 +1,4 @@
 import numbers
-import re
 from typing import List, Optional, Union
 
 import anndata
@@ -7,6 +6,7 @@ import tiledbsoma as soma
 from typing_extensions import TypedDict
 
 from .experiment_query import AxisColumnNames, AxisQuery, experiment_query
+from .util import get_experiment
 
 ObsQuery = TypedDict(
     "ObsQuery",
@@ -110,15 +110,15 @@ def get_anndata(
 
     """
 
-    # lower/snake case the organism name to find the experiment name
-    exp_name = re.sub(r"[ ]+", "_", organism).lower()
+    # # lower/snake case the organism name to find the experiment name
+    # exp_name = re.sub(r"[ ]+", "_", organism).lower()
 
-    if exp_name not in census["census_data"]:
-        raise ValueError(f"Unknown organism {organism} - does not exist")
-    exp = census["census_data"][exp_name]
-    if exp.soma_type != "SOMAExperiment":
-        raise ValueError(f"Unknown organism {organism} - not a SOMA Experiment")
-
+    # if exp_name not in census["census_data"]:
+    #     raise ValueError(f"Unknown organism {organism} - does not exist")
+    # exp = census["census_data"][exp_name]
+    # if exp.soma_type != "SOMAExperiment":
+    #     raise ValueError(f"Unknown organism {organism} - not a SOMA Experiment")
+    exp = get_experiment(census, organism)
     _obs_query = _build_query(obs_query)
     _var_query = _build_query(var_query)
     with experiment_query(exp, measurement_name=measurement_name, obs_query=_obs_query, var_query=_var_query) as query:
