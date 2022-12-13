@@ -3,7 +3,7 @@ import pytest
 import scipy.sparse
 
 
-def test_get_experiment():
+def test_get_experiment() -> None:
     census = cell_census.open_soma(census_version="latest")
     mouse_uri = census["census_data"]["mus_musculus"].uri
     human_uri = census["census_data"]["homo_sapiens"].uri
@@ -21,7 +21,7 @@ def test_get_experiment():
 
 
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-def test_get_presence_matrix(organism):
+def test_get_presence_matrix(organism: str) -> None:
     census = cell_census.open_soma(census_version="latest")
 
     census_datasets = census["census_info"]["datasets"].read_as_pandas_all()
