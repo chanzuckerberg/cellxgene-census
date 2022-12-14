@@ -14,13 +14,13 @@ set -o xtrace
 
 DEVICE_PREFIX="nvme"
 
-# Must be run as privledged user
+# Must be run as privileged user
 if [[ $(id -u) != 0 ]]; then
   echo "ERROR: not root. You must run using sudo. Exiting with no action taken."
   exit
 fi
 
-# Detect all blcok devices that are disks, and do not have
+# Detect all block devices that are disks, and do not have
 # partitions or other holder devices (eg, part of raid group, etc) 
 function detect_devices {
   PY_CMD='

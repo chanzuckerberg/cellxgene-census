@@ -1,43 +1,43 @@
 import numbers
-import re
 from typing import List, Optional, Union
 
 import anndata
 import tiledbsoma as soma
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
+from .experiment import get_experiment
 from .experiment_query import AxisColumnNames, AxisQuery, experiment_query
 
 ObsQuery = TypedDict(
     "ObsQuery",
     {
-        "assay": Optional[Union[str, List[str]]],
-        "assay_ontology_term_id": Optional[Union[str, List[str]]],
-        "cell_type": Optional[Union[str, List[str]]],
-        "cell_type_ontology_term_id": Optional[Union[str, List[str]]],
-        "development_stage": Optional[Union[str, List[str]]],
-        "development_stage_ontology_term_id": Optional[Union[str, List[str]]],
-        "disease": Optional[Union[str, List[str]]],
-        "disease_ontology_term_id": Optional[Union[str, List[str]]],
-        "donor_id": Optional[Union[str, List[str]]],
-        "is_primary_data": Optional[bool],
-        "self_reported_ethnicity": Optional[Union[str, List[str]]],
-        "self_reported_ethnicity_ontology_term_id": Optional[Union[str, List[str]]],
-        "sex": Optional[Union[str, List[str]]],
-        "sex_ontology_term_id": Optional[Union[str, List[str]]],
-        "suspension_type": Optional[Union[str, List[str]]],
-        "tissue": Optional[Union[str, List[str]]],
-        "tissue_ontology_term_id": Optional[Union[str, List[str]]],
-        "tissue_general": Optional[Union[str, List[str]]],
-        "tissue_general_ontology_term_id": Optional[Union[str, List[str]]],
+        "assay": NotRequired[Union[str, List[str]]],
+        "assay_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "cell_type": NotRequired[Union[str, List[str]]],
+        "cell_type_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "development_stage": NotRequired[Union[str, List[str]]],
+        "development_stage_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "disease": NotRequired[Union[str, List[str]]],
+        "disease_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "donor_id": NotRequired[Union[str, List[str]]],
+        "is_primary_data": NotRequired[bool],
+        "self_reported_ethnicity": NotRequired[Union[str, List[str]]],
+        "self_reported_ethnicity_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "sex": NotRequired[Union[str, List[str]]],
+        "sex_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "suspension_type": NotRequired[Union[str, List[str]]],
+        "tissue": NotRequired[Union[str, List[str]]],
+        "tissue_ontology_term_id": NotRequired[Union[str, List[str]]],
+        "tissue_general": NotRequired[Union[str, List[str]]],
+        "tissue_general_ontology_term_id": NotRequired[Union[str, List[str]]],
     },
 )
 
 VarQuery = TypedDict(
     "VarQuery",
     {
-        "feature_id": Optional[Union[str, List[str]]],
-        "feature_name": Optional[Union[str, List[str]]],
+        "feature_id": NotRequired[Union[str, List[str]]],
+        "feature_name": NotRequired[Union[str, List[str]]],
     },
 )
 
@@ -109,17 +109,13 @@ def get_anndata(
     >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
 
     """
-
-    # lower/snake case the organism name to find the experiment name
-    exp_name = re.sub(r"[ ]+", "_", organism).lower()
-
-    if exp_name not in census["census_data"]:
-        raise ValueError(f"Unknown organism {organism} - does not exist")
-    exp = census["census_data"][exp_name]
-    if exp.soma_type != "SOMAExperiment":
-        raise ValueError(f"Unknown organism {organism} - not a SOMA Experiment")
-
+    exp = get_experiment(census, organism)
     _obs_query = _build_query(obs_query)
     _var_query = _build_query(var_query)
-    with experiment_query(exp, measurement_name=measurement_name, obs_query=_obs_query, var_query=_var_query) as query:
+    with experiment_query(
+        exp,
+        measurement_name=measurement_name,
+        obs_query=_obs_query,
+        var_query=_var_query,
+    ) as query:
         return query.read_as_anndata(X_name=X_name, column_names=column_names)
