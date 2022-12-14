@@ -665,9 +665,9 @@ For each organism the `SOMAExperiment` MUST contain the following:
 * Cell metadata – `census_obj[“census_data”][organism].obs` – `SOMADataFrame`
 * Data  –  `census_obj[“census_data”][organism].ms` – `SOMACollection`. This `SOMACollection` MUST only contain one `SOMAMeasurement` in `census_obj[“census_data”][organism].ms[“RNA”]` with the following:
 	* Matrix  data –  `census_obj[“census_data”][organism].ms[“RNA”].X` – `SOMACollection`. It MUST contain exactly one layer: 
-		* Count matrix – `census_obj[“census_data”][organism].ms[“RNA”].X[“raw”]` – `SOMASparseNdArray`
+		* Count matrix – `census_obj[“census_data”][organism].ms[“RNA”].X[“raw”]` – `SOMASparseNDArray`
 	* Feature metadata – `census_obj[“census_data”][organism].ms[“RNA”].var` – `SOMAIndexedDataFrame`
-	* Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence_matrix”]` – `SOMASparseNdArray`
+	* Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence_matrix”]` – `SOMASparseNDArray`
 
 
 For each organism the `SOMAExperiment` SHOULD NOT contain the following:
@@ -678,9 +678,9 @@ For each organism the `SOMAExperiment` SHOULD NOT contain the following:
 	* `obsp`
 	* `obs_ms`
 
-#### Matrix Data, count (raw) matrix – `census_obj[“census_data”][organism].ms[“RNA”].X[“raw”]` – `SOMASparseNdArray`
+#### Matrix Data, count (raw) matrix – `census_obj[“census_data”][organism].ms[“RNA”].X[“raw”]` – `SOMASparseNDArray`
 
-Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNdArray` with a fill value of zero (0), and no explicitly stored zero values.
+Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNDArray` with a fill value of zero (0), and no explicitly stored zero values.
 
 
 #### Feature metadata – `census_obj[“census_data”][organism].ms[“RNA”].var` – `SOMADataFrame`
@@ -718,9 +718,9 @@ The following columns MUST be included:
 </tbody>
 </table>
 
-#### Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence”]` – `SOMASparseNdArray`
+#### Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence”]` – `SOMASparseNDArray`
 
-In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, the Cell Census MUST include a presence matrix encoded as a `SOMASparseNdArray`.
+In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, the Cell Census MUST include a presence matrix encoded as a `SOMASparseNDArray`.
 
 For all features included in the Cell Census, the dataset presence matrix MUST indicate what features are included in each dataset of the Cell Census. This information MUST be encoded as a boolean matrix, `True` indicates the feature was included in the dataset, `False` otherwise. This is a two-dimensional matrix and it MUST be `N x M` where `N` is the number of datasets and `M` is the number of features. The matrix is indexed by the `soma_joinid` value of  `census_obj[“census_info”][“datasets”]` and `census_obj[“census_data”][organism].ms[“RNA”].var`.
 

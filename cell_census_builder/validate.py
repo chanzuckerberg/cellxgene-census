@@ -111,14 +111,14 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         for lyr in CENSUS_X_LAYERS:
             # layers only exist if there are cells in the measurement
             if lyr in rna.X:
-                assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNdArray"
+                assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNDArray"
 
         # and a presence matrix
         assert "varp" in rna and rna["varp"].exists() and rna["varp"].soma_type == "SOMACollection"
         # dataset presence only exists if there are cells in the measurement
         if "dataset_presence_matrix" in rna.varp:
             assert rna.varp["dataset_presence_matrix"].exists()
-            assert rna.varp["dataset_presence_matrix"].soma_type == "SOMASparseNdArray"
+            assert rna.varp["dataset_presence_matrix"].soma_type == "SOMASparseNDArray"
 
     return True
 
@@ -252,7 +252,7 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
         if len(soma_joinids) > 0:
             assert "raw" in se.ms["RNA"].X and se.ms["RNA"].X["raw"].exists()
 
-            def count_elements(arr: soma.SparseNdArray, join_ids: npt.NDArray[np.int64]) -> int:
+            def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
                 # TODO XXX: Work-around for regression TileDB-SOMA#473
                 # return sum(t.non_zero_length for t in arr.read_sparse_tensor((join_ids, slice(None))))
                 return sum(t.non_zero_length for t in arr.read_sparse_tensor((pa.array(join_ids), slice(None))))
