@@ -12,3 +12,8 @@ ignore_missing_imports = true
 warn_unreachable = true
 strict = true
 plugins = "numpy.typing.mypy_plugin"
+
+[tool.pytest.ini_options]
+markers = [
+    "live_corpus: runs on the live Cell Census data corpus",
+]
