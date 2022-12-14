@@ -25,10 +25,14 @@ jobs:
         run: python -m build
         working-directory: api/python/cell_census/
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload wheel
+        uses: actions/upload-artifact@v3
         with:
+          name: wheel
           path: api/python/cell_census/dist/cell_census-*.whl
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload wheel
+        uses: actions/upload-artifact@v3
         with:
+          name: sdist
           path: api/python/cell_census/dist/cell_census-*.tar.gz
