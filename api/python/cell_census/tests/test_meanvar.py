@@ -1,6 +1,7 @@
 import numpy as np
-from cell_census.compute import OnlineMatrixMeanVariance
 from scipy import sparse
+
+from cell_census.compute import OnlineMatrixMeanVariance
 
 
 def test_online_mean_var() -> None:

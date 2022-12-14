@@ -1,5 +1,6 @@
-import cell_census
 import pytest
+
+import cell_census
 
 
 @pytest.mark.live_corpus

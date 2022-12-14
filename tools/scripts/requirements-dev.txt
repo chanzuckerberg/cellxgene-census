@@ -1,0 +1,5 @@
+black
+black[jupyter]
+isort
+flake8-bugbear
+mypy==0.982

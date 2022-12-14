@@ -6,11 +6,12 @@ on:
     branches: [main]
 
 jobs:
-  lint:
+  lint_cell_census_builder:
+    name: lint cell_census_builder
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .
+        working-directory: ./tools/
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -19,22 +20,42 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install -U pip
-          python -m pip install black black[jupyter]
-          python -m pip install isort
-          python -m pip install flake8-bugbear
-          python -m pip install mypy==0.982 types-setuptools types-requests numpy pytest
-      - name: Python Black
+          python -m pip install -r scripts/requirements-dev.txt
+      - name: Lint script
+        run: bash scripts/formatting.sh
+
+  lint_cell_census_package:
+    name: lint cell_census Python package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api/python/cell_census/
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install deps
         run: |
-          python -m black --check --diff .
-      - name: Python isort
+          python -m pip install -U pip
+          python -m pip install -r scripts/requirements-dev.txt
+      - name: Lint script
+        run: bash scripts/formatting.sh
+
+  lint_cell_census_notebooks:
+    name: lint cell_census notebooks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api/python/notebooks/
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.7"
+      - name: Install deps
         run: |
-          python -m isort --check --diff .
-      - name: Python style with flake8[bugbear]
-        run: |
-          python -m flake8 .
-      - name: Check type annotations mypy
-        run: |
-          # cell_census_builder is Python 3.9+
-          # cell_census package is Python 3.7+
-          python -m mypy --python-version 3.9 ./cell_census_builder
-          python -m mypy --python-version 3.7 ./api
+          python -m pip install -U pip
+          python -m pip install -r scripts/requirements-dev.txt
+      - name: Lint script
+        run: bash scripts/formatting.sh
