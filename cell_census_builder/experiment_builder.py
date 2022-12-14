@@ -225,7 +225,7 @@ class ExperimentBuilder:
         for pa_batch in pa_table.to_batches():
             se.obs.write(pa_batch)
 
-        # Accmulate the union of all var ids/names (for raw and processed), to be later persisted.
+        # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
         # but may need to evolve this logic if that assumption is not scalable.
         tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name"]]
@@ -287,14 +287,14 @@ class ExperimentBuilder:
             assert self.n_var > 0
             measurement = se.ms["RNA"]
             for layer_name in CENSUS_X_LAYERS:
-                snda = soma.SparseNdArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx()).create(
+                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx()).create(
                     CENSUS_X_LAYERS[layer_name],
                     (self.n_obs, self.n_var),
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
                 measurement.X.set(layer_name, snda, relative=True)
 
-            presence_matrix = soma.SparseNdArray(
+            presence_matrix = soma.SparseNDArray(
                 uricat(measurement.varp.uri, "dataset_presence_matrix"), ctx=TileDB_Ctx()
             )
             max_dataset_joinid = max(d.soma_joinid for d in datasets)

@@ -35,7 +35,7 @@ def consolidate_collection(
     futures = []
     for soma_obj in collection.values():
         type = soma_obj.soma_type
-        if type in ["SOMADataFrame", "SOMASparseNdArray", "SOMADenseNdArray"]:
+        if type in ["SOMADataFrame", "SOMASparseNDArray", "SOMADenseNDArray"]:
             logging.info(f"Consolidate: queuing {type} {soma_obj.uri}")
             futures.append(ppe.submit(consolidate_tiledb_object, soma_obj.uri))
         elif type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:

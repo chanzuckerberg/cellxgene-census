@@ -50,7 +50,7 @@ class ExperimentQuery:
     IMPORTANT: this class is not thread safe.
 
     IMPORTANT: this query class assumes it can store the full result of both axis dataframe
-    queries in memory, and only provides incremental access to the underlying X NdArray. API
+    queries in memory, and only provides incremental access to the underlying X NDArray. API
     features such as `n_obs` and `n_vars` codify this in the API.
 
     IMPORTANT: you must call `close()` on any instance of this class in order to release
@@ -158,7 +158,7 @@ class ExperimentQuery:
     def n_vars(self) -> int:
         return len(self.var_joinids())
 
-    def _fetchX(self, X: soma.SparseNdArray, prefetch: bool = False) -> Iterator[pa.Table]:
+    def _fetchX(self, X: soma.SparseNDArray, prefetch: bool = False) -> Iterator[pa.Table]:
         assert self._joinids["obs"] is not None
         assert self._joinids["var"] is not None
 
@@ -195,7 +195,7 @@ class ExperimentQuery:
             raise ValueError("Unknown X layer")
 
         X = self.experiment.ms[self.ms].X[layer]
-        if X.soma_type != "SOMASparseNdArray":
+        if X.soma_type != "SOMASparseNDArray":
             raise NotImplementedError("Dense array unsupported")
 
         futures = []
@@ -230,7 +230,7 @@ class ExperimentQuery:
             if _xname not in X_collection:
                 raise ValueError("Unknown X layer name")
             # TODO: dense array slicing
-            if X_collection[_xname].soma_type != "SOMASparseNdArray":
+            if X_collection[_xname].soma_type != "SOMASparseNDArray":
                 raise NotImplementedError("Dense array unsupported")
 
         if column_names is None:
