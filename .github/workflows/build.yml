@@ -1,0 +1,27 @@
+name: cell_census build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build_python_wheels:
+    name: Build Python wheels and sdist
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+
+      - name: Install deps
+        run: |
+          python -m pip install -U pip setuptools build
+
+      - name: Build
+        run: python -m build
+        working-directory: api/python/cell_census/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/*
