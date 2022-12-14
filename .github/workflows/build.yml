@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_python_wheels:
-    name: Build Python wheels and sdist
+    name: Build Python wheel and sdist
     runs-on: ubuntu-latest
 
     steps:
@@ -27,4 +27,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          path: api/python/cell_census/dist/*
+          path: api/python/cell_census/dist/cell_census-*.whl
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: api/python/cell_census/dist/cell_census-*.tar.gz
