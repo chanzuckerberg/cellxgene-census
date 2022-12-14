@@ -1,9 +1,9 @@
 name: cell_census build
 
 on:
-  # pull_request:
-  # push:
-  #   branches: [main]
+  pull_request:
+  push:
+    branches: [main]
 
 jobs:
   build_python_wheels:
@@ -24,4 +24,4 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          path: dist/*
+          path: api/python/cell_census/dist/*
