@@ -9,9 +9,9 @@ jobs:
   unit_tests:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: api/python/cell_census/
+    # defaults:
+    #   run:
+    #     working-directory: api/python/cell_census/
 
     strategy:
       matrix:
