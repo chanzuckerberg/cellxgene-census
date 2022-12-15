@@ -38,17 +38,17 @@ If testing exposes problems, fix and commit a solution as you would any other ch
 
 ## Step 3: Create a release
 
-Prior to this process, determine the correct semver version number for the new release.
+Prior to this process, determine the correct semver version number for the new release. Please consider if this is a major, minor or patch release, and if it should have a tag (e.g., a release candidate, with a `-rc.#` suffix).
 
 To create a release, perform the following:
 
-1. Create a branch and PR at the commit/tag you wish to release the repo. Title the PR so that it is obvious that it is a release PR (e.g., "Release 1.0.3").
+1. Create a branch and PR at the commit/tag you wish to release the repo. Title the PR so that it is obvious that it is a release PR (e.g., "Release 1.0.3", "Release Candidate 2.9.0-rc.1", etc.).
 2. Using the new semver, set the version in `api/python/cell_census/src/cell_census/__init__.py` and commit/push this change upstream.
 3. Wait for the GitHub action to build the assets, and ensure the CI passes.
 4. Download the asset zip, and unzip it into a temporary directory (e.g., /tmp/dist/).
 5. If desired, test the assets using instructions from Step 2 above.
-6. Merge the PR into main.
-7. Create and publish a GitHub Release, using the semver release number (prefixed with `v`) as a tag. Mark as pre-release if appropriate.
+6. If this is a final release (not a release candiate), merge the PR into main. If a relase candidate, with the final release expected shortly, maintain the PR and repeat the above steps for the final release.
+7. Create and publish a GitHub Release, using the semver release number defined above (prefixed with `v`) as a tag. If this is a release candiate, mark as a pre-release in the GitHub Release form.
 
 Do not delete the build assets - proceed to publishing assets to PyPi in Step 4
 
