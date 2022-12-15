@@ -31,4 +31,4 @@ jobs:
           pip install -e ./api/python/cell_census/
       - name: Test with pytest
         run: |
-          pytest ./tests/
+          pytest ./api/python/cell_census/tests/
