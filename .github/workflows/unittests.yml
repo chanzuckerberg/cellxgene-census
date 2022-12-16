@@ -1,23 +1,18 @@
 name: cell_census Python package unit tests
 
 on:
-  # pull_request:
-  # push:
-  #   branches: [main]
-  workflow_dispatch
+  pull_request:
+  push:
+    branches: [main]
 
 jobs:
   unit_tests:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: api/python/cell_census/
-
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -32,4 +27,4 @@ jobs:
           pip install -e ./api/python/cell_census/
       - name: Test with pytest
         run: |
-          pytest ./tests/
+          pytest ./api/python/cell_census/tests/
