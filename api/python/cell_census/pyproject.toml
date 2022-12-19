@@ -1,6 +1,53 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "cell_census"
+dynamic = ["version"]
+description = "API to simplify use of the CZI Science CELLxGENE Cell Census"
+authors = [
+    { name = "Chan Zuckerberg Initiative", email = "cellxgene@chanzuckerberg.com" }
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">= 3.8, < 3.11"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies= [
+    "numba",
+    "numpy",
+    "requests",
+    "tiledb>=0.19.0",
+    "tiledbsoma==0.5.0a2",
+    "typing_extensions",
+    "s3fs",
+    "scikit-misc",
+]
+
+[project.urls]
+homepage = "https://github.com/chanzuckerberg/cell-census"
+repository = "https://github.com/chanzuckerberg/cell-census"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cell_census*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
+
+[tool.setuptools_scm]
+root = "../../.."
 
 [tool.black]
 line-length = 120
