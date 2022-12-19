@@ -31,15 +31,15 @@ Any pre-built asset on Github can be installed and tested from the Github URL. F
   ```
 - If you downloaded using the browser, unzip into a temp directory, e.g.,
   ```shell
-  $ unzip artifact.zip -d /tmp/artifact/
+  $ unzip artifact.zip -d ./artifact/
   Archive:  artifact.zip
-    inflating: /tmp/artifact/cell_census-0.0.1.dev0-py3-none-any.whl
-    inflating: /tmp/artifact/cell_census-0.0.1.dev0.tar.gz
+    inflating: ./artifact/cell_census-0.0.1.dev0-py3-none-any.whl
+    inflating: ./artifact/cell_census-0.0.1.dev0.tar.gz
   ```
 - Uninstall any existing installation, install and test the downloaded version, e.g.,
   ```shell
   $ pip uninstall cell_census
-  $ pip install /tmp/artifact/cell_census-0.0.1.dev0-py3-none-any.whl
+  $ pip install ./artifact/cell_census-0.0.1.dev0-py3-none-any.whl
   ```
 
 To test a release candidate:
@@ -61,16 +61,16 @@ To create a release, perform the following:
 1. Identify both the (tested & validated) commit and semver for the release.
 2. Tag the commit with the release version (_including_ a `v` prefix) and push the tag to origin. **Important**: use an annotated tag, e.g., `git tag -a v1.9.4 -m 'Release 1.9.4`. For example:
    ```shell
-   $ git tag -a v1.3.5 -m 'Release 1.3.5'
-   $ git push origin v1.3.5
+   $ git tag -a v1.9.4 -m 'Release 1.9.4'
+   $ git push origin v1.9.4
    ```
 3. Trigger a build by manually triggering the `build.yml` workflow. For example:
    ```shell
-   $ gh workflow run build.yml --ref v1.3.4
+   $ gh workflow run build.yml --ref v1.9.4
    ```
 4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
 5. Optional: download the asset from the build workflow and validate it.
-6. Create and publish a GitHub Release, using the tag above (e.g., `v1.3.4`).).
+6. Create and publish a GitHub Release, using the tag above (e.g., `v1.9.4`).).
 
 ## Step 4: Publish assets to PyPi
 
