@@ -44,7 +44,7 @@ Any pre-built asset on Github can be installed and tested from the Github URL. F
 
 To test a release candidate:
 
-1. Identify the commit tag you wish to test. Download and test the artifact built for that commit as desribed above.
+1. Identify the commit tag you wish to test. Download and test the artifact built for that commit as described above.
 2. Perform any necessary end-user testing, using the above installation method
 3. If acceptable, proceed to Step 3 - create a release.
 
