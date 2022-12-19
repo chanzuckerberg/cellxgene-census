@@ -12,19 +12,20 @@ The following approach is used to manage releases of the Python cell_census pack
 
 While not strictly required, this process assumes you have me the following prerequisites:
 
-- Github CLI tool installed. See [documentation](https://cli.github.com/).
 - Write access to the chanzuckerberg/cell_census repo
+- An account on pypi.org and test.pypi.org with access to the cell_census project
+- Github CLI tool installed. See [documentation](https://cli.github.com/).
 - `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/).
 
 ## Step 1: Building the package assets
 
-A build will occur automatically upon each commit to main, or upon each commit to a PR. Builds are retained for a period of time (currently the GH default of 90 days).
+A build will occur automatically upon each commit to main, or upon each commit to a PR. Builds are retained for a limited period of time (currently the GH default of 90 days).
 
 ## Step 2: Release candidate testing
 
 Any pre-built asset on Github can be installed and tested from the Github URL. For example:
 
-- Download the build artifact.zip from GitHub, using the GH Action run ID:
+- Download the build artifact.zip from GitHub, using the GH Action run ID associated with the `build` action for your commit:
   ```shell
   $ gh run download <id>
   ```
@@ -55,27 +56,23 @@ Prior to this process, determine the correct semver version number for the new r
 
 To create a release, perform the following:
 
-1. Create a branch and PR at the commit/tag you wish to release the repo. Title the PR so that it is obvious that it is a release PR (e.g., "Release 1.0.3", "Release Candidate 2.9.0-rc.1", etc.).
-2. Create an annotated git tag on the head of the branch using the new release semver, prefixed with a `v`, e.g., `git tag -a v1.9.4 -m 'Release 1.9.4`. Note: if the branch was updated, and previously tagged, you will need to use the --force flag.
-3. Commit and push the tag upstream, e.g., `git push v1.9.4`
-4. Wait for the GitHub action to build the assets, and ensure the CI passes.
-5. Download the asset zip, and unzip it into a temporary directory (e.g., /tmp/dist/).
-6. If desired, test the assets using instructions from Step 2 above.
-7. If this is a final release (not a release candiate), merge the PR into main. If a relase candidate, with the final release expected shortly, maintain the PR and repeat the above steps for the final release.
-8. Create and publish a GitHub Release, using the semver release number defined above (prefixed with `v`) as a tag. If this is a release candiate, mark as a pre-release in the GitHub Release form.
+1. Identify the commit (on `main`) and semver for the release.
+2. Tag the commit with the release version (_including_ a `v` prefix) and push the tag to origin. **Important**: use an annotated tag, e.g., `git tag -a v1.9.4 -m 'Release 1.9.4`. For example:
+    ```shell
+    $ git tag -a v1.3.5 -m 'Release 1.3.5'
+    $ git push origin v1.3.5
+    ```
+3. Create and publish a GitHub Release, using the tag above (e.g., `v1.3.4`).).
 
-Do not delete the build assets - proceed to publishing assets to PyPi in Step 4
 
 ## Step 4: Publish assets to PyPi
 
-This step assumes you have a PyPi account with permission to manage the project. You may optionally test this process with test.pypi.org.
+To publish built release assets to PyPi (*note*: this will require your pypi login):
 
-To publish built release assets to PyPi:
-
-1. Locate the assets you downloaded in Step 3
-2. Use twine to upload to PyPi:
+1. Download the assets built for your release commit, using the same method as step 2 above.
+2. Use twine to upload to PyPi (this assumes the downloaded assets are in ./artifact/):
    ```shell
-   pipx run twine upload /tmp/dist/*
+   pipx run twine upload ./artifact/*
    ```
 
-To test with TestPyPi, use `twine upload --repository testpypi dist/*`. More instructions [here](https://packaging.python.org/en/latest/guides/using-testpypi/).
+To test with TestPyPi, use `twine upload --repository testpypi artifact/*`. More instructions [here](https://packaging.python.org/en/latest/guides/using-testpypi/).
