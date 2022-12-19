@@ -10,7 +10,7 @@ The following approach is used to manage releases of the Python cell_census pack
 
 ## Prerequisites
 
-While not strictly required, this process assumes you have me the following prerequisites:
+While not strictly required, this process assumes you have met the following prerequisites:
 
 - Write access to the chanzuckerberg/cell_census repo
 - An account on pypi.org and test.pypi.org with access to the cell_census project
