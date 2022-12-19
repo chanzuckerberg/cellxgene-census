@@ -54,23 +54,33 @@ If testing exposes problems, fix and commit a solution as you would any other ch
 
 Prior to this process, determine the correct semver version number for the new release. Please consider if this is a major, minor or patch release, and if it should have a tag (e.g., a release candidate, with a `-rc.#` suffix).
 
+This process also assumes you are releasing from `main`. If you create a release PR, it should be merged before releasing.
+
 To create a release, perform the following:
 
-1. Identify the commit (on `main`) and semver for the release.
+1. Identify both the (tested & validated) commit and semver for the release.
 2. Tag the commit with the release version (_including_ a `v` prefix) and push the tag to origin. **Important**: use an annotated tag, e.g., `git tag -a v1.9.4 -m 'Release 1.9.4`. For example:
-    ```shell
-    $ git tag -a v1.3.5 -m 'Release 1.3.5'
-    $ git push origin v1.3.5
-    ```
-3. Create and publish a GitHub Release, using the tag above (e.g., `v1.3.4`).).
-
+   ```shell
+   $ git tag -a v1.3.5 -m 'Release 1.3.5'
+   $ git push origin v1.3.5
+   ```
+3. Trigger a build by manually triggering the `build.yml` workflow. For example:
+   ```shell
+   $ gh workflow run build.yml --ref v1.3.4
+   ```
+4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
+5. Optional: download the asset from the build workflow and validate it.
+6. Create and publish a GitHub Release, using the tag above (e.g., `v1.3.4`).).
 
 ## Step 4: Publish assets to PyPi
 
-To publish built release assets to PyPi (*note*: this will require your pypi login):
+To publish built release assets to PyPi (_note_: this will require your pypi login):
 
-1. Download the assets built for your release commit, using the same method as step 2 above.
-2. Use twine to upload to PyPi (this assumes the downloaded assets are in ./artifact/):
+1. Download the assets built for your release commit, using the same method as step 2 above, e.g.,
+   ```shell
+   $ gh run download <ID>
+   ```
+2. Use twine to upload to PyPi (this assumes the downloaded assets are in ./artifact/), e.g.,
    ```shell
    pipx run twine upload ./artifact/*
    ```
