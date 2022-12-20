@@ -13,7 +13,7 @@ The following approach is used to manage releases of the Python cell_census pack
 While not strictly required, this process assumes you have met the following prerequisites:
 
 - You have write access to the chanzuckerberg/cell_census repo
-- You have nn account on pypi.org and test.pypi.org, both with access to the cell_census project
+- You have an account on pypi.org and test.pypi.org, both with access to the cell_census project
 - You have the Github CLI tool (`gh`) installed. See [documentation](https://cli.github.com/).
 - You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/).
 
@@ -63,7 +63,7 @@ If testing exposes problems, fix and commit a solution as you would any other ch
 
 ## Step 3: Create a release
 
-Prior to this process, determine the correct semver version number for the new release. Please consider if this is a major, minor or patch release, and if it should have a tag (e.g., an alpha build, with a `a#` suffix or a pre-release candidate, with a `-rc). If you are not sure, please review [PEP 440](https://peps.python.org/pep-0440/) for more information.
+Prior to this process, determine the correct semver version number for the new release. Please consider if this is a major, minor or patch release, and if it should have a tag (e.g., an alpha build, with a `a#` suffix or a pre-release candidate, with a `-rc` suffix). If you are not sure, please review [PEP 440](https://peps.python.org/pep-0440/) for more information.
 
 This process also assumes you are releasing from `main`. If you create a release PR, it should be merged to main before releasing.
 
@@ -81,7 +81,7 @@ To create a release, perform the following:
    ```
 4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
 5. Optional, _but recommended_: download the asset from the build workflow and validate it.
-6. Create and publish a GitHub Release, using the \<SEMVER> tag above (e.g., `v1.9.4`).). It is recommeded that you include a release summary and change log in the GH release.
+6. Create and publish a GitHub Release, using the `<SEMVER>` tag above (e.g., `v1.9.4`). It is recommended that you include a release summary and change log in the GH release.
 
 ## Step 4: Publish assets to PyPi
 
