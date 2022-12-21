@@ -126,7 +126,7 @@ def get_anndata(
 
     >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
 
-    >>> get_anndata(cesus, "Homo sapiens", obs_joinds=[0,88,222])
+    >>> get_anndata(cesus, "Homo sapiens", obs_joinids=[0,88,222])
 
     """
     exp = get_experiment(census, organism)
