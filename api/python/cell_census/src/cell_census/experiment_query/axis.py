@@ -6,10 +6,9 @@ import numpy.typing as npt
 import pyarrow as pa
 from typing_extensions import TypedDict
 
-# Type declaration/helpers local to this file
-#
-Coordinates = Tuple[Union[slice, int, npt.ArrayLike], ...]
-ValueFilter = str
+AxisCoordinate = Union[slice, int, npt.ArrayLike]
+AxisCoordinates = Tuple[AxisCoordinate, ...]
+AxisValueFilter = str
 
 MatrixAxisQuery = TypedDict(
     "MatrixAxisQuery",
@@ -38,8 +37,8 @@ class AxisQuery:
     ```
     """
 
-    value_filter: Optional[str] = None
-    coords: Optional[Coordinates] = None
+    value_filter: Optional[AxisValueFilter] = None
+    coords: Optional[AxisCoordinates] = None
 
     def __post_init__(self) -> None:
         # TODO: Error class
