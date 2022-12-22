@@ -9,10 +9,8 @@ def test_get_anndata() -> None:
     ad = cell_census.get_anndata(
         census,
         organism="Mus musculus",
-        value_filter={
-            "obs": "tissue_general == 'vasculature'",
-            "var": "feature_name in ['Gm53058', '0610010K14Rik']",
-        },
+        obs_value_filter="tissue_general == 'vasculature'",
+        var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
         column_names={
             "obs": ["soma_joinid", "cell_type", "tissue", "tissue_general", "assay"],
             "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
