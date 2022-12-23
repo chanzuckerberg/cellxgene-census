@@ -2,8 +2,8 @@
 
 Demonstration notebooks for the CELLxGENE Cell Census. There are two kinds of notebooks:
 
-1. **API mechanics** — Located under [`api_demo`](api_demo) these notebooks provide technical demonstrations of the Cell Census API capabilities.
-2. **Computational biology analysis** — Located under [`analysis_demo`](analysis_demo) these notebooks provide an overview of the data in the Cell Census, how to access it and how to use the it in an analytical framework.
+1. **API mechanics** — Located under `api_demo` these notebooks provide technical demonstrations of the Cell Census API capabilities.
+2. **Computational biology analysis** — Located under `analysis_demo` these notebooks provide an overview of the data in the Cell Census, how to access it and how to use the it in an analytical framework.
 
 ## Dependencies
 
