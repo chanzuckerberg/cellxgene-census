@@ -1,8 +1,9 @@
 # ReadMe
 
-Demonstration notebooks for the CELLxGENE Cell Census
+Demonstration notebooks for the CELLxGENE Cell Census. There are two kinds of notebooks:
 
-This is a quick start on how to run the notebooks.  It is Linux-flavored.
+1. **API mechanics** — Located under `api_mechanics_notebooks` these notebooks provide technical demonstrations of the Cell Census API capabilities.
+2. **Computational biology** — Located under `comp_bio_notebooks` these notebooks provide an overview of the data in the Cell Census and how to use the API and data in an analytical framework.
 
 ## Dependencies
 
