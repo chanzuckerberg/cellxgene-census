@@ -349,7 +349,7 @@ All datasets used to build the Cell Census MUST be included in a table modeled a
   <tr>
     <td>collection_id</td>
     <td>string</td>
-    <td rowspan="5">As Defined in CELLxGENE Discover <a href="https://github.com/chanzuckerberg/single-cell/blob/main/design-documents/0001-data-portal-architecture/text.md#data-model">data schema</a>.</td>
+    <td rowspan="5">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
   </tr>
   <tr>
     <td>collection_name</td>
