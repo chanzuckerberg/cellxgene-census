@@ -344,7 +344,7 @@ def validate_X_layers(
 
 def _validate_X_has_no_dups(X: SparseNDArray, n_obs: int) -> bool:
     """
-    Validate that there are no duplicate coordinates in the (sparse) X matrix . The check is
+    Validate that there are no duplicate coordinates in the (sparse) X matrix. The check is
     performed iteratively over slices of the obs axis, and not the entire X matrix at once,
     to limit memory usage. A given obs slice will include all var axis values, so we can safely perform
     the duplication check on this slice (by checking uniqueness). The downside is that tiles may be
@@ -352,8 +352,8 @@ def _validate_X_has_no_dups(X: SparseNDArray, n_obs: int) -> bool:
     are better.
     """
 
-    # Keep per-slice memory usage < 1GB: 4096 obs * 30000 genes *.05 sparsity * (64*2) bytes/coord
-    stride = 4096
+    # Keep per-slice memory usage < 1GB: 2^15 obs * 30000 genes * 0.05 sparsity * (8 * 2) bytes/coord
+    stride = 2**15
     for obs_slice_start in range(0, n_obs, stride):
         coords_obs_slice = None
         obs_slice = slice(obs_slice_start, min(obs_slice_start + stride, n_obs - 1))
