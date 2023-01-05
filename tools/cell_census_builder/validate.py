@@ -13,6 +13,7 @@ import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
+from tiledbsoma import SparseNDArray
 
 from .anndata import make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -217,11 +218,15 @@ def validate_axis_dataframes(
         assert eb_info[eb.name].n_obs == len(census_obs_df)
         assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
         assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+        assert len(census_obs_df) == census_obs_df.soma_joinid.nunique(), \
+            f"obs soma_joinid values are not unique for experiment {eb.name}"
 
         census_var_df = se.ms["RNA"].var.read_as_pandas_all(column_names=["feature_id", "soma_joinid"])
         assert n_vars == len(census_var_df)
         assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
         assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
+        assert len(census_var_df) == census_var_df.soma_joinid.nunique(), \
+            f"var soma_joinid values are not unique for experiment {eb.name}"
 
     return True
 
@@ -284,7 +289,7 @@ def validate_X_layers(
     experiment_builders: List[ExperimentBuilder],
     args: argparse.Namespace,
 ) -> bool:
-    """ "
+    """
     Validate all X layers: schema, shape, contents
 
     Raises on error.  Returns True on success.
@@ -311,6 +316,9 @@ def validate_X_layers(
                 assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                 assert X.shape == (n_obs, n_vars)
 
+                assert _validate_X_has_no_dups(X, n_obs), \
+                    f"duplicate coordinates in {eb.name} layer {lyr} matrix"
+
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
             futures = [
@@ -330,6 +338,31 @@ def validate_X_layers(
         ):
             logging.info(f"validate_X {n} of {len(datasets)} complete.")
             assert vld
+
+    return True
+
+
+def _validate_X_has_no_dups(X: SparseNDArray, n_obs: int) -> bool:
+    """
+    Validate that there are no duplicate coordinates in the (sparse) X matrix . The check is
+    performed iteratively over slices of the obs axis, and not the entire X matrix at once,
+    to limit memory usage. A given obs slice will include all var axis values, so we can safely perform
+    the duplication check on this slice (by checking uniqueness). The downside is that tiles may be
+    read multiple times, since a given tile may span values in multiple obs slices. So larger strides
+    are better.
+    """
+
+    # Keep per-slice memory usage < 1GB: 4096 obs * 30000 genes *.05 sparsity * (64*2) bytes/coord
+    stride = 4096
+    for obs_slice_start in range(0, n_obs, stride):
+        coords_obs_slice = None
+        obs_slice = slice(obs_slice_start, min(obs_slice_start + stride, n_obs - 1))
+        for coo in X.read_sparse_tensor(coords=[obs_slice]):
+            coords_obs_slice_partial = coo.to_numpy()[1]
+            coords_obs_slice = np.concatenate(coords_obs_slice, coords_obs_slice_partial) \
+                if coords_obs_slice else coords_obs_slice_partial
+        if len(coords_obs_slice) != len(np.unique(coords_obs_slice, axis=0)):
+            return False
 
     return True
 

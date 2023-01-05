@@ -120,8 +120,13 @@ def build(
     top_level_collection, filtered_datasets = build_step2_create_axis(
         soma_path, assets_path, datasets, experiment_builders, args
     )
-    assign_soma_joinids(filtered_datasets)
+
+    if not filtered_datasets:
+        logging.error("Zero datasets are suitable for processing. Aborting.")
+        return 1
+
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
+    assign_soma_joinids(filtered_datasets)
     gc.collect()
 
     # Step 3- create X layers
