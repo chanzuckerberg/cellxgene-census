@@ -359,8 +359,8 @@ def _validate_X_has_no_dups(X: SparseNDArray, n_obs: int) -> bool:
         obs_slice = slice(obs_slice_start, min(obs_slice_start + stride, n_obs - 1))
         for coo in X.read_sparse_tensor(coords=[obs_slice]):
             coords_obs_slice_partial = coo.to_numpy()[1]
-            coords_obs_slice = np.concatenate(coords_obs_slice, coords_obs_slice_partial) \
-                if coords_obs_slice else coords_obs_slice_partial
+            coords_obs_slice = np.concatenate([coords_obs_slice, coords_obs_slice_partial], axis=0) \
+                if coords_obs_slice is not None else coords_obs_slice_partial
         if len(coords_obs_slice) != len(np.unique(coords_obs_slice, axis=0)):
             return False
 
