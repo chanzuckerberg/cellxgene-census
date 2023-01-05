@@ -318,7 +318,7 @@ def validate_X_layers(
                 assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                 assert X.shape == (n_obs, n_vars)
 
-                assert _validate_X_has_no_dups(X, n_obs), f"duplicate coordinates in {eb.name} layer {lyr} matrix"
+                assert _validate_X_has_no_dup_coords(X, n_obs), f"duplicate coordinates in {eb.name} layer {lyr} matrix"
 
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
@@ -343,7 +343,7 @@ def validate_X_layers(
     return True
 
 
-def _validate_X_has_no_dups(X: SparseNDArray, n_obs: int) -> bool:
+def _validate_X_has_no_dup_coords(X: SparseNDArray, n_obs: int) -> bool:
     """
     Validate that there are no duplicate coordinates in the (sparse) X matrix. The check is
     performed iteratively over slices of the obs axis, and not the entire X matrix at once,
