@@ -218,15 +218,17 @@ def validate_axis_dataframes(
         assert eb_info[eb.name].n_obs == len(census_obs_df)
         assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
         assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
-        assert len(census_obs_df) == census_obs_df.soma_joinid.nunique(), \
-            f"obs soma_joinid values are not unique for experiment {eb.name}"
+        assert (
+            len(census_obs_df) == census_obs_df.soma_joinid.nunique()
+        ), f"obs soma_joinid values are not unique for experiment {eb.name}"
 
         census_var_df = se.ms["RNA"].var.read_as_pandas_all(column_names=["feature_id", "soma_joinid"])
         assert n_vars == len(census_var_df)
         assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
         assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
-        assert len(census_var_df) == census_var_df.soma_joinid.nunique(), \
-            f"var soma_joinid values are not unique for experiment {eb.name}"
+        assert (
+            len(census_var_df) == census_var_df.soma_joinid.nunique()
+        ), f"var soma_joinid values are not unique for experiment {eb.name}"
 
     return True
 
@@ -316,8 +318,7 @@ def validate_X_layers(
                 assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                 assert X.shape == (n_obs, n_vars)
 
-                assert _validate_X_has_no_dups(X, n_obs), \
-                    f"duplicate coordinates in {eb.name} layer {lyr} matrix"
+                assert _validate_X_has_no_dups(X, n_obs), f"duplicate coordinates in {eb.name} layer {lyr} matrix"
 
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
@@ -359,9 +360,12 @@ def _validate_X_has_no_dups(X: SparseNDArray, n_obs: int) -> bool:
         obs_slice = slice(obs_slice_start, min(obs_slice_start + stride, n_obs - 1))
         for coo in X.read_sparse_tensor(coords=[obs_slice]):
             coords_obs_slice_partial = coo.to_numpy()[1]
-            coords_obs_slice = np.concatenate([coords_obs_slice, coords_obs_slice_partial], axis=0) \
-                if coords_obs_slice is not None else coords_obs_slice_partial
-        if len(coords_obs_slice) != len(np.unique(coords_obs_slice, axis=0)):
+            coords_obs_slice = (
+                np.concatenate([coords_obs_slice, coords_obs_slice_partial], axis=0)
+                if coords_obs_slice is not None
+                else coords_obs_slice_partial
+            )
+        if coords_obs_slice is not None and len(coords_obs_slice) != len(np.unique(coords_obs_slice, axis=0)):
             return False
 
     return True
