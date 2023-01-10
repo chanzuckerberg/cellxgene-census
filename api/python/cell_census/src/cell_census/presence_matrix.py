@@ -1,4 +1,3 @@
-import numpy as np
 import tiledbsoma as soma
 from scipy import sparse
 
@@ -38,17 +37,4 @@ def get_presence_matrix(
 
     exp = get_experiment(census, organism)
     presence = exp.ms[measurement_name].varp["dataset_presence_matrix"]
-
-    # Read the entire presence matrix. It may be returned in incremental chunks if larger than
-    # read buffers, so concatenate into a single scipy.sparse.sp_matrix.
-
-    # TODO: TileDB-SOMA#596 when implemented, will simplify this
-
-    arrow_sparse_tensors = [t for t in presence.read_sparse_tensor((slice(None),))]
-    flat_arrays = [t.to_numpy() for t in arrow_sparse_tensors]
-    data = np.concatenate(tuple(t[0] for t in flat_arrays))
-    coords = np.concatenate(tuple(t[1] for t in flat_arrays))
-    presence_matrix = sparse.coo_matrix(
-        (data.flatten(), (coords.T[0].flatten(), coords.T[1].flatten())), shape=presence.shape
-    ).tocsr()
-    return presence_matrix
+    return presence.read((slice(None),)).csrs().concat().to_scipy()

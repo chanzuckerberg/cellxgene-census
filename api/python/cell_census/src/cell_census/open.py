@@ -101,7 +101,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     """
     description = get_census_version_description(census_version)  # raises
     census = _open_soma(description)
-    dataset = census["census_info"]["datasets"].read_as_pandas_all(value_filter=f"dataset_id == '{dataset_id}'")
+    dataset = census["census_info"]["datasets"].read(value_filter=f"dataset_id == '{dataset_id}'").concat().to_pandas()
     if len(dataset) == 0:
         raise KeyError("Unknown dataset_id")
 
