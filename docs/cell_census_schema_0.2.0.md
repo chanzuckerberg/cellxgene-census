@@ -1,6 +1,6 @@
 # CELLxGENE Cell Census Schema 
 
-**Version**: 1.0.0.
+**Version**: 0.2.0.
 
 **Last edited**: Dec, 2022.
 
@@ -848,7 +848,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ## Changelog
 
-### Version 1.0.0
+### Version 0.2.0
 * The "Dataset Presence Matrix" was renamed to "Feature Dataset Presence Matrix" and moved from  `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence_matrix”]`  to `census_obj[“census_data”][organism].ms[“RNA”][“feature_dataset_presence_matrix”]`.
 
 ### Version 0.0.1
