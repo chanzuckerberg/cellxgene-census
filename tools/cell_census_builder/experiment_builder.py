@@ -13,6 +13,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
+from tiledbsoma import SparseNDArray
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -25,7 +26,7 @@ from .globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
-    TileDB_Ctx,
+    TileDB_Ctx, FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -154,7 +155,7 @@ class ExperimentBuilder:
         )
 
         # make measurement and add to ms collection
-        measurement = soma.Measurement(uricat(se.ms.uri, "RNA")).create()
+        measurement = soma.Measurement(uricat(se.ms.uri, MEASUREMENT_RNA_NAME)).create()
         se.ms.set("RNA", measurement, relative=True)
 
         # make the `var` in the measurement
@@ -171,9 +172,6 @@ class ExperimentBuilder:
 
         # make the `X` collection (but not the actual layers)
         measurement.set("X", soma.Collection(uricat(measurement.uri, "X")).create(), relative=True)
-
-        # make the varp, to later contain the presence matrix
-        measurement.set("varp", soma.Collection(uricat(measurement.uri, "varp")).create(), relative=True)
 
         self.build_state = self.build_state.next()
         return
@@ -277,7 +275,7 @@ class ExperimentBuilder:
         logging.info(f"{self.name}: create X layers")
         se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
         assert se.exists()
-        assert se.ms["RNA"].exists()
+        assert se.ms[MEASUREMENT_RNA_NAME].exists()
         assert self.n_obs >= 0 and self.n_var >= 0
         assert self.build_state == ExperimentBuilder.BuildState.AxisWritten
         assert self.n_obs == 0 or self.n_datasets > 0
@@ -285,7 +283,7 @@ class ExperimentBuilder:
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if self.n_obs > 0:
             assert self.n_var > 0
-            measurement = se.ms["RNA"]
+            measurement = se.ms[MEASUREMENT_RNA_NAME]
             for layer_name in CENSUS_X_LAYERS:
                 snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx()).create(
                     CENSUS_X_LAYERS[layer_name],
@@ -295,11 +293,11 @@ class ExperimentBuilder:
                 measurement.X.set(layer_name, snda, relative=True)
 
             presence_matrix = soma.SparseNDArray(
-                uricat(measurement.varp.uri, "dataset_presence_matrix"), ctx=TileDB_Ctx()
+                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME), ctx=TileDB_Ctx()
             )
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
             presence_matrix.create(pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var))
-            measurement.varp.set("dataset_presence_matrix", presence_matrix, relative=True)
+            measurement.set(FEATURE_DATASET_PRESENCE_MATRIX_NAME, presence_matrix, relative=True)
 
         self.build_state = self.build_state.next()
         return
@@ -359,7 +357,8 @@ class ExperimentBuilder:
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
             se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
-            se.ms["RNA"].varp["dataset_presence_matrix"].write_sparse_tensor(pa.SparseCOOTensor.from_scipy(pm))
+            fdpm: SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+            fdpm.write_sparse_tensor(pa.SparseCOOTensor.from_scipy(pm))
 
         self.build_state = self.build_state.next()
 

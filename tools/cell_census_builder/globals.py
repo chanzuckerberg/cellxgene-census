@@ -28,9 +28,25 @@ CENSUS_SUMMARY_CELL_COUNTS_COLUMNS = {
     "total_cell_count": pa.int64(),
     "unique_cell_count": pa.int64(),
 }
+
+# top-level SOMA collection
+CENSUS_INFO_NAME = "census_info"
+
+# top-level SOMA collection
+CENSUS_DATA_NAME = "census_data"
+
+# "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name
 
+# "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_NAME = "summary"
+
+# "census_data"/{organism}/ms/"RNA" SOMA Matrix
+MEASUREMENT_RNA_NAME = "RNA"
+
+# "census_data"/{organism}/ms/"RNA"/"feature_dataset_presence_matrix" SOMA Matrix
+FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
+
 
 # CXG schema columns we preserve in our census, and the Arrow type to encode as.  Schema:
 # https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md

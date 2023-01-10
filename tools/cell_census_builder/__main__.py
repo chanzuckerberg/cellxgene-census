@@ -14,7 +14,7 @@ from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers
-from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, TileDB_Ctx
+from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, TileDB_Ctx, CENSUS_DATA_NAME, CENSUS_INFO_NAME
 from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
@@ -70,7 +70,7 @@ def main() -> int:
     assets_path = uricat(args.uri, args.build_tag, "h5ads")
 
     # create the experiment builders
-    experiment_builders = make_experiment_builders(uricat(soma_path, "census_data"), args)
+    experiment_builders = make_experiment_builders(uricat(soma_path, CENSUS_DATA_NAME), args)
 
     cc = 0
     if args.subcommand == "build":
@@ -129,11 +129,11 @@ def build(
     gc.collect()
 
     # Write out dataset manifest and summary information
-    create_dataset_manifest(top_level_collection["census_info"], filtered_datasets)
+    create_dataset_manifest(top_level_collection[CENSUS_INFO_NAME], filtered_datasets)
     create_census_summary_cell_counts(
-        top_level_collection["census_info"], [e.census_summary_cell_counts for e in experiment_builders]
+        top_level_collection[CENSUS_INFO_NAME], [e.census_summary_cell_counts for e in experiment_builders]
     )
-    create_census_summary(top_level_collection["census_info"], experiment_builders, args.build_tag)
+    create_census_summary(top_level_collection[CENSUS_INFO_NAME], experiment_builders, args.build_tag)
 
     if args.consolidate:
         consolidate(args, top_level_collection.uri)
@@ -159,7 +159,7 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
     top_level_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
 
     # Create sub-collections for experiments, etc.
-    for n in ["census_info", "census_data"]:
+    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
         cltn = soma.Collection(uricat(top_level_collection.uri, n), ctx=TileDB_Ctx()).create()
         top_level_collection.set(n, cltn, relative=True)
 
@@ -207,7 +207,7 @@ def build_step2_create_axis(
 
     # Create axis
     for e in experiment_builders:
-        e.create(data_collection=top_level_collection["census_data"])
+        e.create(data_collection=top_level_collection[CENSUS_DATA_NAME])
         assert soma.Experiment(e.se_uri).exists()
 
     # Write obs axis and accumulate var axis (and remember the datasets that pass our filter)

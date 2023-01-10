@@ -2,6 +2,8 @@ import re
 
 import tiledbsoma as soma
 
+from cell_census_builder.globals import CENSUS_DATA_NAME
+
 
 def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     """
@@ -33,9 +35,9 @@ def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     # lower/snake case the organism name to find the experiment name
     exp_name = re.sub(r"[ ]+", "_", organism).lower()
 
-    if exp_name not in census["census_data"]:
+    if exp_name not in census[CENSUS_DATA_NAME]:
         raise ValueError(f"Unknown organism {organism} - does not exist")
-    exp = census["census_data"][exp_name]
+    exp = census[CENSUS_DATA_NAME][exp_name]
     if exp.soma_type != "SOMAExperiment":
         raise ValueError(f"Unknown organism {organism} - not a SOMA Experiment")
 

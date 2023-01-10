@@ -2,6 +2,8 @@ import sys
 import cell_census
 import pandas as pd
 
+from cell_census_builder.globals import CENSUS_DATA_NAME
+
 if __name__ == '__main__':
     census_version = sys.argv[1] if len(sys.argv) > 1 else "latest"
 
@@ -17,7 +19,7 @@ if __name__ == '__main__':
 
     obs_df = {
         name: experiment.obs.read_as_pandas_all(column_names=[c[0] for c in COLS_TO_QUERY])
-        for name, experiment in census["census_data"].items()
+        for name, experiment in census[CENSUS_DATA_NAME].items()
     }
 
     # Use Pandas to summarize and display
