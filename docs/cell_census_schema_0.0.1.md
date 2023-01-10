@@ -667,12 +667,14 @@ For each organism the `SOMAExperiment` MUST contain the following:
 	* Matrix  data –  `census_obj[“census_data”][organism].ms[“RNA”].X` – `SOMACollection`. It MUST contain exactly one layer: 
 		* Count matrix – `census_obj[“census_data”][organism].ms[“RNA”].X[“raw”]` – `SOMASparseNDArray`
 	* Feature metadata – `census_obj[“census_data”][organism].ms[“RNA”].var` – `SOMAIndexedDataFrame`
-	* Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence_matrix”]` – `SOMASparseNDArray`
+	* Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”][“feature_dataset_presence_matrix”]` – `SOMASparseNDArray`
 
 
 For each organism the `SOMAExperiment` SHOULD NOT contain the following:
 
 * Elements of `census_obj[“census_data”][organism].ms[“RNA”]`: 
+	* `varm`
+	* `varp`
 	* `var_ms`
 	* `obsm` 
 	* `obsp`
@@ -718,7 +720,7 @@ The following columns MUST be included:
 </tbody>
 </table>
 
-#### Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”].varp[“dataset_presence”]` – `SOMASparseNDArray`
+#### Feature dataset presence matrix – `census_obj[“census_data”][organism].ms[“RNA”][“feature_dataset_presence_matrix”]` – `SOMASparseNDArray`
 
 In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, the Cell Census MUST include a presence matrix encoded as a `SOMASparseNDArray`.
 
