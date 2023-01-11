@@ -27,11 +27,11 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies= [
-    "numba",
-    "numpy",
+    "numba>=0.55",
+    "numpy>=1.21",
     "requests",
     "tiledb>=0.19.0",
-    "tiledbsoma==0.5.0a2",
+    "tiledbsoma==0.5.0a3",
     "typing_extensions",
     "s3fs",
     "scikit-misc",
