@@ -50,7 +50,7 @@ def get_anndata(
 
     """
     exp = get_experiment(census, organism)
-    with exp.query_by_axis(
+    with exp.axis_query(
         measurement_name,
         obs_query=soma.experiment_query.AxisQuery(value_filter=obs_value_filter)
         if obs_value_filter is not None
