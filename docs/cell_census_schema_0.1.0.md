@@ -2,7 +2,7 @@
 
 **Version**: 0.1.0.
 
-**Last edited**: Dec, 2022.
+**Last edited**: Jan, 2023.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -837,7 +837,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ## Changelog
 
-### Version 0.2.0
+### Version 0.1.0
 * The "Dataset Presence Matrix" was renamed to "Feature Dataset Presence Matrix" and moved from  `census_obj["census_data"][organism].ms["RNA"].varp["dataset_presence_matrix"]`  to `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]`.
 * Editorial: changes all double quotes in the schema to ASCII quotes 0x22.
 
