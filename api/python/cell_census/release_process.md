@@ -56,7 +56,7 @@ Any pre-built asset on Github can be installed and tested from the Github URL. F
 To test a release candidate:
 
 1. Identify the build you wish to test. Download and test the artifact built for that commit as described above.
-2. Perform any necessary end-user testing, using the above installation method
+2. Perform end-user testing, using the above installation method
 3. If acceptable, proceed to Step 3 - create a release.
 
 If testing exposes problems, fix and commit a solution as you would any other change.

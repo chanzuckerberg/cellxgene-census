@@ -23,7 +23,7 @@ def test_open_soma_latest() -> None:
 def test_get_source_h5ad_uri() -> None:
     rng = np.random.default_rng()
     census = cell_census.open_soma(census_version="latest")
-    census_datasets = census["census_info"]["datasets"].read_as_pandas_all()
+    census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
     for idx in rng.choice(np.arange(len(census_datasets)), size=10, replace=False):
         a_dataset = census_datasets.iloc[idx]
         locator = cell_census.get_source_h5ad_uri(a_dataset.dataset_id)
@@ -35,7 +35,7 @@ def test_get_source_h5ad_uri() -> None:
 @pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path) -> None:
     census = cell_census.open_soma(census_version="latest")
-    census_datasets = census["census_info"]["datasets"].read_as_pandas_all()
+    census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
     small_dataset = census_datasets.nsmallest(1, "dataset_total_cell_count").iloc[0]
 
     adata_path = tmp_path / "adata.h5ad"
