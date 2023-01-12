@@ -29,7 +29,7 @@ from .globals import (
     CENSUS_X_LAYERS,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
-    TileDB_Ctx,
+    TileDB_Ctx, CENSUS_INFO_NAME, CENSUS_DATA_NAME, FEATURE_DATASET_PRESENCE_MATRIX_NAME,
 )
 from .mp import create_process_pool_executor
 from .util import uricat
@@ -71,12 +71,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     )
     assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
 
-    for name in ["census_info", "census_data"]:
+    for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
         assert name in census
         assert census[name].soma_type == "SOMACollection"
         assert census[name].exists()
 
-    census_info = census["census_info"]
+    census_info = census[CENSUS_INFO_NAME]
     for name in [CENSUS_DATASETS_NAME, CENSUS_SUMMARY_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME]:
         assert name in census_info, f"`{name}` missing from census_info"
         assert census_info[name].soma_type == "SOMADataFrame"
@@ -89,7 +89,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
 
     # there should be an experiment for each builder
-    census_data = census["census_data"]
+    census_data = census[CENSUS_DATA_NAME]
     for eb in experiment_builders:
         assert (
             eb.name in census_data
@@ -113,12 +113,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             if lyr in rna.X:
                 assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNDArray"
 
-        # and a presence matrix
-        assert "varp" in rna and rna["varp"].exists() and rna["varp"].soma_type == "SOMACollection"
+        # and a dataset presence matrix
         # dataset presence only exists if there are cells in the measurement
-        if "dataset_presence_matrix" in rna.varp:
-            assert rna.varp["dataset_presence_matrix"].exists()
-            assert rna.varp["dataset_presence_matrix"].soma_type == "SOMASparseNDArray"
+        if FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna:
+            assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].exists()
+            assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
+            # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
     return True
 
@@ -126,7 +126,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> Dict[str, EbInfo]:
     assets_path, soma_path, dataset, experiment_builders = args
     census = soma.Collection(soma_path, ctx=TileDB_Ctx())
-    census_data = census["census_data"]
+    census_data = census[CENSUS_DATA_NAME]
     dataset_id = dataset.dataset_id
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset], backed="r"))
     eb_info: Dict[str, EbInfo] = {}
@@ -171,7 +171,7 @@ def validate_axis_dataframes(
     """
     logging.debug("validate_axis_dataframes")
     census = soma.Collection(soma_path, ctx=TileDB_Ctx())
-    census_data = census["census_data"]
+    census_data = census[CENSUS_DATA_NAME]
 
     # check schema
     expected_obs_columns = CENSUS_OBS_TERM_COLUMNS
@@ -237,7 +237,7 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
     """
     assets_path, soma_path, dataset, experiment_builders = args
     census = soma.Collection(soma_path, ctx=TileDB_Ctx())
-    census_data = census["census_data"]
+    census_data = census[CENSUS_DATA_NAME]
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
     for eb in experiment_builders:
         se = census_data[eb.name]
@@ -291,7 +291,7 @@ def validate_X_layers(
     """
     logging.debug("validate_X_layers")
     census = soma.Collection(soma_path, ctx=TileDB_Ctx())
-    census_data = census["census_data"]
+    census_data = census[CENSUS_DATA_NAME]
 
     for eb in experiment_builders:
         se = census_data[eb.name]
@@ -337,7 +337,7 @@ def validate_X_layers(
 def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]:
     # Datasets are pulled from the census datasets manifest, validating the SOMA
     # census against the snapshot assets.
-    df = soma.Collection(soma_path)["census_info"][CENSUS_DATASETS_NAME].read_as_pandas_all()
+    df = soma.Collection(soma_path)[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read_as_pandas_all()
     df.drop(columns=["soma_joinid"], inplace=True)
     df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: uricat(assets_path, p))
     datasets = Dataset.from_dataframe(df)
