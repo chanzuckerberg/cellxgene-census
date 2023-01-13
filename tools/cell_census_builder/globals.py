@@ -3,7 +3,7 @@ from typing import Set
 import pyarrow as pa
 import tiledb
 
-CENSUS_SCHEMA_VERSION = "0.0.1"
+CENSUS_SCHEMA_VERSION = "0.1.0"
 
 CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
 CXG_SCHEMA_VERSION_IMPORT = [CXG_SCHEMA_VERSION]  # versions we can ingest
