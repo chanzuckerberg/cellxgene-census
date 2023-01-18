@@ -2,6 +2,7 @@ from typing import Optional
 
 import anndata
 import tiledbsoma as soma
+from somacore.query.query import AxisColumnNames
 
 from .experiment import get_experiment
 
@@ -13,7 +14,7 @@ def get_anndata(
     X_name: str = "raw",
     obs_value_filter: Optional[str] = None,
     var_value_filter: Optional[str] = None,
-    column_names: Optional[soma.experiment_query.AxisColumnNames] = None,
+    column_names: Optional[AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
     Convience wrapper around soma.Experiment query, to build and execute a query,
