@@ -2,6 +2,7 @@ from typing import Optional
 
 import anndata
 import tiledbsoma as soma
+from somacore import AxisQuery
 from somacore.query.query import AxisColumnNames
 
 from .experiment import get_experiment
@@ -53,10 +54,10 @@ def get_anndata(
     exp = get_experiment(census, organism)
     with exp.axis_query(
         measurement_name,
-        obs_query=soma.experiment_query.AxisQuery(value_filter=obs_value_filter)
+        obs_query=AxisQuery(value_filter=obs_value_filter)
         if obs_value_filter is not None
         else None,
-        var_query=soma.experiment_query.AxisQuery(value_filter=var_value_filter)
+        var_query=AxisQuery(value_filter=var_value_filter)
         if var_value_filter is not None
         else None,
     ) as query:

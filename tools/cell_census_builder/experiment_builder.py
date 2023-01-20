@@ -26,7 +26,7 @@ from .globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
-    TileDB_Ctx, FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME,
+    TileDB_Ctx, FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -132,7 +132,7 @@ class ExperimentBuilder:
         """Make experiment at `uri` with a single Measurement and add to top-level collection."""
         logging.info(f"{self.name}: create experiment at {self.se_uri}")
 
-        se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
+        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
         if se.exists():
             logging.error("Census already exists - aborting")
             raise Exception("Census already exists")
@@ -212,7 +212,7 @@ class ExperimentBuilder:
         obs_df = obs_df[list(CENSUS_OBS_TERM_COLUMNS)]
         obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
 
-        se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
+        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
         assert se.exists()
 
         pa_table = pa.Table.from_pandas(
@@ -273,7 +273,7 @@ class ExperimentBuilder:
         Create layers in ms['RNA']/X
         """
         logging.info(f"{self.name}: create X layers")
-        se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
+        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
         assert se.exists()
         assert se.ms[MEASUREMENT_RNA_NAME].exists()
         assert self.n_obs >= 0 and self.n_var >= 0
@@ -285,7 +285,8 @@ class ExperimentBuilder:
             assert self.n_var > 0
             measurement = se.ms[MEASUREMENT_RNA_NAME]
             for layer_name in CENSUS_X_LAYERS:
-                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name), ctx=TileDB_Ctx()).create(
+                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name),
+                                          context=SOMA_TileDB_Context()).create(
                     CENSUS_X_LAYERS[layer_name],
                     (self.n_obs, self.n_var),
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
@@ -293,7 +294,8 @@ class ExperimentBuilder:
                 measurement.X.set(layer_name, snda, relative=True)
 
             presence_matrix = soma.SparseNDArray(
-                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME), ctx=TileDB_Ctx()
+                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME),
+                context=SOMA_TileDB_Context()
             )
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
             presence_matrix.create(pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var))
@@ -305,14 +307,14 @@ class ExperimentBuilder:
     def create_joinid_metadata(self) -> None:
         logging.info(f"{self.name}: make joinid metadata")
         assert self.build_state >= ExperimentBuilder.BuildState.AxisWritten
-        se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
+        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
         assert se.exists()
 
         # Map of dataset_id -> starting soma_joinid for obs axis.  This code _assumes_
         # that soma_joinid is contiguous (ie, no deletions in obs), which is
         # known true for our use case (aggregating h5ads).
         self.dataset_obs_joinid_start = (
-            se.obs.read_as_pandas_all(column_names=["dataset_id", "soma_joinid"])
+            se.obs.read(column_names=["dataset_id", "soma_joinid"]).concat().to_pandas()
             .groupby("dataset_id")
             .min()
             .soma_joinid.to_dict()
@@ -356,9 +358,9 @@ class ExperimentBuilder:
             pm.eliminate_zeros()
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
-            se = soma.Experiment(self.se_uri, ctx=TileDB_Ctx())
+            se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
             fdpm: SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
-            fdpm.write_sparse_tensor(pa.SparseCOOTensor.from_scipy(pm))
+            fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
         self.build_state = self.build_state.next()
 
@@ -391,7 +393,7 @@ def _accumulate_all_X_layers(
             # this dataset has no data for this experiment
             continue
 
-        se = soma.Experiment(eb.se_uri, ctx=TileDB_Ctx())
+        se = soma.Experiment(eb.se_uri, context=SOMA_TileDB_Context())
         assert se is not None
         assert se.exists()
 
@@ -413,7 +415,7 @@ def _accumulate_all_X_layers(
             f"({progress[0]} of {progress[1]})"
         )
         global_var_joinids = (
-            se.ms[ms_name].var.read_as_pandas_all(column_names=["feature_id", "soma_joinid"]).set_index("feature_id")
+            se.ms[ms_name].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas().set_index("feature_id")
         )
         local_var_joinids = raw_var.join(global_var_joinids).soma_joinid.to_numpy()
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
@@ -427,7 +429,7 @@ def _accumulate_all_X_layers(
             assert (col >= 0).all()
             X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
             X_remap.eliminate_zeros()
-            se.ms[ms_name].X[layer_name].write_sparse_tensor(pa.SparseCOOTensor.from_scipy(X_remap))
+            se.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
             gc.collect()
 
         # Save presence information by dataset_id

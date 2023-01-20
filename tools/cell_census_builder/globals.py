@@ -2,6 +2,7 @@ from typing import Set
 
 import pyarrow as pa
 import tiledb
+from tiledbsoma.options import SOMATileDBContext
 
 CENSUS_SCHEMA_VERSION = "0.1.0"
 
@@ -209,8 +210,18 @@ FEATURE_REFERENCE_IGNORE: Set[str] = set()
 Singletons used throughout the package
 """
 
+# Global SOMATileDBContext
+_SOMA_TileDB_Context: SOMATileDBContext = None
+
 # Global TileDB context
 _TileDB_Ctx: tiledb.Ctx = None
+
+
+def SOMA_TileDB_Context() -> SOMATileDBContext:
+    global _SOMA_TileDB_Context
+    if _SOMA_TileDB_Context is None:
+        _SOMA_TileDB_Context = SOMATileDBContext(tiledb_ctx=TileDB_Ctx())
+    return _SOMA_TileDB_Context
 
 
 def TileDB_Ctx() -> tiledb.Ctx:
@@ -218,5 +229,6 @@ def TileDB_Ctx() -> tiledb.Ctx:
 
 
 def set_tiledb_ctx(ctx: tiledb.Ctx) -> None:
-    global _TileDB_Ctx
+    global _TileDB_Ctx, _SOMA_TileDB_Context
     _TileDB_Ctx = ctx
+    _SOMA_TileDB_Context = None

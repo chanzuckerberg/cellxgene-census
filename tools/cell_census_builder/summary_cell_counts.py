@@ -6,7 +6,8 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, TileDB_Ctx
+from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, TileDB_Ctx, \
+    SOMA_TileDB_Context
 from .util import (
     anndata_ordered_bool_issue_853_workaround,
     pandas_dataframe_strings_to_ascii_issue_247_workaround,
@@ -35,7 +36,7 @@ def create_census_summary_cell_counts(
 
     # write to a SOMA dataframe
     summary_counts_uri = uricat(info_collection.uri, CENSUS_SUMMARY_CELL_COUNTS_NAME)
-    summary_counts = soma.DataFrame(summary_counts_uri, ctx=TileDB_Ctx())
+    summary_counts = soma.DataFrame(summary_counts_uri, context=SOMA_TileDB_Context())
     summary_counts.create(pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"])
     for batch in pa.Table.from_pandas(df, preserve_index=False).to_batches():
         summary_counts.write(batch)

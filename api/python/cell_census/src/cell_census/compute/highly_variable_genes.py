@@ -9,17 +9,15 @@ def highly_variable_genes(query: ExperimentAxisQuery, n_top_genes: int = 10) -> 
     """
     Acknowledgements: scanpy highly variable genes implementation, github.com/scverse/scanpy
     """
-    use_prefetch = True
-
     try:
         import skmisc.loess
     except ImportError:
         raise ImportError("Please install skmisc package via `pip install --user scikit-misc")
 
-    indexer = query.get_indexer()
+    indexer = query._indexer # TODO: get_indexer() https://github.com/single-cell-data/TileDB-SOMA/issues/768
     mvn = OnlineMatrixMeanVariance(query.n_obs, query.n_vars)
-    for arrow_tbl in query.X("raw", prefetch=use_prefetch):
-        var_dim = indexer.var_index(arrow_tbl["soma_dim_1"])
+    for arrow_tbl in query.X("raw").tables():
+        var_dim = indexer.by_var(arrow_tbl["soma_dim_1"])
         data = arrow_tbl["soma_data"].to_numpy()
         mvn.update(var_dim, data)
 
@@ -48,8 +46,8 @@ def highly_variable_genes(query: ExperimentAxisQuery, n_top_genes: int = 10) -> 
     clip_val = reg_std * vmax + u
     counts_sum = np.zeros((query.n_vars,), dtype=np.float64)  # clipped
     squared_counts_sum = np.zeros((query.n_vars,), dtype=np.float64)  # clipped
-    for arrow_tbl in query.X("raw", prefetch=use_prefetch):
-        var_dim = indexer.var_index(arrow_tbl["soma_dim_1"])
+    for arrow_tbl in query.X("raw").tables():
+        var_dim = indexer.by_var(arrow_tbl["soma_dim_1"])
         data = arrow_tbl["soma_data"].to_numpy()
         # clip
         mask = data > clip_val[var_dim]

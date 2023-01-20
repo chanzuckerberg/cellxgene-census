@@ -6,7 +6,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .experiment_builder import ExperimentBuilder, get_summary_stats
-from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, TileDB_Ctx
+from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, TileDB_Ctx, SOMA_TileDB_Context
 from .util import pandas_dataframe_strings_to_ascii_issue_247_workaround, uricat
 
 
@@ -33,7 +33,7 @@ def create_census_summary(
 
     # write to a SOMA dataframe
     summary_uri = uricat(info_collection.uri, CENSUS_SUMMARY_NAME)
-    summary = soma.DataFrame(summary_uri, ctx=TileDB_Ctx())
+    summary = soma.DataFrame(summary_uri, context=SOMA_TileDB_Context())
     summary.create(pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"])
     for batch in pa.Table.from_pandas(df, preserve_index=False).to_batches():
         summary.write(batch)
