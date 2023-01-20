@@ -14,7 +14,7 @@ def highly_variable_genes(query: ExperimentAxisQuery, n_top_genes: int = 10) -> 
     except ImportError:
         raise ImportError("Please install skmisc package via `pip install --user scikit-misc")
 
-    indexer = query._indexer # TODO: get_indexer() https://github.com/single-cell-data/TileDB-SOMA/issues/768
+    indexer = query._indexer  # TODO: get_indexer() https://github.com/single-cell-data/TileDB-SOMA/issues/768
     mvn = OnlineMatrixMeanVariance(query.n_obs, query.n_vars)
     for arrow_tbl in query.X("raw").tables():
         var_dim = indexer.by_var(arrow_tbl["soma_dim_1"])
