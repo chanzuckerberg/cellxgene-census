@@ -6,8 +6,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, TileDB_Ctx, \
-    SOMA_TileDB_Context
+from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, SOMA_TileDB_Context
 from .util import (
     anndata_ordered_bool_issue_853_workaround,
     pandas_dataframe_strings_to_ascii_issue_247_workaround,
