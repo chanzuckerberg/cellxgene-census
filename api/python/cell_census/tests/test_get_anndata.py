@@ -1,18 +1,18 @@
 import pytest
-import somacore
+import tiledbsoma as soma
 
 import cell_census
 
 
 @pytest.fixture
-def census() -> somacore.Collection:
+def census() -> soma.Collection:
     return cell_census.open_soma(census_version="latest")
 
 
 @pytest.mark.live_corpus
-def test_get_anndata(census: somacore.Collection) -> None:
+def test_get_anndata(census: soma.Collection) -> None:
 
-    ad = census.get_anndata(
+    ad = cell_census.get_anndata(
         census,
         organism="Mus musculus",
         obs_value_filter="tissue_general == 'vasculature'",
@@ -31,17 +31,12 @@ def test_get_anndata(census: somacore.Collection) -> None:
 
 
 @pytest.mark.live_corpus
-def test_get_anndata_allows_missing_obs_or_var_filter(census: somacore.Collection) -> None:
-    # TODO: test with a small, local census test fixture, for performance
+def test_get_anndata_allows_missing_obs_or_var_filter(census: soma.Collection) -> None:
+    # TODO: test with a small, local census test fixture, for performance; reinstate commented-out test, below
 
-    adata = cell_census.get_anndata(
-            census,
-            organism="Homo sapiens",
-            obs_value_filter=f"tissue == 'tongue'"
-    )
+    adata = cell_census.get_anndata(census, organism="Homo sapiens", obs_value_filter="tissue == 'tongue'")
     assert adata.obs.shape[0] == 372
 
-    # TODO: too slow, reinstate with local census test fixture
     # adata = cell_census.get_anndata(
     #         census,
     #         organism="Homo sapiens",
