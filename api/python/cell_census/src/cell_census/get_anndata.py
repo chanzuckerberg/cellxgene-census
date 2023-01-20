@@ -54,7 +54,7 @@ def get_anndata(
     exp = get_experiment(census, organism)
     with exp.axis_query(
         measurement_name,
-        obs_query=AxisQuery(value_filter=obs_value_filter) if obs_value_filter is not None else None,
-        var_query=AxisQuery(value_filter=var_value_filter) if var_value_filter is not None else None,
+        obs_query=AxisQuery(value_filter=obs_value_filter) if obs_value_filter is not None else AxisQuery(),
+        var_query=AxisQuery(value_filter=var_value_filter) if var_value_filter is not None else AxisQuery(),
     ) as query:
         return query.to_anndata(X_name=X_name, column_names=column_names)
