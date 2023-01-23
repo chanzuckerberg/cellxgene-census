@@ -83,22 +83,6 @@ def is_positive_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix
         return True
 
 
-def pandas_dataframe_strings_to_ascii_issue_247_workaround(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    TileDB-SOMA _temporarily_ supports only ASCII in strings.
-    This code will convert all strings in a dataframe to ascii.
-    Remove this code when TileDB-SOMA#274 is resolved.
-    """
-    import unicodedata
-
-    warn("Converting dataframe strings to ASCII as temporary work-around for TileDB-SOMA#274.")
-    for k in df:
-        if df[k].dtype == object:
-            df[k] = df[k].map(lambda val: unicodedata.normalize("NFKD", val).encode("ascii", "ignore").decode())
-
-    return df
-
-
 def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
     # """
     # TileDB-SOMA does not support creating dataframe with categorical / dictionary

@@ -6,8 +6,8 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .experiment_builder import ExperimentBuilder, get_summary_stats
-from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, TileDB_Ctx, SOMA_TileDB_Context
-from .util import pandas_dataframe_strings_to_ascii_issue_247_workaround, uricat
+from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, SOMA_TileDB_Context
+from .util import uricat
 
 
 def create_census_summary(
@@ -27,9 +27,6 @@ def create_census_summary(
 
     df = pd.DataFrame.from_records(data, columns=["label", "value"])
     df["soma_joinid"] = range(len(df))
-
-    # TODO: work-around for TileDB-SOMA#274.  Remove when fixed.
-    df = pandas_dataframe_strings_to_ascii_issue_247_workaround(df)
 
     # write to a SOMA dataframe
     summary_uri = uricat(info_collection.uri, CENSUS_SUMMARY_NAME)

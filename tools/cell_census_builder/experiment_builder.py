@@ -25,7 +25,7 @@ from .globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
-    TileDB_Ctx, FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
+    FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -35,7 +35,6 @@ from .util import (
     anndata_ordered_bool_issue_853_workaround,
     array_chunker,
     is_positive_integral,
-    pandas_dataframe_strings_to_ascii_issue_247_workaround,
     uricat,
 )
 
@@ -195,9 +194,6 @@ class ExperimentBuilder:
         # requires 'organism', do be careful not to delete that.
         obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]].reset_index(drop=True).copy()
 
-        # TODO XXX: Temporary work around pending resolution of TileDB-SOMA#274
-        obs_df = pandas_dataframe_strings_to_ascii_issue_247_workaround(obs_df)
-
         obs_df["soma_joinid"] = range(self.n_obs, self.n_obs + len(obs_df))
         obs_df["dataset_id"] = dataset.dataset_id
 
@@ -249,9 +245,6 @@ class ExperimentBuilder:
             self.var_df["soma_joinid"] = range(len(self.var_df))
             self.var_df = self.var_df.join(self.gene_feature_length["feature_length"], on="feature_id")
             self.var_df.feature_length.fillna(0, inplace=True)
-
-            # TODO XXX: Temporary work around pending resolution of TileDB-SOMA#274
-            self.var_df = pandas_dataframe_strings_to_ascii_issue_247_workaround(self.var_df)
 
             self.var_df = anndata_ordered_bool_issue_853_workaround(self.var_df)
 
