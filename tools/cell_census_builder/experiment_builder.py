@@ -13,7 +13,6 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
-from tiledbsoma import SparseNDArray
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -359,7 +358,7 @@ class ExperimentBuilder:
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
             se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-            fdpm: SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+            fdpm: soma.SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
         self.build_state = self.build_state.next()

@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
-from somacore.query.query import ExperimentAxisQuery
+import somacore
 
 from .meanvar import OnlineMatrixMeanVariance
 
 
-def highly_variable_genes(query: ExperimentAxisQuery, n_top_genes: int = 10) -> pd.DataFrame:
+def highly_variable_genes(query: somacore.ExperimentAxisQuery, n_top_genes: int = 10) -> pd.DataFrame:
     """
     Acknowledgements: scanpy highly variable genes implementation, github.com/scverse/scanpy
     """
