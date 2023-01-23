@@ -4,7 +4,7 @@ anndata
 numpy
 tiledb
 # NOTE: You can also build this dependency from source, per ./notebooks/README.md.
-tiledbsoma==0.5.0a6
+tiledbsoma==0.5.0a4
 scipy
 fsspec
 s3fs
