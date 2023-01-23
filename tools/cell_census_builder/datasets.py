@@ -6,7 +6,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME, TileDB_Ctx
+from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME, TileDB_Ctx, SOMA_TileDB_Context
 from .util import pandas_dataframe_strings_to_ascii_issue_247_workaround, uricat
 
 T = TypeVar("T", bound="Dataset")
@@ -76,7 +76,7 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
 
     # write to a SOMA dataframe
     manifest_uri = uricat(info_collection.uri, CENSUS_DATASETS_NAME)
-    manifest = soma.DataFrame(manifest_uri, ctx=TileDB_Ctx())
+    manifest = soma.DataFrame(manifest_uri, context=SOMA_TileDB_Context())
     manifest.create(pa.Schema.from_pandas(manifest_df, preserve_index=False), index_column_names=["soma_joinid"])
     for batch in pa.Table.from_pandas(manifest_df, preserve_index=False).to_batches():
         manifest.write(batch)

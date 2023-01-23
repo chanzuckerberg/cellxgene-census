@@ -29,7 +29,7 @@ from .globals import (
     CENSUS_X_LAYERS,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
-    TileDB_Ctx, CENSUS_INFO_NAME, CENSUS_DATA_NAME, FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    TileDB_Ctx, CENSUS_INFO_NAME, CENSUS_DATA_NAME, FEATURE_DATASET_PRESENCE_MATRIX_NAME, SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .util import uricat
@@ -63,7 +63,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         |   +-- homo_sapiens: soma.Experiment
         |   +-- mus_musculus: soma.Experiment
     """
-    census = soma.Collection(soma_path, ctx=TileDB_Ctx())
+    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     assert census.exists() and census.soma_type == "SOMACollection"
     assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
     assert (
@@ -125,7 +125,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 
 def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> Dict[str, EbInfo]:
     assets_path, soma_path, dataset, experiment_builders = args
-    census = soma.Collection(soma_path, ctx=TileDB_Ctx())
+    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     census_data = census[CENSUS_DATA_NAME]
     dataset_id = dataset.dataset_id
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset], backed="r"))
@@ -136,10 +136,10 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuil
         se = census_data[eb.name]
         ad = anndata_cell_filter(unfiltered_ad, retain_X=False)
         dataset_obs = (
-            se.obs.read_as_pandas_all(
+            se.obs.read(
                 column_names=list(CENSUS_OBS_TERM_COLUMNS),
                 value_filter=f"dataset_id == '{dataset_id}'",
-            )
+            ).concat().to_pandas()
             .drop(columns=["dataset_id", "tissue_general", "tissue_general_ontology_term_id"])
             .sort_values(by="soma_joinid")
             .drop(columns=["soma_joinid"])
@@ -170,7 +170,7 @@ def validate_axis_dataframes(
     Raises on error.  Returns True on success.
     """
     logging.debug("validate_axis_dataframes")
-    census = soma.Collection(soma_path, ctx=TileDB_Ctx())
+    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     census_data = census[CENSUS_DATA_NAME]
 
     # check schema
@@ -213,12 +213,12 @@ def validate_axis_dataframes(
         se = census_data[eb.name]
         n_vars = len(eb_info[eb.name].vars)
 
-        census_obs_df = se.obs.read_as_pandas_all(column_names=["soma_joinid", "dataset_id"])
+        census_obs_df = se.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
         assert eb_info[eb.name].n_obs == len(census_obs_df)
         assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
         assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
 
-        census_var_df = se.ms["RNA"].var.read_as_pandas_all(column_names=["feature_id", "soma_joinid"])
+        census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         assert n_vars == len(census_var_df)
         assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
         assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
@@ -236,7 +236,7 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
     * there are no zeros explicitly saved (this is mandated by cell census schema)
     """
     assets_path, soma_path, dataset, experiment_builders = args
-    census = soma.Collection(soma_path, ctx=TileDB_Ctx())
+    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     census_data = census[CENSUS_DATA_NAME]
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
     for eb in experiment_builders:
@@ -244,9 +244,9 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
-        soma_joinids: npt.NDArray[np.int64] = se.obs.read_as_pandas_all(
+        soma_joinids: npt.NDArray[np.int64] = se.obs.read(
             column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
-        ).soma_joinid.to_numpy()
+        ).concat().to_pandas().soma_joinid.to_numpy()
 
         raw_nnz = 0
         if len(soma_joinids) > 0:
@@ -254,8 +254,9 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
 
             def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
                 # TODO XXX: Work-around for regression TileDB-SOMA#473
-                # return sum(t.non_zero_length for t in arr.read_sparse_tensor((join_ids, slice(None))))
-                return sum(t.non_zero_length for t in arr.read_sparse_tensor((pa.array(join_ids), slice(None))))
+                # return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))))
+                return sum(t.non_zero_length
+                           for t in arr.read((pa.array(join_ids), slice(None))).csrs())
 
             raw_nnz = count_elements(se.ms["RNA"].X["raw"], soma_joinids)
 
@@ -290,16 +291,16 @@ def validate_X_layers(
     Raises on error.  Returns True on success.
     """
     logging.debug("validate_X_layers")
-    census = soma.Collection(soma_path, ctx=TileDB_Ctx())
+    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     census_data = census[CENSUS_DATA_NAME]
 
     for eb in experiment_builders:
         se = census_data[eb.name]
         assert se.ms["RNA"].X.exists()
 
-        census_obs_df = se.obs.read_as_pandas_all(column_names=["soma_joinid"])
+        census_obs_df = se.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
         n_obs = len(census_obs_df)
-        census_var_df = se.ms["RNA"].var.read_as_pandas_all(column_names=["feature_id", "soma_joinid"])
+        census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         n_vars = len(census_var_df)
 
         if n_obs > 0:
@@ -337,7 +338,7 @@ def validate_X_layers(
 def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]:
     # Datasets are pulled from the census datasets manifest, validating the SOMA
     # census against the snapshot assets.
-    df = soma.Collection(soma_path)[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read_as_pandas_all()
+    df = soma.Collection(soma_path)[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
     df.drop(columns=["soma_joinid"], inplace=True)
     df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: uricat(assets_path, p))
     datasets = Dataset.from_dataframe(df)

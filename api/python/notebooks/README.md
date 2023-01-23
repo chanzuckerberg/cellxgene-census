@@ -45,7 +45,7 @@ $ git clone https://github.com/chanzuckerberg/cell-census.git
 ```
 4. Install packages needed to run notebooks:
 ```shell
-  $ pip install scikit-misc
+  $ pip install scikit-misc scvi-tools
 ```
 
 ## Verify your installation

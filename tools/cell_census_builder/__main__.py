@@ -14,7 +14,8 @@ from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers
-from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, TileDB_Ctx, CENSUS_DATA_NAME, CENSUS_INFO_NAME
+from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
+    SOMA_TileDB_Context
 from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
@@ -147,7 +148,7 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
 
     Returns the top-most collection.
     """
-    top_level_collection = soma.Collection(soma_path, ctx=TileDB_Ctx())
+    top_level_collection = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     if top_level_collection.exists():
         logging.error("Census already exists - aborting")
         raise Exception("Census already exists - aborting")
@@ -160,7 +161,8 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
 
     # Create sub-collections for experiments, etc.
     for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
-        cltn = soma.Collection(uricat(top_level_collection.uri, n), ctx=TileDB_Ctx()).create()
+        cltn = soma.Collection(uricat(top_level_collection.uri, n),
+                               context=SOMA_TileDB_Context()).create()
         top_level_collection.set(n, cltn, relative=True)
 
     return top_level_collection

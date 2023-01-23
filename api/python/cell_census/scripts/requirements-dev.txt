@@ -7,4 +7,5 @@ types-setuptools
 types-requests
 numpy
 pytest
+requests-mock
 twine
