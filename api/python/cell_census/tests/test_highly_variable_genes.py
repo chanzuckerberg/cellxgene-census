@@ -1,5 +1,5 @@
 import pytest
-import somacore
+import tiledbsoma as soma
 
 import cell_census
 from cell_census.compute import highly_variable_genes
@@ -10,11 +10,11 @@ def test_highly_variable_genes() -> None:
     census = cell_census.open_soma(census_version="latest")
     experiment = census["census_data"]["homo_sapiens"]
 
-    query = somacore.ExperimentAxisQuery(
+    query = soma.ExperimentAxisQuery(
         experiment,
         "RNA",
-        obs_query=somacore.AxisQuery(value_filter="tissue_general == 'scalp' and is_primary_data == True"),
-        var_query=somacore.AxisQuery(coords=(slice(0, 31),)),
+        obs_query=soma.AxisQuery(value_filter="tissue_general == 'scalp' and is_primary_data == True"),
+        var_query=soma.AxisQuery(coords=(slice(0, 31),)),
     )
 
     result = highly_variable_genes(query, n_top_genes=10)
