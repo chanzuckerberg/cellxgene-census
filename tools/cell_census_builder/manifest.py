@@ -65,7 +65,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
         }
         for collection in collections
         for dataset in collection["datasets"]
-        if dataset["tombstone"] is False  # ignore anything that has been deleted
+        # if dataset["tombstone"] is False  # ignore anything that has been deleted
     }
     logging.info(f"Found {len(datasets)} datasets, in {len(collections)} collections")
 
