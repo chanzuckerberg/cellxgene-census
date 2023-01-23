@@ -2,7 +2,10 @@ from typing import Optional
 
 import anndata
 import tiledbsoma as soma
-import somacore
+# TODO: rm this use use `soma.AxisQuery` after updating to tilebsoma 0.5.0a5
+from somacore import AxisQuery
+# TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
+from somacore.query.query import AxisColumnNames
 
 from .experiment import get_experiment
 
@@ -14,7 +17,7 @@ def get_anndata(
     X_name: str = "raw",
     obs_value_filter: Optional[str] = None,
     var_value_filter: Optional[str] = None,
-    column_names: Optional[somacore.AxisColumnNames] = None,
+    column_names: Optional[AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
     Convience wrapper around soma.Experiment query, to build and execute a query,
@@ -53,7 +56,7 @@ def get_anndata(
     exp = get_experiment(census, organism)
     with exp.axis_query(
         measurement_name,
-        obs_query=somacore.AxisQuery(value_filter=obs_value_filter) if obs_value_filter is not None else somacore.AxisQuery(),
-        var_query=somacore.AxisQuery(value_filter=var_value_filter) if var_value_filter is not None else somacore.AxisQuery(),
+        obs_query=AxisQuery(value_filter=obs_value_filter) if obs_value_filter is not None else AxisQuery(),
+        var_query=AxisQuery(value_filter=var_value_filter) if var_value_filter is not None else AxisQuery(),
     ) as query:
         return query.to_anndata(X_name=X_name, column_names=column_names)

@@ -8,14 +8,13 @@ from datetime import datetime, timezone
 from typing import List, Tuple
 
 import tiledbsoma as soma
-from tiledbsoma.options import SOMATileDBContext
 
 from .anndata import open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers
-from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, TileDB_Ctx, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
+from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
     SOMA_TileDB_Context
 from .manifest import load_manifest
 from .mp import process_initializer
