@@ -6,7 +6,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .experiment_builder import ExperimentBuilder, get_summary_stats
-from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, TileDB_Ctx, SOMA_TileDB_Context
+from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, SOMA_TileDB_Context
 from .util import uricat
 
 
