@@ -6,8 +6,8 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME, SOMA_TileDB_Context
-from .util import uricat
+from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME, TileDB_Ctx, SOMA_TileDB_Context
+from .util import pandas_dataframe_strings_to_ascii_issue_247_workaround, uricat
 
 T = TypeVar("T", bound="Dataset")
 
@@ -70,6 +70,9 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     logging.info("Creating dataset_manifest")
     manifest_df = Dataset.to_dataframe(datasets)
     manifest_df = manifest_df[CENSUS_DATASETS_COLUMNS + ["soma_joinid"]]
+
+    # TODO: work-around for TileDB-SOMA#274.  Remove when fixed.
+    manifest_df = pandas_dataframe_strings_to_ascii_issue_247_workaround(manifest_df)
 
     # write to a SOMA dataframe
     manifest_uri = uricat(info_collection.uri, CENSUS_DATASETS_NAME)

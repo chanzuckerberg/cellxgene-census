@@ -9,6 +9,7 @@ import tiledbsoma as soma
 from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, SOMA_TileDB_Context
 from .util import (
     anndata_ordered_bool_issue_853_workaround,
+    pandas_dataframe_strings_to_ascii_issue_247_workaround,
     uricat,
 )
 
@@ -28,6 +29,8 @@ def create_census_summary_cell_counts(
     )
     df["soma_joinid"] = df.index.astype(np.int64)
 
+    # TODO: work-around for TileDB-SOMA#274.  Remove when fixed.
+    df = pandas_dataframe_strings_to_ascii_issue_247_workaround(df)
     df = anndata_ordered_bool_issue_853_workaround(df)
 
     # write to a SOMA dataframe
