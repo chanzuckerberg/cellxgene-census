@@ -9,6 +9,8 @@
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/raid-config.html
 #
 
+DEVICES="$@"
+
 # exit immediately when a command fails
 set -e
 # treat unset variables as an error and exit immediately
@@ -75,6 +77,6 @@ function mount_volume {
   chmod 777 ${MOUNTPOINT}
 }
 
-create_volume $(detect_devices ${DEVICE_PREFIX})
+create_volume ${DEVICES:-$(detect_devices ${DEVICE_PREFIX})}
 mount_volume
 echo "Done. Mounted on ${MOUNTPOINT}."
