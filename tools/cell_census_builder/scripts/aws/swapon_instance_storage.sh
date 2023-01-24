@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
-# This automates adding all instance (ephemeral) storage as swap
+# This automates adding either all or the specified number of instance 
+# (ephemeral) storage devices as swap
 #
+# Usage:
+# swapon_instance_storage.sh [DEVICE_COUNT]
+# Example:
+# swapon_instance_storage.sh 3
+##
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-swap-volumes.html
 
 NUM_DEVICES=$1
