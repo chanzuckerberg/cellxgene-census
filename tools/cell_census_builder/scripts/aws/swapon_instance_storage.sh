@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 
-# This automates adding all instance (ephemeral) storage as swap
+# This automates adding either all or the specified number of instance 
+# (ephemeral) storage devices as swap
 #
+# Usage:
+# swapon_instance_storage.sh [DEVICE_COUNT]
+# Example:
+# swapon_instance_storage.sh 3
+##
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-swap-volumes.html
+
+NUM_DEVICES=$1
 
 # exit immediately when a command fails
 set -e
@@ -37,7 +45,9 @@ for d in bdevs:
   lsblk --json --output NAME,TYPE,MOUNTPOINT | python3 -c "${PY_CMD}" "$1"
 }
 
-for bdev in $(detect_devices ${DEVICE_PREFIX}); do
+DEVICES=( `detect_devices ${DEVICE_PREFIX}` )
+# For NUM_DEVICES devices (or all devices if NUM_DEVICES not specified), add to swap
+for bdev in ${DEVICES[*]:0:${NUM_DEVICES:-${#DEVICES[*]}}}; do
   echo "Adding ${bdev}"
   mkswap ${bdev}
   swapon -v ${bdev}

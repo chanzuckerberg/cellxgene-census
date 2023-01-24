@@ -65,15 +65,17 @@ def load_manifest_from_CxG() -> List[Dataset]:
         }
         for collection in collections
         for dataset in collection["datasets"]
-        if dataset["tombstone"] is False  # ignore anything that has been deleted
     }
     logging.info(f"Found {len(datasets)} datasets, in {len(collections)} collections")
 
     # load per-dataset schema version
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as tp:
+    # max_workers currently set to 4 (was 8) and 1 sec delay added per API call due to
+    # https://github.com/chanzuckerberg/single-cell-data-portal/issues/3535
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as tp:
         dataset_metadata = tp.map(
             lambda d: fetch_json(
-                f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}"
+                f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}",
+                delay_secs=1
             ),
             datasets.values(),
         )

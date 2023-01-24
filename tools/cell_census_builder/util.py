@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import requests
+import time
 from scipy import sparse
 
 
@@ -62,9 +63,10 @@ def uricat(container_uri: str, *paths: str) -> str:
     return uri
 
 
-def fetch_json(url: str) -> object:
+def fetch_json(url: str, delay_secs: float=0.0) -> object:
     response = requests.get(url)
     response.raise_for_status()
+    time.sleep(delay_secs)
     return response.json()
 
 

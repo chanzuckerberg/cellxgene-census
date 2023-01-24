@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 
-# This automates mounting all instance (ephemeral) storage onto a file
-# system.  If a single device is found, it creates an ext4 file system.
-# If multiple are found, it creates a RAID0 group, and an ext4 file
-# system on top of it.
+# This automates mounting either all of the instance (ephemeral) storage 
+# devices or the specified devices onto a file system.  If a single device
+# is found, it creates an ext4 file system. If multiple devices are found or specified, 
+# it creates a RAID0 group, and an ext4 file system on top of it.
+# 
+# Usage:
+# mount_instance_storage.sh [DEVICE]...
+# Example:
+# mount_instance_storage.sh /dev/nvme{4,5}n1
 #
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/add-instance-store-volumes.html
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/raid-config.html
 #
+
+DEVICES="$@"
 
 # exit immediately when a command fails
 set -e
@@ -75,6 +82,6 @@ function mount_volume {
   chmod 777 ${MOUNTPOINT}
 }
 
-create_volume $(detect_devices ${DEVICE_PREFIX})
+create_volume ${DEVICES:-$(detect_devices ${DEVICE_PREFIX})}
 mount_volume
 echo "Done. Mounted on ${MOUNTPOINT}."
