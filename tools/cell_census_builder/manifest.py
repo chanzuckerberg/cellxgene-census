@@ -69,6 +69,8 @@ def load_manifest_from_CxG() -> List[Dataset]:
     logging.info(f"Found {len(datasets)} datasets, in {len(collections)} collections")
 
     # load per-dataset schema version
+    # max_workers currently set to 4 (was 8) and 1 sec delay added per API call due to
+    # https://github.com/chanzuckerberg/single-cell-data-portal/issues/3535
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as tp:
         dataset_metadata = tp.map(
             lambda d: fetch_json(
