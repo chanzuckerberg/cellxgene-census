@@ -30,8 +30,11 @@ dependencies= [
     "numba>=0.55",
     "numpy>=1.21",
     "requests",
-    "tiledb>=0.19.0",
+    # NOTE: The API's version of tiledbsoma MUST be >= the builder's tiledbsoma version, to ensure reader compatibility
+    # of TileDB on-disk storage format. Make sure this doesn't fall behind the builder's tiledbsoma version.
     "tiledbsoma==0.5.0a6",
+    # NOTE: tiledb is also a requirement of the API, but tiledbsoma also has a tiledb dependency, so just use the same version here
+    # "tiledb",
     "typing_extensions",
     "s3fs",
     "scikit-misc",
