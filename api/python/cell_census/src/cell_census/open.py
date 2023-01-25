@@ -5,7 +5,6 @@ from typing import Optional
 import s3fs
 import tiledb
 import tiledbsoma as soma
-import tiledbsoma.options as soma_options
 
 from .release_directory import CensusLocator, CensusVersionDescription, get_census_version_description
 from .util import uri_join
@@ -24,7 +23,9 @@ def _open_soma(description: CensusVersionDescription) -> soma.Collection:
     s3_region = locator.get("s3_region", None)
     if s3_region is not None:
         tiledb_config["vfs.s3.region"] = locator["s3_region"]
-    return soma.Collection(uri=locator["uri"], context=soma_options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config)))
+    return soma.Collection(
+        uri=locator["uri"], context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config))
+    )
 
 
 def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = None) -> soma.Collection:
@@ -66,7 +67,9 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
     """
 
     if uri is not None:
-        return soma.Collection(uri=uri, context=soma_options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION)))
+        return soma.Collection(
+            uri=uri, context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION))
+        )
 
     if census_version is None:
         raise ValueError("Must specify either a cell census version or an explicit URI.")
