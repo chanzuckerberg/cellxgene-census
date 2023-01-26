@@ -59,7 +59,7 @@ def get_anndata(
     --------
     >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
     
-    >>> get_anndata(census, "Mus musculus", obs_coors=([1, 10, 100],)
+    >>> get_anndata(census, "Mus musculus", obs_coors=([1, 10, 100],))
 
     >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
 
