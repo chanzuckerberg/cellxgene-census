@@ -37,9 +37,17 @@ def get_anndata(
     obs_value_filter: str, default None
         Value filter for the ``obs`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
+    obs_coords: Tuple[SparseDFCoord, ...]
+        A set of coordinates on the ``obs`` DataFrame index. The tuple must have a length less 
+        than or equal to the number of dimensions, and be of a type supported by 
+        SOMA ``DataFrame``.
     var_value_filter: str, default None
         Value filter for the ``var`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
+    var_coords: Tuple[SparseDFCoord, ...]
+        A set of coordinates on the ``var`` DataFrame index. The tuple must have a length less 
+        than or equal to the number of dimensions, and be of a type supported by 
+        SOMA ``DataFrame``.
     column_names: dict[Literal['obs', 'var'], List[str]]
         Colums to fetch for obs and var dataframes.
 
@@ -50,6 +58,8 @@ def get_anndata(
     Examples
     --------
     >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
+    
+    >>> get_anndata(census, "Mus musculus", obs_coors=([1, 10, 100],)
 
     >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
 
