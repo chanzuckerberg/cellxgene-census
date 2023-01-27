@@ -35,6 +35,7 @@ def process_initializer(verbose: int = 0) -> None:
                 {
                     "py.init_buffer_bytes": 512 * 1024**2,
                     "py.deduplicate": "true",
+                    "soma.init_buffer_bytes": 512 * 1024**2,
                 }
             )
         )

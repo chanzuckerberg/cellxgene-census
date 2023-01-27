@@ -81,7 +81,8 @@ def main() -> int:
         assert cc != 0 or all(e.is_finished() for e in experiment_builders)
 
     if cc == 0 and (args.subcommand == "validate" or args.validate):
-        cc = validate(args, experiment_builders)
+        # validate() returns True on success, raises on failure
+        cc = 0 if validate(args, experiment_builders) else 1
 
     return cc
 
