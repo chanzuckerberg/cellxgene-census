@@ -21,13 +21,7 @@ def cpu_count() -> int:
 
 
 def process_initializer(verbose: int = 0) -> None:
-    level = (
-        logging.DEBUG
-        if verbose > 1
-        else logging.INFO
-        if verbose == 1
-        else logging.WARNING
-    )
+    level = logging.DEBUG if verbose > 1 else logging.INFO if verbose == 1 else logging.WARNING
     logging.basicConfig(
         format="%(asctime)s %(process)-7s %(levelname)-8s %(message)s",
         level=level,

@@ -117,9 +117,7 @@ class TissueMapper:
         "UBERON_0001062",  # anatomical entity
     ]
 
-    def __init__(
-        self, uberon_ontology: str = "http://purl.obolibrary.org/obo/uberon.owl"
-    ):
+    def __init__(self, uberon_ontology: str = "http://purl.obolibrary.org/obo/uberon.owl"):
         # TODO: use the pinned ontology at `single-cell-curation`
         self._uberon = owlready2.get_ontology(uberon_ontology)
         self._uberon.load()
@@ -137,9 +135,7 @@ class TissueMapper:
                 - This could happen with something like "UBERON:0002048 (cell culture)"
         """
 
-        tissue_ontology_term_id = self.reformat_ontology_term_id(
-            tissue_ontology_term_id, to_writable=False
-        )
+        tissue_ontology_term_id = self.reformat_ontology_term_id(tissue_ontology_term_id, to_writable=False)
 
         if tissue_ontology_term_id in self._cached_tissues:
             # If we have looked this up already
@@ -149,9 +145,7 @@ class TissueMapper:
 
         if not entity:
             # If not found as an ontology ID return itself
-            result = self.reformat_ontology_term_id(
-                tissue_ontology_term_id, to_writable=True
-            )
+            result = self.reformat_ontology_term_id(tissue_ontology_term_id, to_writable=True)
             self._cached_tissues[tissue_ontology_term_id] = result
             return result
 
@@ -188,9 +182,7 @@ class TissueMapper:
         if ontology_term_id in self._cached_labels:
             return self._cached_labels[ontology_term_id]
 
-        entity = self._get_entity_from_id(
-            self.reformat_ontology_term_id(ontology_term_id, to_writable=False)
-        )
+        entity = self._get_entity_from_id(self.reformat_ontology_term_id(ontology_term_id, to_writable=False))
         if entity:
             result = entity.label[0]
         else:
@@ -209,20 +201,14 @@ class TissueMapper:
 
         if to_writable:
             if ontology_term_id.count("_") != 1:
-                raise ValueError(
-                    f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one '_'"
-                )
+                raise ValueError(f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one '_'")
             return ontology_term_id.replace("_", ":")
         else:
             if ontology_term_id.count(":") != 1:
-                raise ValueError(
-                    f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one ':'"
-                )
+                raise ValueError(f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one ':'")
             return ontology_term_id.replace(":", "_")
 
-    def _list_ancestors(
-        self, entity: owlready2.entity.ThingClass, ancestors: List[str] = []
-    ) -> List[str]:
+    def _list_ancestors(self, entity: owlready2.entity.ThingClass, ancestors: List[str] = []) -> List[str]:
         """
         Recursive function that given an entity of an ontology, it traverses the ontology and returns
         a list of all ancestors associated with the entity.
@@ -258,9 +244,7 @@ class TissueMapper:
         Given a readable ontology term id (e.g. "UBERON_0002048"), it returns the associated ontology entity
         """
         # TODO: use the pinned ontology at `single-cell-curation`
-        return self._uberon.search_one(
-            iri=f"http://purl.obolibrary.org/obo/{ontology_term_id}"
-        )
+        return self._uberon.search_one(iri=f"http://purl.obolibrary.org/obo/{ontology_term_id}")
 
     @staticmethod
     def _is_restriction(entity: owlready2.entity.ThingClass) -> bool:

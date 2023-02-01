@@ -12,9 +12,7 @@ def test_highly_variable_genes() -> None:
     query = soma.ExperimentAxisQuery(
         experiment,
         "RNA",
-        obs_query=soma.AxisQuery(
-            value_filter="tissue_general == 'scalp' and is_primary_data == True"
-        ),
+        obs_query=soma.AxisQuery(value_filter="tissue_general == 'scalp' and is_primary_data == True"),
         var_query=soma.AxisQuery(coords=(slice(0, 31),)),
     )
 

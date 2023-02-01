@@ -54,9 +54,7 @@ class EbInfo:
         return self
 
 
-def validate_all_soma_objects_exist(
-    soma_path: str, experiment_builders: List[ExperimentBuilder]
-) -> bool:
+def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
     """
     Validate all objects present and contain expected metadata.
 
@@ -71,17 +69,11 @@ def validate_all_soma_objects_exist(
     """
     census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     assert census.exists() and census.soma_type == "SOMACollection"
+    assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
     assert (
-        "cxg_schema_version" in census.metadata
-        and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
+        "census_schema_version" in census.metadata and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
     )
-    assert (
-        "census_schema_version" in census.metadata
-        and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
-    )
-    assert "created_on" in census.metadata and datetime.fromisoformat(
-        census.metadata["created_on"]
-    )
+    assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
 
     for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
         assert name in census
@@ -98,15 +90,11 @@ def validate_all_soma_objects_exist(
         assert census_info[name].soma_type == "SOMADataFrame"
         assert census_info[name].exists()
 
-    assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(
-        CENSUS_DATASETS_COLUMNS + ["soma_joinid"]
-    )
+    assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
     assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
         list(CENSUS_SUMMARY_CELL_COUNTS_COLUMNS) + ["soma_joinid"]
     )
-    assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(
-        ["label", "value", "soma_joinid"]
-    )
+    assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
 
     # there should be an experiment for each builder
     census_data = census[CENSUS_DATA_NAME]
@@ -122,45 +110,28 @@ def validate_all_soma_objects_exist(
         assert "ms" in e and e.ms.exists() and e.ms.soma_type == "SOMACollection"
 
         # there should be a single measurement called 'RNA'
-        assert (
-            "RNA" in e.ms
-            and e.ms["RNA"].exists()
-            and e.ms["RNA"].soma_type == "SOMAMeasurement"
-        )
+        assert "RNA" in e.ms and e.ms["RNA"].exists() and e.ms["RNA"].soma_type == "SOMAMeasurement"
 
         # The measurement should contain all X layers where n_obs > 0 (existence checked elsewhere)
         rna = e.ms["RNA"]
-        assert (
-            "var" in rna
-            and rna["var"].exists()
-            and rna["var"].soma_type == "SOMADataFrame"
-        )
-        assert (
-            "X" in rna and rna["X"].exists() and rna["X"].soma_type == "SOMACollection"
-        )
+        assert "var" in rna and rna["var"].exists() and rna["var"].soma_type == "SOMADataFrame"
+        assert "X" in rna and rna["X"].exists() and rna["X"].soma_type == "SOMACollection"
         for lyr in CENSUS_X_LAYERS:
             # layers only exist if there are cells in the measurement
             if lyr in rna.X:
-                assert (
-                    rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNDArray"
-                )
+                assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNDArray"
 
         # and a dataset presence matrix
         # dataset presence only exists if there are cells in the measurement
         if FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna:
             assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].exists()
-            assert (
-                rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type
-                == "SOMASparseNDArray"
-            )
+            assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
             # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
     return True
 
 
-def _validate_axis_dataframes(
-    args: Tuple[str, str, Dataset, List[ExperimentBuilder]]
-) -> Dict[str, EbInfo]:
+def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> Dict[str, EbInfo]:
     assets_path, soma_path, dataset, experiment_builders = args
     census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     census_data = census[CENSUS_DATA_NAME]
@@ -191,17 +162,13 @@ def _validate_axis_dataframes(
             .reset_index(drop=True)
         )
 
-        assert len(dataset_obs) == len(
-            ad.obs
-        ), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
+        assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
         if ad.n_obs > 0:
             eb_info[eb.name].n_obs += ad.n_obs
             eb_info[eb.name].dataset_ids.add(dataset_id)
             eb_info[eb.name].vars |= set(ad.var.index.array)
             ad_obs = ad.obs[list(CXG_OBS_TERM_COLUMNS)].reset_index(drop=True)
-            assert (
-                (dataset_obs == ad_obs).all().all()
-            ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
+            assert (dataset_obs == ad_obs).all().all(), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
     return eb_info
 
@@ -232,14 +199,10 @@ def validate_axis_dataframes(
         assert sorted(var.keys()) == sorted(expected_var_columns.keys())
         for field in obs.schema:
             assert field.name in expected_obs_columns
-            assert (
-                field.type == expected_obs_columns[field.name]
-            ), f"Unexpected type in {field.name}: {field.type}"
+            assert field.type == expected_obs_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
         for field in var.schema:
             assert field.name in expected_var_columns
-            assert (
-                field.type == expected_var_columns[field.name]
-            ), f"Unexpected type in {field.name}: {field.type}"
+            assert field.type == expected_var_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
 
     # check shapes & perform weak test of contents
     eb_info = {eb.name: EbInfo() for eb in experiment_builders}
@@ -252,9 +215,7 @@ def validate_axis_dataframes(
                 )
                 for dataset in datasets
             ]
-            for n, future in enumerate(
-                concurrent.futures.as_completed(futures), start=1
-            ):
+            for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
                 res = future.result()
                 for eb_name, ebi in res.items():
                     eb_info[eb_name].update(ebi)
@@ -271,33 +232,20 @@ def validate_axis_dataframes(
         se = census_data[eb.name]
         n_vars = len(eb_info[eb.name].vars)
 
-        census_obs_df = (
-            se.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
-        )
+        census_obs_df = se.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
         assert eb_info[eb.name].n_obs == len(census_obs_df)
-        assert (len(census_obs_df) == 0) or (
-            census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs
-        )
+        assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
         assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
 
-        census_var_df = (
-            se.ms["RNA"]
-            .var.read(column_names=["feature_id", "soma_joinid"])
-            .concat()
-            .to_pandas()
-        )
+        census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         assert n_vars == len(census_var_df)
         assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
-        assert (len(census_var_df) == 0) or (
-            census_var_df.soma_joinid.max() + 1 == n_vars
-        )
+        assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
     return True
 
 
-def _validate_X_layers_contents(
-    args: Tuple[str, str, Dataset, List[ExperimentBuilder]]
-) -> bool:
+def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
@@ -329,15 +277,10 @@ def _validate_X_layers_contents(
         if len(soma_joinids) > 0:
             assert "raw" in se.ms["RNA"].X and se.ms["RNA"].X["raw"].exists()
 
-            def count_elements(
-                arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]
-            ) -> int:
+            def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
                 # TODO XXX: Work-around for regression TileDB-SOMA#473
                 # return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))))
-                return sum(
-                    t.non_zero_length
-                    for t in arr.read((pa.array(join_ids), slice(None))).csrs()
-                )
+                return sum(t.non_zero_length for t in arr.read((pa.array(join_ids), slice(None))).csrs())
 
             raw_nnz = count_elements(se.ms["RNA"].X["raw"], soma_joinids)
 
@@ -384,12 +327,7 @@ def validate_X_layers(
 
         census_obs_df = se.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
         n_obs = len(census_obs_df)
-        census_var_df = (
-            se.ms["RNA"]
-            .var.read(column_names=["feature_id", "soma_joinid"])
-            .concat()
-            .to_pandas()
-        )
+        census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         n_vars = len(census_var_df)
 
         if n_obs > 0:
@@ -410,17 +348,13 @@ def validate_X_layers(
                 )
                 for dataset in datasets
             ]
-            for n, future in enumerate(
-                concurrent.futures.as_completed(futures), start=1
-            ):
+            for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
                 assert future.result()
                 logging.info(f"validate_X {n} of {len(datasets)} complete.")
     else:
         for n, vld in enumerate(
             (
-                _validate_X_layers_contents(
-                    (assets_path, soma_path, dataset, experiment_builders)
-                )
+                _validate_X_layers_contents((assets_path, soma_path, dataset, experiment_builders))
                 for dataset in datasets
             ),
             start=1,
@@ -434,16 +368,9 @@ def validate_X_layers(
 def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]:
     # Datasets are pulled from the census datasets manifest, validating the SOMA
     # census against the snapshot assets.
-    df = (
-        soma.Collection(soma_path)[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME]
-        .read()
-        .concat()
-        .to_pandas()
-    )
+    df = soma.Collection(soma_path)[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
     df.drop(columns=["soma_joinid"], inplace=True)
-    df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(
-        lambda p: uricat(assets_path, p)
-    )
+    df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: uricat(assets_path, p))
     datasets = Dataset.from_dataframe(df)
     return datasets
 
@@ -452,17 +379,13 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     """Confirm contents of manifest are correct."""
     for d in datasets:
         p = pathlib.Path(uricat(assets_path, d.dataset_h5ad_path))
-        assert (
-            p.exists() and p.is_file()
-        ), f"{d.dataset_h5ad_path} is missing from the census"
+        assert p.exists() and p.is_file(), f"{d.dataset_h5ad_path} is missing from the census"
         assert str(p).endswith(".h5ad"), "Expected only H5AD assets"
 
     return True
 
 
-def validate(
-    args: argparse.Namespace, experiment_builders: List[ExperimentBuilder]
-) -> bool:
+def validate(args: argparse.Namespace, experiment_builders: List[ExperimentBuilder]) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
 
@@ -481,11 +404,7 @@ def validate(
     datasets = load_datasets_from_census(assets_path, soma_path)
     assert validate_manifest_contents(assets_path, datasets)
 
-    assert validate_axis_dataframes(
-        assets_path, soma_path, datasets, experiment_builders, args
-    )
-    assert validate_X_layers(
-        assets_path, soma_path, datasets, experiment_builders, args
-    )
+    assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
+    assert validate_X_layers(assets_path, soma_path, datasets, experiment_builders, args)
     logging.info("Validation success")
     return True

@@ -24,9 +24,7 @@ class OnlineMatrixMeanVariance:
         self.u_a = np.zeros((n_variables,), dtype=np.float64)
         self.M2_a = np.zeros((n_variables,), dtype=np.float64)
 
-    def update(
-        self, coord_vec: npt.NDArray[np.int64], value_vec: npt.NDArray[np.float32]
-    ) -> None:
+    def update(self, coord_vec: npt.NDArray[np.int64], value_vec: npt.NDArray[np.float32]) -> None:
         _mean_variance_update(coord_vec, value_vec, self.n_a, self.u_a, self.M2_a)
 
     def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:

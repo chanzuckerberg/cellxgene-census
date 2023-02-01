@@ -69,9 +69,7 @@ def fetch_json(url: str, delay_secs: float = 0.0) -> object:
     return response.json()
 
 
-def is_positive_integral(
-    X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix]
-) -> bool:
+def is_positive_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix]) -> bool:
     """
     Return true if the matrix/array contains only positive integral values,
     False otherwise.
@@ -105,16 +103,11 @@ def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
     # This causes Arrow to blow up.
     copied = False
     for k in df.keys():
-        if (
-            pd.api.types.is_categorical_dtype(df[k])
-            and type(df[k].cat.ordered) == np.bool_
-        ):
+        if pd.api.types.is_categorical_dtype(df[k]) and type(df[k].cat.ordered) == np.bool_:
             if not copied:
                 df = df.copy()
                 copied = True
 
-            df[k] = df[k].cat.set_categories(
-                df[k].cat.categories, ordered=bool(df[k].cat.ordered)
-            )
+            df[k] = df[k].cat.set_categories(df[k].cat.categories, ordered=bool(df[k].cat.ordered))
 
     return df

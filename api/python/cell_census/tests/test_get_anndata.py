@@ -32,9 +32,7 @@ def test_get_anndata(census: soma.Collection) -> None:
 def test_get_anndata_allows_missing_obs_or_var_filter(census: soma.Collection) -> None:
     # TODO: test with a small, local census test fixture, for performance; reinstate commented-out test, below
 
-    adata = cell_census.get_anndata(
-        census, organism="Homo sapiens", obs_value_filter="tissue == 'tongue'"
-    )
+    adata = cell_census.get_anndata(census, organism="Homo sapiens", obs_value_filter="tissue == 'tongue'")
     assert adata.obs.shape[0] == 372
 
     # adata = cell_census.get_anndata(

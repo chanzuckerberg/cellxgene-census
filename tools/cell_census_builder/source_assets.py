@@ -11,9 +11,7 @@ from .datasets import Dataset
 from .mp import cpu_count, create_process_pool_executor
 
 
-def stage_source_assets(
-    datasets: List[Dataset], args: argparse.Namespace, assets_dir: str
-) -> None:
+def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, assets_dir: str) -> None:
     logging.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
 
@@ -27,10 +25,7 @@ def stage_source_assets(
             path
             for path in pe.map(
                 copy_file,
-                (
-                    (n, dataset, assets_dir, N)
-                    for n, dataset in enumerate(datasets, start=1)
-                ),
+                ((n, dataset, assets_dir, N) for n, dataset in enumerate(datasets, start=1)),
             )
         ]
 
@@ -43,9 +38,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
     protocol = urllib.parse.urlparse(dataset.corpora_asset_h5ad_uri).scheme
     fs = fsspec.filesystem(
         protocol,
-        client_kwargs={
-            "timeout": aiohttp.ClientTimeout(total=HTTP_GET_TIMEOUT_SEC, connect=None)
-        },
+        client_kwargs={"timeout": aiohttp.ClientTimeout(total=HTTP_GET_TIMEOUT_SEC, connect=None)},
     )
     dataset_file_name = f"{dataset.dataset_id}.h5ad"
     dataset_path = f"{asset_dir}/{dataset_file_name}"

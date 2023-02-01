@@ -19,27 +19,13 @@ if __name__ == "__main__":
     ]
 
     obs_df = {
-        name: experiment.obs.read(column_names=[c[0] for c in COLS_TO_QUERY])
-        .concat()
-        .to_pandas()
+        name: experiment.obs.read(column_names=[c[0] for c in COLS_TO_QUERY]).concat().to_pandas()
         for name, experiment in census[CENSUS_DATA_NAME].items()
     }
 
     # Use Pandas to summarize and display
-    stats = [
-        (organism, col[1], df[col[0]].nunique())
-        for organism, df in obs_df.items()
-        for col in COLS_TO_QUERY
-    ]
-    print(
-        census["census_info"]["summary"]
-        .read()
-        .concat()
-        .to_pandas()[["label", "value"]]
-        .to_string(index=False)
-    )
+    stats = [(organism, col[1], df[col[0]].nunique()) for organism, df in obs_df.items() for col in COLS_TO_QUERY]
+    print(census["census_info"]["summary"].read().concat().to_pandas()[["label", "value"]].to_string(index=False))
     stats_df = pd.DataFrame(stats, columns=["organism", "attribute", "unique count"])
-    display_stats_df = pd.pivot(
-        stats_df, index=["organism"], columns=["attribute"], values=["unique count"]
-    )
+    display_stats_df = pd.pivot(stats_df, index=["organism"], columns=["attribute"], values=["unique count"])
     print(display_stats_df)

@@ -50,8 +50,6 @@ def consolidate_collection(
 
 def consolidate_tiledb_object(uri: str) -> str:
     logging.info(f"Consolidate: starting {uri}")
-    tiledb.consolidate(
-        uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3})
-    )
+    tiledb.consolidate(uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3}))
     tiledb.vacuum(uri)
     return uri

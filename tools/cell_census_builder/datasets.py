@@ -49,12 +49,7 @@ class Dataset:
     @classmethod
     def to_dataframe(cls: Type[T], datasets: List[T]) -> pd.DataFrame:
         if len(datasets) == 0:
-            return pd.DataFrame(
-                {
-                    field.name: pd.Series(dtype=field.type)
-                    for field in dataclasses.fields(cls)
-                }
-            )
+            return pd.DataFrame({field.name: pd.Series(dtype=field.type) for field in dataclasses.fields(cls)})
 
         return pd.DataFrame(datasets)
 
@@ -68,9 +63,7 @@ def assign_soma_joinids(datasets: List[Dataset]) -> None:
         dataset.soma_joinid = joinid
 
 
-def create_dataset_manifest(
-    info_collection: soma.Collection, datasets: List[Dataset]
-) -> None:
+def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dataset]) -> None:
     """
     Write the Cell Census `census_datasets` dataframe
     """

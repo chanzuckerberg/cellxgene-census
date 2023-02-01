@@ -22,11 +22,6 @@ def test_unicode_support() -> None:
         )
         s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 
-        pd_df_in = (
-            soma.DataFrame(uri=os.path.join(d, "unicode_support"))
-            .read()
-            .concat()
-            .to_pandas()
-        )
+        pd_df_in = soma.DataFrame(uri=os.path.join(d, "unicode_support")).read().concat().to_pandas()
 
         assert pd_df_in["value"].to_list() == ["Ünicode", "S̈upport"]
