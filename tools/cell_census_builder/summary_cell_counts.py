@@ -7,10 +7,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, SOMA_TileDB_Context
-from .util import (
-    anndata_ordered_bool_issue_853_workaround,
-    uricat,
-)
+from .util import anndata_ordered_bool_issue_853_workaround, uricat
 
 
 def create_census_summary_cell_counts(
@@ -23,7 +20,11 @@ def create_census_summary_cell_counts(
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
         .drop(columns=["dataset_id"])
-        .groupby(by=["organism", "category", "ontology_term_id"], as_index=False, observed=True)
+        .groupby(
+            by=["organism", "category", "ontology_term_id"],
+            as_index=False,
+            observed=True,
+        )
         .agg({"unique_cell_count": "sum", "total_cell_count": "sum", "label": "first"})
     )
     df["soma_joinid"] = df.index.astype(np.int64)
@@ -33,7 +34,10 @@ def create_census_summary_cell_counts(
     # write to a SOMA dataframe
     summary_counts_uri = uricat(info_collection.uri, CENSUS_SUMMARY_CELL_COUNTS_NAME)
     summary_counts = soma.DataFrame(summary_counts_uri, context=SOMA_TileDB_Context())
-    summary_counts.create(pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"])
+    summary_counts.create(
+        pa.Schema.from_pandas(df, preserve_index=False),
+        index_column_names=["soma_joinid"],
+    )
     for batch in pa.Table.from_pandas(df, preserve_index=False).to_batches():
         summary_counts.write(batch)
     info_collection.set(CENSUS_SUMMARY_CELL_COUNTS_NAME, summary_counts, relative=True)
@@ -51,7 +55,9 @@ def init_summary_counts_accumulator() -> pd.DataFrame:
     )
 
 
-def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd.DataFrame:
+def accumulate_summary_counts(
+    current: pd.DataFrame, obs_df: pd.DataFrame
+) -> pd.DataFrame:
     """
     Add summary counts to the census_summary_cell_counts dataframe
     """
@@ -81,9 +87,13 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
         if term_label is not None:
             cats.append(term_label)
             columns.update({term_label: "label"})
-        assert len(cats) > 0 and len(columns) > 0  # i.e., one or both of term or label are specified
+        assert (
+            len(cats) > 0 and len(columns) > 0
+        )  # i.e., one or both of term or label are specified
 
-        df = obs_df[["dataset_id", "organism", *cats, "is_primary_data"]].rename(columns=columns)
+        df = obs_df[["dataset_id", "organism", *cats, "is_primary_data"]].rename(
+            columns=columns
+        )
         if "label" not in df:
             df["label"] = "na"
         if "ontology_term_id" not in df:

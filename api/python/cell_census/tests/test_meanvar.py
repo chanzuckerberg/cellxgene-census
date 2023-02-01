@@ -1,13 +1,13 @@
 import numpy as np
-from scipy import sparse
-
 from cell_census.compute import OnlineMatrixMeanVariance
+from scipy import sparse
 
 
 def test_online_mean_var() -> None:
-
     rng = np.random.default_rng()
-    matrix = sparse.random(1200, 51, density=0.1, format="coo", dtype=np.float32, random_state=rng)
+    matrix = sparse.random(
+        1200, 51, density=0.1, format="coo", dtype=np.float32, random_state=rng
+    )
     olmv = OnlineMatrixMeanVariance(*matrix.shape)
 
     stride = 101

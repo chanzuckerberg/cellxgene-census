@@ -30,7 +30,9 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
 
 
 def consolidate_collection(
-    args: argparse.Namespace, collection: soma.Collection, ppe: concurrent.futures.ProcessPoolExecutor
+    args: argparse.Namespace,
+    collection: soma.Collection,
+    ppe: concurrent.futures.ProcessPoolExecutor,
 ) -> List[concurrent.futures.Future[str]]:
     futures = []
     for soma_obj in collection.values():
@@ -48,6 +50,8 @@ def consolidate_collection(
 
 def consolidate_tiledb_object(uri: str) -> str:
     logging.info(f"Consolidate: starting {uri}")
-    tiledb.consolidate(uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3}))
+    tiledb.consolidate(
+        uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3})
+    )
     tiledb.vacuum(uri)
     return uri

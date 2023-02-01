@@ -7,7 +7,9 @@ from typing_extensions import TypedDict
 The following types describe the expected directory of Cell Census builds, used
 to bootstrap all data location requests.
 """
-CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
+CensusVersionName = (
+    str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
+)
 CensusLocator = TypedDict(
     "CensusLocator",
     {
@@ -24,11 +26,15 @@ CensusVersionDescription = TypedDict(
         "h5ads": CensusLocator,  # source H5ADs locator
     },
 )
-CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
+CensusDirectory = Dict[
+    CensusVersionName, Union[CensusVersionName, CensusVersionDescription]
+]
 
 
 # URL for the default top-level directory of all public data, formatted as a CensusDirectory
-CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgene-data-public/cell-census/release.json"
+CELL_CENSUS_RELEASE_DIRECTORY_URL = (
+    "https://s3.us-west-2.amazonaws.com/cellxgene-data-public/cell-census/release.json"
+)
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:

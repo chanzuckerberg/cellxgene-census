@@ -2,9 +2,10 @@ from typing import Optional, Tuple
 
 import anndata
 import tiledbsoma as soma
+from somacore.options import SparseDFCoord
+
 # TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
 from somacore.query.query import AxisColumnNames
-from somacore.options import SparseDFCoord
 
 from .experiment import get_experiment
 
@@ -57,7 +58,7 @@ def get_anndata(
     exp = get_experiment(census, organism)
     with exp.axis_query(
         measurement_name,
-        obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords = obs_coords),
-        var_query=soma.AxisQuery(value_filter=var_value_filter, coords = var_coords),
+        obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
+        var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
         return query.to_anndata(X_name=X_name, column_names=column_names)

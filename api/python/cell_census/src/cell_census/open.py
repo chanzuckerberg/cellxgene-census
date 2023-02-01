@@ -24,11 +24,14 @@ def _open_soma(description: CensusVersionDescription) -> soma.Collection:
     if s3_region is not None:
         tiledb_config["vfs.s3.region"] = locator["s3_region"]
     return soma.Collection(
-        uri=locator["uri"], context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config))
+        uri=locator["uri"],
+        context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config)),
     )
 
 
-def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = None) -> soma.Collection:
+def open_soma(
+    *, census_version: Optional[str] = "latest", uri: Optional[str] = None
+) -> soma.Collection:
     """
     Open the Cell Census by version or URI, returning a soma.Collection containing
     the top-level census.  Raises error if census_version is specified and unknown, or if
@@ -68,17 +71,24 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
 
     if uri is not None:
         return soma.Collection(
-            uri=uri, context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION))
+            uri=uri,
+            context=soma.options.SOMATileDBContext(
+                tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION)
+            ),
         )
 
     if census_version is None:
-        raise ValueError("Must specify either a cell census version or an explicit URI.")
+        raise ValueError(
+            "Must specify either a cell census version or an explicit URI."
+        )
 
     description = get_census_version_description(census_version)  # raises
     return _open_soma(description)
 
 
-def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
+def get_source_h5ad_uri(
+    dataset_id: str, *, census_version: str = "latest"
+) -> CensusLocator:
     """
     Open the named version of the census, and return the URI for the dataset_id.
     This does not guarantee that the H5AD exists or is accessible to the user.
@@ -103,7 +113,12 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     """
     description = get_census_version_description(census_version)  # raises
     census = _open_soma(description)
-    dataset = census["census_info"]["datasets"].read(value_filter=f"dataset_id == '{dataset_id}'").concat().to_pandas()
+    dataset = (
+        census["census_info"]["datasets"]
+        .read(value_filter=f"dataset_id == '{dataset_id}'")
+        .concat()
+        .to_pandas()
+    )
     if len(dataset) == 0:
         raise KeyError("Unknown dataset_id")
 
@@ -114,7 +129,9 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     return locator
 
 
-def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
+def download_source_h5ad(
+    dataset_id: str, to_path: str, *, census_version: str = "latest"
+) -> None:
     """
     Download the source H5AD dataset, for the given dataset_id, to the user-specified
     file name.

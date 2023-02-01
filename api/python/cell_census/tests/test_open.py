@@ -1,11 +1,10 @@
 import pathlib
 
 import anndata
+import cell_census
 import numpy as np
 import pytest
 import tiledbsoma as soma
-
-import cell_census
 
 
 @pytest.mark.live_corpus
@@ -39,7 +38,9 @@ def test_download_source_h5ad(tmp_path: pathlib.Path) -> None:
     small_dataset = census_datasets.nsmallest(1, "dataset_total_cell_count").iloc[0]
 
     adata_path = tmp_path / "adata.h5ad"
-    cell_census.download_source_h5ad(small_dataset.dataset_id, adata_path.as_posix(), census_version="latest")
+    cell_census.download_source_h5ad(
+        small_dataset.dataset_id, adata_path.as_posix(), census_version="latest"
+    )
     assert adata_path.exists() and adata_path.is_file()
 
     ad = anndata.read_h5ad(adata_path.as_posix())

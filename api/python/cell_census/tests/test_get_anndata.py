@@ -1,7 +1,6 @@
+import cell_census
 import pytest
 import tiledbsoma as soma
-
-import cell_census
 
 
 @pytest.fixture
@@ -11,7 +10,6 @@ def census() -> soma.Collection:
 
 @pytest.mark.live_corpus
 def test_get_anndata(census: soma.Collection) -> None:
-
     ad = cell_census.get_anndata(
         census,
         organism="Mus musculus",
@@ -34,7 +32,9 @@ def test_get_anndata(census: soma.Collection) -> None:
 def test_get_anndata_allows_missing_obs_or_var_filter(census: soma.Collection) -> None:
     # TODO: test with a small, local census test fixture, for performance; reinstate commented-out test, below
 
-    adata = cell_census.get_anndata(census, organism="Homo sapiens", obs_value_filter="tissue == 'tongue'")
+    adata = cell_census.get_anndata(
+        census, organism="Homo sapiens", obs_value_filter="tissue == 'tongue'"
+    )
     assert adata.obs.shape[0] == 372
 
     # adata = cell_census.get_anndata(

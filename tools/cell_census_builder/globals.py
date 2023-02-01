@@ -121,14 +121,29 @@ CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
+            "dims": {
+                "soma_joinid": {
+                    "filters": [
+                        "DoubleDeltaFilter",
+                        {"_type": "ZstdFilter", "level": 19},
+                    ]
+                }
+            },
             "attrs": {
                 **{
-                    k: {"filters": ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]}
+                    k: {
+                        "filters": [
+                            "DictionaryFilter",
+                            {"_type": "ZstdFilter", "level": 19},
+                        ]
+                    }
                     for k in _RepetativeStringLabelObs
                 },
             },
-            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+            "offsets_filters": [
+                "DoubleDeltaFilter",
+                {"_type": "ZstdFilter", "level": 19},
+            ],
         }
     }
 }
@@ -143,8 +158,18 @@ CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
-            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+            "dims": {
+                "soma_joinid": {
+                    "filters": [
+                        "DoubleDeltaFilter",
+                        {"_type": "ZstdFilter", "level": 19},
+                    ]
+                }
+            },
+            "offsets_filters": [
+                "DoubleDeltaFilter",
+                {"_type": "ZstdFilter", "level": 19},
+            ],
         }
     }
 }
@@ -158,13 +183,26 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
             "create": {
                 "capacity": 2**16,
                 "dims": {
-                    "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
+                    "soma_dim_0": {
+                        "tile": 2048,
+                        "filters": [{"_type": "ZstdFilter", "level": 5}],
+                    },
                     "soma_dim_1": {
                         "tile": 2048,
-                        "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}],
+                        "filters": [
+                            "ByteShuffleFilter",
+                            {"_type": "ZstdFilter", "level": 5},
+                        ],
                     },
                 },
-                "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
+                "attrs": {
+                    "soma_data": {
+                        "filters": [
+                            "ByteShuffleFilter",
+                            {"_type": "ZstdFilter", "level": 5},
+                        ]
+                    }
+                },
                 "cell_order": "row-major",
                 "tile_order": "row-major",
             },

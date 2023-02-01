@@ -5,14 +5,18 @@ import tiledbsoma as soma
 from .meanvar import OnlineMatrixMeanVariance
 
 
-def highly_variable_genes(query: soma.ExperimentAxisQuery, n_top_genes: int = 10) -> pd.DataFrame:
+def highly_variable_genes(
+    query: soma.ExperimentAxisQuery, n_top_genes: int = 10
+) -> pd.DataFrame:
     """
     Acknowledgements: scanpy highly variable genes implementation, github.com/scverse/scanpy
     """
     try:
         import skmisc.loess
     except ImportError:
-        raise ImportError("Please install skmisc package via `pip install --user scikit-misc")
+        raise ImportError(
+            "Please install skmisc package via `pip install --user scikit-misc"
+        )
 
     indexer = query.indexer
     mvn = OnlineMatrixMeanVariance(query.n_obs, query.n_vars)
@@ -66,7 +70,9 @@ def highly_variable_genes(query: soma.ExperimentAxisQuery, n_top_genes: int = 10
 
     # this is done in SelectIntegrationFeatures() in Seurat v3
     ranked_norm_gene_vars = ranked_norm_gene_vars.astype(np.float32)
-    num_batches_high_var = np.sum((ranked_norm_gene_vars < n_top_genes).astype(int), axis=0)
+    num_batches_high_var = np.sum(
+        (ranked_norm_gene_vars < n_top_genes).astype(int), axis=0
+    )
     ranked_norm_gene_vars[ranked_norm_gene_vars >= n_top_genes] = np.nan
     ma_ranked = np.ma.masked_invalid(ranked_norm_gene_vars)  # type: ignore
     median_ranked = np.ma.median(ma_ranked, axis=0).filled(np.nan)  # type: ignore

@@ -14,8 +14,14 @@ from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers
-from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
-    SOMA_TileDB_Context
+from .globals import (
+    CENSUS_DATA_NAME,
+    CENSUS_INFO_NAME,
+    CENSUS_SCHEMA_VERSION,
+    CXG_SCHEMA_VERSION,
+    RNA_SEQ,
+    SOMA_TileDB_Context,
+)
 from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
@@ -24,7 +30,9 @@ from .util import uricat
 from .validate import validate
 
 
-def make_experiment_builders(base_uri: str, args: argparse.Namespace) -> List[ExperimentBuilder]:
+def make_experiment_builders(
+    base_uri: str, args: argparse.Namespace
+) -> List[ExperimentBuilder]:
     """
     Define all soma.Experiments to build in the census.
 
@@ -44,13 +52,19 @@ def make_experiment_builders(base_uri: str, args: argparse.Namespace) -> List[Ex
         ExperimentBuilder(
             base_uri=base_uri,
             name="homo_sapiens",
-            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606", assay_ontology_term_ids=RNA_SEQ),
+            anndata_cell_filter_spec=dict(
+                organism_ontology_term_id="NCBITaxon:9606",
+                assay_ontology_term_ids=RNA_SEQ,
+            ),
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
         ExperimentBuilder(
             base_uri=base_uri,
             name="mus_musculus",
-            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090", assay_ontology_term_ids=RNA_SEQ),
+            anndata_cell_filter_spec=dict(
+                organism_ontology_term_id="NCBITaxon:10090",
+                assay_ontology_term_ids=RNA_SEQ,
+            ),
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
     ]
@@ -71,7 +85,9 @@ def main() -> int:
     assets_path = uricat(args.uri, args.build_tag, "h5ads")
 
     # create the experiment builders
-    experiment_builders = make_experiment_builders(uricat(soma_path, CENSUS_DATA_NAME), args)
+    experiment_builders = make_experiment_builders(
+        uricat(soma_path, CENSUS_DATA_NAME), args
+    )
 
     cc = 0
     if args.subcommand == "build":
@@ -87,7 +103,10 @@ def main() -> int:
 
 
 def build(
-    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
+    args: argparse.Namespace,
+    soma_path: str,
+    assets_path: str,
+    experiment_builders: List[ExperimentBuilder],
 ) -> int:
     """
     Approximately, build steps are:
@@ -122,19 +141,26 @@ def build(
         soma_path, assets_path, datasets, experiment_builders, args
     )
     assign_soma_joinids(filtered_datasets)
-    logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
+    logging.info(
+        f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing."
+    )
     gc.collect()
 
     # Step 3- create X layers
-    build_step3_create_X_layers(assets_path, filtered_datasets, experiment_builders, args)
+    build_step3_create_X_layers(
+        assets_path, filtered_datasets, experiment_builders, args
+    )
     gc.collect()
 
     # Write out dataset manifest and summary information
     create_dataset_manifest(top_level_collection[CENSUS_INFO_NAME], filtered_datasets)
     create_census_summary_cell_counts(
-        top_level_collection[CENSUS_INFO_NAME], [e.census_summary_cell_counts for e in experiment_builders]
+        top_level_collection[CENSUS_INFO_NAME],
+        [e.census_summary_cell_counts for e in experiment_builders],
     )
-    create_census_summary(top_level_collection[CENSUS_INFO_NAME], experiment_builders, args.build_tag)
+    create_census_summary(
+        top_level_collection[CENSUS_INFO_NAME], experiment_builders, args.build_tag
+    )
 
     if args.consolidate:
         consolidate(args, top_level_collection.uri)
@@ -155,32 +181,41 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
 
     top_level_collection.create()
     # Set top-level metadata for the experiment
-    top_level_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
+    top_level_collection.metadata["created_on"] = datetime.now(
+        tz=timezone.utc
+    ).isoformat(timespec="seconds")
     top_level_collection.metadata["cxg_schema_version"] = CXG_SCHEMA_VERSION
     top_level_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
 
     # Create sub-collections for experiments, etc.
     for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
-        cltn = soma.Collection(uricat(top_level_collection.uri, n),
-                               context=SOMA_TileDB_Context()).create()
+        cltn = soma.Collection(
+            uricat(top_level_collection.uri, n), context=SOMA_TileDB_Context()
+        ).create()
         top_level_collection.set(n, cltn, relative=True)
 
     return top_level_collection
 
 
-def build_step1_get_source_assets(args: argparse.Namespace, assets_path: str) -> List[Dataset]:
+def build_step1_get_source_assets(
+    args: argparse.Namespace, assets_path: str
+) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
     datasets = load_manifest(args.manifest)
     if len(datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
-        raise AssertionError("No H5AD files in the manifest (or we can't find the files)")
+        raise AssertionError(
+            "No H5AD files in the manifest (or we can't find the files)"
+        )
 
     # Testing/debugging hook - hidden option
     if args.test_first_n is not None and args.test_first_n > 0:
         # Process the N smallest datasets
-        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.test_first_n]
+        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[
+            0 : args.test_first_n
+        ]
 
     # Stage all files
     stage_source_assets(datasets, args, assets_path)
@@ -216,7 +251,7 @@ def build_step2_create_axis(
     filtered_datasets = []
     N = len(datasets) * len(experiment_builders)
     n = 1
-    for (dataset, ad) in open_anndata(assets_path, datasets, backed="r"):
+    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
         dataset_total_cell_count = 0
         for e in experiment_builders:
             dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
@@ -229,7 +264,9 @@ def build_step2_create_axis(
     # Commit / write var
     for e in experiment_builders:
         e.commit_axis()
-        logging.info(f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets")
+        logging.info(
+            f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets"
+        )
 
     logging.info("Build step 2 - axis creation - finished")
     return top_level_collection, filtered_datasets
@@ -266,7 +303,9 @@ def build_step3_create_X_layers(
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cell_census_builder")
     parser.add_argument("uri", type=str, help="Census top-level URI")
-    parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
+    parser.add_argument(
+        "-v", "--verbose", action="count", default=0, help="Increase logging verbosity"
+    )
     parser.add_argument(
         "-mp",
         "--multi-process",
@@ -292,7 +331,10 @@ def create_args_parser() -> argparse.ArgumentParser:
         help="Manifest file",
     )
     build_parser.add_argument(
-        "--validate", action=argparse.BooleanOptionalAction, default=True, help="Validate immediately after build"
+        "--validate",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Validate immediately after build",
     )
     build_parser.add_argument(
         "--consolidate",

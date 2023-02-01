@@ -42,15 +42,21 @@ def open_anndata(
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
         if h5ad.schema_version not in CXG_SCHEMA_VERSION_IMPORT:
-            logging.error(f"H5AD has old schema version, skipping {h5ad.dataset_h5ad_path}")
+            logging.error(
+                f"H5AD has old schema version, skipping {h5ad.dataset_h5ad_path}"
+            )
             continue
 
         # Multi-organism datasets - any dataset with 2+ feature_reference organisms is ignored,
         # exclusive of values in FEATURE_REFERENCE_IGNORE. See also, cell filter for mismatched
         # cell/feature organism values.
-        feature_reference_organisms = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
+        feature_reference_organisms = (
+            set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
+        )
         if len(feature_reference_organisms) > 1:
-            logging.info(f"H5AD ignored due to multi-organism feature_reference: {h5ad.dataset_id}")
+            logging.info(
+                f"H5AD ignored due to multi-organism feature_reference: {h5ad.dataset_id}"
+            )
             continue
 
         # shape of raw and final must be same shape. Schema 2.0 disallows cell filtering,
@@ -68,7 +74,9 @@ def open_anndata(
                 if ad.isbacked:
                     ad = ad.to_memory()
                 ad.X.resize(ad.n_obs, len(new_var))
-                ad = anndata.AnnData(X=ad.X, obs=ad.obs, var=new_var, raw=ad.raw, dtype=np.float32)
+                ad = anndata.AnnData(
+                    X=ad.X, obs=ad.obs, var=new_var, raw=ad.raw, dtype=np.float32
+                )
 
         # sanity checks & expectations for any AnnData we can handle
         if ad.raw is not None:
@@ -79,13 +87,17 @@ def open_anndata(
         assert ad.X.shape == (len(ad.obs), len(ad.var))
 
         # TODO: In principle, we could look up missing feature_name, but for now, just assert they exist
-        assert ((ad.var.feature_name != "") & (ad.var.feature_name != None)).all()  # noqa: E711
+        assert (
+            (ad.var.feature_name != "") & (ad.var.feature_name != None)
+        ).all()  # noqa: E711
 
         yield (h5ad, ad)
 
 
 class AnnDataFilterFunction(Protocol):
-    def __call__(self, ad: anndata.AnnData, retain_X: Optional[bool] = True) -> anndata.AnnData:
+    def __call__(
+        self, ad: anndata.AnnData, retain_X: Optional[bool] = True
+    ) -> anndata.AnnData:
         ...
 
 
@@ -105,22 +117,30 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     organism_ontology_term_id = filter_spec.get("organism_ontology_term_id", None)
     assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids", None)
 
-    def _filter(ad: anndata.AnnData, retain_X: Optional[bool] = True) -> anndata.AnnData:
+    def _filter(
+        ad: anndata.AnnData, retain_X: Optional[bool] = True
+    ) -> anndata.AnnData:
         obs_mask = ~(  # noqa: E712
             ad.obs.tissue_ontology_term_id.str.endswith(" (organoid)")
             | ad.obs.tissue_ontology_term_id.str.endswith(" (cell culture)")
         )
 
         if organism_ontology_term_id is not None:
-            obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
+            obs_mask = obs_mask & (
+                ad.obs.organism_ontology_term_id == organism_ontology_term_id
+            )
         if assay_ontology_term_ids is not None:
             obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(RNA_SEQ)
 
         # multi-organism dataset cell filter - exclude any cells where organism != feature_reference
-        feature_references = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
+        feature_references = (
+            set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
+        )
         assert len(feature_references) == 1  # else there is a bug in open_anndata
         feature_reference_organism_ontology_id = feature_references.pop()
-        obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == feature_reference_organism_ontology_id)
+        obs_mask = obs_mask & (
+            ad.obs.organism_ontology_term_id == feature_reference_organism_ontology_id
+        )
 
         # This does NOT slice raw on the var axis.
         # See https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.raw.html
@@ -135,7 +155,9 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         if raw:
             # remove non-gene features
             mask = ad.raw.var.feature_biotype == "gene"
-            raw = anndata.AnnData(X=ad.raw.X[:, mask], obs=ad.obs, var=ad.raw.var[mask], dtype=np.float32)
+            raw = anndata.AnnData(
+                X=ad.raw.X[:, mask], obs=ad.obs, var=ad.raw.var[mask], dtype=np.float32
+            )
 
         # sanity checks
         if raw is not None:
@@ -151,7 +173,6 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
 
 
 def get_cellxgene_schema_version(ad: anndata.AnnData) -> str:
-
     # cellxgene >=2.0
     if "schema_version" in ad.uns:
         # not sure why this is a nested array

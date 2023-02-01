@@ -25,18 +25,15 @@ from .globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
-    FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
+    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    MEASUREMENT_RNA_NAME,
+    SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
 from .summary_cell_counts import accumulate_summary_counts, init_summary_counts_accumulator
 from .tissue_mapper import TissueMapper  # type: ignore
-from .util import (
-    anndata_ordered_bool_issue_853_workaround,
-    array_chunker,
-    is_positive_integral,
-    uricat,
-)
+from .util import anndata_ordered_bool_issue_853_workaround, array_chunker, is_positive_integral, uricat
 
 # Contents:
 #   dataset_id
@@ -85,7 +82,11 @@ class ExperimentBuilder:
             return ExperimentBuilder.BuildState(self.value + 1)
 
     def __init__(
-        self, base_uri: str, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]
+        self,
+        base_uri: str,
+        name: str,
+        anndata_cell_filter_spec: AnnDataFilterSpec,
+        gene_feature_length_uris: List[str],
     ):
         self.name = name
         self.anndata_cell_filter_spec = anndata_cell_filter_spec
@@ -101,7 +102,9 @@ class ExperimentBuilder:
         self.var_df: pd.DataFrame = pd.DataFrame(columns=["feature_id", "feature_name"])
         self.dataset_obs_joinid_start: Dict[str, int]
         self.census_summary_cell_counts = init_summary_counts_accumulator()
-        self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
+        self.presence: Dict[
+            int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]
+        ] = {}
         self.build_state = ExperimentBuilder.BuildState.Initialized
 
         self.load_assets()
@@ -119,7 +122,9 @@ class ExperimentBuilder:
             .drop(columns=["feature_name", "gene_version"])
             for uri in self.gene_feature_length_uris
         )
-        logging.info(f"Loaded gene lengths external reference for {self.name}, {len(self.gene_feature_length)} genes.")
+        logging.info(
+            f"Loaded gene lengths external reference for {self.name}, {len(self.gene_feature_length)} genes."
+        )
 
     def is_finished(self) -> bool:
         return self.build_state == ExperimentBuilder.BuildState.X_Presence_Written
@@ -169,30 +174,42 @@ class ExperimentBuilder:
         )
 
         # make the `X` collection (but not the actual layers)
-        measurement.set("X", soma.Collection(uricat(measurement.uri, "X")).create(), relative=True)
+        measurement.set(
+            "X", soma.Collection(uricat(measurement.uri, "X")).create(), relative=True
+        )
 
         self.build_state = self.build_state.next()
         return
 
-    def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData, progress: Tuple[int, int] = (0, 0)) -> int:
+    def accumulate_axes(
+        self, dataset: Dataset, ad: anndata.AnnData, progress: Tuple[int, int] = (0, 0)
+    ) -> int:
         """
         Write obs, accumate var.
 
         Returns: number of cells that make it past the experiment filter.
         """
         progmsg = f"({progress[0]} of {progress[1]})"
-        logging.info(f"{self.name}: accumulate axis for dataset '{dataset.dataset_id}' {progmsg}")
+        logging.info(
+            f"{self.name}: accumulate axis for dataset '{dataset.dataset_id}' {progmsg}"
+        )
         assert self.build_state == ExperimentBuilder.BuildState.Created
 
         anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
         ad = anndata_cell_filter(ad, retain_X=False)
         if ad.n_obs == 0:
-            logging.info(f"{self.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
+            logging.info(
+                f"{self.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}"
+            )
             return 0
 
         # Narrow columns just to minimize memory footprint. Summary cell counting
         # requires 'organism', do be careful not to delete that.
-        obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]].reset_index(drop=True).copy()
+        obs_df = (
+            ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]]
+            .reset_index(drop=True)
+            .copy()
+        )
 
         obs_df["soma_joinid"] = range(self.n_obs, self.n_obs + len(obs_df))
         obs_df["dataset_id"] = dataset.dataset_id
@@ -221,7 +238,9 @@ class ExperimentBuilder:
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
         # but may need to evolve this logic if that assumption is not scalable.
-        tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name"]]
+        tv = ad.var.rename_axis("feature_id").reset_index()[
+            ["feature_id", "feature_name"]
+        ]
         self.var_df = pd.concat([self.var_df, tv]).drop_duplicates()
 
         self.n_obs += len(obs_df)
@@ -243,7 +262,9 @@ class ExperimentBuilder:
         if len(self.var_df) > 0:
             # persist var
             self.var_df["soma_joinid"] = range(len(self.var_df))
-            self.var_df = self.var_df.join(self.gene_feature_length["feature_length"], on="feature_id")
+            self.var_df = self.var_df.join(
+                self.gene_feature_length["feature_length"], on="feature_id"
+            )
             self.var_df.feature_length.fillna(0, inplace=True)
 
             self.var_df = anndata_ordered_bool_issue_853_workaround(self.var_df)
@@ -277,8 +298,9 @@ class ExperimentBuilder:
             assert self.n_var > 0
             measurement = se.ms[MEASUREMENT_RNA_NAME]
             for layer_name in CENSUS_X_LAYERS:
-                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name),
-                                          context=SOMA_TileDB_Context()).create(
+                snda = soma.SparseNDArray(
+                    uricat(measurement.X.uri, layer_name), context=SOMA_TileDB_Context()
+                ).create(
                     CENSUS_X_LAYERS[layer_name],
                     (self.n_obs, self.n_var),
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
@@ -287,11 +309,15 @@ class ExperimentBuilder:
 
             presence_matrix = soma.SparseNDArray(
                 uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME),
-                context=SOMA_TileDB_Context()
+                context=SOMA_TileDB_Context(),
             )
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
-            presence_matrix.create(pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var))
-            measurement.set(FEATURE_DATASET_PRESENCE_MATRIX_NAME, presence_matrix, relative=True)
+            presence_matrix.create(
+                pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var)
+            )
+            measurement.set(
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, presence_matrix, relative=True
+            )
 
         self.build_state = self.build_state.next()
         return
@@ -306,7 +332,9 @@ class ExperimentBuilder:
         # that soma_joinid is contiguous (ie, no deletions in obs), which is
         # known true for our use case (aggregating h5ads).
         self.dataset_obs_joinid_start = (
-            se.obs.read(column_names=["dataset_id", "soma_joinid"]).concat().to_pandas()
+            se.obs.read(column_names=["dataset_id", "soma_joinid"])
+            .concat()
+            .to_pandas()
             .groupby("dataset_id")
             .min()
             .soma_joinid.to_dict()
@@ -325,7 +353,9 @@ class ExperimentBuilder:
         """
         assert "dataset_id" in obs_df
         assert len(obs_df) > 0
-        self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
+        self.census_summary_cell_counts = accumulate_summary_counts(
+            self.census_summary_cell_counts, obs_df
+        )
 
     def commit_presence_matrix(self, datasets: List[Dataset]) -> None:
         """
@@ -338,7 +368,9 @@ class ExperimentBuilder:
 
             # A few sanity checks
             assert len(self.presence) == self.n_datasets
-            assert max_dataset_joinid >= max(self.presence.keys())  # key is dataset joinid
+            assert max_dataset_joinid >= max(
+                self.presence.keys()
+            )  # key is dataset joinid
 
             # LIL is fast way to create spmatrix
             pm = sparse.lil_array((max_dataset_joinid + 1, self.n_var), dtype=bool)
@@ -351,7 +383,9 @@ class ExperimentBuilder:
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
             se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-            fdpm: soma.SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+            fdpm: soma.SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME
+            ]
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
         self.build_state = self.build_state.next()
@@ -375,12 +409,16 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     gc.collect()
-    logging.debug(f"Loading AnnData for dataset {dataset.dataset_id} ({progress[0]} of {progress[1]})")
+    logging.debug(
+        f"Loading AnnData for dataset {dataset.dataset_id} ({progress[0]} of {progress[1]})"
+    )
     unfiltered_ad = next(open_anndata(assets_path, [dataset]))[1]
     assert unfiltered_ad.isbacked is False
 
     presence = []
-    for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
+    for eb, dataset_obs_joinid_start in zip(
+        experiment_builders, dataset_obs_joinid_starts
+    ):
         if dataset_obs_joinid_start is None:
             # this dataset has no data for this experiment
             continue
@@ -398,7 +436,9 @@ def _accumulate_all_X_layers(
         raw_X, raw_var = (ad.X, ad.var) if ad.raw is None else (ad.raw.X, ad.raw.var)
 
         if not is_positive_integral(raw_X):
-            logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
+            logging.error(
+                f"{dataset.dataset_id} contains non-integer or negative valued data"
+            )
 
         # save X['raw']
         layer_name = "raw"
@@ -407,7 +447,11 @@ def _accumulate_all_X_layers(
             f"({progress[0]} of {progress[1]})"
         )
         global_var_joinids = (
-            se.ms[ms_name].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas().set_index("feature_id")
+            se.ms[ms_name]
+            .var.read(column_names=["feature_id", "soma_joinid"])
+            .concat()
+            .to_pandas()
+            .set_index("feature_id")
         )
         local_var_joinids = raw_var.join(global_var_joinids).soma_joinid.to_numpy()
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
@@ -454,7 +498,10 @@ def _accumulate_all_X_layers(
 
 @overload
 def _accumulate_X(
-    assets_path: str, dataset: Dataset, experiment_builders: List["ExperimentBuilder"], progress: Tuple[int, int]
+    assets_path: str,
+    dataset: Dataset,
+    experiment_builders: List["ExperimentBuilder"],
+    progress: Tuple[int, int],
 ) -> PresenceResults:
     ...
 
@@ -487,7 +534,8 @@ def _accumulate_X(
         assert eb.dataset_obs_joinid_start is not None
 
     dataset_obs_joinid_starts = [
-        eb.dataset_obs_joinid_start.get(dataset.dataset_id, None) for eb in experiment_builders
+        eb.dataset_obs_joinid_start.get(dataset.dataset_id, None)
+        for eb in experiment_builders
     ]
     if executor is not None:
         return executor.submit(
@@ -501,12 +549,20 @@ def _accumulate_X(
         )
     else:
         return _accumulate_all_X_layers(
-            assets_path, dataset, experiment_builders, dataset_obs_joinid_starts, "RNA", progress
+            assets_path,
+            dataset,
+            experiment_builders,
+            dataset_obs_joinid_starts,
+            "RNA",
+            progress,
         )
 
 
 def populate_X_layers(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: argparse.Namespace
+    assets_path: str,
+    datasets: List[Dataset],
+    experiment_builders: List[ExperimentBuilder],
+    args: argparse.Namespace,
 ) -> None:
     """
     Do all X layer processing for all Experiments.
@@ -516,7 +572,6 @@ def populate_X_layers(
     presence: List[PresenceResult] = []
     if args.multi_process:
         with create_process_pool_executor(args) as pe:
-
             futures = {
                 _accumulate_X(
                     assets_path,
@@ -531,11 +586,15 @@ def populate_X_layers(
             for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
                 # propagate exceptions - not expecting any other return values
                 presence += f.result()
-                logging.info(f"pass 2, {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
+                logging.info(
+                    f"pass 2, {futures[f].dataset_id} ({n} of {len(futures)}) complete."
+                )
 
     else:
         for n, dataset in enumerate(datasets, start=1):
-            presence += _accumulate_X(assets_path, dataset, experiment_builders, progress=(n, len(datasets)))
+            presence += _accumulate_X(
+                assets_path, dataset, experiment_builders, progress=(n, len(datasets))
+            )
 
     eb_by_name = {e.name: e for e in experiment_builders}
     for _, dataset_soma_joinid, eb_name, pres_data, pres_col in presence:
@@ -562,13 +621,22 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
     tissue_ids = obs_df.tissue_ontology_term_id.unique()
 
     # Map specific ID -> general ID
-    tissue_general_id_map = {id: tissue_mapper.get_high_level_tissue(id) for id in tissue_ids}
+    tissue_general_id_map = {
+        id: tissue_mapper.get_high_level_tissue(id) for id in tissue_ids
+    }
     if not all(tissue_general_id_map.values()):
-        logging.error(f"{dataset_id} contains tissue types which could not be generalized.")
-    obs_df["tissue_general_ontology_term_id"] = obs_df.tissue_ontology_term_id.map(tissue_general_id_map)
+        logging.error(
+            f"{dataset_id} contains tissue types which could not be generalized."
+        )
+    obs_df["tissue_general_ontology_term_id"] = obs_df.tissue_ontology_term_id.map(
+        tissue_general_id_map
+    )
 
     # Assign general label
     tissue_general_label_map = {
-        id: tissue_mapper.get_label_from_writable_id(id) for id in tissue_general_id_map.values()
+        id: tissue_mapper.get_label_from_writable_id(id)
+        for id in tissue_general_id_map.values()
     }
-    obs_df["tissue_general"] = obs_df.tissue_general_ontology_term_id.map(tissue_general_label_map)
+    obs_df["tissue_general"] = obs_df.tissue_general_ontology_term_id.map(
+        tissue_general_label_map
+    )

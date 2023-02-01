@@ -36,10 +36,13 @@ def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
     datasets = [
         d
         for d in all_datasets
-        if d.corpora_asset_h5ad_uri.endswith(".h5ad") and os.path.exists(d.corpora_asset_h5ad_uri)
+        if d.corpora_asset_h5ad_uri.endswith(".h5ad")
+        and os.path.exists(d.corpora_asset_h5ad_uri)
     ]
     if len(datasets) != len(all_datasets):
-        logging.warning("Manifest contained records which are not H5AD files or which are not accessible - ignoring")
+        logging.warning(
+            "Manifest contained records which are not H5AD files or which are not accessible - ignoring"
+        )
     return datasets
 
 
@@ -54,7 +57,9 @@ def load_manifest_from_CxG() -> List[Dataset]:
 
     # Load all collections and extract dataset_id
     collections = fetch_json(f"{CXG_BASE_URI}curation/v1/collections")
-    assert isinstance(collections, list), "Unexpected REST API response, /curation/v1/collections"
+    assert isinstance(
+        collections, list
+    ), "Unexpected REST API response, /curation/v1/collections"
     datasets = {
         dataset["id"]: {
             "collection_id": collection["id"],
@@ -75,7 +80,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
         dataset_metadata = tp.map(
             lambda d: fetch_json(
                 f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}",
-                delay_secs=1
+                delay_secs=1,
             ),
             datasets.values(),
         )
@@ -91,9 +96,15 @@ def load_manifest_from_CxG() -> List[Dataset]:
         )
 
     # Remove any datasets that don't match our target schema version
-    obsolete_dataset_ids = [id for id in datasets if datasets[id]["schema_version"] not in CXG_SCHEMA_VERSION_IMPORT]
+    obsolete_dataset_ids = [
+        id
+        for id in datasets
+        if datasets[id]["schema_version"] not in CXG_SCHEMA_VERSION_IMPORT
+    ]
     if len(obsolete_dataset_ids) > 0:
-        logging.warning(f"Dropping {len(obsolete_dataset_ids)} datasets due to unsupported schema version")
+        logging.warning(
+            f"Dropping {len(obsolete_dataset_ids)} datasets due to unsupported schema version"
+        )
         for id in obsolete_dataset_ids:
             logging.info(f"Dropping dataset_id {id} due to schema version.")
             datasets.pop(id)
@@ -116,7 +127,9 @@ def load_manifest_from_CxG() -> List[Dataset]:
         ), "Unexpected REST API response, /curation/v1/collections/.../datasets/.../assets"
         assets_h5ad = [a for a in assets if a["filetype"] == "H5AD"]
         if len(assets_h5ad) == 0:
-            logging.error(f"Unable to find H5AD asset for dataset id {dataset_id} - ignoring this dataset")
+            logging.error(
+                f"Unable to find H5AD asset for dataset id {dataset_id} - ignoring this dataset"
+            )
             no_asset_found.append(dataset_id)
         else:
             asset = assets_h5ad[0]

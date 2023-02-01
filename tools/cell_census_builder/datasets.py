@@ -49,7 +49,12 @@ class Dataset:
     @classmethod
     def to_dataframe(cls: Type[T], datasets: List[T]) -> pd.DataFrame:
         if len(datasets) == 0:
-            return pd.DataFrame({field.name: pd.Series(dtype=field.type) for field in dataclasses.fields(cls)})
+            return pd.DataFrame(
+                {
+                    field.name: pd.Series(dtype=field.type)
+                    for field in dataclasses.fields(cls)
+                }
+            )
 
         return pd.DataFrame(datasets)
 
@@ -63,7 +68,9 @@ def assign_soma_joinids(datasets: List[Dataset]) -> None:
         dataset.soma_joinid = joinid
 
 
-def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dataset]) -> None:
+def create_dataset_manifest(
+    info_collection: soma.Collection, datasets: List[Dataset]
+) -> None:
     """
     Write the Cell Census `census_datasets` dataframe
     """
@@ -74,7 +81,10 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     # write to a SOMA dataframe
     manifest_uri = uricat(info_collection.uri, CENSUS_DATASETS_NAME)
     manifest = soma.DataFrame(manifest_uri, context=SOMA_TileDB_Context())
-    manifest.create(pa.Schema.from_pandas(manifest_df, preserve_index=False), index_column_names=["soma_joinid"])
+    manifest.create(
+        pa.Schema.from_pandas(manifest_df, preserve_index=False),
+        index_column_names=["soma_joinid"],
+    )
     for batch in pa.Table.from_pandas(manifest_df, preserve_index=False).to_batches():
         manifest.write(batch)
     info_collection.set(CENSUS_DATASETS_NAME, manifest, relative=True)

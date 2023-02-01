@@ -1,7 +1,6 @@
+import cell_census
 import pytest
 import scipy.sparse
-
-import cell_census
 
 
 @pytest.mark.live_corpus
@@ -33,5 +32,9 @@ def test_get_presence_matrix(organism: str) -> None:
     assert isinstance(pm, scipy.sparse.csr_matrix)
     assert pm.shape[0] == len(census_datasets)
     assert pm.shape[1] == len(
-        census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid"]).concat().to_pandas()
+        census["census_data"][organism]
+        .ms["RNA"]
+        .var.read(column_names=["soma_joinid"])
+        .concat()
+        .to_pandas()
     )
