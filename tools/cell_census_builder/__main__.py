@@ -14,13 +14,13 @@ from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers
-from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
+from .globals import CENSUS_BUILDER_GIT_SHA, CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
     SOMA_TileDB_Context
 from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import uricat
+from .util import get_git_commit_sha, uricat
 from .validate import validate
 
 
@@ -138,6 +138,8 @@ def build(
 
     if args.consolidate:
         consolidate(args, top_level_collection.uri)
+
+    add_git_commit_sha(top_level_collection[CENSUS_INFO_NAME])
 
     return 0
 
@@ -261,6 +263,10 @@ def build_step3_create_X_layers(
         e.commit_presence_matrix(filtered_datasets)
 
     logging.info("Build step 3 - X layer creation - finished")
+
+def add_git_commit_sha(info_collection: soma.Collection) -> None:
+    sha = get_git_commit_sha()
+    info_collection.set(CENSUS_BUILDER_GIT_SHA, sha, relative=True)
 
 
 def create_args_parser() -> argparse.ArgumentParser:
