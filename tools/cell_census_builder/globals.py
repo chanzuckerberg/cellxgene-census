@@ -42,9 +42,6 @@ CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name
 # "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_NAME = "summary"
 
-# "census_info"/"builder_git_sha" string
-CENSUS_BUILDER_GIT_SHA = "builder-git-sha"
-
 # "census_data"/{organism}/ms/"RNA" SOMA Matrix
 MEASUREMENT_RNA_NAME = "RNA"
 
