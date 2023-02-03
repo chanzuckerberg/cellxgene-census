@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  pre-commit checks:
+  pre_commit_checks:
     name: pre-commit checks
     runs-on: ubuntu-latest
     steps:
