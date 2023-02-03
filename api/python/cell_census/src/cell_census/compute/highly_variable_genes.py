@@ -12,7 +12,7 @@ def highly_variable_genes(query: soma.ExperimentAxisQuery, n_top_genes: int = 10
     try:
         import skmisc.loess
     except ImportError:
-        raise ImportError("Please install skmisc package via `pip install --user scikit-misc")
+        raise ImportError("Please install skmisc package via `pip install --user scikit-misc") from None
 
     indexer = query.indexer
     mvn = OnlineMatrixMeanVariance(query.n_obs, query.n_vars)

@@ -139,10 +139,7 @@ def load_manifest(manifest_fp: Optional[io.TextIOBase] = None) -> List[Dataset]:
     Load dataset manifest from the file pointer if provided, else bootstrap
     the load rom the CELLxGENE REST API.
     """
-    if manifest_fp is not None:
-        datasets = load_manifest_from_fp(manifest_fp)
-    else:
-        datasets = load_manifest_from_CxG()
+    datasets = load_manifest_from_fp(manifest_fp) if manifest_fp is not None else load_manifest_from_CxG()
 
     logging.info(f"Loaded {len(datasets)} datasets.")
     datasets = dedup_datasets(datasets)

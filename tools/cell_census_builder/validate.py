@@ -33,7 +33,6 @@ from .globals import (
     CXG_SCHEMA_VERSION,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     SOMA_TileDB_Context,
-    TileDB_Ctx,
 )
 from .mp import create_process_pool_executor
 from .util import uricat

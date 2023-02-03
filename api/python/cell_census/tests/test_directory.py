@@ -44,7 +44,7 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     assert isinstance(directory, dict)
     assert len(directory) > 0
-    assert all((type(k) == str for k in directory.keys()))
+    assert all((type(k) == str for k in directory))
     assert all((type(v) == dict for v in directory.values()))
 
     for tag in DIRECTORY_JSON:

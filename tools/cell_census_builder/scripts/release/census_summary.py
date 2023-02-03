@@ -2,7 +2,6 @@ import sys
 
 import cell_census
 import pandas as pd
-
 from cell_census_builder.globals import CENSUS_DATA_NAME
 
 if __name__ == "__main__":
