@@ -2,13 +2,12 @@ import time
 import urllib.parse
 from typing import Any, Union
 
+import git
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import requests
 from scipy import sparse
-
-import git
 
 
 def array_chunker(arr: Union[npt.NDArray[Any], sparse.spmatrix]) -> sparse.coo_matrix:
@@ -112,6 +111,7 @@ def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
 def get_git_commit_sha() -> str:
     """
     Returns the git commit SHA for the current repo
@@ -119,6 +119,7 @@ def get_git_commit_sha() -> str:
     repo = git.Repo(search_parent_directories=True)
     hexsha: str = repo.head.object.hexsha
     return hexsha
+
 
 def is_git_repo_dirty() -> bool:
     """

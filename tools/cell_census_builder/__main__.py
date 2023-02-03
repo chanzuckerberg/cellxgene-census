@@ -26,7 +26,7 @@ from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, uricat, is_git_repo_dirty
+from .util import get_git_commit_sha, is_git_repo_dirty, uricat
 from .validate import validate
 
 
@@ -284,6 +284,7 @@ def build_step3_create_X_layers(
         e.commit_presence_matrix(filtered_datasets)
 
     logging.info("Build step 3 - X layer creation - finished")
+
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cell_census_builder")

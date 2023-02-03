@@ -2,7 +2,7 @@ exclude: (^doc/)|(.*/venv/)
 default_stages: [commit]
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.1.0 # Must be kept in sync with black version in requirements.txt
+    rev: 23.1.0
     hooks:
       - id: black-jupyter
       - id: black
