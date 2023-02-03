@@ -8,6 +8,8 @@ import pandas as pd
 import requests
 from scipy import sparse
 
+import git
+
 
 def array_chunker(arr: Union[npt.NDArray[Any], sparse.spmatrix]) -> sparse.coo_matrix:
     """
@@ -109,3 +111,19 @@ def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
             df[k] = df[k].cat.set_categories(df[k].cat.categories, ordered=bool(df[k].cat.ordered))
 
     return df
+
+def get_git_commit_sha() -> str:
+    """
+    Returns the git commit SHA for the current repo
+    """
+    repo = git.Repo(search_parent_directories=True)
+    hexsha: str = repo.head.object.hexsha
+    return hexsha
+
+def is_git_repo_dirty() -> bool:
+    """
+    Returns True if the git repo is dirty, i.e. there are uncommitted changes
+    """
+    repo = git.Repo()
+    is_dirty: bool = repo.is_dirty()
+    return is_dirty

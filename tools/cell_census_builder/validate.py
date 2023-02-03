@@ -73,6 +73,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         "census_schema_version" in census.metadata and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
     )
     assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
+    assert "git_commit_sha" in census.metadata
 
     for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
         assert name in census
