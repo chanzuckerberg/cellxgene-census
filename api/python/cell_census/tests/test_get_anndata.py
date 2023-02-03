@@ -11,7 +11,6 @@ def census() -> soma.Collection:
 
 @pytest.mark.live_corpus
 def test_get_anndata(census: soma.Collection) -> None:
-
     ad = cell_census.get_anndata(
         census,
         organism="Mus musculus",
