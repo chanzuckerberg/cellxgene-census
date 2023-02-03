@@ -6,4 +6,4 @@
 python -m black --check --diff .
 python -m isort --check --diff .
 python -m flake8 .
-python -m mypy --python-version 3.7 .
+python -m mypy --python-version 3.8 .

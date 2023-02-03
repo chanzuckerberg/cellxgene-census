@@ -8,7 +8,7 @@ Demonstration notebooks for the CELLxGENE Cell Census. There are two kinds of no
 ## Dependencies
 
 You must be on a Linux or MacOS system, with the following installed:
-* Python 3.9+
+* Python 3.8+
 * C++ 17 build tools
 * cmake 3.21 or later
 * git
