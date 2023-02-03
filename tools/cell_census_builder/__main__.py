@@ -144,8 +144,6 @@ def build(
     if args.consolidate:
         consolidate(args, top_level_collection.uri)
 
-    add_git_commit_sha(top_level_collection)
-
     return 0
 
 
