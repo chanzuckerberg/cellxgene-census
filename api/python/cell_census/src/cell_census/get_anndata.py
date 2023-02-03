@@ -42,9 +42,15 @@ def get_anndata(
     obs_value_filter: str, default None
         Value filter for the ``obs`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
+    obs_coords: tuple[int, slice or NumPy ArrayLike of int], default None
+        Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+        May be a tuple containing an int, a list of int, or a slice.
     var_value_filter: str, default None
         Value filter for the ``var`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
+    var_coords: tuple[int, slice or NumPy ArrayLike of int], default None
+        Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+        May be a tuple containing an int, a list of int, or a slice.
     column_names: dict[Literal['obs', 'var'], List[str]]
         Colums to fetch for obs and var dataframes.
 
@@ -57,6 +63,8 @@ def get_anndata(
     >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
 
     >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
+
+    >>> get_anndata(census, "Homo sapiens", obs_coords=(slice(0, 1000),))
 
     """
     exp = get_experiment(census, organism)
