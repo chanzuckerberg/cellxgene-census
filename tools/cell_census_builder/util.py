@@ -121,3 +121,10 @@ def get_git_commit_sha() -> str:
     """
     repo = git.Repo(search_parent_directories=True)
     return repo.head.object.hexsha
+
+def is_git_repo_dirty() -> bool:
+    """
+    Returns True if the git repo is dirty, i.e. there are uncommitted changes
+    """
+    repo = git.Repo()
+    return repo.is_dirty()

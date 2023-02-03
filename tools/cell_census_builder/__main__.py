@@ -20,7 +20,7 @@ from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, uricat
+from .util import get_git_commit_sha, uricat, is_git_repo_dirty
 from .validate import validate
 
 
@@ -108,6 +108,11 @@ def build(
     # Don't clobber an existing census build
     if os.path.exists(soma_path) or os.path.exists(assets_path):
         logging.error("Census build path already exists - aborting build")
+        return 1
+
+    # Ensure that the git tree is clean
+    if is_git_repo_dirty():
+        logging.error("The git repo has uncommitted changes - aborting build")
         return 1
 
     # Create top-level build directories
