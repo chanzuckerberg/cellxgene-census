@@ -1,6 +1,7 @@
-import cell_census
 import pytest
 import tiledbsoma as soma
+
+import cell_census
 
 
 @pytest.fixture

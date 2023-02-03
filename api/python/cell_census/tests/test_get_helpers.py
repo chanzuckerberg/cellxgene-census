@@ -1,6 +1,7 @@
-import cell_census
 import pytest
 import scipy.sparse
+
+import cell_census
 
 
 @pytest.mark.live_corpus

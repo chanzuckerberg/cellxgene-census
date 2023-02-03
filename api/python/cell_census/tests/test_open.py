@@ -1,10 +1,11 @@
 import pathlib
 
 import anndata
-import cell_census
 import numpy as np
 import pytest
 import tiledbsoma as soma
+
+import cell_census
 
 
 @pytest.mark.live_corpus
