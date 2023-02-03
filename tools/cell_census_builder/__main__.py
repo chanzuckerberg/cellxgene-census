@@ -106,13 +106,13 @@ def build(
     """
 
     # Don't clobber an existing census build
-    if os.path.exists(soma_path) or os.path.exists(assets_path):
-        logging.error("Census build path already exists - aborting build")
-        return 1
+    # if os.path.exists(soma_path) or os.path.exists(assets_path):
+    #     logging.error("Census build path already exists - aborting build")
+    #     return 1
 
-    # Create top-level build directories
-    os.makedirs(soma_path, exist_ok=False)
-    os.makedirs(assets_path, exist_ok=False)
+    # # Create top-level build directories
+    # os.makedirs(soma_path, exist_ok=False)
+    # os.makedirs(assets_path, exist_ok=False)
 
     # Step 1 - get all source assets
     datasets = build_step1_get_source_assets(args, assets_path)
@@ -221,6 +221,8 @@ def build_step2_create_axis(
         for e in experiment_builders:
             dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
             n += 1
+
+        print("XXXXX", dataset_total_cell_count)
 
         dataset.dataset_total_cell_count = dataset_total_cell_count
         if dataset_total_cell_count > 0:
