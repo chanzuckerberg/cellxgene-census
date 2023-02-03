@@ -3,11 +3,11 @@ from typing import Optional, Tuple
 import anndata
 import tiledbsoma as soma
 
-# TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
-from somacore.query.query import AxisColumnNames
-
 # TODO: waiting on https://github.com/single-cell-data/TileDB-SOMA/issues/872.
 from somacore.options import SparseDFCoord
+
+# TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
+from somacore.query.query import AxisColumnNames
 
 from .experiment import get_experiment
 
