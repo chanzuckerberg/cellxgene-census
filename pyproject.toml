@@ -5,11 +5,8 @@ include = '\.pyi?$'
 exclude = '''
 (
   /(
-      \.eggs         # exclude a few common directories in the
     | \.git          # root of the project
-    | \.hg
     | \.mypy_cache
-    | \.tox
     | \.venv
     | venv
     | virtualenv
