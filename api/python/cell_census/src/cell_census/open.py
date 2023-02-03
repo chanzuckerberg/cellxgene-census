@@ -37,6 +37,8 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
 
     TODO: add platform_config hook when it is further defined, allowing config overrides.
 
+    [lifecycle: experimental]
+
     Parameters
     ----------
     census_version : Optional[str]
@@ -84,6 +86,8 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     This does not guarantee that the H5AD exists or is accessible to the user.
     Raises an error if dataset_id or census_version are unknown.
 
+    [lifecycle: experimental]
+
     Parameters
     ----------
     dataset_id : str
@@ -121,6 +125,8 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
 
     Will raise an error if the path already exists (i.e., will not overwrite
     an existing file), or is not a file.
+
+    [lifecycle: experimental]
 
     Parameters
     ----------

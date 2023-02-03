@@ -15,6 +15,8 @@ def get_presence_matrix(
     The returned sparse matrix is indexed on the first dimension by the dataset ``soma_joinid`` values,
     and on the second dimension by the ``var`` DataFrame ``soma_joinid`` values.
 
+    [lifecycle: experimental]
+
     Parameters
     ----------
     census : soma.Collection

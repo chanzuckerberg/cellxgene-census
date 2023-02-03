@@ -24,6 +24,8 @@ def get_anndata(
     Convience wrapper around soma.Experiment query, to build and execute a query,
     and return it as an AnnData object.
 
+    [lifecycle: experimental]
+
     Parameters
     ----------
     census : soma.Collection

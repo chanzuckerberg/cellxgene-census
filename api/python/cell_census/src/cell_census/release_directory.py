@@ -36,6 +36,8 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     Get release description for given census version, from the Cell Census release directory.
     Raises KeyError if unknown census_version value.
 
+    [lifecycle: experimental]
+
     Parameters
     ----------
     census_version : str
@@ -70,6 +72,8 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of cell census releases currently available.
+
+    [lifecycle: experimental]
 
     Parameters
     ----------

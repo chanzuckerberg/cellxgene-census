@@ -11,6 +11,8 @@ def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
 
     Will raise a ValueError if unable to find the specified organism.
 
+    [lifecycle: experimental]
+
     Parameters
     ----------
     census - soma.Collection
