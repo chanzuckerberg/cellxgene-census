@@ -1,6 +1,6 @@
 import os.path
 import urllib.parse
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import s3fs
 import tiledb
@@ -19,7 +19,7 @@ DEFAULT_TILEDB_CONFIGURATION = {
 def _open_soma(description: CensusVersionDescription) -> soma.Collection:
     """Private."""
     locator = description["soma"]
-    tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
+    tiledb_config: Dict[str, Any] = {**DEFAULT_TILEDB_CONFIGURATION}
     s3_region = locator.get("s3_region")
     if s3_region is not None:
         tiledb_config["vfs.s3.region"] = s3_region

@@ -18,9 +18,9 @@ def get_anndata(
     measurement_name: str = "RNA",
     X_name: str = "raw",
     obs_value_filter: Optional[str] = None,
-    obs_coords: Tuple[SparseDFCoord, ...] = (slice(None),),
+    obs_coords: Optional[Tuple[SparseDFCoord, ...]] = None,
     var_value_filter: Optional[str] = None,
-    var_coords: Tuple[SparseDFCoord, ...] = (slice(None),),
+    var_coords: Optional[Tuple[SparseDFCoord, ...]] = None,
     column_names: Optional[AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
@@ -60,6 +60,8 @@ def get_anndata(
 
     """
     exp = get_experiment(census, organism)
+    obs_coords = obs_coords or (slice(None),)
+    var_coords = var_coords or (slice(None),)
     with exp.axis_query(
         measurement_name,
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
