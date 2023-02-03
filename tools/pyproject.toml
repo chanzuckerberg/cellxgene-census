@@ -12,3 +12,9 @@ ignore_missing_imports = true
 warn_unreachable = true
 strict = true
 plugins = "numpy.typing.mypy_plugin"
+
+[tool.ruff]
+select = ["E", "F", "B", "I"]
+ignore = ["E501", "E402", "C408", ]
+line-length = 120
+target-version = "py39"

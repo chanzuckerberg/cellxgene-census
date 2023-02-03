@@ -16,7 +16,7 @@ def array_chunker(arr: Union[npt.NDArray[Any], sparse.spmatrix]) -> sparse.coo_m
     """
     nnz_chunk_size = 256 * 1024**2  # goal (~2.4GiB for a 32-bit COO)
 
-    if isinstance(arr, (sparse.csr_matrix, sparse.csr_array)):
+    if isinstance(arr, sparse.csr_matrix) or isinstance(arr, sparse.csr_array):
         avg_nnz_per_row = arr.nnz // arr.shape[0]
         row_chunk_size = max(1, round(nnz_chunk_size / avg_nnz_per_row))
         for row_idx in range(0, arr.shape[0], row_chunk_size):
@@ -26,7 +26,7 @@ def array_chunker(arr: Union[npt.NDArray[Any], sparse.spmatrix]) -> sparse.coo_m
             yield slc
         return
 
-    if isinstance(arr, (sparse.csc_matrix, sparse.csc_array)):
+    if isinstance(arr, sparse.csc_matrix) or isinstance(arr, sparse.csc_array):
         avg_nnz_per_col = arr.nnz // arr.shape[1]
         col_chunk_size = max(1, round(nnz_chunk_size / avg_nnz_per_col))
         for col_idx in range(0, arr.shape[1], col_chunk_size):
@@ -79,8 +79,10 @@ def is_positive_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix
 
     if np.signbit(data).any():
         return False
+    elif np.any(~np.equal(np.mod(data, 1), 0)):
+        return False
     else:
-        return not np.any(~np.equal(np.mod(data, 1), 0))
+        return True
 
 
 def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
@@ -101,7 +103,7 @@ def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
     # cause Pandas CategoricalDtype `ordered` to be a numpy.bool_, rather than a bool.
     # This causes Arrow to blow up.
     copied = False
-    for k in df:
+    for k in df.keys():
         if pd.api.types.is_categorical_dtype(df[k]) and type(df[k].cat.ordered) == np.bool_:
             if not copied:
                 df = df.copy()

@@ -33,7 +33,12 @@ from .mp import create_process_pool_executor
 from .source_assets import cat_file
 from .summary_cell_counts import accumulate_summary_counts, init_summary_counts_accumulator
 from .tissue_mapper import TissueMapper  # type: ignore
-from .util import anndata_ordered_bool_issue_853_workaround, array_chunker, is_positive_integral, uricat
+from .util import (
+    anndata_ordered_bool_issue_853_workaround,
+    array_chunker,
+    is_positive_integral,
+    uricat,
+)
 
 # Contents:
 #   dataset_id
@@ -82,11 +87,7 @@ class ExperimentBuilder:
             return ExperimentBuilder.BuildState(self.value + 1)
 
     def __init__(
-        self,
-        base_uri: str,
-        name: str,
-        anndata_cell_filter_spec: AnnDataFilterSpec,
-        gene_feature_length_uris: List[str],
+        self, base_uri: str, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]
     ):
         self.name = name
         self.anndata_cell_filter_spec = anndata_cell_filter_spec
@@ -286,8 +287,7 @@ class ExperimentBuilder:
                 measurement.X.set(layer_name, snda, relative=True)
 
             presence_matrix = soma.SparseNDArray(
-                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME),
-                context=SOMA_TileDB_Context(),
+                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME), context=SOMA_TileDB_Context()
             )
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
             presence_matrix.create(pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var))
@@ -460,10 +460,7 @@ def _accumulate_all_X_layers(
 
 @overload
 def _accumulate_X(
-    assets_path: str,
-    dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
+    assets_path: str, dataset: Dataset, experiment_builders: List["ExperimentBuilder"], progress: Tuple[int, int]
 ) -> PresenceResults:
     ...
 
@@ -510,20 +507,12 @@ def _accumulate_X(
         )
     else:
         return _accumulate_all_X_layers(
-            assets_path,
-            dataset,
-            experiment_builders,
-            dataset_obs_joinid_starts,
-            "RNA",
-            progress,
+            assets_path, dataset, experiment_builders, dataset_obs_joinid_starts, "RNA", progress
         )
 
 
 def populate_X_layers(
-    assets_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
-    args: argparse.Namespace,
+    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: argparse.Namespace
 ) -> None:
     """
     Do all X layer processing for all Experiments.

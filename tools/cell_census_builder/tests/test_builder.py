@@ -17,8 +17,7 @@ def test_unicode_support() -> None:
         pd_df = pd.DataFrame(data={"value": ["Ünicode", "S̈upport"]}, columns=["value"])
         pd_df["soma_joinid"] = pd_df.index
         s_df = soma.DataFrame(uri=os.path.join(d, "unicode_support")).create(
-            pa.Schema.from_pandas(pd_df, preserve_index=False),
-            index_column_names=["soma_joinid"],
+            pa.Schema.from_pandas(pd_df, preserve_index=False), index_column_names=["soma_joinid"]
         )
         s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 

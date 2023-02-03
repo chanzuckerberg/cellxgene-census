@@ -30,9 +30,7 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
 
 
 def consolidate_collection(
-    args: argparse.Namespace,
-    collection: soma.Collection,
-    ppe: concurrent.futures.ProcessPoolExecutor,
+    args: argparse.Namespace, collection: soma.Collection, ppe: concurrent.futures.ProcessPoolExecutor
 ) -> List[concurrent.futures.Future[str]]:
     futures = []
     for soma_obj in collection.values():

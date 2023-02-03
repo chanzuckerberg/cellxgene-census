@@ -11,12 +11,5 @@ def uri_join(base: str, url: str) -> str:
 
     p_base = urllib.parse.urlparse(base)
     path = urllib.parse.urljoin(p_base.path, p_url.path)
-    parts = [
-        p_base.scheme,
-        p_base.netloc,
-        path,
-        p_url.params,
-        p_url.query,
-        p_url.fragment,
-    ]
+    parts = [p_base.scheme, p_base.netloc, path, p_url.params, p_url.query, p_url.fragment]
     return urllib.parse.urlunparse(parts)

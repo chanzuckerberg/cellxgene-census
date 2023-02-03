@@ -21,12 +21,10 @@ def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, asset
     N = len(datasets)
     n_workers = max(min(8, cpu_count()), 64)
     with create_process_pool_executor(args, n_workers) as pe:
-        paths = list(
-            pe.map(
-                copy_file,
-                ((n, dataset, assets_dir, N) for n, dataset in enumerate(datasets, start=1)),
-            )
-        )
+        paths = [
+            path
+            for path in pe.map(copy_file, ((n, dataset, assets_dir, N) for n, dataset in enumerate(datasets, start=1)))
+        ]
 
     for i in range(len(datasets)):
         datasets[i].dataset_h5ad_path = paths[i]

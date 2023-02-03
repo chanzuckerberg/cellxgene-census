@@ -50,19 +50,13 @@ def make_experiment_builders(base_uri: str, args: argparse.Namespace) -> List[Ex
         ExperimentBuilder(
             base_uri=base_uri,
             name="homo_sapiens",
-            anndata_cell_filter_spec=dict(
-                organism_ontology_term_id="NCBITaxon:9606",
-                assay_ontology_term_ids=RNA_SEQ,
-            ),
+            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606", assay_ontology_term_ids=RNA_SEQ),
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
         ExperimentBuilder(
             base_uri=base_uri,
             name="mus_musculus",
-            anndata_cell_filter_spec=dict(
-                organism_ontology_term_id="NCBITaxon:10090",
-                assay_ontology_term_ids=RNA_SEQ,
-            ),
+            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090", assay_ontology_term_ids=RNA_SEQ),
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
     ]
@@ -99,10 +93,7 @@ def main() -> int:
 
 
 def build(
-    args: argparse.Namespace,
-    soma_path: str,
-    assets_path: str,
-    experiment_builders: List[ExperimentBuilder],
+    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> int:
     """
     Approximately, build steps are:
@@ -152,8 +143,7 @@ def build(
     # Write out dataset manifest and summary information
     create_dataset_manifest(top_level_collection[CENSUS_INFO_NAME], filtered_datasets)
     create_census_summary_cell_counts(
-        top_level_collection[CENSUS_INFO_NAME],
-        [e.census_summary_cell_counts for e in experiment_builders],
+        top_level_collection[CENSUS_INFO_NAME], [e.census_summary_cell_counts for e in experiment_builders]
     )
     create_census_summary(top_level_collection[CENSUS_INFO_NAME], experiment_builders, args.build_tag)
 
@@ -315,10 +305,7 @@ def create_args_parser() -> argparse.ArgumentParser:
         help="Manifest file",
     )
     build_parser.add_argument(
-        "--validate",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Validate immediately after build",
+        "--validate", action=argparse.BooleanOptionalAction, default=True, help="Validate immediately after build"
     )
     build_parser.add_argument(
         "--consolidate",

@@ -81,11 +81,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         assert census[name].exists()
 
     census_info = census[CENSUS_INFO_NAME]
-    for name in [
-        CENSUS_DATASETS_NAME,
-        CENSUS_SUMMARY_NAME,
-        CENSUS_SUMMARY_CELL_COUNTS_NAME,
-    ]:
+    for name in [CENSUS_DATASETS_NAME, CENSUS_SUMMARY_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME]:
         assert name in census_info, f"`{name}` missing from census_info"
         assert census_info[name].soma_type == "SOMADataFrame"
         assert census_info[name].exists()
@@ -150,13 +146,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuil
             )
             .concat()
             .to_pandas()
-            .drop(
-                columns=[
-                    "dataset_id",
-                    "tissue_general",
-                    "tissue_general_ontology_term_id",
-                ]
-            )
+            .drop(columns=["dataset_id", "tissue_general", "tissue_general_ontology_term_id"])
             .sort_values(by="soma_joinid")
             .drop(columns=["soma_joinid"])
             .reset_index(drop=True)
@@ -209,10 +199,7 @@ def validate_axis_dataframes(
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
             futures = [
-                ppe.submit(
-                    _validate_axis_dataframes,
-                    (assets_path, soma_path, dataset, experiment_builders),
-                )
+                ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_builders))
                 for dataset in datasets
             ]
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
@@ -265,8 +252,7 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
 
         soma_joinids: npt.NDArray[np.int64] = (
             se.obs.read(
-                column_names=["soma_joinid", "dataset_id"],
-                value_filter=f"dataset_id == '{dataset.dataset_id}'",
+                column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
             )
             .concat()
             .to_pandas()
@@ -286,10 +272,7 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
 
         def count_nonzero(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
             """Return _actual_ non-zero count, NOT the stored value count."""
-            if isinstance(
-                arr,
-                (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array),
-            ):
+            if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
                 return np.count_nonzero(arr.data)
             return np.count_nonzero(arr)
 
@@ -342,10 +325,7 @@ def validate_X_layers(
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
             futures = [
-                ppe.submit(
-                    _validate_X_layers_contents,
-                    (assets_path, soma_path, dataset, experiment_builders),
-                )
+                ppe.submit(_validate_X_layers_contents, (assets_path, soma_path, dataset, experiment_builders))
                 for dataset in datasets
             ]
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):

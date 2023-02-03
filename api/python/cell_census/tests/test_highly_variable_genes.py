@@ -19,12 +19,6 @@ def test_highly_variable_genes() -> None:
     result = highly_variable_genes(query, n_top_genes=10)
 
     assert result.shape == (32, 5)
-    assert list(result.columns) == [
-        "means",
-        "variances",
-        "highly_variable_rank",
-        "variances_norm",
-        "highly_variable",
-    ]
+    assert list(result.columns) == ["means", "variances", "highly_variable_rank", "variances_norm", "highly_variable"]
     assert result[result["highly_variable"]].shape[0] == 10
     # TODO: assert the computed highly variable genes are in fact the correct ones

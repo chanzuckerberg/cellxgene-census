@@ -24,8 +24,7 @@ def _open_soma(description: CensusVersionDescription) -> soma.Collection:
     if s3_region is not None:
         tiledb_config["vfs.s3.region"] = locator["s3_region"]
     return soma.Collection(
-        uri=locator["uri"],
-        context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config)),
+        uri=locator["uri"], context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config))
     )
 
 
@@ -69,8 +68,7 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
 
     if uri is not None:
         return soma.Collection(
-            uri=uri,
-            context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION)),
+            uri=uri, context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION))
         )
 
     if census_version is None:
