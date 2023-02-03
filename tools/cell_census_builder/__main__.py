@@ -161,6 +161,9 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
     top_level_collection.metadata["cxg_schema_version"] = CXG_SCHEMA_VERSION
     top_level_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
 
+    sha = get_git_commit_sha()
+    top_level_collection.metadata["git_commit_sha"] = sha
+
     # Create sub-collections for experiments, etc.
     for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
         cltn = soma.Collection(uricat(top_level_collection.uri, n),
@@ -263,10 +266,6 @@ def build_step3_create_X_layers(
         e.commit_presence_matrix(filtered_datasets)
 
     logging.info("Build step 3 - X layer creation - finished")
-
-def add_git_commit_sha(top_level_collection: soma.Collection) -> None:
-    sha = get_git_commit_sha()
-    top_level_collection.metadata["git_commit_sha"] = sha
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cell_census_builder")
