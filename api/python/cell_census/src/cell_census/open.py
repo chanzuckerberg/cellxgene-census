@@ -13,7 +13,6 @@ DEFAULT_TILEDB_CONFIGURATION = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
-    "py.deduplicate": "true",
 }
 
 
