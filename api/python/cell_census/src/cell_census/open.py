@@ -20,9 +20,9 @@ def _open_soma(description: CensusVersionDescription) -> soma.Collection:
     """Private."""
     locator = description["soma"]
     tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
-    s3_region = locator.get("s3_region", None)
+    s3_region = locator.get("s3_region")
     if s3_region is not None:
-        tiledb_config["vfs.s3.region"] = locator["s3_region"]
+        tiledb_config["vfs.s3.region"] = s3_region
     return soma.Collection(
         uri=locator["uri"], context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config))
     )
@@ -34,7 +34,10 @@ def _open_soma(description: CensusVersionDescription) -> soma.Collection:
 #
 def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = None) -> soma.Collection:
     """
-    Open the Cell Census by version or URI, returning a soma.Collection containing the top-level census.  Raises error if ``census_version`` is specified and unknown, or if neither ``uri`` or ``census_version`` are specified, or if the ``uri`` can not be opened [lifecycle: experimental].
+    Open the Cell Census by version or URI, returning a soma.Collection containing the
+    top-level census.  Raises error if ``census_version`` is specified and unknown, or
+    if neither ``uri`` or ``census_version`` are specified, or if the ``uri`` can not
+    be opened [lifecycle: experimental].
 
     Parameters
     ----------
@@ -79,7 +82,9 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
     """
-    Open the named version of the census, and return the URI for the dataset_id. This does not guarantee that the H5AD exists or is accessible to the user. Raises an error if dataset_id or census_version are unknown [lifecycle: experimental].
+    Open the named version of the census, and return the URI for the dataset_id. This
+    does not guarantee that the H5AD exists or is accessible to the user. Raises an
+    error if dataset_id or census_version are unknown [lifecycle: experimental].
 
     Parameters
     ----------
@@ -113,7 +118,9 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
 
 def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
     """
-    Download the source H5AD dataset, for the given dataset_id, to the user-specified file name. Will raise an error if the path already exists (i.e., will not overwrite an existing file), or is not a file [lifecycle: experimental].
+    Download the source H5AD dataset, for the given dataset_id, to the user-specified
+    file name. Will raise an error if the path already exists (i.e., will not overwrite
+    an existing file), or is not a file [lifecycle: experimental].
 
     Parameters
     ----------

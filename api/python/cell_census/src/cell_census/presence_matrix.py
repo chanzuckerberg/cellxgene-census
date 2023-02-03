@@ -10,7 +10,11 @@ def get_presence_matrix(
     measurement_name: str = "RNA",
 ) -> sparse.csr_matrix:
     """
-    Read the gene presence matrix and return as a SciPy sparse CSR array (scipy.sparse.csr_array). The returned sparse matrix is indexed on the first dimension by the dataset ``soma_joinid`` values, and on the second dimension by the ``var`` DataFrame ``soma_joinid`` values [lifecycle: experimental].
+    Read the gene presence matrix and return as a SciPy sparse CSR array
+    (scipy.sparse.csr_array). The returned sparse matrix is indexed on the
+    first dimension by the dataset ``soma_joinid`` values, and on the
+    second dimension by the ``var`` DataFrame ``soma_joinid`` values
+    [lifecycle: experimental].
 
     Parameters
     ----------

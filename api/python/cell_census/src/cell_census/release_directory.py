@@ -33,7 +33,9 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgen
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
     """
-    Get release description for given census version, from the Cell Census release directory. Raises KeyError if unknown census_version value [lifecycle: experimental].
+    Get release description for given census version, from the Cell
+    Census release directory. Raises KeyError if unknown census_version
+    value [lifecycle: experimental].
 
     Parameters
     ----------
