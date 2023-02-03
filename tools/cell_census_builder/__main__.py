@@ -20,7 +20,7 @@ from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import uricat
+from .util import get_git_commit_sha, uricat, is_git_repo_dirty
 from .validate import validate
 
 
@@ -110,6 +110,11 @@ def build(
         logging.error("Census build path already exists - aborting build")
         return 1
 
+    # Ensure that the git tree is clean
+    if is_git_repo_dirty():
+        logging.error("The git repo has uncommitted changes - aborting build")
+        return 1
+
     # Create top-level build directories
     os.makedirs(soma_path, exist_ok=False)
     os.makedirs(assets_path, exist_ok=False)
@@ -158,6 +163,9 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
     top_level_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
     top_level_collection.metadata["cxg_schema_version"] = CXG_SCHEMA_VERSION
     top_level_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
+
+    sha = get_git_commit_sha()
+    top_level_collection.metadata["git_commit_sha"] = sha
 
     # Create sub-collections for experiments, etc.
     for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
@@ -261,7 +269,6 @@ def build_step3_create_X_layers(
         e.commit_presence_matrix(filtered_datasets)
 
     logging.info("Build step 3 - X layer creation - finished")
-
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cell_census_builder")
