@@ -139,7 +139,7 @@ def build(
     if args.consolidate:
         consolidate(args, top_level_collection.uri)
 
-    add_git_commit_sha(top_level_collection[CENSUS_INFO_NAME])
+    add_git_commit_sha(top_level_collection)
 
     return 0
 
@@ -264,10 +264,9 @@ def build_step3_create_X_layers(
 
     logging.info("Build step 3 - X layer creation - finished")
 
-def add_git_commit_sha(info_collection: soma.Collection) -> None:
+def add_git_commit_sha(top_level_collection: soma.Collection) -> None:
     sha = get_git_commit_sha()
-    info_collection.set(CENSUS_BUILDER_GIT_SHA, sha, relative=True)
-
+    top_level_collection.metadata["git_commit_sha"] = sha
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cell_census_builder")
