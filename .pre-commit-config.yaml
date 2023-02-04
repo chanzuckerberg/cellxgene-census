@@ -30,14 +30,13 @@ repos:
         args: [ "--config=./tools/pyproject.toml", "--fix" ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.982
+    rev: v0.991
     hooks:
       - id: mypy
         name: mypy-cell-census
         files: ^api/python/cell_census
         args: ["--config-file=./api/python/cell_census/pyproject.toml"]
         additional_dependencies:
-          - mypy==0.982
           - types-requests
           - pytest
           - numpy
@@ -48,7 +47,6 @@ repos:
         files: ^tools
         args: ["--config-file=./tools/pyproject.toml"]
         additional_dependencies:
-          - mypy==0.982
           - types-requests
           - pytest
           - numpy
