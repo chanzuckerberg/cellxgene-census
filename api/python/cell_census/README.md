@@ -2,9 +2,9 @@
 
 The `cell_census` package provides an API to facilitate use of the CZI Science Cell Census. The Cell Census is a versioned container for the single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/).
 
-**Status**: Unstable, under rapid development
+**Status**: Pre-release, under rapid development. Expect API changes.
 
-For more information, see the [cell_census repo](https://github.com/chanzuckerberg/cell-census/)
+For more information, see the [cell_census repo](https://github.com/chanzuckerberg/cell-census/).
 
 ### For More Help
 
