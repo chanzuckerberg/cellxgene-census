@@ -14,13 +14,19 @@ from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers
-from .globals import CENSUS_SCHEMA_VERSION, CXG_SCHEMA_VERSION, RNA_SEQ, CENSUS_DATA_NAME, CENSUS_INFO_NAME, \
-    SOMA_TileDB_Context
+from .globals import (
+    CENSUS_DATA_NAME,
+    CENSUS_INFO_NAME,
+    CENSUS_SCHEMA_VERSION,
+    CXG_SCHEMA_VERSION,
+    RNA_SEQ,
+    SOMA_TileDB_Context,
+)
 from .manifest import load_manifest
 from .mp import process_initializer
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, uricat, is_git_repo_dirty
+from .util import get_git_commit_sha, is_git_repo_dirty, uricat
 from .validate import validate
 
 
@@ -169,8 +175,7 @@ def create_top_level_collections(soma_path: str) -> soma.Collection:
 
     # Create sub-collections for experiments, etc.
     for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
-        cltn = soma.Collection(uricat(top_level_collection.uri, n),
-                               context=SOMA_TileDB_Context()).create()
+        cltn = soma.Collection(uricat(top_level_collection.uri, n), context=SOMA_TileDB_Context()).create()
         top_level_collection.set(n, cltn, relative=True)
 
     return top_level_collection
@@ -224,7 +229,7 @@ def build_step2_create_axis(
     filtered_datasets = []
     N = len(datasets) * len(experiment_builders)
     n = 1
-    for (dataset, ad) in open_anndata(assets_path, datasets, backed="r"):
+    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
         dataset_total_cell_count = 0
         for e in experiment_builders:
             dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
@@ -269,6 +274,7 @@ def build_step3_create_X_layers(
         e.commit_presence_matrix(filtered_datasets)
 
     logging.info("Build step 3 - X layer creation - finished")
+
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cell_census_builder")

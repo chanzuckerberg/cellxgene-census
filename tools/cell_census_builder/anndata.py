@@ -151,7 +151,6 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
 
 
 def get_cellxgene_schema_version(ad: anndata.AnnData) -> str:
-
     # cellxgene >=2.0
     if "schema_version" in ad.uns:
         # not sure why this is a nested array

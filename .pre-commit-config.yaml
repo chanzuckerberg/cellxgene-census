@@ -1,0 +1,56 @@
+exclude: (^doc/)|(.*/venv/)
+default_stages: [commit]
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black-jupyter
+        name: black-notebooks
+        files: ^api/python/notebooks
+        args: ["--config", "./api/python/notebooks/pyproject.toml"]
+      - id: black
+        name: black-cell-census
+        files: ^api/python/cell_census
+        args: ["--config", "./api/python/cell_census/pyproject.toml"]
+      - id: black
+        name: black-tools
+        files: ^tools
+        args: ["--config", "./tools/pyproject.toml"]
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.239
+    hooks:
+      - id: ruff
+        name: ruff-cell-census
+        files: ^api/python/cell_census
+        args: ["--config=./api/python/cell_census/pyproject.toml", "--fix"]
+      - id: ruff
+        name: ruff-tools
+        files: ^tools
+        args: [ "--config=./tools/pyproject.toml", "--fix" ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.982
+    hooks:
+      - id: mypy
+        name: mypy-cell-census
+        files: ^api/python/cell_census
+        args: ["--config-file=./api/python/cell_census/pyproject.toml"]
+        additional_dependencies:
+          - mypy==0.982
+          - types-requests
+          - pytest
+          - numpy
+          - typing_extensions
+          - types-setuptools
+      - id: mypy
+        name: mypy-tools
+        files: ^tools
+        args: ["--config-file=./tools/pyproject.toml"]
+        additional_dependencies:
+          - mypy==0.982
+          - types-requests
+          - pytest
+          - numpy
+          - typing_extensions
+          - types-setuptools

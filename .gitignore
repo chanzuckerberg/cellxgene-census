@@ -131,3 +131,6 @@ dmypy.json
 # common user tmp directories
 tmp
 temp
+
+# ruff
+.ruff_cache

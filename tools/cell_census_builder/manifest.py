@@ -74,8 +74,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as tp:
         dataset_metadata = tp.map(
             lambda d: fetch_json(
-                f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}",
-                delay_secs=1
+                f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}", delay_secs=1
             ),
             datasets.values(),
         )
