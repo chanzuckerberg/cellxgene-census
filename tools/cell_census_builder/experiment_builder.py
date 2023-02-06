@@ -429,7 +429,7 @@ def _accumulate_all_X_layers(
         pres_data = raw_X.sum(axis=0) > 0
         if isinstance(pres_data, np.matrix):
             pres_data = pres_data.A
-        pres_data = pres_data[0]
+            pres_data = pres_data[0]
         pres_cols = local_var_joinids[np.arange(ad.n_vars, dtype=np.int64)]
 
         assert pres_data.dtype == bool

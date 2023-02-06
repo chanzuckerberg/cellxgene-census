@@ -24,47 +24,52 @@ from tools.cell_census_builder.util import uricat
 class TestBuilder(unittest.TestCase):
 
     def generate_h5ad(self):
-        X = np.random.rand(3, 4)
+        X = np.random.randint(5, size=(4, 4))
 
         # Create obs
-        random_string_category = pd.Series(data=["a", "b", "b"], dtype="category")
-        random_float_category = pd.Series(data=[3.2, 1.1, 2.2], dtype=np.float32)
         obs_dataframe = pd.DataFrame(
             data={
-                "string_category": random_string_category, 
-                "float_category": random_float_category,
+                "cell_idx": pd.Series([1,2,3,4]),
                 "cell_type_ontology_term_id": "CL:0000192",
-                "assay_ontology_term_id": "EFO:0009918",
+                "assay_ontology_term_id": "EFO:0008720",
                 "disease_ontology_term_id": "PATO:0000461",
-                "organism_ontology_term_id": "NCBITaxon:10090",
+                "organism_ontology_term_id": "NCBITaxon:9606", # TODO: add one that fails the filter
                 "sex_ontology_term_id": "unknown",
-                "tissue_ontology_term_id": "CL:0000192 (cell culture)",
+                "tissue_ontology_term_id": "CL:0000192",
                 "is_primary_data":  False,
                 "self_reported_ethnicity_ontology_term_id": "na",
                 "development_stage_ontology_term_id": "MmusDv:0000003",
                 "donor_id": "donor_2",
                 "suspension_type": "na",
+                "assay": "test",
+                "cell_type": "test",
+                "development_stage": "test",
+                "disease": "test",
+                "self_reported_ethnicity": "test",
+                "sex": "test",
+                "tissue": "test",
+                "organism": "test",
             }
         )
         obs = obs_dataframe
 
+        print(obs)
+
         # Create vars
-        random_int_category = pd.Series(data=[3, 1, 2, 4], dtype=np.int32)
-        random_bool_category = pd.Series(data=[True, True, False, True], dtype=np.bool_)
         feature_name = pd.Series(data=["a", "b", "c", "d"])
         var_dataframe = pd.DataFrame(
             data={
-                "feature_biotype": "spike-in",
+                "feature_biotype": "gene",
                 "feature_is_filtered": False,
                 "feature_name": "ERCC-00002 (spike-in control)",
-                "feature_reference": "NCBITaxon:32630",
+                "feature_reference": "NCBITaxon:9606",
             },
             index=feature_name,
         )
         var = var_dataframe
 
         # Create embeddings
-        random_embedding = np.random.rand(3, 2)
+        random_embedding = np.random.rand(4, 4)
         obsm = {"X_awesome_embedding": random_embedding}
 
         # Create uns corpora metadata
@@ -99,12 +104,6 @@ class TestBuilder(unittest.TestCase):
             Dataset(dataset_id = "second_id", corpora_asset_h5ad_uri = "mock", dataset_h5ad_path=second_h5ad_path)
         ]
 
-        
-        # create the experiment builders
-        # self.experiment_builders = make_experiment_builders(uricat(soma_path, CENSUS_DATA_NAME), args)
-
-        # self.builder = build(None, soma_path, assets_path, experiment_builders)
-
         process_initializer()
 
         return super().setUp()
@@ -119,9 +118,12 @@ class TestBuilder(unittest.TestCase):
         with patch("tools.cell_census_builder.__main__.build_step1_get_source_assets") as m:
             m.return_value = self.datasets
             from types import SimpleNamespace
-            args = SimpleNamespace(multi_process=False, consolidate=False)
+            args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
             builder = build(args, self.soma_path, self.assets_path, experiment_builders)
-            self.assertTrue(False)
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -222,8 +222,6 @@ def build_step2_create_axis(
             dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
             n += 1
 
-        print("XXXXX", dataset_total_cell_count)
-
         dataset.dataset_total_cell_count = dataset_total_cell_count
         if dataset_total_cell_count > 0:
             filtered_datasets.append(dataset)
