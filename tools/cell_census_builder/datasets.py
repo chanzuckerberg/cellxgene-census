@@ -75,9 +75,6 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     manifest_uri = uricat(info_collection.uri, CENSUS_DATASETS_NAME)
     manifest = soma.DataFrame(manifest_uri, context=SOMA_TileDB_Context())
 
-    print(f"******* {manifest_df}")
-
-    
     manifest.create(pa.Schema.from_pandas(manifest_df, preserve_index=False), index_column_names=["soma_joinid"])
     for batch in pa.Table.from_pandas(manifest_df, preserve_index=False).to_batches():
         manifest.write(batch)

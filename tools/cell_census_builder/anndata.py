@@ -116,8 +116,6 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         if assay_ontology_term_ids is not None:
             obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(RNA_SEQ)
 
-        print("ZZZZZ", ad.obs.tissue_ontology_term_id)
-
         # multi-organism dataset cell filter - exclude any cells where organism != feature_reference
         feature_references = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
         assert len(feature_references) == 1  # else there is a bug in open_anndata

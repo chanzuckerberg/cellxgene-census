@@ -85,6 +85,19 @@ def main() -> int:
 
     return cc
 
+def prepare_file_system(soma_path: str, assets_path) -> None:
+    """
+    Prepares the file system for the builder run
+    """
+    # Don't clobber an existing census build
+    if os.path.exists(soma_path) or os.path.exists(assets_path):
+        logging.error("Census build path already exists - aborting build")
+        return 1
+
+    # # Create top-level build directories
+    os.makedirs(soma_path, exist_ok=False)
+    os.makedirs(assets_path, exist_ok=False)
+
 
 def build(
     args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
@@ -105,14 +118,7 @@ def build(
         suitable for providing to sys.exit()
     """
 
-    # Don't clobber an existing census build
-    # if os.path.exists(soma_path) or os.path.exists(assets_path):
-    #     logging.error("Census build path already exists - aborting build")
-    #     return 1
-
-    # # Create top-level build directories
-    # os.makedirs(soma_path, exist_ok=False)
-    # os.makedirs(assets_path, exist_ok=False)
+    prepare_file_system(soma_path, assets_path)
 
     # Step 1 - get all source assets
     datasets = build_step1_get_source_assets(args, assets_path)
