@@ -91,6 +91,7 @@ def main() -> int:
 
     return cc
 
+
 def prepare_file_system(soma_path: str, assets_path) -> None:
     """
     Prepares the file system for the builder run

@@ -1,42 +1,47 @@
 # General unit tests for cell_census_builder. Intention is to add more fine-grained tests for builder.
 import os
+import unittest
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-import pandas as pd
-import pyarrow as pa
-import tiledbsoma as soma
-import unittest
 import anndata
 
 # from tools.cell_census_builder.__main__ import build, make_experiment_builders
-
 import numpy as np
-from api.python.cell_census.src import cell_census
+import pandas as pd
+import pyarrow as pa
+import tiledbsoma as soma
+from scipy.sparse import csc_matrix
 
+from api.python.cell_census.src import cell_census
 from tools.cell_census_builder.__main__ import build, make_experiment_builders
 from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME, CENSUS_X_LAYERS_PLATFORM_CONFIG
+from tools.cell_census_builder.globals import (
+    CENSUS_DATA_NAME,
+    CENSUS_INFO_NAME,
+    CENSUS_X_LAYERS_PLATFORM_CONFIG,
+)
 from tools.cell_census_builder.mp import process_initializer
 from tools.cell_census_builder.util import uricat
 
 
 class TestBuilder(unittest.TestCase):
-
     def generate_h5ad(self):
         X = np.random.randint(5, size=(4, 4))
+        # The builder only supports sparse matrices
+        X = csc_matrix(X)
 
         # Create obs
         obs_dataframe = pd.DataFrame(
             data={
-                "cell_idx": pd.Series([1,2,3,4]),
+                "cell_idx": pd.Series([1, 2, 3, 4]),
                 "cell_type_ontology_term_id": "CL:0000192",
                 "assay_ontology_term_id": "EFO:0008720",
                 "disease_ontology_term_id": "PATO:0000461",
-                "organism_ontology_term_id": "NCBITaxon:9606", # TODO: add one that fails the filter
+                "organism_ontology_term_id": "NCBITaxon:9606",  # TODO: add one that fails the filter
                 "sex_ontology_term_id": "unknown",
                 "tissue_ontology_term_id": "CL:0000192",
-                "is_primary_data":  False,
+                "is_primary_data": False,
                 "self_reported_ethnicity_ontology_term_id": "na",
                 "development_stage_ontology_term_id": "MmusDv:0000003",
                 "donor_id": "donor_2",
@@ -80,7 +85,6 @@ class TestBuilder(unittest.TestCase):
         return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
     def setUp(self) -> None:
-
         self.td = TemporaryDirectory()
 
         self.assets_path = f"{self.td.name}/h5ads"
@@ -98,8 +102,8 @@ class TestBuilder(unittest.TestCase):
         second_h5ad.write_h5ad(second_h5ad_path)
 
         self.datasets = [
-            Dataset(dataset_id = "first_id", corpora_asset_h5ad_uri = "mock", dataset_h5ad_path=first_h5ad_path),
-            Dataset(dataset_id = "second_id", corpora_asset_h5ad_uri = "mock", dataset_h5ad_path=second_h5ad_path)
+            Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
+            Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
         ]
 
         process_initializer()
@@ -109,7 +113,6 @@ class TestBuilder(unittest.TestCase):
         CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2
 
         return super().setUp()
-
 
     def tearDown(self) -> None:
         self.td.cleanup()
@@ -127,12 +130,13 @@ class TestBuilder(unittest.TestCase):
         with patch("tools.cell_census_builder.__main__.build_step1_get_source_assets") as m:
             m.return_value = self.datasets
             from types import SimpleNamespace
+
             args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
             build(args, self.soma_path, self.assets_path, experiment_builders)
 
             # Query the census and do assertions
             census = cell_census.open_soma(uri=self.soma_path)
-            
+
             # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
             human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
             self.assertEqual(human_obs.shape[0], 8)
@@ -157,19 +161,17 @@ class TestBuilder(unittest.TestCase):
         support unicode in DataFrame columns.
         """
         with TemporaryDirectory() as d:
-            pd_df = pd.DataFrame(data={'value': ["Ünicode", "S̈upport"]}, columns=['value'])
-            pd_df['soma_joinid'] = pd_df.index
-            s_df = soma.DataFrame(uri=os.path.join(d, "unicode_support")).\
-                create(pa.Schema.from_pandas(pd_df, preserve_index=False), index_column_names=['soma_joinid'])
+            pd_df = pd.DataFrame(data={"value": ["Ünicode", "S̈upport"]}, columns=["value"])
+            pd_df["soma_joinid"] = pd_df.index
+            s_df = soma.DataFrame(uri=os.path.join(d, "unicode_support")).create(
+                pa.Schema.from_pandas(pd_df, preserve_index=False), index_column_names=["soma_joinid"]
+            )
             s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 
             pd_df_in = soma.DataFrame(uri=os.path.join(d, "unicode_support")).read().concat().to_pandas()
 
-            assert pd_df_in['value'].to_list() == ["Ünicode", "S̈upport"]
+            assert pd_df_in["value"].to_list() == ["Ünicode", "S̈upport"]
 
 
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
