@@ -6,56 +6,14 @@ on:
     branches: [main]
 
 jobs:
-  lint_cell_census_builder:
-    name: lint cell_census_builder
+  pre_commit_checks:
+    name: pre-commit checks
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./tools/
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-      - name: Install deps
-        run: |
-          python -m pip install -U pip
-          python -m pip install -r scripts/requirements-dev.txt
-      - name: Lint script
-        run: bash scripts/formatting.sh
+      - name: check backend
+        uses: pre-commit/action@v3.0.0
 
-  lint_cell_census_package:
-    name: lint cell_census Python package
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api/python/cell_census/
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-      - name: Install deps
-        run: |
-          python -m pip install -U pip
-          python -m pip install -r scripts/requirements-dev.txt
-      - name: Lint script
-        run: bash scripts/formatting.sh
-
-  lint_cell_census_notebooks:
-    name: lint cell_census notebooks
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api/python/notebooks/
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.7"
-      - name: Install deps
-        run: |
-          python -m pip install -U pip
-          python -m pip install -r scripts/requirements-dev.txt
-      - name: Lint script
-        run: bash scripts/formatting.sh

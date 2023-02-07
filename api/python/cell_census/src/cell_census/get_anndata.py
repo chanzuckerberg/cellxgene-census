@@ -1,10 +1,13 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import anndata
 import tiledbsoma as soma
+
+# TODO: waiting on https://github.com/single-cell-data/TileDB-SOMA/issues/872.
+from somacore.options import SparseDFCoord
+
 # TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
 from somacore.query.query import AxisColumnNames
-from somacore.options import SparseDFCoord
 
 from .experiment import get_experiment
 
@@ -15,14 +18,16 @@ def get_anndata(
     measurement_name: str = "RNA",
     X_name: str = "raw",
     obs_value_filter: Optional[str] = None,
-    obs_coords: Tuple[SparseDFCoord, ...] = (slice(None),),
+    obs_coords: Optional[SparseDFCoord] = None,
     var_value_filter: Optional[str] = None,
-    var_coords: Tuple[SparseDFCoord, ...] = (slice(None),),
+    var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
     Convience wrapper around soma.Experiment query, to build and execute a query,
     and return it as an AnnData object.
+
+    [lifecycle: experimental]
 
     Parameters
     ----------
@@ -37,9 +42,15 @@ def get_anndata(
     obs_value_filter: str, default None
         Value filter for the ``obs`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
+    obs_coords: tuple[int, slice or NumPy ArrayLike of int], default None
+        Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+        May be an int, a list of int, or a slice. The default, None, selects all.
     var_value_filter: str, default None
         Value filter for the ``var`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
+    var_coords: tuple[int, slice or NumPy ArrayLike of int], default None
+        Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+        May be an int, a list of int, or a slice. The default, None, selects all.
     column_names: dict[Literal['obs', 'var'], List[str]]
         Colums to fetch for obs and var dataframes.
 
@@ -53,11 +64,15 @@ def get_anndata(
 
     >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
 
+    >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
+
     """
     exp = get_experiment(census, organism)
+    obs_coords = (obs_coords,) if obs_coords else (slice(None),)
+    var_coords = (var_coords,) if var_coords else (slice(None),)
     with exp.axis_query(
         measurement_name,
-        obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords = obs_coords),
-        var_query=soma.AxisQuery(value_filter=var_value_filter, coords = var_coords),
+        obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
+        var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
         return query.to_anndata(X_name=X_name, column_names=column_names)

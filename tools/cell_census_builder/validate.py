@@ -18,8 +18,10 @@ from .anndata import make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .experiment_builder import ExperimentBuilder
 from .globals import (
+    CENSUS_DATA_NAME,
     CENSUS_DATASETS_COLUMNS,
     CENSUS_DATASETS_NAME,
+    CENSUS_INFO_NAME,
     CENSUS_OBS_TERM_COLUMNS,
     CENSUS_SCHEMA_VERSION,
     CENSUS_SUMMARY_CELL_COUNTS_COLUMNS,
@@ -29,7 +31,8 @@ from .globals import (
     CENSUS_X_LAYERS,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
-    TileDB_Ctx, CENSUS_INFO_NAME, CENSUS_DATA_NAME, FEATURE_DATASET_PRESENCE_MATRIX_NAME, SOMA_TileDB_Context,
+    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .util import uricat
@@ -70,6 +73,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         "census_schema_version" in census.metadata and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
     )
     assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
+    assert "git_commit_sha" in census.metadata
 
     for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
         assert name in census
@@ -139,7 +143,9 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuil
             se.obs.read(
                 column_names=list(CENSUS_OBS_TERM_COLUMNS),
                 value_filter=f"dataset_id == '{dataset_id}'",
-            ).concat().to_pandas()
+            )
+            .concat()
+            .to_pandas()
             .drop(columns=["dataset_id", "tissue_general", "tissue_general_ontology_term_id"])
             .sort_values(by="soma_joinid")
             .drop(columns=["soma_joinid"])
@@ -244,9 +250,14 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
-        soma_joinids: npt.NDArray[np.int64] = se.obs.read(
-            column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
-        ).concat().to_pandas().soma_joinid.to_numpy()
+        soma_joinids: npt.NDArray[np.int64] = (
+            se.obs.read(
+                column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
+            )
+            .concat()
+            .to_pandas()
+            .soma_joinid.to_numpy()
+        )
 
         raw_nnz = 0
         if len(soma_joinids) > 0:
@@ -255,8 +266,7 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
             def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
                 # TODO XXX: Work-around for regression TileDB-SOMA#473
                 # return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))))
-                return sum(t.non_zero_length
-                           for t in arr.read((pa.array(join_ids), slice(None))).csrs())
+                return sum(t.non_zero_length for t in arr.read((pa.array(join_ids), slice(None))).csrs())
 
             raw_nnz = count_elements(se.ms["RNA"].X["raw"], soma_joinids)
 

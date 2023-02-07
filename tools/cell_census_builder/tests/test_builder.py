@@ -1,7 +1,6 @@
 # General unit tests for cell_census_builder. Intention is to add more fine-grained tests for builder.
-from argparse import Namespace
 import os
-from tempfile import mkstemp, TemporaryDirectory
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pandas as pd

@@ -15,7 +15,6 @@ from typing import List
 
 
 class TissueMapper:
-
     # Name of anatomical structure, used to determine the set of ancestors for a given
     # entity that we"re interested in.
     ANATOMICAL_STRUCTURE_NAME = "UBERON_0000061"

@@ -12,7 +12,6 @@ from .mp import cpu_count, create_process_pool_executor
 
 
 def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, assets_dir: str) -> None:
-
     logging.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
 

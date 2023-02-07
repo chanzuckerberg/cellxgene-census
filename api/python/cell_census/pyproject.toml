@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">= 3.8, < 3.11"
+requires-python = ">= 3.7, < 3.11"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
@@ -22,6 +22,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -56,10 +57,6 @@ root = "../../.."
 line-length = 120
 target_version = ['py39']
 
-[tool.isort]
-profile="black"
-line_length = 120
-
 [tool.mypy]
 show_error_codes = true
 ignore_missing_imports = true
@@ -71,3 +68,12 @@ plugins = "numpy.typing.mypy_plugin"
 markers = [
     "live_corpus: runs on the live Cell Census data corpus",
 ]
+
+[tool.ruff]
+select = ["E", "F", "B", "I"]
+ignore = ["E501", "E402", "C408", ]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.isort]
+known-first-party =["cell_census"]

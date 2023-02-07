@@ -25,7 +25,9 @@ from .globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
-    FEATURE_DATASET_PRESENCE_MATRIX_NAME, MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
+    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    MEASUREMENT_RNA_NAME,
+    SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -277,8 +279,7 @@ class ExperimentBuilder:
             assert self.n_var > 0
             measurement = se.ms[MEASUREMENT_RNA_NAME]
             for layer_name in CENSUS_X_LAYERS:
-                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name),
-                                          context=SOMA_TileDB_Context()).create(
+                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name), context=SOMA_TileDB_Context()).create(
                     CENSUS_X_LAYERS[layer_name],
                     (self.n_obs, self.n_var),
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
@@ -286,8 +287,7 @@ class ExperimentBuilder:
                 measurement.X.set(layer_name, snda, relative=True)
 
             presence_matrix = soma.SparseNDArray(
-                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME),
-                context=SOMA_TileDB_Context()
+                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME), context=SOMA_TileDB_Context()
             )
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
             presence_matrix.create(pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var))
@@ -306,7 +306,9 @@ class ExperimentBuilder:
         # that soma_joinid is contiguous (ie, no deletions in obs), which is
         # known true for our use case (aggregating h5ads).
         self.dataset_obs_joinid_start = (
-            se.obs.read(column_names=["dataset_id", "soma_joinid"]).concat().to_pandas()
+            se.obs.read(column_names=["dataset_id", "soma_joinid"])
+            .concat()
+            .to_pandas()
             .groupby("dataset_id")
             .min()
             .soma_joinid.to_dict()
@@ -407,7 +409,11 @@ def _accumulate_all_X_layers(
             f"({progress[0]} of {progress[1]})"
         )
         global_var_joinids = (
-            se.ms[ms_name].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas().set_index("feature_id")
+            se.ms[ms_name]
+            .var.read(column_names=["feature_id", "soma_joinid"])
+            .concat()
+            .to_pandas()
+            .set_index("feature_id")
         )
         local_var_joinids = raw_var.join(global_var_joinids).soma_joinid.to_numpy()
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
@@ -516,7 +522,6 @@ def populate_X_layers(
     presence: List[PresenceResult] = []
     if args.multi_process:
         with create_process_pool_executor(args) as pe:
-
             futures = {
                 _accumulate_X(
                     assets_path,

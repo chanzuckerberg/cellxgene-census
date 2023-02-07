@@ -2,7 +2,6 @@ from cell_census.util import uri_join
 
 
 def test_uri_join() -> None:
-
     assert uri_join("https://foo/", "bar") == "https://foo/bar"
     assert uri_join("https://foo/a", "bar") == "https://foo/bar"
     assert uri_join("https://foo/a/", "bar") == "https://foo/a/bar"

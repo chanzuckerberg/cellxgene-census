@@ -17,3 +17,4 @@ aiohttp
 Cython  # required by owlready2
 wheel  # required by owlready2
 owlready2
+gitpython
