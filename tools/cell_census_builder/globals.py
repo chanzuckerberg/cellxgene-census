@@ -158,9 +158,9 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
             "create": {
                 "capacity": 2**16,
                 "dims": {
-                    "soma_dim_0": {"tile": 2, "filters": [{"_type": "ZstdFilter", "level": 5}]},
+                    "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
                     "soma_dim_1": {
-                        "tile": 2,
+                        "tile": 2048,
                         "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}],
                     },
                 },

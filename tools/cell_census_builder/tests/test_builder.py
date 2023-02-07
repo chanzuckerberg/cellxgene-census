@@ -17,7 +17,7 @@ from api.python.cell_census.src import cell_census
 
 from tools.cell_census_builder.__main__ import build, make_experiment_builders
 from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME
+from tools.cell_census_builder.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME, CENSUS_X_LAYERS_PLATFORM_CONFIG
 from tools.cell_census_builder.mp import process_initializer
 from tools.cell_census_builder.util import uricat
 
@@ -104,6 +104,10 @@ class TestBuilder(unittest.TestCase):
         ]
 
         process_initializer()
+
+        # The tile extent needs to be smaller than the default (2048) to work with the fixture
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2
 
         return super().setUp()
 

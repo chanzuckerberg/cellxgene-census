@@ -94,7 +94,7 @@ def prepare_file_system(soma_path: str, assets_path) -> None:
         logging.error("Census build path already exists - aborting build")
         return 1
 
-    # # Create top-level build directories
+    # Create top-level build directories
     os.makedirs(soma_path, exist_ok=False)
     os.makedirs(assets_path, exist_ok=False)
 
