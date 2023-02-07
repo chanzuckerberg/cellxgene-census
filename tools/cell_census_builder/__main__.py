@@ -100,6 +100,11 @@ def prepare_file_system(soma_path: str, assets_path) -> None:
         logging.error("Census build path already exists - aborting build")
         return 1
 
+    # Ensure that the git tree is clean
+    if is_git_repo_dirty():
+        logging.error("The git repo has uncommitted changes - aborting build")
+        return 1
+
     # Create top-level build directories
     os.makedirs(soma_path, exist_ok=False)
     os.makedirs(assets_path, exist_ok=False)
