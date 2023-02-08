@@ -314,11 +314,9 @@ def create_args_parser() -> argparse.ArgumentParser:
         help="Consolidate TileDB objects after build",
     )
     # hidden option for testing by devs. Will process only the first 'n' datasets
-    build_parser.add_argument("--test-first-n", type=int, help=argparse.SUPPRESS)
+    build_parser.add_argument("--test-first-n", type=int)
     # hidden option for testing by devs. Allow for WIP testing by devs.
-    build_parser.add_argument(
-        "--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction, help=argparse.SUPPRESS
-    )
+    build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
 
     # VALIDATE
     subparsers.add_parser("validate", help="Validate an existing cell census build")
