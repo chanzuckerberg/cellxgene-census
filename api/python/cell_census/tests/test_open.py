@@ -11,19 +11,21 @@ import cell_census
 @pytest.mark.live_corpus
 def test_open_soma_latest() -> None:
     # There should _always_ be a 'latest'
-    census = cell_census.open_soma(census_version="latest")
-    assert census is not None
-    assert isinstance(census, soma.Collection)
+    with cell_census.open_soma(census_version="latest") as census:
+        assert census is not None
+        assert isinstance(census, soma.Collection)
 
     # and it should always be the default
-    assert cell_census.open_soma().uri == census.uri
+    with cell_census.open_soma() as default_census:
+        assert default_census.uri == census.uri
 
 
 @pytest.mark.live_corpus
 def test_get_source_h5ad_uri() -> None:
+    with cell_census.open_soma(census_version="latest") as census:
+        census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
+
     rng = np.random.default_rng()
-    census = cell_census.open_soma(census_version="latest")
-    census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
     for idx in rng.choice(np.arange(len(census_datasets)), size=10, replace=False):
         a_dataset = census_datasets.iloc[idx]
         locator = cell_census.get_source_h5ad_uri(a_dataset.dataset_id)
@@ -34,8 +36,9 @@ def test_get_source_h5ad_uri() -> None:
 
 @pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path) -> None:
-    census = cell_census.open_soma(census_version="latest")
-    census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
+    with cell_census.open_soma(census_version="latest") as census:
+        census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
+
     small_dataset = census_datasets.nsmallest(1, "dataset_total_cell_count").iloc[0]
 
     adata_path = tmp_path / "adata.h5ad"

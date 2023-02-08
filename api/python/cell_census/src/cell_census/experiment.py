@@ -3,7 +3,7 @@ import re
 import tiledbsoma as soma
 
 
-def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
+def open_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     """
     Given a census soma.Collection, return the experiment for the named organism.
     Organism matching is somewhat flexible, attempting to map from human-friendly
@@ -23,11 +23,12 @@ def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
 
     Examples
     --------
-    >>> cell_census.get_experiment(census, 'homo sapiens')
+    >>> with cell_census.open_experiment(census, 'homo sapiens') as human:
+    ...     print(human.obs)
 
-    >>> cell_census.get_experiment(census, 'Homo sapiens')
+    >>> cell_census.open_experiment(census, 'Homo sapiens')
 
-    >>> cell_census.get_experiment(census, 'homo_sapiens')
+    >>> cell_census.open_experiment(census, 'homo_sapiens')
     """
     # lower/snake case the organism name to find the experiment name
     exp_name = re.sub(r"[ ]+", "_", organism).lower()

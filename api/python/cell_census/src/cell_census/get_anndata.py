@@ -9,7 +9,7 @@ from somacore.options import SparseDFCoord
 # TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
 from somacore.query.query import AxisColumnNames
 
-from .experiment import get_experiment
+from .experiment import open_experiment
 
 
 def get_anndata(
@@ -67,12 +67,12 @@ def get_anndata(
     >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
 
     """
-    exp = get_experiment(census, organism)
-    obs_coords = (obs_coords,) if obs_coords else (slice(None),)
-    var_coords = (var_coords,) if var_coords else (slice(None),)
-    with exp.axis_query(
-        measurement_name,
-        obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
-        var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
-    ) as query:
-        return query.to_anndata(X_name=X_name, column_names=column_names)
+    with open_experiment(census, organism) as exp:
+        obs_coords = (obs_coords,) if obs_coords else (slice(None),)
+        var_coords = (var_coords,) if var_coords else (slice(None),)
+        with exp.axis_query(
+            measurement_name,
+            obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
+            var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
+        ) as query:
+            return query.to_anndata(X_name=X_name, column_names=column_names)

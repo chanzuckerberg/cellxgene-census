@@ -6,7 +6,7 @@ except ImportError:
 
 # from importlib.metadata import PackageNotFoundError, version
 
-from .experiment import get_experiment
+from .experiment import open_experiment
 from .get_anndata import get_anndata
 from .open import download_source_h5ad, get_source_h5ad_uri, open_soma
 from .presence_matrix import get_presence_matrix
@@ -23,8 +23,8 @@ __all__ = [
     "get_anndata",
     "get_census_version_description",
     "get_census_version_directory",
-    "get_experiment",
     "get_presence_matrix",
     "get_source_h5ad_uri",
+    "open_experiment",
     "open_soma",
 ]

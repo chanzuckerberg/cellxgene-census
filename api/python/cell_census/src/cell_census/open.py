@@ -1,12 +1,12 @@
 import os.path
 import urllib.parse
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import s3fs
 import tiledb
 import tiledbsoma as soma
 
-from .release_directory import CensusLocator, CensusVersionDescription, get_census_version_description
+from .release_directory import CensusLocator, get_census_version_description
 from .util import uri_join
 
 DEFAULT_TILEDB_CONFIGURATION = {
@@ -16,23 +16,28 @@ DEFAULT_TILEDB_CONFIGURATION = {
 }
 
 
-def _open_soma(description: CensusVersionDescription) -> soma.Collection:
-    """Private."""
-    locator = description["soma"]
-    tiledb_config: Dict[str, Any] = {**DEFAULT_TILEDB_CONFIGURATION}
+def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
+    """Private. Merge config defaults and return open census as a soma Collection/context."""
+    context = context or soma.options.SOMATileDBContext()
+
+    tiledb_config = context.tiledb_ctx.config()
+    tiledb_config.update(DEFAULT_TILEDB_CONFIGURATION)
     s3_region = locator.get("s3_region")
     if s3_region is not None:
         tiledb_config["vfs.s3.region"] = s3_region
-    return soma.Collection(
-        uri=locator["uri"], context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(tiledb_config))
-    )
+
+    tiledb_ctx = tiledb.Ctx(config=tiledb_config)
+    context = soma.options.SOMATileDBContext.evolve(context, tiledb_ctx=tiledb_ctx)
+
+    return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-# TODO:  there are several changes pending for `open_soma`:
-# * add config or context hook when it is further defined, allowing config overrides.
-# * port to the factory `soma.open()` when it exists
-#
-def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = None) -> soma.Collection:
+def open_soma(
+    *,
+    census_version: Optional[str] = "latest",
+    uri: Optional[str] = None,
+    context: Optional[soma.options.SOMATileDBContext] = None,
+) -> soma.Collection:
     """
     Open the Cell Census by version or URI, returning a soma.Collection containing the
     top-level census.  Raises error if ``census_version`` is specified and unknown, or
@@ -69,15 +74,13 @@ def open_soma(*, census_version: Optional[str] = "latest", uri: Optional[str] = 
     """
 
     if uri is not None:
-        return soma.Collection(
-            uri=uri, context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(DEFAULT_TILEDB_CONFIGURATION))
-        )
+        return _open_soma({"uri": uri, "s3_region": None}, context)
 
     if census_version is None:
         raise ValueError("Must specify either a cell census version or an explicit URI.")
 
     description = get_census_version_description(census_version)  # raises
-    return _open_soma(description)
+    return _open_soma(description["soma"], context)
 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
@@ -104,7 +107,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     's3_region': 'us-west-2'}
     """
     description = get_census_version_description(census_version)  # raises
-    census = _open_soma(description)
+    census = _open_soma(description["soma"])
     dataset = census["census_info"]["datasets"].read(value_filter=f"dataset_id == '{dataset_id}'").concat().to_pandas()
     if len(dataset) == 0:
         raise KeyError("Unknown dataset_id")
