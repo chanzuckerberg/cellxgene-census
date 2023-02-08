@@ -10,6 +10,7 @@ import anndata
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+import pytest
 import tiledbsoma as soma
 from scipy.sparse import csc_matrix
 
@@ -86,8 +87,23 @@ class TestBuilder:
 
     soma_path: str
     assets_path: str
-    datasets: List[Dataset]
     td: TemporaryDirectory  # type: ignore
+
+    @pytest.fixture
+    def datasets(self) -> List[Dataset]:
+        first_h5ad = TestBuilder.generate_h5ad()
+        second_h5ad = TestBuilder.generate_h5ad()
+
+        first_h5ad_path = f"{self.assets_path}/first.h5ad"
+        second_h5ad_path = f"{self.assets_path}/second.h5ad"
+
+        first_h5ad.write_h5ad(first_h5ad_path)
+        second_h5ad.write_h5ad(second_h5ad_path)
+
+        return [
+            Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
+            Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
+        ]
 
     @classmethod
     def setup_class(cls) -> None:
@@ -97,20 +113,6 @@ class TestBuilder:
         os.mkdir(cls.assets_path)
         cls.soma_path = f"{cls.td.name}/soma"
         os.mkdir(cls.soma_path)
-
-        first_h5ad = TestBuilder.generate_h5ad()
-        second_h5ad = TestBuilder.generate_h5ad()
-
-        first_h5ad_path = f"{cls.assets_path}/first.h5ad"
-        second_h5ad_path = f"{cls.assets_path}/second.h5ad"
-
-        first_h5ad.write_h5ad(first_h5ad_path)
-        second_h5ad.write_h5ad(second_h5ad_path)
-
-        cls.datasets = [
-            Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
-            Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
-        ]
 
         process_initializer()
 
@@ -122,7 +124,7 @@ class TestBuilder:
     def teardown_class(cls) -> None:
         cls.td.cleanup()
 
-    def test_base_builder_creation(self) -> None:
+    def test_base_builder_creation(self, datasets: List[Dataset]) -> None:
         """
         Runs the builder, queries the census and performs a set of base assertions.
         """
@@ -131,7 +133,7 @@ class TestBuilder:
         mock_prepare_file_system.start()
 
         mock_get_assets = patch(
-            "tools.cell_census_builder.__main__.build_step1_get_source_assets", return_value=self.datasets
+            "tools.cell_census_builder.__main__.build_step1_get_source_assets", return_value=datasets
         )
         mock_get_assets.start()
 
@@ -160,9 +162,9 @@ class TestBuilder:
         assert var.shape[0] == 4
 
         # There should be 2 datasets
-        datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
-        assert datasets.shape[0] == 2
-        assert list(datasets["dataset_id"]) == ["first_id", "second_id"]
+        returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
+        assert returned_datasets.shape[0] == 2
+        assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
 
     def test_unicode_support(self) -> None:
         """
