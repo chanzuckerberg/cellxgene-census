@@ -1,12 +1,9 @@
-# General unit tests for cell_census_builder. Intention is to add more fine-grained tests for builder.
 import os
 from tempfile import TemporaryDirectory
 from typing import List
 from unittest.mock import patch
 
 import anndata
-
-# from tools.cell_census_builder.__main__ import build, make_experiment_builders
 import numpy as np
 import pandas as pd
 import pyarrow as pa

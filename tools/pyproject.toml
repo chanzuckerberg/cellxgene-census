@@ -8,7 +8,6 @@ ignore_missing_imports = true
 warn_unreachable = true
 strict = true
 plugins = "numpy.typing.mypy_plugin"
-exclude = ["test_builder.py"]
 
 [tool.ruff]
 select = ["E", "F", "B", "I"]
