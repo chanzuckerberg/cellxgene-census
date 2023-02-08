@@ -92,7 +92,7 @@ def main() -> int:
     return cc
 
 
-def prepare_file_system(soma_path: str, assets_path: str) -> None:
+def prepare_file_system(soma_path: str, assets_path: str, args: argparse.Namespace) -> None:
     """
     Prepares the file system for the builder run
     """
@@ -101,7 +101,7 @@ def prepare_file_system(soma_path: str, assets_path: str) -> None:
         raise Exception("Census build path already exists - aborting build")
 
     # Ensure that the git tree is clean
-    if is_git_repo_dirty():
+    if not args.test_disable_dirty_git_check and is_git_repo_dirty():
         raise Exception("The git repo has uncommitted changes - aborting build")
 
     # Create top-level build directories
@@ -129,7 +129,7 @@ def build(
     """
 
     try:
-        prepare_file_system(soma_path, assets_path)
+        prepare_file_system(soma_path, assets_path, args)
     except Exception as e:
         logging.error(e)
         return 1
@@ -322,8 +322,10 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=True,
         help="Consolidate TileDB objects after build",
     )
-    # hidden option for testing. Will process only the first 'n' datasets
-    build_parser.add_argument("--test-first-n", type=int, help=argparse.SUPPRESS)
+    # hidden option for testing by devs. Will process only the first 'n' datasets
+    build_parser.add_argument("--test-first-n", type=int)
+    # hidden option for testing by devs. Allow for WIP testing by devs.
+    build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
 
     # VALIDATE
     subparsers.add_parser("validate", help="Validate an existing cell census build")
