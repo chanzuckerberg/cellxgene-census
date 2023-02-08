@@ -229,10 +229,24 @@ def validate_axis_dataframes(
         assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
         assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
+        # Validate that all obs soma_joinids are unique and in the range [0, n).
+        obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
+        assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
+        assert (len(obs_unique_joinids) == 0) or (
+            (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
+        )
+
+        # Validate that all var soma_joinids are unique and in the range [0, n).
+        var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
+        assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
+        assert (len(var_unique_joinids) == 0) or (
+            (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
+        )
+
     return True
 
 
-def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> bool:
+def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
@@ -288,6 +302,37 @@ def _validate_X_layers_contents(args: Tuple[str, str, Dataset, List[ExperimentBu
     return True
 
 
+def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str, int, int]) -> bool:
+    """Validate that all X layers have no duplicate coordinates"""
+    soma_path, experiment_builder, layer_name, row_range_start, row_range_stop = args
+    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
+    census_data = census[CENSUS_DATA_NAME]
+    se = census_data[experiment_builder.name]
+    logging.info(
+        f"validate_no_dups_X start, {experiment_builder.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+    )
+    if layer_name not in se.ms["RNA"].X:
+        return True
+
+    X_layer = se.ms["RNA"].X[layer_name]
+    n_rows, n_cols = X_layer.shape
+    ROW_SLICE_SIZE = 100_000
+
+    for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
+        # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape.
+        # TODO: remove when issue is resolved.
+        end_row = min(row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
+
+        slice_of_X = X_layer.read(coords=(slice(row, end_row),)).tables().concat()
+
+        # Use C layout offset for unique test
+        offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
+        unique_offsets = np.unique(offsets)
+        assert len(offsets) == len(unique_offsets)
+
+    return True
+
+
 def validate_X_layers(
     assets_path: str,
     soma_path: str,
@@ -310,8 +355,10 @@ def validate_X_layers(
 
         census_obs_df = se.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
         n_obs = len(census_obs_df)
+        assert eb.n_obs == n_obs
         census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         n_vars = len(census_var_df)
+        assert eb.n_var == n_vars
 
         if n_obs > 0:
             for lyr in CENSUS_X_LAYERS:
@@ -324,17 +371,37 @@ def validate_X_layers(
 
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
-            futures = [
-                ppe.submit(_validate_X_layers_contents, (assets_path, soma_path, dataset, experiment_builders))
+            ROWS_PER_PROCESS = 1_000_000
+            dup_coord_futures = [
+                ppe.submit(
+                    _validate_X_layer_has_unique_coords,
+                    (soma_path, eb, layer_name, row_start, row_start + ROWS_PER_PROCESS),
+                )
+                for eb in experiment_builders
+                for layer_name in CENSUS_X_LAYERS
+                for row_start in range(0, eb.n_obs, ROWS_PER_PROCESS)
+            ]
+            per_dataset_futures = [
+                ppe.submit(
+                    _validate_X_layers_contents_by_dataset, (assets_path, soma_path, dataset, experiment_builders)
+                )
                 for dataset in datasets
             ]
-            for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+            for n, future in enumerate(concurrent.futures.as_completed(dup_coord_futures), start=1):
+                assert future.result()
+                logging.info(f"validate_no_dups_X {n} of {len(dup_coord_futures)} complete.")
+            for n, future in enumerate(concurrent.futures.as_completed(per_dataset_futures), start=1):
                 assert future.result()
                 logging.info(f"validate_X {n} of {len(datasets)} complete.")
+
     else:
+        for eb in experiment_builders:
+            for layer_name in CENSUS_X_LAYERS:
+                logging.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
+                assert _validate_X_layer_has_unique_coords((soma_path, eb, layer_name, 0, eb.n_obs))
         for n, vld in enumerate(
             (
-                _validate_X_layers_contents((assets_path, soma_path, dataset, experiment_builders))
+                _validate_X_layers_contents_by_dataset((assets_path, soma_path, dataset, experiment_builders))
                 for dataset in datasets
             ),
             start=1,

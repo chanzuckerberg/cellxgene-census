@@ -117,7 +117,7 @@ def build(
         return 1
 
     # Ensure that the git tree is clean
-    if is_git_repo_dirty():
+    if not args.test_disable_dirty_git_check and is_git_repo_dirty():
         logging.error("The git repo has uncommitted changes - aborting build")
         return 1
 
@@ -313,8 +313,10 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=True,
         help="Consolidate TileDB objects after build",
     )
-    # hidden option for testing. Will process only the first 'n' datasets
-    build_parser.add_argument("--test-first-n", type=int, help=argparse.SUPPRESS)
+    # hidden option for testing by devs. Will process only the first 'n' datasets
+    build_parser.add_argument("--test-first-n", type=int)
+    # hidden option for testing by devs. Allow for WIP testing by devs.
+    build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
 
     # VALIDATE
     subparsers.add_parser("validate", help="Validate an existing cell census build")
