@@ -319,8 +319,10 @@ def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str,
     ROW_SLICE_SIZE = 100_000
 
     for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
-        # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape
+        # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape.
+        # TODO: remove when issue is resolved.
         end_row = min(row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
+
         slice_of_X = X_layer.read(coords=(slice(row, end_row),)).tables().concat()
 
         # Use C layout offset for unique test
