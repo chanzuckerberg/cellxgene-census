@@ -27,7 +27,37 @@ from tools.cell_census_builder.util import uricat
 
 
 class TestBuilder:
-    def generate_h5ad() -> anndata.AnnData:  # type: ignore
+    soma_path: str
+    assets_path: str
+    td: TemporaryDirectory  # type: ignore
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """
+        Setup method that:
+        1. Initializes a temporary file system with the correct paths
+        2. Patches some configuration to work with fixtures
+        3. Calls `process_initializer()` to setup the environment
+        """
+        cls.td = TemporaryDirectory()
+
+        cls.assets_path = f"{cls.td.name}/h5ads"
+        os.mkdir(cls.assets_path)
+        cls.soma_path = f"{cls.td.name}/soma"
+        os.mkdir(cls.soma_path)
+
+        process_initializer()
+
+        # The tile extent needs to be smaller than the default (2048) to work with the fixture
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2  # type: ignore
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2  # type: ignore
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        cls.td.cleanup()
+
+    @pytest.fixture
+    def h5ad(self) -> anndata.AnnData:
         X = np.random.randint(5, size=(4, 4))
         # The builder only supports sparse matrices
         X = csc_matrix(X)
@@ -85,14 +115,10 @@ class TestBuilder:
 
         return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
-    soma_path: str
-    assets_path: str
-    td: TemporaryDirectory  # type: ignore
-
     @pytest.fixture
-    def datasets(self) -> List[Dataset]:
-        first_h5ad = TestBuilder.generate_h5ad()
-        second_h5ad = TestBuilder.generate_h5ad()
+    def datasets(self, h5ad: anndata.AnnData) -> List[Dataset]:
+        first_h5ad = h5ad
+        second_h5ad = h5ad
 
         first_h5ad_path = f"{self.assets_path}/first.h5ad"
         second_h5ad_path = f"{self.assets_path}/second.h5ad"
@@ -104,25 +130,6 @@ class TestBuilder:
             Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
             Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
         ]
-
-    @classmethod
-    def setup_class(cls) -> None:
-        cls.td = TemporaryDirectory()
-
-        cls.assets_path = f"{cls.td.name}/h5ads"
-        os.mkdir(cls.assets_path)
-        cls.soma_path = f"{cls.td.name}/soma"
-        os.mkdir(cls.soma_path)
-
-        process_initializer()
-
-        # The tile extent needs to be smaller than the default (2048) to work with the fixture
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2  # type: ignore
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2  # type: ignore
-
-    @classmethod
-    def teardown_class(cls) -> None:
-        cls.td.cleanup()
 
     def test_base_builder_creation(self, datasets: List[Dataset]) -> None:
         """
