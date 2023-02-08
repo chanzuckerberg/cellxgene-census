@@ -302,22 +302,26 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     return True
 
 
-def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str]) -> bool:
+def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str, int, int]) -> bool:
     """Validate that all X layers have no duplicate coordinates"""
-    soma_path, experiment_builder, layer_name = args
+    soma_path, experiment_builder, layer_name, row_range_start, row_range_stop = args
     census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     census_data = census[CENSUS_DATA_NAME]
     se = census_data[experiment_builder.name]
+    logging.info(
+        f"validate_no_dups_X start, {experiment_builder.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+    )
     if layer_name not in se.ms["RNA"].X:
         return True
 
     X_layer = se.ms["RNA"].X[layer_name]
     n_rows, n_cols = X_layer.shape
     ROW_SLICE_SIZE = 100_000
-    for start_row in range(0, n_rows, ROW_SLICE_SIZE):
-        # work around TileDB-SOMA bug #900
-        end_row = min(start_row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
-        slice_of_X = X_layer.read(coords=(slice(start_row, end_row),)).tables().concat()
+
+    for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
+        # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape
+        end_row = min(row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
+        slice_of_X = X_layer.read(coords=(slice(row, end_row),)).tables().concat()
 
         # Use C layout offset for unique test
         offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
@@ -349,8 +353,10 @@ def validate_X_layers(
 
         census_obs_df = se.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
         n_obs = len(census_obs_df)
+        assert eb.n_obs == n_obs
         census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         n_vars = len(census_var_df)
+        assert eb.n_var == n_vars
 
         if n_obs > 0:
             for lyr in CENSUS_X_LAYERS:
@@ -363,10 +369,15 @@ def validate_X_layers(
 
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
+            ROWS_PER_PROCESS = 1_000_000
             dup_coord_futures = [
-                ppe.submit(_validate_X_layer_has_unique_coords, (soma_path, eb, layer_name))
+                ppe.submit(
+                    _validate_X_layer_has_unique_coords,
+                    (soma_path, eb, layer_name, row_start, row_start + ROWS_PER_PROCESS),
+                )
                 for eb in experiment_builders
                 for layer_name in CENSUS_X_LAYERS
+                for row_start in range(0, eb.n_obs, ROWS_PER_PROCESS)
             ]
             per_dataset_futures = [
                 ppe.submit(
@@ -380,11 +391,12 @@ def validate_X_layers(
             for n, future in enumerate(concurrent.futures.as_completed(per_dataset_futures), start=1):
                 assert future.result()
                 logging.info(f"validate_X {n} of {len(datasets)} complete.")
+
     else:
         for eb in experiment_builders:
             for layer_name in CENSUS_X_LAYERS:
                 logging.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
-                assert _validate_X_layer_has_unique_coords((soma_path, eb, layer_name))
+                assert _validate_X_layer_has_unique_coords((soma_path, eb, layer_name, 0, eb.n_obs))
         for n, vld in enumerate(
             (
                 _validate_X_layers_contents_by_dataset((assets_path, soma_path, dataset, experiment_builders))
