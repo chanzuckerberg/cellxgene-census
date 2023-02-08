@@ -1,6 +1,7 @@
 # General unit tests for cell_census_builder. Intention is to add more fine-grained tests for builder.
 import os
 from tempfile import TemporaryDirectory
+from typing import List
 from unittest.mock import patch
 
 import anndata
@@ -25,7 +26,7 @@ from tools.cell_census_builder.util import uricat
 
 
 class TestBuilder:
-    def generate_h5ad() -> anndata.AnnData:
+    def generate_h5ad() -> anndata.AnnData:  # type: ignore
         X = np.random.randint(5, size=(4, 4))
         # The builder only supports sparse matrices
         X = csc_matrix(X)
@@ -79,12 +80,17 @@ class TestBuilder:
         uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
         # Need to carefully set the corpora schema versions in order for tests to pass.
-        uns["schema_version"] = "3.0.0"
+        uns["schema_version"] = "3.0.0"  # type: ignore
 
         return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
+    soma_path: str
+    assets_path: str
+    datasets: List[Dataset]
+    td: TemporaryDirectory  # type: ignore
+
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         cls.td = TemporaryDirectory()
 
         cls.assets_path = f"{cls.td.name}/h5ads"
@@ -109,14 +115,14 @@ class TestBuilder:
         process_initializer()
 
         # The tile extent needs to be smaller than the default (2048) to work with the fixture
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2  # type: ignore
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2  # type: ignore
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         cls.td.cleanup()
 
-    def test_base_builder_creation(self):
+    def test_base_builder_creation(self) -> None:
         """
         Runs the builder, queries the census and performs a set of base assertions.
         """
@@ -124,38 +130,41 @@ class TestBuilder:
         mock_prepare_file_system = patch("tools.cell_census_builder.__main__.prepare_file_system")
         mock_prepare_file_system.start()
 
-        experiment_builders = make_experiment_builders(uricat(self.soma_path, CENSUS_DATA_NAME), [])
-        with patch("tools.cell_census_builder.__main__.build_step1_get_source_assets") as m:
-            m.return_value = self.datasets
-            from types import SimpleNamespace
+        mock_get_assets = patch(
+            "tools.cell_census_builder.__main__.build_step1_get_source_assets", return_value=self.datasets
+        )
+        mock_get_assets.start()
 
-            args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
-            return_value = build(args, self.soma_path, self.assets_path, experiment_builders)
+        experiment_builders = make_experiment_builders(uricat(self.soma_path, CENSUS_DATA_NAME), [])  # type: ignore
+        from types import SimpleNamespace
 
-            # return_value = 0 means that the validation passed
-            assert return_value == 0
+        args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
+        return_value = build(args, self.soma_path, self.assets_path, experiment_builders)  # type: ignore
 
-            # Query the census and do assertions
-            census = cell_census.open_soma(uri=self.soma_path)
+        # return_value = 0 means that the validation passed
+        assert return_value == 0
 
-            # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
-            human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
-            assert human_obs.shape[0] == 8
+        # Query the census and do assertions
+        census = cell_census.open_soma(uri=self.soma_path)
 
-            # mus_musculus should have 0 cells
-            mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
-            assert mouse_obs.shape[0] == 0
+        # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
+        human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
+        assert human_obs.shape[0] == 8
 
-            # There are only 4 unique genes
-            var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
-            assert var.shape[0] == 4
+        # mus_musculus should have 0 cells
+        mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
+        assert mouse_obs.shape[0] == 0
 
-            # There should be 2 datasets
-            datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
-            assert datasets.shape[0] == 2
-            assert list(datasets["dataset_id"]) == ["first_id", "second_id"]
+        # There are only 4 unique genes
+        var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
+        assert var.shape[0] == 4
 
-    def test_unicode_support(self):
+        # There should be 2 datasets
+        datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
+        assert datasets.shape[0] == 2
+        assert list(datasets["dataset_id"]) == ["first_id", "second_id"]
+
+    def test_unicode_support(self) -> None:
         """
         Regression test that unicode is supported correctly in tiledbsoma.
         This test is not strictly necessary, but it validates the requirements that Cell Census
