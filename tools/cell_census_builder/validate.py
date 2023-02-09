@@ -432,17 +432,15 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     return True
 
 
-def validate(args: argparse.Namespace, experiment_builders: List[ExperimentBuilder]) -> bool:
+def validate(
+    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
+) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
     """
     logging.info("Validation start")
-
-    base_path = uricat(args.uri, args.build_tag)
-    soma_path = uricat(base_path, "soma")
-    assets_path = uricat(base_path, "h5ads")
 
     assert os.path.exists(soma_path) and os.path.exists(assets_path)
 
