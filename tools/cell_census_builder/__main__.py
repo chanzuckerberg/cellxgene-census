@@ -30,7 +30,7 @@ from .util import get_git_commit_sha, is_git_repo_dirty, uricat
 from .validate import validate
 
 
-def make_experiment_builders(base_uri: str, args: argparse.Namespace) -> List[ExperimentBuilder]:
+def make_experiment_builders() -> List[ExperimentBuilder]:
     """
     Define all soma.Experiments to build in the census.
 
@@ -47,18 +47,13 @@ def make_experiment_builders(base_uri: str, args: argparse.Namespace) -> List[Ex
         GENE_LENGTH_BASE_URI + "genes_sars_cov_2.csv.gz",
     ]
     experiment_builders = [  # The soma.Experiments we want to build
-        ExperimentBuilder(
-            base_uri=base_uri,
-            name="homo_sapiens",
-            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606", assay_ontology_term_ids=RNA_SEQ),
-            gene_feature_length_uris=GENE_LENGTH_URIS,
-        ),
-        ExperimentBuilder(
-            base_uri=base_uri,
-            name="mus_musculus",
-            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090", assay_ontology_term_ids=RNA_SEQ),
-            gene_feature_length_uris=GENE_LENGTH_URIS,
-        ),
+        ExperimentBuilder(name="homo_sapiens", anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606",
+                                                                             assay_ontology_term_ids=RNA_SEQ),
+                          gene_feature_length_uris=GENE_LENGTH_URIS),
+        ExperimentBuilder(name="mus_musculus",
+                          anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090",
+                                                        assay_ontology_term_ids=RNA_SEQ),
+                          gene_feature_length_uris=GENE_LENGTH_URIS),
     ]
 
     return experiment_builders
@@ -77,7 +72,7 @@ def main() -> int:
     assets_path = uricat(args.uri, args.build_tag, "h5ads")
 
     # create the experiment builders
-    experiment_builders = make_experiment_builders(uricat(soma_path, CENSUS_DATA_NAME), args)
+    experiment_builders = make_experiment_builders()
 
     cc = 0
     if args.subcommand == "build":
@@ -129,9 +124,8 @@ def build(
     datasets = build_step1_get_source_assets(args, assets_path)
 
     # Step 2 - build axis dataframes
-    top_level_collection, filtered_datasets = build_step2_create_axis(
-        soma_path, assets_path, datasets, experiment_builders, args
-    )
+    top_level_collection, filtered_datasets = build_step2_create_axis(soma_path, assets_path, datasets,
+                                                                      experiment_builders)
     assign_soma_joinids(filtered_datasets)
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
     gc.collect()
@@ -153,32 +147,29 @@ def build(
     return 0
 
 
-def create_top_level_collections(soma_path: str) -> soma.Collection:
+def populate_root_collection(root_collection: soma.Collection) -> soma.Collection:
     """
-    Create the top-level SOMA collections for the Census.
+    Create the root SOMA collection for the Census.
 
-    Returns the top-most collection.
+    Returns the root collection.
     """
-    top_level_collection = soma.Collection(soma_path, context=SOMA_TileDB_Context())
-    if top_level_collection.exists():
-        logging.error("Census already exists - aborting")
-        raise Exception("Census already exists - aborting")
+    # if root_collection.exists():
+    #     logging.error("Census already exists - aborting")
+    #     raise Exception("Census already exists - aborting")
 
-    top_level_collection.create()
-    # Set top-level metadata for the experiment
-    top_level_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
-    top_level_collection.metadata["cxg_schema_version"] = CXG_SCHEMA_VERSION
-    top_level_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
+    # Set root metadata for the experiment
+    root_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
+    root_collection.metadata["cxg_schema_version"] = CXG_SCHEMA_VERSION
+    root_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
 
     sha = get_git_commit_sha()
-    top_level_collection.metadata["git_commit_sha"] = sha
+    root_collection.metadata["git_commit_sha"] = sha
 
     # Create sub-collections for experiments, etc.
     for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
-        cltn = soma.Collection(uricat(top_level_collection.uri, n), context=SOMA_TileDB_Context()).create()
-        top_level_collection.set(n, cltn, relative=True)
+        root_collection.add_new_collection(n)
 
-    return top_level_collection
+    return root_collection
 
 
 def build_step1_get_source_assets(args: argparse.Namespace, assets_path: str) -> List[Dataset]:
@@ -202,13 +193,8 @@ def build_step1_get_source_assets(args: argparse.Namespace, assets_path: str) ->
     return datasets
 
 
-def build_step2_create_axis(
-    soma_path: str,
-    assets_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
-    args: argparse.Namespace,
-) -> Tuple[soma.Collection, List[Dataset]]:
+def build_step2_create_axis(soma_path: str, assets_path: str, datasets: List[Dataset],
+                            experiment_builders: List[ExperimentBuilder]) -> Tuple[soma.Collection, List[Dataset]]:
     """
     Create all objects, and populate the axis dataframes.
 
@@ -218,34 +204,34 @@ def build_step2_create_axis(
     """
     logging.info("Build step 2 - axis creation - started")
 
-    top_level_collection = create_top_level_collections(soma_path)
+    with soma.Collection.create(soma_path, context=SOMA_TileDB_Context()) as root_collection:
+        populate_root_collection(root_collection)
 
-    # Create axis
-    for e in experiment_builders:
-        e.create(data_collection=top_level_collection[CENSUS_DATA_NAME])
-        assert soma.Experiment(e.se_uri).exists()
-
-    # Write obs axis and accumulate var axis (and remember the datasets that pass our filter)
-    filtered_datasets = []
-    N = len(datasets) * len(experiment_builders)
-    n = 1
-    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-        dataset_total_cell_count = 0
+        # Create axis
         for e in experiment_builders:
-            dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
-            n += 1
+            e.create(census_data=root_collection[CENSUS_DATA_NAME])
 
-        dataset.dataset_total_cell_count = dataset_total_cell_count
-        if dataset_total_cell_count > 0:
-            filtered_datasets.append(dataset)
+        # Write obs axis and accumulate var axis (and remember the datasets that pass our filter)
+        filtered_datasets = []
+        N = len(datasets) * len(experiment_builders)
+        n = 1
+        for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
+            dataset_total_cell_count = 0
+            for e in experiment_builders:
+                dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
+                n += 1
 
-    # Commit / write var
-    for e in experiment_builders:
-        e.commit_axis()
-        logging.info(f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets")
+            dataset.dataset_total_cell_count = dataset_total_cell_count
+            if dataset_total_cell_count > 0:
+                filtered_datasets.append(dataset)
 
-    logging.info("Build step 2 - axis creation - finished")
-    return top_level_collection, filtered_datasets
+        # Commit / write var
+        for e in experiment_builders:
+            e.commit_axis()
+            logging.info(f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets")
+
+        logging.info("Build step 2 - axis creation - finished")
+        return root_collection, filtered_datasets
 
 
 def build_step3_create_X_layers(

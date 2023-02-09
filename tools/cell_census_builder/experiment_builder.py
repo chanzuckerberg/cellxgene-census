@@ -11,8 +11,10 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
+import somacore
 import tiledbsoma as soma
 from scipy import sparse
+from somacore.experiment import Experiment
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -86,13 +88,10 @@ class ExperimentBuilder:
         def next(self) -> "ExperimentBuilder.BuildState":
             return ExperimentBuilder.BuildState(self.value + 1)
 
-    def __init__(
-        self, base_uri: str, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]
-    ):
+    def __init__(self, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]):
         self.name = name
         self.anndata_cell_filter_spec = anndata_cell_filter_spec
         self.gene_feature_length_uris = gene_feature_length_uris
-        self.se_uri = uricat(base_uri, name)
 
         # accumulated state
         self.n_obs: int = 0
@@ -126,55 +125,42 @@ class ExperimentBuilder:
     def is_finished(self) -> bool:
         return self.build_state == ExperimentBuilder.BuildState.X_Presence_Written
 
-    def create(self, data_collection: soma.Collection) -> None:
+    def create(self, census_data: soma.Collection) -> None:
+        """Create experiment within the specified Collection with a single Measurement and add to root collection."""
+
         assert self.build_state == ExperimentBuilder.BuildState.Initialized
 
-        """Make experiment at `uri` with a single Measurement and add to top-level collection."""
-        logging.info(f"{self.name}: create experiment at {self.se_uri}")
+        logging.info(f"{self.name}: create experiment at {uricat(census_data.uri, self.name)}")
 
-        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-        if se.exists():
-            logging.error("Census already exists - aborting")
-            raise Exception("Census already exists")
-        se.create()
-        data_collection.set(self.name, se, relative=True)
+        se = census_data.add_new_collection(self.name, soma.Experiment)
 
         # create `ms`
-        se.set("ms", soma.Collection(uricat(se.uri, "ms")).create(), relative=True)
+        ms = se.add_new_collection("ms")
 
         # create `obs`
         obs_schema = pa.schema(list(CENSUS_OBS_TERM_COLUMNS.items()))
-        se.set(
-            "obs",
-            soma.DataFrame(uricat(se.uri, "obs")).create(
-                obs_schema,
-                index_column_names=["soma_joinid"],
-                platform_config=CENSUS_OBS_PLATFORM_CONFIG,
-            ),
-            relative=True,
-        )
+        se.add_new_dataframe("obs",
+                             schema=obs_schema,
+                             index_column_names=["soma_joinid"],
+                             platform_config=CENSUS_OBS_PLATFORM_CONFIG)
 
         # make measurement and add to ms collection
-        measurement = soma.Measurement(uricat(se.ms.uri, MEASUREMENT_RNA_NAME)).create()
-        se.ms.set("RNA", measurement, relative=True)
+        rna_measurement = ms.add_new_collection("RNA", soma.Measurement)
 
-        # make the `var` in the measurement
+        # create `var` in the measurement
         var_schema = pa.schema(list(CENSUS_VAR_TERM_COLUMNS.items()))
-        measurement.set(
+        ms.add_new_dataframe(
             "var",
-            soma.DataFrame(uricat(measurement.uri, "var")).create(
-                var_schema,
-                index_column_names=["soma_joinid"],
-                platform_config=CENSUS_VAR_PLATFORM_CONFIG,
-            ),
-            relative=True,
-        )
+            schema=var_schema,
+            index_column_names=["soma_joinid"],
+            platform_config=CENSUS_VAR_PLATFORM_CONFIG,
+            )
 
         # make the `X` collection (but not the actual layers)
-        measurement.set("X", soma.Collection(uricat(measurement.uri, "X")).create(), relative=True)
+        rna_measurement.add_new_collection("X")
 
         self.build_state = self.build_state.next()
-        return
+
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData, progress: Tuple[int, int] = (0, 0)) -> int:
         """
