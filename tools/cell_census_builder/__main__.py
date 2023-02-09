@@ -72,7 +72,6 @@ def main() -> int:
     process_initializer(args.verbose)
 
     # normalize our base URI - must include trailing slash
-    args.uri = args.uri if args.uri.endswith("/") else args.uri + "/"
     soma_path = uricat(args.uri, args.build_tag, "soma")
     assets_path = uricat(args.uri, args.build_tag, "h5ads")
 
@@ -87,7 +86,7 @@ def main() -> int:
         assert cc != 0 or all(e.is_finished() for e in experiment_builders)
 
     if cc == 0 and (args.subcommand == "validate" or args.validate):
-        validate(args, experiment_builders)
+        validate(args, soma_path, assets_path, experiment_builders)
 
     return cc
 
