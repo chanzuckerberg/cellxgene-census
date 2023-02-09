@@ -133,42 +133,38 @@ class TestBuilder:
         Runs the builder, queries the census and performs a set of base assertions.
         """
 
-        mock_prepare_file_system = patch("tools.cell_census_builder.__main__.prepare_file_system")
-        mock_prepare_file_system.start()
+        with patch("tools.cell_census_builder.__main__.prepare_file_system"):
+            with patch("tools.cell_census_builder.__main__.build_step1_get_source_assets") as get_assets:
+                get_assets.return_value = datasets
 
-        mock_get_assets = patch(
-            "tools.cell_census_builder.__main__.build_step1_get_source_assets", return_value=datasets
-        )
-        mock_get_assets.start()
+                experiment_builders = make_experiment_builders(uricat(self.soma_path, CENSUS_DATA_NAME), [])  # type: ignore
+                from types import SimpleNamespace
 
-        experiment_builders = make_experiment_builders(uricat(self.soma_path, CENSUS_DATA_NAME), [])  # type: ignore
-        from types import SimpleNamespace
+                args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
+                return_value = build(args, self.soma_path, self.assets_path, experiment_builders)  # type: ignore
 
-        args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
-        return_value = build(args, self.soma_path, self.assets_path, experiment_builders)  # type: ignore
+                # return_value = 0 means that the validation passed
+                assert return_value == 0
 
-        # return_value = 0 means that the validation passed
-        assert return_value == 0
+                # Query the census and do assertions
+                census = cell_census.open_soma(uri=self.soma_path)
 
-        # Query the census and do assertions
-        census = cell_census.open_soma(uri=self.soma_path)
+                # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
+                human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
+                assert human_obs.shape[0] == 8
 
-        # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
-        human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
-        assert human_obs.shape[0] == 8
+                # mus_musculus should have 0 cells
+                mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
+                assert mouse_obs.shape[0] == 0
 
-        # mus_musculus should have 0 cells
-        mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
-        assert mouse_obs.shape[0] == 0
+                # There are only 4 unique genes
+                var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
+                assert var.shape[0] == 4
 
-        # There are only 4 unique genes
-        var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
-        assert var.shape[0] == 4
-
-        # There should be 2 datasets
-        returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
-        assert returned_datasets.shape[0] == 2
-        assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
+                # There should be 2 datasets
+                returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
+                assert returned_datasets.shape[0] == 2
+                assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
 
     def test_unicode_support(self) -> None:
         """
