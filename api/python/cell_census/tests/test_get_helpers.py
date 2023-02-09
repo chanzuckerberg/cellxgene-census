@@ -5,27 +5,21 @@ import cell_census
 
 
 @pytest.mark.live_corpus
-def test_open_experiment() -> None:
+def test_get_experiment() -> None:
     with cell_census.open_soma(census_version="latest") as census:
         mouse_uri = census["census_data"]["mus_musculus"].uri
         human_uri = census["census_data"]["homo_sapiens"].uri
 
-    with cell_census.open_experiment(census, "mus musculus") as e:
-        assert e.uri == mouse_uri
-    with cell_census.open_experiment(census, "Mus musculus") as e:
-        assert e.uri == mouse_uri
-    with cell_census.open_experiment(census, "mus_musculus") as e:
-        assert e.uri == mouse_uri
+        assert cell_census.get_experiment(census, "mus musculus").uri == mouse_uri
+        assert cell_census.get_experiment(census, "Mus musculus").uri == mouse_uri
+        assert cell_census.get_experiment(census, "mus_musculus").uri == mouse_uri
 
-    with cell_census.open_experiment(census, "homo sapiens") as e:
-        assert e.uri == human_uri
-    with cell_census.open_experiment(census, "Homo sapiens") as e:
-        assert e.uri == human_uri
-    with cell_census.open_experiment(census, "homo_sapiens") as e:
-        assert e.uri == human_uri
+        assert cell_census.get_experiment(census, "homo sapiens").uri == human_uri
+        assert cell_census.get_experiment(census, "Homo sapiens").uri == human_uri
+        assert cell_census.get_experiment(census, "homo_sapiens").uri == human_uri
 
     with pytest.raises(ValueError):
-        cell_census.open_experiment(census, "no such critter")
+        cell_census.get_experiment(census, "no such critter")
 
 
 @pytest.mark.live_corpus

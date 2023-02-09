@@ -1,15 +1,14 @@
 import os.path
 import urllib.parse
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import s3fs
-import tiledb
 import tiledbsoma as soma
 
 from .release_directory import CensusLocator, get_census_version_description
 from .util import uri_join
 
-DEFAULT_TILEDB_CONFIGURATION = {
+DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
@@ -19,15 +18,20 @@ DEFAULT_TILEDB_CONFIGURATION = {
 def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
     """Private. Merge config defaults and return open census as a soma Collection/context."""
     context = context or soma.options.SOMATileDBContext()
-
-    tiledb_config = context.tiledb_ctx.config()
-    tiledb_config.update(DEFAULT_TILEDB_CONFIGURATION)
     s3_region = locator.get("s3_region")
-    if s3_region is not None:
-        tiledb_config["vfs.s3.region"] = s3_region
 
-    tiledb_ctx = tiledb.Ctx(config=tiledb_config)
-    context = soma.options.SOMATileDBContext.evolve(context, tiledb_ctx=tiledb_ctx)
+    if not context:
+        # if no user-defined context, cell_census defaults take precedence over SOMA defaults
+        tiledb_config = DEFAULT_TILEDB_CONFIGURATION
+        if s3_region is not None:
+            tiledb_config.copy()["vfs.s3.region"] = s3_region
+        context = context.replace(tiledb_config=tiledb_config)
+    else:
+        # if specified, the user context takes precedence _except_ for AWS Region in locator
+        if s3_region is not None:
+            tiledb_config = context.tiledb_ctx.config()
+            tiledb_config["vfs.s3.region"] = s3_region
+            context = context.replace(tiledb_config=tiledb_config)
 
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
@@ -55,22 +59,33 @@ def open_soma(
 
     Returns
     -------
-    soma.Collection : returns a SOMA Collection object.
+    soma.Collection : returns a SOMA Collection object. Can be used as a context manager, which
+        will automatically close upon exit.
 
     Examples
     --------
-    Open the default Cell Census version:
+    Open the default Cell Census version, using a context manager which will automatically
+    close the census upon exit of the context.
 
+    >>> with cell_census.open_soma() as census:
+            ...
+
+    Open and close:
     >>> census = cell_census.open_soma()
+        ...
+        census.close()
 
     Open a specific Cell Census by version:
-    >>> census = cell_census.open_soma("2022-12-31")
+    >>> with cell_census.open_soma("2022-12-31") as census:
+            ...
 
     Open a Cell Census by S3 URI, rather than by version.
-    >>> census = cell_census.open_soma(uri="s3://bucket/path")
+    >>> with cell_census.open_soma(uri="s3://bucket/path") as census:
+            ...
 
     Open a Cell Census by path (file:// URI), rather than by version.
-    >>> census = cell_census.open_soma(uri="/tmp/census")
+    >>> cell_census.open_soma(uri="/tmp/census") as census:
+            ...
     """
 
     if uri is not None:
