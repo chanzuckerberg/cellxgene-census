@@ -5,6 +5,7 @@ from typing import List
 
 import tiledbsoma as soma
 
+from .globals import SOMA_TileDB_Context
 from .mp import create_process_pool_executor
 
 if soma.get_storage_engine() == "tiledb":
@@ -18,15 +19,12 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
     if soma.get_storage_engine() != "tiledb":
         return
 
-    census = soma.Collection(uri)
-    if not census.exists():
-        return
-
-    with create_process_pool_executor(args) as ppe:
-        futures = consolidate_collection(args, census, ppe)
-    for future in concurrent.futures.as_completed(futures):
-        uri = future.result()
-        logging.info(f"Consolidate: completed {uri}")
+    with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
+        with create_process_pool_executor(args) as ppe:
+            futures = consolidate_collection(args, census, ppe)
+        for future in concurrent.futures.as_completed(futures):
+            uri = future.result()
+            logging.info(f"Consolidate: completed {uri}")
 
 
 def consolidate_collection(

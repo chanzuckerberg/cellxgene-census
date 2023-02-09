@@ -4,8 +4,9 @@ import logging
 import multiprocessing
 import os.path
 import sys
+from contextlib import ExitStack
 from datetime import datetime, timezone
-from typing import List, Tuple
+from typing import List
 
 import tiledbsoma as soma
 
@@ -78,9 +79,6 @@ def main() -> int:
     if args.subcommand == "build":
         cc = build(args, soma_path, assets_path, experiment_builders)
 
-        # sanity check for build completion
-        assert cc != 0 or all(e.is_finished() for e in experiment_builders)
-
     if cc == 0 and (args.subcommand == "validate" or args.validate):
         validate(args, experiment_builders)
 
@@ -120,29 +118,30 @@ def build(
     os.makedirs(soma_path, exist_ok=False)
     os.makedirs(assets_path, exist_ok=False)
 
-    # Step 1 - get all source assets
-    datasets = build_step1_get_source_assets(args, assets_path)
-
-    # Step 2 - build axis dataframes
-    top_level_collection, filtered_datasets = build_step2_create_axis(soma_path, assets_path, datasets,
-                                                                      experiment_builders)
+    # Step 1 - get all source datasets
+    datasets = build_step1_get_source_datasets(args, assets_path)
+    filtered_datasets = filter_datasets_and_accumulate_axes(assets_path, datasets, experiment_builders)
     assign_soma_joinids(filtered_datasets)
+
+    # Step 2 - create root collection, and all child objects, but do not populate X layers
+    root_collection = build_step2_create_root_collection(soma_path, filtered_datasets, experiment_builders)
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
     gc.collect()
 
-    # Step 3- create X layers
-    build_step3_create_X_layers(assets_path, filtered_datasets, experiment_builders, args)
+    # Step 3 - populate X layers
+    build_step3_populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
     gc.collect()
 
     # Write out dataset manifest and summary information
-    create_dataset_manifest(top_level_collection[CENSUS_INFO_NAME], filtered_datasets)
-    create_census_summary_cell_counts(
-        top_level_collection[CENSUS_INFO_NAME], [e.census_summary_cell_counts for e in experiment_builders]
-    )
-    create_census_summary(top_level_collection[CENSUS_INFO_NAME], experiment_builders, args.build_tag)
+    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, 'w') as census_info:
+        create_dataset_manifest(census_info, filtered_datasets)
+        create_census_summary_cell_counts(
+            census_info, [e.census_summary_cell_counts for e in experiment_builders]
+        )
+        create_census_summary(census_info, experiment_builders, args.build_tag)
 
     if args.consolidate:
-        consolidate(args, top_level_collection.uri)
+        consolidate(args, root_collection.uri)
 
     return 0
 
@@ -172,7 +171,7 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     return root_collection
 
 
-def build_step1_get_source_assets(args: argparse.Namespace, assets_path: str) -> List[Dataset]:
+def build_step1_get_source_datasets(args: argparse.Namespace, assets_path: str) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
@@ -193,71 +192,64 @@ def build_step1_get_source_assets(args: argparse.Namespace, assets_path: str) ->
     return datasets
 
 
-def build_step2_create_axis(soma_path: str, assets_path: str, datasets: List[Dataset],
-                            experiment_builders: List[ExperimentBuilder]) -> Tuple[soma.Collection, List[Dataset]]:
+def build_step2_create_root_collection(soma_path: str, filtered_datasets: List[Dataset],
+                                       experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
     """
     Create all objects, and populate the axis dataframes.
 
-    Returns: the filtered datasets that will be included. This is simply
-    an optimization to allow subsequent X matrix writing to skip unused
-    datasets.
+    Returns: the root collection.
     """
     logging.info("Build step 2 - axis creation - started")
 
     with soma.Collection.create(soma_path, context=SOMA_TileDB_Context()) as root_collection:
         populate_root_collection(root_collection)
 
-        # Create axis
         for e in experiment_builders:
-            e.create(census_data=root_collection[CENSUS_DATA_NAME])
-
-        # Write obs axis and accumulate var axis (and remember the datasets that pass our filter)
-        filtered_datasets = []
-        N = len(datasets) * len(experiment_builders)
-        n = 1
-        for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-            dataset_total_cell_count = 0
-            for e in experiment_builders:
-                dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
-                n += 1
-
-            dataset.dataset_total_cell_count = dataset_total_cell_count
-            if dataset_total_cell_count > 0:
-                filtered_datasets.append(dataset)
-
-        # Commit / write var
-        for e in experiment_builders:
-            e.commit_axis()
+            e.create(census_data=root_collection[CENSUS_DATA_NAME],
+                     filtered_datasets=filtered_datasets)
             logging.info(f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets")
 
         logging.info("Build step 2 - axis creation - finished")
-        return root_collection, filtered_datasets
+        return root_collection
 
 
-def build_step3_create_X_layers(
+def filter_datasets_and_accumulate_axes(assets_path, datasets, experiment_builders):
+    # Accumulate obs and var axes (and remember the datasets that pass our filter)
+    filtered_datasets = []
+    N = len(datasets) * len(experiment_builders)
+    n = 1
+    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
+        dataset_total_cell_count = 0
+        for e in experiment_builders:
+            dataset_total_cell_count += e.accumulate_axes(dataset, ad, progress=(n, N))
+            n += 1
+
+        dataset.dataset_total_cell_count = dataset_total_cell_count
+        if dataset_total_cell_count > 0:
+            filtered_datasets.append(dataset)
+    return filtered_datasets
+
+
+def build_step3_populate_X_layers(
     assets_path: str,
     filtered_datasets: List[Dataset],
     experiment_builders: List[ExperimentBuilder],
     args: argparse.Namespace,
 ) -> None:
     """
-    Create and populate all X layers
+    Populate all X layers.
     """
     logging.info("Build step 3 - X layer creation - started")
-    # base_path = args.uri
 
-    # Create X layers
-    for e in experiment_builders:
-        e.create_X_layers(filtered_datasets)
-        e.create_joinid_metadata()
+    with ExitStack() as experiments:
+        for eb in experiment_builders:
+            # TODO: assert soma.Collection.exists(eb.experiment.uri)
+            assert eb.experiment.closed
+            # open experiments for write and ensure they are closed when exiting
+            experiments.enter_context(eb.reopen_for_write())
 
-    # Process all X data
-    populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
-
-    # tidy up and finish
-    for e in experiment_builders:
-        e.commit_X(consolidate=args.consolidate)
-        e.commit_presence_matrix(filtered_datasets)
+        # Process all X data
+        populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
 
     logging.info("Build step 3 - X layer creation - finished")
 

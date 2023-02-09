@@ -3,7 +3,6 @@ import concurrent.futures
 import gc
 import io
 import logging
-from enum import IntEnum
 from typing import Dict, List, Optional, Sequence, Tuple, TypedDict, Union, overload
 
 import anndata
@@ -11,10 +10,10 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
-import somacore
 import tiledbsoma as soma
 from scipy import sparse
 from somacore.experiment import Experiment
+from tiledbsoma.tiledb_object import TileDBObject
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -29,7 +28,6 @@ from .globals import (
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
-    SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -58,6 +56,12 @@ PresenceResults = Tuple[PresenceResult, ...]
 tissue_mapper: TissueMapper = TissueMapper()
 
 
+def _assert_open_for_write(obj: TileDBObject) -> None:
+    assert obj is not None
+    assert obj.exists(obj.uri)
+    assert obj.mode == 'w'
+    assert not obj.closed
+
 class ExperimentBuilder:
     """
     Class to help build a parameterized SOMA experiment, where key parameters are:
@@ -72,21 +76,8 @@ class ExperimentBuilder:
     anndata_cell_filter_spec: AnnDataFilterSpec
     gene_feature_length_uris: List[str]
     gene_feature_length: pd.DataFrame
-    build_state: "ExperimentBuilder.BuildState"
 
-    # builder state sanity check, used to catch usage errors.
 
-    class BuildState(IntEnum):
-        Initialized = 0
-        Created = 1
-        AxisWritten = 2
-        X_Created = 3
-        X_JoinIdMetadataCreated = 4
-        X_Written = 5
-        X_Presence_Written = 6
-
-        def next(self) -> "ExperimentBuilder.BuildState":
-            return ExperimentBuilder.BuildState(self.value + 1)
 
     def __init__(self, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]):
         self.name = name
@@ -100,10 +91,12 @@ class ExperimentBuilder:
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.var_df: pd.DataFrame = pd.DataFrame(columns=["feature_id", "feature_name"])
-        self.dataset_obs_joinid_start: Dict[str, int]
+        self.obs_df: pd.DataFrame = pd.DataFrame(columns=CENSUS_OBS_TERM_COLUMNS)
+        self.dataset_obs_joinid_start: Optional[Dict[str, int]] = None   # initialized in create_joinid_metadata()
         self.census_summary_cell_counts = init_summary_counts_accumulator()
+        self.experiment: Optional[soma.Experiment] = None  # initialized in create()
+        self.global_var_joinids: Optional[pd.DataFrame] = None
         self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
-        self.build_state = ExperimentBuilder.BuildState.Initialized
 
         self.load_assets()
 
@@ -122,55 +115,59 @@ class ExperimentBuilder:
         )
         logging.info(f"Loaded gene lengths external reference for {self.name}, {len(self.gene_feature_length)} genes.")
 
-    def is_finished(self) -> bool:
-        return self.build_state == ExperimentBuilder.BuildState.X_Presence_Written
-
-    def create(self, census_data: soma.Collection) -> None:
-        """Create experiment within the specified Collection with a single Measurement and add to root collection."""
-
-        assert self.build_state == ExperimentBuilder.BuildState.Initialized
+    def create(self, census_data: soma.Collection, filtered_datasets: List[Dataset]) -> None:
+        """Create experiment within the specified Collection with a single Measurement."""
 
         logging.info(f"{self.name}: create experiment at {uricat(census_data.uri, self.name)}")
 
-        se = census_data.add_new_collection(self.name, soma.Experiment)
+        self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
 
         # create `ms`
-        ms = se.add_new_collection("ms")
+        ms = self.experiment.add_new_collection("ms")
 
         # create `obs`
         obs_schema = pa.schema(list(CENSUS_OBS_TERM_COLUMNS.items()))
-        se.add_new_dataframe("obs",
-                             schema=obs_schema,
-                             index_column_names=["soma_joinid"],
-                             platform_config=CENSUS_OBS_PLATFORM_CONFIG)
+        self.experiment.add_new_dataframe("obs",
+                                          schema=obs_schema,
+                                          index_column_names=["soma_joinid"],
+                                          platform_config=CENSUS_OBS_PLATFORM_CONFIG)
 
         # make measurement and add to ms collection
-        rna_measurement = ms.add_new_collection("RNA", soma.Measurement)
+        rna_measurement = ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
         # create `var` in the measurement
         var_schema = pa.schema(list(CENSUS_VAR_TERM_COLUMNS.items()))
-        ms.add_new_dataframe(
+        rna_measurement.add_new_dataframe(
             "var",
             schema=var_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_VAR_PLATFORM_CONFIG,
             )
 
-        # make the `X` collection (but not the actual layers)
-        rna_measurement.add_new_collection("X")
+        # SOMA does not currently support empty arrays, so special case this corner-case.
+        if self.n_var > 0:
+            max_dataset_joinid = max(d.soma_joinid for d in filtered_datasets)
 
-        self.build_state = self.build_state.next()
+            rna_measurement.add_new_sparse_ndarray(
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+                type=pa.bool_(),
+                shape=(max_dataset_joinid + 1, self.n_var))
+
+        self.populate_obs_axis()
+        self.populate_var_axis()
+        self.create_X_with_layers()
+        self.create_joinid_metadata()
 
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData, progress: Tuple[int, int] = (0, 0)) -> int:
         """
-        Write obs, accumate var.
+        Write obs, accumulate var.
 
         Returns: number of cells that make it past the experiment filter.
         """
+
         progmsg = f"({progress[0]} of {progress[1]})"
         logging.info(f"{self.name}: accumulate axis for dataset '{dataset.dataset_id}' {progmsg}")
-        assert self.build_state == ExperimentBuilder.BuildState.Created
 
         anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
         ad = anndata_cell_filter(ad, retain_X=False)
@@ -193,18 +190,7 @@ class ExperimentBuilder:
 
         # drop columns we don't want to write
         obs_df = obs_df[list(CENSUS_OBS_TERM_COLUMNS)]
-        obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
-
-        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-        assert se.exists()
-
-        pa_table = pa.Table.from_pandas(
-            obs_df,
-            preserve_index=False,
-            columns=list(CENSUS_OBS_TERM_COLUMNS),
-        )
-        for pa_batch in pa_table.to_batches():
-            se.obs.write(pa_batch)
+        self.obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
 
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
@@ -212,8 +198,8 @@ class ExperimentBuilder:
         tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name"]]
         self.var_df = pd.concat([self.var_df, tv]).drop_duplicates()
 
-        self.n_obs += len(obs_df)
-        self.n_unique_obs += (obs_df.is_primary_data == True).sum()  # noqa: E712
+        self.n_obs += len(self.obs_df)
+        self.n_unique_obs += (self.obs_df.is_primary_data == True).sum()  # noqa: E712
 
         donors = obs_df.donor_id.unique()
         self.n_donors += len(donors) - np.isin(donors, DONOR_ID_IGNORE).sum()
@@ -221,11 +207,19 @@ class ExperimentBuilder:
         self.n_datasets += 1
         return len(obs_df)
 
-    def commit_axis(self) -> None:
-        logging.info(f"{self.name}: commit axes")
-        se = soma.Experiment(self.se_uri)
-        assert se.exists()
-        assert self.build_state == ExperimentBuilder.BuildState.Created
+    def populate_obs_axis(self):
+        logging.info(f'experiment {self.name} obs = {self.obs_df.shape}')
+        pa_table = pa.Table.from_pandas(
+            self.obs_df,
+            preserve_index=False,
+            columns=list(CENSUS_OBS_TERM_COLUMNS),
+        )
+        self.experiment.obs.write(pa_table)
+
+    def populate_var_axis(self) -> None:
+        logging.info(f"{self.name}: populate var axis")
+
+        _assert_open_for_write(self.experiment.ms["RNA"].var)
 
         # if is possible there is nothing to write
         if len(self.var_df) > 0:
@@ -236,76 +230,54 @@ class ExperimentBuilder:
 
             self.var_df = anndata_ordered_bool_issue_853_workaround(self.var_df)
 
-            se.ms["RNA"].var.write(
-                pa.RecordBatch.from_pandas(
+            self.experiment.ms["RNA"].var.write(
+                pa.Table.from_pandas(
                     self.var_df,
                     preserve_index=False,
                     columns=list(CENSUS_VAR_TERM_COLUMNS),
                 )
             )
 
-        self.n_var = len(self.var_df)
-        self.build_state = self.build_state.next()
-        return
+            self.global_var_joinids = self.var_df[["feature_id", "soma_joinid"]].set_index("feature_id")
 
-    def create_X_layers(self, datasets: List[Dataset]) -> None:
+
+        self.n_var = len(self.var_df)
+
+
+    def create_X_with_layers(self) -> None:
         """
         Create layers in ms['RNA']/X
         """
         logging.info(f"{self.name}: create X layers")
-        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-        assert se.exists()
-        assert se.ms[MEASUREMENT_RNA_NAME].exists()
-        assert self.n_obs >= 0 and self.n_var >= 0
-        assert self.build_state == ExperimentBuilder.BuildState.AxisWritten
-        assert self.n_obs == 0 or self.n_datasets > 0
+
+        rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
+        _assert_open_for_write(rna_measurement)
+
+        # make the `X` collection (but not the actual layers)
+        rna_measurement.add_new_collection("X")
 
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if self.n_obs > 0:
             assert self.n_var > 0
-            measurement = se.ms[MEASUREMENT_RNA_NAME]
             for layer_name in CENSUS_X_LAYERS:
-                snda = soma.SparseNDArray(uricat(measurement.X.uri, layer_name), context=SOMA_TileDB_Context()).create(
-                    CENSUS_X_LAYERS[layer_name],
-                    (self.n_obs, self.n_var),
-                    platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
-                )
-                measurement.X.set(layer_name, snda, relative=True)
-
-            presence_matrix = soma.SparseNDArray(
-                uricat(measurement.uri, FEATURE_DATASET_PRESENCE_MATRIX_NAME), context=SOMA_TileDB_Context()
-            )
-            max_dataset_joinid = max(d.soma_joinid for d in datasets)
-            presence_matrix.create(pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var))
-            measurement.set(FEATURE_DATASET_PRESENCE_MATRIX_NAME, presence_matrix, relative=True)
-
-        self.build_state = self.build_state.next()
-        return
+                rna_measurement["X"].add_new_sparse_ndarray(layer_name,
+                                                            type=CENSUS_X_LAYERS[layer_name],
+                                                            shape=(self.n_obs, self.n_var),
+                                                            platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
+                                                            )
 
     def create_joinid_metadata(self) -> None:
         logging.info(f"{self.name}: make joinid metadata")
-        assert self.build_state >= ExperimentBuilder.BuildState.AxisWritten
-        se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-        assert se.exists()
+        assert self.obs_df is not None
+
 
         # Map of dataset_id -> starting soma_joinid for obs axis.  This code _assumes_
         # that soma_joinid is contiguous (ie, no deletions in obs), which is
         # known true for our use case (aggregating h5ads).
-        self.dataset_obs_joinid_start = (
-            se.obs.read(column_names=["dataset_id", "soma_joinid"])
-            .concat()
-            .to_pandas()
-            .groupby("dataset_id")
-            .min()
-            .soma_joinid.to_dict()
-        )
-
-        self.build_state = self.build_state.next()
-
-    def commit_X(self, *, consolidate: bool = False) -> None:
-        logging.info(f"{self.name}: commit X")
-        assert self.build_state == ExperimentBuilder.BuildState.X_JoinIdMetadataCreated
-        self.build_state = self.build_state.next()
+        self.dataset_obs_joinid_start = (self.obs_df[["dataset_id", "soma_joinid"]]
+                                         .groupby("dataset_id")
+                                         .min()
+                                         .soma_joinid.to_dict())
 
     def _accumulate_summary_cell_counts(self, obs_df: pd.DataFrame) -> None:
         """
@@ -315,11 +287,11 @@ class ExperimentBuilder:
         assert len(obs_df) > 0
         self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
 
-    def commit_presence_matrix(self, datasets: List[Dataset]) -> None:
+    def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
         """
         Save presence matrix per Experiment
         """
-        assert self.build_state == ExperimentBuilder.BuildState.X_Written
+        _assert_open_for_write(self.experiment)
 
         if len(self.presence) > 0:
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
@@ -338,11 +310,14 @@ class ExperimentBuilder:
             pm.eliminate_zeros()
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
-            se = soma.Experiment(self.se_uri, context=SOMA_TileDB_Context())
-            fdpm: soma.SparseNDArray = se.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+            fdpm: soma.SparseNDArray = self.experiment.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
-        self.build_state = self.build_state.next()
+
+    def reopen_for_write(self) -> Experiment:
+        assert self.experiment.closed
+        self.experiment = soma.Experiment.open(self.experiment.uri, 'w')
+        return self.experiment
 
 
 def _accumulate_all_X_layers(
@@ -373,9 +348,9 @@ def _accumulate_all_X_layers(
             # this dataset has no data for this experiment
             continue
 
-        se = soma.Experiment(eb.se_uri, context=SOMA_TileDB_Context())
-        assert se is not None
-        assert se.exists()
+        if eb.n_var == 0:
+            # edge case for test builds that have no data for an entire experiment (organism)
+            continue
 
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad)
@@ -394,14 +369,7 @@ def _accumulate_all_X_layers(
             f"{eb.name}: saving X layer '{layer_name}' for dataset '{dataset.dataset_id}' "
             f"({progress[0]} of {progress[1]})"
         )
-        global_var_joinids = (
-            se.ms[ms_name]
-            .var.read(column_names=["feature_id", "soma_joinid"])
-            .concat()
-            .to_pandas()
-            .set_index("feature_id")
-        )
-        local_var_joinids = raw_var.join(global_var_joinids).soma_joinid.to_numpy()
+        local_var_joinids = raw_var.join(eb.global_var_joinids).soma_joinid.to_numpy()
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
 
         for n, X in enumerate(array_chunker(raw_X), start=1):
@@ -413,7 +381,7 @@ def _accumulate_all_X_layers(
             assert (col >= 0).all()
             X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
             X_remap.eliminate_zeros()
-            se.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
+            eb.experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
             gc.collect()
 
         # Save presence information by dataset_id
@@ -475,12 +443,13 @@ def _accumulate_X(
     """
     for eb in experiment_builders:
         # sanity checks
-        assert eb.build_state == ExperimentBuilder.BuildState.X_JoinIdMetadataCreated
+        _assert_open_for_write(eb.experiment)
         assert eb.dataset_obs_joinid_start is not None
 
     dataset_obs_joinid_starts = [
         eb.dataset_obs_joinid_start.get(dataset.dataset_id, None) for eb in experiment_builders
     ]
+
     if executor is not None:
         return executor.submit(
             _accumulate_all_X_layers,
@@ -493,9 +462,9 @@ def _accumulate_X(
         )
     else:
         return _accumulate_all_X_layers(
-            assets_path, dataset, experiment_builders, dataset_obs_joinid_starts, "RNA", progress
+            assets_path, dataset, experiment_builders, dataset_obs_joinid_starts,
+            MEASUREMENT_RNA_NAME, progress
         )
-
 
 def populate_X_layers(
     assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: argparse.Namespace

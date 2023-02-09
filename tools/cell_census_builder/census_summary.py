@@ -29,9 +29,8 @@ def create_census_summary(
     df["soma_joinid"] = range(len(df))
 
     # write to a SOMA dataframe
-    summary_uri = uricat(info_collection.uri, CENSUS_SUMMARY_NAME)
-    summary = soma.DataFrame(summary_uri, context=SOMA_TileDB_Context())
-    summary.create(pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"])
-    for batch in pa.Table.from_pandas(df, preserve_index=False).to_batches():
-        summary.write(batch)
-    info_collection.set(CENSUS_SUMMARY_NAME, summary, relative=True)
+    with info_collection.add_new_dataframe(CENSUS_SUMMARY_NAME,
+                                           schema=pa.Schema.from_pandas(df, preserve_index=False),
+                                           index_column_names=["soma_joinid"]) as summary:
+        summary.write(pa.Table.from_pandas(df, preserve_index=False))
+
