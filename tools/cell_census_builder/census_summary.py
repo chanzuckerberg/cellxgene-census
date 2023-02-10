@@ -6,8 +6,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .experiment_builder import ExperimentBuilder, get_summary_stats
-from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, SOMA_TileDB_Context
-from .util import uricat
+from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME
 
 
 def create_census_summary(
@@ -29,8 +28,7 @@ def create_census_summary(
     df["soma_joinid"] = range(len(df))
 
     # write to a SOMA dataframe
-    with info_collection.add_new_dataframe(CENSUS_SUMMARY_NAME,
-                                           schema=pa.Schema.from_pandas(df, preserve_index=False),
-                                           index_column_names=["soma_joinid"]) as summary:
+    with info_collection.add_new_dataframe(
+        CENSUS_SUMMARY_NAME, schema=pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"]
+    ) as summary:
         summary.write(pa.Table.from_pandas(df, preserve_index=False))
-

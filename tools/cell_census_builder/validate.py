@@ -71,7 +71,8 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         assert soma.Collection.exists(census.uri)
         assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
         assert (
-            "census_schema_version" in census.metadata and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
+            "census_schema_version" in census.metadata
+            and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
         )
         assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
         assert "git_commit_sha" in census.metadata
@@ -366,7 +367,7 @@ def validate_X_layers(
 
             census_obs_df = se.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
             n_obs = len(census_obs_df)
-            logging.info(f'uri = {se.obs.uri}, eb.n_obs = {eb.n_obs}; n_obs = {n_obs}')
+            logging.info(f"uri = {se.obs.uri}, eb.n_obs = {eb.n_obs}; n_obs = {n_obs}")
             # TODO: Only works when run as builder, not standalone validator, since ExpBuilder is not fully initialized
             #  in the latter case
             assert eb.n_obs == n_obs

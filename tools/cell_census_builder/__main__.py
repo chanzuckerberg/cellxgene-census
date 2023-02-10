@@ -48,13 +48,16 @@ def make_experiment_builders() -> List[ExperimentBuilder]:
         GENE_LENGTH_BASE_URI + "genes_sars_cov_2.csv.gz",
     ]
     experiment_builders = [  # The soma.Experiments we want to build
-        ExperimentBuilder(name="homo_sapiens", anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606",
-                                                                             assay_ontology_term_ids=RNA_SEQ),
-                          gene_feature_length_uris=GENE_LENGTH_URIS),
-        ExperimentBuilder(name="mus_musculus",
-                          anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090",
-                                                        assay_ontology_term_ids=RNA_SEQ),
-                          gene_feature_length_uris=GENE_LENGTH_URIS),
+        ExperimentBuilder(
+            name="homo_sapiens",
+            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606", assay_ontology_term_ids=RNA_SEQ),
+            gene_feature_length_uris=GENE_LENGTH_URIS,
+        ),
+        ExperimentBuilder(
+            name="mus_musculus",
+            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090", assay_ontology_term_ids=RNA_SEQ),
+            gene_feature_length_uris=GENE_LENGTH_URIS,
+        ),
     ]
 
     return experiment_builders
@@ -141,11 +144,9 @@ def build(
     gc.collect()
 
     # Write out dataset manifest and summary information
-    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, 'w', context=SOMA_TileDB_Context()) as census_info:
+    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, "w", context=SOMA_TileDB_Context()) as census_info:
         create_dataset_manifest(census_info, filtered_datasets)
-        create_census_summary_cell_counts(
-            census_info, [e.census_summary_cell_counts for e in experiment_builders]
-        )
+        create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
         create_census_summary(census_info, experiment_builders, args.build_tag)
 
     if args.consolidate:
@@ -197,8 +198,9 @@ def build_step1_get_source_datasets(args: argparse.Namespace, assets_path: str) 
     return datasets
 
 
-def build_step2_create_root_collection(soma_path: str, filtered_datasets: List[Dataset],
-                                       experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
+def build_step2_create_root_collection(
+    soma_path: str, filtered_datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
+) -> soma.Collection:
     """
     Create all objects, and populate the axis dataframes.
 
@@ -210,8 +212,7 @@ def build_step2_create_root_collection(soma_path: str, filtered_datasets: List[D
         populate_root_collection(root_collection)
 
         for e in experiment_builders:
-            e.create(census_data=root_collection[CENSUS_DATA_NAME],
-                     filtered_datasets=filtered_datasets)
+            e.create(census_data=root_collection[CENSUS_DATA_NAME], filtered_datasets=filtered_datasets)
             logging.info(f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets")
 
         logging.info("Build step 2 - axis creation - finished")

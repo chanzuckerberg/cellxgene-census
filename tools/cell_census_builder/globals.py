@@ -1,4 +1,3 @@
-import logging
 import time
 from typing import Set
 
@@ -224,6 +223,7 @@ WRITE_TIMESTAMP = int(time.time() * 1000)
 # Using "end of time" for read_timestamp means that all writes are visible, no matter what write timestamp was used
 END_OF_TIME = 0xFFFFFFFFFFFFFFFF
 
+
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
     global _SOMA_TileDB_Context
     if _SOMA_TileDB_Context is None:
@@ -234,10 +234,11 @@ def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
         _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
             tiledb_ctx=TileDB_Ctx(),
             # TODO: Setting an explicit write timestamp causes later reads to fail!
-            #write_timestamp=write_timestamp,
+            # write_timestamp=write_timestamp,
             # TODO: We *should* be able to set this equal to WRITE_TIMESTAMP, but as specifying a write_timestamp is
             #  problematic, we must use "end of time" for now
-            read_timestamp=END_OF_TIME)
+            read_timestamp=END_OF_TIME,
+        )
     return _SOMA_TileDB_Context
 
 

@@ -27,7 +27,8 @@ from .globals import (
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
-    MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
+    MEASUREMENT_RNA_NAME,
+    SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -59,8 +60,9 @@ tissue_mapper: TissueMapper = TissueMapper()
 def _assert_open_for_write(obj: TileDBObject) -> None:
     assert obj is not None
     assert obj.exists(obj.uri)
-    assert obj.mode == 'w'
+    assert obj.mode == "w"
     assert not obj.closed
+
 
 class ExperimentBuilder:
     """
@@ -77,8 +79,6 @@ class ExperimentBuilder:
     gene_feature_length_uris: List[str]
     gene_feature_length: pd.DataFrame
 
-
-
     def __init__(self, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]):
         self.name = name
         self.anndata_cell_filter_spec = anndata_cell_filter_spec
@@ -92,7 +92,7 @@ class ExperimentBuilder:
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.var_df: pd.DataFrame = pd.DataFrame(columns=["feature_id", "feature_name"])
         self.obs_df: pd.DataFrame = pd.DataFrame(columns=CENSUS_OBS_TERM_COLUMNS)
-        self.dataset_obs_joinid_start: Optional[Dict[str, int]] = None   # initialized in create_joinid_metadata()
+        self.dataset_obs_joinid_start: Optional[Dict[str, int]] = None  # initialized in create_joinid_metadata()
         self.census_summary_cell_counts = init_summary_counts_accumulator()
         self.experiment: Optional[soma.Experiment] = None  # initialized in create()
         self.global_var_joinids: Optional[pd.DataFrame] = None
@@ -127,10 +127,9 @@ class ExperimentBuilder:
 
         # create `obs`
         obs_schema = pa.schema(list(CENSUS_OBS_TERM_COLUMNS.items()))
-        self.experiment.add_new_dataframe("obs",
-                                          schema=obs_schema,
-                                          index_column_names=["soma_joinid"],
-                                          platform_config=CENSUS_OBS_PLATFORM_CONFIG)
+        self.experiment.add_new_dataframe(
+            "obs", schema=obs_schema, index_column_names=["soma_joinid"], platform_config=CENSUS_OBS_PLATFORM_CONFIG
+        )
 
         # make measurement and add to ms collection
         rna_measurement = ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
@@ -142,22 +141,20 @@ class ExperimentBuilder:
             schema=var_schema,
             index_column_names=["soma_joinid"],
             platform_config=CENSUS_VAR_PLATFORM_CONFIG,
-            )
+        )
 
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if self.n_var > 0:
             max_dataset_joinid = max(d.soma_joinid for d in filtered_datasets)
 
             rna_measurement.add_new_sparse_ndarray(
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME,
-                type=pa.bool_(),
-                shape=(max_dataset_joinid + 1, self.n_var))
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var)
+            )
 
         self.populate_obs_axis()
         self.populate_var_axis()
         self.create_X_with_layers()
         self.create_joinid_metadata()
-
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData, progress: Tuple[int, int] = (0, 0)) -> int:
         """
@@ -208,7 +205,7 @@ class ExperimentBuilder:
         return len(obs_df)
 
     def populate_obs_axis(self):
-        logging.info(f'experiment {self.name} obs = {self.obs_df.shape}')
+        logging.info(f"experiment {self.name} obs = {self.obs_df.shape}")
         pa_table = pa.Table.from_pandas(
             self.obs_df,
             preserve_index=False,
@@ -240,9 +237,7 @@ class ExperimentBuilder:
 
             self.global_var_joinids = self.var_df[["feature_id", "soma_joinid"]].set_index("feature_id")
 
-
         self.n_var = len(self.var_df)
-
 
     def create_X_with_layers(self) -> None:
         """
@@ -260,24 +255,23 @@ class ExperimentBuilder:
         if self.n_obs > 0:
             assert self.n_var > 0
             for layer_name in CENSUS_X_LAYERS:
-                rna_measurement["X"].add_new_sparse_ndarray(layer_name,
-                                                            type=CENSUS_X_LAYERS[layer_name],
-                                                            shape=(self.n_obs, self.n_var),
-                                                            platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
-                                                            )
+                rna_measurement["X"].add_new_sparse_ndarray(
+                    layer_name,
+                    type=CENSUS_X_LAYERS[layer_name],
+                    shape=(self.n_obs, self.n_var),
+                    platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
+                )
 
     def create_joinid_metadata(self) -> None:
         logging.info(f"{self.name}: make joinid metadata")
         assert self.obs_df is not None
 
-
         # Map of dataset_id -> starting soma_joinid for obs axis.  This code _assumes_
         # that soma_joinid is contiguous (ie, no deletions in obs), which is
         # known true for our use case (aggregating h5ads).
-        self.dataset_obs_joinid_start = (self.obs_df[["dataset_id", "soma_joinid"]]
-                                         .groupby("dataset_id")
-                                         .min()
-                                         .soma_joinid.to_dict())
+        self.dataset_obs_joinid_start = (
+            self.obs_df[["dataset_id", "soma_joinid"]].groupby("dataset_id").min().soma_joinid.to_dict()
+        )
 
     def _accumulate_summary_cell_counts(self, obs_df: pd.DataFrame) -> None:
         """
@@ -313,10 +307,9 @@ class ExperimentBuilder:
             fdpm: soma.SparseNDArray = self.experiment.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
-
     def reopen_for_write(self) -> Experiment:
         assert self.experiment.closed
-        self.experiment = soma.Experiment.open(self.experiment.uri, 'w', context=SOMA_TileDB_Context())
+        self.experiment = soma.Experiment.open(self.experiment.uri, "w", context=SOMA_TileDB_Context())
         return self.experiment
 
 
@@ -462,9 +455,9 @@ def _accumulate_X(
         )
     else:
         return _accumulate_all_X_layers(
-            assets_path, dataset, experiment_builders, dataset_obs_joinid_starts,
-            MEASUREMENT_RNA_NAME, progress
+            assets_path, dataset, experiment_builders, dataset_obs_joinid_starts, MEASUREMENT_RNA_NAME, progress
         )
+
 
 def populate_X_layers(
     assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: argparse.Namespace
