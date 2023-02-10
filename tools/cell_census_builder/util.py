@@ -127,6 +127,6 @@ def is_git_repo_dirty() -> bool:
     """
     Returns True if the git repo is dirty, i.e. there are uncommitted changes
     """
-    repo = git.Repo()
+    repo = git.Repo(search_parent_directories=True)
     is_dirty: bool = repo.is_dirty()
     return is_dirty
