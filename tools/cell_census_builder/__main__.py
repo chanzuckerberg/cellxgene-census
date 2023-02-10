@@ -106,33 +106,6 @@ def prepare_file_system(soma_path: str, assets_path: str, args: argparse.Namespa
     os.makedirs(assets_path, exist_ok=False)
 
 
-def accumulate_axes(assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]) -> int:
-    N = len(datasets) * len(experiment_builders)
-    n = 1
-    dataset_total_cell_count = 0
-
-    # obs and var prep
-    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-        for e in experiment_builders:
-            logging.info(f"{e.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
-            dataset_total_cell_count += e.accumulate_axes(dataset, ad)
-            n += 1
-
-    # var & presence
-    if len(datasets) > 0:
-        for eb in experiment_builders:
-            eb.populate_var_axis()
-
-            # SOMA does not currently support empty arrays, so special case this corner-case.
-            if eb.n_var > 0:
-                max_dataset_joinid = max(d.soma_joinid for d in datasets)
-                eb.experiment.ms["RNA"].add_new_sparse_ndarray(
-                    FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, eb.n_var)
-                )
-
-    return dataset_total_cell_count
-
-
 def build(
     args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> int:
@@ -179,22 +152,6 @@ def build(
         consolidate(args, root_collection.uri)
 
     return 0
-
-
-def build_step4_populate_summary_info(
-    root_collection: soma.Collection,
-    experiment_builders: List[ExperimentBuilder],
-    filtered_datasets: List[Dataset],
-    build_tag: str,
-) -> None:
-    logging.info("Build step 4 - summary info - started")
-
-    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, "w", context=SOMA_TileDB_Context()) as census_info:
-        create_dataset_manifest(census_info, filtered_datasets)
-        create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
-        create_census_summary(census_info, experiment_builders, build_tag)
-
-    logging.info("Build step 4 - summary info - finished")
 
 
 def populate_root_collection(root_collection: soma.Collection) -> soma.Collection:
@@ -283,6 +240,33 @@ def filter_datasets(
     return filtered_datasets
 
 
+def accumulate_axes(assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]) -> int:
+    N = len(datasets) * len(experiment_builders)
+    n = 1
+    dataset_total_cell_count = 0
+
+    # obs and var prep
+    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
+        for e in experiment_builders:
+            logging.info(f"{e.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
+            dataset_total_cell_count += e.accumulate_axes(dataset, ad)
+            n += 1
+
+    # var & presence
+    if len(datasets) > 0:
+        for eb in experiment_builders:
+            eb.populate_var_axis()
+
+            # SOMA does not currently support empty arrays, so special case this corner-case.
+            if eb.n_var > 0:
+                max_dataset_joinid = max(d.soma_joinid for d in datasets)
+                eb.experiment.ms["RNA"].add_new_sparse_ndarray(
+                    FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, eb.n_var)
+                )
+
+    return dataset_total_cell_count
+
+
 def build_step3_populate_axes_and_X_layers(
     assets_path: str,
     filtered_datasets: List[Dataset],
@@ -308,6 +292,22 @@ def build_step3_populate_axes_and_X_layers(
         populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
 
     logging.info("Build step 3 - X layer creation - finished")
+
+
+def build_step4_populate_summary_info(
+    root_collection: soma.Collection,
+    experiment_builders: List[ExperimentBuilder],
+    filtered_datasets: List[Dataset],
+    build_tag: str,
+) -> None:
+    logging.info("Build step 4 - summary info - started")
+
+    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, "w", context=SOMA_TileDB_Context()) as census_info:
+        create_dataset_manifest(census_info, filtered_datasets)
+        create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
+        create_census_summary(census_info, experiment_builders, build_tag)
+
+    logging.info("Build step 4 - summary info - finished")
 
 
 def create_args_parser() -> argparse.ArgumentParser:
