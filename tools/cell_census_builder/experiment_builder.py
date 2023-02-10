@@ -11,7 +11,6 @@ import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
-from anndata import AnnData
 from scipy import sparse
 from somacore.experiment import Experiment
 from tiledbsoma.tiledb_object import TileDBObject
@@ -203,7 +202,6 @@ class ExperimentBuilder:
         )
         self.experiment.obs.write(pa_table)
 
-
     def populate_var_axis(self) -> None:
         logging.info(f"{self.name}: populate var axis")
 
@@ -252,7 +250,6 @@ class ExperimentBuilder:
                     shape=(self.n_obs, self.n_var),
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
-
 
     def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
         """

@@ -10,8 +10,6 @@ import pandas as pd
 import pyarrow as pa
 import pytest
 import tiledbsoma as soma
-from scipy.sparse import csc_matrix
-
 from cell_census_builder.__main__ import build, make_experiment_builders
 from cell_census_builder.datasets import Dataset
 from cell_census_builder.globals import (
@@ -20,7 +18,7 @@ from cell_census_builder.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
 from cell_census_builder.mp import process_initializer
-from cell_census_builder.util import uricat
+from scipy.sparse import csc_matrix
 
 
 class TestBuilder:
@@ -46,8 +44,8 @@ class TestBuilder:
         process_initializer()
 
         # The tile extent needs to be smaller than the default (2048) to work with the fixture
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2  # type: ignore
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2  # type: ignore
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"]["tile"] = 2
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"]["tile"] = 2
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -58,8 +56,7 @@ class TestBuilder:
         name: str
         organism_ontology_term_id: str
 
-    ORGANISMS=[Organism('homo_sapiens', "NCBITaxon:9606"),
-               Organism('mus_musculus', "NCBITaxon:10090")]
+    ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
 
     def h5ad(self, organism: Organism) -> anndata.AnnData:
         X = np.random.randint(5, size=(4, 4))
@@ -126,8 +123,11 @@ class TestBuilder:
             h5ad = self.h5ad(organism)
             h5ad_path = f"{self.assets_path}/{organism.name}.h5ad"
             h5ad.write_h5ad(h5ad_path)
-            datasets.append(Dataset(dataset_id=f"dataset_{organism.name}", corpora_asset_h5ad_uri="mock",
-                                    dataset_h5ad_path=h5ad_path),)
+            datasets.append(
+                Dataset(
+                    dataset_id=f"dataset_{organism.name}", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=h5ad_path
+                ),
+            )
 
         return datasets
 
@@ -141,11 +141,11 @@ class TestBuilder:
         ) as get_assets:
             get_assets.return_value = datasets
 
-            experiment_builders = make_experiment_builders()  # type: ignore
+            experiment_builders = make_experiment_builders()
             from types import SimpleNamespace
 
             args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
-            return_value = build(args, self.soma_path, self.assets_path, experiment_builders)  # type: ignore
+            return_value = build(args, self.soma_path, self.assets_path, experiment_builders)
 
             # return_value = 0 means that the validation passed
             assert return_value == 0
@@ -155,27 +155,26 @@ class TestBuilder:
                 # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
                 human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
                 assert human_obs.shape[0] == 4
-                assert all(human_obs['dataset_id'] == "dataset_homo_sapiens")
+                assert all(human_obs["dataset_id"] == "dataset_homo_sapiens")
 
                 # mus_musculus should have 0 cells
                 mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
                 assert mouse_obs.shape[0] == 4
-                assert all(mouse_obs['dataset_id'] == "dataset_mus_musculus")
+                assert all(mouse_obs["dataset_id"] == "dataset_mus_musculus")
 
                 # There are only 4 unique genes
                 var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
                 assert var.shape[0] == 4
-                assert all(var["feature_id"].str.startswith('homo_sapiens'))
+                assert all(var["feature_id"].str.startswith("homo_sapiens"))
 
                 var = census[CENSUS_DATA_NAME]["mus_musculus"]["ms"]["RNA"]["var"].read().concat().to_pandas()
                 assert var.shape[0] == 4
-                assert all(var["feature_id"].str.startswith('mus_musculus'))
+                assert all(var["feature_id"].str.startswith("mus_musculus"))
 
                 # There should be 2 datasets
                 returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
                 assert returned_datasets.shape[0] == 2
-                assert list(returned_datasets["dataset_id"]) == ["dataset_homo_sapiens",
-                                                                 "dataset_mus_musculus"]
+                assert list(returned_datasets["dataset_id"]) == ["dataset_homo_sapiens", "dataset_mus_musculus"]
 
     def test_unicode_support(self) -> None:
         """
@@ -186,10 +185,12 @@ class TestBuilder:
         with TemporaryDirectory() as d:
             pd_df = pd.DataFrame(data={"value": ["Ünicode", "S̈upport"]}, columns=["value"])
             pd_df["soma_joinid"] = pd_df.index
-            with soma.DataFrame.create(uri=os.path.join(d, "unicode_support"),
-                                       schema=pa.Schema.from_pandas(pd_df, preserve_index=False),
-                                       index_column_names=["soma_joinid"]) as s_df:
+            with soma.DataFrame.create(
+                uri=os.path.join(d, "unicode_support"),
+                schema=pa.Schema.from_pandas(pd_df, preserve_index=False),
+                index_column_names=["soma_joinid"],
+            ) as s_df:
                 s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 
             with soma.DataFrame.open(uri=os.path.join(d, "unicode_support")) as pd_df_in:
-                assert  pd_df_in.read().concat().to_pandas()["value"].to_list() == ["Ünicode", "S̈upport"]
+                assert pd_df_in.read().concat().to_pandas()["value"].to_list() == ["Ünicode", "S̈upport"]
