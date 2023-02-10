@@ -11,6 +11,7 @@ import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
+from anndata import AnnData
 from scipy import sparse
 from somacore.experiment import Experiment
 from tiledbsoma.tiledb_object import TileDBObject
@@ -91,8 +92,7 @@ class ExperimentBuilder:
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.var_df: pd.DataFrame = pd.DataFrame(columns=["feature_id", "feature_name"])
-        self.obs_df: pd.DataFrame = pd.DataFrame(columns=CENSUS_OBS_TERM_COLUMNS)
-        self.dataset_obs_joinid_start: Optional[Dict[str, int]] = None  # initialized in create_joinid_metadata()
+        self.dataset_obs_joinid_start: Dict[str, int] = {}
         self.census_summary_cell_counts = init_summary_counts_accumulator()
         self.experiment: Optional[soma.Experiment] = None  # initialized in create()
         self.global_var_joinids: Optional[pd.DataFrame] = None
@@ -115,7 +115,7 @@ class ExperimentBuilder:
         )
         logging.info(f"Loaded gene lengths external reference for {self.name}, {len(self.gene_feature_length)} genes.")
 
-    def create(self, census_data: soma.Collection, filtered_datasets: List[Dataset]) -> None:
+    def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
 
         logging.info(f"{self.name}: create experiment at {uricat(census_data.uri, self.name)}")
@@ -143,32 +143,18 @@ class ExperimentBuilder:
             platform_config=CENSUS_VAR_PLATFORM_CONFIG,
         )
 
-        # SOMA does not currently support empty arrays, so special case this corner-case.
-        if self.n_var > 0:
-            max_dataset_joinid = max(d.soma_joinid for d in filtered_datasets)
+    def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
+        anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
+        return anndata_cell_filter(ad, retain_X=False)
 
-            rna_measurement.add_new_sparse_ndarray(
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var)
-            )
-
-        self.populate_obs_axis()
-        self.populate_var_axis()
-        self.create_X_with_layers()
-        self.create_joinid_metadata()
-
-    def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData, progress: Tuple[int, int] = (0, 0)) -> int:
+    def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
         """
         Write obs, accumulate var.
 
         Returns: number of cells that make it past the experiment filter.
         """
-
-        progmsg = f"({progress[0]} of {progress[1]})"
-        logging.info(f"{self.name}: accumulate axis for dataset '{dataset.dataset_id}' {progmsg}")
-
-        anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
-        ad = anndata_cell_filter(ad, retain_X=False)
-        if ad.n_obs == 0:
+        ad = self.filter_anndata_cells(ad)
+        if len(ad.obs) == 0:
             logging.info(f"{self.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
             return 0
 
@@ -183,11 +169,15 @@ class ExperimentBuilder:
         add_tissue_mapping(obs_df, dataset.dataset_id)
 
         # Accumulate aggregation counts
-        self._accumulate_summary_cell_counts(obs_df)
+        self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
 
         # drop columns we don't want to write
         obs_df = obs_df[list(CENSUS_OBS_TERM_COLUMNS)]
-        self.obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
+        obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
+
+        self.populate_obs_axis(obs_df)
+
+        self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs
 
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
@@ -195,8 +185,8 @@ class ExperimentBuilder:
         tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name"]]
         self.var_df = pd.concat([self.var_df, tv]).drop_duplicates()
 
-        self.n_obs += len(self.obs_df)
-        self.n_unique_obs += (self.obs_df.is_primary_data == True).sum()  # noqa: E712
+        self.n_obs += len(obs_df)
+        self.n_unique_obs += (obs_df.is_primary_data == True).sum()  # noqa: E712
 
         donors = obs_df.donor_id.unique()
         self.n_donors += len(donors) - np.isin(donors, DONOR_ID_IGNORE).sum()
@@ -204,14 +194,15 @@ class ExperimentBuilder:
         self.n_datasets += 1
         return len(obs_df)
 
-    def populate_obs_axis(self) -> None:
-        logging.info(f"experiment {self.name} obs = {self.obs_df.shape}")
+    def populate_obs_axis(self, obs_df: pd.DataFrame) -> None:
+        logging.info(f"experiment {self.name} obs = {obs_df.shape}")
         pa_table = pa.Table.from_pandas(
-            self.obs_df,
+            obs_df,
             preserve_index=False,
             columns=list(CENSUS_OBS_TERM_COLUMNS),
         )
         self.experiment.obs.write(pa_table)
+
 
     def populate_var_axis(self) -> None:
         logging.info(f"{self.name}: populate var axis")
@@ -248,7 +239,7 @@ class ExperimentBuilder:
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
         _assert_open_for_write(rna_measurement)
 
-        # make the `X` collection (but not the actual layers)
+        # make the `X` collection
         rna_measurement.add_new_collection("X")
 
         # SOMA does not currently support empty arrays, so special case this corner-case.
@@ -262,24 +253,6 @@ class ExperimentBuilder:
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
 
-    def create_joinid_metadata(self) -> None:
-        logging.info(f"{self.name}: make joinid metadata")
-        assert self.obs_df is not None
-
-        # Map of dataset_id -> starting soma_joinid for obs axis.  This code _assumes_
-        # that soma_joinid is contiguous (ie, no deletions in obs), which is
-        # known true for our use case (aggregating h5ads).
-        self.dataset_obs_joinid_start = (
-            self.obs_df[["dataset_id", "soma_joinid"]].groupby("dataset_id").min().soma_joinid.to_dict()
-        )
-
-    def _accumulate_summary_cell_counts(self, obs_df: pd.DataFrame) -> None:
-        """
-        Add summary counts to the census_summary_cell_counts dataframe
-        """
-        assert "dataset_id" in obs_df
-        assert len(obs_df) > 0
-        self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
 
     def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
         """

@@ -55,7 +55,9 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
     Add summary counts to the census_summary_cell_counts dataframe
     """
     assert "dataset_id" in obs_df
-    assert len(obs_df) > 0
+
+    if len(obs_df) == 0:
+        return current
 
     CATEGORIES = [
         # term_id, label

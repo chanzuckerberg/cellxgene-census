@@ -1,4 +1,5 @@
 import os
+from dataclasses import dataclass
 from tempfile import TemporaryDirectory
 from typing import List
 from unittest.mock import patch
@@ -52,8 +53,15 @@ class TestBuilder:
     def teardown_class(cls) -> None:
         cls.td.cleanup()
 
-    @pytest.fixture
-    def h5ad(self) -> anndata.AnnData:
+    @dataclass
+    class Organism:
+        name: str
+        organism_ontology_term_id: str
+
+    ORGANISMS=[Organism('homo_sapiens', "NCBITaxon:9606"),
+               Organism('mus_musculus', "NCBITaxon:10090")]
+
+    def h5ad(self, organism: Organism) -> anndata.AnnData:
         X = np.random.randint(5, size=(4, 4))
         # The builder only supports sparse matrices
         X = csc_matrix(X)
@@ -65,7 +73,7 @@ class TestBuilder:
                 "cell_type_ontology_term_id": "CL:0000192",
                 "assay_ontology_term_id": "EFO:0008720",
                 "disease_ontology_term_id": "PATO:0000461",
-                "organism_ontology_term_id": "NCBITaxon:9606",  # TODO: add one that fails the filter
+                "organism_ontology_term_id": organism.organism_ontology_term_id,
                 "sex_ontology_term_id": "unknown",
                 "tissue_ontology_term_id": "CL:0000192",
                 "is_primary_data": False,
@@ -86,13 +94,13 @@ class TestBuilder:
         obs = obs_dataframe
 
         # Create vars
-        feature_name = pd.Series(data=["a", "b", "c", "d"])
+        feature_name = pd.Series(data=[f"{organism.name}_{g}" for g in ["a", "b", "c", "d"]])
         var_dataframe = pd.DataFrame(
             data={
                 "feature_biotype": "gene",
                 "feature_is_filtered": False,
                 "feature_name": "ERCC-00002 (spike-in control)",
-                "feature_reference": "NCBITaxon:9606",
+                "feature_reference": organism.organism_ontology_term_id,
             },
             index=feature_name,
         )
@@ -112,20 +120,16 @@ class TestBuilder:
         return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
     @pytest.fixture
-    def datasets(self, h5ad: anndata.AnnData) -> List[Dataset]:
-        first_h5ad = h5ad
-        second_h5ad = h5ad
+    def datasets(self) -> List[Dataset]:
+        datasets = []
+        for organism in self.ORGANISMS:
+            h5ad = self.h5ad(organism)
+            h5ad_path = f"{self.assets_path}/{organism.name}.h5ad"
+            h5ad.write_h5ad(h5ad_path)
+            datasets.append(Dataset(dataset_id=f"dataset_{organism.name}", corpora_asset_h5ad_uri="mock",
+                                    dataset_h5ad_path=h5ad_path),)
 
-        first_h5ad_path = f"{self.assets_path}/first.h5ad"
-        second_h5ad_path = f"{self.assets_path}/second.h5ad"
-
-        first_h5ad.write_h5ad(first_h5ad_path)
-        second_h5ad.write_h5ad(second_h5ad_path)
-
-        return [
-            Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
-            Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
-        ]
+        return datasets
 
     def test_base_builder_creation(self, datasets: List[Dataset]) -> None:
         """
@@ -150,20 +154,28 @@ class TestBuilder:
             with soma.Collection.open(uri=self.soma_path) as census:
                 # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
                 human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
-                assert human_obs.shape[0] == 8
+                assert human_obs.shape[0] == 4
+                assert all(human_obs['dataset_id'] == "dataset_homo_sapiens")
 
                 # mus_musculus should have 0 cells
                 mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
-                assert mouse_obs.shape[0] == 0
+                assert mouse_obs.shape[0] == 4
+                assert all(mouse_obs['dataset_id'] == "dataset_mus_musculus")
 
                 # There are only 4 unique genes
                 var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
                 assert var.shape[0] == 4
+                assert all(var["feature_id"].str.startswith('homo_sapiens'))
+
+                var = census[CENSUS_DATA_NAME]["mus_musculus"]["ms"]["RNA"]["var"].read().concat().to_pandas()
+                assert var.shape[0] == 4
+                assert all(var["feature_id"].str.startswith('mus_musculus'))
 
                 # There should be 2 datasets
                 returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
                 assert returned_datasets.shape[0] == 2
-                assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
+                assert list(returned_datasets["dataset_id"]) == ["dataset_homo_sapiens",
+                                                                 "dataset_mus_musculus"]
 
     def test_unicode_support(self) -> None:
         """
