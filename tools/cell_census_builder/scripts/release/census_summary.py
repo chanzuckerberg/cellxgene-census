@@ -40,23 +40,54 @@ if __name__ == "__main__":
         curr_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
 
         # Datasets removed, added
-
         curr_datasets_ids = set(curr_datasets["dataset_id"])
         prev_dataset_ids = set(prev_datasets["dataset_id"])
 
-        print("Datasets that were added")
-        print(curr_datasets_ids - prev_dataset_ids)
+        added_datasets = curr_datasets_ids - prev_dataset_ids
+        removed_datasets = prev_dataset_ids - curr_datasets_ids
+        if added_datasets:
+            print("Datasets that were added")
+            for d in added_datasets:
+                print(d)
 
-        print("Datasets that were removed")
-        print(prev_dataset_ids - curr_datasets_ids)
+        if removed_datasets:
+            print("Datasets that were removed")
+            for d in removed_datasets:
+                print(d)
 
         # Datasets in both versions but that have differing cell counts
+        joined = prev_datasets.join(
+            curr_datasets.set_index("dataset_id"), on="dataset_id", lsuffix="_prev", rsuffix="_curr"
+        )
+        datasets_with_different_cell_counts = joined.loc[
+            joined["dataset_total_cell_count_prev"] != joined["dataset_total_cell_count_curr"]
+        ][["dataset_id", "dataset_total_cell_count_prev", "dataset_total_cell_count_curr"]]
+
+        if not datasets_with_different_cell_counts.empty:
+            print("Datasets that have a different cell count")
+            print(datasets_with_different_cell_counts)
+
         # Total cell count deltas by experiment (mouse, human)
+        for organism in ["homo_sapiens", "mus_musculus"]:
+            curr_count = census[CENSUS_DATA_NAME][organism]["obs"].count
+            prev_count = previous_census[CENSUS_DATA_NAME][organism]["obs"].count
+            print(
+                f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}"
+            )
+
         # Deltas between summary_cell_counts dataframes
+
         # Genes removed, added
+        for organism in ["homo_sapiens", "mus_musculus"]:
+            curr_genes = census[CENSUS_DATA_NAME][organism]["ms"]["RNA"]["var"].read().concat().to_pandas()
+            prev_genes = previous_census[CENSUS_DATA_NAME][organism]["ms"]["RNA"]["var"].read().concat().to_pandas()
 
-        print(prev_datasets.columns)
-        # print(curr_datasets)
+            new_genes = set(curr_genes["feature_id"]) - set(prev_genes["feature_id"])
+            if new_genes:
+                print("Genes added")
+                new_genes
 
-        print("DIFF")
-        print(curr_datasets["dataset_ids"] - prev_datasets)
+            removed_genes = set(prev_genes["feature_id"]) - set(curr_genes["feature_id"])
+            if removed_genes:
+                print("Genes removed")
+                removed_genes
