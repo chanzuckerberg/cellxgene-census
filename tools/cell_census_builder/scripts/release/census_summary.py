@@ -30,6 +30,7 @@ if __name__ == "__main__":
     stats_df = pd.DataFrame(stats, columns=["organism", "attribute", "unique count"])
     display_stats_df = pd.pivot(stats_df, index=["organism"], columns=["attribute"], values=["unique count"])
     print(display_stats_df)
+    print()
 
     # Calculate the diff with respect to the previous version (if specified)
 
@@ -49,11 +50,13 @@ if __name__ == "__main__":
             print("Datasets that were added")
             for d in added_datasets:
                 print(d)
+                print()
 
         if removed_datasets:
             print("Datasets that were removed")
             for d in removed_datasets:
                 print(d)
+                print()
 
         # Datasets in both versions but that have differing cell counts
         joined = prev_datasets.join(
@@ -66,6 +69,7 @@ if __name__ == "__main__":
         if not datasets_with_different_cell_counts.empty:
             print("Datasets that have a different cell count")
             print(datasets_with_different_cell_counts)
+            print()
 
         # Total cell count deltas by experiment (mouse, human)
         for organism in ["homo_sapiens", "mus_musculus"]:
@@ -74,8 +78,31 @@ if __name__ == "__main__":
             print(
                 f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}"
             )
+            print()
 
         # Deltas between summary_cell_counts dataframes
+        y = census["census_info"]["summary_cell_counts"].read().concat().to_pandas()
+        y = y.set_index(["organism", "category", "ontology_term_id"])
+
+        z = previous_census["census_info"]["summary_cell_counts"].read().concat().to_pandas()
+        z = z.set_index(["organism", "category", "ontology_term_id"])
+
+        w = y.join(z, lsuffix="_prev", rsuffix="_curr")
+        delta = w.loc[w["total_cell_count_prev"] != w["total_cell_count_curr"]][
+            ["total_cell_count_prev", "total_cell_count_curr"]
+        ].reset_index()
+        if not delta.empty:
+            print("Summary delta - total cell counts")
+            print(delta)
+            print()
+
+        delta = w.loc[w["unique_cell_count_prev"] != w["unique_cell_count_curr"]][
+            ["unique_cell_count_prev", "unique_cell_count_curr"]
+        ].reset_index()
+        if not delta.empty:
+            print("Summary delta - unique cell counts")
+            print(delta)
+            print()
 
         # Genes removed, added
         for organism in ["homo_sapiens", "mus_musculus"]:
@@ -86,8 +113,10 @@ if __name__ == "__main__":
             if new_genes:
                 print("Genes added")
                 new_genes
+                print()
 
             removed_genes = set(prev_genes["feature_id"]) - set(curr_genes["feature_id"])
             if removed_genes:
                 print("Genes removed")
                 removed_genes
+                print()
