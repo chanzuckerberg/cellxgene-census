@@ -15,6 +15,7 @@ from tools.cell_census_builder.globals import (
     CENSUS_INFO_NAME,
 )
 from tools.cell_census_builder.util import uricat
+from tools.cell_census_builder.validate import validate
 
 
 def test_base_builder_creation(
@@ -38,6 +39,10 @@ def test_base_builder_creation(
         # Query the census and do assertions
         census = cell_census.open_soma(uri=soma_path)
 
+        # validate the cell_census
+        return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore
+        assert return_value is True
+
         # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
         human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
         assert human_obs.shape[0] == 8
@@ -54,11 +59,6 @@ def test_base_builder_creation(
         returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
         assert returned_datasets.shape[0] == 2
         assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
-
-        test_directory = os.listdir(tmp_path)
-        assert len(test_directory) == 2
-        assert "soma" in test_directory
-        assert "h5ads" in test_directory
 
 
 def test_unicode_support(tmp_path: pathlib.Path) -> None:
