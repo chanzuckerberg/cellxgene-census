@@ -22,9 +22,9 @@ def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDB
 
     if not context:
         # if no user-defined context, cell_census defaults take precedence over SOMA defaults
-        tiledb_config = DEFAULT_TILEDB_CONFIGURATION
+        tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
         if s3_region is not None:
-            tiledb_config.copy()["vfs.s3.region"] = s3_region
+            tiledb_config["vfs.s3.region"] = s3_region
         context = context.replace(tiledb_config=tiledb_config)
     else:
         # if specified, the user context takes precedence _except_ for AWS Region in locator
