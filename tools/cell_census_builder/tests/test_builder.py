@@ -11,16 +11,15 @@ import pytest
 import tiledbsoma as soma
 from scipy.sparse import csc_matrix
 
-from api.python.cell_census.src import cell_census
-from tools.cell_census_builder.__main__ import build, make_experiment_builders
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.globals import (
+from cell_census_builder.__main__ import build, make_experiment_builders
+from cell_census_builder.datasets import Dataset
+from cell_census_builder.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
-from tools.cell_census_builder.mp import process_initializer
-from tools.cell_census_builder.util import uricat
+from cell_census_builder.mp import process_initializer
+from cell_census_builder.util import uricat
 
 
 class TestBuilder:
@@ -133,12 +132,12 @@ class TestBuilder:
         Runs the builder, queries the census and performs a set of base assertions.
         """
 
-        with patch("tools.cell_census_builder.__main__.prepare_file_system"), patch(
-            "tools.cell_census_builder.__main__.build_step1_get_source_assets"
+        with patch("cell_census_builder.__main__.prepare_file_system"), patch(
+            "cell_census_builder.__main__.build_step1_get_source_datasets"
         ) as get_assets:
             get_assets.return_value = datasets
 
-            experiment_builders = make_experiment_builders(uricat(self.soma_path, CENSUS_DATA_NAME), [])  # type: ignore
+            experiment_builders = make_experiment_builders()  # type: ignore
             from types import SimpleNamespace
 
             args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
@@ -148,24 +147,23 @@ class TestBuilder:
             assert return_value == 0
 
             # Query the census and do assertions
-            census = cell_census.open_soma(uri=self.soma_path)
+            with soma.Collection.open(uri=self.soma_path) as census:
+                # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
+                human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
+                assert human_obs.shape[0] == 8
 
-            # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
-            human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
-            assert human_obs.shape[0] == 8
+                # mus_musculus should have 0 cells
+                mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
+                assert mouse_obs.shape[0] == 0
 
-            # mus_musculus should have 0 cells
-            mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
-            assert mouse_obs.shape[0] == 0
+                # There are only 4 unique genes
+                var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
+                assert var.shape[0] == 4
 
-            # There are only 4 unique genes
-            var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
-            assert var.shape[0] == 4
-
-            # There should be 2 datasets
-            returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
-            assert returned_datasets.shape[0] == 2
-            assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
+                # There should be 2 datasets
+                returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
+                assert returned_datasets.shape[0] == 2
+                assert list(returned_datasets["dataset_id"]) == ["first_id", "second_id"]
 
     def test_unicode_support(self) -> None:
         """
@@ -176,11 +174,10 @@ class TestBuilder:
         with TemporaryDirectory() as d:
             pd_df = pd.DataFrame(data={"value": ["Ünicode", "S̈upport"]}, columns=["value"])
             pd_df["soma_joinid"] = pd_df.index
-            s_df = soma.DataFrame(uri=os.path.join(d, "unicode_support")).create(
-                pa.Schema.from_pandas(pd_df, preserve_index=False), index_column_names=["soma_joinid"]
-            )
-            s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
+            with soma.DataFrame.create(uri=os.path.join(d, "unicode_support"),
+                                       schema=pa.Schema.from_pandas(pd_df, preserve_index=False),
+                                       index_column_names=["soma_joinid"]) as s_df:
+                s_df.write(pa.Table.from_pandas(pd_df, preserve_index=False))
 
-            pd_df_in = soma.DataFrame(uri=os.path.join(d, "unicode_support")).read().concat().to_pandas()
-
-            assert pd_df_in["value"].to_list() == ["Ünicode", "S̈upport"]
+            with soma.DataFrame.open(uri=os.path.join(d, "unicode_support")) as pd_df_in:
+                assert  pd_df_in.read().concat().to_pandas()["value"].to_list() == ["Ünicode", "S̈upport"]
