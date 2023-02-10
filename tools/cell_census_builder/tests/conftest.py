@@ -6,9 +6,14 @@ import anndata
 import numpy as np
 import pandas as pd
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 from scipy.sparse import csc_matrix
 
 from tools.cell_census_builder.datasets import Dataset
+from tools.cell_census_builder.globals import (
+    CENSUS_X_LAYERS_PLATFORM_CONFIG,
+)
+from tools.cell_census_builder.mp import process_initializer
 
 
 def h5ad() -> anndata.AnnData:
@@ -99,3 +104,14 @@ def datasets(assets_path: str) -> List[Dataset]:
         Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
         Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
     ]
+
+
+@pytest.fixture()
+def setup(monkeypatch: MonkeyPatch) -> None:
+    process_initializer()
+    monkeypatch.setitem(
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"], "tile", 2  # type: ignore
+    )
+    monkeypatch.setitem(
+        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2  # type: ignore
+    )

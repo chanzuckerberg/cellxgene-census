@@ -441,9 +441,9 @@ def validate(
     Will raise if validation fails. Returns True on success.
     """
     logging.info("Validation start")
-
+    assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
     assert os.path.exists(soma_path) and os.path.exists(assets_path)
-
+    assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
     assert validate_all_soma_objects_exist(soma_path, experiment_builders)
 
     datasets = load_datasets_from_census(assets_path, soma_path)
