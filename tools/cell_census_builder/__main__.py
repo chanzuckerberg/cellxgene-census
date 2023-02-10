@@ -219,7 +219,9 @@ def build_step2_create_root_collection(
         return root_collection
 
 
-def filter_datasets_and_accumulate_axes(assets_path, datasets, experiment_builders):
+def filter_datasets_and_accumulate_axes(
+    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
+) -> List[Dataset]:
     # Accumulate obs and var axes (and remember the datasets that pass our filter)
     filtered_datasets = []
     N = len(datasets) * len(experiment_builders)

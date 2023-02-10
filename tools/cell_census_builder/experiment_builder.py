@@ -204,7 +204,7 @@ class ExperimentBuilder:
         self.n_datasets += 1
         return len(obs_df)
 
-    def populate_obs_axis(self):
+    def populate_obs_axis(self) -> None:
         logging.info(f"experiment {self.name} obs = {self.obs_df.shape}")
         pa_table = pa.Table.from_pandas(
             self.obs_df,
