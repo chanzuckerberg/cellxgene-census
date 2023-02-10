@@ -69,8 +69,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert census.soma_type == "SOMACollection"
         assert soma.Collection.exists(census.uri)
-        logging.info(soma_path)
-        logging.info(dict(census.metadata.items()))
         assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
         assert (
             "census_schema_version" in census.metadata and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
@@ -318,32 +316,32 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
 def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str, int, int]) -> bool:
     """Validate that all X layers have no duplicate coordinates"""
     soma_path, experiment_builder, layer_name, row_range_start, row_range_stop = args
-    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
-    census_data = census[CENSUS_DATA_NAME]
-    se = census_data[experiment_builder.name]
-    logging.info(
-        f"validate_no_dups_X start, {experiment_builder.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
-    )
-    if layer_name not in se.ms["RNA"].X:
+    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+        census_data = census[CENSUS_DATA_NAME]
+        se = census_data[experiment_builder.name]
+        logging.info(
+            f"validate_no_dups_X start, {experiment_builder.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+        )
+        if layer_name not in se.ms["RNA"].X:
+            return True
+
+        X_layer = se.ms["RNA"].X[layer_name]
+        n_rows, n_cols = X_layer.shape
+        ROW_SLICE_SIZE = 100_000
+
+        for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
+            # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape.
+            # TODO: remove when issue is resolved.
+            end_row = min(row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
+
+            slice_of_X = X_layer.read(coords=(slice(row, end_row),)).tables().concat()
+
+            # Use C layout offset for unique test
+            offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
+            unique_offsets = np.unique(offsets)
+            assert len(offsets) == len(unique_offsets)
+
         return True
-
-    X_layer = se.ms["RNA"].X[layer_name]
-    n_rows, n_cols = X_layer.shape
-    ROW_SLICE_SIZE = 100_000
-
-    for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
-        # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape.
-        # TODO: remove when issue is resolved.
-        end_row = min(row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
-
-        slice_of_X = X_layer.read(coords=(slice(row, end_row),)).tables().concat()
-
-        # Use C layout offset for unique test
-        offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
-        unique_offsets = np.unique(offsets)
-        assert len(offsets) == len(unique_offsets)
-
-    return True
 
 
 def validate_X_layers(
@@ -369,7 +367,8 @@ def validate_X_layers(
             census_obs_df = se.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
             n_obs = len(census_obs_df)
             logging.info(f'uri = {se.obs.uri}, eb.n_obs = {eb.n_obs}; n_obs = {n_obs}')
-            # TODO: Only works when run as builder, not standalone validator
+            # TODO: Only works when run as builder, not standalone validator, since ExpBuilder is not fully initialized
+            #  in the latter case
             assert eb.n_obs == n_obs
             census_var_df = se.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
             n_vars = len(census_var_df)

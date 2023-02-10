@@ -133,7 +133,7 @@ def build(
     gc.collect()
 
     # Write out dataset manifest and summary information
-    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, 'w') as census_info:
+    with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, 'w', context=SOMA_TileDB_Context()) as census_info:
         create_dataset_manifest(census_info, filtered_datasets)
         create_census_summary_cell_counts(
             census_info, [e.census_summary_cell_counts for e in experiment_builders]
@@ -152,9 +152,6 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
 
     Returns the root collection.
     """
-    # if root_collection.exists():
-    #     logging.error("Census already exists - aborting")
-    #     raise Exception("Census already exists - aborting")
 
     # Set root metadata for the experiment
     root_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")

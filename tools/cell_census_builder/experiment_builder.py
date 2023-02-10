@@ -27,7 +27,7 @@ from .globals import (
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
-    MEASUREMENT_RNA_NAME,
+    MEASUREMENT_RNA_NAME, SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor
 from .source_assets import cat_file
@@ -316,7 +316,7 @@ class ExperimentBuilder:
 
     def reopen_for_write(self) -> Experiment:
         assert self.experiment.closed
-        self.experiment = soma.Experiment.open(self.experiment.uri, 'w')
+        self.experiment = soma.Experiment.open(self.experiment.uri, 'w', context=SOMA_TileDB_Context())
         return self.experiment
 
 

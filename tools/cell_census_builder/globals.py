@@ -1,3 +1,5 @@
+import logging
+import time
 from typing import Set
 
 import pyarrow as pa
@@ -216,11 +218,26 @@ _SOMA_TileDB_Context: soma.options.SOMATileDBContext = None
 # Global TileDB context
 _TileDB_Ctx: tiledb.Ctx = None
 
+# The logical timestamp at which all builder data should be recorded
+WRITE_TIMESTAMP = int(time.time() * 1000)
+
+# Using "end of time" for read_timestamp means that all writes are visible, no matter what write timestamp was used
+END_OF_TIME = 0xFFFFFFFFFFFFFFFF
 
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
     global _SOMA_TileDB_Context
     if _SOMA_TileDB_Context is None:
-        _SOMA_TileDB_Context = soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx())
+        # Set write timestamp to "now", so that we use consistent timestamps across all writes (mostly for aesthetic
+        # reasons). Set read timestamps to be same as write timestamp so that post-build validation reads can "see"
+        # the writes. Without setting read timestamp explicitly, the read timestamp would default to a time that
+        # prevents seeing the builder's writes.
+        _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
+            tiledb_ctx=TileDB_Ctx(),
+            # TODO: Setting an explicit write timestamp causes later reads to fail!
+            #write_timestamp=write_timestamp,
+            # TODO: We *should* be able to set this equal to WRITE_TIMESTAMP, but as specifying a write_timestamp is
+            #  problematic, we must use "end of time" for now
+            read_timestamp=END_OF_TIME)
     return _SOMA_TileDB_Context
 
 
