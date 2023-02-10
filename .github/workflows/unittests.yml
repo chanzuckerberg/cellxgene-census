@@ -28,7 +28,7 @@ jobs:
       - name: Test with pytest (API)
         run: |
           pytest ./api/python/cell_census/tests/
-jobs:
+          
   unit_tests_builder:
         runs-on: ubuntu-latest
 
