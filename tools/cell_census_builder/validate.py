@@ -119,7 +119,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 
             e = census_data[eb.name]
             with tiledb.Group(e.uri) as e_group:
-                assert "obs" in e and e.obs.exists() and e.obs.soma_type == "SOMADataFrame"
+                assert (
+                    "obs" in e
+                    and e.obs.exists()
+                    and e.obs.soma_type == "SOMADataFrame"
+                    and len(tiledb.array_fragments(e.obs)) == 1
+                )
                 assert e_group.is_relative("obs")
                 assert "ms" in e and e.ms.exists() and e.ms.soma_type == "SOMACollection"
                 assert e_group.is_relative("ms")
@@ -134,7 +139,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             with tiledb.Group(rna.uri) as rna_group:
                 assert "var" in rna and rna["var"].exists() and rna["var"].soma_type == "SOMADataFrame"
                 assert rna_group.is_relative("var")
-                assert "X" in rna and rna["X"].exists() and rna["X"].soma_type == "SOMACollection"
+                assert (
+                    "X" in rna
+                    and rna["X"].exists()
+                    and rna["X"].soma_type == "SOMACollection"
+                    and len(tiledb.array_fragments(rna.X.uri)) == 1
+                )
                 assert rna_group.is_relative("X")
 
                 with tiledb.Group(rna.X.uri) as x_group:
@@ -142,7 +152,11 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                         # layers only exist if there are cells in the measurement
 
                         if lyr in rna.X:
-                            assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNDArray"
+                            assert (
+                                rna.X[lyr].exists()
+                                and rna.X[lyr].soma_type == "SOMASparseNDArray"
+                                and len(tiledb.array_fragments(rna.X[lyr].uri)) == 1
+                            )
                             x_group.is_relative(lyr)
 
                 # and a dataset presence matrix
@@ -152,6 +166,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                     assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
                     # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
                     assert rna_group.is_relative(FEATURE_DATASET_PRESENCE_MATRIX_NAME)
+                    assert len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
 
     return True
 
