@@ -101,8 +101,24 @@ def datasets(assets_path: str) -> List[Dataset]:
     second_h5ad.write_h5ad(second_h5ad_path)
 
     return [
-        Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
-        Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
+        Dataset(
+            dataset_id="first_id",
+            dataset_title="title1",
+            collection_id="1",
+            collection_name="collection 1",
+            collection_doi="doi1",
+            corpora_asset_h5ad_uri="mock",
+            dataset_h5ad_path=first_h5ad_path,
+        ),
+        Dataset(
+            dataset_id="second_id",
+            dataset_title="title2",
+            collection_id="2",
+            collection_name="collection 2",
+            collection_doi="doi2",
+            corpora_asset_h5ad_uri="mock",
+            dataset_h5ad_path=second_h5ad_path,
+        ),
     ]
 
 

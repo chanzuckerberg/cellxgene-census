@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
@@ -90,6 +91,14 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             assert census_info[name].soma_type == "SOMADataFrame"
             assert census_info[name].exists()
             assert census_info_group.is_relative(name)
+
+    # verify required dataset fields are set
+    census_info[CENSUS_DATASETS_NAME]
+    df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
+    assert not all(df["collection_id"].isin([""]))
+    assert not all(df["collection_name"].isin([""]))
+    assert not all(df["collection_doi"].isin([""]))
+    assert not all(df["dataset_title"].isin([""]))
 
     assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
     assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
