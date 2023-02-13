@@ -50,11 +50,17 @@ if __name__ == "__main__":
             print("Datasets that were added")
             added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)]
             print(added_datasets_df[["dataset_id", "dataset_title", "collection_name"]])
+        else:
+            print("No datasets were added")
+        print()
 
         if removed_datasets:
             print("Datasets that were removed")
             removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)]
             print(removed_datasets_df[["dataset_id", "dataset_title", "collection_name"]])
+        else:
+            print("No datasets were removed")
+        print()
 
         # Datasets in both versions but that have differing cell counts
         joined = prev_datasets.join(
@@ -70,9 +76,10 @@ if __name__ == "__main__":
             print()
 
         # Total cell count deltas by experiment (mouse, human)
-        for organism in ["homo_sapiens", "mus_musculus"]:
-            curr_count = census[CENSUS_DATA_NAME][organism]["obs"].count
-            prev_count = previous_census[CENSUS_DATA_NAME][organism]["obs"].count
+
+        for organism in census[CENSUS_DATA_NAME]:
+            curr_count = census[CENSUS_DATA_NAME][organism].obs.count
+            prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
             print(
                 f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}"
             )
@@ -103,18 +110,22 @@ if __name__ == "__main__":
             print()
 
         # Genes removed, added
-        for organism in ["homo_sapiens", "mus_musculus"]:
-            curr_genes = census[CENSUS_DATA_NAME][organism]["ms"]["RNA"]["var"].read().concat().to_pandas()
-            prev_genes = previous_census[CENSUS_DATA_NAME][organism]["ms"]["RNA"]["var"].read().concat().to_pandas()
+        for organism in census[CENSUS_DATA_NAME]:
+            curr_genes = census[CENSUS_DATA_NAME][organism].ms["RNA"].var.read().concat().to_pandas()
+            prev_genes = previous_census[CENSUS_DATA_NAME][organism].ms["RNA"].var.read().concat().to_pandas()
 
             new_genes = set(curr_genes["feature_id"]) - set(prev_genes["feature_id"])
             if new_genes:
                 print("Genes added")
-                new_genes
+                print(new_genes)
+            else:
+                "No genes were added."
                 print()
 
             removed_genes = set(prev_genes["feature_id"]) - set(curr_genes["feature_id"])
             if removed_genes:
                 print("Genes removed")
-                removed_genes
+                print(removed_genes)
+            else:
+                "No genes were removed."
                 print()
