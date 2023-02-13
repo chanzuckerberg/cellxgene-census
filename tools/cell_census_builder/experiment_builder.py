@@ -433,7 +433,7 @@ def populate_X_layers(
     assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: argparse.Namespace
 ) -> None:
     """
-    Do all X layer processing for all Experiments.
+    Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
     """
 
     # populate X layers

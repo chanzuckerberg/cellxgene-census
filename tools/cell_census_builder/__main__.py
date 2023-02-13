@@ -8,8 +8,8 @@ from contextlib import ExitStack
 from datetime import datetime, timezone
 from typing import List
 
-import pyarrow as pa
 import tiledbsoma as soma
+import pyarrow as pa
 
 from .anndata import open_anndata
 from .census_summary import create_census_summary
@@ -21,9 +21,8 @@ from .globals import (
     CENSUS_INFO_NAME,
     CENSUS_SCHEMA_VERSION,
     CXG_SCHEMA_VERSION,
-    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     RNA_SEQ,
-    SOMA_TileDB_Context,
+    SOMA_TileDB_Context, FEATURE_DATASET_PRESENCE_MATRIX_NAME,
 )
 from .manifest import load_manifest
 from .mp import process_initializer
@@ -245,14 +244,14 @@ def accumulate_axes(assets_path: str, datasets: List[Dataset], experiment_builde
     n = 1
     dataset_total_cell_count = 0
 
-    # obs and var prep
+    # append to `obs`; accumulate `var` data
     for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-        for e in experiment_builders:
-            logging.info(f"{e.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
-            dataset_total_cell_count += e.accumulate_axes(dataset, ad)
+        for eb in experiment_builders:
+            logging.info(f"{eb.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
+            dataset_total_cell_count += eb.accumulate_axes(dataset, ad)
             n += 1
 
-    # var & presence
+    # populate `var`; create empty `presence` now that we have its dimensions
     if len(datasets) > 0:
         for eb in experiment_builders:
             eb.populate_var_axis()
@@ -289,7 +288,11 @@ def build_step3_populate_axes_and_X_layers(
         # Process all X data
         for eb in experiment_builders:
             eb.create_X_with_layers()
+
         populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
+
+        for eb in experiment_builders:
+            eb.populate_presence_matrix(filtered_datasets)
 
     logging.info("Build step 3 - X layer creation - finished")
 

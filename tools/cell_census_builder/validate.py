@@ -130,9 +130,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 
             # and a dataset presence matrix
             # dataset presence only exists if there are cells in the measurement
-            if FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna:
+            if eb.n_obs > 0:
+                assert FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
                 assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
+                presence = rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].read().tables().concat().to_pandas()
+                assert len(presence) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
         return True
