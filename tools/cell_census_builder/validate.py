@@ -57,7 +57,7 @@ class EbInfo:
 
 def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
     """
-    Validate all objects present, stored in the same relative path, and contain expected metadata.
+    Validate all objects present, stored in the same relative path, consolidated, and contain expected metadata.
 
     soma_path
         +-- census_info
@@ -68,6 +68,9 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         |   +-- homo_sapiens: soma.Experiment
         |   +-- mus_musculus: soma.Experiment
     """
+    error_tiledb_group = "tiledb_group's children are not relative"
+    error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
+
     census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
     assert census.exists() and census.soma_type == "SOMACollection"
     assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
@@ -100,6 +103,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     assert not all(df["collection_doi"].isin([""]))
     assert not all(df["dataset_title"].isin([""]))
 
+    # verify soma_joinid
     assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
     assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
         list(CENSUS_SUMMARY_CELL_COUNTS_COLUMNS) + ["soma_joinid"]
@@ -114,50 +118,38 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                 eb.name in census_data
                 and census_data[eb.name].exists()
                 and census_data[eb.name].soma_type == "SOMAExperiment"
-                and census_data_group.is_relative(eb.name)
             )
-
+            assert census_data_group.is_relative(eb.name), error_tiledb_group
             e = census_data[eb.name]
             with tiledb.Group(e.uri) as e_group:
-                assert (
-                    "obs" in e
-                    and e.obs.exists()
-                    and e.obs.soma_type == "SOMADataFrame"
-                    and len(tiledb.array_fragments(e.obs)) == 1
-                )
-                assert e_group.is_relative("obs")
+                assert "obs" in e and e.obs.exists() and e.obs.soma_type == "SOMADataFrame"
+                assert len(tiledb.array_fragments(e.obs)) == 1, error_layer_fragment
+                assert e_group.is_relative("obs"), error_tiledb_group
                 assert "ms" in e and e.ms.exists() and e.ms.soma_type == "SOMACollection"
-                assert e_group.is_relative("ms")
+                assert e_group.is_relative("ms"), error_tiledb_group
 
             # there should be a single measurement called 'RNA'
             assert "RNA" in e.ms and e.ms["RNA"].exists() and e.ms["RNA"].soma_type == "SOMAMeasurement"
             with tiledb.Group(e.ms.uri) as e_ms_group:
-                assert e_ms_group.is_relative("RNA")
+                assert e_ms_group.is_relative("RNA"), error_tiledb_group
 
             # The measurement should contain all X layers where n_obs > 0 (existence checked elsewhere)
             rna = e.ms["RNA"]
             with tiledb.Group(rna.uri) as rna_group:
                 assert "var" in rna and rna["var"].exists() and rna["var"].soma_type == "SOMADataFrame"
-                assert rna_group.is_relative("var")
-                assert (
-                    "X" in rna
-                    and rna["X"].exists()
-                    and rna["X"].soma_type == "SOMACollection"
-                    and len(tiledb.array_fragments(rna.X.uri)) == 1
-                )
-                assert rna_group.is_relative("X")
+                assert rna_group.is_relative("var"), error_tiledb_group
+                assert "X" in rna and rna["X"].exists() and rna["X"].soma_type == "SOMACollection"
+                assert len(tiledb.array_fragments(rna.X.uri)) == 1, error_layer_fragment
+                assert rna_group.is_relative("X"), error_tiledb_group
 
                 with tiledb.Group(rna.X.uri) as x_group:
                     for lyr in CENSUS_X_LAYERS:
                         # layers only exist if there are cells in the measurement
 
                         if lyr in rna.X:
-                            assert (
-                                rna.X[lyr].exists()
-                                and rna.X[lyr].soma_type == "SOMASparseNDArray"
-                                and len(tiledb.array_fragments(rna.X[lyr].uri)) == 1
-                            )
-                            x_group.is_relative(lyr)
+                            assert rna.X[lyr].exists() and rna.X[lyr].soma_type == "SOMASparseNDArray"
+                            assert len(tiledb.array_fragments(rna.X[lyr].uri)) == 1, error_layer_fragment
+                            assert x_group.is_relative(lyr), error_tiledb_group
 
                 # and a dataset presence matrix
                 # dataset presence only exists if there are cells in the measurement
@@ -165,8 +157,10 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                     assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].exists()
                     assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
                     # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
-                    assert rna_group.is_relative(FEATURE_DATASET_PRESENCE_MATRIX_NAME)
-                    assert len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
+                    assert rna_group.is_relative(FEATURE_DATASET_PRESENCE_MATRIX_NAME), error_tiledb_group
+                    assert (
+                        len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
+                    ), error_layer_fragment
 
     return True
 
@@ -476,6 +470,14 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     return True
 
 
+def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
+    """Verify that the entire census is a single directory tree"""
+    assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
+    assert os.path.exists(soma_path) and os.path.exists(assets_path)
+    assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
+    return True
+
+
 def validate(
     args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> bool:
@@ -485,10 +487,7 @@ def validate(
     Will raise if validation fails. Returns True on success.
     """
     logging.info("Validation start")
-    assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
-    assert os.path.exists(soma_path) and os.path.exists(assets_path)
-    assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
-
+    assert validate_directory_structure(soma_path, assets_path)
     assert validate_all_soma_objects_exist(soma_path, experiment_builders)
 
     datasets = load_datasets_from_census(assets_path, soma_path)
