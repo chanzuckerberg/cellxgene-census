@@ -60,7 +60,6 @@ def load_manifest_from_CxG() -> List[Dataset]:
             "collection_id": collection["id"],
             "collection_name": null_to_empty_str(collection["name"]),
             "collection_doi": null_to_empty_str(collection["doi"]),
-            "dataset_title": dataset["title"],
             "dataset_id": dataset["id"],
         }
         for collection in collections
