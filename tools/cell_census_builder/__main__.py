@@ -8,8 +8,8 @@ from contextlib import ExitStack
 from datetime import datetime, timezone
 from typing import List
 
-import tiledbsoma as soma
 import pyarrow as pa
+import tiledbsoma as soma
 
 from .anndata import open_anndata
 from .census_summary import create_census_summary
@@ -21,8 +21,9 @@ from .globals import (
     CENSUS_INFO_NAME,
     CENSUS_SCHEMA_VERSION,
     CXG_SCHEMA_VERSION,
+    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     RNA_SEQ,
-    SOMA_TileDB_Context, FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
 from .mp import process_initializer
