@@ -48,15 +48,13 @@ if __name__ == "__main__":
         removed_datasets = prev_dataset_ids - curr_datasets_ids
         if added_datasets:
             print("Datasets that were added")
-            for d in added_datasets:
-                print(d)
-                print()
+            added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)]
+            print(added_datasets_df[["dataset_id", "dataset_title", "collection_name"]])
 
         if removed_datasets:
             print("Datasets that were removed")
-            for d in removed_datasets:
-                print(d)
-                print()
+            removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)]
+            print(removed_datasets_df[["dataset_id", "dataset_title", "collection_name"]])
 
         # Datasets in both versions but that have differing cell counts
         joined = prev_datasets.join(
