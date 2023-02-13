@@ -68,8 +68,8 @@ def get_anndata(
 
     """
     exp = get_experiment(census, organism)
-    obs_coords = (obs_coords,) if obs_coords else (slice(None),)
-    var_coords = (var_coords,) if var_coords else (slice(None),)
+    obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
+    var_coords = (slice(None),) if var_coords is None else (var_coords,)
     with exp.axis_query(
         measurement_name,
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
