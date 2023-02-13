@@ -123,7 +123,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             e = census_data[eb.name]
             with tiledb.Group(e.uri) as e_group:
                 assert "obs" in e and e.obs.exists() and e.obs.soma_type == "SOMADataFrame"
-                assert len(tiledb.array_fragments(e.obs)) == 1, error_layer_fragment
+                assert len(tiledb.array_fragments(e.obs.uri)) == 1, error_layer_fragment
                 assert e_group.is_relative("obs"), error_tiledb_group
                 assert "ms" in e and e.ms.exists() and e.ms.soma_type == "SOMACollection"
                 assert e_group.is_relative("ms"), error_tiledb_group
@@ -139,7 +139,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                 assert "var" in rna and rna["var"].exists() and rna["var"].soma_type == "SOMADataFrame"
                 assert rna_group.is_relative("var"), error_tiledb_group
                 assert "X" in rna and rna["X"].exists() and rna["X"].soma_type == "SOMACollection"
-                assert len(tiledb.array_fragments(rna.X.uri)) == 1, error_layer_fragment
                 assert rna_group.is_relative("X"), error_tiledb_group
 
                 with tiledb.Group(rna.X.uri) as x_group:

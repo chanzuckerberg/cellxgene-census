@@ -30,7 +30,7 @@ def test_base_builder_creation(
         experiment_builders = make_experiment_builders(uricat(soma_path, CENSUS_DATA_NAME), [])  # type: ignore
         from types import SimpleNamespace
 
-        args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
+        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", max_workers=1, verbose=True)
         return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore
 
         # return_value = 0 means that the build succeeded
