@@ -72,7 +72,6 @@ def main() -> int:
     process_initializer(args.verbose)
 
     # normalize our base URI - must include trailing slash
-    args.uri = args.uri if args.uri.endswith("/") else args.uri + "/"
     soma_path = uricat(args.uri, args.build_tag, "soma")
     assets_path = uricat(args.uri, args.build_tag, "h5ads")
 
@@ -87,9 +86,26 @@ def main() -> int:
         assert cc != 0 or all(e.is_finished() for e in experiment_builders)
 
     if cc == 0 and (args.subcommand == "validate" or args.validate):
-        validate(args, experiment_builders)
+        validate(args, soma_path, assets_path, experiment_builders)
 
     return cc
+
+
+def prepare_file_system(soma_path: str, assets_path: str, args: argparse.Namespace) -> None:
+    """
+    Prepares the file system for the builder run
+    """
+    # Don't clobber an existing census build
+    if os.path.exists(soma_path) or os.path.exists(assets_path):
+        raise Exception("Census build path already exists - aborting build")
+
+    # Ensure that the git tree is clean
+    if not args.test_disable_dirty_git_check and is_git_repo_dirty():
+        raise Exception("The git repo has uncommitted changes - aborting build")
+
+    # Create top-level build directories
+    os.makedirs(soma_path, exist_ok=False)
+    os.makedirs(assets_path, exist_ok=False)
 
 
 def build(
@@ -111,19 +127,11 @@ def build(
         suitable for providing to sys.exit()
     """
 
-    # Don't clobber an existing census build
-    if os.path.exists(soma_path) or os.path.exists(assets_path):
-        logging.error("Census build path already exists - aborting build")
+    try:
+        prepare_file_system(soma_path, assets_path, args)
+    except Exception as e:
+        logging.error(e)
         return 1
-
-    # Ensure that the git tree is clean
-    if not args.test_disable_dirty_git_check and is_git_repo_dirty():
-        logging.error("The git repo has uncommitted changes - aborting build")
-        return 1
-
-    # Create top-level build directories
-    os.makedirs(soma_path, exist_ok=False)
-    os.makedirs(assets_path, exist_ok=False)
 
     # Step 1 - get all source assets
     datasets = build_step1_get_source_assets(args, assets_path)
