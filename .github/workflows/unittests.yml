@@ -31,7 +31,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: /home/runner/work/cell-census/.coverage*
+          path: ./.coverage*
           retention-days: 3
 
   unit_tests_builder:
@@ -59,7 +59,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: /home/runner/work/cell-census/.coverage*
+          path: ./.coverage*
           retention-days: 3
 
   submit-codecoverage:
