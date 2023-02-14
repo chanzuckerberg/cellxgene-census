@@ -133,10 +133,11 @@ def build(
     # Step 1 - get all source datasets
     datasets = build_step1_get_source_datasets(args, assets_path)
     filtered_datasets = filter_datasets(assets_path, datasets, experiment_builders)
+
     assign_soma_joinids(filtered_datasets)
 
     # Step 2 - create root collection, and all child objects, but do not populate X layers
-    root_collection = build_step2_create_root_collection(soma_path, filtered_datasets, experiment_builders)
+    root_collection = build_step2_create_root_collection(soma_path, experiment_builders)
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
     gc.collect()
 
@@ -197,7 +198,7 @@ def build_step1_get_source_datasets(args: argparse.Namespace, assets_path: str) 
 
 
 def build_step2_create_root_collection(
-    soma_path: str, filtered_datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
+    soma_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> soma.Collection:
     """
     Create all objects, and populate the axis dataframes.
@@ -211,7 +212,6 @@ def build_step2_create_root_collection(
 
         for e in experiment_builders:
             e.create(census_data=root_collection[CENSUS_DATA_NAME])
-            logging.info(f"Experiment {e.name} will contain {e.n_obs} cells from {e.n_datasets} datasets")
 
         logging.info("Build step 2 - axis creation - finished")
         return root_collection
@@ -236,6 +236,7 @@ def filter_datasets(
         dataset.dataset_total_cell_count = dataset_total_cell_count
         if dataset_total_cell_count > 0:
             filtered_datasets.append(dataset)
+
     return filtered_datasets
 
 
@@ -249,6 +250,7 @@ def accumulate_axes(assets_path: str, datasets: List[Dataset], experiment_builde
         for eb in reopen_experiment_builders(experiment_builders):
             logging.info(f"{eb.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
             dataset_total_cell_count += eb.accumulate_axes(dataset, ad)
+            logging.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
             n += 1
 
     # populate `var`; create empty `presence` now that we have its dimensions
