@@ -7,10 +7,10 @@ import pandas as pd
 from tools.cell_census_builder.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
 
 # Print all of the Pandas DataFrames, except the dimensions
-pd.options.display.max_columns = None
-pd.options.display.max_rows = None
+pd.options.display.max_columns = None  # type: ignore[assignment] # None is legal per Pandas documentation.
+pd.options.display.max_rows = None  # type: ignore[assignment] # None is legal per Pandas documentation.
 pd.options.display.width = 1024
-pd.options.display.show_dimensions = False
+pd.options.display.show_dimensions = False  # type: ignore[assignment] # boolean is legal per Pandas documentation.
 
 
 def display_summary(census_version: str) -> int:
