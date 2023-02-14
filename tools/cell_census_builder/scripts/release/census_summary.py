@@ -63,7 +63,7 @@ def display_diff(census_version: str, previous_census_version: str) -> int:
     added_datasets = curr_datasets_ids - prev_dataset_ids
     removed_datasets = prev_dataset_ids - curr_datasets_ids
     if added_datasets:
-        print("Datasets that were added")
+        print(f"Datasets that were added ({len(added_datasets)})")
         added_datasets_df = curr_datasets[curr_datasets["dataset_id"].isin(added_datasets)]
         print(added_datasets_df[["dataset_id", "dataset_title", "collection_name"]])
     else:
@@ -71,7 +71,7 @@ def display_diff(census_version: str, previous_census_version: str) -> int:
     print()
 
     if removed_datasets:
-        print("Datasets that were removed")
+        print(f"Datasets that were removed ({len(removed_datasets)}")
         removed_datasets_df = prev_datasets[prev_datasets["dataset_id"].isin(removed_datasets)]
         print(removed_datasets_df[["dataset_id", "dataset_title", "collection_name"]])
     else:
