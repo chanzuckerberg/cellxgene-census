@@ -3,7 +3,8 @@ import concurrent.futures
 import gc
 import io
 import logging
-from typing import Dict, List, Optional, Sequence, Tuple, TypedDict, Union, overload
+from contextlib import ExitStack
+from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypedDict, Union, overload
 
 import anndata
 import numpy as np
@@ -12,7 +13,6 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
-from somacore.experiment import Experiment
 from tiledbsoma.tiledb_object import TileDBObject
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
@@ -94,10 +94,26 @@ class ExperimentBuilder:
         self.dataset_obs_joinid_start: Dict[str, int] = {}
         self.census_summary_cell_counts = init_summary_counts_accumulator()
         self.experiment: Optional[soma.Experiment] = None  # initialized in create()
+        self.experiment_uri: Optional[str] = None  # initialized in create()
         self.global_var_joinids: Optional[pd.DataFrame] = None
         self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
 
         self.load_assets()
+
+    def __getstate__(self):
+        """
+        Avoid pickling Experiment which cannot be serialized
+        """
+        state = self.__dict__.copy()
+        del state["experiment"]
+        return state
+
+    def __setstate__(self, state):
+        """
+        Restore `experiment` slot when unpickling
+        """
+        self.__dict__.update(state)
+        self.experiment = None
 
     def load_assets(self) -> None:
         """
@@ -120,6 +136,7 @@ class ExperimentBuilder:
         logging.info(f"{self.name}: create experiment at {uricat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
+        self.experiment_uri = self.experiment.uri
 
         # create `ms`
         ms = self.experiment.add_new_collection("ms")
@@ -194,6 +211,8 @@ class ExperimentBuilder:
         return len(obs_df)
 
     def populate_obs_axis(self, obs_df: pd.DataFrame) -> None:
+        _assert_open_for_write(self.experiment)
+
         logging.info(f"experiment {self.name} obs = {obs_df.shape}")
         pa_table = pa.Table.from_pandas(
             obs_df,
@@ -277,11 +296,6 @@ class ExperimentBuilder:
             fdpm: soma.SparseNDArray = self.experiment.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
-    def reopen_for_write(self) -> Experiment:
-        assert self.experiment.closed
-        self.experiment = soma.Experiment.open(self.experiment.uri, "w", context=SOMA_TileDB_Context())
-        return self.experiment
-
 
 def _accumulate_all_X_layers(
     assets_path: str,
@@ -344,7 +358,8 @@ def _accumulate_all_X_layers(
             assert (col >= 0).all()
             X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
             X_remap.eliminate_zeros()
-            eb.experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
+            with soma.Experiment.open(eb.experiment_uri, "w") as experiment:
+                experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
             gc.collect()
 
         # Save presence information by dataset_id
@@ -406,7 +421,6 @@ def _accumulate_X(
     """
     for eb in experiment_builders:
         # sanity checks
-        _assert_open_for_write(eb.experiment)
         assert eb.dataset_obs_joinid_start is not None
 
     dataset_obs_joinid_starts = [
@@ -495,3 +509,21 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
         id: tissue_mapper.get_label_from_writable_id(id) for id in tissue_general_id_map.values()
     }
     obs_df["tissue_general"] = obs_df.tissue_general_ontology_term_id.map(tissue_general_label_map)
+
+
+def reopen_experiment_builders(
+    experiment_builders: List[ExperimentBuilder],
+) -> Generator[ExperimentBuilder, None, None]:
+    """
+    Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use
+    the experiment for writing, without having to explicitly close it.
+    """
+    with ExitStack() as experiments_stack:
+        for eb in experiment_builders:
+            # open experiments for write and ensure they are closed when exiting
+            assert eb.experiment.closed
+            eb.experiment = soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context())
+            experiments_stack.enter_context(eb.experiment)
+
+        for eb in experiment_builders:
+            yield eb
