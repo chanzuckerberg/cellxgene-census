@@ -12,6 +12,7 @@ pd.options.display.max_rows = None
 pd.options.display.width = 1024
 pd.options.display.show_dimensions = False
 
+
 def display_summary(census_version: str) -> int:
     census = cell_census.open_soma(census_version=census_version)
 
