@@ -6,6 +6,11 @@ import pandas as pd
 
 from tools.cell_census_builder.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
 
+# Print all of the Pandas DataFrames, except the dimensions
+pd.options.display.max_columns = None
+pd.options.display.max_rows = None
+pd.options.display.width = 1024
+pd.options.display.show_dimensions = False
 
 def display_summary(census_version: str) -> int:
     census = cell_census.open_soma(census_version=census_version)
@@ -37,6 +42,16 @@ def display_summary(census_version: str) -> int:
 def display_diff(census_version: str, previous_census_version: str) -> int:
     census = cell_census.open_soma(census_version=census_version)
     previous_census = cell_census.open_soma(census_version=previous_census_version)
+
+    # Total cell count deltas by experiment (mouse, human)
+
+    for organism in census[CENSUS_DATA_NAME]:
+        curr_count = census[CENSUS_DATA_NAME][organism].obs.count
+        prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
+        print(
+            f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}"
+        )
+        print()
 
     prev_datasets = previous_census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
     curr_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
@@ -74,16 +89,6 @@ def display_diff(census_version: str, previous_census_version: str) -> int:
     if not datasets_with_different_cell_counts.empty:
         print("Datasets that have a different cell count")
         print(datasets_with_different_cell_counts)
-        print()
-
-    # Total cell count deltas by experiment (mouse, human)
-
-    for organism in census[CENSUS_DATA_NAME]:
-        curr_count = census[CENSUS_DATA_NAME][organism].obs.count
-        prev_count = previous_census[CENSUS_DATA_NAME][organism].obs.count
-        print(
-            f"Previous {organism} cell count: {prev_count}, current {organism} cell count: {curr_count}, delta {curr_count - prev_count}"
-        )
         print()
 
     # Deltas between summary_cell_counts dataframes
