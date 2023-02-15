@@ -376,12 +376,16 @@ def validate_X_layers(
         census_obs_df = exp.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
         n_obs = len(census_obs_df)
         logging.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb.n_obs}; n_obs = {n_obs}")
-        # TODO: Only works when run as builder, not standalone validator, since ExpBuilder is not fully initialized
-        #  in the latter case
-        assert eb.n_obs == n_obs
+        # TODO: Only works when run as builder, not standalone validator
+        #  https://github.com/chanzuckerberg/cell-census/issues/179
+        if eb.build_completed:
+            assert eb.n_obs == n_obs
         census_var_df = exp.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
         n_vars = len(census_var_df)
-        assert eb.n_var == n_vars
+        # TODO: Only works when run as builder, not standalone validator
+        #  https://github.com/chanzuckerberg/cell-census/issues/179
+        if eb.build_completed:
+            assert eb.n_var == n_vars
 
         if n_obs > 0:
             for lyr in CENSUS_X_LAYERS:
@@ -472,6 +476,14 @@ def validate(
     logging.info("Validation start")
 
     assert os.path.exists(soma_path) and os.path.exists(assets_path)
+
+    # HACK: experiment_uri is only initialized in create(), which is only called if census is built before calling
+    # the validator; fails in validator-only mode
+    # TODO: This should be handled more elegantly, say, by initializing
+    #  in the ExperimentBuilder constructor. https://github.com/chanzuckerberg/cell-census/issues/179
+    for eb in experiment_builders:
+        if not eb.build_completed:
+            eb.experiment_uri = f"{soma_path}/{CENSUS_DATA_NAME}/{eb.name}"
 
     assert validate_all_soma_objects_exist(soma_path, experiment_builders)
 
