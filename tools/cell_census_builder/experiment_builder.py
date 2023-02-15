@@ -497,8 +497,7 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
 
 
 def reopen_experiment_builders(
-    experiment_builders: List[ExperimentBuilder],
-    mode: OpenMode ='w'
+    experiment_builders: List[ExperimentBuilder], mode: OpenMode = "w"
 ) -> Generator[ExperimentBuilder, None, None]:
     """
     Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use

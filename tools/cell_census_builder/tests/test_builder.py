@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from tempfile import TemporaryDirectory
 from typing import List
 from unittest.mock import patch

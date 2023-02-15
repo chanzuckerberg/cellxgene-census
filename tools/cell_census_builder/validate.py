@@ -13,7 +13,6 @@ import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
-from sklearn.linear_model._ridge import _get_rescaled_operator
 
 from .anndata import make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -135,7 +134,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                 assert FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
                 assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
-                assert sum([c.non_zero_length for c in rna['feature_dataset_presence_matrix'].read().csrs()]) > 0
+                assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().csrs()]) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
         return True
@@ -235,7 +234,7 @@ def validate_axis_dataframes(
                 eb_info[eb_name].update(ebi)
             logging.info(f"validate_axis {n} of {len(datasets)} complete.")
 
-    for eb in reopen_experiment_builders(experiment_builders, 'r'):
+    for eb in reopen_experiment_builders(experiment_builders, "r"):
         assert eb.experiment is not None
         exp: soma.Experiment = eb.experiment
         n_vars = len(eb_info[eb.name].vars)
@@ -277,7 +276,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     * there are no zeros explicitly saved (this is mandated by cell census schema)
     """
     assets_path, soma_path, dataset, experiment_builders = args
-    for eb in reopen_experiment_builders(experiment_builders, 'r'):
+    for eb in reopen_experiment_builders(experiment_builders, "r"):
         assert eb.experiment is not None
         exp: soma.Experiment = eb.experiment
 
@@ -364,7 +363,7 @@ def validate_X_layers(
     Raises on error.  Returns True on success.
     """
     logging.debug("validate_X_layers")
-    for eb in reopen_experiment_builders(experiment_builders, 'r'):
+    for eb in reopen_experiment_builders(experiment_builders, "r"):
         assert eb.experiment is not None
         exp = eb.experiment
 

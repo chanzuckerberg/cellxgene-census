@@ -5,11 +5,10 @@ import multiprocessing
 import os.path
 import sys
 from datetime import datetime, timezone
-from typing import List, Union
+from typing import List
 
 import pyarrow as pa
 import tiledbsoma as soma
-from anndata import AnnData
 
 from .anndata import open_anndata
 from .census_summary import create_census_summary
@@ -230,9 +229,6 @@ def populate_obs_axis(
     for eb in experiment_builders:
         logging.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
 
-
-
-
     return filtered_datasets
 
 
@@ -248,9 +244,7 @@ def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder])
             )
 
 
-def build_step2_create_root_collection(
-    soma_path: str, experiment_builders: List[ExperimentBuilder]
-) -> soma.Collection:
+def build_step2_create_root_collection(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
     """
     Create all objects
 
@@ -269,10 +263,10 @@ def build_step2_create_root_collection(
 
 
 def build_step3_populate_obs_and_var_axes(
-        assets_path: str,
-        datasets: List[Dataset],
-        experiment_builders: List[ExperimentBuilder],
-    ) -> List[Dataset]:
+    assets_path: str,
+    datasets: List[Dataset],
+    experiment_builders: List[ExperimentBuilder],
+) -> List[Dataset]:
     """
     Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built.
     """
