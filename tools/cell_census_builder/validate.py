@@ -39,7 +39,7 @@ from .mp import create_process_pool_executor
 from .util import uricat
 
 
-@dataclass
+@dataclass  # TODO: use attrs
 class EbInfo:
     """Class used to collect information about axis (for validation code)"""
 

@@ -60,6 +60,7 @@ class TestBuilder:
     ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
 
     def h5ad(self, organism: Organism) -> anndata.AnnData:
+        # TODO: use scipy.sparse.random for direct creation of a sparse matrix (w/o dense intermediary)
         X = np.random.randint(5, size=(4, 4))
         # The builder only supports sparse matrices
         X = sparse.csc_matrix(X)

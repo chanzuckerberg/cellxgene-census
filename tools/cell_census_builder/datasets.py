@@ -11,7 +11,7 @@ from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME
 T = TypeVar("T", bound="Dataset")
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass  # TODO: use attrs
 class Dataset:
     """
     Type used to handle source H5AD datasets read from manifest
