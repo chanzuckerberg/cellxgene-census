@@ -226,7 +226,7 @@ END_OF_TIME = 0xFFFFFFFFFFFFFFFF
 
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
     global _SOMA_TileDB_Context
-    if _SOMA_TileDB_Context is None:
+    if _SOMA_TileDB_Context is None or _SOMA_TileDB_Context != TileDB_Ctx():
         # Set write timestamp to "now", so that we use consistent timestamps across all writes (mostly for aesthetic
         # reasons). Set read timestamps to be same as write timestamp so that post-build validation reads can "see"
         # the writes. Without setting read timestamp explicitly, the read timestamp would default to a time that

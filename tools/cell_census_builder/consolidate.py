@@ -8,9 +8,6 @@ import tiledbsoma as soma
 from .globals import SOMA_TileDB_Context
 from .mp import create_process_pool_executor
 
-if soma.get_storage_engine() == "tiledb":
-    import tiledb
-
 
 def consolidate(args: argparse.Namespace, uri: str) -> None:
     """
@@ -45,6 +42,10 @@ def consolidate_collection(
 
 
 def consolidate_tiledb_object(uri: str) -> str:
+    assert soma.get_storage_engine() == "tiledb"
+
+    import tiledb
+
     logging.info(f"Consolidate: starting {uri}")
     tiledb.consolidate(uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3}))
     tiledb.vacuum(uri)

@@ -220,7 +220,6 @@ def build_step2_create_root_collection(
 def filter_datasets(
     assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
 ) -> List[Dataset]:
-    # Accumulate obs and var axes (and remember the datasets that pass our filter)
     filtered_datasets = []
     N = len(datasets) * len(experiment_builders)
     n = 1
@@ -228,7 +227,7 @@ def filter_datasets(
     for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
         dataset_total_cell_count = 0
         for e in experiment_builders:
-            logging.info(f"{e.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
+            logging.info(f"{e.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
             if ad_filtered := e.filter_anndata_cells(ad):
                 dataset_total_cell_count += ad_filtered.shape[0]
             n += 1
@@ -275,9 +274,9 @@ def build_step3_populate_axes_and_X_layers(
     args: argparse.Namespace,
 ) -> None:
     """
-    Populate all X layers.
+    Populate all axes and X layers.
     """
-    logging.info("Build step 3 - X layer creation - started")
+    logging.info("Build step 3 - Populate all axes and X layers - started")
 
     accumulate_axes(assets_path, filtered_datasets, experiment_builders)
 

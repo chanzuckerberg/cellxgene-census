@@ -5,6 +5,7 @@ from typing import List
 from unittest.mock import patch
 
 import anndata
+import attrs
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -18,7 +19,7 @@ from cell_census_builder.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
 from cell_census_builder.mp import process_initializer
-from scipy.sparse import csc_matrix
+from scipy import sparse
 
 
 class TestBuilder:
@@ -51,7 +52,7 @@ class TestBuilder:
     def teardown_class(cls) -> None:
         cls.td.cleanup()
 
-    @dataclass
+    @attrs.define
     class Organism:
         name: str
         organism_ontology_term_id: str
@@ -61,7 +62,7 @@ class TestBuilder:
     def h5ad(self, organism: Organism) -> anndata.AnnData:
         X = np.random.randint(5, size=(4, 4))
         # The builder only supports sparse matrices
-        X = csc_matrix(X)
+        X = sparse.csc_matrix(X)
 
         # Create obs
         obs_dataframe = pd.DataFrame(
