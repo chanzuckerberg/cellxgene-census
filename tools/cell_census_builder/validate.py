@@ -70,12 +70,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert census.soma_type == "SOMACollection"
         assert soma.Collection.exists(census.uri)
-        assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
-        assert (
-            "census_schema_version" in census.metadata
-            and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
-        )
-        assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
+        assert "cxg_schema_version" in census.metadata
+        assert census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
+        assert "census_schema_version" in census.metadata
+        assert census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
+        assert "created_on" in census.metadata
+        assert datetime.fromisoformat(census.metadata["created_on"])
         assert "git_commit_sha" in census.metadata
 
         for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
@@ -135,8 +135,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                 assert FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
                 assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
-                presence = rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].read().tables().concat().to_pandas()
-                assert len(presence) > 0
+                assert sum([c.non_zero_length for c in rna['feature_dataset_presence_matrix'].read().csrs()]) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
         return True
@@ -278,7 +277,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     * there are no zeros explicitly saved (this is mandated by cell census schema)
     """
     assets_path, soma_path, dataset, experiment_builders = args
-    for eb in  reopen_experiment_builders(experiment_builders, 'r'):
+    for eb in reopen_experiment_builders(experiment_builders, 'r'):
         assert eb.experiment is not None
         exp: soma.Experiment = eb.experiment
 
@@ -301,9 +300,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             assert soma.SparseNDArray.exists(exp.ms["RNA"].X["raw"].uri)
 
             def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
-                # TODO XXX: Work-around for regression TileDB-SOMA#473
-                # return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))))
-                return sum(t.non_zero_length for t in arr.read((pa.array(join_ids), slice(None))).csrs())
+                return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).csrs())
 
             raw_nnz = count_elements(exp.ms["RNA"].X["raw"], soma_joinids)
 
