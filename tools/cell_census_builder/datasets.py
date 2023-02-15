@@ -57,7 +57,7 @@ class Dataset:
         return [Dataset(**r) for r in datasets.to_dict("records")]
 
 
-def assign_soma_joinids(datasets: List[Dataset]) -> None:
+def assign_dataset_soma_joinids(datasets: List[Dataset]) -> None:
     for joinid, dataset in enumerate(datasets):
         dataset.soma_joinid = joinid
 

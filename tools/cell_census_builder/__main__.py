@@ -13,7 +13,7 @@ import tiledbsoma as soma
 from .anndata import open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
-from .datasets import Dataset, assign_soma_joinids, create_dataset_manifest
+from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import ExperimentBuilder, populate_X_layers, reopen_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
@@ -132,21 +132,20 @@ def build(
 
     # Step 1 - get all source datasets
     datasets = build_step1_get_source_datasets(args, assets_path)
-    filtered_datasets = filter_datasets(assets_path, datasets, experiment_builders)
 
-    assign_soma_joinids(filtered_datasets)
-
-    # Step 2 - create root collection, and all child objects, but do not populate X layers
+    # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
     root_collection = build_step2_create_root_collection(soma_path, experiment_builders)
-    logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
     gc.collect()
 
-    # Step 3 - populate axes and X layers
-    build_step3_populate_axes_and_X_layers(assets_path, filtered_datasets, experiment_builders, args)
+    # Step 3 - populate axes
+    filtered_datasets = build_step3_populate_obs_and_var_axes(assets_path, datasets, experiment_builders)
+
+    # Step 4 - populate axes and X layers
+    build_step4_populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
     gc.collect()
 
-    # Write out dataset manifest and summary information
-    build_step4_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.build_tag)
+    # Step 5- write out dataset manifest and summary information
+    build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.build_tag)
 
     for eb in experiment_builders:
         eb.build_completed = True
@@ -204,7 +203,7 @@ def build_step2_create_root_collection(
     soma_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> soma.Collection:
     """
-    Create all objects, and populate the axis dataframes.
+    Create all objects
 
     Returns: the root collection.
     """
@@ -262,15 +261,35 @@ def accumulate_axes(assets_path: str, datasets: List[Dataset], experiment_builde
 
             # SOMA does not currently support empty arrays, so special case this corner-case.
             if eb.n_var > 0:
-                max_dataset_joinid = max(d.soma_joinid for d in datasets)
                 eb.experiment.ms["RNA"].add_new_sparse_ndarray(
-                    FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, eb.n_var)
+                    FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(len(datasets) + 1, eb.n_var)
                 )
 
     return dataset_total_cell_count
 
+def build_step3_populate_obs_and_var_axes(
+        assets_path: str,
+        datasets: List[Dataset],
+        experiment_builders: List[ExperimentBuilder],
+    ) -> List[Dataset]:
+    """
+    Populate obs and var axes
+    """
+    logging.info("Build step 3 - Populate obs and var axes - started")
 
-def build_step3_populate_axes_and_X_layers(
+    filtered_datasets = filter_datasets(assets_path, datasets, experiment_builders)
+    logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
+
+    accumulate_axes(assets_path, filtered_datasets, experiment_builders)
+
+    assign_dataset_soma_joinids(filtered_datasets)
+
+    logging.info("Build step 3 - Populate obs and var axes - finished")
+
+    return filtered_datasets
+
+
+def build_step4_populate_X_layers(
     assets_path: str,
     filtered_datasets: List[Dataset],
     experiment_builders: List[ExperimentBuilder],
@@ -279,9 +298,8 @@ def build_step3_populate_axes_and_X_layers(
     """
     Populate all axes and X layers.
     """
-    logging.info("Build step 3 - Populate all axes and X layers - started")
+    logging.info("Build step 3 - Populate all axes X layers - started")
 
-    accumulate_axes(assets_path, filtered_datasets, experiment_builders)
 
     # Process all X data
     for eb in reopen_experiment_builders(experiment_builders):
@@ -295,7 +313,7 @@ def build_step3_populate_axes_and_X_layers(
     logging.info("Build step 3 - X layer creation - finished")
 
 
-def build_step4_populate_summary_info(
+def build_step5_populate_summary_info(
     root_collection: soma.Collection,
     experiment_builders: List[ExperimentBuilder],
     filtered_datasets: List[Dataset],
