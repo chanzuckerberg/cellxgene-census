@@ -100,21 +100,6 @@ class ExperimentBuilder:
 
         self.load_assets()
 
-    def __getstate__(self):
-        """
-        Avoid pickling Experiment which cannot be serialized
-        """
-        state = self.__dict__.copy()
-        del state["experiment"]
-        return state
-
-    def __setstate__(self, state):
-        """
-        Restore `experiment` slot when unpickling
-        """
-        self.__dict__.update(state)
-        self.experiment = None
-
     def load_assets(self) -> None:
         """
         Load any external assets required to create the experiment.
@@ -422,6 +407,8 @@ def _accumulate_X(
     for eb in experiment_builders:
         # sanity checks
         assert eb.dataset_obs_joinid_start is not None
+        # clear the experiment object to avoid pickling error
+        eb.experiment = None
 
     dataset_obs_joinid_starts = [
         eb.dataset_obs_joinid_start.get(dataset.dataset_id, None) for eb in experiment_builders
@@ -449,7 +436,6 @@ def populate_X_layers(
     """
     Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
     """
-
     # populate X layers
     presence: List[PresenceResult] = []
     if args.multi_process:
@@ -521,7 +507,7 @@ def reopen_experiment_builders(
     with ExitStack() as experiments_stack:
         for eb in experiment_builders:
             # open experiments for write and ensure they are closed when exiting
-            assert eb.experiment.closed
+            assert eb.experiment is None or eb.experiment.closed
             eb.experiment = soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context())
             experiments_stack.enter_context(eb.experiment)
 
