@@ -13,6 +13,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
+from somacore.options import OpenMode
 from tiledbsoma.tiledb_object import TileDBObject
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
@@ -499,6 +500,7 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
 
 def reopen_experiment_builders(
     experiment_builders: List[ExperimentBuilder],
+    mode: OpenMode ='w'
 ) -> Generator[ExperimentBuilder, None, None]:
     """
     Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use
@@ -508,7 +510,7 @@ def reopen_experiment_builders(
         for eb in experiment_builders:
             # open experiments for write and ensure they are closed when exiting
             assert eb.experiment is None or eb.experiment.closed
-            eb.experiment = soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context())
+            eb.experiment = soma.Experiment.open(eb.experiment_uri, mode, context=SOMA_TileDB_Context())
             experiments_stack.enter_context(eb.experiment)
 
         for eb in experiment_builders:
