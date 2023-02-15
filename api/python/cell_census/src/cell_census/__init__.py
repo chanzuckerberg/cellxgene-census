@@ -6,7 +6,7 @@ An API to facilitate use of the CZI Science Cell Census. The Cell Census is a ve
 The API is built on the `tiledbsoma` SOMA API, and provides a number of helper functions including:
 
     * Open a named version of the Cell Census, for use with the SOMA API
-    * Get a list of available Cell Census verisons, and for each version, a description
+    * Get a list of available Cell Census versions, and for each version, a description
     * Get a slice of the Cell Census as an AnnData, for use with ScanPy
     * Get the URI for, or directly download, underlying data in H5AD format
 
