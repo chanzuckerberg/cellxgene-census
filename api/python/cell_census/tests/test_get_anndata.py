@@ -10,17 +10,18 @@ def census() -> soma.Collection:
 
 
 @pytest.mark.live_corpus
-def test_get_anndata(census: soma.Collection) -> None:
-    ad = cell_census.get_anndata(
-        census,
-        organism="Mus musculus",
-        obs_value_filter="tissue_general == 'vasculature'",
-        var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
-        column_names={
-            "obs": ["soma_joinid", "cell_type", "tissue", "tissue_general", "assay"],
-            "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
-        },
-    )
+def test_get_anndata_value_filter(census: soma.Collection) -> None:
+    with census:
+        ad = cell_census.get_anndata(
+            census,
+            organism="Mus musculus",
+            obs_value_filter="tissue_general == 'vasculature'",
+            var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+            column_names={
+                "obs": ["soma_joinid", "cell_type", "tissue", "tissue_general", "assay"],
+                "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
+            },
+        )
 
     assert ad is not None
     assert ad.n_vars == 2
@@ -30,15 +31,33 @@ def test_get_anndata(census: soma.Collection) -> None:
 
 
 @pytest.mark.live_corpus
+def test_get_anndata_coords(census: soma.Collection) -> None:
+    with census:
+        ad = cell_census.get_anndata(census, organism="Mus musculus", obs_coords=slice(1000), var_coords=slice(2000))
+
+    assert ad is not None
+    assert ad.n_vars == 2001
+    assert ad.n_obs == 1001
+
+
+@pytest.mark.live_corpus
 def test_get_anndata_allows_missing_obs_or_var_filter(census: soma.Collection) -> None:
-    # TODO: test with a small, local census test fixture, for performance; reinstate commented-out test, below
+    # This test is slightly sensitive to the live data, in that it assumes the
+    # existance of certain cell tissue labels and gene feature ids.
+    with census:
+        mouse = census["census_data"]["mus_musculus"]
 
-    adata = cell_census.get_anndata(census, organism="Homo sapiens", obs_value_filter="tissue == 'tongue'")
-    assert adata.obs.shape[0] == 372
+        adata = cell_census.get_anndata(census, organism="Mus musculus", obs_value_filter="tissue == 'aorta'")
+        assert adata.n_obs == len(
+            mouse.obs.read(value_filter="tissue == 'aorta'", column_names=["soma_joinid"]).concat()
+        )
+        assert adata.n_vars == len(mouse.ms["RNA"].var.read(column_names=["soma_joinid"]).concat())
 
-    # adata = cell_census.get_anndata(
-    #         census,
-    #         organism="Homo sapiens",
-    #         var_value_filter=f"feature_id == 'TP53'"
-    # )
-    # assert adata.var.shape[0] == 1
+        adata = cell_census.get_anndata(
+            census,
+            organism="Mus musculus",
+            obs_coords=slice(10000),
+            var_value_filter="feature_id == 'ENSMUSG00000069581'",
+        )
+        assert adata.n_obs == 10001
+        assert adata.n_vars == 1
