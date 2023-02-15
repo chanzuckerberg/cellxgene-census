@@ -5,10 +5,11 @@ import multiprocessing
 import os.path
 import sys
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Union
 
 import pyarrow as pa
 import tiledbsoma as soma
+from anndata import AnnData
 
 from .anndata import open_anndata
 from .census_summary import create_census_summary
@@ -199,6 +200,54 @@ def build_step1_get_source_datasets(args: argparse.Namespace, assets_path: str) 
     return datasets
 
 
+def populate_obs_axis(
+    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
+) -> List[Dataset]:
+    filtered_datasets = []
+    N = len(datasets) * len(experiment_builders)
+    n = 0
+
+    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
+        dataset_total_cell_count = 0
+
+        for eb in reopen_experiment_builders(experiment_builders):
+            n += 1
+            logging.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
+            ad_filtered = eb.filter_anndata_cells(ad)
+
+            if len(ad_filtered.obs) == 0:
+                logging.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
+                continue
+
+            # append to `obs`; accumulate `var` data
+            dataset_total_cell_count += eb.accumulate_axes(dataset, ad_filtered)
+
+        # dataset passes filter if either experiment includes cells from the dataset
+        if dataset_total_cell_count > 0:
+            filtered_datasets.append(dataset)
+            dataset.dataset_total_cell_count = dataset_total_cell_count
+
+    for eb in experiment_builders:
+        logging.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
+
+
+
+
+    return filtered_datasets
+
+
+def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder]) -> int:
+    for eb in reopen_experiment_builders(experiment_builders):
+        # populate `var`; create empty `presence` now that we have its dimensions
+        eb.populate_var_axis()
+
+        # SOMA does not currently support empty arrays, so special case this corner-case.
+        if eb.n_var > 0:
+            eb.experiment.ms["RNA"].add_new_sparse_ndarray(
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(eb.n_datasets + 1, eb.n_var)
+            )
+
+
 def build_step2_create_root_collection(
     soma_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> soma.Collection:
@@ -219,68 +268,20 @@ def build_step2_create_root_collection(
         return root_collection
 
 
-def filter_datasets(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
-) -> List[Dataset]:
-    filtered_datasets = []
-    N = len(datasets) * len(experiment_builders)
-    n = 1
-
-    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-        dataset_total_cell_count = 0
-        for e in experiment_builders:
-            logging.info(f"{e.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
-            if ad_filtered := e.filter_anndata_cells(ad):
-                dataset_total_cell_count += ad_filtered.shape[0]
-            n += 1
-
-        dataset.dataset_total_cell_count = dataset_total_cell_count
-        if dataset_total_cell_count > 0:
-            filtered_datasets.append(dataset)
-
-    return filtered_datasets
-
-
-def accumulate_axes(assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]) -> int:
-    N = len(datasets) * len(experiment_builders)
-    n = 1
-    dataset_total_cell_count = 0
-
-    # append to `obs`; accumulate `var` data
-    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-        for eb in reopen_experiment_builders(experiment_builders):
-            logging.info(f"{eb.name}: accumulate axis for dataset '{dataset.dataset_id}' ({n} of {N})")
-            dataset_total_cell_count += eb.accumulate_axes(dataset, ad)
-            logging.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
-            n += 1
-
-    # populate `var`; create empty `presence` now that we have its dimensions
-    if len(datasets) > 0:
-        for eb in reopen_experiment_builders(experiment_builders):
-            eb.populate_var_axis()
-
-            # SOMA does not currently support empty arrays, so special case this corner-case.
-            if eb.n_var > 0:
-                eb.experiment.ms["RNA"].add_new_sparse_ndarray(
-                    FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(len(datasets) + 1, eb.n_var)
-                )
-
-    return dataset_total_cell_count
-
 def build_step3_populate_obs_and_var_axes(
         assets_path: str,
         datasets: List[Dataset],
         experiment_builders: List[ExperimentBuilder],
     ) -> List[Dataset]:
     """
-    Populate obs and var axes
+    Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built.
     """
     logging.info("Build step 3 - Populate obs and var axes - started")
 
-    filtered_datasets = filter_datasets(assets_path, datasets, experiment_builders)
-    logging.info(f"({len(filtered_datasets)} of {len(datasets)}) suitable for processing.")
+    filtered_datasets = populate_obs_axis(assets_path, datasets, experiment_builders)
+    logging.info(f"({len(filtered_datasets)} of {len(datasets)}) datasets suitable for processing.")
 
-    accumulate_axes(assets_path, filtered_datasets, experiment_builders)
+    populate_var_axis_and_presence(experiment_builders)
 
     assign_dataset_soma_joinids(filtered_datasets)
 
@@ -296,10 +297,9 @@ def build_step4_populate_X_layers(
     args: argparse.Namespace,
 ) -> None:
     """
-    Populate all axes and X layers.
+    Populate X layers.
     """
-    logging.info("Build step 3 - Populate all axes X layers - started")
-
+    logging.info("Build step 3 - populate X layers - started")
 
     # Process all X data
     for eb in reopen_experiment_builders(experiment_builders):
@@ -310,7 +310,7 @@ def build_step4_populate_X_layers(
     for eb in reopen_experiment_builders(experiment_builders):
         eb.populate_presence_matrix(filtered_datasets)
 
-    logging.info("Build step 3 - X layer creation - finished")
+    logging.info("Build step 3 - populate X layers - finished")
 
 
 def build_step5_populate_summary_info(

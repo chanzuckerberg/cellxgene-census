@@ -156,10 +156,7 @@ class ExperimentBuilder:
 
         Returns: number of cells that make it past the experiment filter.
         """
-        ad = self.filter_anndata_cells(ad)
-        if len(ad.obs) == 0:
-            logging.info(f"{self.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
-            return 0
+        assert len(ad.obs) > 0
 
         # Narrow columns just to minimize memory footprint. Summary cell counting
         # requires 'organism', do be careful not to delete that.
