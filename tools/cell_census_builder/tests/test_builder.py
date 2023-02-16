@@ -123,14 +123,17 @@ class TestBuilder:
     def datasets(self) -> List[Dataset]:
         datasets = []
         for organism in self.ORGANISMS:
-            h5ad = self.h5ad(organism)
-            h5ad_path = f"{self.assets_path}/{organism.name}.h5ad"
-            h5ad.write_h5ad(h5ad_path)
-            datasets.append(
-                Dataset(
-                    dataset_id=f"dataset_{organism.name}", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=h5ad_path
-                ),
-            )
+            for dataset_id in range(2):
+                h5ad = self.h5ad(organism)
+                h5ad_path = f"{self.assets_path}/{organism.name}_{dataset_id}.h5ad"
+                h5ad.write_h5ad(h5ad_path)
+                datasets.append(
+                    Dataset(
+                        dataset_id=f"{organism.name}_{dataset_id}",
+                        corpora_asset_h5ad_uri="mock",
+                        dataset_h5ad_path=h5ad_path,
+                    ),
+                )
 
         return datasets
 
@@ -159,13 +162,13 @@ class TestBuilder:
             ) as census:
                 # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
                 human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
-                assert human_obs.shape[0] == 4
-                assert all(human_obs["dataset_id"] == "dataset_homo_sapiens")
+                assert human_obs.shape[0] == 8
+                assert list(np.unique(human_obs["dataset_id"])) == ["homo_sapiens_0", "homo_sapiens_1"]
 
-                # mus_musculus should have 0 cells
+                # mus_musculus should have 8 cells
                 mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
-                assert mouse_obs.shape[0] == 4
-                assert all(mouse_obs["dataset_id"] == "dataset_mus_musculus")
+                assert mouse_obs.shape[0] == 8
+                assert list(np.unique(mouse_obs["dataset_id"])) == ["mus_musculus_0", "mus_musculus_1"]
 
                 # There are only 4 unique genes
                 var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
@@ -176,10 +179,15 @@ class TestBuilder:
                 assert var.shape[0] == 4
                 assert all(var["feature_id"].str.startswith("mus_musculus"))
 
-                # There should be 2 datasets
+                # There should be 4 total datasets
                 returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
-                assert returned_datasets.shape[0] == 2
-                assert list(returned_datasets["dataset_id"]) == ["dataset_homo_sapiens", "dataset_mus_musculus"]
+                assert returned_datasets.shape[0] == 4
+                assert list(returned_datasets["dataset_id"]) == [
+                    "homo_sapiens_0",
+                    "homo_sapiens_1",
+                    "mus_musculus_0",
+                    "mus_musculus_1",
+                ]
 
     def test_unicode_support(self) -> None:
         """

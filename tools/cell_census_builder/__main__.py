@@ -233,7 +233,7 @@ def populate_obs_axis(
     return filtered_datasets
 
 
-def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder]) -> None:
+def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder], n_census_datasets: int) -> None:
     for eb in reopen_experiment_builders(experiment_builders):
         # populate `var`; create empty `presence` now that we have its dimensions
         eb.populate_var_axis()
@@ -241,7 +241,7 @@ def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder])
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if eb.n_var > 0:
             eb.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(eb.n_datasets + 1, eb.n_var)
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(n_census_datasets + 1, eb.n_var)
             )
 
 
@@ -276,7 +276,7 @@ def build_step3_populate_obs_and_var_axes(
     filtered_datasets = populate_obs_axis(assets_path, datasets, experiment_builders)
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) datasets suitable for processing.")
 
-    populate_var_axis_and_presence(experiment_builders)
+    populate_var_axis_and_presence(experiment_builders, len(filtered_datasets))
 
     assign_dataset_soma_joinids(filtered_datasets)
 
