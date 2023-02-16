@@ -455,7 +455,7 @@ def populate_X_layers(
             for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
                 # propagate exceptions - not expecting any other return values
                 presence += f.result()
-                logging.info(f"pass 2, {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
+                logging.info(f"populate X for dataset {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
 
     else:
         for n, dataset in enumerate(datasets, start=1):
