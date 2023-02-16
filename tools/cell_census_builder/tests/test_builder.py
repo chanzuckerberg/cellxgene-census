@@ -17,6 +17,8 @@ from cell_census_builder.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
+    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    MEASUREMENT_RNA_NAME,
 )
 from cell_census_builder.mp import process_initializer
 from scipy import sparse
@@ -188,6 +190,18 @@ class TestBuilder:
                     "mus_musculus_0",
                     "mus_musculus_1",
                 ]
+
+                # Presence matrix should exist with the correct dimensions
+                for exp_name in ["homo_sapiens", "mus_musculus"]:
+                    fdpm = census[CENSUS_DATA_NAME][exp_name].ms[MEASUREMENT_RNA_NAME][
+                        FEATURE_DATASET_PRESENCE_MATRIX_NAME
+                    ]
+                    fdpm_df = fdpm.read().tables().concat().to_pandas()
+                    n_datasets = fdpm_df["soma_dim_0"].nunique()
+                    n_features = fdpm_df["soma_dim_1"].nunique()
+                    assert n_datasets == 2
+                    assert n_features == 4
+                    assert fdpm.nnz == 8
 
     def test_unicode_support(self) -> None:
         """

@@ -7,7 +7,6 @@ import sys
 from datetime import datetime, timezone
 from typing import List
 
-import pyarrow as pa
 import tiledbsoma as soma
 
 from .anndata import open_anndata
@@ -20,7 +19,6 @@ from .globals import (
     CENSUS_INFO_NAME,
     CENSUS_SCHEMA_VERSION,
     CXG_SCHEMA_VERSION,
-    FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     RNA_SEQ,
     SOMA_TileDB_Context,
 )
@@ -233,16 +231,10 @@ def populate_obs_axis(
     return filtered_datasets
 
 
-def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder], n_census_datasets: int) -> None:
+def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder]) -> None:
     for eb in reopen_experiment_builders(experiment_builders):
         # populate `var`; create empty `presence` now that we have its dimensions
         eb.populate_var_axis()
-
-        # SOMA does not currently support empty arrays, so special case this corner-case.
-        if eb.n_var > 0:
-            eb.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(n_census_datasets + 1, eb.n_var)
-            )
 
 
 def build_step2_create_root_collection(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
@@ -276,7 +268,7 @@ def build_step3_populate_obs_and_var_axes(
     filtered_datasets = populate_obs_axis(assets_path, datasets, experiment_builders)
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) datasets suitable for processing.")
 
-    populate_var_axis_and_presence(experiment_builders, len(filtered_datasets))
+    populate_var_axis_and_presence(experiment_builders)
 
     assign_dataset_soma_joinids(filtered_datasets)
 
@@ -303,7 +295,7 @@ def build_step4_populate_X_layers(
     populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
 
     for eb in reopen_experiment_builders(experiment_builders):
-        eb.populate_presence_matrix(filtered_datasets)
+        eb.populate_presence_matrix()
 
     logging.info("Build step 4 - Populate X layers - finished")
 

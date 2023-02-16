@@ -254,18 +254,19 @@ class ExperimentBuilder:
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
 
-    def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
+    def populate_presence_matrix(self) -> None:
         """
         Save presence matrix per Experiment
         """
         _assert_open_for_write(self.experiment)
+        assert self.presence
 
+        # SOMA does not currently support empty arrays, so special case this corner-case.
         if len(self.presence) > 0:
-            max_dataset_joinid = max(d.soma_joinid for d in datasets)
-
-            # A few sanity checks
+            # sanity check
             assert len(self.presence) == self.n_datasets
-            assert max_dataset_joinid >= max(self.presence.keys())  # key is dataset joinid
+
+            max_dataset_joinid = max(self.presence.keys())
 
             # LIL is fast way to create spmatrix
             pm = sparse.lil_array((max_dataset_joinid + 1, self.n_var), dtype=bool)
@@ -277,9 +278,10 @@ class ExperimentBuilder:
             pm.eliminate_zeros()
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
-            fdpm: soma.SparseNDArray = self.experiment.ms[MEASUREMENT_RNA_NAME][  # type:ignore
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME
-            ]
+
+            fdpm = self.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var)
+            )
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
 
@@ -462,8 +464,8 @@ def populate_X_layers(
             presence += _accumulate_X(assets_path, dataset, experiment_builders, progress=(n, len(datasets)))
 
     eb_by_name = {e.name: e for e in experiment_builders}
-    for _, dataset_soma_joinid, eb_name, pres_data, pres_col in presence:
-        eb_by_name[eb_name].presence[dataset_soma_joinid] = (pres_data, pres_col)
+    for _, dataset_soma_joinid, eb_name, pres_dataset, pres_col in presence:
+        eb_by_name[eb_name].presence[dataset_soma_joinid] = (pres_dataset, pres_col)
 
 
 class SummaryStats(TypedDict):
