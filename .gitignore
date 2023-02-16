@@ -120,6 +120,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# sphinx documentation
+/doc/_build/
+
 # mypy
 .mypy_cache/
 .dmypy.json
