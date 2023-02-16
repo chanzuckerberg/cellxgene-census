@@ -69,16 +69,12 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert census.soma_type == "SOMACollection"
         assert soma.Collection.exists(census.uri)
-        assert "cxg_schema_version" in census.metadata
         assert census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
-        assert "census_schema_version" in census.metadata
         assert census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
-        assert "created_on" in census.metadata
         assert datetime.fromisoformat(census.metadata["created_on"])
         assert "git_commit_sha" in census.metadata
 
         for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
-            assert name in census
             assert soma.Collection.exists(census[name].uri)
             assert census[name].soma_type == "SOMACollection"
 
@@ -97,29 +93,23 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]
         for eb in experiment_builders:
-            assert eb.name in census_data
             assert soma.Experiment.exists(census_data[eb.name].uri)
             assert census_data[eb.name].soma_type == "SOMAExperiment"
 
             e = census_data[eb.name]
-            assert "obs" in e
             assert soma.DataFrame.exists(e.obs.uri)
             assert e.obs.soma_type == "SOMADataFrame"
-            assert "ms" in e
             assert soma.Collection.exists(e.ms.uri)
             assert e.ms.soma_type == "SOMACollection"
 
             # there should be a single measurement called 'RNA'
-            assert "RNA" in e.ms
             assert soma.Measurement.exists(e.ms["RNA"].uri)
             assert e.ms["RNA"].soma_type == "SOMAMeasurement"
 
             # The measurement should contain all X layers where n_obs > 0 (existence checked elsewhere)
             rna = e.ms["RNA"]
-            assert "var" in rna
             assert soma.DataFrame.exists(rna["var"].uri)
             assert rna["var"].soma_type == "SOMADataFrame"
-            assert "X" in rna
             assert soma.Collection.exists(rna["X"].uri)
             assert rna["X"].soma_type == "SOMACollection"
             for lyr in CENSUS_X_LAYERS:
@@ -131,7 +121,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             # and a dataset presence matrix
             # dataset presence only exists if there are cells in the measurement
             if eb.n_obs > 0:
-                assert FEATURE_DATASET_PRESENCE_MATRIX_NAME in rna
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
                 assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
                 assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().csrs()]) > 0
@@ -201,10 +190,8 @@ def validate_axis_dataframes(
             assert sorted(obs.keys()) == sorted(expected_obs_columns.keys())
             assert sorted(var.keys()) == sorted(expected_var_columns.keys())
             for field in obs.schema:
-                assert field.name in expected_obs_columns
                 assert field.type == expected_obs_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
             for field in var.schema:
-                assert field.name in expected_var_columns
                 assert field.type == expected_var_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
 
     # check shapes & perform weak test of contents
@@ -295,7 +282,6 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
 
         raw_nnz = 0
         if len(soma_joinids) > 0:
-            assert "raw" in exp.ms["RNA"].X
             assert soma.SparseNDArray.exists(exp.ms["RNA"].X["raw"].uri)
 
             def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:

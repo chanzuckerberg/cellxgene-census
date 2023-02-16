@@ -53,7 +53,7 @@ class TestBuilder:
     def teardown_class(cls) -> None:
         cls.td.cleanup()
 
-    @attrs.define
+    @attrs.define(frozen=True)
     class Organism:
         name: str
         organism_ontology_term_id: str
