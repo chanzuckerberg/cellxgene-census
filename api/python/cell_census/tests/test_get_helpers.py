@@ -2,6 +2,7 @@ import pytest
 import scipy.sparse
 
 import cell_census
+from cell_census.experiment import _get_experiment
 
 
 @pytest.mark.live_corpus
@@ -10,16 +11,16 @@ def test_get_experiment() -> None:
         mouse_uri = census["census_data"]["mus_musculus"].uri
         human_uri = census["census_data"]["homo_sapiens"].uri
 
-        assert cell_census.get_experiment(census, "mus musculus").uri == mouse_uri
-        assert cell_census.get_experiment(census, "Mus musculus").uri == mouse_uri
-        assert cell_census.get_experiment(census, "mus_musculus").uri == mouse_uri
+        assert _get_experiment(census, "mus musculus").uri == mouse_uri
+        assert _get_experiment(census, "Mus musculus").uri == mouse_uri
+        assert _get_experiment(census, "mus_musculus").uri == mouse_uri
 
-        assert cell_census.get_experiment(census, "homo sapiens").uri == human_uri
-        assert cell_census.get_experiment(census, "Homo sapiens").uri == human_uri
-        assert cell_census.get_experiment(census, "homo_sapiens").uri == human_uri
+        assert _get_experiment(census, "homo sapiens").uri == human_uri
+        assert _get_experiment(census, "Homo sapiens").uri == human_uri
+        assert _get_experiment(census, "homo_sapiens").uri == human_uri
 
     with pytest.raises(ValueError):
-        cell_census.get_experiment(census, "no such critter")
+        _get_experiment(census, "no such critter")
 
 
 @pytest.mark.live_corpus
