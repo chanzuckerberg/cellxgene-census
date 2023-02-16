@@ -259,7 +259,6 @@ class ExperimentBuilder:
         Save presence matrix per Experiment
         """
         _assert_open_for_write(self.experiment)
-        assert self.presence
 
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if len(self.presence) > 0:
