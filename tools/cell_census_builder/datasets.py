@@ -54,7 +54,7 @@ class Dataset:
 
     @classmethod
     def from_dataframe(cls: Type[T], datasets: pd.DataFrame) -> List["Dataset"]:
-        return [Dataset(**r) for r in datasets.to_dict("records")]
+        return [Dataset(**r) for r in datasets.to_dict("records")]  # type: ignore[misc]
 
 
 def assign_dataset_soma_joinids(datasets: List[Dataset]) -> None:

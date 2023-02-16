@@ -203,12 +203,12 @@ class ExperimentBuilder:
             preserve_index=False,
             columns=list(CENSUS_OBS_TERM_COLUMNS),
         )
-        self.experiment.obs.write(pa_table)
+        self.experiment.obs.write(pa_table)  # type:ignore
 
     def populate_var_axis(self) -> None:
         logging.info(f"{self.name}: populate var axis")
 
-        _assert_open_for_write(self.experiment.ms["RNA"].var)
+        _assert_open_for_write(self.experiment.ms["RNA"].var)  # type:ignore[union-attr]
 
         # if is possible there is nothing to write
         if len(self.var_df) > 0:
@@ -219,7 +219,7 @@ class ExperimentBuilder:
 
             self.var_df = anndata_ordered_bool_issue_853_workaround(self.var_df)
 
-            self.experiment.ms["RNA"].var.write(
+            self.experiment.ms["RNA"].var.write(  # type:ignore
                 pa.Table.from_pandas(
                     self.var_df,
                     preserve_index=False,
@@ -237,7 +237,7 @@ class ExperimentBuilder:
         """
         logging.info(f"{self.name}: create X layers")
 
-        rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
+        rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]  # type:ignore
         _assert_open_for_write(rna_measurement)
 
         # make the `X` collection
@@ -277,7 +277,9 @@ class ExperimentBuilder:
             pm.eliminate_zeros()
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
-            fdpm: soma.SparseNDArray = self.experiment.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+            fdpm: soma.SparseNDArray = self.experiment.ms[MEASUREMENT_RNA_NAME][  # type:ignore
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME
+            ]
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
 

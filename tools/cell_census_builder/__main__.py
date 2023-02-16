@@ -214,7 +214,7 @@ def populate_obs_axis(
             logging.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
             ad_filtered = eb.filter_anndata_cells(ad)
 
-            if len(ad_filtered.obs) == 0:
+            if len(ad_filtered.obs) == 0:  # type:ignore
                 logging.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
                 continue
 
@@ -239,7 +239,7 @@ def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder])
 
         # SOMA does not currently support empty arrays, so special case this corner-case.
         if eb.n_var > 0:
-            eb.experiment.ms["RNA"].add_new_sparse_ndarray(
+            eb.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
                 FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(eb.n_datasets + 1, eb.n_var)
             )
 

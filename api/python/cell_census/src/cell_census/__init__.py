@@ -23,8 +23,8 @@ __all__ = [
     "get_anndata",
     "get_census_version_description",
     "get_census_version_directory",
-    "get_experiment",
     "get_presence_matrix",
     "get_source_h5ad_uri",
+    "get_experiment",
     "open_soma",
 ]

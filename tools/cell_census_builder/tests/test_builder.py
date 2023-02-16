@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
+import tiledb
 import tiledbsoma as soma
 from cell_census_builder.__main__ import build, make_experiment_builders
 from cell_census_builder.datasets import Dataset
@@ -19,6 +20,7 @@ from cell_census_builder.globals import (
 )
 from cell_census_builder.mp import process_initializer
 from scipy import sparse
+from tiledbsoma.options import SOMATileDBContext
 
 
 class TestBuilder:
@@ -152,7 +154,9 @@ class TestBuilder:
             assert return_value == 0
 
             # Query the census and do assertions
-            with soma.Collection.open(uri=self.soma_path) as census:
+            with soma.Collection.open(
+                uri=self.soma_path, context=SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": "us-west-2"}))
+            ) as census:
                 # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
                 human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
                 assert human_obs.shape[0] == 4
