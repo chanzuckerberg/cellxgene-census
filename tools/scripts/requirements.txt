@@ -5,7 +5,7 @@ numpy
 # NOTE: You can also build this dependency from source, per ./notebooks/README.md.
 # NOTE: The builder's version of tiledbsoma MUST be <= the API's tiledbsoma version, to ensure reader compatibility
 # of TileDB on-disk storage format
-tiledbsoma==0.5.0a10
+tiledbsoma==0.5.0a11
 # NOTE: tiledb is also a requirement of the builder, but builder must not use a tiledb version that is ahead of
 # tiledbsoma's tiledb version (so just use the same version)
 # tiledb
