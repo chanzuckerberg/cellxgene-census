@@ -16,12 +16,16 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
     if soma.get_storage_engine() != "tiledb":
         return
 
+    logging.info("consolidate - started")
+
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
         with create_process_pool_executor(args) as ppe:
             futures = consolidate_collection(args, census, ppe)
         for future in concurrent.futures.as_completed(futures):
             uri = future.result()
             logging.info(f"Consolidate: completed {uri}")
+
+    logging.info("consolidate - finished")
 
 
 def consolidate_collection(

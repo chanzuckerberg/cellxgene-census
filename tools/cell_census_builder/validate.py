@@ -474,5 +474,5 @@ def validate(
 
     assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
     assert validate_X_layers(assets_path, soma_path, datasets, experiment_builders, args)
-    logging.info("Validation success")
+    logging.info("Validation finished (success)")
     return True

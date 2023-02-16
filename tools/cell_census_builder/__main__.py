@@ -140,7 +140,7 @@ def build(
     # Step 3 - populate axes
     filtered_datasets = build_step3_populate_obs_and_var_axes(assets_path, datasets, experiment_builders)
 
-    # Step 4 - populate axes and X layers
+    # Step 4 - populate X layers
     build_step4_populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
     gc.collect()
 
@@ -150,6 +150,7 @@ def build(
     for eb in experiment_builders:
         eb.build_completed = True
 
+    # consolidate TileDB data
     if args.consolidate:
         consolidate(args, root_collection.uri)
 
