@@ -251,7 +251,7 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: List
 
     Returns: the root collection.
     """
-    logging.info("Build step 2 - axis creation - started")
+    logging.info("Build step 2 - Create root collection - started")
 
     with soma.Collection.create(soma_path, context=SOMA_TileDB_Context()) as root_collection:
         populate_root_collection(root_collection)
@@ -259,7 +259,7 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: List
         for e in experiment_builders:
             e.create(census_data=root_collection[CENSUS_DATA_NAME])
 
-        logging.info("Build step 2 - axis creation - finished")
+        logging.info("Build step 2 - Create root collection - finished")
         return root_collection
 
 
@@ -294,7 +294,7 @@ def build_step4_populate_X_layers(
     """
     Populate X layers.
     """
-    logging.info("Build step 3 - populate X layers - started")
+    logging.info("Build step 4 - Populate X layers - started")
 
     # Process all X data
     for eb in reopen_experiment_builders(experiment_builders):
@@ -305,7 +305,7 @@ def build_step4_populate_X_layers(
     for eb in reopen_experiment_builders(experiment_builders):
         eb.populate_presence_matrix(filtered_datasets)
 
-    logging.info("Build step 3 - populate X layers - finished")
+    logging.info("Build step 4 - Populate X layers - finished")
 
 
 def build_step5_populate_summary_info(
@@ -314,14 +314,14 @@ def build_step5_populate_summary_info(
     filtered_datasets: List[Dataset],
     build_tag: str,
 ) -> None:
-    logging.info("Build step 4 - summary info - started")
+    logging.info("Build step 5 - Populate summary info - started")
 
     with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, "w", context=SOMA_TileDB_Context()) as census_info:
         create_dataset_manifest(census_info, filtered_datasets)
         create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
         create_census_summary(census_info, experiment_builders, build_tag)
 
-    logging.info("Build step 4 - summary info - finished")
+    logging.info("Build step 5 - Populate summary info - finished")
 
 
 def create_args_parser() -> argparse.ArgumentParser:
