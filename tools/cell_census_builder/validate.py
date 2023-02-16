@@ -212,7 +212,7 @@ def validate_axis_dataframes(
     # clear the TileDBObject instance variables to avoid pickling error
     for eb in experiment_builders:
         eb.experiment = None
-        eb.presence = None
+        eb.presence = {}
 
     eb_info = {eb.name: EbInfo() for eb in experiment_builders}
     if args.multi_process:
@@ -318,7 +318,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 ad.raw.X
             ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.raw.X)}"
 
-        return True
+    return True
 
 
 def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str, int, int]) -> bool:
@@ -395,7 +395,7 @@ def validate_X_layers(
     # clear the TileDBObject instance variables to avoid pickling error
     for eb in experiment_builders:
         eb.experiment = None
-        eb.presence = None
+        eb.presence = {}
 
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:

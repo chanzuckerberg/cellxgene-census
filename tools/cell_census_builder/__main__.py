@@ -232,7 +232,7 @@ def populate_obs_axis(
     return filtered_datasets
 
 
-def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder]) -> int:
+def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder]) -> None:
     for eb in reopen_experiment_builders(experiment_builders):
         # populate `var`; create empty `presence` now that we have its dimensions
         eb.populate_var_axis()
