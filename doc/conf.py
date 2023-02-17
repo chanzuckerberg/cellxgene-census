@@ -7,10 +7,10 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'cell-census'
-copyright = '2023, CZIF'
-author = 'CZIF'
+copyright = '2022-2023 Chan Zuckerberg Initiative'
+author = 'Chan Zuckerberg Initiative'
 
-verson = "0.5"
+version = "0.5"
 release = "0.5.0"
 
 # -- General configuration ---------------------------------------------------

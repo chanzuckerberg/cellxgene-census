@@ -1,10 +1,6 @@
 cell-census Python API Reference
 ==============================
 
-Experiment
-----
-.. autofunction:: cell_census._get_experiment
-
 AnnData
 ----
 .. autofunction:: cell_census.get_anndata
