@@ -1,3 +1,6 @@
+.. meta::
+   :name=robots: noindex
+   
 Installation
 =====
 
