@@ -10,7 +10,7 @@ TODO: later
 
 Experiment
 ----
-.. autofunction:: cell_census.get_experiment
+.. autofunction:: cell_census._get_experiment
 
 AnnData
 ----
