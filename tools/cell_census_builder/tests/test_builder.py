@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 import pandas as pd
 import pyarrow as pa
+import tiledb
 import tiledbsoma as soma
 
-from api.python.cell_census.src import cell_census
 from tools.cell_census_builder.__main__ import build, make_experiment_builders
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.globals import (
@@ -36,12 +36,15 @@ def test_base_builder_creation(
         # return_value = 0 means that the build succeeded
         assert return_value == 0
 
-        # Query the census and do assertions
-        census = cell_census.open_soma(uri=soma_path)
-
         # validate the cell_census
         return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore
         assert return_value is True
+
+        # Query the census and do assertions
+        census = soma.Collection(
+            uri=soma_path,
+            context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": "us-west-2"})),
+        )
 
         # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
         human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
