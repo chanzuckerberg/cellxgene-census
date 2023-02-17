@@ -3,7 +3,7 @@ import re
 import tiledbsoma as soma
 
 
-def get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
+def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     """
     Given a census ``soma.Collection``, return the experiment for the named organism.
     Organism matching is somewhat flexible, attempting to map from human-friendly
