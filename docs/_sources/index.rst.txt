@@ -6,8 +6,6 @@
 Welcome to cell-census documentation!
 =======================================
 
-Note: this site is currently under construction. The location will change in the future, so don't bookmark it.
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
