@@ -19,7 +19,7 @@ jobs:
           extra-packages: any::rcmdcheck, any::styler
           needs: check
       - name: styler
-        run: Rscript -e 'style_pkg("api/r/cellcensus", dry="fail")'
+        run: Rscript -e 'library("styler"); style_pkg("api/r/cellcensus", dry="fail")'
       - uses: r-lib/actions/check-r-package@v2
         with:
           working-directory: ./api/r/cellcensus
