@@ -10,8 +10,8 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://s3.us-west-2.amazonaws.com/cellxge
 #'
 #' @examples
 get_census_version_description <- function(census_version) {
-  census_directory = get_census_version_directory()
-  description = census_directory[census_version,]
+  census_directory <- get_census_version_directory()
+  description <- census_directory[census_version, ]
   if (nrow(description) == 0) {
     stop(paste("unknown Cell Census version:", census_version))
   }
@@ -51,7 +51,7 @@ get_census_version_directory <- function() {
 
 # https://stackoverflow.com/a/38950304
 simple_rapply <- function(x, fn) {
-  if(is.list(x)) {
+  if (is.list(x)) {
     lapply(x, simple_rapply, fn)
   } else {
     fn(x)

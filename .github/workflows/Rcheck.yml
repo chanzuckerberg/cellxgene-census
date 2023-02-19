@@ -16,8 +16,10 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ./api/r/cellcensus
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, styler
           needs: check
+      - name: styler
+        run: Rscript -e 'style_pkg("api/r/cellcensus", dry="fail")'
       - uses: r-lib/actions/check-r-package@v2
         with:
           working-directory: ./api/r/cellcensus
