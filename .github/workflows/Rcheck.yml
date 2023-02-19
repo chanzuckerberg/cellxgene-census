@@ -1,0 +1,26 @@
+name: cell_census R package checks
+
+on:
+  pull_request:
+    paths-ignore:
+      - "apis/python/**"
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: '4.1.2'
+      - name: Install dependencies
+        run: |
+          Rscript -e 'install.packages("remotes")'
+          Rscript -e 'remotes::install_deps("api/r/cellcensus/DESCRIPTION")'
+      - name: Build and Check
+        run: |
+          cd api/r/cellcensus
+          R CMD build . && R CMD check *tar.gz --as-cran
