@@ -38,4 +38,4 @@ def get_presence_matrix(
 
     exp = _get_experiment(census, organism)
     presence = exp.ms[measurement_name]["feature_dataset_presence_matrix"]
-    return presence.read((slice(None),)).csrs().concat().to_scipy()
+    return presence.read((slice(None),)).coos().concat().to_scipy().tocsr()
