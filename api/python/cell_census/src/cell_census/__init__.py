@@ -20,9 +20,9 @@ except ImportError:
     import importlib_metadata as metadata  # type: ignore[no-redef]
 
 from ._get_anndata import get_anndata
+from ._open import download_source_h5ad, get_source_h5ad_uri, open_soma
 from ._presence_matrix import get_presence_matrix
 from ._release_directory import get_census_version_description, get_census_version_directory
-from .open import download_source_h5ad, get_source_h5ad_uri, open_soma
 
 try:
     __version__ = metadata.version("cell_census")
