@@ -6,7 +6,7 @@ import s3fs
 import tiledbsoma as soma
 
 from .release_directory import CensusLocator, get_census_version_description
-from .util import uri_join
+from .util import _uri_join
 
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
@@ -130,7 +130,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     locator = description["h5ads"].copy()
     h5ads_base_uri = locator["uri"]
     dataset_h5ad_path = dataset.dataset_h5ad_path.iloc[0]
-    locator["uri"] = uri_join(h5ads_base_uri, dataset_h5ad_path)
+    locator["uri"] = _uri_join(h5ads_base_uri, dataset_h5ad_path)
     return locator
 
 

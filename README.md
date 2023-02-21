@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/chanzuckerberg/cell-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cell-census)
+
 # CELLxGENE Cell Census
 
 **Status**: Unstable, under rapid development
