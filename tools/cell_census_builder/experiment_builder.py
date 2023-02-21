@@ -14,7 +14,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 from scipy import sparse
 from somacore.options import OpenMode
-from tiledbsoma.tiledb_object import TileDBObject
+from tiledbsoma._tiledb_object import TileDBObject
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset

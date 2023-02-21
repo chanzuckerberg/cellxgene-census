@@ -233,10 +233,7 @@ def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
         # prevents seeing the builder's writes.
         _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
             tiledb_ctx=TileDB_Ctx(),
-            # TODO: Setting an explicit write timestamp causes later reads to fail!
-            # write_timestamp=write_timestamp,
-            # TODO: We *should* be able to set this equal to WRITE_TIMESTAMP, but as specifying a write_timestamp is
-            #  problematic, we must use "end of time" for now
+            write_timestamp=WRITE_TIMESTAMP,
             read_timestamp=END_OF_TIME,
         )
     return _SOMA_TileDB_Context
