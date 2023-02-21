@@ -51,7 +51,7 @@ The Cell Census requires a Linux or MacOS system with:
 
 ### Documentation
 
-Reference documentation, data description and tutorials can be access at the Cell Census doc-site. *Coming soon*. 
+Reference documentation, data description, and tutorials can be access at the Cell Census doc-site. *Coming soon*. 
 
 Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 
@@ -80,7 +80,7 @@ census.close()
 
 ##### Querying a slice of cell metadata
 
-This filters female cells of cell type "microglial cell" or "neuron", and select the columns "assay", "cell_type" and "tissue".
+The following filters female cells of cell type "microglial cell" or "neuron", and selects the columns "assay", "cell_type" and "tissue".
 
 ```python
 # Reads SOMA data frame
@@ -98,7 +98,7 @@ cell_metadata = cell_metadata.to_pandas()
 
 ##### Obtaining a slice as AnnData 
 
-This filters female cells of cell type "microglial cell" or "neuron", and select the cell metadata columns "assay", "cell_type" and "tissue". It alsot filters for the genes "ENSG00000161798" and "ENSG00000188229"
+The following filters female cells of cell type "microglial cell" or "neuron", and selects the cell metadata columns "assay", "cell_type" and "tissue". It also filters for the genes "ENSG00000161798" and "ENSG00000188229".
 
 ```python
 adata = cell_census.get_anndata(
