@@ -14,6 +14,12 @@ The **Cell Census** is a data object and a convenience API to open it. The objec
 - R and Python support.
 - Export to AnnData and Seurat.
 
+## Cell Census data releases
+
+Starting in  mid 2023, Cell Census long-term supported data builds will be released every 6 months and are guaranteed to be stored for public access for at least 5 years upon release. 
+
+In between long-term supported data build releases, weekly builds are released without any guarantee of permanence. 
+
 ## Cell Census data organization
 
 The Cell Census follow as specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema_0.1.0.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
