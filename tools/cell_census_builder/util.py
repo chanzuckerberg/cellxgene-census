@@ -104,10 +104,7 @@ def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
     # This causes Arrow to blow up.
     copied = False
     for k in df.keys():
-        if (
-            pd.api.types.is_categorical_dtype(df[k])
-            and type(df[k].cat.ordered) == np.bool_  # type: ignore[comparison-overlap]
-        ):
+        if pd.api.types.is_categorical_dtype(df[k]) and type(df[k].cat.ordered) == np.bool_:
             if not copied:
                 df = df.copy()
                 copied = True
