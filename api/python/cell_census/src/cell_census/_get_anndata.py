@@ -9,7 +9,7 @@ from somacore.options import SparseDFCoord
 # TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
 from somacore.query.query import AxisColumnNames
 
-from .experiment import _get_experiment
+from ._experiment import _get_experiment
 
 
 def get_anndata(

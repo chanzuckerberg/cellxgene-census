@@ -1,7 +1,7 @@
 import tiledbsoma as soma
 from scipy import sparse
 
-from .experiment import _get_experiment
+from ._experiment import _get_experiment
 
 
 def get_presence_matrix(
