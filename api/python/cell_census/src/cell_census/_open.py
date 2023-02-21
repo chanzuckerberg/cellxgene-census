@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 import s3fs
 import tiledbsoma as soma
 
-from .release_directory import CensusLocator, get_census_version_description
-from .util import _uri_join
+from ._release_directory import CensusLocator, get_census_version_description
+from ._util import _uri_join
 
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
