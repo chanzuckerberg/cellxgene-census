@@ -47,7 +47,6 @@ def test_base_builder_creation(
             uri=soma_path,
             context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": "us-west-2"})),
         ) as census:
-
             # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
             human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
             assert human_obs.shape[0] == 8

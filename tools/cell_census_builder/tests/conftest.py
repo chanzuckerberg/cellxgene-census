@@ -15,7 +15,6 @@ from tools.cell_census_builder.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
 from tools.cell_census_builder.mp import process_initializer
-from tiledbsoma.options import SOMATileDBContext
 
 
 @attrs.define(frozen=True)
