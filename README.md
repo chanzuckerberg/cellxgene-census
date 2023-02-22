@@ -74,7 +74,7 @@ $ pip install -U cell-census
 
 ##### Opening the Cell Census
 
-Directly opening the Cell Census.
+You can directly open the Cell Census.
 
 ```python
 import cell_census
@@ -83,7 +83,7 @@ census = cell_census.open_soma()
 census.close()
 ```
 
-Or using a context manager.
+Or use a context manager.
 
 ```python
 import cell_census
