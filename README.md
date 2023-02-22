@@ -6,13 +6,16 @@ The **Cell Census** provides easy-to-use and efficient computational tooling to 
 
 ## Motivation: Single-cell analysis at scale 
 
-The **Cell Census** is a data object and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation of [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA and currently absent in the single-cell field, including:
+The **Cell Census** is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation of [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA and currently absent in the single-cell field, including:
 
 - Cloud-based data storage and access.
 - Efficient access for larger-than-memory slices of data.
 - Data streaming for iterative/parallelizablne  methods.
 - R and Python support.
 - Export to AnnData and Seurat.
+
+
+The Cell Census is free to use.
 
 ## Cell Census data releases
 
@@ -22,17 +25,17 @@ In between long-term supported data build releases, weekly builds are released w
 
 ## Cell Census data organization
 
-The Cell Census follow a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema_0.1.0.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
+The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema_0.1.0.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
 
 
-Cell Census, collection with:
+Cell Census, a collection with:
 
 - `"census_info" ` — collection with summary objects.
    - `"summary"` — data frame with Cell Census metadata.
    - `"datasets"` — data frame listing all datasets included.
    - `"summary_cell_counts"`  — data frame with cell counts across cell metadata variables.
-- `"census_data"` — collection with the single-cell data.
-	- `"homo_sapiens"` or `"mus_musculus"`:
+- `"census_data"` — collection with the single-cell data per organism.
+	- `"homo_sapiens"` or `"mus_musculus"` — collection with:
 		- `obs`  — data frame with cell metadata.
 		- `ms["RNA"]` — collection with count matrix and gene metadada.
 		   - `X["raw"]` — sparse matrix with raw counts.
@@ -45,9 +48,9 @@ Cell Census, collection with:
 
 The Cell Census requires a Linux or MacOS system with:
 
-- Python 3.7 to Python 3.10. Or R ????
-- Recommended: >16 GB of memory
-- Recommended: >5 Mbps internet connection    
+- Python 3.7 to Python 3.10. Or R, supported versions TBD.
+- Recommended: >16 GB of memory.
+- Recommended: >5 Mbps internet connection. 
 
 ### Documentation
 
@@ -71,6 +74,8 @@ $ pip install -U cell-census
 
 ##### Opening the Cell Census
 
+Directly opening the Cell Census.
+
 ```python
 import cell_census
 census = cell_census.open_soma()
@@ -78,7 +83,15 @@ census = cell_census.open_soma()
 census.close()
 ```
 
-##### Querying a slice of cell metadata
+Or using a context manager.
+
+```python
+import cell_census
+with cell_census.open_soma() as census:
+	...
+```
+
+##### Querying a slice of cell metadata.
 
 The following filters female cells of cell type "microglial cell" or "neuron", and selects the columns "assay", "cell_type" and "tissue".
 
@@ -113,9 +126,9 @@ adata = cell_census.get_anndata(
 
 ##### Memory-efficient queries
 
-This example provides a demonstration to access the data for larger-than-memory operations. 
+This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
 
-First we initiate a lazy-evaluation query to access all brain and male cells from human.
+First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or used called in a context manager — `with ...`.
 
 ```
 import tiledbsoma
@@ -130,19 +143,20 @@ query = human.axis_query(
 )
 ```
 
-Now we can iterate over the matrix count, and the cell and gene metadata. For example to iterate over the matrix count, we can get an iterator and perform operations per iteration.
+Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
 
 ```
 iterator = query.X("raw").tables()
 
 # Get a slice a pyarrow.Table
 raw_slice = next (iterator) 
+...
 ```
 
 Alternatively.
 
 ```
-for iterator in  query.X("raw").tables():
+for raw_slice in  query.X("raw").tables():
    ...
 ``` 
 
@@ -158,45 +172,38 @@ census.close()
 *Coming soon*
 
 
-## Questions, feedback and issue
+## Questions, feedback and issues
 
-(P0) Header: Questions, feedback, issues. 
-It should contain:
-Question guidelines – formal questions add as github issue, quick&dirty go to the slack channel.
-Feature request guidelines – link to airtable form
-Issue guidelines – add as github issue
-Any other feedback – soma@chanzuckerberg.com 
+- Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cell-census/issues). Alternatively, for quick support you can join the C[ZI Science Community](https://join-cellxgene-users.herokuapp.com/) on Slack and join the `#cell-census-users` channel
+- Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cell-census/issues). 
+- Feature requests: please submit requests using this [form](https://airtable.com/shrVV1g0d6nvBoQYu).
+- Security issue: if you believe you have found a security issue, we would appreciate notification. Please send an email to <security@chanzuckerberg.com>.
+- You can send any other feedback to <soma@chanzuckerberg.com>
 
 
 ## Coming soon
 
-(P0) Header: Coming soon
-It should contain:
-What’s next in our roadmap: modeling at scale
-Important areas of research not currently implemented:
-Organism-wide normalization
-Organism-wide embeddings
-Smart subsampling
+- R support!
+- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless of integration of the Cell Census and [PyTorch](https://pytorch.org/).
+- To increase the usability of the Cell Census for research, in 2023 and 2024 we are planing to explore the following areas :
+   - Organism-wide normalization
+   - Organism-wide embeddings
+   - Smart subsampling
 
 ## Contribute
 
-(P0) Header: How to contribute
-An eng should complete this
+*Coming soon.*
 
 ## Projects and tools using the Cell Census
 
-(P1) Project using the Cell Census: How to contribute
-A list of projects utilizing the Cell Census
+If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>
 
 ## Reuse
 
-The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the CZ Cell Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
+The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the Cell Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
 
-## Security
 
-If you believe you have found a security issue, we would appreciate notification. Please send email to <security@chanzuckerberg.com>.
-
-### Code of Conduct
+## Code of Conduct
 
 This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to <opensource@chanzuckerberg.com>.
 
