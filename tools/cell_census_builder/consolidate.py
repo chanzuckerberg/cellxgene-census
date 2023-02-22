@@ -6,7 +6,7 @@ from typing import List
 import tiledbsoma as soma
 
 from .globals import SOMA_TileDB_Context
-from .mp import create_process_pool_executor
+from .mp import create_process_pool_executor, log_on_broken_process_pool
 
 
 def consolidate(args: argparse.Namespace, uri: str) -> None:
@@ -16,33 +16,38 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
     if soma.get_storage_engine() != "tiledb":
         return
 
-    logging.info("consolidate - started")
+    logging.info("Consolidate: started")
 
+    # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
-        with create_process_pool_executor(args) as ppe:
-            futures = consolidate_collection(args, census, ppe)
-        for future in concurrent.futures.as_completed(futures):
+        uris_to_consolidate = _walk_tree(census)
+    logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
+
+    # Queue consolidator for each array
+    with create_process_pool_executor(args) as ppe:
+        futures = [ppe.submit(consolidate_tiledb_object, uri) for uri in uris_to_consolidate]
+        logging.info(f"Consolidate: {len(futures)} consolidation jobs queued")
+
+        # Wait for consolidation to complete
+        for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+            log_on_broken_process_pool(ppe)
             uri = future.result()
-            logging.info(f"Consolidate: completed {uri}")
+            logging.info(f"Consolidate: completed [{n} of {len(futures)}]: {uri}")
 
-    logging.info("consolidate - finished")
+    logging.info("Consolidate: finished")
 
 
-def consolidate_collection(
-    args: argparse.Namespace, collection: soma.Collection, ppe: concurrent.futures.ProcessPoolExecutor
-) -> List[concurrent.futures.Future[str]]:
-    futures = []
+def _walk_tree(collection: soma.Collection) -> List[str]:
+    uris = []
     for soma_obj in collection.values():
         type = soma_obj.soma_type
         if type in ["SOMADataFrame", "SOMASparseNDArray", "SOMADenseNDArray"]:
-            logging.info(f"Consolidate: queuing {type} {soma_obj.uri}")
-            futures.append(ppe.submit(consolidate_tiledb_object, soma_obj.uri))
+            uris.append(soma_obj.uri)
         elif type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
-            futures += consolidate_collection(args, soma_obj, ppe)
+            uris += _walk_tree(soma_obj)
         else:
             raise TypeError(f"Unknown SOMA type {type}.")
-
-    return futures
+    return uris
 
 
 def consolidate_tiledb_object(uri: str) -> str:
@@ -50,7 +55,8 @@ def consolidate_tiledb_object(uri: str) -> str:
 
     import tiledb
 
-    logging.info(f"Consolidate: starting {uri}")
+    logging.info(f"Consolidate: start uri {uri}")
     tiledb.consolidate(uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3}))
     tiledb.vacuum(uri)
+    logging.info(f"Consolidate: end uri {uri}")
     return uri
