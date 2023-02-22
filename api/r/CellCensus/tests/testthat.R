@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(cellcensus)
+library(CellCensus)
 
-test_check("cellcensus")
+test_check("CellCensus")

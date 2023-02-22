@@ -134,3 +134,4 @@ temp
 
 # ruff
 .ruff_cache
+.Rproj.user
