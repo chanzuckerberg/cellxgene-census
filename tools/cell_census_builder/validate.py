@@ -34,7 +34,7 @@ from .globals import (
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     SOMA_TileDB_Context,
 )
-from .mp import create_process_pool_executor
+from .mp import create_process_pool_executor, log_on_broken_process_pool
 from .util import uricat
 
 
@@ -123,7 +123,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             if eb.n_obs > 0:
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
                 assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
-                assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().csrs()]) > 0
+                assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().coos()]) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
         return True
@@ -253,7 +253,7 @@ def validate_axis_dataframes(
     return True
 
 
-def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> bool:
+def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[ExperimentBuilder]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
@@ -262,12 +262,13 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     * the nnz is correct
     * there are no zeros explicitly saved (this is mandated by cell census schema)
     """
-    assets_path, soma_path, dataset, experiment_builders = args
+    assets_path, dataset, experiment_builders = args
+    _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
+
     for eb in reopen_experiment_builders(experiment_builders, "r"):
         assert eb.experiment is not None
         exp: soma.Experiment = eb.experiment
 
-        _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
@@ -285,7 +286,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             assert soma.SparseNDArray.exists(exp.ms["RNA"].X["raw"].uri)
 
             def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
-                return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).csrs())
+                return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).coos())
 
             raw_nnz = count_elements(exp.ms["RNA"].X["raw"], soma_joinids)
 
@@ -307,9 +308,9 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     return True
 
 
-def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str, int, int]) -> bool:
+def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentBuilder, str, int, int]) -> bool:
     """Validate that all X layers have no duplicate coordinates"""
-    soma_path, experiment_builder, layer_name, row_range_start, row_range_stop = args
+    experiment_builder, layer_name, row_range_start, row_range_stop = args
     with soma.Experiment.open(experiment_builder.experiment_uri, context=SOMA_TileDB_Context()) as exp:
         logging.info(
             f"validate_no_dups_X start, {experiment_builder.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
@@ -338,7 +339,6 @@ def _validate_X_layer_has_unique_coords(args: Tuple[str, ExperimentBuilder, str,
 
 def validate_X_layers(
     assets_path: str,
-    soma_path: str,
     datasets: List[Dataset],
     experiment_builders: List[ExperimentBuilder],
     args: argparse.Namespace,
@@ -389,22 +389,22 @@ def validate_X_layers(
             dup_coord_futures = [
                 ppe.submit(
                     _validate_X_layer_has_unique_coords,
-                    (soma_path, eb, layer_name, row_start, row_start + ROWS_PER_PROCESS),
+                    (eb, layer_name, row_start, row_start + ROWS_PER_PROCESS),
                 )
                 for eb in experiment_builders
                 for layer_name in CENSUS_X_LAYERS
-                for row_start in range(0, eb.n_obs, ROWS_PER_PROCESS)
+                for row_start in range(0, n_obs, ROWS_PER_PROCESS)
             ]
             per_dataset_futures = [
-                ppe.submit(
-                    _validate_X_layers_contents_by_dataset, (assets_path, soma_path, dataset, experiment_builders)
-                )
+                ppe.submit(_validate_X_layers_contents_by_dataset, (assets_path, dataset, experiment_builders))
                 for dataset in datasets
             ]
             for n, future in enumerate(concurrent.futures.as_completed(dup_coord_futures), start=1):
+                log_on_broken_process_pool(ppe)
                 assert future.result()
                 logging.info(f"validate_no_dups_X {n} of {len(dup_coord_futures)} complete.")
             for n, future in enumerate(concurrent.futures.as_completed(per_dataset_futures), start=1):
+                log_on_broken_process_pool(ppe)
                 assert future.result()
                 logging.info(f"validate_X {n} of {len(datasets)} complete.")
 
@@ -412,10 +412,10 @@ def validate_X_layers(
         for eb in experiment_builders:
             for layer_name in CENSUS_X_LAYERS:
                 logging.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
-                assert _validate_X_layer_has_unique_coords((soma_path, eb, layer_name, 0, eb.n_obs))
+                assert _validate_X_layer_has_unique_coords((eb, layer_name, 0, n_obs))
         for n, vld in enumerate(
             (
-                _validate_X_layers_contents_by_dataset((assets_path, soma_path, dataset, experiment_builders))
+                _validate_X_layers_contents_by_dataset((assets_path, dataset, experiment_builders))
                 for dataset in datasets
             ),
             start=1,
@@ -473,6 +473,6 @@ def validate(
     assert validate_manifest_contents(assets_path, datasets)
 
     assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
-    assert validate_X_layers(assets_path, soma_path, datasets, experiment_builders, args)
+    assert validate_X_layers(assets_path, datasets, experiment_builders, args)
     logging.info("Validation finished (success)")
     return True
