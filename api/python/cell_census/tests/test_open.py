@@ -6,6 +6,7 @@ import pytest
 import tiledbsoma as soma
 
 import cell_census
+from cell_census._open import DEFAULT_TILEDB_CONFIGURATION
 
 
 @pytest.mark.live_corpus
@@ -18,6 +19,8 @@ def test_open_soma_latest() -> None:
     # and it should always be the default
     with cell_census.open_soma() as default_census:
         assert default_census.uri == census.uri
+        for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
+            assert census.context.tiledb_ctx.config()[k] == str(v)
 
 
 @pytest.mark.live_corpus

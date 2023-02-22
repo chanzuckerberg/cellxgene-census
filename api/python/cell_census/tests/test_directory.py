@@ -4,7 +4,7 @@ import pytest
 import requests_mock as rm
 
 import cell_census
-from cell_census.release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
+from cell_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 DIRECTORY_JSON = {
     "latest": "2022-11-01",

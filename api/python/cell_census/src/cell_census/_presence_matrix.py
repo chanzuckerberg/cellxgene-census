@@ -1,7 +1,7 @@
 import tiledbsoma as soma
 from scipy import sparse
 
-from .experiment import _get_experiment
+from ._experiment import _get_experiment
 
 
 def get_presence_matrix(
@@ -38,4 +38,4 @@ def get_presence_matrix(
 
     exp = _get_experiment(census, organism)
     presence = exp.ms[measurement_name]["feature_dataset_presence_matrix"]
-    return presence.read((slice(None),)).csrs().concat().to_scipy()
+    return presence.read((slice(None),)).coos().concat().to_scipy().tocsr()

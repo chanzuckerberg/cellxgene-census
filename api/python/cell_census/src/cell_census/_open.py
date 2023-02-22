@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 import s3fs
 import tiledbsoma as soma
 
-from .release_directory import CensusLocator, get_census_version_description
-from .util import _uri_join
+from ._release_directory import CensusLocator, get_census_version_description
+from ._util import _uri_join
 
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
@@ -17,11 +17,11 @@ DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
 
 def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
     """Private. Merge config defaults and return open census as a soma Collection/context."""
-    context = context or soma.options.SOMATileDBContext()
     s3_region = locator.get("s3_region")
 
     if not context:
         # if no user-defined context, cell_census defaults take precedence over SOMA defaults
+        context = soma.options.SOMATileDBContext()
         tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
         if s3_region is not None:
             tiledb_config["vfs.s3.region"] = s3_region
