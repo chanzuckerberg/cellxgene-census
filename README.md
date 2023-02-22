@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/chanzuckerberg/cell-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cell-census)
+
 # Cell Census of CZ CELLxGENE Discover
 
 **CZ CELLxGENE Discover** ([cellxgene.cziscience.com](https://cellxgene.cziscience.com/)) is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is standardized** to include raw counts and a common vocabulary for gene and cell metadata.
@@ -196,7 +198,7 @@ census.close()
 
 ## Projects and tools using the Cell Census
 
-If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>.
+If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>
 
 ## Reuse
 
