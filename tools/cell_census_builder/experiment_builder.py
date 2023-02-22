@@ -11,10 +11,10 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
+import somacore
 import tiledbsoma as soma
 from scipy import sparse
 from somacore.options import OpenMode
-from tiledbsoma.tiledb_object import TileDBObject
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -58,7 +58,7 @@ PresenceResults = Tuple[PresenceResult, ...]
 tissue_mapper: TissueMapper = TissueMapper()
 
 
-def _assert_open_for_write(obj: TileDBObject) -> None:
+def _assert_open_for_write(obj: somacore.SOMAObject) -> None:
     assert obj is not None
     assert obj.exists(obj.uri)
     assert obj.mode == "w"
