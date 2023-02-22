@@ -456,7 +456,7 @@ def validate(
     Will raise if validation fails. Returns True on success.
     """
     logging.info("Validation start")
-
+    assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
     assert os.path.exists(soma_path) and os.path.exists(assets_path)
 
     # HACK: experiment_uri is only initialized in create(), which is only called if census is built before calling
@@ -467,6 +467,7 @@ def validate(
         if not eb.build_completed:
             eb.experiment_uri = f"{soma_path}/{CENSUS_DATA_NAME}/{eb.name}"
 
+    assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
     assert validate_all_soma_objects_exist(soma_path, experiment_builders)
 
     datasets = load_datasets_from_census(assets_path, soma_path)

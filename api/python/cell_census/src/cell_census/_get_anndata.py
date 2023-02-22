@@ -9,7 +9,7 @@ from somacore.options import SparseDFCoord
 # TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
 from somacore.query.query import AxisColumnNames
 
-from .experiment import get_experiment
+from ._experiment import _get_experiment
 
 
 def get_anndata(
@@ -25,9 +25,7 @@ def get_anndata(
 ) -> anndata.AnnData:
     """
     Convience wrapper around soma.Experiment query, to build and execute a query,
-    and return it as an AnnData object.
-
-    [lifecycle: experimental]
+    and return it as an AnnData object [lifecycle: experimental].
 
     Parameters
     ----------
@@ -67,7 +65,7 @@ def get_anndata(
     >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
 
     """
-    exp = get_experiment(census, organism)
+    exp = _get_experiment(census, organism)
     obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
     var_coords = (slice(None),) if var_coords is None else (var_coords,)
     with exp.axis_query(

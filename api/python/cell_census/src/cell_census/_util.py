@@ -1,7 +1,7 @@
 import urllib.parse
 
 
-def uri_join(base: str, url: str) -> str:
+def _uri_join(base: str, url: str) -> str:
     """
     like urllib.parse.urljoin, but doesn't get confused by S3://
     """
