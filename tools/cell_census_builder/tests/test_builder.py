@@ -33,13 +33,13 @@ def test_base_builder_creation(
         from types import SimpleNamespace
 
         args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
-        return_value = build(args, soma_path, assets_path, experiment_builders)
+        return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
 
         # validate the cell_census
-        return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore
+        return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
         assert return_value is True
 
         # Query the census and do assertions
