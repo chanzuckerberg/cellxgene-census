@@ -197,7 +197,7 @@ class ExperimentBuilder:
     def populate_obs_axis(self, obs_df: pd.DataFrame) -> None:
         _assert_open_for_write(self.experiment)
 
-        logging.info(f"experiment {self.name} obs = {obs_df.shape}")
+        logging.debug(f"experiment {self.name} obs = {obs_df.shape}")
         pa_table = pa.Table.from_pandas(
             obs_df,
             preserve_index=False,
