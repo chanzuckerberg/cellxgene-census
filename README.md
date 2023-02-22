@@ -115,8 +115,7 @@ adata = cell_census.get_anndata(
 
 This example provides a demonstration to access the data for larger-than-memory operations. 
 
-First we initiate a lazy-evaluation query to access all brain and male cells from human:
-measurement 
+First we initiate a lazy-evaluation query to access all brain and male cells from human.
 
 ```
 import tiledbsoma
