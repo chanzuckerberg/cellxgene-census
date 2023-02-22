@@ -834,12 +834,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </table>
 
 
-
 ## Changelog
 
 ### Version 0.1.1
 * Adds clarifying text for "Feature Dataset Presence Matrix"
-
 
 ### Version 0.1.0
 * The "Dataset Presence Matrix" was renamed to "Feature Dataset Presence Matrix" and moved from  `census_obj["census_data"][organism].ms["RNA"].varp["dataset_presence_matrix"]`  to `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]`.
