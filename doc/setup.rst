@@ -50,11 +50,13 @@ Check that your installation works - this make take a few seconds, as it loads m
   $ python -c 'import cell_census; print(cell_census.open_soma().soma_type)'
   SOMACollection
 
-Development Instruction
+Latest development version
 ----
 
 If you want to work with the latest development version of cell-census, you can simply clone the repository 
-and, from the root directory, run:
+and, from the root directory, install locally via pip:
 ::
 
+  $ git clone https://github.com/chanzuckerberg/cell-census.git
+  $ cd cell-census
   $ pip install -e api/python/cell_census/
