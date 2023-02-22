@@ -88,7 +88,7 @@ Or use a context manager.
 ```python
 import cell_census
 with cell_census.open_soma() as census:
-	...
+   ...
 ```
 
 ##### Querying a slice of cell metadata.
@@ -126,7 +126,7 @@ adata = cell_census.get_anndata(
 
 ##### Memory-efficient queries
 
-This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
+This example provides a demonstration to accessed the data for larger-than-memory operations using **TileDB-SOMA** operations. 
 
 First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or used called in a context manager — `with ...`.
 
@@ -196,7 +196,7 @@ census.close()
 
 ## Projects and tools using the Cell Census
 
-If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>
+If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>.
 
 ## Reuse
 
