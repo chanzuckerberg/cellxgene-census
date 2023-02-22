@@ -24,37 +24,37 @@ def get_anndata(
     column_names: Optional[AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
-    Convience wrapper around soma.Experiment query, to build and execute a query,
-    and return it as an AnnData object [lifecycle: experimental].
+    Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
+    and return it as an ``AnnData`` object [lifecycle: experimental].
 
     Parameters
     ----------
-    census : soma.Collection
+    census : ``soma.Collection``
         The census object, usually returned by `cell_census.open_soma()`
-    organism : str
+    organism : ``str``
         The organism to query, usually one of "Homo sapiens" or "Mus musculus"
-    measurement_name : str, default 'RNA'
+    measurement_name : ``str``, default ``"RNA"``
         The measurement object to query
-    X_name : str, default "raw"
-        The X layer to query
-    obs_value_filter: str, default None
+    X_name : str, default ``"raw"``
+        The ``X`` layer to query
+    obs_value_filter: ``str``, default ``None``
         Value filter for the ``obs`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
-    obs_coords: tuple[int, slice or NumPy ArrayLike of int], default None
+    obs_coords: ``tuple``[``int``, slice or NumPy ArrayLike of ``int``], default ``None``
         Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
-        May be an int, a list of int, or a slice. The default, None, selects all.
-    var_value_filter: str, default None
+        May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+    var_value_filter: ``str``, default ``None``
         Value filter for the ``var`` metadata. Value is a filter query written in the
         SOMA ``value_filter`` syntax.
-    var_coords: tuple[int, slice or NumPy ArrayLike of int], default None
+    var_coords: ``tuple``[``int``, slice or NumPy ArrayLike of ``int``], default ``None``
         Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
-        May be an int, a list of int, or a slice. The default, None, selects all.
-    column_names: dict[Literal['obs', 'var'], List[str]]
-        Colums to fetch for obs and var dataframes.
+        May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+    column_names: ``dict[Literal['obs', 'var'], List[str]]``
+        Colums to fetch for ``obs`` and ``var`` dataframes.
 
     Returns
     -------
-    anndata.AnnData - containing the census slice
+    ``anndata.AnnData`` - containing the census slice
 
     Examples
     --------

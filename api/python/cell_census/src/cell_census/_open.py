@@ -43,14 +43,14 @@ def open_soma(
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
     """
-    Open the Cell Census by version or URI, returning a soma.Collection containing the
+    Open the Cell Census by version or URI, returning a ``soma.Collection`` containing the
     top-level census.  Raises error if ``census_version`` is specified and unknown, or
     if neither ``uri`` or ``census_version`` are specified, or if the ``uri`` can not
     be opened [lifecycle: experimental].
 
     Parameters
     ----------
-    census_version : Optional[str]
+    census_version : ``Optional[str]``
         The version of the Census, e.g., "latest"
     uri : Optional[str]
         The URI containing the Census SOMA objects. If specified, will take precedence
@@ -59,7 +59,7 @@ def open_soma(
 
     Returns
     -------
-    soma.Collection : returns a SOMA Collection object. Can be used as a context manager, which
+    ``soma.Collection`` : returns a SOMA Collection object. Can be used as a context manager, which
         will automatically close upon exit.
 
     Examples
@@ -71,19 +71,23 @@ def open_soma(
             ...
 
     Open and close:
+
     >>> census = cell_census.open_soma()
         ...
         census.close()
 
     Open a specific Cell Census by version:
+
     >>> with cell_census.open_soma("2022-12-31") as census:
             ...
 
     Open a Cell Census by S3 URI, rather than by version.
+
     >>> with cell_census.open_soma(uri="s3://bucket/path") as census:
             ...
 
     Open a Cell Census by path (file:// URI), rather than by version.
+
     >>> with cell_census.open_soma(uri="/tmp/census") as census:
             ...
     """
@@ -100,20 +104,20 @@ def open_soma(
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
     """
-    Open the named version of the census, and return the URI for the dataset_id. This
+    Open the named version of the census, and return the URI for the ``dataset_id``. This
     does not guarantee that the H5AD exists or is accessible to the user. Raises an
-    error if dataset_id or census_version are unknown [lifecycle: experimental].
+    error if ``dataset_id`` or ``census_version`` are unknown [lifecycle: experimental].
 
     Parameters
     ----------
-    dataset_id : str
-        The dataset_id of interest
-    census_version : Optional[str]
+    dataset_id : ``str``
+        The ``dataset_id`` of interest
+    census_version : ``Optional[str]``
         The census version
 
     Returns
     -------
-    CensusLocator : the URI and optional S3 region for the source H5AD
+    ``CensusLocator`` : the URI and optional S3 region for the source H5AD
 
     Examples
     --------
@@ -136,17 +140,17 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
 
 def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
     """
-    Download the source H5AD dataset, for the given dataset_id, to the user-specified
+    Download the source H5AD dataset, for the given ``dataset_id``, to the user-specified
     file name. Will raise an error if the path already exists (i.e., will not overwrite
     an existing file), or is not a file [lifecycle: experimental].
 
     Parameters
     ----------
-    dataset_id : str
-        Fetch the source (original) H5AD associated with this dataset_id.
-    to_path : str
+    dataset_id : ``str``
+        Fetch the source (original) H5AD associated with this ``dataset_id``.
+    to_path : ``str``
         The file name where the downloaded H5AD will be written.  Must not already exist.
-    census_version : str
+    census_version : ``str``
         The census version name. Defaults to ``latest``.
 
     Returns
@@ -155,7 +159,7 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
 
     See Also
     --------
-    get_source_h5ad_uri : Look up the location of the source H5AD.
+    ``get_source_h5ad_uri`` : Look up the location of the source H5AD.
 
     Examples
     --------
