@@ -78,7 +78,7 @@ help(cell_census.get_anndata)
 # etc
 ```
 
-**Querying a slice of cell metadata.**
+##### Querying a slice of cell metadata.
 
 The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type`, `tissue`, `tissue_general`, `suspension_type`, and `disease`.
 
@@ -123,7 +123,7 @@ The output is a `pandas.DataFrame` with about 300K cells meeting our query crite
 
 ##### Obtaining a slice as AnnData 
 
-The following creates an `anndata.AnnData` object on-demand with the same cell filtering criteria as above and filtering only the genes `ENSG00000161798`, `ENSG00000188229`. This object can be then used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
+The following creates an `anndata.AnnData` object on-demand with the same cell filtering criteria as above and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
 
 ```python
 import cell_census
@@ -165,9 +165,9 @@ with cell_census.open_soma() as census:
     measurement_name = "RNA",
     obs_query = tiledbsoma.AxisQuery(
         value_filter = "tissue == 'brain' and sex == 'male'"
-   )
-   
-   # Continued below
+    )
+    
+    # Continued below
 
 ```
 
@@ -188,9 +188,8 @@ And you can now perform operation on each iteration slice. As with any any Pytho
 And you must close the query.
 
 ```
-   # Continued from above 
-   
-   query.close()
+    # Continued from above
+    query.close()
 ```
 
 ### R quick start
@@ -212,9 +211,9 @@ And you must close the query.
 - R support!
 - We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Cell Census and [PyTorch](https://pytorch.org/).
 - To increase the usability of the Cell Census for research, in 2023 and 2024 we are planning to explore the following areas :
-   - Organism-wide normalization
-   - Organism-wide embeddings
-   - Smart subsampling
+   - Include organism-wide normalized layers.
+   - Include Organism-wide embeddings.
+   - On-demand information-rich subsampling.
 
 ## Projects and tools using the Cell Census
 
