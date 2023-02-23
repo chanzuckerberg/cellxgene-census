@@ -33,20 +33,8 @@ In between long-term supported data build releases, weekly builds are released w
 
 The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema_0.1.0.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
 
+<img src="./docs/cell_census_data_model.svg">
 
-Cell Census, a collection with:
-
-- `"census_info" ` — collection with summary objects:
-   - `"summary"` — data frame with Cell Census metadata.
-   - `"datasets"` — data frame listing all datasets included.
-   - `"summary_cell_counts"`  — data frame with cell counts across cell metadata variables.
-- `"census_data"` — collection with the single-cell data per organism:
-	- `"homo_sapiens"` or `"mus_musculus"` — collection with:
-		- `obs`  — data frame with cell metadata.
-		- `ms["RNA"]` — collection with the count matrix and gene metadata:
-		   - `X["raw"]` — sparse matrix with raw counts.
-		   - `var` — data frame with gene metadata for >60K genes.
-		   - `"feature_dataset_presence_matrix"`— sparse boolean matrix flagging genes measured per dataset. 
 
 ## Quick start
 
@@ -186,7 +174,7 @@ Now we can iterate over the matrix count, as well as the cell and gene metadata.
    ...
 ```
 
-And you can now perform operation on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop
+And you can now perform operation on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop.
 
 And you must close the query.
 
@@ -218,10 +206,6 @@ And you must close the query.
    - Organism-wide normalization
    - Organism-wide embeddings
    - Smart subsampling
-
-## Contribute
-
-*Coming soon.*
 
 ## Projects and tools using the Cell Census
 
