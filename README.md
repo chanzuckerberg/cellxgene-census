@@ -2,9 +2,17 @@
 
 # Cell Census of CZ CELLxGENE Discover
 
-**CZ CELLxGENE Discover** ([cellxgene.cziscience.com](https://cellxgene.cziscience.com/)) is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is standardized** to include raw counts and a common vocabulary for gene and cell metadata.
+[**CZ CELLxGENE Discover**](https://cellxgene.cziscience.com/)  is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is [standardized](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema/3.0.0)** to include raw counts and a common vocabulary for gene and cell metadata.
 
 The **Cell Census** provides easy-to-use and efficient computational tooling to access, query, and analyze all RNA data from CZ CELLxGENE Discover. The Cell Census aims to break the barrier of data fragmentation in the single-cell field by presenting a **new access paradigm of cell-based slicing and querying** for all data at CZ CELLxGENE Discover.
+
+Get started on using the Cell Census:
+
+- [Quick start](#Quick-start).
+- [Documentation](https://chanzuckerberg.github.io/cell-census/index.html). *Under development.*
+- [Python tutorials](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
+- R tutorials. *Coming soon.*
+
 
 ## Motivation: Single-cell analysis at scale 
 
@@ -12,12 +20,9 @@ The **Cell Census** is a data object publicly hosted online and a convenience AP
 
 - Cloud-based data storage and access.
 - Efficient access for larger-than-memory slices of data.
-- Data streaming for iterative/parallelizablne  methods.
+- Data streaming for iterative/parallelizable  methods.
 - R and Python support.
 - Export to AnnData and Seurat.
-
-
-The Cell Census is free to use.
 
 ## Cell Census data releases
 
@@ -44,7 +49,7 @@ Cell Census, a collection with:
 		   - `var` — data frame with gene metadata for >60K genes.
 		   - `"feature_dataset_presence_matrix"`— sparse boolean matrix flagging genes measured per dataset. 
 
-## Getting started
+## Quick start
 
 ### Requirements
 
@@ -56,9 +61,7 @@ The Cell Census requires a Linux or MacOS system with:
 
 ### Documentation
 
-Reference documentation, data description, and tutorials can be access at the Cell Census doc-site. *Coming soon*. 
-
-Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
+Reference documentation, data description, and tutorials can be accessed at the Cell Census doc-site. *Coming soon*. 
 
 ### Python quick start
 
@@ -67,63 +70,86 @@ Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/ce
 It is recommended to install the Cell Census and all of its dependencies in a new virtual environment via `pip`:
 
 ```
-$ python -m venv ./venv
-$ source ./venv/bin/activate
-$ pip install -U cell-census
+python -m venv ./venv
+source ./venv/bin/activate
+pip install -U cell-census
 ```
 
 #### Usage examples
 
-##### Opening the Cell Census
+Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 
-You can directly open the Cell Census.
-
-```python
-import cell_census
-census = cell_census.open_soma()
-...
-census.close()
-```
-
-Or use a context manager.
-
-```python
-import cell_census
-with cell_census.open_soma() as census:
-   ...
-```
+Below there are 3 examples of common operations you can do with the Cell Census.
 
 ##### Querying a slice of cell metadata.
 
-The following filters female cells of cell type "microglial cell" or "neuron", and selects the columns "assay", "cell_type" and "tissue".
+The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type` and `tissue`, `tissue_general`, `suspension_type`, and `disease`.
 
 ```python
-# Reads SOMA data frame
-cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
-   value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
-   column_names = ["assay", "cell_type", "tissue"]
-)
+import cell_census
 
-# Concatenates results to pyarrow.Table
-cell_metadata = cell_metadata.concat()
+with cell_census.open_soma() as census:
 
-# Converts to pandas.DataFrame
-cell_metadata = cell_metadata.to_pandas()
+   # Reads SOMA data frame as a slice
+   cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
+      value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
+      column_names = ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]
+   )
+   
+   # Concatenates results to pyarrow.Table
+   cell_metadata = cell_metadata.concat()
+   
+   # Converts to pandas.DataFrame
+   cell_metadata = cell_metadata.to_pandas()
+   
+   print(cell_metadata)
+```
+
+The output is a `pandas.DataFrame` with about 300K cells meeting our query criteria and the selected columns.
+
+```bash
+            assay        cell_type           tissue tissue_general suspension_type disease     sex
+0       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+1       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+2       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+3       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+4       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+...           ...              ...              ...            ...             ...     ...     ...
+299617  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299618  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299619  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299620  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299621  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+
+[299622 rows x 7 columns]
 ```
 
 ##### Obtaining a slice as AnnData 
 
-The following filters female cells of cell type "microglial cell" or "neuron", and selects the cell metadata columns "assay", "cell_type" and "tissue". It also filters for the genes "ENSG00000161798" and "ENSG00000188229".
+The following creates an `anndata.AnnData` object on-demand with the same cell filtering criteria as above and filtering only the genes `ENSG00000161798`, `ENSG00000188229`. This object can be then used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
 
 ```python
-adata = cell_census.get_anndata(
-    census = census,
-    organism = "Homo sapiens",
-    var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
-    obs_value_filter = "cell_type == 'B cell' and tissue_general == 'lung' and disease == 'COVID-19'",
-    column_names = {"obs": ["assay", "cell_type", "tissue"]},
-)
+import cell_census
 
+with cell_census.open_soma() as census:
+   adata = cell_census.get_anndata(
+      census = census,
+      organism = "Homo sapiens",
+      var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
+      obs_value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
+      column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
+   )
+   
+   print(adata)
+
+```
+
+The output with about 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
+
+``` bash
+AnnData object with n_obs × n_vars = 299622 × 2
+    obs: 'assay', 'cell_type', 'tissue', 'tissue_general', 'suspension_type', 'disease', 'sex'
+    var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'
 ```
 
 ##### Memory-efficient queries
@@ -132,41 +158,43 @@ This example provides a demonstration to accessed the data for larger-than-memor
 
 First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or used called in a context manager — `with ...`.
 
-```
-import tiledbsoma
+```python
+import cell_census
 
-human = census["census_data"]["homo_sapiens"]
-
-query = human.axis_query(
+with cell_census.open_soma() as census:
+   
+   human = census["census_data"]["homo_sapiens"]
+   
+   query = human.axis_query(
    measurement_name = "RNA",
    obs_query = tiledbsoma.AxisQuery(
       value_filter = "tissue == 'brain' and sex == 'male'"
    )
-)
+   
+   # Continued below
+
 ```
 
 Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
 
-```
-iterator = query.X("raw").tables()
-
-# Get a slice a pyarrow.Table
-raw_slice = next (iterator) 
-...
-```
-
-Alternatively.
-
-```
-for raw_slice in  query.X("raw").tables():
+```python
+   #continued from above 
+   
+   iterator = query.X("raw").tables()
+   
+   # Get an iterative slice as pyarrow.Table
+   raw_slice = next (iterator) 
    ...
-``` 
+```
 
-And you must close the query and Cell Census after you are done.
+And you can now perform operation on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop
+
+And you must close the query.
 
 ```
-query.close()
-census.close()
+   #continued from above 
+   
+   query.close()
 ```
 
 ### R quick start
@@ -186,8 +214,8 @@ census.close()
 ## Coming soon
 
 - R support!
-- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless of integration of the Cell Census and [PyTorch](https://pytorch.org/).
-- To increase the usability of the Cell Census for research, in 2023 and 2024 we are planing to explore the following areas :
+- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Cell Census and [PyTorch](https://pytorch.org/).
+- To increase the usability of the Cell Census for research, in 2023 and 2024 we are planning to explore the following areas :
    - Organism-wide normalization
    - Organism-wide embeddings
    - Smart subsampling
