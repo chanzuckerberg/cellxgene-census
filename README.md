@@ -16,7 +16,7 @@ Get started on using the Cell Census:
 
 ## Motivation: Single-cell analysis at scale 
 
-The **Cell Census** is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA and currently absent in the single-cell field, including:
+The **Cell Census** is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA including:
 
 - Cloud-based data storage and access.
 - Efficient access for larger-than-memory slices of data.
