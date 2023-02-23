@@ -71,14 +71,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     error_tiledb_group = "tiledb_group's children are not relative"
     error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
 
-    census = soma.Collection(soma_path, context=SOMA_TileDB_Context())
-    assert census.exists() and census.soma_type == "SOMACollection"
-    assert "cxg_schema_version" in census.metadata and census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
-    assert (
-        "census_schema_version" in census.metadata and census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
-    )
-    assert "created_on" in census.metadata and datetime.fromisoformat(census.metadata["created_on"])
-    assert "git_commit_sha" in census.metadata
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert census.soma_type == "SOMACollection"
         assert soma.Collection.exists(census.uri)
@@ -121,7 +113,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             for eb in experiment_builders:
                 assert soma.Experiment.exists(census_data[eb.name].uri)
                 assert census_data[eb.name].soma_type == "SOMAExperiment"
-                assert census_data[eb.name].exists()
                 assert census_data_group.is_relative(eb.name), error_tiledb_group
 
                 e = census_data[eb.name]
