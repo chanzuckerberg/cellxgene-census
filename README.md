@@ -13,7 +13,6 @@ Get started on using the Cell Census:
 - [Python tutorials](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 - R tutorials. *Coming soon.*
 
-
 ## Motivation: Single-cell analysis at scale 
 
 The **Cell Census** is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA including:
@@ -79,7 +78,7 @@ pip install -U cell-census
 
 Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 
-Below there are 3 examples of common operations you can do with the Cell Census.
+Below are 3 examples of common operations you can do with the Cell Census.
 
 ##### Querying a slice of cell metadata.
 
