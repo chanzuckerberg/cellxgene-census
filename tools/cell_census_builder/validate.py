@@ -57,7 +57,7 @@ class EbInfo:
 
 def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
     """
-    Validate all objects present, stored in the same relative path, consolidated, and contain expected metadata.
+    Validate all objects present, stored in the same relative path, and contain expected metadata.
 
     soma_path
         +-- census_info
@@ -479,6 +479,7 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
 
 
 def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
+    """Verify that obs, var and X layers are all fully consolidated & vacuumed"""
     error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
