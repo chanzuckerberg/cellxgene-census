@@ -504,7 +504,7 @@ def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentB
                 assert (
                     len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
                 ), error_layer_fragment
-        return True
+    return True
 
 
 def validate_directory_structure(soma_path: str, assets_path: str) -> bool:

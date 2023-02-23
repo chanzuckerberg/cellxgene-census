@@ -31,7 +31,7 @@ def test_base_builder_creation(
     ), patch("tools.cell_census_builder.consolidate.run"), patch(
         "tools.cell_census_builder.validate.validate_consolidation", return_value=True
     ):
-        # Patching consolidate_tiledb_object becuase is uses to much memory to run in github actions.
+        # Patching consolidate_tiledb_object, becuase is uses to much memory to run in github actions.
         experiment_builders = make_experiment_builders()
         from types import SimpleNamespace
 
