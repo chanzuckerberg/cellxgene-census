@@ -17,12 +17,20 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
         return
 
     logging.info("Consolidate: started")
+    uris_to_consolidate = gather(uri)
+    run(args, uris_to_consolidate)
+    logging.info("Consolidate: finished")
 
+
+def gather(uri: str) -> List[str]:
     # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
         uris_to_consolidate = _walk_tree(census)
     logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
+    return uris_to_consolidate
 
+
+def run(args: argparse.Namespace, uris_to_consolidate: List[str]) -> None:
     # Queue consolidator for each array
     with create_process_pool_executor(args) as ppe:
         futures = [ppe.submit(consolidate_tiledb_object, uri) for uri in uris_to_consolidate]
@@ -33,8 +41,6 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
             log_on_broken_process_pool(ppe)
             uri = future.result()
             logging.info(f"Consolidate: completed [{n} of {len(futures)}]: {uri}")
-
-    logging.info("Consolidate: finished")
 
 
 def _walk_tree(collection: soma.Collection) -> List[str]:
