@@ -28,7 +28,10 @@ def test_base_builder_creation(
     """
     with patch("tools.cell_census_builder.__main__.prepare_file_system"), patch(
         "tools.cell_census_builder.__main__.build_step1_get_source_datasets", return_value=datasets
+    ), patch("tools.cell_census_builder.consolidate.consolidate_tiledb_object"), patch(
+        "tools.cell_census_builder.validate.validate_consolidation", return_value=True
     ):
+        # Patching consolidate_tiledb_object becuase is uses to much memory to run in github actions.
         experiment_builders = make_experiment_builders()
         from types import SimpleNamespace
 

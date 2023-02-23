@@ -69,7 +69,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         |   +-- mus_musculus: soma.Experiment
     """
     error_tiledb_group = "tiledb_group's children are not relative"
-    error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert census.soma_type == "SOMACollection"
@@ -119,7 +118,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                 with tiledb.Group(e.uri) as e_group:
                     assert soma.DataFrame.exists(e.obs.uri)
                     assert e.obs.soma_type == "SOMADataFrame"
-                    assert len(tiledb.array_fragments(e.obs.uri)) == 1, error_layer_fragment
                     assert e_group.is_relative("obs"), error_tiledb_group
                     assert soma.Collection.exists(e.ms.uri)
                     assert e.ms.soma_type == "SOMACollection"
@@ -147,7 +145,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                             if lyr in rna.X:
                                 assert soma.SparseNDArray.exists(rna.X[lyr].uri)
                                 assert rna.X[lyr].soma_type == "SOMASparseNDArray"
-                                assert len(tiledb.array_fragments(rna.X[lyr].uri)) == 1, error_layer_fragment
                                 assert x_group.is_relative(lyr), error_tiledb_group
 
                     # and a dataset presence matrix
@@ -160,9 +157,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                         )
                         # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
                         assert rna_group.is_relative(FEATURE_DATASET_PRESENCE_MATRIX_NAME), error_tiledb_group
-                        assert (
-                            len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
-                        ), error_layer_fragment
         return True
 
 
@@ -484,6 +478,35 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     return True
 
 
+def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
+    error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
+
+    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+        census_info = census[CENSUS_INFO_NAME]
+        for name in [CENSUS_DATASETS_NAME, CENSUS_SUMMARY_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME]:
+            assert len(tiledb.array_fragments(census_info[name].uri)) == 1, error_layer_fragment
+
+        # there should be an experiment for each builder
+        census_data = census[CENSUS_DATA_NAME]
+        for eb in experiment_builders:
+            e = census_data[eb.name]
+            assert len(tiledb.array_fragments(e.obs.uri)) == 1, error_layer_fragment
+
+            # The measurement should contain all X layers where n_obs > 0 (existence checked elsewhere)
+            rna = e.ms["RNA"]
+
+            for lyr in CENSUS_X_LAYERS:
+                # layers only exist if there are cells in the measurement
+                if lyr in rna.X:
+                    assert len(tiledb.array_fragments(rna.X[lyr].uri)) == 1, error_layer_fragment
+            # dataset presence only exists if there are cells in the measurement
+            if eb.n_obs > 0:
+                assert (
+                    len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
+                ), error_layer_fragment
+        return True
+
+
 def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
     """Verify that the entire census is a single directory tree"""
     assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
@@ -519,5 +542,6 @@ def validate(
 
     assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
     assert validate_X_layers(assets_path, datasets, experiment_builders, args)
+    assert validate_consolidation(soma_path, experiment_builders)
     logging.info("Validation finished (success)")
     return True
