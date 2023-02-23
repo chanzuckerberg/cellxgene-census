@@ -61,8 +61,6 @@ Reference documentation can also be accessed directly from Python or R.
 It is recommended to install the Cell Census and all of its dependencies in a new virtual environment via `pip`:
 
 ```
-python -m venv ./venv
-source ./venv/bin/activate
 pip install -U cell-census
 ```
 
@@ -70,7 +68,7 @@ pip install -U cell-census
 
 Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 
-Below are 3 examples of common operations you can do with the Cell Census. As a reminder the reference documentation for the API can be accessed via `help()`:
+Below are 3 examples of common operations you can do with the Cell Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
 
 ```python
 import cell_census
@@ -80,7 +78,7 @@ help(cell_census.get_anndata)
 # etc
 ```
 
-##### Querying a slice of cell metadata.
+**Querying a slice of cell metadata.**
 
 The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type`, `tissue`, `tissue_general`, `suspension_type`, and `disease`.
 
