@@ -17,8 +17,7 @@ from tools.cell_census_builder.globals import (
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
 )
-
-# from tools.cell_census_builder.validate import validate
+from tools.cell_census_builder.validate import validate
 
 
 def test_base_builder_creation(
@@ -33,14 +32,16 @@ def test_base_builder_creation(
         experiment_builders = make_experiment_builders()
         from types import SimpleNamespace
 
-        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", max_workers=1, verbose=True)
+        args = SimpleNamespace(
+            multi_process=False, consolidate=False, build_tag="test_tag", max_workers=1, verbose=True
+        )
         return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
 
         # validate the cell_census
-        # return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
+        return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
         assert return_value is True
 
         # Query the census and do assertions
