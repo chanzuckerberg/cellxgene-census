@@ -25,13 +25,13 @@ The **Cell Census** is a data object publicly hosted online and a convenience AP
 
 ## Cell Census data releases
 
-Starting in  mid 2023, Cell Census long-term supported data builds will be released every 6 months and are guaranteed to be stored for public access for at least 5 years upon release. 
+Starting in  mid 2023, Cell Census long-term supported data builds will be released every 6 months and and will be publicly accessible for at least 5 years upon release. 
 
 In between long-term supported data build releases, weekly builds are released without any guarantee of permanence. 
 
 ## Cell Census data organization
 
-The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema_0.1.0.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
+The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
 
 <img src="./docs/cell_census_data_model.svg">
 
@@ -45,10 +45,14 @@ The Cell Census requires a Linux or MacOS system with:
 - Python 3.7 to Python 3.10. Or R, supported versions TBD.
 - Recommended: >16 GB of memory.
 - Recommended: >5 Mbps internet connection. 
+- Recommended: for increased performance use the API through a AWS-EC2 instance from the region `us-west-2`. The Cell Census data builds are hosted in a AWS-S3 bucket in that region.
 
 ### Documentation
 
-Reference documentation, data description, and tutorials can be accessed at the Cell Census doc-site. *Coming soon*. 
+The Cell Census [doc-site](https://chanzuckerberg.github.io/cell-census/index.html) *under development*, contains the reference documentation, data description, and tutorials.
+
+Reference documentation can also be accessed directly from Python or R.
+
 
 ### Python quick start
 
@@ -66,7 +70,15 @@ pip install -U cell-census
 
 Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 
-Below are 3 examples of common operations you can do with the Cell Census.
+Below are 3 examples of common operations you can do with the Cell Census. As a reminder the reference documentation for the API can be accessed via `help()`:
+
+```python
+import cell_census
+
+help(cell_census)
+help(cell_census.get_anndata)
+# etc
+```
 
 ##### Querying a slice of cell metadata.
 
@@ -76,20 +88,20 @@ The following reads the cell metadata and filters `female` cells of cell type `m
 import cell_census
 
 with cell_census.open_soma() as census:
-
-   # Reads SOMA data frame as a slice
-   cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
-      value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
-      column_names = ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]
-   )
-   
-   # Concatenates results to pyarrow.Table
-   cell_metadata = cell_metadata.concat()
-   
-   # Converts to pandas.DataFrame
-   cell_metadata = cell_metadata.to_pandas()
-   
-   print(cell_metadata)
+    
+    # Reads SOMA data frame as a slice
+    cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
+        value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
+        column_names = ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]
+    )
+    
+    # Concatenates results to pyarrow.Table
+    cell_metadata = cell_metadata.concat()
+    
+    # Converts to pandas.DataFrame
+    cell_metadata = cell_metadata.to_pandas()
+    
+    print(cell_metadata)
 ```
 
 The output is a `pandas.DataFrame` with about 300K cells meeting our query criteria and the selected columns.
@@ -119,16 +131,16 @@ The following creates an `anndata.AnnData` object on-demand with the same cell f
 import cell_census
 
 with cell_census.open_soma() as census:
-   adata = cell_census.get_anndata(
-      census = census,
-      organism = "Homo sapiens",
-      var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
-      obs_value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
-      column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
-   )
-   
-   print(adata)
-
+    adata = cell_census.get_anndata(
+        census = census,
+        organism = "Homo sapiens",
+        var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
+        obs_value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
+        column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
+    )
+    
+    print(adata)
+    
 ```
 
 The output with about 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
@@ -141,7 +153,7 @@ AnnData object with n_obs × n_vars = 299622 × 2
 
 ##### Memory-efficient queries
 
-This example provides a demonstration to accessed the data for larger-than-memory operations using **TileDB-SOMA** operations. 
+This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
 
 First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or used called in a context manager — `with ...`.
 
@@ -149,13 +161,12 @@ First we initiate a lazy-evaluation query to access all brain and male cells fro
 import cell_census
 
 with cell_census.open_soma() as census:
-   
-   human = census["census_data"]["homo_sapiens"]
-   
-   query = human.axis_query(
-   measurement_name = "RNA",
-   obs_query = tiledbsoma.AxisQuery(
-      value_filter = "tissue == 'brain' and sex == 'male'"
+    
+    human = census["census_data"]["homo_sapiens"]
+    query = human.axis_query(
+    measurement_name = "RNA",
+    obs_query = tiledbsoma.AxisQuery(
+        value_filter = "tissue == 'brain' and sex == 'male'"
    )
    
    # Continued below
@@ -165,13 +176,13 @@ with cell_census.open_soma() as census:
 Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
 
 ```python
-   #continued from above 
-   
-   iterator = query.X("raw").tables()
-   
-   # Get an iterative slice as pyarrow.Table
-   raw_slice = next (iterator) 
-   ...
+    # Continued from above 
+    
+    iterator = query.X("raw").tables()
+    
+    # Get an iterative slice as pyarrow.Table
+    raw_slice = next (iterator) 
+    ...
 ```
 
 And you can now perform operation on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop.
@@ -179,7 +190,7 @@ And you can now perform operation on each iteration slice. As with any any Pytho
 And you must close the query.
 
 ```
-   #continued from above 
+   # Continued from above 
    
    query.close()
 ```
