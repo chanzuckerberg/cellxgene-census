@@ -82,7 +82,7 @@ Below are 3 examples of common operations you can do with the Cell Census.
 
 ##### Querying a slice of cell metadata.
 
-The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type` and `tissue`, `tissue_general`, `suspension_type`, and `disease`.
+The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type`, `tissue`, `tissue_general`, `suspension_type`, and `disease`.
 
 ```python
 import cell_census
