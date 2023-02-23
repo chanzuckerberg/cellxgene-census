@@ -6,13 +6,12 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME, SOMA_TileDB_Context
-from .util import uricat
+from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME
 
 T = TypeVar("T", bound="Dataset")
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass  # TODO: use attrs
 class Dataset:
     """
     Type used to handle source H5AD datasets read from manifest
@@ -58,7 +57,7 @@ class Dataset:
         return [Dataset(**r) for r in datasets.to_dict("records")]  # type: ignore[misc]
 
 
-def assign_soma_joinids(datasets: List[Dataset]) -> None:
+def assign_dataset_soma_joinids(datasets: List[Dataset]) -> None:
     for joinid, dataset in enumerate(datasets):
         dataset.soma_joinid = joinid
 
@@ -72,9 +71,9 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     manifest_df = manifest_df[CENSUS_DATASETS_COLUMNS + ["soma_joinid"]]
 
     # write to a SOMA dataframe
-    manifest_uri = uricat(info_collection.uri, CENSUS_DATASETS_NAME)
-    manifest = soma.DataFrame(manifest_uri, context=SOMA_TileDB_Context())
-    manifest.create(pa.Schema.from_pandas(manifest_df, preserve_index=False), index_column_names=["soma_joinid"])
-    for batch in pa.Table.from_pandas(manifest_df, preserve_index=False).to_batches():
-        manifest.write(batch)
-    info_collection.set(CENSUS_DATASETS_NAME, manifest, relative=True)
+    with info_collection.add_new_dataframe(
+        CENSUS_DATASETS_NAME,
+        schema=pa.Schema.from_pandas(manifest_df, preserve_index=False),
+        index_column_names=["soma_joinid"],
+    ) as manifest:
+        manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False))
