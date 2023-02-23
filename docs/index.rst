@@ -26,3 +26,4 @@ Contents
    setup
    python-api
    schema
+   examples
