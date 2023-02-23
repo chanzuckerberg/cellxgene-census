@@ -130,7 +130,8 @@ CENSUS_OBS_PLATFORM_CONFIG = {
                 },
             },
             "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
-            "allows_duplicates": True,
+            # TODO: enable when https://github.com/single-cell-data/TileDB-SOMA/issues/988 is fixed
+            # "allows_duplicates": True,
         }
     }
 }
@@ -147,7 +148,8 @@ CENSUS_VAR_PLATFORM_CONFIG = {
             "capacity": 2**16,
             "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
             "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
-            "allows_duplicates": True,
+            # TODO: enable when https://github.com/single-cell-data/TileDB-SOMA/issues/988 is fixed
+            # "allows_duplicates": True,
         }
     }
 }
@@ -170,7 +172,8 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
                 "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
                 "cell_order": "row-major",
                 "tile_order": "row-major",
-                "allows_duplicates": True,
+                # TODO: enable when https://github.com/single-cell-data/TileDB-SOMA/issues/988 is fixed
+                # "allows_duplicates": True,
             },
         }
     }
