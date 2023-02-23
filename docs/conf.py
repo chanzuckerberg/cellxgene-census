@@ -16,7 +16,18 @@ release = "0.5.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', "nbsphinx"]
+extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx"]
+
+tiledb_version = "latest"
+
+intersphinx_mapping = {
+    "tiledbsoma-py": (
+        "https://tiledb-inc-tiledb-soma.readthedocs-hosted.com/en/%s/"
+        % tiledb_version,
+        None,
+    ),
+    'python': ('https://docs.python.org/3', None)
+}
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

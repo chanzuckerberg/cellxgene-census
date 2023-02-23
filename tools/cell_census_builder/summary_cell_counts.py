@@ -6,10 +6,9 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME, SOMA_TileDB_Context
+from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME
 from .util import (
     anndata_ordered_bool_issue_853_workaround,
-    uricat,
 )
 
 
@@ -31,12 +30,12 @@ def create_census_summary_cell_counts(
     df = anndata_ordered_bool_issue_853_workaround(df)
 
     # write to a SOMA dataframe
-    summary_counts_uri = uricat(info_collection.uri, CENSUS_SUMMARY_CELL_COUNTS_NAME)
-    summary_counts = soma.DataFrame(summary_counts_uri, context=SOMA_TileDB_Context())
-    summary_counts.create(pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"])
-    for batch in pa.Table.from_pandas(df, preserve_index=False).to_batches():
-        summary_counts.write(batch)
-    info_collection.set(CENSUS_SUMMARY_CELL_COUNTS_NAME, summary_counts, relative=True)
+    with info_collection.add_new_dataframe(
+        CENSUS_SUMMARY_CELL_COUNTS_NAME,
+        schema=pa.Schema.from_pandas(df, preserve_index=False),
+        index_column_names=["soma_joinid"],
+    ) as cell_counts:
+        cell_counts.write(pa.Table.from_pandas(df, preserve_index=False))
 
 
 def init_summary_counts_accumulator() -> pd.DataFrame:
@@ -56,7 +55,9 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
     Add summary counts to the census_summary_cell_counts dataframe
     """
     assert "dataset_id" in obs_df
-    assert len(obs_df) > 0
+
+    if len(obs_df) == 0:
+        return current
 
     CATEGORIES = [
         # term_id, label

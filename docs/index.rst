@@ -24,6 +24,7 @@ Contents
    :maxdepth: 1
 
    setup
+   soma
    python-api
    schema
    examples

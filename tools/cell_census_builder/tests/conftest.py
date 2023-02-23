@@ -3,11 +3,12 @@ import pathlib
 from typing import List
 
 import anndata
+import attrs
 import numpy as np
 import pandas as pd
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from scipy.sparse import csc_matrix
+from scipy import sparse
 
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.globals import (
@@ -16,10 +17,19 @@ from tools.cell_census_builder.globals import (
 from tools.cell_census_builder.mp import process_initializer
 
 
-def h5ad() -> anndata.AnnData:
+@attrs.define(frozen=True)
+class Organism:
+    name: str
+    organism_ontology_term_id: str
+
+
+ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
+
+
+def get_h5ad(organism: Organism) -> anndata.AnnData:
     X = np.random.randint(5, size=(4, 4))
     # The builder only supports sparse matrices
-    X = csc_matrix(X)
+    X = sparse.csr_matrix(X)
 
     # Create obs
     obs_dataframe = pd.DataFrame(
@@ -28,7 +38,7 @@ def h5ad() -> anndata.AnnData:
             "cell_type_ontology_term_id": "CL:0000192",
             "assay_ontology_term_id": "EFO:0008720",
             "disease_ontology_term_id": "PATO:0000461",
-            "organism_ontology_term_id": "NCBITaxon:9606",  # TODO: add one that fails the filter
+            "organism_ontology_term_id": organism.organism_ontology_term_id,
             "sex_ontology_term_id": "unknown",
             "tissue_ontology_term_id": "CL:0000192",
             "is_primary_data": False,
@@ -49,13 +59,13 @@ def h5ad() -> anndata.AnnData:
     obs = obs_dataframe
 
     # Create vars
-    feature_name = pd.Series(data=["a", "b", "c", "d"])
+    feature_name = pd.Series(data=[f"{organism.name}_{g}" for g in ["a", "b", "c", "d"]])
     var_dataframe = pd.DataFrame(
         data={
             "feature_biotype": "gene",
             "feature_is_filtered": False,
             "feature_name": "ERCC-00002 (spike-in control)",
-            "feature_reference": "NCBITaxon:9606",
+            "feature_reference": organism.organism_ontology_term_id,
         },
         index=feature_name,
     )
@@ -91,19 +101,21 @@ def soma_path(tmp_path: pathlib.Path) -> str:
 
 @pytest.fixture
 def datasets(assets_path: str) -> List[Dataset]:
-    first_h5ad = h5ad()
-    second_h5ad = h5ad()
+    datasets = []
+    for organism in ORGANISMS:
+        for dataset_id in range(2):
+            h5ad = get_h5ad(organism)
+            h5ad_path = f"{assets_path}/{organism.name}_{dataset_id}.h5ad"
+            h5ad.write_h5ad(h5ad_path)
+            datasets.append(
+                Dataset(
+                    dataset_id=f"{organism.name}_{dataset_id}",
+                    corpora_asset_h5ad_uri="mock",
+                    dataset_h5ad_path=h5ad_path,
+                ),
+            )
 
-    first_h5ad_path = f"{assets_path}/first.h5ad"
-    second_h5ad_path = f"{assets_path}/second.h5ad"
-
-    first_h5ad.write_h5ad(first_h5ad_path)
-    second_h5ad.write_h5ad(second_h5ad_path)
-
-    return [
-        Dataset(dataset_id="first_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=first_h5ad_path),
-        Dataset(dataset_id="second_id", corpora_asset_h5ad_uri="mock", dataset_h5ad_path=second_h5ad_path),
-    ]
+    return datasets
 
 
 @pytest.fixture()
