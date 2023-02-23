@@ -6,7 +6,7 @@ import pytest
 import tiledbsoma as soma
 
 import cell_census
-from cell_census.open import DEFAULT_TILEDB_CONFIGURATION
+from cell_census._open import DEFAULT_TILEDB_CONFIGURATION
 
 
 @pytest.mark.live_corpus

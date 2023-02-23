@@ -1,8 +1,8 @@
 # CELLxGENE Cell Census Schema 
 
-**Version**: 0.1.0.
+**Version**: 0.1.1.
 
-**Last edited**: Jan, 2023.
+**Last edited**: Feb, 2023.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -711,9 +711,9 @@ The following columns MUST be included:
 
 #### Feature dataset presence matrix – `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
 
-In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, the Cell Census MUST include a presence matrix encoded as a `SOMASparseNDArray`.
+In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, for each `SOMAExperiment` the Cell Census MUST include a presence matrix encoded as a `SOMASparseNDArray`.
 
-For all features included in the Cell Census, the dataset presence matrix MUST indicate what features are included in each dataset of the Cell Census. This information MUST be encoded as a boolean matrix, `True` indicates the feature was included in the dataset, `False` otherwise. This is a two-dimensional matrix and it MUST be `N x M` where `N` is the number of datasets and `M` is the number of features. The matrix is indexed by the `soma_joinid` value of  `census_obj["census_info"]["datasets"]` and `census_obj["census_data"][organism].ms["RNA"].var`.
+For all features included in the Cell Census, the dataset presence matrix MUST indicate what features are included in each dataset of the Cell Census. This information MUST be encoded as a boolean matrix, `True` indicates the feature was included in the dataset, `False` otherwise. This is a two-dimensional matrix and it MUST be `N x M` where `N` is the number of datasets in the `SOMAExperiment` and `M` is the number of features. The matrix is indexed by the `soma_joinid` value of  `census_obj["census_info"]["datasets"]` and `census_obj["census_data"][organism].ms["RNA"].var`.
 
 If the feature has at least one cell with a value greater than zero in the count data matrix X in the dataset of origin, the value MUST be `True`; otherwise, it MUST be `False`.
 
@@ -834,8 +834,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </table>
 
 
-
 ## Changelog
+
+### Version 0.1.1
+* Adds clarifying text for "Feature Dataset Presence Matrix"
 
 ### Version 0.1.0
 * The "Dataset Presence Matrix" was renamed to "Feature Dataset Presence Matrix" and moved from  `census_obj["census_data"][organism].ms["RNA"].varp["dataset_presence_matrix"]`  to `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]`.

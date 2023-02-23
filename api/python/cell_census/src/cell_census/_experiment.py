@@ -5,21 +5,21 @@ import tiledbsoma as soma
 
 def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     """
-    Given a census soma.Collection, return the experiment for the named organism.
+    Given a census ``soma.Collection``, return the experiment for the named organism.
     Organism matching is somewhat flexible, attempting to map from human-friendly
-    names to the underlying collection element name.  Will raise a ValueError if
+    names to the underlying collection element name.  Will raise a ``ValueError`` if
     unable to find the specified organism [lifecycle: experimental].
 
     Parameters
     ----------
-    census - soma.Collection
+    census - ``soma.Collection``
         The census
-    organism - str
+    organism - ``str``
         The organism name, eg., ``Homo sapiens``
 
     Returns
     -------
-    soma.Experiment - the requested experiment.
+    ``soma.Experiment`` - the requested experiment.
 
     Examples
     --------

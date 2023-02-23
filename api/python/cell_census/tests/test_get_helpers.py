@@ -2,7 +2,7 @@ import pytest
 import scipy.sparse
 
 import cell_census
-from cell_census.experiment import _get_experiment
+from cell_census._experiment import _get_experiment
 
 
 @pytest.mark.live_corpus
