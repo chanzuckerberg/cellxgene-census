@@ -4,7 +4,8 @@
 
 [**CZ CELLxGENE Discover**](https://cellxgene.cziscience.com/)  is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is [standardized](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema/3.0.0)** to include raw counts and a common vocabulary for gene and cell metadata.
 
-The **Cell Census** provides easy-to-use and efficient computational tooling to access, query, and analyze all RNA data from CZ CELLxGENE Discover. The Cell Census aims to break the barrier of data fragmentation in the single-cell field by presenting a **new access paradigm of cell-based slicing and querying** for all data at CZ CELLxGENE Discover.
+The **Cell Census** provides easy-to-use and efficient computational tooling to access, query, and analyze all RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or obtain slices of the data in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
+
 
 Get started on using the Cell Census:
 
@@ -15,7 +16,9 @@ Get started on using the Cell Census:
 
 ## Motivation: Single-cell analysis at scale 
 
-The **Cell Census** is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA including:
+The Cell Census aims to break the barrier of data fragmentation in the single-cell field by presenting a   cell-based slicing and querying access paradigm for all data at CZ CELLxGENE Discover.
+
+The Cell Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA including:
 
 - Cloud-based data storage and access.
 - Efficient access for larger-than-memory slices of data.
@@ -194,7 +197,7 @@ And you must close the query.
 
 ### R quick start
 
-*Coming soon*
+*Coming soon.*
 
 
 ## Questions, feedback and issues
