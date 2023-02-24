@@ -113,12 +113,10 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             rna = e.ms["RNA"]
             assert soma.DataFrame.exists(rna["var"].uri)
             assert soma.Collection.exists(rna["X"].uri)
-
-            with tiledb.Group(rna.X.uri):
-                for lyr in CENSUS_X_LAYERS:
-                    # layers only exist if there are cells in the measurement
-                    if lyr in rna.X:
-                        assert soma.SparseNDArray.exists(rna.X[lyr].uri)
+            for lyr in CENSUS_X_LAYERS:
+                # layers only exist if there are cells in the measurement
+                if lyr in rna.X:
+                    assert soma.SparseNDArray.exists(rna.X[lyr].uri)
 
             # and a dataset presence matrix
             # dataset presence only exists if there are cells in the measurement
