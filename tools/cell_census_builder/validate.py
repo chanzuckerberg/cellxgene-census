@@ -471,7 +471,7 @@ def validate_relative_path(soma_path: str) -> bool:
     # TODO use SOMA API. See https://github.com/single-cell-data/TileDB-SOMA/issues/999
 
     def _walk_tree(name: str, parent: Any) -> None:
-        if parent.soma_type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
+        if isinstance(parent, soma.Collection):
             with tiledb.Group(parent.uri) as parent_group:
                 for child in parent_group:
                     assert parent_group.is_relative(child.name), f"{child.name} not relative to {name}"
