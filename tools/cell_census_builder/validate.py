@@ -100,10 +100,9 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 
         # verify required dataset fields are set
         df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
-        assert not all(df["collection_id"].isin([""]))
-        assert not all(df["collection_name"].isin([""]))
-        assert not all(df["collection_doi"].isin([""]))
-        assert not all(df["dataset_title"].isin([""]))
+        assert (df["collection_id"] != "").all()
+        assert (df["collection_name"] != "").all()
+        assert (df["dataset_title"] != "").all()
 
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]
@@ -485,7 +484,7 @@ def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentB
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         consolidated_uris = list_uris_to_consolidate(census)
         for uri in consolidated_uris:
-            len(tiledb.array_fragments(uri)) == 1, error_layer_fragment
+            assert len(tiledb.array_fragments(uri)) == 1, error_layer_fragment
     return True
 
 
