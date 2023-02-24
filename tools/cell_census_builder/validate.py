@@ -58,7 +58,7 @@ class EbInfo:
 
 def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
     """
-    Validate all objects present, and contain expected metadata.
+    Validate all objects present and contain expected metadata.
 
     soma_path
         +-- census_info
