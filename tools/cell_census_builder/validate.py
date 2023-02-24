@@ -17,6 +17,7 @@ import tiledbsoma as soma
 from scipy import sparse
 
 from .anndata import make_anndata_cell_filter, open_anndata
+from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
 from .experiment_builder import ExperimentBuilder, reopen_experiment_builders
 from .globals import (
@@ -71,7 +72,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     error_tiledb_group = "tiledb_group's children are not relative"
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        assert census.soma_type == "SOMACollection"
         assert soma.Collection.exists(census.uri)
         assert census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
         assert census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
@@ -81,16 +81,16 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         with tiledb.Group(census.uri) as census_group:
             for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
                 assert soma.Collection.exists(census[name].uri)
-                assert census[name].soma_type == "SOMACollection"
                 assert census_group.is_relative(name), error_tiledb_group
+                # TODO(bento007): ^use soma API for this check once supported
 
         census_info = census[CENSUS_INFO_NAME]
         with tiledb.Group(census_info.uri) as census_info_group:
             for name in [CENSUS_DATASETS_NAME, CENSUS_SUMMARY_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME]:
                 assert name in census_info, f"`{name}` missing from census_info"
                 assert soma.DataFrame.exists(census_info[name].uri)
-                assert census_info[name].soma_type == "SOMADataFrame"
                 assert census_info_group.is_relative(name), error_tiledb_group
+                # TODO(bento007): ^use soma API for this check once supported
 
         assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
         assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
@@ -99,7 +99,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
 
         # verify required dataset fields are set
-        census_info[CENSUS_DATASETS_NAME]
         df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
         assert not all(df["collection_id"].isin([""]))
         assert not all(df["collection_name"].isin([""]))
@@ -111,17 +110,19 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         with tiledb.Group(census_data.uri) as census_data_group:
             for eb in experiment_builders:
                 assert soma.Experiment.exists(census_data[eb.name].uri)
-                assert census_data[eb.name].soma_type == "SOMAExperiment"
                 assert census_data_group.is_relative(eb.name), error_tiledb_group
+                # TODO(bento007): ^use soma API for this check once supported
 
                 e = census_data[eb.name]
                 with tiledb.Group(e.uri) as e_group:
                     assert soma.DataFrame.exists(e.obs.uri)
                     assert e.obs.soma_type == "SOMADataFrame"
                     assert e_group.is_relative("obs"), error_tiledb_group
+                    # TODO(bento007): ^use soma API for this check once supported
                     assert soma.Collection.exists(e.ms.uri)
                     assert e.ms.soma_type == "SOMACollection"
                     assert e_group.is_relative("ms"), error_tiledb_group
+                    # TODO(bento007): ^use soma API for this check once supported
 
                 # there should be a single measurement called 'RNA'
                 assert soma.Measurement.exists(e.ms["RNA"].uri)
@@ -133,25 +134,24 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
                 rna = e.ms["RNA"]
                 with tiledb.Group(rna.uri) as rna_group:
                     assert soma.DataFrame.exists(rna["var"].uri)
-                    assert rna["var"].soma_type == "SOMADataFrame"
                     assert rna_group.is_relative("var"), error_tiledb_group
+                    # TODO(bento007): ^use soma API for this check once supported
                     assert soma.Collection.exists(rna["X"].uri)
-                    assert rna["X"].soma_type == "SOMACollection"
                     assert rna_group.is_relative("X"), error_tiledb_group
+                    # TODO(bento007): ^use soma API for this check once supported
 
                     with tiledb.Group(rna.X.uri) as x_group:
                         for lyr in CENSUS_X_LAYERS:
                             # layers only exist if there are cells in the measurement
                             if lyr in rna.X:
                                 assert soma.SparseNDArray.exists(rna.X[lyr].uri)
-                                assert rna.X[lyr].soma_type == "SOMASparseNDArray"
                                 assert x_group.is_relative(lyr), error_tiledb_group
+                                # TODO(bento007): ^use soma API for this check once supported
 
                     # and a dataset presence matrix
                     # dataset presence only exists if there are cells in the measurement
                     if eb.n_obs > 0:
                         assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
-                        assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
                         assert (
                             sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().coos()]) > 0
                         )
@@ -483,28 +483,9 @@ def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentB
     error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        census_info = census[CENSUS_INFO_NAME]
-        for name in [CENSUS_DATASETS_NAME, CENSUS_SUMMARY_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME]:
-            assert len(tiledb.array_fragments(census_info[name].uri)) == 1, error_layer_fragment
-
-        # there should be an experiment for each builder
-        census_data = census[CENSUS_DATA_NAME]
-        for eb in experiment_builders:
-            e = census_data[eb.name]
-            assert len(tiledb.array_fragments(e.obs.uri)) == 1, error_layer_fragment
-
-            # The measurement should contain all X layers where n_obs > 0 (existence checked elsewhere)
-            rna = e.ms["RNA"]
-
-            for lyr in CENSUS_X_LAYERS:
-                # layers only exist if there are cells in the measurement
-                if lyr in rna.X:
-                    assert len(tiledb.array_fragments(rna.X[lyr].uri)) == 1, error_layer_fragment
-            # dataset presence only exists if there are cells in the measurement
-            if eb.n_obs > 0:
-                assert (
-                    len(tiledb.array_fragments(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)) == 1
-                ), error_layer_fragment
+        consolidated_uris = list_uris_to_consolidate(census)
+        for uri in consolidated_uris:
+            len(tiledb.array_fragments(uri)) == 1, error_layer_fragment
     return True
 
 

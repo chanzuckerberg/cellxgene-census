@@ -17,20 +17,20 @@ def consolidate(args: argparse.Namespace, uri: str) -> None:
         return
 
     logging.info("Consolidate: started")
-    uris_to_consolidate = gather(uri)
-    run(args, uris_to_consolidate)
+    uris_to_consolidate = _gather(uri)
+    _run(args, uris_to_consolidate)
     logging.info("Consolidate: finished")
 
 
-def gather(uri: str) -> List[str]:
+def _gather(uri: str) -> List[str]:
     # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
-        uris_to_consolidate = _walk_tree(census)
+        uris_to_consolidate = list_uris_to_consolidate(census)
     logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
     return uris_to_consolidate
 
 
-def run(args: argparse.Namespace, uris_to_consolidate: List[str]) -> None:
+def _run(args: argparse.Namespace, uris_to_consolidate: List[str]) -> None:
     # Queue consolidator for each array
     with create_process_pool_executor(args) as ppe:
         futures = [ppe.submit(consolidate_tiledb_object, uri) for uri in uris_to_consolidate]
@@ -43,14 +43,17 @@ def run(args: argparse.Namespace, uris_to_consolidate: List[str]) -> None:
             logging.info(f"Consolidate: completed [{n} of {len(futures)}]: {uri}")
 
 
-def _walk_tree(collection: soma.Collection) -> List[str]:
+def list_uris_to_consolidate(collection: soma.Collection) -> List[str]:
+    """
+    Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated.
+    """
     uris = []
     for soma_obj in collection.values():
         type = soma_obj.soma_type
         if type in ["SOMADataFrame", "SOMASparseNDArray", "SOMADenseNDArray"]:
             uris.append(soma_obj.uri)
         elif type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
-            uris += _walk_tree(soma_obj)
+            uris += list_uris_to_consolidate(soma_obj)
         else:
             raise TypeError(f"Unknown SOMA type {type}.")
     return uris
