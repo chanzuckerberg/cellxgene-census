@@ -64,7 +64,7 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 def test_live_directory_contents() -> None:
     # Sanity check that all directory contents are usable
 
-    fs = s3fs.S3FileSystem()
+    fs = s3fs.S3FileSystem(anon=True, cache_regions=True)
 
     directory = cell_census.get_census_version_directory()
     assert "latest" in directory
