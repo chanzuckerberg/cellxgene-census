@@ -2,6 +2,7 @@ from typing import Any
 
 import pytest
 import requests_mock as rm
+import s3fs
 
 import cell_census
 from cell_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
@@ -57,3 +58,24 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     for tag in directory:
         assert directory[tag] == cell_census.get_census_version_description(tag)
+
+
+@pytest.mark.live_corpus
+def test_live_directory_contents() -> None:
+    # Sanity check that all directory contents are usable. This uses the
+    # live directory, so it _could_ start failing without a code change.
+    # But given the purpose of this package, that seems like a reasonable
+    # tradeoff, as the data directory should never be "corrupt" or there
+    # is widespread impact on users.
+
+    fs = s3fs.S3FileSystem(anon=True, cache_regions=True)
+
+    directory = cell_census.get_census_version_directory()
+    assert "latest" in directory
+
+    for version, version_description in directory.items():
+        with cell_census.open_soma(census_version=version) as census:
+            assert census is not None
+
+        assert fs.exists(version_description["soma"]["uri"])
+        assert fs.exists(version_description["h5ads"]["uri"])
