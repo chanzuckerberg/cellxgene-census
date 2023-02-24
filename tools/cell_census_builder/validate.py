@@ -447,12 +447,10 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
 
 def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
     """Verify that obs, var and X layers are all fully consolidated & vacuumed"""
-    error_layer_fragment = "Layer has not been fully consolidated & vacuumed"
-
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         consolidated_uris = list_uris_to_consolidate(census)
         for uri in consolidated_uris:
-            assert len(tiledb.array_fragments(uri)) == 1, error_layer_fragment
+            assert len(tiledb.array_fragments(uri)) == 1, f"{uri} has not been fully consolidated & vacuumed"
     return True
 
 
