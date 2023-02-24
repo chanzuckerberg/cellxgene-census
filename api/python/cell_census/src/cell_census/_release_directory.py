@@ -39,17 +39,17 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
     Parameters
     ----------
-    census_version : str
+    census_version : ``str``
         The census version name.
 
     Returns
     -------
-    CensusReleaseDescription
+    ``CensusVersionDescription``
         Dictionary containing a description of the release.
 
     See Also
     --------
-    get_census_version_directory : returns the entire directory as a dict.
+    ``get_census_version_directory`` : returns the entire directory as a dict.
 
     Examples
     --------
@@ -78,13 +78,13 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
 
     Returns
     -------
-    Dict[CensusReleaseName, CensusReleaseDescription]
+    ``Dict[CensusVersionName, CensusVersionDescription]``
         Dictionary of release names and their corresponding
         release description.
 
     See Also
     --------
-    get_census_version_description : get description by census_version.
+    ``get_census_version_description`` : get description by census_version.
 
     Examples
     --------

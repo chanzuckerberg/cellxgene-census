@@ -1,7 +1,7 @@
 import tiledbsoma as soma
 from scipy import sparse
 
-from .experiment import _get_experiment
+from ._experiment import _get_experiment
 
 
 def get_presence_matrix(
@@ -11,23 +11,23 @@ def get_presence_matrix(
 ) -> sparse.csr_matrix:
     """
     Read the gene presence matrix and return as a SciPy sparse CSR array
-    (scipy.sparse.csr_array). The returned sparse matrix is indexed on the
+    (``scipy.sparse.csr_array``). The returned sparse matrix is indexed on the
     first dimension by the dataset ``soma_joinid`` values, and on the
     second dimension by the ``var`` DataFrame ``soma_joinid`` values
     [lifecycle: experimental].
 
     Parameters
     ----------
-    census : soma.Collection
+    census : ``soma.Collection``
         The census from which to read the presence matrix.
-    organism : str
+    organism : ``str``
         The organism to query, usually one of "Homo sapiens" or "Mus musculus"
-    measurement_name : str, default 'RNA'
+    measurement_name : ``str``, default ``"RNA"``
         The measurement object to query
 
     Returns
     -------
-    scipy.sparse.csr_array - containing the presence matrix.
+    ``scipy.sparse.csr_array`` - containing the presence matrix.
 
     Examples
     --------
@@ -38,4 +38,4 @@ def get_presence_matrix(
 
     exp = _get_experiment(census, organism)
     presence = exp.ms[measurement_name]["feature_dataset_presence_matrix"]
-    return presence.read((slice(None),)).csrs().concat().to_scipy()
+    return presence.read((slice(None),)).coos().concat().to_scipy().tocsr()

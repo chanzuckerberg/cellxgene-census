@@ -20,10 +20,13 @@ TL;DR:
 
 The build process:
 
-- Pass 1: stage all source H5AD files
-- Pass 2: build the axis dataframes for each experiment. This is a single-threaded pass, building dense dataframes.
-- Pass 3: build the X layers for each experiment. This is a concurrent pass, reading/writing X layers in parallel.
-- Pass 4: optional, validate the above
+- Step 1: Retrieve all source H5AD files, storing locally (parallelized, I/O-bound)
+- Step 2: Create root collection and child objects (fast).
+- Step 3: Write the axis dataframes for each experiment, filtering the datasets and cells to include (serialized iteration of dataset H5ADs).
+- Step 4: Write the X layers for each experiment (parallelized iteration of filtered dataset H5ADs).
+- Step 5: Write datasets manifest and summary info.
+- (Optional) Consolidate TileDB data 
+- (Optional) Validate the entire Cell Census, re-reading from storage.
 
 Modes of operation:
 a) (default) creating the entire "cell census" using all files currently in the CELLxGENE repository.
