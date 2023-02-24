@@ -10,11 +10,14 @@ from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 import pyarrow as pa
+import tiledb
 import tiledbsoma as soma
 from scipy import sparse
 
 from .anndata import make_anndata_cell_filter, open_anndata
+from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
 from .experiment_builder import ExperimentBuilder, reopen_experiment_builders
 from .globals import (
@@ -66,8 +69,8 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         |   +-- homo_sapiens: soma.Experiment
         |   +-- mus_musculus: soma.Experiment
     """
+
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        assert census.soma_type == "SOMACollection"
         assert soma.Collection.exists(census.uri)
         assert census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
         assert census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
@@ -76,13 +79,11 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 
         for name in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
             assert soma.Collection.exists(census[name].uri)
-            assert census[name].soma_type == "SOMACollection"
 
         census_info = census[CENSUS_INFO_NAME]
         for name in [CENSUS_DATASETS_NAME, CENSUS_SUMMARY_NAME, CENSUS_SUMMARY_CELL_COUNTS_NAME]:
             assert name in census_info, f"`{name}` missing from census_info"
             assert soma.DataFrame.exists(census_info[name].uri)
-            assert census_info[name].soma_type == "SOMADataFrame"
 
         assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
         assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
@@ -90,42 +91,39 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
         )
         assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
 
+        # verify required dataset fields are set
+        df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
+        assert (df["collection_id"] != "").all()
+        assert (df["collection_name"] != "").all()
+        assert (df["dataset_title"] != "").all()
+
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]
         for eb in experiment_builders:
             assert soma.Experiment.exists(census_data[eb.name].uri)
-            assert census_data[eb.name].soma_type == "SOMAExperiment"
 
             e = census_data[eb.name]
             assert soma.DataFrame.exists(e.obs.uri)
-            assert e.obs.soma_type == "SOMADataFrame"
             assert soma.Collection.exists(e.ms.uri)
-            assert e.ms.soma_type == "SOMACollection"
 
             # there should be a single measurement called 'RNA'
             assert soma.Measurement.exists(e.ms["RNA"].uri)
-            assert e.ms["RNA"].soma_type == "SOMAMeasurement"
 
             # The measurement should contain all X layers where n_obs > 0 (existence checked elsewhere)
             rna = e.ms["RNA"]
             assert soma.DataFrame.exists(rna["var"].uri)
-            assert rna["var"].soma_type == "SOMADataFrame"
             assert soma.Collection.exists(rna["X"].uri)
-            assert rna["X"].soma_type == "SOMACollection"
             for lyr in CENSUS_X_LAYERS:
                 # layers only exist if there are cells in the measurement
                 if lyr in rna.X:
                     assert soma.SparseNDArray.exists(rna.X[lyr].uri)
-                    assert rna.X[lyr].soma_type == "SOMASparseNDArray"
 
             # and a dataset presence matrix
             # dataset presence only exists if there are cells in the measurement
             if eb.n_obs > 0:
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
-                assert rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].soma_type == "SOMASparseNDArray"
                 assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().coos()]) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
-
         return True
 
 
@@ -447,6 +445,45 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     return True
 
 
+def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
+    """Verify that obs, var and X layers are all fully consolidated & vacuumed"""
+    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+        consolidated_uris = list_uris_to_consolidate(census)
+        for uri in consolidated_uris:
+            assert len(tiledb.array_fragments(uri)) == 1, f"{uri} has not been fully consolidated & vacuumed"
+    return True
+
+
+def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
+    """Verify that the entire census is a single directory tree"""
+    assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
+    assert os.path.exists(soma_path) and os.path.exists(assets_path)
+    assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
+    return True
+
+
+def validate_relative_path(soma_path: str) -> bool:
+    """
+    Verify the census objects are stored in the same relative path
+    :param soma_path:
+    :return:
+    """
+    # TODO use SOMA API. See https://github.com/single-cell-data/TileDB-SOMA/issues/999
+
+    def _walk_tree(name: str, parent: Any) -> None:
+        if isinstance(parent, soma.Collection):
+            with tiledb.Group(parent.uri) as parent_group:
+                for child in parent_group:
+                    assert parent_group.is_relative(child.name), f"{child.name} not relative to {name}"
+            for child_name, soma_object in parent.items():
+                _walk_tree(".".join([name, child_name]), soma_object)
+
+    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+        _walk_tree("census", census)
+
+    return True
+
+
 def validate(
     args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
 ) -> bool:
@@ -456,8 +493,7 @@ def validate(
     Will raise if validation fails. Returns True on success.
     """
     logging.info("Validation start")
-    assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
-    assert os.path.exists(soma_path) and os.path.exists(assets_path)
+    assert validate_directory_structure(soma_path, assets_path)
 
     # HACK: experiment_uri is only initialized in create(), which is only called if census is built before calling
     # the validator; fails in validator-only mode
@@ -469,11 +505,12 @@ def validate(
 
     assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
     assert validate_all_soma_objects_exist(soma_path, experiment_builders)
-
+    assert validate_relative_path(soma_path)
     datasets = load_datasets_from_census(assets_path, soma_path)
     assert validate_manifest_contents(assets_path, datasets)
 
     assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
     assert validate_X_layers(assets_path, datasets, experiment_builders, args)
+    assert validate_consolidation(soma_path, experiment_builders)
     logging.info("Validation finished (success)")
     return True
