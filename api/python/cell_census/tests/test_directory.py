@@ -62,7 +62,11 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
 @pytest.mark.live_corpus
 def test_live_directory_contents() -> None:
-    # Sanity check that all directory contents are usable
+    # Sanity check that all directory contents are usable. This uses the
+    # live directory, so it _could_ start failing without a code change.
+    # But given the purpose of this package, that seems like a reasonable
+    # tradeoff, as the data directory should never be "corrupt" or there
+    # is widespread impact on users.
 
     fs = s3fs.S3FileSystem(anon=True, cache_regions=True)
 
