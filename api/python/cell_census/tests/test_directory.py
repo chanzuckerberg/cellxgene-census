@@ -1,8 +1,8 @@
 from typing import Any
 
 import pytest
-import s3fs
 import requests_mock as rm
+import s3fs
 
 import cell_census
 from cell_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
