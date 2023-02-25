@@ -6,7 +6,7 @@ from typing import Optional, cast
 
 import tiledbsoma as soma
 
-from .globals import set_tiledb_ctx
+from .globals import DEFAULT_TILEDB_CONFIG, set_tiledb_ctx
 
 if soma.get_storage_engine() == "tiledb":
     import tiledb
@@ -30,15 +30,7 @@ def process_initializer(verbose: int = 0) -> None:
     logging.captureWarnings(True)
 
     if soma.get_storage_engine() == "tiledb":
-        set_tiledb_ctx(
-            tiledb.Ctx(
-                {
-                    "py.init_buffer_bytes": 512 * 1024**2,
-                    "py.deduplicate": "true",
-                    "soma.init_buffer_bytes": 512 * 1024**2,
-                }
-            )
-        )
+        set_tiledb_ctx(tiledb.Ctx(DEFAULT_TILEDB_CONFIG))
 
 
 def create_process_pool_executor(

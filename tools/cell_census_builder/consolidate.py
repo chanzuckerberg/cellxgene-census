@@ -5,7 +5,7 @@ from typing import List
 
 import tiledbsoma as soma
 
-from .globals import SOMA_TileDB_Context
+from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
 from .mp import create_process_pool_executor, log_on_broken_process_pool
 
 
@@ -65,7 +65,7 @@ def consolidate_tiledb_object(uri: str) -> str:
     import tiledb
 
     logging.info(f"Consolidate: start uri {uri}")
-    tiledb.consolidate(uri, config=tiledb.Config({"sm.consolidation.buffer_size": 1 * 1024**3}))
+    tiledb.consolidate(uri, config=tiledb.Config(DEFAULT_TILEDB_CONFIG))
     tiledb.vacuum(uri)
     logging.info(f"Consolidate: end uri {uri}")
     return uri

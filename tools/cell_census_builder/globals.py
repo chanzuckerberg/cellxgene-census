@@ -1,4 +1,3 @@
-import time
 from typing import Set
 
 import pyarrow as pa
@@ -209,6 +208,13 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 # multi-organism filtering. Currently the null set.
 FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
+# The default configuration for TileDB contexts
+DEFAULT_TILEDB_CONFIG = {
+    "py.init_buffer_bytes": 512 * 1024**2,
+    "py.deduplicate": "true",
+    "soma.init_buffer_bytes": 512 * 1024**2,
+    "sm.consolidation.buffer_size": 1 * 1024**3,
+}
 
 """
 Singletons used throughout the package
@@ -220,13 +226,8 @@ _SOMA_TileDB_Context: soma.options.SOMATileDBContext = None
 # Global TileDB context
 _TileDB_Ctx: tiledb.Ctx = None
 
-# The logical timestamp at which all builder data should be recorded
-WRITE_TIMESTAMP = int(time.time() * 1000)
 
-# Using "end of time" for read_timestamp means that all writes are visible, no matter what write timestamp was used
-END_OF_TIME = 0xFFFFFFFFFFFFFFFF
-
-
+# XXX TODO - this doesn't need to be a singleton
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
     global _SOMA_TileDB_Context
     if _SOMA_TileDB_Context is None or _SOMA_TileDB_Context != TileDB_Ctx():
@@ -236,11 +237,10 @@ def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
         # prevents seeing the builder's writes.
         _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
             tiledb_ctx=TileDB_Ctx(),
-            # TODO: Setting an explicit write timestamp causes later reads to fail!
-            # write_timestamp=write_timestamp,
-            # TODO: We *should* be able to set this equal to WRITE_TIMESTAMP, but as specifying a write_timestamp is
-            #  problematic, we must use "end of time" for now
-            read_timestamp=END_OF_TIME,
+            # `None` opts out of explicit timestamp consistency, and uses the underlying
+            # TileDB per-object write consistency. This is sufficient given that this
+            # builder explicitly orders / synchronizes all reading/writing.
+            timestamp=None,
         )
     return _SOMA_TileDB_Context
 
