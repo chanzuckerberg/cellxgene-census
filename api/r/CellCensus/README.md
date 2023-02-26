@@ -16,8 +16,11 @@ You can install the development version of CellCensus from [GitHub](https://gith
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("chanzuckerberg/cell-census")
+devtools::install_github("chanzuckerberg/cell-census/api/r/CellCensus")
+print(CellCensus::open_soma())
 ```
+
+(minimal apt dependencies: r-base cmake git)
 
 ## Example
 
