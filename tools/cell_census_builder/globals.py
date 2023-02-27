@@ -208,7 +208,9 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 # multi-organism filtering. Currently the null set.
 FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
-# The default configuration for TileDB contexts
+# The default configuration for TileDB contexts used in the builder
+# Any worker process created will initialize its TileDB_Ctx singleton
+# with this configuration.
 DEFAULT_TILEDB_CONFIG = {
     "py.init_buffer_bytes": 512 * 1024**2,
     "py.deduplicate": "true",
@@ -227,14 +229,9 @@ _SOMA_TileDB_Context: soma.options.SOMATileDBContext = None
 _TileDB_Ctx: tiledb.Ctx = None
 
 
-# XXX TODO - this doesn't need to be a singleton
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
     global _SOMA_TileDB_Context
     if _SOMA_TileDB_Context is None or _SOMA_TileDB_Context != TileDB_Ctx():
-        # Set write timestamp to "now", so that we use consistent timestamps across all writes (mostly for aesthetic
-        # reasons). Set read timestamps to be same as write timestamp so that post-build validation reads can "see"
-        # the writes. Without setting read timestamp explicitly, the read timestamp would default to a time that
-        # prevents seeing the builder's writes.
         _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
             tiledb_ctx=TileDB_Ctx(),
             # `None` opts out of explicit timestamp consistency, and uses the underlying
@@ -246,6 +243,7 @@ def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
 
 
 def TileDB_Ctx() -> tiledb.Ctx:
+    # See `DEFAULT_TILEDB_CONFIG` above
     return _TileDB_Ctx
 
 
