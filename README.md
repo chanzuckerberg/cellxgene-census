@@ -4,8 +4,7 @@
 
 [**CZ CELLxGENE Discover**](https://cellxgene.cziscience.com/)  is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is [standardized](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema/3.0.0)** to include raw counts and a common vocabulary for gene and cell metadata.
 
-The **Cell Census** provides efficient computational tooling to access, query, and analyze all RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or obtain slices of the data in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
-
+The **Cell Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
 
 Get started on using the Cell Census:
 
@@ -14,9 +13,7 @@ Get started on using the Cell Census:
 - [Python tutorials](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
 - R tutorials. *Coming soon.*
 
-## Motivation: Single-cell analysis at scale 
-
-The Cell Census aims to break the barrier of data fragmentation in the single-cell field by presenting a   cell-based slicing and querying access paradigm for all data at CZ CELLxGENE Discover.
+## Technology
 
 The Cell Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA including:
 
@@ -28,9 +25,9 @@ The Cell Census is a data object publicly hosted online and a convenience API to
 
 ## Cell Census data releases
 
-Starting in  mid 2023, Cell Census long-term supported data builds will be released every 6 months and and will be publicly accessible for at least 5 years upon release. 
+Starting in  mid 2023, Cell Census long-term supported data builds will be released every 6 months and will be publicly accessible for at least 5 years after release. 
 
-In between long-term supported data build releases, weekly builds are released without any guarantee of permanence. 
+In between long-term supported data build releases, weekly builds will be released without any guarantee of permanence. 
 
 ## Cell Census data organization
 
@@ -186,7 +183,7 @@ Now we can iterate over the matrix count, as well as the cell and gene metadata.
     ...
 ```
 
-And you can now perform operation on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop.
+And you can now perform operations on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop.
 
 And you must close the query.
 
@@ -202,10 +199,9 @@ And you must close the query.
 
 ## Questions, feedback and issues
 
-- Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cell-census/issues). Alternatively, for quick support you can join the C[ZI Science Community](https://join-cellxgene-users.herokuapp.com/) on Slack and join the `#cell-census-users` channel
+- Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cell-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://join-cellxgene-users.herokuapp.com/) on Slack and join the `#cell-census-users` channel
 - Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cell-census/issues). 
-- Feature requests: please submit requests using this [form](https://airtable.com/shrVV1g0d6nvBoQYu).
-- Security issue: if you believe you have found a security issue, we would appreciate notification. Please send an email to <security@chanzuckerberg.com>.
+- Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <security@chanzuckerberg.com>.
 - You can send any other feedback to <soma@chanzuckerberg.com>
 
 
