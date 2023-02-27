@@ -27,3 +27,4 @@ Contents
    soma
    python-api
    schema
+   examples
