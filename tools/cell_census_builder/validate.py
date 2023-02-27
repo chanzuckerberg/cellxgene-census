@@ -455,7 +455,7 @@ def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentB
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         consolidated_uris = list_uris_to_consolidate(census)
         for uri in consolidated_uris:
-            # If empty array, must have fragment count of zero.  if non-empty array,
+            # If an empty array, must have fragment count of zero. If a non-empty array,
             # must have fragment count of one.
             assert (len(tiledb.array_fragments(uri)) == 1) or (
                 len(tiledb.array_fragments(uri)) == 0 and is_empty_tiledb_array(uri)
