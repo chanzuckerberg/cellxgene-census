@@ -87,7 +87,7 @@ import cell_census
 
 with cell_census.open_soma() as census:
     
-    # Reads SOMA data frame as a slice
+    # Reads SOMADataFrame as a slice
     cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
         value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
         column_names = ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]
