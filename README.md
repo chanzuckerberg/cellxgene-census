@@ -31,7 +31,7 @@ In between long-term supported data build releases, weekly builds will be releas
 
 ## Cell Census data organization
 
-The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md). Briefly, the Cell Census is a collection of a variety of **SOMA** objects organized with the following hierarchy.
+The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md). Briefly, the Cell Census is a collection of a variety of **[SOMA objects](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types)** organized with the following hierarchy.
 
 <img src="./docs/cell_census_data_model.svg">
 
@@ -49,7 +49,7 @@ The Cell Census requires a Linux or MacOS system with:
 
 ### Documentation
 
-The Cell Census [doc-site](https://chanzuckerberg.github.io/cell-census/index.html) *under development*, contains the reference documentation, data description, and tutorials.
+The Cell Census [doc-site](https://chanzuckerberg.github.io/cell-census/index.html) (*under development*), contains the reference documentation, data description, and tutorials.
 
 Reference documentation can also be accessed directly from Python or R.
 
