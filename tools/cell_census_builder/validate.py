@@ -450,7 +450,8 @@ def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentB
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         consolidated_uris = list_uris_to_consolidate(census)
         for uri in consolidated_uris:
-            assert len(tiledb.array_fragments(uri)) == 1, f"{uri} has not been fully consolidated & vacuumed"
+            # allow zero or one, as the array may not have been populated
+            assert len(tiledb.array_fragments(uri)) <= 1, f"{uri} has not been fully consolidated & vacuumed"
     return True
 
 
