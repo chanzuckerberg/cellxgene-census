@@ -1,4 +1,4 @@
-name: cell_census R package checks
+name: R CellCensus package checks
 
 on:
   pull_request:
