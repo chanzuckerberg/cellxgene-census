@@ -1,3 +1,4 @@
+import functools
 from typing import Set
 
 import pyarrow as pa
@@ -208,9 +209,8 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 # multi-organism filtering. Currently the null set.
 FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
-# The default configuration for TileDB contexts used in the builder
-# Any worker process created will initialize its TileDB_Ctx singleton
-# with this configuration.
+
+# The default configuration for TileDB contexts used in the builder.
 DEFAULT_TILEDB_CONFIG = {
     "py.init_buffer_bytes": 512 * 1024**2,
     "py.deduplicate": "true",
@@ -218,27 +218,17 @@ DEFAULT_TILEDB_CONFIG = {
     "sm.consolidation.buffer_size": 1 * 1024**3,
 }
 
+
 """
 Singletons used throughout the package
 """
 
-# Global SOMATileDBContext
-_SOMA_TileDB_Context: soma.options.SOMATileDBContext = None
 
-# Global TileDB context
-_TileDB_Ctx: tiledb.Ctx = None
-
-
+@functools.cache
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
-    global _SOMA_TileDB_Context
-    if _SOMA_TileDB_Context is None:
-        _SOMA_TileDB_Context = soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx(), timestamp=None)
-    return _SOMA_TileDB_Context
+    return soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx(), timestamp=None)
 
 
+@functools.cache
 def TileDB_Ctx() -> tiledb.Ctx:
-    # See `DEFAULT_TILEDB_CONFIG` above
-    global _TileDB_Ctx
-    if _TileDB_Ctx is None:
-        _TileDB_Ctx = tiledb.Ctx(DEFAULT_TILEDB_CONFIG)
-    return _TileDB_Ctx
+    return tiledb.Ctx(DEFAULT_TILEDB_CONFIG)
