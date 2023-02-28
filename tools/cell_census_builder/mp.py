@@ -4,13 +4,6 @@ import logging
 import os
 from typing import Optional, cast
 
-import tiledbsoma as soma
-
-from .globals import DEFAULT_TILEDB_CONFIG, set_tiledb_ctx
-
-if soma.get_storage_engine() == "tiledb":
-    import tiledb
-
 
 def cpu_count() -> int:
     """Sign, os.cpu_count() returns None if "undetermined" number of CPUs"""
@@ -28,9 +21,6 @@ def process_initializer(verbose: int = 0) -> None:
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     logging.captureWarnings(True)
-
-    if soma.get_storage_engine() == "tiledb":
-        set_tiledb_ctx(tiledb.Ctx(DEFAULT_TILEDB_CONFIG))
 
 
 def create_process_pool_executor(

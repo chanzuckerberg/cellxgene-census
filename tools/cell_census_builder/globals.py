@@ -231,23 +231,14 @@ _TileDB_Ctx: tiledb.Ctx = None
 
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
     global _SOMA_TileDB_Context
-    if _SOMA_TileDB_Context is None or _SOMA_TileDB_Context != TileDB_Ctx():
-        _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
-            tiledb_ctx=TileDB_Ctx(),
-            # `None` opts out of explicit timestamp consistency, and uses the underlying
-            # TileDB per-object write consistency. This is sufficient given that this
-            # builder explicitly orders / synchronizes all reading/writing.
-            timestamp=None,
-        )
+    if _SOMA_TileDB_Context is None:
+        _SOMA_TileDB_Context = soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx(), timestamp=None)
     return _SOMA_TileDB_Context
 
 
 def TileDB_Ctx() -> tiledb.Ctx:
     # See `DEFAULT_TILEDB_CONFIG` above
+    global _TileDB_Ctx
+    if _TileDB_Ctx is None:
+        _TileDB_Ctx = tiledb.Ctx(DEFAULT_TILEDB_CONFIG)
     return _TileDB_Ctx
-
-
-def set_tiledb_ctx(ctx: tiledb.Ctx) -> None:
-    global _TileDB_Ctx, _SOMA_TileDB_Context
-    _TileDB_Ctx = ctx
-    _SOMA_TileDB_Context = None
