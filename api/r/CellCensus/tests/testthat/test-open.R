@@ -1,6 +1,6 @@
 test_that("open_soma", {
-  coll <- open_soma("2023-02-13")
-  expect_equal(coll$uri, "s3://cellxgene-data-public/cell-census/2023-02-13/soma/")
+  coll <- open_soma("latest")
+  expect_true(startsWith(coll$uri, "s3://cellxgene-data-public/cell-census/"))
   expect_true(coll$exists())
   expect_true(coll$get("census_data")$get("homo_sapiens")$exists())
 })
