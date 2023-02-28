@@ -4,6 +4,7 @@ on:
   pull_request:
     paths-ignore:
       - "apis/python/**"
+      - "tools/cell_census_builder/**"
   push:
     branches: [main]
 
