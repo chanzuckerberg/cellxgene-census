@@ -82,6 +82,8 @@ def test_base_builder_creation(
             # Presence matrix should exist with the correct dimensions
             for exp_name in ["homo_sapiens", "mus_musculus"]:
                 fdpm = census[CENSUS_DATA_NAME][exp_name].ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+                fdpm_matrix = fdpm.read().coos().concat()
+                assert fdpm_matrix.shape[0] == 4  # 4 datasets
                 fdpm_df = fdpm.read().tables().concat().to_pandas()
                 n_datasets = fdpm_df["soma_dim_0"].nunique()
                 n_features = fdpm_df["soma_dim_1"].nunique()
