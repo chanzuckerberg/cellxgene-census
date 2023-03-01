@@ -47,7 +47,8 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     [lifecycle: experimental]
 
     Args:
-        census_version: The census version name.
+        census_version:
+            The census version name.
 
     Returns:
         ``CensusVersionDescription`` - a dictionary containing a description of the release.
@@ -76,13 +77,12 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
 def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of cell census releases currently available
+    Get the directory of cell census releases currently available.
 
     [lifecycle: experimental]
 
     Returns:
-        ``Dict[CensusVersionName, CensusVersionDescription]`` - Dictionary
-            of release names and their corresponding release description.
+        A dictionary that contains release names and their corresponding release description.
 
     See Also:
         :func:`get_census_version_description`: get description by census_version.

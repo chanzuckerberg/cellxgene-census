@@ -56,10 +56,13 @@ def open_soma(
     [lifecycle: experimental]
 
     Args:
-        census_version: The version of the Census, e.g. "latest".
-        uri: The URI containing the Census SOMA objects. If specified, will take precedence
+        census_version:
+            The version of the Census, e.g. "latest".
+        uri:
+            The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
-        context: a custom :class:`SOMATileDBContext`.
+        context:
+            A custom :class:`SOMATileDBContext`.
 
     Returns:
         A SOMA Collection object containing the top-level census.
@@ -70,7 +73,6 @@ def open_soma(
             or a version are specified.
 
     Examples:
-
         Open the default Cell Census version, using a context manager which will automatically
         close the census upon exit of the context.
 
@@ -116,14 +118,16 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     [lifecycle: experimental]
 
     Args:
-        dataset_id: The ``dataset_id`` of interest.
-        census_version: The census version.
+        dataset_id:
+            The ``dataset_id`` of interest.
+        census_version:
+            The census version.
 
     Returns:
-        A :class:`CensusLocator` object that contains the URI and optional S3 region for the source H5AD.
+        A :py:obj:`CensusLocator` object that contains the URI and optional S3 region for the source H5AD.
 
     Raises:
-        KeyError: if either dataset_id or census_version do not exist.
+        KeyError: if either `dataset_id` or `census_version` do not exist.
 
     Examples:
         >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
@@ -150,9 +154,12 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     [lifecycle: experimental]
 
     Args:
-        dataset_id: Fetch the source (original) H5AD associated with this `dataset_id`.
-        to_path: The file name where the downloaded H5AD will be written.  Must not already exist.
-        census_version: The census version name. Defaults to `latest`.
+        dataset_id
+            Fetch the source (original) H5AD associated with this `dataset_id`.
+        to_path:
+            The file name where the downloaded H5AD will be written.  Must not already exist.
+        census_version:
+            The census version name. Defaults to `latest`.
 
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite

@@ -26,9 +26,12 @@ def get_presence_matrix(
     [lifecycle: experimental]
 
     Args:
-        census: The census from which to read the presence matrix.
-        organism: The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
-        measurement_name: The measurement object to query. Deafults to `RNA`.
+        census:
+            The census from which to read the presence matrix.
+        organism:
+            The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+        measurement_name:
+            The measurement object to query. Deafults to `RNA`.
 
     Returns:
         A :class:`scipy.sparse.csr_array` object containing the presence matrix.

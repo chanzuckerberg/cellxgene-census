@@ -38,19 +38,28 @@ def get_anndata(
     [lifecycle: experimental]
 
     Args:
-        census: The census object, usually returned by :func:`cell_census.open_soma()`.
-        organism: The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
-        measurement_name: The measurement object to query. Defaults to `RNA`.
-        X_name: The ``X`` layer to query. Defaults to `raw`.
-        obs_value_filter: Value filter for the ``obs`` metadata. Value is a filter query written in the
+        census:
+            The census object, usually returned by :func:`cell_census.open_soma()`.
+        organism:
+            The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+        measurement_name:
+            The measurement object to query. Defaults to `RNA`.
+        X_name:
+            The ``X`` layer to query. Defaults to `raw`.
+        obs_value_filter:
+            Value filter for the ``obs`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
-        obs_coords: Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+        obs_coords:
+            Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-        var_value_filter: Value filter for the ``var`` metadata. Value is a filter query written in the
+        var_value_filter:
+            Value filter for the ``var`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
-        var_coords: Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+        var_coords:
+            Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-        column_names: Columns to fetch for ``obs`` and ``var`` dataframes.
+        column_names:
+            Columns to fetch for ``obs`` and ``var`` dataframes.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.

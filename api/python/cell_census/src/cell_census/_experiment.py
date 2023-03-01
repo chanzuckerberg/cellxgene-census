@@ -21,14 +21,16 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     [lifecycle: experimental]
 
     Args:
-        census: soma.Collection, The census
-        organism: str, The organism name, eg., ``Homo sapiens``
+        census: soma.Collection
+            The census.
+        organism: str
+            The organism name, eg., ``Homo sapiens``.
 
     Returns:
         A soma.Experiment object with the requested experiment.
 
     Raises:
-        ValueError: if unable to find the specified organism
+        ValueError: if unable to find the specified organism.
 
     Examples:
 
