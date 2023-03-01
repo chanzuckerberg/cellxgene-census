@@ -1,3 +1,12 @@
+# Copyright (c) 2022-2023 Chan Zuckerberg Initiative
+#
+# Licensed under the MIT License.
+
+"""Versioning of Cell Census builds
+
+Methods to retrieve information about the available Cell Census versions.
+"""
+
 from typing import Dict, Optional, Union, cast
 
 import requests
@@ -32,34 +41,31 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgen
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
-    """
-    Get release description for given census version, from the Cell
-    Census release directory. Raises KeyError if unknown census_version
-    value [lifecycle: experimental].
+    """Get release description for given census version, from the Cell
+    Census release directory.
 
-    Parameters
-    ----------
-    census_version : ``str``
-        The census version name.
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``CensusVersionDescription``
-        Dictionary containing a description of the release.
+    Args:
+        census_version: The census version name.
 
-    See Also
-    --------
-    ``get_census_version_directory`` : returns the entire directory as a dict.
+    Returns:
+        ``CensusVersionDescription`` - a dictionary containing a description of the release.
 
-    Examples
-    --------
-    >>> cell_census.get_census_version_description("latest")
-    {'release_date': None,
-    'release_build': '2022-12-01',
-    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-    's3_region': 'us-west-2'},
-    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-    's3_region': 'us-west-2'}}
+    Raises:
+        KeyError: if unknown census_version value.
+
+    See Also:
+        :func:`get_census_version_directory`: returns the entire directory as a dict.
+
+    Examples:
+        >>> cell_census.get_census_version_description("latest")
+        {'release_date': None,
+        'release_build': '2022-12-01',
+        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+        's3_region': 'us-west-2'},
+        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+        's3_region': 'us-west-2'}}
     """
     census_directory = get_census_version_directory()
     description = census_directory.get(census_version, None)
@@ -70,43 +76,37 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
 def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of cell census releases currently available [lifecycle: experimental].
+    Get the directory of cell census releases currently available
 
-    Parameters
-    ----------
-    None
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``Dict[CensusVersionName, CensusVersionDescription]``
-        Dictionary of release names and their corresponding
-        release description.
+    Returns:
+        ``Dict[CensusVersionName, CensusVersionDescription]`` - Dictionary
+            of release names and their corresponding release description.
 
-    See Also
-    --------
-    ``get_census_version_description`` : get description by census_version.
+    See Also:
+        :func:`get_census_version_description`: get description by census_version.
 
-    Examples
-    --------
-    >>> cell_census.get_census_version_directory()
-    {'latest': {'release_date': None,
-    'release_build': '2022-12-01',
-    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-    's3_region': 'us-west-2'},
-    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-    's3_region': 'us-west-2'}},
-    '2022-12-01': {'release_date': None,
-    'release_build': '2022-12-01',
-    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-    's3_region': 'us-west-2'},
-    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-    's3_region': 'us-west-2'}},
-    '2022-11-29': {'release_date': None,
-    'release_build': '2022-11-29',
-    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
-    's3_region': 'us-west-2'},
-    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
-    's3_region': 'us-west-2'}}}
+    Examples:
+        >>> cell_census.get_census_version_directory()
+        {'latest': {'release_date': None,
+        'release_build': '2022-12-01',
+        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+        's3_region': 'us-west-2'},
+        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+        's3_region': 'us-west-2'}},
+        '2022-12-01': {'release_date': None,
+        'release_build': '2022-12-01',
+        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+        's3_region': 'us-west-2'},
+        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+        's3_region': 'us-west-2'}},
+        '2022-11-29': {'release_date': None,
+        'release_build': '2022-11-29',
+        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+        's3_region': 'us-west-2'},
+        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+        's3_region': 'us-west-2'}}}
     """
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()

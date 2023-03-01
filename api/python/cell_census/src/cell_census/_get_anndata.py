@@ -1,3 +1,11 @@
+# Copyright (c) 2022-2023 Chan Zuckerberg Initiative
+#
+# Licensed under the MIT License.
+
+"""Get slice as AnnData
+
+Methods to retrieve slices of the census as AnnData objects.
+"""
 from typing import Optional
 
 import anndata
@@ -25,45 +33,32 @@ def get_anndata(
 ) -> anndata.AnnData:
     """
     Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
-    and return it as an ``AnnData`` object [lifecycle: experimental].
+    and return it as an :py:class:`anndata.AnnData` object.
 
-    Parameters
-    ----------
-    census : ``soma.Collection``
-        The census object, usually returned by `cell_census.open_soma()`
-    organism : ``str``
-        The organism to query, usually one of "Homo sapiens" or "Mus musculus"
-    measurement_name : ``str``, default ``"RNA"``
-        The measurement object to query
-    X_name : str, default ``"raw"``
-        The ``X`` layer to query
-    obs_value_filter: ``str``, default ``None``
-        Value filter for the ``obs`` metadata. Value is a filter query written in the
-        SOMA ``value_filter`` syntax.
-    obs_coords: ``tuple``[``int``, slice or NumPy ArrayLike of ``int``], default ``None``
-        Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
-        May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-    var_value_filter: ``str``, default ``None``
-        Value filter for the ``var`` metadata. Value is a filter query written in the
-        SOMA ``value_filter`` syntax.
-    var_coords: ``tuple``[``int``, slice or NumPy ArrayLike of ``int``], default ``None``
-        Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
-        May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-    column_names: ``dict[Literal['obs', 'var'], List[str]]``
-        Colums to fetch for ``obs`` and ``var`` dataframes.
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``anndata.AnnData`` - containing the census slice
+    Args:
+        census: The census object, usually returned by :func:`cell_census.open_soma()`.
+        organism: The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+        measurement_name: The measurement object to query. Defaults to `RNA`.
+        X_name: The ``X`` layer to query. Defaults to `raw`.
+        obs_value_filter: Value filter for the ``obs`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+        obs_coords: Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+        var_value_filter: Value filter for the ``var`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+        var_coords: Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+        column_names: Colums to fetch for ``obs`` and ``var`` dataframes.
 
-    Examples
-    --------
-    >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
+    Returns:
+        An :py:class:`anndata.AnnData` object containing the census slice.
 
-    >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
-
-    >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
-
+    Examples:
+        >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
+        >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
+        >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
     """
     exp = _get_experiment(census, organism)
     obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
