@@ -33,7 +33,7 @@ def get_anndata(
 ) -> anndata.AnnData:
     """
     Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
-    and return it as an :py:class:`anndata.AnnData` object.
+    and return it as an :class:`anndata.AnnData` object.
 
     [lifecycle: experimental]
 
@@ -50,14 +50,16 @@ def get_anndata(
             SOMA ``value_filter`` syntax.
         var_coords: Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-        column_names: Colums to fetch for ``obs`` and ``var`` dataframes.
+        column_names: Columns to fetch for ``obs`` and ``var`` dataframes.
 
     Returns:
-        An :py:class:`anndata.AnnData` object containing the census slice.
+        An :class:`anndata.AnnData` object containing the census slice.
 
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
+
         >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
+
         >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
     """
     exp = _get_experiment(census, organism)

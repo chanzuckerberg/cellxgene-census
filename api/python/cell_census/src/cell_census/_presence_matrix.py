@@ -31,7 +31,7 @@ def get_presence_matrix(
         measurement_name: The measurement object to query. Deafults to `RNA`.
 
     Returns:
-        A :py:class:`scipy.sparse.csr_array` object containing the presence matrix.
+        A :class:`scipy.sparse.csr_array` object containing the presence matrix.
 
     Raises:
         ValueError: if the organism cannot be found.
@@ -39,7 +39,7 @@ def get_presence_matrix(
     Examples:
         >>> get_presence_matrix(census, "Homo sapiens", "RNA")
         <321x60554 sparse array of type '<class 'numpy.uint8'>'
-            with 6441269 stored elements in Compressed Sparse Row format>
+        with 6441269 stored elements in Compressed Sparse Row format>
     """
 
     exp = _get_experiment(census, organism)
