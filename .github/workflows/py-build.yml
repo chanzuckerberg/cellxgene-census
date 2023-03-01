@@ -1,4 +1,4 @@
-name: cell_census build
+name: Python cell_census build
 
 on:
   pull_request:
