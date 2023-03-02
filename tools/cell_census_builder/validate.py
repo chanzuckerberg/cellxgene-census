@@ -6,7 +6,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import numpy.typing as npt
@@ -14,7 +14,6 @@ import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
-from scipy import sparse
 
 from .anndata import make_anndata_cell_filter, open_anndata
 from .consolidate import list_uris_to_consolidate
@@ -251,6 +250,12 @@ def validate_axis_dataframes(
     return True
 
 
+def _sum_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> float:
+    """Return the _cell_census_ sum of the X matrix values from a dataset"""
+    result: float = arr.read((join_ids, slice(None))).tables().concat().column("soma_data").to_pandas().sum()
+    return result
+
+
 def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[ExperimentBuilder]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
@@ -270,6 +275,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
+        # Extract soma_joinids assocaited with the dataset from the cell census.
         soma_joinids: npt.NDArray[np.int64] = (
             exp.obs.read(
                 column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
@@ -279,30 +285,18 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
             .soma_joinid.to_numpy()
         )
 
-        raw_nnz = 0
+        raw_sum = 0.0
         if len(soma_joinids) > 0:
             assert soma.SparseNDArray.exists(exp.ms["RNA"].X["raw"].uri)
+            raw_sum = _sum_elements(exp.ms["RNA"].X["raw"], soma_joinids)
 
-            def count_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> int:
-                return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).coos())
-
-            raw_nnz = count_elements(exp.ms["RNA"].X["raw"], soma_joinids)
-
-        def count_nonzero(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
-            """Return _actual_ non-zero count, NOT the stored value count."""
-            if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
-                return np.count_nonzero(arr.data)
-            return np.count_nonzero(arr)
-
+        error = "{}:{} 'raw' {} mismatch {} vs {}"
         if ad.raw is None:
-            assert raw_nnz == count_nonzero(
-                ad.X
-            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.X)}"
+            h5ad_sum = sum(ad.X.data)  # calculate the actual sum of the X matrix values
+            assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
         else:
-            assert raw_nnz == count_nonzero(
-                ad.raw.X
-            ), f"{eb.name}:{dataset.dataset_id} 'raw' nnz mismatch {raw_nnz} vs {count_nonzero(ad.raw.X)}"
-
+            h5ad_sum = sum(ad.raw.X.data)  # calculate the actual sum of the X matrix values
+            assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
     return True
 
 
