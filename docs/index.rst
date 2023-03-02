@@ -28,3 +28,4 @@ Contents
    python-api
    R API <https://chanzuckerberg.github.io/cell-census/r/index.html>
    schema
+   examples

@@ -28,11 +28,14 @@ def test_base_builder_creation(
     """
     with patch("tools.cell_census_builder.__main__.prepare_file_system"), patch(
         "tools.cell_census_builder.__main__.build_step1_get_source_datasets", return_value=datasets
+    ), patch("tools.cell_census_builder.consolidate._run"), patch(
+        "tools.cell_census_builder.validate.validate_consolidation", return_value=True
     ):
+        # Patching consolidate_tiledb_object, becuase is uses to much memory to run in github actions.
         experiment_builders = make_experiment_builders()
         from types import SimpleNamespace
 
-        args = SimpleNamespace(multi_process=False, consolidate=False, build_tag="test_tag")
+        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", max_workers=1, verbose=True)
         return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
 
         # return_value = 0 means that the build succeeded
@@ -79,6 +82,22 @@ def test_base_builder_creation(
             # Presence matrix should exist with the correct dimensions
             for exp_name in ["homo_sapiens", "mus_musculus"]:
                 fdpm = census[CENSUS_DATA_NAME][exp_name].ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+                fdpm_matrix = fdpm.read().coos().concat()
+
+                # The first dimension of the presence matrix should map to the soma_joinids of the returned datasets
+                dim_0 = fdpm_matrix.to_scipy().row
+                assert all(dim_0 >= 0)
+                assert all(dim_0 <= max(returned_datasets.soma_joinid))
+                assert fdpm_matrix.shape[0] == max(returned_datasets.soma_joinid) + 1
+
+                # All rows indexed by a Dataframe's soma_joinid that does not belong to the experiment contain all zeros
+                dense_pm = fdpm_matrix.to_scipy().todense()
+                for i, dataset in returned_datasets.iterrows():
+                    if dataset["dataset_id"].startswith(exp_name):
+                        assert np.count_nonzero(dense_pm[i]) > 0
+                    else:
+                        assert np.count_nonzero(dense_pm[i]) == 0
+
                 fdpm_df = fdpm.read().tables().concat().to_pandas()
                 n_datasets = fdpm_df["soma_dim_0"].nunique()
                 n_features = fdpm_df["soma_dim_1"].nunique()

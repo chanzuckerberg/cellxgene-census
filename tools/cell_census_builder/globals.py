@@ -1,4 +1,4 @@
-import time
+import functools
 from typing import Set
 
 import pyarrow as pa
@@ -130,8 +130,7 @@ CENSUS_OBS_PLATFORM_CONFIG = {
                 },
             },
             "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
-            # TODO: enable when https://github.com/single-cell-data/TileDB-SOMA/issues/988 is fixed
-            # "allows_duplicates": True,
+            "allows_duplicates": True,
         }
     }
 }
@@ -148,8 +147,7 @@ CENSUS_VAR_PLATFORM_CONFIG = {
             "capacity": 2**16,
             "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
             "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
-            # TODO: enable when https://github.com/single-cell-data/TileDB-SOMA/issues/988 is fixed
-            # "allows_duplicates": True,
+            "allows_duplicates": True,
         }
     }
 }
@@ -172,8 +170,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
                 "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
                 "cell_order": "row-major",
                 "tile_order": "row-major",
-                # TODO: enable when https://github.com/single-cell-data/TileDB-SOMA/issues/988 is fixed
-                # "allows_duplicates": True,
+                "allows_duplicates": True,
             },
         }
     }
@@ -213,46 +210,25 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
 
+# The default configuration for TileDB contexts used in the builder.
+DEFAULT_TILEDB_CONFIG = {
+    "py.init_buffer_bytes": 512 * 1024**2,
+    "py.deduplicate": "true",
+    "soma.init_buffer_bytes": 512 * 1024**2,
+    "sm.consolidation.buffer_size": 1 * 1024**3,
+}
+
+
 """
 Singletons used throughout the package
 """
 
-# Global SOMATileDBContext
-_SOMA_TileDB_Context: soma.options.SOMATileDBContext = None
 
-# Global TileDB context
-_TileDB_Ctx: tiledb.Ctx = None
-
-# The logical timestamp at which all builder data should be recorded
-WRITE_TIMESTAMP = int(time.time() * 1000)
-
-# Using "end of time" for read_timestamp means that all writes are visible, no matter what write timestamp was used
-END_OF_TIME = 0xFFFFFFFFFFFFFFFF
-
-
+@functools.cache
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
-    global _SOMA_TileDB_Context
-    if _SOMA_TileDB_Context is None or _SOMA_TileDB_Context != TileDB_Ctx():
-        # Set write timestamp to "now", so that we use consistent timestamps across all writes (mostly for aesthetic
-        # reasons). Set read timestamps to be same as write timestamp so that post-build validation reads can "see"
-        # the writes. Without setting read timestamp explicitly, the read timestamp would default to a time that
-        # prevents seeing the builder's writes.
-        _SOMA_TileDB_Context = soma.options.SOMATileDBContext(
-            tiledb_ctx=TileDB_Ctx(),
-            # TODO: Setting an explicit write timestamp causes later reads to fail!
-            # write_timestamp=write_timestamp,
-            # TODO: We *should* be able to set this equal to WRITE_TIMESTAMP, but as specifying a write_timestamp is
-            #  problematic, we must use "end of time" for now
-            read_timestamp=END_OF_TIME,
-        )
-    return _SOMA_TileDB_Context
+    return soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx(), timestamp=None)
 
 
+@functools.cache
 def TileDB_Ctx() -> tiledb.Ctx:
-    return _TileDB_Ctx
-
-
-def set_tiledb_ctx(ctx: tiledb.Ctx) -> None:
-    global _TileDB_Ctx, _SOMA_TileDB_Context
-    _TileDB_Ctx = ctx
-    _SOMA_TileDB_Context = None
+    return tiledb.Ctx(DEFAULT_TILEDB_CONFIG)

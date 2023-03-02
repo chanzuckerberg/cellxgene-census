@@ -1,4 +1,4 @@
-name: cell_census Python package unit tests
+name: Python cell_census package unit tests
 
 on:
   pull_request:

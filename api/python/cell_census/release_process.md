@@ -19,7 +19,7 @@ While not strictly required, this process assumes you have met the following pre
 
 ## Step 1: Building the package assets
 
-A build will occur automatically upon each commit to main, upon each commit to a PR, or when the build workflow is manually invoked. The build workflow is defined by the GH `build.yml` workflow. Build artifacts are the Python setuptools-created `sdist` and `wheel`, and are retained for a limited period of time (currently the GH default of 90 days).
+A build will occur automatically upon each commit to main, upon each commit to a PR, or when the build workflow is manually invoked. The build workflow is defined by the GH `py-build.yml` workflow. Build artifacts are the Python setuptools-created `sdist` and `wheel`, and are retained for a limited period of time (currently the GH default of 90 days).
 
 Unless you are revising and testing the build process itself, there is no need to manually perform a build.
 
@@ -75,9 +75,9 @@ To create a release, perform the following:
    $ git tag -a <SEMVER> -m 'Release <SEMVER>'
    $ git push origin <SEMVER>
    ```
-3. Trigger a build for this tag by manually triggering the `build.yml` workflow. For example:
+3. Trigger a build for this tag by manually triggering the `py-build.yml` workflow. For example:
    ```shell
-   $ gh workflow run build.yml --ref <SEMVER>
+   $ gh workflow run py-build.yml --ref <SEMVER>
    ```
 4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
 5. Optional, _but recommended_: download the asset from the build workflow and validate it.

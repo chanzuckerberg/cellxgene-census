@@ -110,6 +110,9 @@ def datasets(assets_path: str) -> List[Dataset]:
             datasets.append(
                 Dataset(
                     dataset_id=f"{organism.name}_{dataset_id}",
+                    dataset_title=f"title_{organism.name}",
+                    collection_id=f"id_{organism.name}",
+                    collection_name=f"collection_{organism.name}",
                     corpora_asset_h5ad_uri="mock",
                     dataset_h5ad_path=h5ad_path,
                 ),
