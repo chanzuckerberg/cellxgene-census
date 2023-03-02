@@ -83,7 +83,21 @@ def test_base_builder_creation(
             for exp_name in ["homo_sapiens", "mus_musculus"]:
                 fdpm = census[CENSUS_DATA_NAME][exp_name].ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
                 fdpm_matrix = fdpm.read().coos().concat()
-                assert fdpm_matrix.shape[0] == 4  # 4 datasets
+
+                # The first dimension of the presence matrix should map to the soma_joinids of the returned datasets
+                dim_0 = fdpm_matrix.to_scipy().row
+                assert all(dim_0 >= 0)
+                assert all(dim_0 <= max(returned_datasets.soma_joinid))
+                assert fdpm_matrix.shape[0] == max(returned_datasets.soma_joinid) + 1
+
+                # All rows indexed by a Dataframe's soma_joinid that does not belong to the experiment contain all zeros
+                dense_pm = fdpm_matrix.to_scipy().todense()
+                for i, dataset in returned_datasets.iterrows():
+                    if dataset["dataset_id"].startswith(exp_name):
+                        assert np.count_nonzero(dense_pm[i]) > 0
+                    else:
+                        assert np.count_nonzero(dense_pm[i]) == 0
+
                 fdpm_df = fdpm.read().tables().concat().to_pandas()
                 n_datasets = fdpm_df["soma_dim_0"].nunique()
                 n_features = fdpm_df["soma_dim_1"].nunique()
