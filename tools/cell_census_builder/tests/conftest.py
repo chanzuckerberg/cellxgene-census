@@ -27,7 +27,7 @@ ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus"
 
 
 def get_h5ad(organism: Organism) -> anndata.AnnData:
-    X = np.random.randint(5, size=(4, 4))
+    X = np.random.randint(5, size=(4, 4)).astype(np.float32)
     # The builder only supports sparse matrices
     X = sparse.csr_matrix(X)
 
@@ -54,7 +54,8 @@ def get_h5ad(organism: Organism) -> anndata.AnnData:
             "sex": "test",
             "tissue": "test",
             "organism": "test",
-        }
+        },
+        index=["1", "2", "3", "4"],
     )
     obs = obs_dataframe
 

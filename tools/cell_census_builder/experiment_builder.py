@@ -7,6 +7,7 @@ from contextlib import ExitStack
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypedDict, Union, overload
 
 import anndata
+import attrs
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -15,6 +16,7 @@ import somacore
 import tiledbsoma as soma
 from scipy import sparse
 from somacore.options import OpenMode
+from typing_extensions import Self
 
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
@@ -65,14 +67,18 @@ def _assert_open_for_write(obj: somacore.SOMAObject) -> None:
     assert not obj.closed
 
 
-class ExperimentBuilder:
+@attrs.define(frozen=True)
+class ExperimentSpecification:
     """
-    Class to help build a parameterized SOMA experiment, where key parameters are:
+    Declarative "specification" of a SOMA experiment. This is a read-only
+    specification, independent of the datasets used to build the census.
+
+    Parameters:
     * experiment "name" (eg, 'human'), must be unique in all experiments.
     * an AnnData filter used to cherry pick data for the experiment
-    * methods to progressively build the experiment
+    * external reference data used to build the experiment, e.g., gene length data
 
-    The creation and driving of these objects is done by the main loop.
+    Usage: to create, use the factory method `ExperimentSpecification.create(...)`
     """
 
     name: str
@@ -80,10 +86,39 @@ class ExperimentBuilder:
     gene_feature_length_uris: List[str]
     gene_feature_length: pd.DataFrame
 
-    def __init__(self, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]):
-        self.name = name
-        self.anndata_cell_filter_spec = anndata_cell_filter_spec
-        self.gene_feature_length_uris = gene_feature_length_uris
+    @classmethod
+    def create(
+        cls, name: str, anndata_cell_filter_spec: AnnDataFilterSpec, gene_feature_length_uris: List[str]
+    ) -> Self:
+        """Factory method. Do not instantiate the class directly."""
+        gene_feature_length = cls._load_gene_feature_length(gene_feature_length_uris)
+        logging.info(f"Loaded gene lengths external reference for {name}, {len(gene_feature_length)} genes.")
+        return cls(name, anndata_cell_filter_spec, gene_feature_length_uris, gene_feature_length)
+
+    @classmethod
+    def _load_gene_feature_length(cls, gene_feature_length_uris: Sequence[str]) -> pd.DataFrame:
+        """
+        Private. Load any external assets required to create the experiment.
+        """
+        return pd.concat(
+            pd.read_csv(
+                io.BytesIO(cat_file(uri)),
+                names=["feature_id", "feature_name", "gene_version", "feature_length"],
+            )
+            .set_index("feature_id")
+            .drop(columns=["feature_name", "gene_version"])
+            for uri in gene_feature_length_uris
+        )
+
+
+class ExperimentBuilder:
+    """
+    Class that embodies the operators and state to build an Experiment.
+    The creation and driving of these objects is done by the main loop.
+    """
+
+    def __init__(self, specification: ExperimentSpecification):
+        self.specification = specification
 
         # accumulated state
         self.n_obs: int = 0
@@ -98,24 +133,18 @@ class ExperimentBuilder:
         self.experiment_uri: Optional[str] = None  # initialized in create()
         self.global_var_joinids: Optional[pd.DataFrame] = None
         self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
-        self.build_completed: bool = False
 
-        self.load_assets()
+    @property
+    def name(self) -> str:
+        return self.specification.name
 
-    def load_assets(self) -> None:
-        """
-        Load any external assets required to create the experiment.
-        """
-        self.gene_feature_length = pd.concat(
-            pd.read_csv(
-                io.BytesIO(cat_file(uri)),
-                names=["feature_id", "feature_name", "gene_version", "feature_length"],
-            )
-            .set_index("feature_id")
-            .drop(columns=["feature_name", "gene_version"])
-            for uri in self.gene_feature_length_uris
-        )
-        logging.info(f"Loaded gene lengths external reference for {self.name}, {len(self.gene_feature_length)} genes.")
+    @property
+    def anndata_cell_filter_spec(self) -> AnnDataFilterSpec:
+        return self.specification.anndata_cell_filter_spec
+
+    @property
+    def gene_feature_length(self) -> pd.DataFrame:
+        return self.specification.gene_feature_length
 
     def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
@@ -260,7 +289,8 @@ class ExperimentBuilder:
         """
         _assert_open_for_write(self.experiment)
 
-        # SOMA does not currently support empty arrays, so special case this corner-case.
+        # SOMA does not currently arrays with a zero length domain, so special case this corner-case
+        # where no data has been read for this experiment.
         if len(self.presence) > 0:
             # sanity check
             assert len(self.presence) == self.n_datasets
