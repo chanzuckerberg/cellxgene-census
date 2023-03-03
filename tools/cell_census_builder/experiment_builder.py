@@ -254,7 +254,7 @@ class ExperimentBuilder:
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
 
-    def populate_presence_matrix(self) -> None:
+    def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
         """
         Save presence matrix per Experiment
         """
@@ -265,7 +265,7 @@ class ExperimentBuilder:
             # sanity check
             assert len(self.presence) == self.n_datasets
 
-            max_dataset_joinid = max(self.presence.keys())
+            max_dataset_joinid = max(d.soma_joinid for d in datasets)
 
             # LIL is fast way to create spmatrix
             pm = sparse.lil_array((max_dataset_joinid + 1, self.n_var), dtype=bool)

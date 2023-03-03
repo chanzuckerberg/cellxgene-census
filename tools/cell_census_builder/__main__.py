@@ -295,7 +295,7 @@ def build_step4_populate_X_layers(
     populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
 
     for eb in reopen_experiment_builders(experiment_builders):
-        eb.populate_presence_matrix()
+        eb.populate_presence_matrix(filtered_datasets)
 
     logging.info("Build step 4 - Populate X layers - finished")
 

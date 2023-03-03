@@ -1,7 +1,9 @@
-name: cell_census build
+name: Python cell_census build
 
 on:
   pull_request:
+    paths-ignore:
+      - "apis/r/**"
   push:
     branches: [main]
   workflow_dispatch:
