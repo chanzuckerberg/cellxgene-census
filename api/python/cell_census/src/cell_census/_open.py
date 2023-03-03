@@ -4,7 +4,7 @@
 
 """Open census and related datasets
 
-Contains methods to open the Cell Census object and access its datasets.
+Contains methods to open  publicly hosted versions of Cell Census object and access its source datasets.
 """
 
 import os.path
