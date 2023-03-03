@@ -149,9 +149,6 @@ def build(
     # Step 5- write out dataset manifest and summary information
     build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.build_tag)
 
-    for eb in experiment_builders:
-        eb.build_completed = True
-
     # consolidate TileDB data
     if args.consolidate:
         consolidate(args, root_collection.uri)

@@ -133,7 +133,6 @@ class ExperimentBuilder:
         self.experiment_uri: Optional[str] = None  # initialized in create()
         self.global_var_joinids: Optional[pd.DataFrame] = None
         self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
-        self.build_completed: bool = False
 
     @property
     def name(self) -> str:
