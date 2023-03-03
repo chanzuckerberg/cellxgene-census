@@ -1,3 +1,12 @@
+# Copyright (c) 2022-2023 Chan Zuckerberg Initiative
+#
+# Licensed under the MIT License.
+
+"""Open census and related datasets
+
+Contains methods to open  publicly hosted versions of Cell Census object and access its source datasets.
+"""
+
 import os.path
 import urllib.parse
 from typing import Any, Dict, Optional
@@ -42,54 +51,54 @@ def open_soma(
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
-    """
-    Open the Cell Census by version or URI, returning a ``soma.Collection`` containing the
-    top-level census.  Raises error if ``census_version`` is specified and unknown, or
-    if neither ``uri`` or ``census_version`` are specified, or if the ``uri`` can not
-    be opened [lifecycle: experimental].
+    """Open the Cell Census by version or URI.
 
-    Parameters
-    ----------
-    census_version : ``Optional[str]``
-        The version of the Census, e.g., "latest"
-    uri : Optional[str]
-        The URI containing the Census SOMA objects. If specified, will take precedence
-        over ``census_version`` parameter. An exception will be raised if the URI can
-        not be opened.
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``soma.Collection`` : returns a SOMA Collection object. Can be used as a context manager, which
-        will automatically close upon exit.
+    Args:
+        census_version:
+            The version of the Census, e.g. "latest".
+        uri:
+            The URI containing the Census SOMA objects. If specified, will take precedence
+            over ``census_version`` parameter.
+        context:
+            A custom :class:`SOMATileDBContext`.
 
-    Examples
-    --------
-    Open the default Cell Census version, using a context manager which will automatically
-    close the census upon exit of the context.
+    Returns:
+        A SOMA Collection object containing the top-level census.
+        It can be used as a context manager, which will automatically close upon exit.
 
-    >>> with cell_census.open_soma() as census:
+    Raises:
+        ValueError: if the census cannot be found, the URI cannot be opened, or neither a URI
+            or a version are specified.
+
+    Examples:
+        Open the default Cell Census version, using a context manager which will automatically
+        close the census upon exit of the context.
+
+        >>> with cell_census.open_soma() as census:
+                ...
+
+        Open and close:
+
+        >>> census = cell_census.open_soma()
             ...
+            census.close()
 
-    Open and close:
+        Open a specific Cell Census by version:
 
-    >>> census = cell_census.open_soma()
-        ...
-        census.close()
+        >>> with cell_census.open_soma("2022-12-31") as census:
+                ...
 
-    Open a specific Cell Census by version:
+        Open a Cell Census by S3 URI, rather than by version.
 
-    >>> with cell_census.open_soma("2022-12-31") as census:
-            ...
+        >>> with cell_census.open_soma(uri="s3://bucket/path") as census:
+                ...
 
-    Open a Cell Census by S3 URI, rather than by version.
+        Open a Cell Census by path (file:// URI), rather than by version.
 
-    >>> with cell_census.open_soma(uri="s3://bucket/path") as census:
-            ...
-
-    Open a Cell Census by path (file:// URI), rather than by version.
-
-    >>> with cell_census.open_soma(uri="/tmp/census") as census:
-            ...
+        >>> with cell_census.open_soma(uri="/tmp/census") as census:
+                ...
     """
 
     if uri is not None:
@@ -103,27 +112,27 @@ def open_soma(
 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
-    """
-    Open the named version of the census, and return the URI for the ``dataset_id``. This
-    does not guarantee that the H5AD exists or is accessible to the user. Raises an
-    error if ``dataset_id`` or ``census_version`` are unknown [lifecycle: experimental].
+    """Open the named version of the census, and return the URI for the ``dataset_id``. This
+    does not guarantee that the H5AD exists or is accessible to the user.
 
-    Parameters
-    ----------
-    dataset_id : ``str``
-        The ``dataset_id`` of interest
-    census_version : ``Optional[str]``
-        The census version
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``CensusLocator`` : the URI and optional S3 region for the source H5AD
+    Args:
+        dataset_id:
+            The ``dataset_id`` of interest.
+        census_version:
+            The census version.
 
-    Examples
-    --------
-    >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
-    {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d.h5ad',
-    's3_region': 'us-west-2'}
+    Returns:
+        A :py:obj:`CensusLocator` object that contains the URI and optional S3 region for the source H5AD.
+
+    Raises:
+        KeyError: if either `dataset_id` or `census_version` do not exist.
+
+    Examples:
+        >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
+        {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d.h5ad',
+        's3_region': 'us-west-2'}
     """
     description = get_census_version_description(census_version)  # raises
     census = _open_soma(description["soma"])
@@ -139,32 +148,28 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
 
 
 def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
-    """
-    Download the source H5AD dataset, for the given ``dataset_id``, to the user-specified
-    file name. Will raise an error if the path already exists (i.e., will not overwrite
-    an existing file), or is not a file [lifecycle: experimental].
+    """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
+    file name.
 
-    Parameters
-    ----------
-    dataset_id : ``str``
-        Fetch the source (original) H5AD associated with this ``dataset_id``.
-    to_path : ``str``
-        The file name where the downloaded H5AD will be written.  Must not already exist.
-    census_version : ``str``
-        The census version name. Defaults to ``latest``.
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    None
+    Args:
+        dataset_id
+            Fetch the source (original) H5AD associated with this `dataset_id`.
+        to_path:
+            The file name where the downloaded H5AD will be written.  Must not already exist.
+        census_version:
+            The census version name. Defaults to `latest`.
 
-    See Also
-    --------
-    ``get_source_h5ad_uri`` : Look up the location of the source H5AD.
+    Raises:
+        ValueError: if the path already exists (i.e., will not overwrite
+            an existing file), or is not a file.
 
-    Examples
-    --------
-    >>> download_source_h5ad("8e47ed12-c658-4252-b126-381df8d52a3d", to_path="/tmp/data.h5ad")
+    See Also:
+        :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.
 
+    Examples:
+        >>> download_source_h5ad("8e47ed12-c658-4252-b126-381df8d52a3d", to_path="/tmp/data.h5ad")
     """
     if os.path.exists(to_path):
         raise ValueError("Path exists - will not overwrite existing file.")

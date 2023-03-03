@@ -16,7 +16,7 @@ release = "0.5.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx"]
+extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx", 'sphinx.ext.napoleon']
 
 tiledb_version = "latest"
 
@@ -26,7 +26,10 @@ intersphinx_mapping = {
         % tiledb_version,
         None,
     ),
-    'python': ('https://docs.python.org/3', None)
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('http://docs.scipy.org/doc/numpy', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
+    'anndata': ('https://anndata.readthedocs.io/en/latest/', None),
 }
 
 templates_path = ['_templates']

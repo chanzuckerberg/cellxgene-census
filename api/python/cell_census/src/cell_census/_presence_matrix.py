@@ -1,3 +1,12 @@
+# Copyright (c) 2022-2023 Chan Zuckerberg Initiative
+#
+# Licensed under the MIT License.
+
+"""Presence matrix methods
+
+Methods to retrieve the feature dataset presence matrix.
+"""
+
 import tiledbsoma as soma
 from scipy import sparse
 
@@ -9,31 +18,31 @@ def get_presence_matrix(
     organism: str,
     measurement_name: str = "RNA",
 ) -> sparse.csr_matrix:
-    """
-    Read the gene presence matrix and return as a SciPy sparse CSR array
-    (``scipy.sparse.csr_array``). The returned sparse matrix is indexed on the
+    """Read the feature dataset presence matrix and return as a SciPy sparse CSR array.
+    The returned sparse matrix is indexed on the
     first dimension by the dataset ``soma_joinid`` values, and on the
-    second dimension by the ``var`` DataFrame ``soma_joinid`` values
-    [lifecycle: experimental].
+    second dimension by the ``var`` DataFrame ``soma_joinid`` values.
 
-    Parameters
-    ----------
-    census : ``soma.Collection``
-        The census from which to read the presence matrix.
-    organism : ``str``
-        The organism to query, usually one of "Homo sapiens" or "Mus musculus"
-    measurement_name : ``str``, default ``"RNA"``
-        The measurement object to query
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``scipy.sparse.csr_array`` - containing the presence matrix.
+    Args:
+        census:
+            The census from which to read the presence matrix.
+        organism:
+            The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+        measurement_name:
+            The measurement object to query. Deafults to `RNA`.
 
-    Examples
-    --------
-    >>> get_presence_matrix(census, "Homo sapiens", "RNA")
-    <321x60554 sparse array of type '<class 'numpy.uint8'>'
-            with 6441269 stored elements in Compressed Sparse Row format>
+    Returns:
+        A :class:`scipy.sparse.csr_array` object containing the presence matrix.
+
+    Raises:
+        ValueError: if the organism cannot be found.
+
+    Examples:
+        >>> get_presence_matrix(census, "Homo sapiens", "RNA")
+        <321x60554 sparse array of type '<class 'numpy.uint8'>'
+        with 6441269 stored elements in Compressed Sparse Row format>
     """
 
     exp = _get_experiment(census, organism)
