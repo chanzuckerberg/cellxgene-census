@@ -4,7 +4,7 @@
 
 """Versioning of Cell Census builds
 
-Methods to retrieve information about the available Cell Census versions.
+Methods to retrieve information about versions of the publicly hosted Cell Census object.
 """
 
 from typing import Dict, Optional, Union, cast
