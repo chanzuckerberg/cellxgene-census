@@ -60,11 +60,11 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
     Validate all objects present and contain expected metadata.
 
     soma_path
-        +-- census_info
+        +-- census_info: soma.Collection
         |   +-- summary: soma.DataFrame
         |   +-- datasets: soma.DataFrame
         |   +-- summary_cell_counts: soma.DataFrame
-        +-- census_data
+        +-- census_data: soma.Collection
         |   +-- homo_sapiens: soma.Experiment
         |   +-- mus_musculus: soma.Experiment
     """
@@ -497,7 +497,6 @@ def validate(
         if not eb.build_completed:
             eb.experiment_uri = f"{soma_path}/{CENSUS_DATA_NAME}/{eb.name}"
 
-    assert soma_path.endswith("soma") and assets_path.endswith("h5ads")
     assert validate_all_soma_objects_exist(soma_path, experiment_builders)
     assert validate_relative_path(soma_path)
     datasets = load_datasets_from_census(assets_path, soma_path)
