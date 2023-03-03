@@ -10,6 +10,8 @@ The `CellCensus` package provides an API to facilitate use of the CZI Science Ce
 
 For more information, see the [cell_census repo](https://github.com/chanzuckerberg/cell-census/).
 
+Also see the [Python API](https://chanzuckerberg.github.io/cell-census/).
+
 ## Installation
 
 You can install the development version of CellCensus from [GitHub](https://github.com/) with:
