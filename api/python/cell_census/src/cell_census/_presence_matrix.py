@@ -4,7 +4,7 @@
 
 """Presence matrix methods
 
-Methods to retrieve the feature presence matrix.
+Methods to retrieve the feature dataset presence matrix.
 """
 
 import tiledbsoma as soma
