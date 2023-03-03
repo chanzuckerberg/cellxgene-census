@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Querying and fetching data from the Cell Census &mdash; cell-census 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Normalizing full-length gene sequencing data from the Cell Census" href="comp_bio_normalizing_full_gene_sequencing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            cell-census
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../soma.html">What is SOMA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">cell-census Python API Reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cell-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../schema.html">Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#api">API</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#analysis">Analysis</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_census_info.html">Learning about the CELLxGENE Cell Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_data_integration_scvi.html">Integration of data from the Cell Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue in the Cell Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data from the Cell Census</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Querying and fetching data from the Cell Census</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Contents">Contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Opening-the-census">Opening the census</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Querying-cell-metadata-(obs)">Querying cell metadata (obs)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Querying-gene-metadata-(var)">Querying gene metadata (var)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Querying-expression-data">Querying expression data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cell-census</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Querying and fetching data from the Cell Census</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/analysis_demo/comp_bio_query_data_and_metadata.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Querying-and-fetching-data-from-the-Cell-Census">
+<h1>Querying and fetching data from the Cell Census<a class="headerlink" href="#Querying-and-fetching-data-from-the-Cell-Census" title="Permalink to this heading">¶</a></h1>
+<p>The Cell Census is a versioned container for the single-cell data hosted at <a class="reference external" href="https://cellxgene.cziscience.com/">CELLxGENE Discover</a>. The Cell Census utilizes <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md">SOMA</a> powered by <a class="reference external" href="https://tiledb.com/products/tiledb-embedded">TileDB</a> for storing, accessing, and efficiently filtering data.</p>
+<p>This notebook showcases the easiest ways to query the expression data and cell/gene metadata from the Cell Census.</p>
+<section id="Contents">
+<h2>Contents<a class="headerlink" href="#Contents" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Opening the census</p></li>
+<li><p>Querying cell metadata (obs)</p></li>
+<li><p>Querying gene metadata (var)</p></li>
+<li><p>Querying expression data</p></li>
+</ul>
+</section>
+<section id="Opening-the-census">
+<h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">cell_census</span></code> python package contains a convenient API to open the latest version of the Cell Census.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cell_census</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cell_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cell_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cell_census.open_soma)</span></code>.</p>
+</section>
+<section id="Querying-cell-metadata-(obs)">
+<h2>Querying cell metadata (obs)<a class="headerlink" href="#Querying-cell-metadata-(obs)" title="Permalink to this heading">¶</a></h2>
+<p>The human gene metadata of the Cell Census, for RNA assays, is located at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].obs</span></code>. This is a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> and as such it can be materialized as a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> via the methods <code class="docutils literal notranslate"><span class="pre">read().concat().to_pandas()</span></code>.</p>
+<p>The mouse cell metadata is at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;mus_musculus&quot;].obs</span></code>.</p>
+<p>For slicing the cell metadata there are two relevant arguments that can be passed through <code class="docutils literal notranslate"><span class="pre">read()</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">column_names</span></code> — list of strings indicating what metadata columns to fetch.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value_filter</span></code> — python expression with selection conditions to fetch rows, it is similar to <code class="docutils literal notranslate"><span class="pre">`pandas.DataFrame.query()</span></code> &lt;<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html">https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html</a>&gt;`__, for full details see <code class="docutils literal notranslate"><span class="pre">`tiledb.QueryCondition</span></code> &lt;<a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition</a>&gt;`__ shortly:</p>
+<ul>
+<li><p>Expressions are one or more comparisons</p></li>
+<li><p>Comparisons are one of column op value or column op column</p></li>
+<li><p>Expressions can combine comparisons using and, or, &amp; or |</p></li>
+<li><p>op is one of &lt; | &gt; | &lt;= | &gt;= | == | != or in</p></li>
+</ul>
+</li>
+</ul>
+<p>To learn what metadata columns are available for fetching and filtering we can directly look at the keys of the cell metadata.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="n">keys</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;soma_joinid&#39;,
+ &#39;dataset_id&#39;,
+ &#39;assay&#39;,
+ &#39;assay_ontology_term_id&#39;,
+ &#39;cell_type&#39;,
+ &#39;cell_type_ontology_term_id&#39;,
+ &#39;development_stage&#39;,
+ &#39;development_stage_ontology_term_id&#39;,
+ &#39;disease&#39;,
+ &#39;disease_ontology_term_id&#39;,
+ &#39;donor_id&#39;,
+ &#39;is_primary_data&#39;,
+ &#39;self_reported_ethnicity&#39;,
+ &#39;self_reported_ethnicity_ontology_term_id&#39;,
+ &#39;sex&#39;,
+ &#39;sex_ontology_term_id&#39;,
+ &#39;suspension_type&#39;,
+ &#39;tissue&#39;,
+ &#39;tissue_ontology_term_id&#39;,
+ &#39;tissue_general&#39;,
+ &#39;tissue_general_ontology_term_id&#39;]
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> is a special <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> column that is used for join operations. The definition for all other columns can be found at the <a class="reference external" href="https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md#cell-metadata--census_objcensus_dataorganismobs--somadataframe">Cell Census schema</a>.</p>
+<p>All of these can be used to fetch specific columns or specific rows matching a condition. For the latter we need to know the values we are looking for <em>a priori</em>.</p>
+<p>For example let’s see what are the possible values available for <code class="docutils literal notranslate"><span class="pre">sex</span></code>. To this we can load all cell metadata but fetching only for the column <code class="docutils literal notranslate"><span class="pre">sex</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sex_cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="n">sex_cell_metadata</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sex</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>male</td>
+    </tr>
+    <tr>
+      <th>24982</th>
+      <td>female</td>
+    </tr>
+    <tr>
+      <th>3833318</th>
+      <td>unknown</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>As you can see there are only three different values for <code class="docutils literal notranslate"><span class="pre">sex</span></code>, that is <code class="docutils literal notranslate"><span class="pre">&quot;male&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;female&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;unknown&quot;</span></code>.</p>
+<p>With this information we can fetch all cell metatadata for a specific <code class="docutils literal notranslate"><span class="pre">sex</span></code> value, for example <code class="docutils literal notranslate"><span class="pre">&quot;unknown&quot;</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_all_unknown_sex</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;sex == &#39;unknown&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">cell_metadata_all_unknown_sex</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>dataset_id</th>
+      <th>assay</th>
+      <th>assay_ontology_term_id</th>
+      <th>cell_type</th>
+      <th>cell_type_ontology_term_id</th>
+      <th>development_stage</th>
+      <th>development_stage_ontology_term_id</th>
+      <th>disease</th>
+      <th>disease_ontology_term_id</th>
+      <th>...</th>
+      <th>is_primary_data</th>
+      <th>self_reported_ethnicity</th>
+      <th>self_reported_ethnicity_ontology_term_id</th>
+      <th>sex</th>
+      <th>sex_ontology_term_id</th>
+      <th>suspension_type</th>
+      <th>tissue</th>
+      <th>tissue_ontology_term_id</th>
+      <th>tissue_general</th>
+      <th>tissue_general_ontology_term_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>3833318</td>
+      <td>f72958f5-7f42-4ebb-98da-445b0c6de516</td>
+      <td>10x 5' v1</td>
+      <td>EFO:0011025</td>
+      <td>endothelial cell</td>
+      <td>CL:0000115</td>
+      <td>40-year-old human stage</td>
+      <td>HsapDv:0000134</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>False</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>3833319</td>
+      <td>f72958f5-7f42-4ebb-98da-445b0c6de516</td>
+      <td>10x 5' v1</td>
+      <td>EFO:0011025</td>
+      <td>non-classical monocyte</td>
+      <td>CL:0000875</td>
+      <td>40-year-old human stage</td>
+      <td>HsapDv:0000134</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>False</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3833320</td>
+      <td>f72958f5-7f42-4ebb-98da-445b0c6de516</td>
+      <td>10x 5' v1</td>
+      <td>EFO:0011025</td>
+      <td>macrophage</td>
+      <td>CL:0000235</td>
+      <td>40-year-old human stage</td>
+      <td>HsapDv:0000134</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>False</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3833321</td>
+      <td>f72958f5-7f42-4ebb-98da-445b0c6de516</td>
+      <td>10x 5' v1</td>
+      <td>EFO:0011025</td>
+      <td>mammary alveolar cell</td>
+      <td>CL:0002325</td>
+      <td>40-year-old human stage</td>
+      <td>HsapDv:0000134</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>False</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3833322</td>
+      <td>f72958f5-7f42-4ebb-98da-445b0c6de516</td>
+      <td>10x 5' v1</td>
+      <td>EFO:0011025</td>
+      <td>non-classical monocyte</td>
+      <td>CL:0000875</td>
+      <td>40-year-old human stage</td>
+      <td>HsapDv:0000134</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>False</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2126422</th>
+      <td>42665669</td>
+      <td>b46237d1-19c6-4af2-9335-9854634bad16</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>mesodermal cell</td>
+      <td>CL:0000222</td>
+      <td>Carnegie stage 23</td>
+      <td>HsapDv:0000030</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+    </tr>
+    <tr>
+      <th>2126423</th>
+      <td>42665670</td>
+      <td>b46237d1-19c6-4af2-9335-9854634bad16</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>colon epithelial cell</td>
+      <td>CL:0011108</td>
+      <td>Carnegie stage 23</td>
+      <td>HsapDv:0000030</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+    </tr>
+    <tr>
+      <th>2126424</th>
+      <td>42665671</td>
+      <td>b46237d1-19c6-4af2-9335-9854634bad16</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>enteroendocrine cell</td>
+      <td>CL:0000164</td>
+      <td>Carnegie stage 23</td>
+      <td>HsapDv:0000030</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+    </tr>
+    <tr>
+      <th>2126425</th>
+      <td>42665672</td>
+      <td>b46237d1-19c6-4af2-9335-9854634bad16</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>colon epithelial cell</td>
+      <td>CL:0011108</td>
+      <td>Carnegie stage 23</td>
+      <td>HsapDv:0000030</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+    </tr>
+    <tr>
+      <th>2126426</th>
+      <td>42665673</td>
+      <td>b46237d1-19c6-4af2-9335-9854634bad16</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>enteric smooth muscle cell</td>
+      <td>CL:0002504</td>
+      <td>Carnegie stage 23</td>
+      <td>HsapDv:0000030</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+      <td>colon</td>
+      <td>UBERON:0001155</td>
+    </tr>
+  </tbody>
+</table>
+<p>2126427 rows × 21 columns</p>
+</div></div>
+</div>
+<p>You can use both <code class="docutils literal notranslate"><span class="pre">column_names</span></code> and <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> to perform specific queries. For example let’s fetch the <code class="docutils literal notranslate"><span class="pre">disease</span></code> columns for the <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cell&quot;</span></code> in the <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_b_cell</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39;&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disease&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">cell_metadata_b_cell</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+disease                                cell_type  tissue_general
+lung adenocarcinoma                    B cell     lung              50228
+non-small cell lung carcinoma          B cell     lung              17484
+normal                                 B cell     lung              15697
+squamous cell lung carcinoma           B cell     lung              11584
+chronic obstructive pulmonary disease  B cell     lung               7147
+interstitial lung disease 2            B cell     lung               5141
+interstitial lung disease              B cell     lung               1655
+pulmonary emphysema                    B cell     lung               1512
+COVID-19                               B cell     lung                704
+small cell lung carcinoma              B cell     lung                583
+non-specific interstitial pneumonia    B cell     lung                284
+hypersensitivity pneumonitis           B cell     lung                 13
+sarcoidosis                            B cell     lung                  6
+dtype: int64
+</pre></div></div>
+</div>
+</section>
+<section id="Querying-gene-metadata-(var)">
+<h2>Querying gene metadata (var)<a class="headerlink" href="#Querying-gene-metadata-(var)" title="Permalink to this heading">¶</a></h2>
+<p>The human gene metadata of the Cell Census is located at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var</span></code>. Similarly to the cell metadata, it is a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> and thus we can also use its method <code class="docutils literal notranslate"><span class="pre">read()</span></code>.</p>
+<p>The mouse gene metadata is at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;mus_musculus&quot;].ms[&quot;RNA&quot;].var</span></code>.</p>
+<p>Let’s take a look at the metadata available for column selection and row filtering.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="n">keys</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;]
+</pre></div></div>
+</div>
+<p>With the exception of <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> these columns are defined in the <a class="reference external" href="https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema_0.1.0.md">Cell Census schema</a>. Similarly to the cell metadata, we can use the same operations to learn and fetch gene metadata.</p>
+<p>For example, to get the <code class="docutils literal notranslate"><span class="pre">feature_name</span></code> and <code class="docutils literal notranslate"><span class="pre">feature_length</span></code> of the genes <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000161798&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000188229&quot;</span></code> we can do the following.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_metadata</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_length&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">gene_metadata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>feature_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>TUBB4B</td>
+      <td>2037</td>
+      <td>ENSG00000188229</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AQP5</td>
+      <td>1884</td>
+      <td>ENSG00000161798</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Querying-expression-data">
+<h2>Querying expression data<a class="headerlink" href="#Querying-expression-data" title="Permalink to this heading">¶</a></h2>
+<p>A convenient way to query and fetch expression data is to use the <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code> method of the <code class="docutils literal notranslate"><span class="pre">cell_census</span></code> API. This is a powerful method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
+<p>The method will return an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">column_names</span></code> — a dictionary with two keys <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code> whose values are lists of strings indicating the columns to select for cell and gene metadata respectively.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> — python expression with selection conditions to fetch <strong>cells</strong> meeting a criteria. For full details see <code class="docutils literal notranslate"><span class="pre">`tiledb.QueryCondition</span></code> &lt;<a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition</a>&gt;`__.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_value_filter</span></code> — python expression with selection conditions to fetch <strong>genes</strong> meeting a criteria. Details as above. For full details see <code class="docutils literal notranslate"><span class="pre">`tiledb.QueryCondition</span></code> &lt;<a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition</a>&gt;`__.</p></li>
+</ul>
+<p>For example if we want to fetch the expression data for:</p>
+<ul class="simple">
+<li><p>Genes <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000161798&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000188229&quot;</span></code>.</p></li>
+<li><p>All <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cells&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">&quot;COVID-19&quot;</span></code>.</p></li>
+<li><p>With all gene metadata and adding <code class="docutils literal notranslate"><span class="pre">sex</span></code> cell metadata.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">cell_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="o">=</span><span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+    <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and disease == &#39;COVID-19&#39;&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">]},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>And now we can take a look at the results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 704 × 2
+    obs: &#39;sex&#39;, &#39;cell_type&#39;, &#39;tissue_general&#39;, &#39;disease&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sex</th>
+      <th>cell_type</th>
+      <th>tissue_general</th>
+      <th>disease</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>female</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>female</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>female</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>female</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>female</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>699</th>
+      <td>male</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>700</th>
+      <td>male</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>701</th>
+      <td>male</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>702</th>
+      <td>male</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+    <tr>
+      <th>703</th>
+      <td>male</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+    </tr>
+  </tbody>
+</table>
+<p>704 rows × 4 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">var</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>9938</td>
+      <td>ENSG00000188229</td>
+      <td>TUBB4B</td>
+      <td>2037</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>12150</td>
+      <td>ENSG00000161798</td>
+      <td>AQP5</td>
+      <td>1884</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>For a full description of <code class="docutils literal notranslate"><span class="pre">get_anndata()</span></code> refer to <code class="docutils literal notranslate"><span class="pre">help(cell_census.get_anndata)</span></code></p>
+<p>Don’t forget to close the census!</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="comp_bio_normalizing_full_gene_sequencing.html" class="btn btn-neutral float-left" title="Normalizing full-length gene sequencing data from the Cell Census" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

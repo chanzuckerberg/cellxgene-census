@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Census datasets presence &mdash; cell-census 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Census Datasets example" href="census_datasets.html" />
+    <link rel="prev" title="Computing on X: using online algorithms" href="census_compute_over_X.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            cell-census
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../soma.html">What is SOMA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">cell-census Python API Reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cell-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../schema.html">Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="census_axis_query.html">Axis Query Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X: using online algorithms</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Census datasets presence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Is-a-feature-present-in-a-dataset?">Is a feature present in a dataset?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#What-datasets-contain-a-feature?">What datasets contain a feature?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#What-features-are-in-a-dataset?">What features are in a dataset?</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Census Datasets example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Cell Census query &amp; extract subsets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_rank_gene_groups.html">Cell Census - demo ScanPy rank_gene_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Census summary cell counts example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cell-census</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Census datasets presence</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_dataset_presence.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Census-datasets-presence">
+<h1>Census datasets presence<a class="headerlink" href="#Census-datasets-presence" title="Permalink to this heading">¶</a></h1>
+<p><em>Goal:</em> demonstrate basic use of the <code class="docutils literal notranslate"><span class="pre">datasets_presence_matrix</span></code> array.</p>
+<p>The presence matrix is a sparse array, indicating which features (var) were present in each dataset. The array has dimensions [n_datasets, n_var], and is stored in the SOMA Measurement <code class="docutils literal notranslate"><span class="pre">varp</span></code> collection. The first dimension is indexed by the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe. The second is indexed by the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe of the measurement.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+<span class="kn">import</span> <span class="nn">cell_census</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cell_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="c1"># Grab the experiment containing human data, and the measurement therein with RNA</span>
+<span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">human_rna</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span>
+
+<span class="c1"># The cell census-wide datasets</span>
+<span class="n">datasets_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="n">datasets_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>collection_id</th>
+      <th>collection_name</th>
+      <th>collection_doi</th>
+      <th>dataset_id</th>
+      <th>dataset_title</th>
+      <th>dataset_h5ad_path</th>
+      <th>dataset_total_cell_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>43d4bb39-21af-4d05-b973-4c1fed7b916c</td>
+      <td>Transcriptional Programming of Normal and Infl...</td>
+      <td>10.1016/j.celrep.2018.09.006</td>
+      <td>f512b8b6-369d-4a85-a695-116e0806857f</td>
+      <td>Skin</td>
+      <td>f512b8b6-369d-4a85-a695-116e0806857f.h5ad</td>
+      <td>68036</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>d36ca85c-3e8b-444c-ba3e-a645040c6185</td>
+      <td>A molecular atlas of the human postmenopausal ...</td>
+      <td>10.1101/2022.08.04.502826</td>
+      <td>90d4a63b-5c02-43eb-acde-c49345681601</td>
+      <td>Fallopian tube RNA</td>
+      <td>90d4a63b-5c02-43eb-acde-c49345681601.h5ad</td>
+      <td>60574</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>d36ca85c-3e8b-444c-ba3e-a645040c6185</td>
+      <td>A molecular atlas of the human postmenopausal ...</td>
+      <td>10.1101/2022.08.04.502826</td>
+      <td>d1207c81-7309-43a7-a5a0-f4283670b62b</td>
+      <td>Ovary RNA</td>
+      <td>d1207c81-7309-43a7-a5a0-f4283670b62b.h5ad</td>
+      <td>26134</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>64b24fda-6591-4ce1-89e7-33eb6c43ad7b</td>
+      <td>A proximal-to-distal survey of healthy adult h...</td>
+      <td>10.1016/j.jcmgh.2022.02.007</td>
+      <td>019c7af2-c827-4454-9970-44d5e39ce068</td>
+      <td>A proximal-to-distal survey of healthy adult h...</td>
+      <td>019c7af2-c827-4454-9970-44d5e39ce068.h5ad</td>
+      <td>12590</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>e9eec7f5-8519-42f6-99b4-6dbd9cc5ef03</td>
+      <td>Humoral immunity at the brain borders in homeo...</td>
+      <td>10.1016/j.coi.2022.102188</td>
+      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</td>
+      <td>A scRNA-seq atlas of immune cells at the CNS b...</td>
+      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff.h5ad</td>
+      <td>130908</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>490</th>
+      <td>490</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2</td>
+      <td>Tabula Sapiens - Stromal</td>
+      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2.h5ad</td>
+      <td>82478</td>
+    </tr>
+    <tr>
+      <th>491</th>
+      <td>491</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>97a17473-e2b1-4f31-a544-44a60773e2dd</td>
+      <td>Tabula Sapiens - Epithelial</td>
+      <td>97a17473-e2b1-4f31-a544-44a60773e2dd.h5ad</td>
+      <td>104148</td>
+    </tr>
+    <tr>
+      <th>492</th>
+      <td>492</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>c5d88abe-f23a-45fa-a534-788985e93dad</td>
+      <td>Tabula Sapiens - Immune</td>
+      <td>c5d88abe-f23a-45fa-a534-788985e93dad.h5ad</td>
+      <td>264824</td>
+    </tr>
+    <tr>
+      <th>493</th>
+      <td>493</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf</td>
+      <td>Tabula Sapiens - Endothelial</td>
+      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf.h5ad</td>
+      <td>31691</td>
+    </tr>
+    <tr>
+      <th>494</th>
+      <td>494</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>53d208b0-2cfd-4366-9866-c3c6114081bc</td>
+      <td>Tabula Sapiens - All Cells</td>
+      <td>53d208b0-2cfd-4366-9866-c3c6114081bc.h5ad</td>
+      <td>483152</td>
+    </tr>
+  </tbody>
+</table>
+<p>495 rows × 8 columns</p>
+</div></div>
+</div>
+<p>For convenience, read the entire presence matrix (for Homo sapiens) into a SciPy array. There is a convience API providing this capability, returning the matrix in a scipy.sparse.array:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">cell_census</span><span class="o">.</span><span class="n">get_presence_matrix</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span> <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
+
+<span class="n">presence_matrix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;495x60664 sparse matrix of type &#39;&lt;class &#39;numpy.uint8&#39;&gt;&#39;
+        with 13015172 stored elements in Compressed Sparse Row format&gt;
+</pre></div></div>
+</div>
+<p>We also need the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe, which is read into a Pandas DataFrame for convenient manipulation:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_df</span> <span class="o">=</span> <span class="n">human_rna</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="n">var_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>ENSG00000238009</td>
+      <td>RP11-34P13.7</td>
+      <td>3726</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>ENSG00000279457</td>
+      <td>WASH9P</td>
+      <td>1397</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>ENSG00000228463</td>
+      <td>AP006222.1</td>
+      <td>8224</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>ENSG00000237094</td>
+      <td>RP4-669L17.4</td>
+      <td>6204</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>ENSG00000230021</td>
+      <td>RP11-206L10.17</td>
+      <td>5495</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>60659</th>
+      <td>60659</td>
+      <td>ENSG00000288699</td>
+      <td>RP11-182N22.10</td>
+      <td>654</td>
+    </tr>
+    <tr>
+      <th>60660</th>
+      <td>60660</td>
+      <td>ENSG00000288700</td>
+      <td>RP11-22E12.2</td>
+      <td>6888</td>
+    </tr>
+    <tr>
+      <th>60661</th>
+      <td>60661</td>
+      <td>ENSG00000288710</td>
+      <td>RP11-386G11.12</td>
+      <td>2968</td>
+    </tr>
+    <tr>
+      <th>60662</th>
+      <td>60662</td>
+      <td>ENSG00000288711</td>
+      <td>AP000326.5</td>
+      <td>1307</td>
+    </tr>
+    <tr>
+      <th>60663</th>
+      <td>60663</td>
+      <td>ENSG00000288721</td>
+      <td>RP5-973N23.5</td>
+      <td>7765</td>
+    </tr>
+  </tbody>
+</table>
+<p>60664 rows × 4 columns</p>
+</div></div>
+</div>
+<section id="Is-a-feature-present-in-a-dataset?">
+<h2>Is a feature present in a dataset?<a class="headerlink" href="#Is-a-feature-present-in-a-dataset?" title="Permalink to this heading">¶</a></h2>
+<p><em>Goal:</em> test if a given feature is present in a given dataset.</p>
+<p><strong>Important:</strong> the presence matrix is indexed by soma_joinid, and is <em>NOT</em> positionally indexed. In other words: * the first dimension of the presence matrix is the dataset’s <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>, as stored in the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe. * the second dimension of the presence matrix is the feature’s <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>, as stored in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_joinid</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">var_df</span><span class="o">.</span><span class="n">feature_id</span> <span class="o">==</span> <span class="s2">&quot;ENSG00000286096&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
+<span class="n">dataset_joinid</span> <span class="o">=</span> <span class="n">datasets_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">datasets_df</span><span class="o">.</span><span class="n">dataset_id</span> <span class="o">==</span> <span class="s2">&quot;97a17473-e2b1-4f31-a544-44a60773e2dd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
+<span class="n">is_present</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">dataset_joinid</span><span class="p">,</span> <span class="n">var_joinid</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Feature is </span><span class="si">{</span><span class="s2">&quot;present&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">is_present</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;not present&quot;</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Feature is present.
+</pre></div></div>
+</div>
+</section>
+<section id="What-datasets-contain-a-feature?">
+<h2>What datasets contain a feature?<a class="headerlink" href="#What-datasets-contain-a-feature?" title="Permalink to this heading">¶</a></h2>
+<p><em>Goal:</em> look up all datasets that have a feature_id present.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Grab the feature&#39;s soma_joinid from the var dataframe</span>
+<span class="n">var_joinid</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">var_df</span><span class="o">.</span><span class="n">feature_id</span> <span class="o">==</span> <span class="s2">&quot;ENSG00000286096&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
+
+<span class="c1"># The presence matrix is indexed by the joinids of the dataset and var dataframes,</span>
+<span class="c1"># so slice out the feature of interest by its joinid.</span>
+<span class="n">dataset_joinids</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[:,</span> <span class="n">var_joinid</span><span class="p">]</span><span class="o">.</span><span class="n">tocoo</span><span class="p">()</span><span class="o">.</span><span class="n">row</span>
+
+<span class="c1"># From the datasets dataframe, slice out the datasets which have a joinid in the list</span>
+<span class="n">datasets_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">datasets_df</span><span class="o">.</span><span class="n">soma_joinid</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">dataset_joinids</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>collection_id</th>
+      <th>collection_name</th>
+      <th>collection_doi</th>
+      <th>dataset_id</th>
+      <th>dataset_title</th>
+      <th>dataset_h5ad_path</th>
+      <th>dataset_total_cell_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>78</th>
+      <td>78</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>07b1d7c8-5c2e-42f7-9246-26f746cd6013</td>
+      <td>Dissection: Myelencephalon (medulla oblongata)...</td>
+      <td>07b1d7c8-5c2e-42f7-9246-26f746cd6013.h5ad</td>
+      <td>27210</td>
+    </tr>
+    <tr>
+      <th>91</th>
+      <td>91</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>7c1c3d47-3166-43e5-9a95-65ceb2d45f78</td>
+      <td>Dissection: Pons (Pn) - Pontine reticular form...</td>
+      <td>7c1c3d47-3166-43e5-9a95-65ceb2d45f78.h5ad</td>
+      <td>49512</td>
+    </tr>
+    <tr>
+      <th>92</th>
+      <td>92</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>9372df2d-13d6-4fac-980b-919a5b7eb483</td>
+      <td>Dissection: Midbrain (M) - Periaqueductal gray...</td>
+      <td>9372df2d-13d6-4fac-980b-919a5b7eb483.h5ad</td>
+      <td>33794</td>
+    </tr>
+    <tr>
+      <th>120</th>
+      <td>120</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>dd03ce70-3243-4c96-9561-330cc461e4d7</td>
+      <td>Dissection: Cerebral cortex (Cx) - Perirhinal ...</td>
+      <td>dd03ce70-3243-4c96-9561-330cc461e4d7.h5ad</td>
+      <td>23732</td>
+    </tr>
+    <tr>
+      <th>134</th>
+      <td>134</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>7a0a8891-9a22-4549-a55b-c2aca23c3a2a</td>
+      <td>Supercluster: Hippocampal CA1-3</td>
+      <td>7a0a8891-9a22-4549-a55b-c2aca23c3a2a.h5ad</td>
+      <td>74979</td>
+    </tr>
+    <tr>
+      <th>136</th>
+      <td>136</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>d2b5efc1-14c6-4b5f-bd98-40f9084872d7</td>
+      <td>Dissection: Tail of Hippocampus (HiT) - Caudal...</td>
+      <td>d2b5efc1-14c6-4b5f-bd98-40f9084872d7.h5ad</td>
+      <td>36886</td>
+    </tr>
+    <tr>
+      <th>140</th>
+      <td>140</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>f8dda921-5fb4-4c94-a654-c6fc346bfd6d</td>
+      <td>Dissection: Cerebral cortex (Cx) - Occipitotem...</td>
+      <td>f8dda921-5fb4-4c94-a654-c6fc346bfd6d.h5ad</td>
+      <td>31899</td>
+    </tr>
+    <tr>
+      <th>143</th>
+      <td>143</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>3a7f3ab4-a280-4b3b-b2c0-6dd05614a78c</td>
+      <td>Supercluster: Splatter</td>
+      <td>3a7f3ab4-a280-4b3b-b2c0-6dd05614a78c.h5ad</td>
+      <td>291833</td>
+    </tr>
+    <tr>
+      <th>145</th>
+      <td>145</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>bdb26abd-f4ba-4ea3-8862-c2340e7a4f55</td>
+      <td>Supercluster: CGE interneuron</td>
+      <td>bdb26abd-f4ba-4ea3-8862-c2340e7a4f55.h5ad</td>
+      <td>227671</td>
+    </tr>
+    <tr>
+      <th>147</th>
+      <td>147</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>5e5ab909-f73f-4b57-98a0-6d2c5662f6a4</td>
+      <td>Dissection: Midbrain (M) - Inferior colliculus...</td>
+      <td>5e5ab909-f73f-4b57-98a0-6d2c5662f6a4.h5ad</td>
+      <td>32306</td>
+    </tr>
+    <tr>
+      <th>155</th>
+      <td>155</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>35c8a04c-8639-4d15-8228-765d8d93fc96</td>
+      <td>Dissection: Hypothalamus (HTH) - supraoptic re...</td>
+      <td>35c8a04c-8639-4d15-8228-765d8d93fc96.h5ad</td>
+      <td>16753</td>
+    </tr>
+    <tr>
+      <th>157</th>
+      <td>157</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>3f56901c-dd4a-47d6-b60b-7b0c0111cfb2</td>
+      <td>Dissection: Head of hippocampus (HiH) - CA1-3</td>
+      <td>3f56901c-dd4a-47d6-b60b-7b0c0111cfb2.h5ad</td>
+      <td>37911</td>
+    </tr>
+    <tr>
+      <th>173</th>
+      <td>173</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>93131426-0124-4ab4-a013-9dfbcd99d467</td>
+      <td>Dissection: Epithalamus - ETH</td>
+      <td>93131426-0124-4ab4-a013-9dfbcd99d467.h5ad</td>
+      <td>24327</td>
+    </tr>
+    <tr>
+      <th>179</th>
+      <td>179</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>acae7679-d077-461c-b857-ee6ccfeb267f</td>
+      <td>Dissection: Head of hippocampus (HiH) - CA1</td>
+      <td>acae7679-d077-461c-b857-ee6ccfeb267f.h5ad</td>
+      <td>39147</td>
+    </tr>
+    <tr>
+      <th>181</th>
+      <td>181</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>c202b243-1aa1-4b16-bc9a-b36241f3b1e3</td>
+      <td>Supercluster: Amygdala excitatory</td>
+      <td>c202b243-1aa1-4b16-bc9a-b36241f3b1e3.h5ad</td>
+      <td>109452</td>
+    </tr>
+    <tr>
+      <th>183</th>
+      <td>183</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>0325478a-9b52-45b5-b40a-2e2ab0d72eb1</td>
+      <td>Supercluster: Upper-layer intratelencephalic</td>
+      <td>0325478a-9b52-45b5-b40a-2e2ab0d72eb1.h5ad</td>
+      <td>455006</td>
+    </tr>
+    <tr>
+      <th>185</th>
+      <td>185</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>c2aad8fc-b63b-4f9b-9cfd-baf7bc9c1771</td>
+      <td>Dissection: Cerebral cortex (Cx) - Temporal po...</td>
+      <td>c2aad8fc-b63b-4f9b-9cfd-baf7bc9c1771.h5ad</td>
+      <td>37642</td>
+    </tr>
+    <tr>
+      <th>186</th>
+      <td>186</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>c4b03352-af8d-492a-8d6b-40f304e0a122</td>
+      <td>Supercluster: Medium spiny neuron</td>
+      <td>c4b03352-af8d-492a-8d6b-40f304e0a122.h5ad</td>
+      <td>152189</td>
+    </tr>
+    <tr>
+      <th>203</th>
+      <td>203</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>fe1a73ab-a203-45fd-84e9-0f7fd19efcbd</td>
+      <td>Dissection: Amygdaloid complex (AMY) - basolat...</td>
+      <td>fe1a73ab-a203-45fd-84e9-0f7fd19efcbd.h5ad</td>
+      <td>35285</td>
+    </tr>
+    <tr>
+      <th>490</th>
+      <td>490</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2</td>
+      <td>Tabula Sapiens - Stromal</td>
+      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2.h5ad</td>
+      <td>82478</td>
+    </tr>
+    <tr>
+      <th>491</th>
+      <td>491</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>97a17473-e2b1-4f31-a544-44a60773e2dd</td>
+      <td>Tabula Sapiens - Epithelial</td>
+      <td>97a17473-e2b1-4f31-a544-44a60773e2dd.h5ad</td>
+      <td>104148</td>
+    </tr>
+    <tr>
+      <th>492</th>
+      <td>492</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>c5d88abe-f23a-45fa-a534-788985e93dad</td>
+      <td>Tabula Sapiens - Immune</td>
+      <td>c5d88abe-f23a-45fa-a534-788985e93dad.h5ad</td>
+      <td>264824</td>
+    </tr>
+    <tr>
+      <th>493</th>
+      <td>493</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf</td>
+      <td>Tabula Sapiens - Endothelial</td>
+      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf.h5ad</td>
+      <td>31691</td>
+    </tr>
+    <tr>
+      <th>494</th>
+      <td>494</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>53d208b0-2cfd-4366-9866-c3c6114081bc</td>
+      <td>Tabula Sapiens - All Cells</td>
+      <td>53d208b0-2cfd-4366-9866-c3c6114081bc.h5ad</td>
+      <td>483152</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="What-features-are-in-a-dataset?">
+<h2>What features are in a dataset?<a class="headerlink" href="#What-features-are-in-a-dataset?" title="Permalink to this heading">¶</a></h2>
+<p><em>Goal:</em> lookup the features present in a given dataset.</p>
+<p>This example also demonstrates the ability to do the query on multiple datasets.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Slice the dataset(s) of interest, and get the joinid(s)</span>
+<span class="n">dataset_joinids</span> <span class="o">=</span> <span class="n">datasets_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">datasets_df</span><span class="o">.</span><span class="n">collection_id</span> <span class="o">==</span> <span class="s2">&quot;17481d16-ee44-49e5-bcf0-28c0780d8c4a&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
+
+<span class="c1"># Slice the presence matrix by the first dimension, i.e., by dataset</span>
+<span class="n">var_joinids</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">dataset_joinids</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">tocoo</span><span class="p">()</span><span class="o">.</span><span class="n">col</span>
+
+<span class="c1"># From the feature (var) dataframe, slice out features which have a joinid in the list.</span>
+<span class="n">var_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">var_df</span><span class="o">.</span><span class="n">soma_joinid</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">var_joinids</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>ENSG00000238009</td>
+      <td>RP11-34P13.7</td>
+      <td>3726</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>ENSG00000279457</td>
+      <td>WASH9P</td>
+      <td>1397</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>ENSG00000228463</td>
+      <td>AP006222.1</td>
+      <td>8224</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>ENSG00000237094</td>
+      <td>RP4-669L17.4</td>
+      <td>6204</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>ENSG00000230021</td>
+      <td>RP11-206L10.17</td>
+      <td>5495</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>56689</th>
+      <td>56689</td>
+      <td>ENSG00000283063</td>
+      <td>TRBV6-2</td>
+      <td>424</td>
+    </tr>
+    <tr>
+      <th>56698</th>
+      <td>56698</td>
+      <td>ENSG00000283095</td>
+      <td>ABC11-4932300O16.1</td>
+      <td>1535</td>
+    </tr>
+    <tr>
+      <th>56705</th>
+      <td>56705</td>
+      <td>ENSG00000283117</td>
+      <td>MGC4859</td>
+      <td>3118</td>
+    </tr>
+    <tr>
+      <th>56706</th>
+      <td>56706</td>
+      <td>ENSG00000283118</td>
+      <td>RP11-107E5.4</td>
+      <td>644</td>
+    </tr>
+    <tr>
+      <th>56709</th>
+      <td>56709</td>
+      <td>ENSG00000283125</td>
+      <td>RP11-299P2.2</td>
+      <td>547</td>
+    </tr>
+  </tbody>
+</table>
+<p>27211 rows × 4 columns</p>
+</div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_compute_over_X.html" class="btn btn-neutral float-left" title="Computing on X: using online algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_datasets.html" class="btn btn-neutral float-right" title="Census Datasets example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
