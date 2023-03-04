@@ -39,6 +39,8 @@ dependencies= [
     "typing_extensions",
     "s3fs",
     "scikit-misc",
+    # TEMPORARY due to bug #1049 in tilebsoma 1.0.0rc3
+    "attrs>=22.2.0",
 ]
 
 [project.urls]
