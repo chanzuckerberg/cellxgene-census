@@ -35,12 +35,10 @@ dependencies= [
     # of TileDB on-disk storage format. Make sure this doesn't fall behind the builder's tiledbsoma version.
     # NOTE: tiledb is also a requirement of the API, but tiledbsoma also has a tiledb dependency, so just use 
     # the same version here
-    "tiledbsoma==1.0.0rc3",
+    "tiledbsoma==1.0.0rc4",
     "typing_extensions",
     "s3fs",
     "scikit-misc",
-    # TEMPORARY due to bug #1049 in tilebsoma 1.0.0rc3
-    "attrs>=22.2.0",
 ]
 
 [project.urls]
