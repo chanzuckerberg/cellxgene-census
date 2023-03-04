@@ -5,7 +5,7 @@ numpy
 # NOTE: You can also build this dependency from source, per ./notebooks/README.md.
 # NOTE: The builder's version of tiledbsoma MUST be <= the API's tiledbsoma version, to ensure reader compatibility
 # of TileDB on-disk storage format
-tiledbsoma==1.0rc2
+tiledbsoma==1.0rc4
 # NOTE: tiledb is also a requirement of the builder, but builder must not use a tiledb version that is ahead of
 # tiledbsoma's tiledb version (so just use the same version)
 # tiledb
@@ -18,4 +18,4 @@ Cython  # required by owlready2
 wheel  # required by owlready2
 owlready2
 gitpython
-attrs
+attrs>=22.2.0
