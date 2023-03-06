@@ -53,7 +53,7 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     assert all((type(v) == dict for v in directory.values()))
 
     for tag in DIRECTORY_JSON:
-        assert tag[0] == '_' or tag in directory
+        assert tag[0] == "_" or tag in directory
         if isinstance(DIRECTORY_JSON[tag], dict):
             assert directory[tag] == DIRECTORY_JSON[tag]
 
