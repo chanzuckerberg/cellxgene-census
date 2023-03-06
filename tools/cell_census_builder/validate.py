@@ -295,39 +295,39 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
             ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
-        # Extract soma_joinids for cells associated with the dataset in X["raw"].
-        cell_soma_joinids: npt.NDArray[np.int64] = (
-            exp.obs.read(
-                column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
-            )
-            .concat()
-            .to_pandas()
-            .soma_joinid.to_numpy()
-        )
-
-        raw_sum = 0.0
-        raw_nnz = 0
-        fdpm_gene_count = 0
-        if len(cell_soma_joinids) > 0:
-            assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
-            raw_nnz = _count_elements(exp.ms[MEASUREMENT_RNA_NAME].X["raw"], cell_soma_joinids)
-            raw_sum = _sum_elements(exp.ms[MEASUREMENT_RNA_NAME].X["raw"], cell_soma_joinids)
-            fdpm_gene_count = _count_elements(
-                exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
+            # Extract soma_joinids for cells associated with the dataset in X["raw"].
+            cell_soma_joinids: npt.NDArray[np.int64] = (
+                exp.obs.read(
+                    column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
+                )
+                .concat()
+                .to_pandas()
+                .soma_joinid.to_numpy()
             )
 
-        if ad.raw is None:
-            ad_x_data = ad.X.data
-        else:
-            pass
-        h5ad_sum = sum(ad_x_data)  # calculate the actual sum of the X matrix values
-        assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
-        h5ad_nnz = _count_nonzero(ad_x_data)
-        assert raw_nnz == h5ad_nnz, error.format(eb.name, dataset.dataset_id, "nnz", raw_nnz, h5ad_nnz)
-        h5ad_gene_count = np.count_nonzero(ad_x_data.sum(axis=0))
-        assert h5ad_gene_count == fdpm_gene_count, error.format(
-            eb.name, dataset.dataset_id, "gene_count", fdpm_gene_count, h5ad_gene_count
-        )
+            raw_sum = 0.0
+            raw_nnz = 0
+            fdpm_gene_count = 0
+            if len(cell_soma_joinids) > 0:
+                assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
+                raw_nnz = _count_elements(exp.ms[MEASUREMENT_RNA_NAME].X["raw"], cell_soma_joinids)
+                raw_sum = _sum_elements(exp.ms[MEASUREMENT_RNA_NAME].X["raw"], cell_soma_joinids)
+                fdpm_gene_count = _count_elements(
+                    exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
+                )
+
+            if ad.raw is None:
+                ad_x = ad.X
+            else:
+                ad_x = ad.raw.X
+            h5ad_sum = sum(ad_x.data)  # calculate the actual sum of the X matrix values
+            assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
+            h5ad_nnz = _count_nonzero(ad_x.data)
+            assert raw_nnz == h5ad_nnz, error.format(eb.name, dataset.dataset_id, "nnz", raw_nnz, h5ad_nnz)
+            h5ad_gene_count = np.count_nonzero(ad_x.sum(axis=0))
+            assert h5ad_gene_count == fdpm_gene_count, error.format(
+                eb.name, dataset.dataset_id, "gene_count", fdpm_gene_count, h5ad_gene_count
+            )
     return True
 
 
