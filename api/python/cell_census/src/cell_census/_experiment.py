@@ -1,33 +1,44 @@
+# Copyright (c) 2022-2023 Chan Zuckerberg Initiative
+#
+# Licensed under the MIT License.
+
+"""
+Experiments handler.
+
+Contains methods to retrieve SOMA Experiments.
+"""
+
 import re
 
 import tiledbsoma as soma
 
 
 def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
-    """
-    Given a census ``soma.Collection``, return the experiment for the named organism.
+    """Given a census ``soma.Collection``, return the experiment for the named organism.
     Organism matching is somewhat flexible, attempting to map from human-friendly
-    names to the underlying collection element name.  Will raise a ``ValueError`` if
-    unable to find the specified organism [lifecycle: experimental].
+    names to the underlying collection element name.
 
-    Parameters
-    ----------
-    census - ``soma.Collection``
-        The census
-    organism - ``str``
-        The organism name, eg., ``Homo sapiens``
+    [lifecycle: experimental]
 
-    Returns
-    -------
-    ``soma.Experiment`` - the requested experiment.
+    Args:
+        census: soma.Collection
+            The census.
+        organism: str
+            The organism name, eg., ``Homo sapiens``.
 
-    Examples
-    --------
-    >>> human = get_experiment(census, 'homo sapiens')
+    Returns:
+        A soma.Experiment object with the requested experiment.
 
-    >>> human = get_experiment(census, 'Homo sapiens')
+    Raises:
+        ValueError: if unable to find the specified organism.
 
-    >>> human = get_experiment(census, 'homo_sapiens')
+    Examples:
+
+        >>> human = get_experiment(census, 'homo sapiens')
+
+        >>> human = get_experiment(census, 'Homo sapiens')
+
+        >>> human = get_experiment(census, 'homo_sapiens')
     """
     # lower/snake case the organism name to find the experiment name
     exp_name = re.sub(r"[ ]+", "_", organism).lower()

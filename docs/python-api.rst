@@ -1,7 +1,7 @@
 .. meta::
    :name=robots: noindex
 
-cell-census Python API Reference
+Python API
 ==============================
 
 Open/retrieve Cell Census data

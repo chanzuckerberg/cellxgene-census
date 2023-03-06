@@ -69,6 +69,8 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     logging.info("Creating dataset_manifest")
     manifest_df = Dataset.to_dataframe(datasets)
     manifest_df = manifest_df[CENSUS_DATASETS_COLUMNS + ["soma_joinid"]]
+    if len(manifest_df) == 0:
+        return
 
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(

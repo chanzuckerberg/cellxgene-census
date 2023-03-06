@@ -9,8 +9,9 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-from tools.cell_census_builder.__main__ import build, make_experiment_builders
+from tools.cell_census_builder.__main__ import build, make_experiment_specs
 from tools.cell_census_builder.datasets import Dataset
+from tools.cell_census_builder.experiment_builder import ExperimentBuilder
 from tools.cell_census_builder.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
@@ -32,7 +33,9 @@ def test_base_builder_creation(
         "tools.cell_census_builder.validate.validate_consolidation", return_value=True
     ):
         # Patching consolidate_tiledb_object, becuase is uses to much memory to run in github actions.
-        experiment_builders = make_experiment_builders()
+        experiment_specifications = make_experiment_specs()
+        experiment_builders = [ExperimentBuilder(spec) for spec in experiment_specifications]
+
         from types import SimpleNamespace
 
         args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", max_workers=1, verbose=True)
@@ -42,7 +45,7 @@ def test_base_builder_creation(
         assert return_value == 0
 
         # validate the cell_census
-        return_value = validate(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
+        return_value = validate(args, soma_path, assets_path, experiment_specifications)  # type: ignore[arg-type]
         assert return_value is True
 
         # Query the census and do assertions

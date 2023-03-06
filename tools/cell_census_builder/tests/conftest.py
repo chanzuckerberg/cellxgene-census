@@ -30,7 +30,7 @@ GENE_IDS = [["a", "b", "c"], ["a", "b", "d"]]
 def get_h5ad(organism: Organism, gene_ids: list[str]) -> anndata.AnnData:
     cells = 4
     genes = 3
-    X = np.random.randint(5, size=(cells, genes))
+    X = np.random.randint(5, size=(cells, genes)).astype(np.float32)
     # The builder only supports sparse matrices
     X = sparse.csr_matrix(X)
 
@@ -57,7 +57,8 @@ def get_h5ad(organism: Organism, gene_ids: list[str]) -> anndata.AnnData:
             "sex": "test",
             "tissue": "test",
             "organism": "test",
-        }
+        },
+        index=["1", "2", "3", "4"],
     )
     obs = obs_dataframe
 

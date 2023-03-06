@@ -13,7 +13,12 @@ from .anndata import open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
-from .experiment_builder import ExperimentBuilder, populate_X_layers, reopen_experiment_builders
+from .experiment_builder import (
+    ExperimentBuilder,
+    ExperimentSpecification,
+    populate_X_layers,
+    reopen_experiment_builders,
+)
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
@@ -30,7 +35,7 @@ from .util import get_git_commit_sha, is_git_repo_dirty, uricat
 from .validate import validate
 
 
-def make_experiment_builders() -> List[ExperimentBuilder]:
+def make_experiment_specs() -> List[ExperimentSpecification]:
     """
     Define all soma.Experiments to build in the census.
 
@@ -46,20 +51,18 @@ def make_experiment_builders() -> List[ExperimentBuilder]:
         GENE_LENGTH_BASE_URI + "genes_mus_musculus.csv.gz",
         GENE_LENGTH_BASE_URI + "genes_sars_cov_2.csv.gz",
     ]
-    experiment_builders = [  # The soma.Experiments we want to build
-        ExperimentBuilder(
+    return [  # The soma.Experiments we want to build
+        ExperimentSpecification.create(
             name="homo_sapiens",
             anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606", assay_ontology_term_ids=RNA_SEQ),
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
-        ExperimentBuilder(
+        ExperimentSpecification.create(
             name="mus_musculus",
             anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090", assay_ontology_term_ids=RNA_SEQ),
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
     ]
-
-    return experiment_builders
 
 
 def main() -> int:
@@ -73,15 +76,16 @@ def main() -> int:
     soma_path = uricat(args.uri, args.build_tag, "soma")
     assets_path = uricat(args.uri, args.build_tag, "h5ads")
 
-    # create the experiment builders
-    experiment_builders = make_experiment_builders()
+    # create the experiment specifications and builders
+    experiment_specifications = make_experiment_specs()
+    experiment_builders = [ExperimentBuilder(spec) for spec in experiment_specifications]
 
     cc = 0
     if args.subcommand == "build":
         cc = build(args, soma_path, assets_path, experiment_builders)
 
     if cc == 0 and (args.subcommand == "validate" or args.validate):
-        validate(args, soma_path, assets_path, experiment_builders)
+        validate(args, soma_path, assets_path, experiment_specifications)
 
     return cc
 
@@ -144,9 +148,6 @@ def build(
 
     # Step 5- write out dataset manifest and summary information
     build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.build_tag)
-
-    for eb in experiment_builders:
-        eb.build_completed = True
 
     # consolidate TileDB data
     if args.consolidate:

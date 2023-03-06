@@ -15,11 +15,12 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 from scipy import sparse
+from typing_extensions import Self
 
 from .anndata import make_anndata_cell_filter, open_anndata
 from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
-from .experiment_builder import ExperimentBuilder, reopen_experiment_builders
+from .experiment_builder import ExperimentSpecification
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_DATASETS_COLUMNS,
@@ -50,14 +51,23 @@ class EbInfo:
     vars: set[str] = dataclasses.field(default_factory=set)
     dataset_ids: set[str] = dataclasses.field(default_factory=set)
 
-    def update(self: "EbInfo", b: "EbInfo") -> "EbInfo":
+    def update(self: Self, b: Self) -> Self:
         self.n_obs += b.n_obs
         self.vars |= b.vars
         self.dataset_ids |= b.dataset_ids
         return self
 
+    @property
+    def n_vars(self) -> int:
+        return len(self.vars)
 
-def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
+
+def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experiment:
+    """Helper function that knows the Census schema path conventions."""
+    return soma.Experiment.open(uricat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
+
+
+def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: List[ExperimentSpecification]) -> bool:
     """
     Validate all objects present and contain expected metadata.
 
@@ -100,7 +110,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
 
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]
-        for eb in experiment_builders:
+        for eb in experiment_specifications:
             assert soma.Experiment.exists(census_data[eb.name].uri)
 
             e = census_data[eb.name]
@@ -114,28 +124,29 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_builders: List[Ex
             rna = e.ms["RNA"]
             assert soma.DataFrame.exists(rna["var"].uri)
             assert soma.Collection.exists(rna["X"].uri)
-            for lyr in CENSUS_X_LAYERS:
-                # layers only exist if there are cells in the measurement
-                if lyr in rna.X:
+
+            # layers and presence exist only if there are cells in the measurement
+            if e.obs.count > 0:
+                for lyr in CENSUS_X_LAYERS:
+                    assert lyr in rna.X
                     assert soma.SparseNDArray.exists(rna.X[lyr].uri)
 
-            # and a dataset presence matrix
-            # dataset presence only exists if there are cells in the measurement
-            if eb.n_obs > 0:
+                # and a dataset presence matrix
                 assert soma.SparseNDArray.exists(rna[FEATURE_DATASET_PRESENCE_MATRIX_NAME].uri)
                 assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().coos()]) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
+
         return True
 
 
-def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentBuilder]]) -> Dict[str, EbInfo]:
-    assets_path, soma_path, dataset, experiment_builders = args
+def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> Dict[str, EbInfo]:
+    assets_path, soma_path, dataset, experiment_specifications = args
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
         dataset_id = dataset.dataset_id
         _, unfiltered_ad = next(open_anndata(assets_path, [dataset], backed="r"))
         eb_info: Dict[str, EbInfo] = {}
-        for eb in experiment_builders:
+        for eb in experiment_specifications:
             eb_info[eb.name] = EbInfo()
             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
             se = census_data[eb.name]
@@ -168,9 +179,9 @@ def validate_axis_dataframes(
     assets_path: str,
     soma_path: str,
     datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
+    experiment_specifications: List[ExperimentSpecification],
     args: argparse.Namespace,
-) -> bool:
+) -> Dict[str, EbInfo]:
     """ "
     Validate axis dataframes: schema, shape, contents
 
@@ -183,7 +194,7 @@ def validate_axis_dataframes(
         # check schema
         expected_obs_columns = CENSUS_OBS_TERM_COLUMNS
         expected_var_columns = CENSUS_VAR_TERM_COLUMNS
-        for eb in experiment_builders:
+        for eb in experiment_specifications:
             obs = census_data[eb.name].obs
             var = census_data[eb.name].ms["RNA"].var
             assert sorted(obs.keys()) == sorted(expected_obs_columns.keys())
@@ -194,17 +205,11 @@ def validate_axis_dataframes(
                 assert field.type == expected_var_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
 
     # check shapes & perform weak test of contents
-
-    # clear the TileDBObject instance variables to avoid pickling error
-    for eb in experiment_builders:
-        eb.experiment = None
-        eb.presence = {}
-
-    eb_info = {eb.name: EbInfo() for eb in experiment_builders}
+    eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
             futures = [
-                ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_builders))
+                ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
                 for dataset in datasets
             ]
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
@@ -215,41 +220,40 @@ def validate_axis_dataframes(
     else:
         for n, dataset in enumerate(datasets, start=1):
             for eb_name, ebi in _validate_axis_dataframes(
-                (assets_path, soma_path, dataset, experiment_builders)
+                (assets_path, soma_path, dataset, experiment_specifications)
             ).items():
                 eb_info[eb_name].update(ebi)
             logging.info(f"validate_axis {n} of {len(datasets)} complete.")
 
-    for eb in reopen_experiment_builders(experiment_builders, "r"):
-        assert eb.experiment is not None
-        exp: soma.Experiment = eb.experiment
-        n_vars = len(eb_info[eb.name].vars)
+    for eb in experiment_specifications:
+        with open_experiment(soma_path, eb) as exp:
+            n_vars = len(eb_info[eb.name].vars)
 
-        census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
-        assert eb_info[eb.name].n_obs == len(census_obs_df)
-        assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
-        assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
+            assert eb_info[eb.name].n_obs == len(census_obs_df)
+            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
+            assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
 
-        census_var_df = exp.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
-        assert n_vars == len(census_var_df)
-        assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
-        assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
+            census_var_df = exp.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
+            assert n_vars == len(census_var_df)
+            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
+            assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
-        # Validate that all obs soma_joinids are unique and in the range [0, n).
-        obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
-        assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
-        assert (len(obs_unique_joinids) == 0) or (
-            (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
-        )
+            # Validate that all obs soma_joinids are unique and in the range [0, n).
+            obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
+            assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
+            assert (len(obs_unique_joinids) == 0) or (
+                (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
+            )
 
-        # Validate that all var soma_joinids are unique and in the range [0, n).
-        var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
-        assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
-        assert (len(var_unique_joinids) == 0) or (
-            (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
-        )
+            # Validate that all var soma_joinids are unique and in the range [0, n).
+            var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
+            assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
+            assert (len(var_unique_joinids) == 0) or (
+                (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
+            )
 
-    return True
+    return eb_info
 
 
 def _count_elements(arr: soma.SparseNDArray, join_ids: Union[npt.NDArray[np.int64], list[int]]) -> int:
@@ -269,7 +273,7 @@ def _sum_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> f
     return result
 
 
-def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[ExperimentBuilder]]) -> bool:
+def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
@@ -283,15 +287,13 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
     """
     error = "{}:{} 'raw' {} mismatch {} vs {}"
 
-    assets_path, dataset, experiment_builders = args
+    assets_path, soma_path, dataset, experiment_specifications = args
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
 
-    for eb in reopen_experiment_builders(experiment_builders, "r"):
-        assert eb.experiment is not None
-        exp: soma.Experiment = eb.experiment
-
-        anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
-        ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
+    for eb in experiment_specifications:
+        with open_experiment(soma_path, eb) as exp:
+            anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
+            ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
         # Extract soma_joinids for cells associated with the dataset in X["raw"].
         cell_soma_joinids: npt.NDArray[np.int64] = (
@@ -329,12 +331,12 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
     return True
 
 
-def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentBuilder, str, int, int]) -> bool:
+def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str, str, int, int]) -> bool:
     """Validate that all X layers have no duplicate coordinates"""
-    experiment_builder, layer_name, row_range_start, row_range_stop = args
-    with soma.Experiment.open(experiment_builder.experiment_uri, context=SOMA_TileDB_Context()) as exp:
+    experiment_specification, soma_path, layer_name, row_range_start, row_range_stop = args
+    with open_experiment(soma_path, experiment_specification) as exp:
         logging.info(
-            f"validate_no_dups_X start, {experiment_builder.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+            f"validate_no_dups_X start, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
         )
         if layer_name not in exp.ms["RNA"].X:
             return True
@@ -360,8 +362,10 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentBuilder, str, int,
 
 def validate_X_layers(
     assets_path: str,
+    soma_path: str,
     datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
+    experiment_specifications: List[ExperimentSpecification],
+    eb_info: Dict[str, EbInfo],
     args: argparse.Namespace,
 ) -> bool:
     """ "
@@ -370,39 +374,27 @@ def validate_X_layers(
     Raises on error.  Returns True on success.
     """
     logging.debug("validate_X_layers")
-    for eb in reopen_experiment_builders(experiment_builders, "r"):
-        assert eb.experiment is not None
-        exp = eb.experiment
+    for eb in experiment_specifications:
+        with open_experiment(soma_path, eb) as exp:
+            assert soma.Collection.exists(exp.ms["RNA"].X.uri)
 
-        assert soma.Collection.exists(exp.ms["RNA"].X.uri)
+            census_obs_df = exp.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
+            n_obs = len(census_obs_df)
+            logging.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb_info[eb.name].n_obs}; n_obs = {n_obs}")
+            assert n_obs == eb_info[eb.name].n_obs
 
-        census_obs_df = exp.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
-        n_obs = len(census_obs_df)
-        logging.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb.n_obs}; n_obs = {n_obs}")
-        # TODO: Only works when run as builder, not standalone validator
-        #  https://github.com/chanzuckerberg/cell-census/issues/179
-        if eb.build_completed:
-            assert eb.n_obs == n_obs
-        census_var_df = exp.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
-        n_vars = len(census_var_df)
-        # TODO: Only works when run as builder, not standalone validator
-        #  https://github.com/chanzuckerberg/cell-census/issues/179
-        if eb.build_completed:
-            assert eb.n_var == n_vars
+            census_var_df = exp.ms["RNA"].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
+            n_vars = len(census_var_df)
+            assert n_vars == eb_info[eb.name].n_vars
 
-        if n_obs > 0:
-            for lyr in CENSUS_X_LAYERS:
-                assert soma.SparseNDArray.exists(exp.ms["RNA"].X[lyr].uri)
-                X = exp.ms["RNA"].X[lyr]
-                assert X.schema.field("soma_dim_0").type == pa.int64()
-                assert X.schema.field("soma_dim_1").type == pa.int64()
-                assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
-                assert X.shape == (n_obs, n_vars)
-
-    # clear the TileDBObject instance variables to avoid pickling error
-    for eb in experiment_builders:
-        eb.experiment = None
-        eb.presence = {}
+            if n_obs > 0:
+                for lyr in CENSUS_X_LAYERS:
+                    assert soma.SparseNDArray.exists(exp.ms["RNA"].X[lyr].uri)
+                    X = exp.ms["RNA"].X[lyr]
+                    assert X.schema.field("soma_dim_0").type == pa.int64()
+                    assert X.schema.field("soma_dim_1").type == pa.int64()
+                    assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
+                    assert X.shape == (n_obs, n_vars)
 
     if args.multi_process:
         with create_process_pool_executor(args) as ppe:
@@ -410,14 +402,16 @@ def validate_X_layers(
             dup_coord_futures = [
                 ppe.submit(
                     _validate_X_layer_has_unique_coords,
-                    (eb, layer_name, row_start, row_start + ROWS_PER_PROCESS),
+                    (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
                 )
-                for eb in experiment_builders
+                for eb in experiment_specifications
                 for layer_name in CENSUS_X_LAYERS
                 for row_start in range(0, n_obs, ROWS_PER_PROCESS)
             ]
             per_dataset_futures = [
-                ppe.submit(_validate_X_layers_contents_by_dataset, (assets_path, dataset, experiment_builders))
+                ppe.submit(
+                    _validate_X_layers_contents_by_dataset, (assets_path, soma_path, dataset, experiment_specifications)
+                )
                 for dataset in datasets
             ]
             for n, future in enumerate(concurrent.futures.as_completed(dup_coord_futures), start=1):
@@ -430,13 +424,13 @@ def validate_X_layers(
                 logging.info(f"validate_X {n} of {len(datasets)} complete.")
 
     else:
-        for eb in experiment_builders:
+        for eb in experiment_specifications:
             for layer_name in CENSUS_X_LAYERS:
                 logging.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
-                assert _validate_X_layer_has_unique_coords((eb, layer_name, 0, n_obs))
+                assert _validate_X_layer_has_unique_coords((eb, soma_path, layer_name, 0, n_obs))
         for n, vld in enumerate(
             (
-                _validate_X_layers_contents_by_dataset((assets_path, dataset, experiment_builders))
+                _validate_X_layers_contents_by_dataset((assets_path, soma_path, dataset, experiment_specifications))
                 for dataset in datasets
             ),
             start=1,
@@ -517,7 +511,7 @@ def validate_relative_path(soma_path: str) -> bool:
 
 
 def validate(
-    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
+    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_specifications: List[ExperimentSpecification]
 ) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
@@ -527,21 +521,13 @@ def validate(
     logging.info("Validation start")
     assert validate_directory_structure(soma_path, assets_path)
 
-    # HACK: experiment_uri is only initialized in create(), which is only called if census is built before calling
-    # the validator; fails in validator-only mode
-    # TODO: This should be handled more elegantly, say, by initializing
-    #  in the ExperimentBuilder constructor. https://github.com/chanzuckerberg/cell-census/issues/179
-    for eb in experiment_builders:
-        if not eb.build_completed:
-            eb.experiment_uri = f"{soma_path}/{CENSUS_DATA_NAME}/{eb.name}"
-
-    assert validate_all_soma_objects_exist(soma_path, experiment_builders)
+    assert validate_all_soma_objects_exist(soma_path, experiment_specifications)
     assert validate_relative_path(soma_path)
     datasets = load_datasets_from_census(assets_path, soma_path)
     assert validate_manifest_contents(assets_path, datasets)
 
-    assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
-    assert validate_X_layers(assets_path, datasets, experiment_builders, args)
+    assert (eb_info := validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args))
+    assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_consolidation(soma_path)
     logging.info("Validation finished (success)")
     return True
