@@ -17,3 +17,5 @@ def test_uri_join() -> None:
     assert _uri_join("/foo/bar", "a") == "/foo/a"
     assert _uri_join("file://foo/bar", "a") == "file://foo/a"
     assert _uri_join("file:///foo/bar", "a") == "file:///foo/a"
+
+    assert _uri_join("https://foo/bar", "https://a/b") == "https://a/b"
