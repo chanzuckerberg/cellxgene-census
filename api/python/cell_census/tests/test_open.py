@@ -37,9 +37,9 @@ def test_open_soma_with_context() -> None:
 
     # Verify that config provided is passed through correctly
     soma_init_buffer_bytes = "221000"
-    timestamp = int(time.time() * 1000) - 10  # don't use exactly current time, as that is the default
+    timestamp_ms = int(time.time() * 1000) - 10  # don't use exactly current time, as that is the default
     cfg = {
-        "timestamp": timestamp,
+        "timestamp": timestamp_ms,
         "tiledb_config": {
             "soma.init_buffer_bytes": soma_init_buffer_bytes,
             "vfs.s3.region": s3_region,
@@ -49,7 +49,7 @@ def test_open_soma_with_context() -> None:
     with cell_census.open_soma(uri=uri, context=context) as census:
         assert census.uri == uri
         assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
-        assert census.context.timestamp == timestamp
+        assert census.context.timestamp_ms == timestamp_ms
 
 
 def test_open_soma_errors() -> None:
