@@ -33,6 +33,9 @@ DIRECTORY_JSON = {
             "s3_region": "us-west-2",
         },
     },
+    # An explicitly dangling tag, to confirm we handle correct
+    # Underscore indicates expected failure to test below
+    "_dangling": "no-such-tag",
 }
 
 
@@ -50,7 +53,7 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     assert all((type(v) == dict for v in directory.values()))
 
     for tag in DIRECTORY_JSON:
-        assert tag in directory
+        assert tag[0] == '_' or tag in directory
         if isinstance(DIRECTORY_JSON[tag], dict):
             assert directory[tag] == DIRECTORY_JSON[tag]
 
@@ -58,6 +61,11 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     for tag in directory:
         assert directory[tag] == cell_census.get_census_version_description(tag)
+
+
+def test_get_census_version_description_errors() -> None:
+    with pytest.raises(KeyError):
+        cell_census.get_census_version_description(census_version="no/such/version/exists")
 
 
 @pytest.mark.live_corpus
