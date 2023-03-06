@@ -6,7 +6,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -14,6 +14,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
+from scipy import sparse
 
 from .anndata import make_anndata_cell_filter, open_anndata
 from .consolidate import list_uris_to_consolidate
@@ -34,6 +35,7 @@ from .globals import (
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    MEASUREMENT_RNA_NAME,
     SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor, log_on_broken_process_pool
@@ -250,6 +252,17 @@ def validate_axis_dataframes(
     return True
 
 
+def _count_elements(arr: soma.SparseNDArray, join_ids: Union[npt.NDArray[np.int64], list[int]]) -> int:
+    return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).coos())
+
+
+def _count_nonzero(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
+    """Return _actual_ non-zero count, NOT the stored value count."""
+    if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
+        return np.count_nonzero(arr.data)
+    return np.count_nonzero(arr)
+
+
 def _sum_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> float:
     """Return the _cell_census_ sum of the X matrix values from a dataset"""
     result: float = arr.read((join_ids, slice(None))).tables().concat().column("soma_data").to_pandas().sum()
@@ -262,9 +275,14 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
     Intended to be dispatched from validate_X_layers.
 
     Currently, implements weak tests:
+    * the sum is correct
     * the nnz is correct
     * there are no zeros explicitly saved (this is mandated by cell census schema)
+    * the number of present genes in each h5ad dataset == the row sum of the corresponding datasets in the presence
+      matrix.
     """
+    error = "{}:{} 'raw' {} mismatch {} vs {}"
+
     assets_path, dataset, experiment_builders = args
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
 
@@ -275,8 +293,8 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
 
-        # Extract soma_joinids assocaited with the dataset from the cell census.
-        soma_joinids: npt.NDArray[np.int64] = (
+        # Extract soma_joinids for cells associated with the dataset in X["raw"].
+        cell_soma_joinids: npt.NDArray[np.int64] = (
             exp.obs.read(
                 column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
             )
@@ -286,17 +304,28 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, Dataset, List[Experi
         )
 
         raw_sum = 0.0
-        if len(soma_joinids) > 0:
-            assert soma.SparseNDArray.exists(exp.ms["RNA"].X["raw"].uri)
-            raw_sum = _sum_elements(exp.ms["RNA"].X["raw"], soma_joinids)
+        raw_nnz = 0
+        fdpm_gene_count = 0
+        if len(cell_soma_joinids) > 0:
+            assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
+            raw_nnz = _count_elements(exp.ms[MEASUREMENT_RNA_NAME].X["raw"], cell_soma_joinids)
+            raw_sum = _sum_elements(exp.ms[MEASUREMENT_RNA_NAME].X["raw"], cell_soma_joinids)
+            fdpm_gene_count = _count_elements(
+                exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
+            )
 
-        error = "{}:{} 'raw' {} mismatch {} vs {}"
         if ad.raw is None:
-            h5ad_sum = sum(ad.X.data)  # calculate the actual sum of the X matrix values
-            assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
+            ad_x_data = ad.X.data
         else:
-            h5ad_sum = sum(ad.raw.X.data)  # calculate the actual sum of the X matrix values
-            assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
+            pass
+        h5ad_sum = sum(ad_x_data)  # calculate the actual sum of the X matrix values
+        assert raw_sum == h5ad_sum, error.format(eb.name, dataset.dataset_id, "sum", raw_sum, h5ad_sum)
+        h5ad_nnz = _count_nonzero(ad_x_data)
+        assert raw_nnz == h5ad_nnz, error.format(eb.name, dataset.dataset_id, "nnz", raw_nnz, h5ad_nnz)
+        h5ad_gene_count = np.count_nonzero(ad_x_data.sum(axis=0))
+        assert h5ad_gene_count == fdpm_gene_count, error.format(
+            eb.name, dataset.dataset_id, "gene_count", fdpm_gene_count, h5ad_gene_count
+        )
     return True
 
 
@@ -423,7 +452,6 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
     # census against the snapshot assets.
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         df = census[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
-        df.drop(columns=["soma_joinid"], inplace=True)
         df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: uricat(assets_path, p))
         datasets = Dataset.from_dataframe(df)
         return datasets
@@ -439,7 +467,7 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     return True
 
 
-def validate_consolidation(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> bool:
+def validate_consolidation(soma_path: str) -> bool:
     """Verify that obs, var and X layers are all fully consolidated & vacuumed"""
 
     def is_empty_tiledb_array(uri: str) -> bool:
@@ -514,6 +542,6 @@ def validate(
 
     assert validate_axis_dataframes(assets_path, soma_path, datasets, experiment_builders, args)
     assert validate_X_layers(assets_path, datasets, experiment_builders, args)
-    assert validate_consolidation(soma_path, experiment_builders)
+    assert validate_consolidation(soma_path)
     logging.info("Validation finished (success)")
     return True

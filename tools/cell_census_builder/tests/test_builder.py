@@ -60,7 +60,7 @@ def test_base_builder_creation(
             assert mouse_obs.shape[0] == 8
             assert list(np.unique(mouse_obs["dataset_id"])) == ["mus_musculus_0", "mus_musculus_1"]
 
-            # There are only 4 unique genes
+            # There are only 6 unique genes
             var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
             assert var.shape[0] == 4
             assert all(var["feature_id"].str.startswith("homo_sapiens"))
@@ -103,7 +103,7 @@ def test_base_builder_creation(
                 n_features = fdpm_df["soma_dim_1"].nunique()
                 assert n_datasets == 2
                 assert n_features == 4
-                assert fdpm.nnz == 8
+                assert fdpm.nnz == 6
 
 
 def test_unicode_support(tmp_path: pathlib.Path) -> None:

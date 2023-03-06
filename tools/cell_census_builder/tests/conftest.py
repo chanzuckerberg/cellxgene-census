@@ -24,10 +24,13 @@ class Organism:
 
 
 ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
+GENE_IDS = [["a", "b", "c"], ["a", "b", "d"]]
 
 
-def get_h5ad(organism: Organism) -> anndata.AnnData:
-    X = np.random.randint(5, size=(4, 4))
+def get_h5ad(organism: Organism, gene_ids: list[str]) -> anndata.AnnData:
+    cells = 4
+    genes = 3
+    X = np.random.randint(5, size=(cells, genes))
     # The builder only supports sparse matrices
     X = sparse.csr_matrix(X)
 
@@ -59,7 +62,7 @@ def get_h5ad(organism: Organism) -> anndata.AnnData:
     obs = obs_dataframe
 
     # Create vars
-    feature_name = pd.Series(data=[f"{organism.name}_{g}" for g in ["a", "b", "c", "d"]])
+    feature_id = pd.Series(data=[f"{organism.name}_{g}" for g in gene_ids])
     var_dataframe = pd.DataFrame(
         data={
             "feature_biotype": "gene",
@@ -67,12 +70,12 @@ def get_h5ad(organism: Organism) -> anndata.AnnData:
             "feature_name": "ERCC-00002 (spike-in control)",
             "feature_reference": organism.organism_ontology_term_id,
         },
-        index=feature_name,
+        index=feature_id,
     )
     var = var_dataframe
 
     # Create embeddings
-    random_embedding = np.random.rand(4, 4)
+    random_embedding = np.random.rand(cells, genes)
     obsm = {"X_awesome_embedding": random_embedding}
 
     # Create uns corpora metadata
@@ -103,13 +106,13 @@ def soma_path(tmp_path: pathlib.Path) -> str:
 def datasets(assets_path: str) -> List[Dataset]:
     datasets = []
     for organism in ORGANISMS:
-        for dataset_id in range(2):
-            h5ad = get_h5ad(organism)
-            h5ad_path = f"{assets_path}/{organism.name}_{dataset_id}.h5ad"
+        for i in range(2):
+            h5ad = get_h5ad(organism, GENE_IDS[i])
+            h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(
                 Dataset(
-                    dataset_id=f"{organism.name}_{dataset_id}",
+                    dataset_id=f"{organism.name}_{i}",
                     dataset_title=f"title_{organism.name}",
                     collection_id=f"id_{organism.name}",
                     collection_name=f"collection_{organism.name}",
