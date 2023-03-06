@@ -36,3 +36,5 @@ def test_get_presence_matrix(organism: str) -> None:
     assert pm.shape[1] == len(
         census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid"]).concat().to_pandas()
     )
+
+    census.close()
