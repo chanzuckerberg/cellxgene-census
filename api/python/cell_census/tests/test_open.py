@@ -88,11 +88,6 @@ def small_dataset_id() -> str:
 
 @pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path, small_dataset_id: str) -> None:
-    # with cell_census.open_soma(census_version="latest") as census:
-    #     census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
-
-    # small_dataset = census_datasets.nsmallest(1, "dataset_total_cell_count").iloc[0]
-
     adata_path = tmp_path / "adata.h5ad"
     cell_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="latest")
     assert adata_path.exists() and adata_path.is_file()
