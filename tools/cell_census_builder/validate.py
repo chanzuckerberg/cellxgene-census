@@ -281,33 +281,33 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
             ad_genes = [*set(ad.var.index.array)]
             if ad.raw is None:
-                ad_x = ad.X
+                expected_x = ad.X
             else:
-                ad_x = ad.raw.X
+                expected_x = ad.raw.X
 
             with exp.axis_query(
                 measurement_name="RNA",
                 obs_query=soma.AxisQuery(value_filter=f"dataset_id == '{dataset.dataset_id}'"),
                 var_query=soma.AxisQuery(value_filter=f"feature_id in {ad_genes}"),
             ) as query:
-                fdpm_gene_count = 0
-                raw_coo = None
+                actual_gene_count = 0
+                actual_coo = None
                 if query.n_obs > 0:
                     assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
                     actual_gene_count = _count_elements(
                         exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
                     )
-                    raw_coo = query.to_anndata("raw").X.tocoo()  # TODO: slow, find a faster method.
+                    actual_coo = query.to_anndata("raw").X.tocoo()  # TODO: slow, find a faster method.
 
-            if raw_coo is not None:
-                assert ad_x.nnz == raw_coo.nnz, error.format("nnz", raw_coo.nnz, ad_x.nnz)
-                assert ad_x.shape == raw_coo.shape, error.format("shape", raw_coo.shape, ad_x.shape)
+            if actual_coo is not None:
+                assert expected_x.nnz == actual_coo.nnz, error.format("nnz", actual_coo.nnz, expected_x.nnz)
+                assert expected_x.shape == actual_coo.shape, error.format("shape", actual_coo.shape, expected_x.shape)
                 assert (
-                    ad_x.tocoo() != raw_coo
+                    expected_x.tocoo() != actual_coo
                 ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
-            expected_gene_count = np.count_nonzero(ad_x.sum(axis=0))
+            expected_gene_count = np.count_nonzero(expected_x.sum(axis=0))
             assert expected_gene_count == actual_gene_count, error.format(
-                "gene_count", fdpm_gene_count, expected_gene_count
+                "gene_count", actual_gene_count, expected_gene_count
             )
     return True
 

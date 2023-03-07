@@ -31,7 +31,8 @@ NUM_DATASET = 2
 def get_h5ad(organism: Organism, gene_ids: list[str]) -> anndata.AnnData:
     cells = 4
     genes = 3
-    X = np.random.randint(5, size=(cells, genes)).astype(np.float32)
+    rng = np.random.default_rng()
+    X = rng.integers(5, size=(cells, genes)).astype(np.float32)
     # The builder only supports sparse matrices
     X = sparse.csr_matrix(X)
 
