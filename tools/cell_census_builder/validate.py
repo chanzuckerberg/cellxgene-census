@@ -14,7 +14,6 @@ import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
-from scipy import sparse
 from typing_extensions import Self
 
 from .anndata import make_anndata_cell_filter, open_anndata
@@ -260,29 +259,16 @@ def _count_elements(arr: soma.SparseNDArray, join_ids: Union[npt.NDArray[np.int6
     return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).coos())
 
 
-def _count_nonzero(arr: Union[sparse.spmatrix, npt.NDArray[Any]]) -> int:
-    """Return _actual_ non-zero count, NOT the stored value count."""
-    if isinstance(arr, (sparse.spmatrix, sparse.coo_array, sparse.csr_array, sparse.csc_array)):
-        return np.count_nonzero(arr.data)
-    return np.count_nonzero(arr)
-
-
-def _sum_elements(arr: soma.SparseNDArray, join_ids: npt.NDArray[np.int64]) -> float:
-    """Return the _cell_census_ sum of the X matrix values from a dataset"""
-    result: float = arr.read((join_ids, slice(None))).tables().concat().column("soma_data").to_pandas().sum()
-    return result
-
-
 def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
 
-    Currently, implements tests:
-    1. the X matrix elements in the h5ad are equal to the cell census.
-    2. the nnz is correct
-    3. there are no zeros explicitly saved (this is mandated by cell census schema)
-    4. the number of present genes in each h5ad dataset == the row sum of the corresponding datasets in the presence
+    Currently, implements weak tests:
+    * the sum is correct
+    * the nnz is correct
+    * there are no zeros explicitly saved (this is mandated by cell census schema)
+    * the number of present genes in each h5ad dataset == the row sum of the corresponding datasets in the presence
       matrix.
     """
     assets_path, soma_path, dataset, experiment_specifications = args
@@ -308,7 +294,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 raw_coo = None
                 if query.n_obs > 0:
                     assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
-                    fdpm_gene_count = _count_elements(
+                    actual_gene_count = _count_elements(
                         exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
                     )
                     raw_coo = query.to_anndata("raw").X.tocoo()  # TODO: slow, find a faster method.
@@ -319,8 +305,10 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 assert (
                     ad_x.tocoo() != raw_coo
                 ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
-            h5ad_gene_count = np.count_nonzero(ad_x.sum(axis=0))
-            assert h5ad_gene_count == fdpm_gene_count, error.format("gene_count", fdpm_gene_count, h5ad_gene_count)
+            expected_gene_count = np.count_nonzero(ad_x.sum(axis=0))
+            assert expected_gene_count == actual_gene_count, error.format(
+                "gene_count", fdpm_gene_count, expected_gene_count
+            )
     return True
 
 

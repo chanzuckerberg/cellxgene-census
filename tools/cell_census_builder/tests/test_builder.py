@@ -63,7 +63,7 @@ def test_base_builder_creation(
             assert mouse_obs.shape[0] == 8
             assert list(np.unique(mouse_obs["dataset_id"])) == ["mus_musculus_0", "mus_musculus_1"]
 
-            # There are only 6 unique genes
+            # Assert number of unique genes
             var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
             assert var.shape[0] == 4
             assert all(var["feature_id"].str.startswith("homo_sapiens"))

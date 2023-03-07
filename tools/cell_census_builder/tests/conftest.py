@@ -25,6 +25,7 @@ class Organism:
 
 ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
 GENE_IDS = [["a", "b", "c"], ["a", "b", "d"]]
+NUM_DATASET = 2
 
 
 def get_h5ad(organism: Organism, gene_ids: list[str]) -> anndata.AnnData:
@@ -107,7 +108,7 @@ def soma_path(tmp_path: pathlib.Path) -> str:
 def datasets(assets_path: str) -> List[Dataset]:
     datasets = []
     for organism in ORGANISMS:
-        for i in range(2):
+        for i in range(NUM_DATASET):
             h5ad = get_h5ad(organism, GENE_IDS[i])
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
