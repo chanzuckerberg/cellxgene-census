@@ -312,7 +312,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
 
             if actual_census_coo is not None:
                 expected_ad_x_coo = expected_ad_x.tocoo()
-                # Reshaping the anndata to match the cell census X. This simplifies comparing the matrices.
+                # The shapes of the anndata X and the cell census X sparse matrices must match in order for the `!=` comparison to proceed to comparing actual values; otherwise it will always return `False` due to the shape mismatch.
                 expected_ad_x_coo = sparse.coo_matrix(
                     (expected_ad_x_coo.data, (expected_ad_x_coo.row, expected_ad_x_coo.col)),
                     shape=actual_census_coo.shape,
