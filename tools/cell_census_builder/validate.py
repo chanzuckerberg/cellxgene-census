@@ -286,9 +286,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 expected_ad_x = ad.raw.X
 
             with exp.axis_query(
-                measurement_name="RNA",
-                obs_query=soma.AxisQuery(value_filter=f"dataset_id == '{dataset.dataset_id}'"),
-                var_query=soma.AxisQuery(value_filter=f"feature_id in {[*ad.var.index.array]}"),
+                measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=f"dataset_id == '{dataset.dataset_id}'")
             ) as query:
                 actual_census_gene_count = 0
                 actual_census_coo = None

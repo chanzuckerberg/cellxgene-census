@@ -78,7 +78,8 @@ def get_h5ad(organism: Organism, gene_ids: list[str]) -> anndata.AnnData:
     var = var_dataframe
 
     # Create embeddings
-    random_embedding = np.random.rand(cells, genes)
+    rng.random()
+    random_embedding = rng.random(cells * genes).reshape(cells, genes)
     obsm = {"X_awesome_embedding": random_embedding}
 
     # Create uns corpora metadata
