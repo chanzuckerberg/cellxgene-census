@@ -298,7 +298,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                         exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
                     )
 
-                    # create coo of dataset in cell_census X and align the matrix to in the anndata.
+                    # retrieve coo of dataset in cell_census X and align the matrix to the anndata X.
                     actual_census_coo = query.X("raw").coos().concat().to_scipy()
                     # mapping the soma_joinid to the anndata feature_ids
                     actual_genes = query.var(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
