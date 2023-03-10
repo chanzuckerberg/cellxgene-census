@@ -18,3 +18,27 @@ test_that("get_source_h5ad_uri", {
 
   expect_error(get_source_h5ad_uri("bogus"))
 })
+
+test_that("download_source_h5ad", {
+  # find the ~smallest dataset
+  census <- open_soma()
+  datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
+    column_names = c("dataset_id", "dataset_total_cell_count")
+  ))
+  dataset <- as.list(datasets[which.min(datasets$dataset_total_cell_count), ])
+
+  # fetch its h5ad
+  fn <- tempfile("data_", fileext = ".h5ad")
+  withr::defer(unlink(fn))
+  expect_false(file.exists(fn))
+
+  download_source_h5ad(dataset$dataset_id, fn)
+  expect_true(file.exists(fn))
+  expect_gt(file.size(fn), 0)
+
+  # refuse overwrite
+  expect_error(download_source_h5ad(dataset$dataset_id, fn))
+
+  # refuse directory
+  expect_error(download_source_h5ad(dataset$dataset_id, tempdir()))
+})
