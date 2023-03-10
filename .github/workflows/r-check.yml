@@ -3,7 +3,7 @@ name: R CellCensus package checks
 on:
   pull_request:
     paths-ignore:
-      - "apis/python/**"
+      - "api/python/**"
       - "tools/cell_census_builder/**"
   push:
     branches: [main]
