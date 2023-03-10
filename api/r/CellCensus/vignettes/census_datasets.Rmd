@@ -83,5 +83,12 @@ print(expt_query)
 # TODO: to_seurat
 ```
 
-TODO: get_h5ad_uri
+You can also use the `CellCensus::get_source_h5ad_uri()` API to fetch a URI pointing to the H5AD associated with this dataset_id. This is the same H5AD you can download from the CELLxGENE Portal, and may contain additional data-submitter provided information which was not included in the Cell Census.
 
+The "locator" returned by this API will include a URI and additional information that may be necessary to use the URI (eg, the S3 region).
+
+```{r}
+CellCensus::get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
+```
+
+The `CellCensus::download_source_h5ad()` API downloads the H5AD to a local file, which can then be used in R by (TODO).
