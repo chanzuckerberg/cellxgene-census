@@ -2,7 +2,10 @@
 
 export(get_census_version_description)
 export(get_census_version_directory)
+export(get_source_h5ad_uri)
 export(open_soma)
+importFrom(httr,build_url)
+importFrom(httr,parse_url)
 importFrom(jsonlite,fromJSON)
 importFrom(tiledb,tiledb_ctx)
 importFrom(tiledbsoma,SOMACollection)
