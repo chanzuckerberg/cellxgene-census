@@ -3,7 +3,7 @@ name: Python Linting
 on:
   pull_request:
     paths-ignore:
-      - "apis/r/**"
+      - "api/r/**"
   push:
     branches: [main]
 
