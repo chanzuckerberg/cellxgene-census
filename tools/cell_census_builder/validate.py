@@ -289,7 +289,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=f"dataset_id == '{dataset.dataset_id}'")
             ) as query:
                 actual_census_gene_count = 0
-                actual_census_coo = None
+                actual_x_coo = None
                 if query.n_obs > 0:
                     assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
                     actual_census_gene_count = _count_elements(
@@ -297,32 +297,31 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                     )
 
                     # retrieve coo of dataset in cell_census X and align the matrix to the anndata X.
-                    actual_census_coo = query.X("raw").coos().concat().to_scipy()
-                    # mapping the soma_joinid to the anndata feature_ids
+                    actual_x_coo = query.X("raw").coos().concat().to_scipy()
+                    # translating the rows
+                    actual_x_coo.row = actual_x_coo.row - actual_x_coo.row.min()
+                    # mapping the var_soma_joinid to the anndata feature_ids
                     actual_genes = query.var(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
                     gene_mapping = ad.var.join(actual_genes.set_index("feature_id"))
                     gene_mapping["ad_id"] = range(gene_mapping.shape[0])
                     gene_mapping = gene_mapping.set_index("soma_joinid")
-                    for i in range(actual_census_coo.col.size):
-                        actual_census_coo.col[i] = gene_mapping.ad_id[actual_census_coo.col[i]]
-                    # translating the rows
-                    actual_census_coo.row = actual_census_coo.row - actual_census_coo.row.min()
-
-            if actual_census_coo is not None:
+                    # actual_x_coo.col.map()
+                    for i in range(actual_x_coo.col.size):
+                        actual_x_coo.col[i] = gene_mapping.ad_id[actual_x_coo.col[i]]
+                    # The shapes of the anndata X and the cell census X sparse matrices must match in order for the
+                    # `!=` comparison to proceed to comparing actual values; otherwise it will always return `False`
+                    # due to the shape mismatch.
+                    actual_x_coo = sparse.coo_matrix((actual_x_coo.data, (actual_x_coo.row, actual_x_coo.col)))
+            if actual_x_coo is not None:
                 expected_ad_x_coo = expected_ad_x.tocoo()
-                # The shapes of the anndata X and the cell census X sparse matrices must match in order for the `!=` comparison to proceed to comparing actual values; otherwise it will always return `False` due to the shape mismatch.
-                expected_ad_x_coo = sparse.coo_matrix(
-                    (expected_ad_x_coo.data, (expected_ad_x_coo.row, expected_ad_x_coo.col)),
-                    shape=actual_census_coo.shape,
+                assert expected_ad_x_coo.nnz == actual_x_coo.nnz, error.format(
+                    "nnz", actual_x_coo.nnz, expected_ad_x.nnz
                 )
-                assert expected_ad_x_coo.nnz == actual_census_coo.nnz, error.format(
-                    "nnz", actual_census_coo.nnz, expected_ad_x.nnz
-                )
-                assert expected_ad_x_coo.shape == actual_census_coo.shape, error.format(
-                    "shape", actual_census_coo.shape, expected_ad_x_coo.shape
+                assert expected_ad_x_coo.shape == actual_x_coo.shape, error.format(
+                    "shape", actual_x_coo.shape, expected_ad_x_coo.shape
                 )
                 assert (
-                    expected_ad_x_coo != actual_census_coo
+                    expected_ad_x_coo != actual_x_coo
                 ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
             expected_gene_count = np.count_nonzero(expected_ad_x.sum(axis=0))
             assert expected_gene_count == actual_census_gene_count, error.format(
