@@ -22,7 +22,7 @@ https://github.com/chanzuckerberg/cell-census/blob/main/api/python/notebooks/api
 
 *Goal:* demonstrate basic use of the `census_datasets` data frame.
 
-Each Cell Census contains a top-level data frame itemizing the datasets contained therein. You can read this `SOMADataFrame` into an [Arrow Table](https://arrow.apache.org/docs/r/reference/Table.html): 
+Each Cell Census contains a top-level data frame itemizing the datasets contained therein. You can read this `SOMADataFrame` into an [Arrow Table](https://arrow.apache.org/docs/r/reference/Table.html):
 
 ```{r}
 census <- CellCensus::open_soma()
@@ -92,3 +92,4 @@ CellCensus::get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
 ```
 
 The `CellCensus::download_source_h5ad()` API downloads the H5AD to a local file, which can then be used in R by (TODO).
+
