@@ -296,22 +296,24 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                         exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
                     )
 
-                    # retrieve coo of dataset in cell_census X and align the matrix to the anndata X.
-                    actual_x_coo = query.X("raw").coos().concat().to_scipy()
-                    # translating the rows
-                    actual_x_coo.row = actual_x_coo.row - actual_x_coo.row.min()
                     # mapping the var_soma_joinid to the anndata feature_ids
                     actual_genes = query.var(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
-                    gene_mapping = ad.var.join(actual_genes.set_index("feature_id"))
+                    gene_mapping = ad.var.join(actual_genes.set_index("feature_id"))[["soma_joinid"]]
                     gene_mapping["ad_id"] = range(gene_mapping.shape[0])
                     gene_mapping = gene_mapping.set_index("soma_joinid")
-                    # actual_x_coo.col.map()
-                    for i in range(actual_x_coo.col.size):
-                        actual_x_coo.col[i] = gene_mapping.ad_id[actual_x_coo.col[i]]
-                    # The shapes of the anndata X and the cell census X sparse matrices must match in order for the
-                    # `!=` comparison to proceed to comparing actual values; otherwise it will always return `False`
-                    # due to the shape mismatch.
-                    actual_x_coo = sparse.coo_matrix((actual_x_coo.data, (actual_x_coo.row, actual_x_coo.col)))
+                    actual_x = (
+                        query.X("raw")
+                        .tables()
+                        .concat()
+                        .to_pandas()
+                        .join(gene_mapping, on="soma_dim_1")[["soma_dim_0", "ad_id", "soma_data"]]
+                    )
+                    # translating the rows
+                    actual_x.soma_dim_0 = actual_x.soma_dim_0 - actual_x.soma_dim_0.min()
+                    # convert to sparse matrix
+                    actual_x_coo = sparse.coo_matrix(
+                        (actual_x.soma_data.array, (actual_x.soma_dim_0.array, actual_x.ad_id.array))
+                    )
             if actual_x_coo is not None:
                 expected_ad_x_coo = expected_ad_x.tocoo()
                 assert expected_ad_x_coo.nnz == actual_x_coo.nnz, error.format(
