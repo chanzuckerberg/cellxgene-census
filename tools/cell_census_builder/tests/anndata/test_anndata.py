@@ -3,8 +3,9 @@ from typing import List
 import anndata as ad
 import numpy as np
 
-from tools.cell_census_builder.anndata import open_anndata
+from tools.cell_census_builder.anndata import make_anndata_cell_filter, open_anndata
 from tools.cell_census_builder.datasets import Dataset
+from tools.cell_census_builder.tests.conftest import ORGANISMS, get_h5ad
 
 
 def test_open_anndata(datasets: List[Dataset]) -> None:
@@ -60,3 +61,64 @@ def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_laye
     # The 4th column (correspnding to the added gene) is all zeros
     added_col = h5ad.X.todense()[:, 3]
     assert np.array_equal(added_col.A1, np.zeros(4))
+
+
+import pytest
+
+
+@pytest.fixture
+def h5ad_simple() -> ad.AnnData:
+    return get_h5ad(ORGANISMS[0])
+
+
+@pytest.fixture
+def h5ad_with_organoids_and_cell_culture() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.obs.at["1", "tissue_ontology_term_id"] = "CL:0000192 (organoid)"
+    h5ad.obs.at["2", "tissue_ontology_term_id"] = "CL:0000192 (cell culture)"
+    return h5ad
+
+
+@pytest.fixture
+def h5ad_with_organism() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.obs.at["1", "organism_ontology_term_id"] = ORGANISMS[1].organism_ontology_term_id
+    return h5ad
+
+
+@pytest.fixture
+def h5ad_with_feature_biotype() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.var.at["homo_sapiens_c", "feature_biotype"] = "non-gene"
+    return h5ad
+
+
+def test_make_anndata_cell_filter(h5ad_simple: ad.AnnData) -> None:
+    func = make_anndata_cell_filter({})  # type: ignore
+    filtered_h5ad = func(h5ad_simple)
+    assert h5ad_simple.var.equals(filtered_h5ad.var)
+    assert h5ad_simple.obs.equals(filtered_h5ad.obs)
+    assert np.array_equal(h5ad_simple.X.todense(), filtered_h5ad.X.todense())
+
+
+def test_make_anndata_cell_filter_filters_out_organoids_cell_culture(
+    h5ad_with_organoids_and_cell_culture: ad.AnnData,
+) -> None:
+    func = make_anndata_cell_filter({})  # type: ignore
+    filtered_h5ad = func(h5ad_with_organoids_and_cell_culture)
+    assert h5ad_with_organoids_and_cell_culture.var.equals(filtered_h5ad.var)
+    assert filtered_h5ad.obs.shape[0] == 2
+
+
+def test_make_anndata_cell_filter_organism(h5ad_with_organism: ad.AnnData) -> None:
+    func = make_anndata_cell_filter({"organism_ontology_term_id": ORGANISMS[0].organism_ontology_term_id})  # type: ignore
+    filtered_h5ad = func(h5ad_with_organism)
+    assert h5ad_with_organism.var.equals(filtered_h5ad.var)
+    assert filtered_h5ad.obs.shape[0] == 3
+
+
+def test_make_anndata_cell_filter_feature_biotype_gene(h5ad_with_feature_biotype: ad.AnnData) -> None:
+    func = make_anndata_cell_filter({})  # type: ignore
+    filtered_h5ad = func(h5ad_with_feature_biotype)
+    assert h5ad_with_feature_biotype.obs.equals(filtered_h5ad.obs)
+    assert filtered_h5ad.var.shape[0] == 3
