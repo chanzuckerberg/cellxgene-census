@@ -5,9 +5,10 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 
 #' Open the Cell Census
 #'
-#' @param census_version The version of the Census, e.g., "latest"
+#' @param census_version The version of the Census, e.g., "latest".
 #' @param uri The URI containing the Census SOMA objects. If specified, takes
 #'            precedence over `census_version`.
+#' @param s3_region Optional AWS region accompanying uri.
 #'
 #' @return Top-level `tiledbsoma::SOMACollection` object
 #' @importFrom tiledbsoma SOMACollection
@@ -15,16 +16,19 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #' @export
 #'
 #' @examples
-open_soma <- function(census_version = "latest", uri = "") {
+open_soma <- function(census_version = "latest", uri = "", s3_region = "") {
   cfg <- DEFAULT_TILEDB_CONFIGURATION
 
   if (uri == "") {
+    stopifnot("'s3_region' applicable only for specific uri" = s3_region == "")
     description <- get_census_version_description(census_version)
     uri <- description$soma.uri
     if ("soma.s3_region" %in% names(description) &&
       description$soma.s3_region != "") {
       cfg <- c(cfg, c("vfs.s3.region" = description$soma.s3_region))
     }
+  } else if (s3_region != "") {
+    cfg <- c(cfg, c("vfs.s3.region" = s3_region))
   }
 
   return(tiledbsoma::SOMACollection$new(uri, ctx = tiledb::tiledb_ctx(cfg)))
