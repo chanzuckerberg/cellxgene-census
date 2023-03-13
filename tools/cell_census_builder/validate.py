@@ -276,7 +276,6 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
 
     for eb in experiment_specifications:
-        error = f"{eb.name}:{dataset.dataset_id}" + " 'raw' {} mismatch {} vs {}"
         with open_experiment(soma_path, eb) as exp:
             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
             ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
@@ -312,7 +311,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             # positionally (re)index obs/rows. We _know_ that the Census assigns
             # obs soma_joinids in the obs position order of the original AnnData, so
             # leverage that for simplicity and speed.
-            rows_by_position = pd.Index(obs_joinids.soma_joinid).get_indexer(rows)
+            rows_by_position = obs_joinids.set_index("soma_joinid").index.get_indexer(rows)
 
             # get the joinids for the var axis
             all_var_ids = (
