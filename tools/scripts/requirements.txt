@@ -2,10 +2,9 @@ pyarrow
 pandas
 anndata
 numpy
-# NOTE: You can also build this dependency from source, per ./notebooks/README.md.
 # NOTE: The builder's version of tiledbsoma MUST be <= the API's tiledbsoma version, to ensure reader compatibility
-# of TileDB on-disk storage format
-tiledbsoma==1.0rc6
+# with TileDB on-disk storage format
+tiledbsoma==1.0
 scipy
 fsspec
 s3fs

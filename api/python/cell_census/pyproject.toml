@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">= 3.7, < 3.11"
+requires-python = ">= 3.7, < 3.11"  # Python 3.11 is pending numba support
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
@@ -31,11 +31,10 @@ dependencies= [
     "numba>=0.55",
     "numpy>=1.21",
     "requests",
-    # NOTE: The API's version of tiledbsoma MUST be >= the builder's tiledbsoma version, to ensure reader compatibility
-    # of TileDB on-disk storage format. Make sure this doesn't fall behind the builder's tiledbsoma version.
-    # NOTE: tiledb is also a requirement of the API, but tiledbsoma also has a tiledb dependency, so just use 
-    # the same version here
-    "tiledbsoma==1.0.0rc6",
+    # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
+    # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
+    # Make sure this version does not fall behind the builder's tiledbsoma version.
+    "tiledbsoma==1.0.0",
     "typing_extensions",
     "s3fs",
     "scikit-misc",
