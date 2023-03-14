@@ -20,7 +20,6 @@ def test_source_assets(tmp_path: pathlib.Path) -> None:
     # Call the function
     stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")  # type: ignore
 
-    # Verify that the files exists
-
+    # Verify that the files exist
     for i in range(10):
         assert pathlib.Path(tmp_path / "dest" / f"dataset_{i}.h5ad").exists()

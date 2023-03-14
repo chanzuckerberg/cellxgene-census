@@ -1,30 +1,8 @@
 import io
-import pathlib
 import re
 from unittest.mock import patch
 
-import pytest
-
 from tools.cell_census_builder.manifest import CXG_BASE_URI, load_manifest
-
-
-@pytest.fixture
-def manifest_csv(tmp_path: pathlib.Path) -> io.TextIOWrapper:
-    # assets_path = f"{tmp_path}/h5ads"
-    # os.mkdir(assets_path)
-    manifest_content = """
-    dataset_id_1, data/h5ads/dataset_id_1.h5ad
-    dataset_id_2, data/h5ads/dataset_id_2.h5ad
-    """
-    path = f"{tmp_path}/manifest.csv"
-    h5ad_path = f"{tmp_path}/data/h5ads/"
-    pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
-    pathlib.Path("data/h5ads/dataset_id_1.h5ad").touch()
-    pathlib.Path("data/h5ads/dataset_id_2.h5ad").touch()
-    with open(path, "w+") as f:
-        f.writelines(manifest_content.strip())
-
-    return open(path)
 
 
 def test_load_manifest_from_file(manifest_csv: io.TextIOWrapper) -> None:
