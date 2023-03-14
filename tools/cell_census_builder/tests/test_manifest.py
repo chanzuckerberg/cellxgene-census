@@ -1,11 +1,12 @@
 import io
+import pathlib
 import re
 from unittest.mock import patch
 
 from tools.cell_census_builder.manifest import CXG_BASE_URI, load_manifest
 
 
-def test_load_manifest_from_file(manifest_csv: io.TextIOWrapper) -> None:
+def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: io.TextIOWrapper) -> None:
     """
     If specified a parameter, `load_manifest` should load the dataset manifest from such file.
     """
@@ -13,8 +14,8 @@ def test_load_manifest_from_file(manifest_csv: io.TextIOWrapper) -> None:
     assert len(manifest) == 2
     assert manifest[0].dataset_id == "dataset_id_1"
     assert manifest[1].dataset_id == "dataset_id_2"
-    assert manifest[0].corpora_asset_h5ad_uri == "data/h5ads/dataset_id_1.h5ad"
-    assert manifest[1].corpora_asset_h5ad_uri == "data/h5ads/dataset_id_2.h5ad"
+    assert manifest[0].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_1.h5ad"
+    assert manifest[1].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
 
 
 def test_load_manifest_from_cxg() -> None:

@@ -38,6 +38,7 @@ def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
         for d in all_datasets
         if d.corpora_asset_h5ad_uri.endswith(".h5ad") and os.path.exists(d.corpora_asset_h5ad_uri)
     ]
+    print("AAAAAAAAA", all_datasets)
     if len(datasets) != len(all_datasets):
         logging.warning("Manifest contained records which are not H5AD files or which are not accessible - ignoring")
     return datasets
