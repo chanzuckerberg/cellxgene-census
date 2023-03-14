@@ -1,5 +1,6 @@
 import pathlib
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.source_assets import stage_source_assets
@@ -18,8 +19,9 @@ def test_source_assets(tmp_path: pathlib.Path) -> None:
         datasets.append(dataset)
 
     # Call the function
-    stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")  # type: ignore
+    with patch("tools.cell_census_builder.source_assets._get_n_workers", return_value=1):
+        stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")  # type: ignore
 
-    # Verify that the files exist
-    for i in range(10):
-        assert pathlib.Path(tmp_path / "dest" / f"dataset_{i}.h5ad").exists()
+        # Verify that the files exist
+        for i in range(10):
+            assert pathlib.Path(tmp_path / "dest" / f"dataset_{i}.h5ad").exists()
