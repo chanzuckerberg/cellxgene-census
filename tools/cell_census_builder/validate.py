@@ -6,10 +6,9 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import tiledb
@@ -256,21 +255,17 @@ def validate_axis_dataframes(
     return eb_info
 
 
-def _count_elements(arr: soma.SparseNDArray, join_ids: Union[npt.NDArray[np.int64], list[int]]) -> int:
-    return sum(t.non_zero_length for t in arr.read((join_ids, slice(None))).coos())
-
-
 def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> bool:
     """
     Validate that a single dataset is correctly represented in the census.
     Intended to be dispatched from validate_X_layers.
 
     Currently, implements weak tests:
-    * the sum is correct
-    * the nnz is correct
-    * there are no zeros explicitly saved (this is mandated by cell census schema)
-    * the number of present genes in each h5ad dataset == the row sum of the corresponding datasets in the presence
-      matrix.
+    * 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
+    * 2 - the contents of the X matrix are EMPTY for all var ids NOT present in the AnnData. Test by asserting that
+      no col IDs contain a joinid not in the AnnData.
+    * 3 - the contents of the presence matrix match the features present
+      in the AnnData (where presence is defined as having a non-zero value)
     """
     assets_path, soma_path, dataset, experiment_specifications = args
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
