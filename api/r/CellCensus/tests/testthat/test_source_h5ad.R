@@ -12,7 +12,7 @@ test_that("get_source_h5ad_uri", {
     loc <- get_source_h5ad_uri(dataset$dataset_id)
 
     expect_true(endsWith(loc$uri, paste("/", dataset$dataset_h5ad_path, sep = "")))
-    expect_equal(loc$s3_region, latest_region)
+    expect_equal(loc$s3_region, census_region)
     # check URI joining with trailing slashes
     expect_false(endsWith(loc$uri, paste("//", dataset$dataset_h5ad_path, sep = "")))
   })
