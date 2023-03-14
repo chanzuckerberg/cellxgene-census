@@ -5,7 +5,7 @@ import numpy as np
 
 from tools.cell_census_builder.anndata import make_anndata_cell_filter, open_anndata
 from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.tests.conftest import ORGANISMS, get_h5ad
+from tools.cell_census_builder.tests.conftest import ORGANISMS
 
 
 def test_open_anndata(datasets: List[Dataset]) -> None:
@@ -63,36 +63,6 @@ def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_laye
     assert np.array_equal(added_col.A1, np.zeros(4))
 
 
-import pytest
-
-
-@pytest.fixture
-def h5ad_simple() -> ad.AnnData:
-    return get_h5ad(ORGANISMS[0])
-
-
-@pytest.fixture
-def h5ad_with_organoids_and_cell_culture() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
-    h5ad.obs.at["1", "tissue_ontology_term_id"] = "CL:0000192 (organoid)"
-    h5ad.obs.at["2", "tissue_ontology_term_id"] = "CL:0000192 (cell culture)"
-    return h5ad
-
-
-@pytest.fixture
-def h5ad_with_organism() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
-    h5ad.obs.at["1", "organism_ontology_term_id"] = ORGANISMS[1].organism_ontology_term_id
-    return h5ad
-
-
-@pytest.fixture
-def h5ad_with_feature_biotype() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
-    h5ad.var.at["homo_sapiens_c", "feature_biotype"] = "non-gene"
-    return h5ad
-
-
 def test_make_anndata_cell_filter(h5ad_simple: ad.AnnData) -> None:
     func = make_anndata_cell_filter({})  # type: ignore
     filtered_h5ad = func(h5ad_simple)
@@ -122,3 +92,10 @@ def test_make_anndata_cell_filter_feature_biotype_gene(h5ad_with_feature_biotype
     filtered_h5ad = func(h5ad_with_feature_biotype)
     assert h5ad_with_feature_biotype.obs.equals(filtered_h5ad.obs)
     assert filtered_h5ad.var.shape[0] == 3
+
+
+def test_make_anndata_cell_filter_assay(h5ad_with_assays: ad.AnnData) -> None:
+    func = make_anndata_cell_filter({"assay_ontology_term_ids": ["EFO:1234", "EFO:1235"]})  # type: ignore
+    filtered_h5ad = func(h5ad_with_assays)
+    assert filtered_h5ad.obs.shape[0] == 2
+    assert list(filtered_h5ad.obs.index) == ["1", "3"]

@@ -1,5 +1,6 @@
 from typing import List
 
+import anndata as ad
 import pytest
 
 from tools.cell_census_builder.datasets import Dataset
@@ -52,3 +53,38 @@ def datasets_with_larger_raw_layer(assets_path: str) -> List[Dataset]:
         ),
     )
     return datasets
+
+
+@pytest.fixture
+def h5ad_simple() -> ad.AnnData:
+    return get_h5ad(ORGANISMS[0])
+
+
+@pytest.fixture
+def h5ad_with_organoids_and_cell_culture() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.obs.at["1", "tissue_ontology_term_id"] = "CL:0000192 (organoid)"
+    h5ad.obs.at["2", "tissue_ontology_term_id"] = "CL:0000192 (cell culture)"
+    return h5ad
+
+
+@pytest.fixture
+def h5ad_with_organism() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.obs.at["1", "organism_ontology_term_id"] = ORGANISMS[1].organism_ontology_term_id
+    return h5ad
+
+
+@pytest.fixture
+def h5ad_with_feature_biotype() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.var.at["homo_sapiens_c", "feature_biotype"] = "non-gene"
+    return h5ad
+
+
+@pytest.fixture
+def h5ad_with_assays() -> ad.AnnData:
+    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad.obs.at["1", "assay_ontology_term_id"] = "EFO:1234"
+    h5ad.obs.at["3", "assay_ontology_term_id"] = "EFO:1235"
+    return h5ad
