@@ -56,6 +56,28 @@ def datasets_with_larger_raw_layer(assets_path: str) -> List[Dataset]:
 
 
 @pytest.fixture
+def datasets_with_incorrect_schema_version(assets_path: str) -> List[Dataset]:
+    organism = ORGANISMS[0]
+    dataset_id = "an_id"
+    datasets = []
+    h5ad = get_h5ad(organism)
+    h5ad.uns["schema_version"] = "2.0.0"
+    h5ad_path = f"{assets_path}/{organism.name}_{dataset_id}.h5ad"
+    h5ad.write_h5ad(h5ad_path)
+    datasets.append(
+        Dataset(
+            dataset_id=f"{organism.name}_{dataset_id}",
+            dataset_title=f"title_{organism.name}",
+            collection_id=f"id_{organism.name}",
+            collection_name=f"collection_{organism.name}",
+            corpora_asset_h5ad_uri="mock",
+            dataset_h5ad_path=h5ad_path,
+        ),
+    )
+    return datasets
+
+
+@pytest.fixture
 def h5ad_simple() -> ad.AnnData:
     return get_h5ad(ORGANISMS[0])
 

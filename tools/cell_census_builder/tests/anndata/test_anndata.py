@@ -3,7 +3,7 @@ from typing import List
 import anndata as ad
 import numpy as np
 
-from tools.cell_census_builder.anndata import make_anndata_cell_filter, open_anndata
+from tools.cell_census_builder.anndata import get_cellxgene_schema_version, make_anndata_cell_filter, open_anndata
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.tests.conftest import ORGANISMS
 
@@ -13,6 +13,7 @@ def test_open_anndata(datasets: List[Dataset]) -> None:
     `open_anndata` should open the h5ads for each of the dataset in the argument,
     and yield both the dataset and the corresponding AnnData object.
     This test does not involve additional filtering steps.
+    The `datasets` used here have no raw layer.
     """
     result = list(open_anndata(".", datasets))
     assert len(result) == len(datasets)
@@ -34,9 +35,20 @@ def test_open_anndata_filters_out_datasets_with_mixed_feature_reference(
     assert len(result) == 0
 
 
+def test_open_anndata_filters_out_wrong_schema_version_datasets(
+    datasets_with_incorrect_schema_version: List[Dataset],
+) -> None:
+    """
+    Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`
+    """
+    result = list(open_anndata(".", datasets_with_incorrect_schema_version))
+    assert len(result) == 0
+
+
 def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_layer: List[Dataset]) -> None:
     """
-    For datasets where the raw.var is bigger than var, `open_anndata` should return a modified normalized layer
+    For datasets with a raw layer, and where raw.var is bigger than var,
+    `open_anndata` should return a modified normalized layer
     (both var and X) that matches the size of raw and is "padded" accordingly.
     """
     result = list(open_anndata(".", datasets_with_larger_raw_layer))
@@ -99,3 +111,8 @@ def test_make_anndata_cell_filter_assay(h5ad_with_assays: ad.AnnData) -> None:
     filtered_h5ad = func(h5ad_with_assays)
     assert filtered_h5ad.obs.shape[0] == 2
     assert list(filtered_h5ad.obs.index) == ["1", "3"]
+
+
+def test_get_cellxgene_schema_version(h5ad_simple: ad.AnnData) -> None:
+    version = get_cellxgene_schema_version(h5ad_simple)
+    assert version == "3.0.0"
