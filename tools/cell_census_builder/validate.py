@@ -276,59 +276,86 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
 
     for eb in experiment_specifications:
-        error = f"{eb.name}:{dataset.dataset_id}" + " 'raw' {} mismatch {} vs {}"
         with open_experiment(soma_path, eb) as exp:
             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
             ad = anndata_cell_filter(unfiltered_ad, retain_X=True)
             if ad.raw is None:
-                expected_ad_x = ad.X
+                expected_ad_x, expected_ad_var = ad.X, ad.var
             else:
-                expected_ad_x = ad.raw.X
+                expected_ad_x, expected_ad_var = ad.raw.X, ad.raw.var
 
-            with exp.axis_query(
-                measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=f"dataset_id == '{dataset.dataset_id}'")
-            ) as query:
-                actual_census_gene_count = 0
-                actual_x_coo = None
-                if query.n_obs > 0:
-                    assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].uri)
-                    actual_census_gene_count = _count_elements(
-                        exp.ms["RNA"][FEATURE_DATASET_PRESENCE_MATRIX_NAME], [dataset.soma_joinid]
-                    )
-
-                    # mapping the var_soma_joinid to the anndata feature_ids
-                    actual_genes = query.var(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
-                    gene_mapping = ad.var.join(actual_genes.set_index("feature_id"))[["soma_joinid"]]
-                    gene_mapping["ad_id"] = range(gene_mapping.shape[0])
-                    gene_mapping = gene_mapping.set_index("soma_joinid")
-                    actual_x = (
-                        query.X("raw")
-                        .tables()
-                        .concat()
-                        .to_pandas()
-                        .join(gene_mapping, on="soma_dim_1")[["soma_dim_0", "ad_id", "soma_data"]]
-                    )
-                    # translating the rows
-                    actual_x.soma_dim_0 = actual_x.soma_dim_0 - actual_x.soma_dim_0.min()
-                    # convert to sparse matrix
-                    actual_x_coo = sparse.coo_matrix(
-                        (actual_x.soma_data.array, (actual_x.soma_dim_0.array, actual_x.ad_id.array))
-                    )
-            if actual_x_coo is not None:
-                expected_ad_x_coo = expected_ad_x.tocoo()
-                assert expected_ad_x_coo.nnz == actual_x_coo.nnz, error.format(
-                    "nnz", actual_x_coo.nnz, expected_ad_x.nnz
+            # get the joinids for the obs axis
+            obs_joinids = (
+                exp.obs.read(
+                    column_names=["soma_joinid", "dataset_id"], value_filter=f"dataset_id == '{dataset.dataset_id}'"
                 )
-                assert expected_ad_x_coo.shape == actual_x_coo.shape, error.format(
-                    "shape", actual_x_coo.shape, expected_ad_x_coo.shape
-                )
-                assert (
-                    expected_ad_x_coo != actual_x_coo
-                ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
-            expected_gene_count = np.count_nonzero(expected_ad_x.sum(axis=0))
-            assert expected_gene_count == actual_census_gene_count, error.format(
-                "gene_count", actual_census_gene_count, expected_gene_count
+                .concat()
+                .to_pandas()
             )
+
+            assert ad.n_obs == len(obs_joinids)
+            if len(obs_joinids) == 0:
+                continue
+
+            X_raw = (
+                exp.ms[MEASUREMENT_RNA_NAME]
+                .X["raw"]
+                .read((obs_joinids.soma_joinid.to_numpy(), slice(None)))
+                .tables()
+                .concat()
+            )
+            data = X_raw["soma_data"].to_numpy()
+            rows = X_raw["soma_dim_0"].to_numpy()
+            cols = X_raw["soma_dim_1"].to_numpy()
+
+            # positionally (re)index obs/rows. We _know_ that the Census assigns
+            # obs soma_joinids in the obs position order of the original AnnData, so
+            # leverage that for simplicity and speed.
+            rows_by_position = obs_joinids.set_index("soma_joinid").index.get_indexer(rows)
+
+            # get the joinids for the var axis
+            all_var_ids = (
+                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
+            )
+            # mask defines which feature_ids are in the AnnData
+            var_joinid_in_adata = all_var_ids.feature_id.isin(expected_ad_var.index)
+            assert ad.n_vars == var_joinid_in_adata.sum()
+
+            # positionally re-index the vars/cols using the feature_id as the join key.
+            cols_by_position = (
+                expected_ad_var.join(all_var_ids.set_index("feature_id"))
+                .set_index("soma_joinid")
+                .index.get_indexer(cols)
+            )
+
+            # Assertion 1 - the contents of the X matrix are EQUAL for all var values
+            # present in the AnnData
+            assert (
+                sparse.coo_matrix((data, (rows_by_position, cols_by_position)), shape=expected_ad_x.shape)
+                != expected_ad_x
+            ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
+
+            # Assertion 2 - the contents of the X matrix are EMPTY for all var ids
+            # NOT present in the AnnData. Test by asserting that no col IDs contain
+            # a joinid not in the AnnData.
+            assert (
+                var_joinid_in_adata.all()
+                or not pd.Series(cols).isin(all_var_ids[~var_joinid_in_adata].soma_joinid).any()
+            ), f"{eb.name}:{dataset.dataset_id} unexpected values present in the X matrix."
+
+            # Assertion 3- the contents of the presence matrix match the features present
+            # in the AnnData (where presence is defined as having a non-zero value)
+            presence = (
+                exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+                .read((dataset.soma_joinid,))
+                .tables()
+                .concat()
+            )
+            assert var_joinid_in_adata[presence["soma_dim_1"].to_numpy()].all()
+            assert np.array_equal(np.unique(cols), np.unique(presence["soma_dim_1"]))
+            # sanity check there are no explicit False stored
+            assert not np.isin(presence["soma_data"], 0).any()
+
     return True
 
 
