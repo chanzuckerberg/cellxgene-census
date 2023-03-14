@@ -4,7 +4,7 @@ anndata
 numpy
 # NOTE: The builder's version of tiledbsoma MUST be <= the API's tiledbsoma version, to ensure reader compatibility
 # with TileDB on-disk storage format
-tiledbsoma==1.0
+tiledbsoma==1.0.0
 scipy
 fsspec
 s3fs
