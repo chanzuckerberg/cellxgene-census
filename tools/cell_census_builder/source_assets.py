@@ -11,6 +11,10 @@ from .datasets import Dataset
 from .mp import cpu_count, create_process_pool_executor
 
 
+def _get_n_workers() -> int:
+    return max(min(8, cpu_count()), 64)
+
+
 def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, assets_dir: str) -> None:
     logging.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
@@ -19,7 +23,7 @@ def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, asset
     datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize, reverse=True)
 
     N = len(datasets)
-    n_workers = max(min(8, cpu_count()), 64)
+    n_workers = _get_n_workers()
     with create_process_pool_executor(args, n_workers) as pe:
         paths = [
             path
