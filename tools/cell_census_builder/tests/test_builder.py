@@ -1,5 +1,7 @@
+import io
 import os
 import pathlib
+from types import SimpleNamespace
 from typing import List
 from unittest.mock import patch
 
@@ -9,7 +11,7 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-from tools.cell_census_builder.__main__ import build, make_experiment_specs
+from tools.cell_census_builder.__main__ import build, build_step1_get_source_datasets, make_experiment_specs
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.experiment_builder import ExperimentBuilder
 from tools.cell_census_builder.globals import (
@@ -126,3 +128,20 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
     with soma.DataFrame.open(uri=os.path.join(tmp_path, "unicode_support")) as pd_df_in:
         assert pd_df_in.read().concat().to_pandas()["value"].to_list() == ["Ünicode", "S̈upport"]
+
+
+def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, manifest_csv: io.TextIOWrapper) -> None:
+    import pathlib
+
+    pathlib.Path(tmp_path / "dest").mkdir()
+    args = SimpleNamespace(manifest=manifest_csv, test_first_n=None, verbose=True, max_workers=1)
+
+    # Call the function
+    datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")  # type: ignore
+
+    # Verify that 2 datasets are returned
+    assert len(datasets) == 2
+
+    # Verify that the datasets have been staged
+    assert pathlib.Path(tmp_path / "dest" / "dataset_id_1.h5ad").exists()
+    assert pathlib.Path(tmp_path / "dest" / "dataset_id_2.h5ad").exists()
