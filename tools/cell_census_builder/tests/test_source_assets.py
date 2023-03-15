@@ -18,7 +18,7 @@ def test_source_assets(tmp_path: pathlib.Path) -> None:
         datasets.append(dataset)
 
     # Call the function
-    stage_source_assets(datasets, SimpleNamespace(verbose=True, max_workers=1), tmp_path / "dest")  # type: ignore
+    stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")  # type: ignore
 
     # Verify that the files exist
     for i in range(10):
