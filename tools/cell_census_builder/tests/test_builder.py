@@ -40,7 +40,7 @@ def test_base_builder_creation(
 
         from types import SimpleNamespace
 
-        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", max_workers=1, verbose=True)
+        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", verbose=True)
         return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
 
         # return_value = 0 means that the build succeeded

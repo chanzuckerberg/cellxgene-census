@@ -19,7 +19,7 @@ def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, asset
     datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize, reverse=True)
 
     N = len(datasets)
-    if args.multi_process:
+    if getattr(args, "multi_process", False):
         n_workers = max(min(8, cpu_count()), 64)
         with create_process_pool_executor(args, n_workers) as pe:
             paths = list(
