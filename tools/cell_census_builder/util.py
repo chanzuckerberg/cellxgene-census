@@ -16,6 +16,20 @@ def array_chunker(
 ) -> Iterator[sparse.coo_matrix]:
     """
     Return the array as multiple chunks, each a coo_matrix.
+    The slicing is always done by row (for ndarray and csr_matrix) or by column (for csc_matrix),
+    and will never split a row (or column) into two separate slices.
+
+    Args:
+        arr:
+            The array to slice (either a numpy ndarray, a scipy.sparse csr_matrix or csc_matrix).
+        nnz_chunk_size:
+            Approximate number of elements in each chunk.
+
+    Returns:
+        An iterator containing the chunks.
+
+    Raises:
+        NotImplementedError: If the matrix type is not supported.
     """
 
     if isinstance(arr, sparse.csr_matrix) or isinstance(arr, sparse.csr_array):
