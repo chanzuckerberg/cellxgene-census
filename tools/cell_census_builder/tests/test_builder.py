@@ -134,15 +134,14 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, manifest_csv: i
     import pathlib
 
     pathlib.Path(tmp_path / "dest").mkdir()
-    args = SimpleNamespace(manifest=manifest_csv, test_first_n=None, verbose=True)
+    args = SimpleNamespace(manifest=manifest_csv, test_first_n=None, verbose=True, max_workers=1)
 
     # Call the function
-    with patch("tools.cell_census_builder.source_assets._get_n_workers", return_value=1):
-        datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")  # type: ignore
+    datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")  # type: ignore
 
-        # Verify that 2 datasets are returned
-        assert len(datasets) == 2
+    # Verify that 2 datasets are returned
+    assert len(datasets) == 2
 
-        # Verify that the datasets have been staged
-        assert pathlib.Path(tmp_path / "dest" / "dataset_id_1.h5ad").exists()
-        assert pathlib.Path(tmp_path / "dest" / "dataset_id_2.h5ad").exists()
+    # Verify that the datasets have been staged
+    assert pathlib.Path(tmp_path / "dest" / "dataset_id_1.h5ad").exists()
+    assert pathlib.Path(tmp_path / "dest" / "dataset_id_2.h5ad").exists()
