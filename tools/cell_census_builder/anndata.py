@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT, FEATURE_REFERENCE_IGNORE, RNA_SEQ
+from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT, FEATURE_REFERENCE_IGNORE
 from .util import uricat
 
 AnnDataFilterSpec = TypedDict(
@@ -114,7 +114,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         if organism_ontology_term_id is not None:
             obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
         if assay_ontology_term_ids is not None:
-            obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(RNA_SEQ)
+            obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(assay_ontology_term_ids)
 
         # multi-organism dataset cell filter - exclude any cells where organism != feature_reference
         feature_references = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
