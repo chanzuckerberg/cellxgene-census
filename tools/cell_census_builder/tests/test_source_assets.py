@@ -1,5 +1,5 @@
 import pathlib
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.source_assets import stage_source_assets
@@ -23,3 +23,11 @@ def test_source_assets(tmp_path: pathlib.Path) -> None:
     # Verify that the files exist
     for i in range(10):
         assert pathlib.Path(tmp_path / "dest" / f"dataset_{i}.h5ad").exists()
+
+
+def setup_module(module: ModuleType) -> None:
+    # this is very important to do early, before any use of `concurrent.futures`
+    import multiprocessing
+
+    if multiprocessing.get_start_method(True) != "spawn":
+        multiprocessing.set_start_method("spawn", True)
