@@ -1,7 +1,7 @@
 import io
 import os
 import pathlib
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 from typing import List
 from unittest.mock import patch
 
@@ -147,7 +147,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, manifest_csv: i
     assert pathlib.Path(tmp_path / "dest" / "dataset_id_2.h5ad").exists()
 
 
-def setup_module(module):
+def setup_module(module: ModuleType) -> None:
     # this is very important to do early, before any use of `concurrent.futures`
     import multiprocessing
 
