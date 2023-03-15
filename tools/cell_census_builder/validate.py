@@ -259,15 +259,14 @@ def validate_axis_dataframes(
 
 def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> bool:
     """
-    Validate that a single dataset is correctly represented in the census.
-    Intended to be dispatched from validate_X_layers.
+    Validate that a single dataset is correctly represented in the census. Intended to be
+    dispatched from validate_X_layers.
 
-    Currently, implements weak tests:
-    * 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
-    * 2 - the contents of the X matrix are EMPTY for all var ids NOT present in the AnnData. Test by asserting that
-      no col IDs contain a joinid not in the AnnData.
-    * 3 - the contents of the presence matrix match the features present
-      in the AnnData (where presence is defined as having a non-zero value)
+    Currently, implements the following tests:
+    * the contents of the X matrix are EQUAL for all var feature_ids present in the AnnData
+    * the contents of the X matrix are EMPTY for all var feature_ids NOT present in the AnnData
+    * the contents of the presence matrix match the features present in the AnnData
+      (where presence is defined as having a non-zero value)
     """
     assets_path, soma_path, dataset, experiment_specifications = args
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
@@ -301,14 +300,14 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 .tables()
                 .concat()
             )
-            data = X_raw["soma_data"].to_numpy()
-            rows = X_raw["soma_dim_0"].to_numpy()
-            cols = X_raw["soma_dim_1"].to_numpy()
+            X_raw_data = X_raw["soma_data"].to_numpy()
+            X_raw_obs_joinids = X_raw["soma_dim_0"].to_numpy()
+            X_raw_var_joinids = X_raw["soma_dim_1"].to_numpy()
 
             # positionally (re)index obs/rows. We _know_ that the Census assigns
             # obs soma_joinids in the obs position order of the original AnnData, so
             # leverage that for simplicity and speed.
-            rows_by_position = obs_joinids.set_index("soma_joinid").index.get_indexer(rows)
+            rows_by_position = obs_joinids.set_index("soma_joinid").index.get_indexer(X_raw_obs_joinids)
 
             # get the joinids for the var axis
             all_var_ids = (
@@ -322,13 +321,13 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             cols_by_position = (
                 expected_ad_var.join(all_var_ids.set_index("feature_id"))
                 .set_index("soma_joinid")
-                .index.get_indexer(cols)
+                .index.get_indexer(X_raw_var_joinids)
             )
 
             # Assertion 1 - the contents of the X matrix are EQUAL for all var values
             # present in the AnnData
             assert (
-                sparse.coo_matrix((data, (rows_by_position, cols_by_position)), shape=expected_ad_x.shape)
+                sparse.coo_matrix((X_raw_data, (rows_by_position, cols_by_position)), shape=expected_ad_x.shape)
                 != expected_ad_x
             ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
 
@@ -337,7 +336,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             # a joinid not in the AnnData.
             assert (
                 var_joinid_in_adata.all()
-                or not pd.Series(cols).isin(all_var_ids[~var_joinid_in_adata].soma_joinid).any()
+                or not pd.Series(X_raw_var_joinids).isin(all_var_ids[~var_joinid_in_adata].soma_joinid).any()
             ), f"{eb.name}:{dataset.dataset_id} unexpected values present in the X matrix."
 
             # Assertion 3- the contents of the presence matrix match the features present
@@ -353,7 +352,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 "container a different number of genes."
             )
             assert np.array_equal(
-                np.unique(cols), np.unique(presence["soma_dim_1"])
+                np.unique(X_raw_var_joinids), np.unique(presence["soma_dim_1"])
             ), f"{eb.name}:{dataset.dataset_id} the genes in the X and presence matrix are not equal."
             # sanity check there are no explicit False stored
             assert not np.isin(presence["soma_data"], 0).any(), (
