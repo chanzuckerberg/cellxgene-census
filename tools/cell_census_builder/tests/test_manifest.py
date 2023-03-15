@@ -18,6 +18,14 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: io.TextIO
     assert manifest[1].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
 
 
+def test_load_manifest_does_dedup(manifest_csv_with_duplicates: io.TextIOWrapper) -> None:
+    """
+    `load_manifest` should not include duplicate datasets from the manifest
+    """
+    manifest = load_manifest(manifest_csv_with_duplicates)
+    assert len(manifest) == 2
+
+
 def test_load_manifest_from_cxg() -> None:
     """
     If no parameters are specified, `load_manifest` should load the dataset list from Discover API.

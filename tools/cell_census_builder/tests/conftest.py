@@ -140,6 +140,24 @@ def manifest_csv(tmp_path: pathlib.Path) -> io.TextIOWrapper:
     return open(path)
 
 
+@pytest.fixture
+def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> io.TextIOWrapper:
+    manifest_content = f"""
+    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
+    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """
+    path = f"{tmp_path}/manifest.csv"
+    h5ad_path = f"{tmp_path}/data/h5ads/"
+    pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(tmp_path / "data/h5ads/dataset_id_1.h5ad").touch()
+    pathlib.Path(tmp_path / "data/h5ads/dataset_id_2.h5ad").touch()
+    with open(path, "w+") as f:
+        f.writelines(manifest_content.strip())
+
+    return open(path)
+
+
 @pytest.fixture()
 def setup(monkeypatch: MonkeyPatch) -> None:
     process_initializer()
