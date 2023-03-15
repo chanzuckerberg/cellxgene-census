@@ -93,11 +93,15 @@ def test_array_chunker() -> None:
     assert chunked[3].nnz == 7
     assert chunked[4].nnz == 3
 
+    # Verify chunking is done by row
+    for i in range(0, 5):
+        assert np.array_equal(chunked[i].todense()[2 * i : 2 * (i + 1), :], X.todense()[2 * i : 2 * (i + 1), :])  # type: ignore
+
     # Case 3: compressed column sparse matrix (csc_matrix)
     # We'll use the same example as for csr, but note that chunking is done by column and not by row.
 
     X = triu(np.ones(100).reshape(10, 10)).tocsc()
-    # In this case, chunks will be 2 rows x 10 column (since on average each row contains 5 nonzeros)
+    # In this case, chunks will be 10 rows x 2 column (since on average each row contains 5 nonzeros)
     chunked = list(array_chunker(X, nnz_chunk_size=10))
     assert len(chunked) == 5
     assert chunked[0].nnz == 3
@@ -105,6 +109,10 @@ def test_array_chunker() -> None:
     assert chunked[2].nnz == 11
     assert chunked[3].nnz == 15
     assert chunked[4].nnz == 19
+
+    # Verify chunks (chunking is done by column)
+    for i in range(0, 5):
+        assert np.array_equal(chunked[i].todense()[:, 2 * i : 2 * (i + 1)], X.todense()[:, 2 * i : 2 * (i + 1)])  # type: ignore
 
     # Other formats are rejected by the method
     X = triu(np.ones(100).reshape(10, 10)).tolil()
