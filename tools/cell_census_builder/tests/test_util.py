@@ -2,33 +2,33 @@ import numpy as np
 import pytest
 from scipy.sparse import coo_matrix, csr_matrix, triu
 
-from tools.cell_census_builder.util import array_chunker, is_positive_integral, uricat
+from tools.cell_census_builder.util import array_chunker, is_nonnegative_integral, uricat
 
 
-def test_is_positive_integral() -> None:
+def test_is_nonnegative_integral() -> None:
     X = np.array([1, 2, 3, 4])
-    assert is_positive_integral(X)
+    assert is_nonnegative_integral(X)
 
     X = np.array([-1, 2, 3, 4])
-    assert not is_positive_integral(X)
+    assert not is_nonnegative_integral(X)
 
     X = np.array([1.2, 0, 3, 4])
-    assert not is_positive_integral(X)
+    assert not is_nonnegative_integral(X)
 
     X = np.zeros((3, 4))
-    assert is_positive_integral(X)
+    assert is_nonnegative_integral(X)
 
     X = csr_matrix([[1, 2, 3], [4, 5, 6]])
-    assert is_positive_integral(X)
+    assert is_nonnegative_integral(X)
 
     X = csr_matrix([[-1, 2, 3], [4, 5, 6]])
-    assert not is_positive_integral(X)
+    assert not is_nonnegative_integral(X)
 
     X = csr_matrix([[1.2, 0, 3], [4, 5, 6]])
-    assert not is_positive_integral(X)
+    assert not is_nonnegative_integral(X)
 
     X = csr_matrix([0, 0, 0])
-    assert is_positive_integral(X)
+    assert is_nonnegative_integral(X)
 
 
 def test_array_chunker() -> None:

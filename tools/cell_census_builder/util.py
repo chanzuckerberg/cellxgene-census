@@ -72,7 +72,7 @@ def fetch_json(url: str, delay_secs: float = 0.0) -> object:
     return response.json()
 
 
-def is_positive_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix]) -> bool:
+def is_nonnegative_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix]) -> bool:
     """
     Return true if the matrix/array contains only positive integral values,
     False otherwise.
