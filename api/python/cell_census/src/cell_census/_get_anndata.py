@@ -35,8 +35,6 @@ def get_anndata(
     Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
 
-    [lifecycle: experimental]
-
     Args:
         census:
             The census object, usually returned by :func:`cell_census.open_soma()`.
@@ -63,6 +61,9 @@ def get_anndata(
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
+
+    Lifecycle:
+        Experimental.
 
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
