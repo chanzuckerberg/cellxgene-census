@@ -1,0 +1,11 @@
+census-builder:
+  uri:
+    /data/cell-census-small/
+  verbose:
+    true
+  commands:
+    build:
+      manifest:
+        /data/manifest-small.csv
+      test-disable-dirty-git-check:
+        true
