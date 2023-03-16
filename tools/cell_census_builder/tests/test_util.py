@@ -24,22 +24,22 @@ def test_is_nonnegative_integral() -> None:
     X = np.zeros((3, 4), dtype=np.float32)
     assert is_nonnegative_integral(X)
 
-    X = csr_matrix([[1, 2, 3], [4, 5, 6]])
+    X = csr_matrix([[1, 2, 3], [4, 5, 6]], dtype=np.float32)
     assert is_nonnegative_integral(X)
 
-    X = csr_matrix([[-1, 2, 3], [4, 5, 6]])
+    X = csr_matrix([[-1, 2, 3], [4, 5, 6]], dtype=np.float32)
     assert not is_nonnegative_integral(X)
 
-    X = csr_matrix([[1.2, 0, 3], [4, 5, 6]])
+    X = csr_matrix([[1.2, 0, 3], [4, 5, 6]], dtype=np.float32)
     assert not is_nonnegative_integral(X)
 
-    X = csr_matrix([0, 0, 0])
+    X = csr_matrix([0, 0, 0], dtype=np.float32)
     assert is_nonnegative_integral(X)
 
     X = np.empty(0, dtype=np.float32)  # Empty ndarray
     assert is_nonnegative_integral(X)
 
-    X = csr_matrix((0, 0))  # Empty sparse matrix
+    X = csr_matrix((0, 0), dtype=np.float32)  # Empty sparse matrix
     assert is_nonnegative_integral(X)
 
 
