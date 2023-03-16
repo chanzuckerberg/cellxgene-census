@@ -10,3 +10,10 @@ test_that("open_soma latest/default", {
   coll_latest <- open_soma("latest")
   expect_equal(coll_default$uri, coll_latest$uri)
 })
+
+test_that("open_soma with custom context", {
+  ctx <- tiledbsoma::SOMATileDBContext$new(config = c("vfs.s3.region" = "bogus"))
+  # open_soma should override our bogus vfs.s3.region setting
+  coll <- open_soma(tiledbsoma_ctx = ctx)
+  expect_true(coll$exists())
+})

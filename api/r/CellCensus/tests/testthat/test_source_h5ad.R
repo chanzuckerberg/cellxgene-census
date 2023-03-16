@@ -1,5 +1,6 @@
 test_that("get_source_h5ad_uri", {
-  census <- open_soma()
+  census_region <- get_census_version_description("latest")$soma.s3_region
+  census <- open_soma("latest")
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
     column_names = c("dataset_id", "dataset_h5ad_path")
   ))
@@ -11,7 +12,7 @@ test_that("get_source_h5ad_uri", {
     loc <- get_source_h5ad_uri(dataset$dataset_id)
 
     expect_true(endsWith(loc$uri, paste("/", dataset$dataset_h5ad_path, sep = "")))
-    expect_equal(loc$s3_region, unname(tiledb::config(census$ctx)["vfs.s3.region"]))
+    expect_equal(loc$s3_region, census_region)
     # check URI joining with trailing slashes
     expect_false(endsWith(loc$uri, paste("//", dataset$dataset_h5ad_path, sep = "")))
   })
