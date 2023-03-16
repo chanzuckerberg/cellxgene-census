@@ -53,8 +53,6 @@ def open_soma(
 ) -> soma.Collection:
     """Open the Cell Census by version or URI.
 
-    [lifecycle: experimental]
-
     Args:
         census_version:
             The version of the Census, e.g. "latest".
@@ -71,6 +69,9 @@ def open_soma(
     Raises:
         ValueError: if the census cannot be found, the URI cannot be opened, or neither a URI
             or a version are specified.
+
+    Lifecycle:
+        Experimental.
 
     Examples:
         Open the default Cell Census version, using a context manager which will automatically
@@ -115,8 +116,6 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     """Open the named version of the census, and return the URI for the ``dataset_id``. This
     does not guarantee that the H5AD exists or is accessible to the user.
 
-    [lifecycle: experimental]
-
     Args:
         dataset_id:
             The ``dataset_id`` of interest.
@@ -128,6 +127,9 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
 
     Raises:
         KeyError: if either `dataset_id` or `census_version` do not exist.
+
+    Lifecycle:
+        Experimental.
 
     Examples:
         >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
@@ -151,8 +153,6 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
     file name.
 
-    [lifecycle: experimental]
-
     Args:
         dataset_id
             Fetch the source (original) H5AD associated with this `dataset_id`.
@@ -164,6 +164,9 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite
             an existing file), or is not a file.
+
+    Lifecycle:
+        Experimental.
 
     See Also:
         :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.

@@ -18,8 +18,6 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     Organism matching is somewhat flexible, attempting to map from human-friendly
     names to the underlying collection element name.
 
-    [lifecycle: experimental]
-
     Args:
         census: soma.Collection
             The census.
@@ -31,6 +29,9 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
 
     Raises:
         ValueError: if unable to find the specified organism.
+
+    Lifecycle:
+        Experimental.
 
     Examples:
 
