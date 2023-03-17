@@ -26,8 +26,6 @@ open_soma <- function(census_version = "latest", uri = NULL, tiledbsoma_ctx = NU
       description$soma.s3_region != "") {
       s3_region <- description$soma.s3_region
     }
-  } else if (s3_region != "") {
-    cfg <- c(cfg, c("vfs.s3.region" = s3_region))
   }
 
   cfg <- DEFAULT_TILEDB_CONFIGURATION
