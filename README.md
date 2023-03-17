@@ -1,6 +1,6 @@
 [![codecov](https://codecov.io/gh/chanzuckerberg/cell-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cell-census)
 
-:exclamation: **Status:** experimental, under rapid development.
+:exclamation: **Status:** pre-release, under rapid development.
 
 :exclamation: **Feature name:** "Cell Census" is a temporary name, final name may change on release.
 
