@@ -8,28 +8,42 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #' @param census_version The version of the Census, e.g., "latest".
 #' @param uri The URI containing the Census SOMA objects. If specified, takes
 #'            precedence over `census_version`.
-#' @param s3_region Optional AWS region accompanying uri.
+#' @param tiledbsoma_ctx A custom `tiledbsoma::SOMATileDBContext`
 #'
 #' @return Top-level `tiledbsoma::SOMACollection` object
 #' @importFrom tiledbsoma SOMACollection
-#' @importFrom tiledb tiledb_ctx
+#' @importFrom tiledbsoma SOMATileDBContext
 #' @export
 #'
 #' @examples
-open_soma <- function(census_version = "latest", uri = "", s3_region = "") {
-  cfg <- DEFAULT_TILEDB_CONFIGURATION
+open_soma <- function(census_version = "latest", uri = NULL, tiledbsoma_ctx = NULL) {
+  s3_region <- NULL
 
-  if (uri == "") {
-    stopifnot("'s3_region' applicable only for specific uri" = s3_region == "")
+  if (is.null(uri)) {
     description <- get_census_version_description(census_version)
     uri <- description$soma.uri
     if ("soma.s3_region" %in% names(description) &&
       description$soma.s3_region != "") {
-      cfg <- c(cfg, c("vfs.s3.region" = description$soma.s3_region))
+      s3_region <- description$soma.s3_region
     }
   } else if (s3_region != "") {
     cfg <- c(cfg, c("vfs.s3.region" = s3_region))
   }
 
-  return(tiledbsoma::SOMACollection$new(uri, ctx = tiledb::tiledb_ctx(cfg)))
+  cfg <- DEFAULT_TILEDB_CONFIGURATION
+  if (is.null(tiledbsoma_ctx)) {
+    if (!is.null(s3_region)) {
+      cfg <- c(cfg, c("vfs.s3.region" = description$soma.s3_region))
+    }
+  } else {
+    # FIXME: we should use something like SOMATileDBContext$replace() (yet to
+    # exist) in case the user context has other important fields besides config
+    cfg <- as.vector(tiledb::config(tiledbsoma_ctx$get_tiledb_context()))
+    if (!is.null(s3_region)) {
+      cfg["vfs.s3.region"] <- s3_region
+    }
+  }
+  tiledbsoma_ctx <- tiledbsoma::SOMATileDBContext$new(config = cfg)
+
+  return(tiledbsoma::SOMACollection$new(uri, tiledbsoma_ctx = tiledbsoma_ctx))
 }

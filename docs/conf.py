@@ -18,6 +18,8 @@ release = "0.5.0"
 
 extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx", 'sphinx.ext.napoleon']
 
+napoleon_custom_sections = ["Lifecycle"]
+
 tiledb_version = "latest"
 
 intersphinx_mapping = {

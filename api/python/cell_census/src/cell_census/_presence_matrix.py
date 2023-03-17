@@ -23,8 +23,6 @@ def get_presence_matrix(
     first dimension by the dataset ``soma_joinid`` values, and on the
     second dimension by the ``var`` DataFrame ``soma_joinid`` values.
 
-    [lifecycle: experimental]
-
     Args:
         census:
             The census from which to read the presence matrix.
@@ -38,6 +36,9 @@ def get_presence_matrix(
 
     Raises:
         ValueError: if the organism cannot be found.
+
+    Lifecycle:
+        Experimental.
 
     Examples:
         >>> get_presence_matrix(census, "Homo sapiens", "RNA")
