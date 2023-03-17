@@ -10,9 +10,10 @@ import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
-from cell_census_builder.build_soma.__main__ import build, build_step1_get_source_datasets, make_experiment_specs
+from cell_census_builder.build_soma.build import build, build_step1_get_source_datasets
 from cell_census_builder.build_soma.datasets import Dataset
 from cell_census_builder.build_soma.experiment_builder import ExperimentBuilder
+from cell_census_builder.build_soma.experiment_specs import make_experiment_specs
 from cell_census_builder.build_soma.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
@@ -28,8 +29,8 @@ def test_base_builder_creation(
     """
     Runs the builder, queries the census and performs a set of base assertions.
     """
-    with patch("cell_census_builder.build_soma.__main__.prepare_file_system"), patch(
-        "cell_census_builder.build_soma.__main__.build_step1_get_source_datasets", return_value=datasets
+    with patch("cell_census_builder.build_soma.build.prepare_file_system"), patch(
+        "cell_census_builder.build_soma.build.build_step1_get_source_datasets", return_value=datasets
     ), patch("cell_census_builder.build_soma.consolidate._run"), patch(
         "cell_census_builder.build_soma.validate.validate_consolidation", return_value=True
     ):

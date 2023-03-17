@@ -5,7 +5,7 @@ from typing import Optional
 
 import psutil
 
-from cell_census_builder.logging import setup_logging, hr_multibyte_unit
+from cell_census_builder.logging import hr_multibyte_unit, setup_logging
 
 """Minimum physical RAM"""
 MIN_RAM = 512 * 1024**3  # 512GiB
