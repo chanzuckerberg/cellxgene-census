@@ -1,8 +1,8 @@
+import os
 import time
 import urllib.parse
 from typing import Any, Iterator, Optional, Union
 
-import git
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -134,6 +134,12 @@ def get_git_commit_sha() -> str:
     """
     Returns the git commit SHA for the current repo
     """
+    # Try to get the git commit SHA from the COMMIT_SHA env variable
+    commit_sha_var = os.getenv("COMMIT_SHA")
+    if commit_sha_var is not None:
+        return commit_sha_var
+    import git  # Scoped import - this requires the git executable to exist on the machine
+
     repo = git.Repo(search_parent_directories=True)
     hexsha: str = repo.head.object.hexsha
     return hexsha
@@ -143,6 +149,8 @@ def is_git_repo_dirty() -> bool:
     """
     Returns True if the git repo is dirty, i.e. there are uncommitted changes
     """
+    import git  # Scoped import - this requires the git executable to exist on the machine
+
     repo = git.Repo(search_parent_directories=True)
     is_dirty: bool = repo.is_dirty()
     return is_dirty
