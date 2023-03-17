@@ -5,6 +5,8 @@ import multiprocessing
 import os
 from typing import Optional, cast
 
+from ..logging import setup_logging
+
 
 def cpu_count() -> int:
     """Sign, os.cpu_count() returns None if "undetermined" number of CPUs"""
@@ -15,13 +17,7 @@ def cpu_count() -> int:
 
 
 def process_initializer(verbose: int = 0) -> None:
-    level = logging.DEBUG if verbose > 1 else logging.INFO if verbose == 1 else logging.WARNING
-    logging.basicConfig(
-        format="%(asctime)s %(process)-7s %(levelname)-8s %(message)s",
-        level=level,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    logging.captureWarnings(True)
+    setup_logging(verbose)
 
 
 def create_process_pool_executor(

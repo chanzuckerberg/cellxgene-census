@@ -10,17 +10,16 @@ import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
-
-from tools.cell_census_builder.__main__ import build, build_step1_get_source_datasets, make_experiment_specs
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.experiment_builder import ExperimentBuilder
-from tools.cell_census_builder.globals import (
+from cell_census_builder.build_soma.__main__ import build, build_step1_get_source_datasets, make_experiment_specs
+from cell_census_builder.build_soma.datasets import Dataset
+from cell_census_builder.build_soma.experiment_builder import ExperimentBuilder
+from cell_census_builder.build_soma.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
 )
-from tools.cell_census_builder.validate import validate
+from cell_census_builder.build_soma.validate import validate
 
 
 def test_base_builder_creation(
@@ -29,10 +28,10 @@ def test_base_builder_creation(
     """
     Runs the builder, queries the census and performs a set of base assertions.
     """
-    with patch("tools.cell_census_builder.__main__.prepare_file_system"), patch(
-        "tools.cell_census_builder.__main__.build_step1_get_source_datasets", return_value=datasets
-    ), patch("tools.cell_census_builder.consolidate._run"), patch(
-        "tools.cell_census_builder.validate.validate_consolidation", return_value=True
+    with patch("cell_census_builder.build_soma.__main__.prepare_file_system"), patch(
+        "cell_census_builder.build_soma.__main__.build_step1_get_source_datasets", return_value=datasets
+    ), patch("cell_census_builder.build_soma.consolidate._run"), patch(
+        "cell_census_builder.build_soma.validate.validate_consolidation", return_value=True
     ):
         # Patching consolidate_tiledb_object, becuase is uses to much memory to run in github actions.
         experiment_specifications = make_experiment_specs()
@@ -41,13 +40,13 @@ def test_base_builder_creation(
         from types import SimpleNamespace
 
         args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", verbose=True)
-        return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
+        return_value = build(args, soma_path, assets_path, experiment_builders)
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
 
         # validate the cell_census
-        return_value = validate(args, soma_path, assets_path, experiment_specifications)  # type: ignore[arg-type]
+        return_value = validate(args, soma_path, assets_path, experiment_specifications)
         assert return_value is True
 
         # Query the census and do assertions
@@ -137,7 +136,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, manifest_csv: i
     args = SimpleNamespace(manifest=manifest_csv, test_first_n=None, verbose=2, multi_process=True)
 
     # Call the function
-    datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")  # type: ignore
+    datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")
 
     # Verify that 2 datasets are returned
     assert len(datasets) == 2

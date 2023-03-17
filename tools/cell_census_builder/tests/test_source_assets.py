@@ -1,8 +1,8 @@
 import pathlib
 from types import ModuleType, SimpleNamespace
 
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.source_assets import stage_source_assets
+from cell_census_builder.build_soma.datasets import Dataset
+from cell_census_builder.build_soma.source_assets import stage_source_assets
 
 
 def test_source_assets(tmp_path: pathlib.Path) -> None:
@@ -18,7 +18,7 @@ def test_source_assets(tmp_path: pathlib.Path) -> None:
         datasets.append(dataset)
 
     # Call the function
-    stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")  # type: ignore
+    stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")
 
     # Verify that the files exist
     for i in range(10):

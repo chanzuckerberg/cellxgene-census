@@ -9,13 +9,12 @@ import numpy as np
 import pandas as pd
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from scipy import sparse
-
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.globals import (
+from cell_census_builder.build_soma.datasets import Dataset
+from cell_census_builder.build_soma.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
-from tools.cell_census_builder.mp import process_initializer
+from cell_census_builder.build_soma.mp import process_initializer
+from scipy import sparse
 
 
 @attrs.define(frozen=True)
@@ -168,9 +167,5 @@ def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> io.TextIOWrapper:
 @pytest.fixture()
 def setup(monkeypatch: MonkeyPatch) -> None:
     process_initializer()
-    monkeypatch.setitem(
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"], "tile", 2  # type: ignore
-    )
-    monkeypatch.setitem(
-        CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2  # type: ignore
-    )
+    monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"], "tile", 2)
+    monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2)

@@ -4,7 +4,7 @@ import sys
 import cell_census
 import pandas as pd
 
-from tools.cell_census_builder.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
+from .build.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
 
 # Print all of the Pandas DataFrames, except the dimensions
 pd.options.display.max_columns = None  # type: ignore[assignment] # None is legal per Pandas documentation.

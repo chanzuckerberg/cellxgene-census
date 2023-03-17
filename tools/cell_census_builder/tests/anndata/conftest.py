@@ -2,9 +2,9 @@ from typing import List
 
 import anndata as ad
 import pytest
+from cell_census_builder.build_soma.datasets import Dataset
 
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.tests.conftest import ORGANISMS, get_h5ad
+from ..conftest import ORGANISMS, get_h5ad
 
 
 @pytest.fixture

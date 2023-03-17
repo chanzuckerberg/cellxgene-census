@@ -1,16 +1,31 @@
 # README
 
-This is a tool to build the SOMA instantiation of the Cell Census schema, as specified in this doc:
+This package contains code to build and release the Cell Census in the SOMA format, as specified in the
+[data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md).
 
-https://docs.google.com/document/d/1GKndzCk9q_1SdYOq3BeCxWgp-o2NSQkEmSBaBPKnNI8/
+This tool is not intended for end-users - it is used by CZI to periodically create and release all
+CELLxGENE data in the above format. The remainder of this document is intended for users of the
+build package.
 
-CAVEATS (READ THIS):
+Please see the top-level [README](../../README.md) for more information on the Cell Census.
 
-1. The code is written to the still-rapidly-evolving and **pre-release** Python SOMA API, _and will be subject to change_ as the SOMA API and `tiledbsoma` evolve and stabilize.
-2. The schema implemented by this code is still evolving and subject to change.
-3. The `cell_census_builder` package requires Python 3.9 or later.
+# Overview
 
-## Usage
+This package contains sub-modules, each of which automate elements of the Cell Census build and release process.
+The ultimate intention is to integrate these into an automated multi-step workflow. Until that occurs, individual steps
+are provided as modules with their own `__main__`, to be manually invoked.
+
+## `host_validation` module
+
+Module which provides a set of checks that the current host machine has the requisite capabilities
+to build the census (e.g., free disk space). Raises exception (non-zero process exit) if host is
+unable to meet base requirements.
+
+Stand-alone usage: `python -m cell_census_builder.host_validation`
+
+## `build_soma` module
+
+Stand-alone use: `python -m cell_census_builder.build_soma ...`
 
 TL;DR:
 
@@ -25,7 +40,7 @@ The build process:
 - Step 3: Write the axis dataframes for each experiment, filtering the datasets and cells to include (serialized iteration of dataset H5ADs).
 - Step 4: Write the X layers for each experiment (parallelized iteration of filtered dataset H5ADs).
 - Step 5: Write datasets manifest and summary info.
-- (Optional) Consolidate TileDB data 
+- (Optional) Consolidate TileDB data
 - (Optional) Validate the entire Cell Census, re-reading from storage.
 
 Modes of operation:
@@ -37,10 +52,10 @@ b) creating a smaller "cell census" from a user-provided list of files (a "manif
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
 - To create a cell census at `<census_path>`, execute:
   > $ python -m cell_census_builder -mp --max-workers 12 <census_path> build
-- Tips: 
-    - `-v` to view info-level logging during run, or `-v -v` for debug-level logging
-    - `--test-first-n <#>` to test build on a subset of datasets
-    - `--build-tag $(date +'%Y%m%d_%H%M%S')` to produce non-conflicting census build directories during testing
+- Tips:
+  - `-v` to view info-level logging during run, or `-v -v` for debug-level logging
+  - `--test-first-n <#>` to test build on a subset of datasets
+  - `--build-tag $(date +'%Y%m%d_%H%M%S')` to produce non-conflicting census build directories during testing
 
 If you run out of memory, reduce `--max-workers`. You can also try a higher number if you have lots of CPU & memory.
 

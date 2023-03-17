@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
+from cell_census_builder.build_soma.util import array_chunker, is_nonnegative_integral, uricat
 from scipy.sparse import coo_matrix, csr_matrix, triu
-
-from tools.cell_census_builder.util import array_chunker, is_nonnegative_integral, uricat
 
 
 def test_is_nonnegative_integral() -> None:
