@@ -22,7 +22,10 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #'
 #' @return a [tiledbsoma::SOMAExperiment] with the requested experiment.
 #'
-#' @NoRd
+#' @importFrom methods is
+#' @importFrom stats setNames
+#'
+#' @noRd
 get_experiment <- function(census, organism) {
   # lower/snake case the organism name to find the experiment name
   exp_name <- tolower(gsub("\\s+", "_", organism))

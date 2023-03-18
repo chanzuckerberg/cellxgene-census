@@ -43,5 +43,5 @@ open_soma <- function(census_version = "latest", uri = NULL, tiledbsoma_ctx = NU
   }
   tiledbsoma_ctx <- tiledbsoma::SOMATileDBContext$new(config = cfg)
 
-  return(tiledbsoma::SOMACollection$new(uri, tiledbsoma_ctx = tiledbsoma_ctx))
+  return(tiledbsoma::SOMACollectionOpen(uri, tiledbsoma_ctx = tiledbsoma_ctx))
 }
