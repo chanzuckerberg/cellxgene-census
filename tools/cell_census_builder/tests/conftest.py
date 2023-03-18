@@ -1,6 +1,7 @@
+import io
 import os
 import pathlib
-from typing import List
+from typing import List, Optional
 
 import anndata
 import attrs
@@ -24,10 +25,16 @@ class Organism:
 
 
 ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
+GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
+NUM_DATASET = 2
 
 
-def get_h5ad(organism: Organism) -> anndata.AnnData:
-    X = np.random.randint(5, size=(4, 4)).astype(np.float32)
+def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None) -> anndata.AnnData:
+    gene_ids = gene_ids or GENE_IDS[0]
+    n_cells = 4
+    n_genes = len(gene_ids)
+    rng = np.random.default_rng()
+    X = rng.integers(5, size=(n_cells, n_genes)).astype(np.float32)
     # The builder only supports sparse matrices
     X = sparse.csr_matrix(X)
 
@@ -60,7 +67,7 @@ def get_h5ad(organism: Organism) -> anndata.AnnData:
     obs = obs_dataframe
 
     # Create vars
-    feature_name = pd.Series(data=[f"{organism.name}_{g}" for g in ["a", "b", "c", "d"]])
+    feature_id = pd.Series(data=[f"{organism.name}_{g}" for g in gene_ids])
     var_dataframe = pd.DataFrame(
         data={
             "feature_biotype": "gene",
@@ -68,12 +75,13 @@ def get_h5ad(organism: Organism) -> anndata.AnnData:
             "feature_name": "ERCC-00002 (spike-in control)",
             "feature_reference": organism.organism_ontology_term_id,
         },
-        index=feature_name,
+        index=feature_id,
     )
     var = var_dataframe
 
     # Create embeddings
-    random_embedding = np.random.rand(4, 4)
+    rng.random()
+    random_embedding = rng.random(n_cells * n_genes).reshape(n_cells, n_genes)
     obsm = {"X_awesome_embedding": random_embedding}
 
     # Create uns corpora metadata
@@ -104,13 +112,13 @@ def soma_path(tmp_path: pathlib.Path) -> str:
 def datasets(assets_path: str) -> List[Dataset]:
     datasets = []
     for organism in ORGANISMS:
-        for dataset_id in range(2):
-            h5ad = get_h5ad(organism)
-            h5ad_path = f"{assets_path}/{organism.name}_{dataset_id}.h5ad"
+        for i in range(NUM_DATASET):
+            h5ad = get_h5ad(organism, GENE_IDS[i])
+            h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(
                 Dataset(
-                    dataset_id=f"{organism.name}_{dataset_id}",
+                    dataset_id=f"{organism.name}_{i}",
                     dataset_title=f"title_{organism.name}",
                     collection_id=f"id_{organism.name}",
                     collection_name=f"collection_{organism.name}",
@@ -120,6 +128,41 @@ def datasets(assets_path: str) -> List[Dataset]:
             )
 
     return datasets
+
+
+@pytest.fixture
+def manifest_csv(tmp_path: pathlib.Path) -> io.TextIOWrapper:
+    manifest_content = f"""
+    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """
+    path = f"{tmp_path}/manifest.csv"
+    h5ad_path = f"{tmp_path}/data/h5ads/"
+    pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(tmp_path / "data/h5ads/dataset_id_1.h5ad").touch()
+    pathlib.Path(tmp_path / "data/h5ads/dataset_id_2.h5ad").touch()
+    with open(path, "w+") as f:
+        f.writelines(manifest_content.strip())
+
+    return open(path)
+
+
+@pytest.fixture
+def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> io.TextIOWrapper:
+    manifest_content = f"""
+    dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
+    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
+    dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
+    """
+    path = f"{tmp_path}/manifest.csv"
+    h5ad_path = f"{tmp_path}/data/h5ads/"
+    pathlib.Path(h5ad_path).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(tmp_path / "data/h5ads/dataset_id_1.h5ad").touch()
+    pathlib.Path(tmp_path / "data/h5ads/dataset_id_2.h5ad").touch()
+    with open(path, "w+") as f:
+        f.writelines(manifest_content.strip())
+
+    return open(path)
 
 
 @pytest.fixture()

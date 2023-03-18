@@ -1,5 +1,7 @@
+import io
 import os
 import pathlib
+from types import ModuleType, SimpleNamespace
 from typing import List
 from unittest.mock import patch
 
@@ -9,7 +11,7 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-from tools.cell_census_builder.__main__ import build, make_experiment_specs
+from tools.cell_census_builder.__main__ import build, build_step1_get_source_datasets, make_experiment_specs
 from tools.cell_census_builder.datasets import Dataset
 from tools.cell_census_builder.experiment_builder import ExperimentBuilder
 from tools.cell_census_builder.globals import (
@@ -38,7 +40,7 @@ def test_base_builder_creation(
 
         from types import SimpleNamespace
 
-        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", max_workers=1, verbose=True)
+        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", verbose=True)
         return_value = build(args, soma_path, assets_path, experiment_builders)  # type: ignore[arg-type]
 
         # return_value = 0 means that the build succeeded
@@ -63,13 +65,13 @@ def test_base_builder_creation(
             assert mouse_obs.shape[0] == 8
             assert list(np.unique(mouse_obs["dataset_id"])) == ["mus_musculus_0", "mus_musculus_1"]
 
-            # There are only 4 unique genes
+            # Assert number of unique genes
             var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
-            assert var.shape[0] == 4
+            assert var.shape[0] == 5
             assert all(var["feature_id"].str.startswith("homo_sapiens"))
 
             var = census[CENSUS_DATA_NAME]["mus_musculus"]["ms"]["RNA"]["var"].read().concat().to_pandas()
-            assert var.shape[0] == 4
+            assert var.shape[0] == 5
             assert all(var["feature_id"].str.startswith("mus_musculus"))
 
             # There should be 4 total datasets
@@ -105,8 +107,8 @@ def test_base_builder_creation(
                 n_datasets = fdpm_df["soma_dim_0"].nunique()
                 n_features = fdpm_df["soma_dim_1"].nunique()
                 assert n_datasets == 2
-                assert n_features == 4
-                assert fdpm.nnz == 8
+                assert n_features == 5
+                assert fdpm.nnz == 7
 
 
 def test_unicode_support(tmp_path: pathlib.Path) -> None:
@@ -126,3 +128,28 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
     with soma.DataFrame.open(uri=os.path.join(tmp_path, "unicode_support")) as pd_df_in:
         assert pd_df_in.read().concat().to_pandas()["value"].to_list() == ["Ünicode", "S̈upport"]
+
+
+def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, manifest_csv: io.TextIOWrapper) -> None:
+    import pathlib
+
+    pathlib.Path(tmp_path / "dest").mkdir()
+    args = SimpleNamespace(manifest=manifest_csv, test_first_n=None, verbose=2, multi_process=True)
+
+    # Call the function
+    datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")  # type: ignore
+
+    # Verify that 2 datasets are returned
+    assert len(datasets) == 2
+
+    # Verify that the datasets have been staged
+    assert pathlib.Path(tmp_path / "dest" / "dataset_id_1.h5ad").exists()
+    assert pathlib.Path(tmp_path / "dest" / "dataset_id_2.h5ad").exists()
+
+
+def setup_module(module: ModuleType) -> None:
+    # this is very important to do early, before any use of `concurrent.futures`
+    import multiprocessing
+
+    if multiprocessing.get_start_method(True) != "spawn":
+        multiprocessing.set_start_method("spawn", True)

@@ -44,8 +44,6 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     """Get release description for given census version, from the Cell
     Census release directory.
 
-    [lifecycle: experimental]
-
     Args:
         census_version:
             The census version name.
@@ -55,6 +53,9 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
     Raises:
         KeyError: if unknown census_version value.
+
+    Lifecycle:
+        Experimental.
 
     See Also:
         :func:`get_census_version_directory`: returns the entire directory as a dict.
@@ -79,10 +80,11 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
     """
     Get the directory of cell census releases currently available.
 
-    [lifecycle: experimental]
-
     Returns:
         A dictionary that contains release names and their corresponding release description.
+
+    Lifecycle:
+        Experimental.
 
     See Also:
         :func:`get_census_version_description`: get description by census_version.

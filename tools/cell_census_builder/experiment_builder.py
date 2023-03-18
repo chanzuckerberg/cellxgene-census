@@ -40,7 +40,7 @@ from .tissue_mapper import TissueMapper  # type: ignore
 from .util import (
     anndata_ordered_bool_issue_853_workaround,
     array_chunker,
-    is_positive_integral,
+    is_nonnegative_integral,
     uricat,
 )
 
@@ -354,7 +354,7 @@ def _accumulate_all_X_layers(
         # follow CELLxGENE 3.0 schema conventions for raw/X aliasing when only raw counts exist
         raw_X, raw_var = (ad.X, ad.var) if ad.raw is None else (ad.raw.X, ad.raw.var)
 
-        if not is_positive_integral(raw_X):
+        if not is_nonnegative_integral(raw_X):
             logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
 
         # save X['raw']

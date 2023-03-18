@@ -4,7 +4,7 @@
 \alias{open_soma}
 \title{Open the Cell Census}
 \usage{
-open_soma(census_version = "latest", uri = "", s3_region = "")
+open_soma(census_version = "latest", uri = NULL, tiledbsoma_ctx = NULL)
 }
 \arguments{
 \item{census_version}{The version of the Census, e.g., "latest".}
@@ -12,7 +12,7 @@ open_soma(census_version = "latest", uri = "", s3_region = "")
 \item{uri}{The URI containing the Census SOMA objects. If specified, takes
 precedence over \code{census_version}.}
 
-\item{s3_region}{Optional AWS region accompanying uri.}
+\item{tiledbsoma_ctx}{A custom \code{tiledbsoma::SOMATileDBContext}}
 }
 \value{
 Top-level \code{tiledbsoma::SOMACollection} object

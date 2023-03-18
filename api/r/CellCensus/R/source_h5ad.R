@@ -14,7 +14,9 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
   census <- open_soma(
     census_version,
     uri = description$soma.uri,
-    s3_region = description$soma.s3_region
+    tiledbsoma_ctx = tiledbsoma::SOMATileDBContext$new(
+      config = c("vfs.s3.region" = description$soma.s3_region)
+    )
   )
 
   # FIXME execution of value_filter:

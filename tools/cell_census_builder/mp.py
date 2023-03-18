@@ -1,6 +1,7 @@
 import argparse
 import concurrent.futures
 import logging
+import multiprocessing
 import os
 from typing import Optional, cast
 
@@ -26,6 +27,11 @@ def process_initializer(verbose: int = 0) -> None:
 def create_process_pool_executor(
     args: argparse.Namespace, max_workers: Optional[int] = None
 ) -> concurrent.futures.ProcessPoolExecutor:
+    # We rely on the pool configuration being correct. Failure to do this will
+    # lead to strange errors on some OS (eg., Linux defaults to fork). Rather
+    # than chase those bugs, assert correct configuration.
+    assert multiprocessing.get_start_method(True) == "spawn"
+
     return concurrent.futures.ProcessPoolExecutor(
         max_workers=args.max_workers if max_workers is None else max_workers,
         initializer=process_initializer,
