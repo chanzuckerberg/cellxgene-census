@@ -77,6 +77,8 @@ expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
   obs_query = obs_query
 )
 print(expt_query)
+# print(expt_query$n_obs)
+# print(expt_query$n_var)
 # FIXME executing expt_query:
 #   Currently unspported type: UTF8
 #   Calls: <Anonymous> ... tiledb_query_condition_init -> libtiledb_query_condition_init
