@@ -18,6 +18,8 @@ Imports:
   aws.s3,
   httr,
   jsonlite,
+  methods,
+  stats,
   tiledbsoma,
   tiledb
 Suggests: 
