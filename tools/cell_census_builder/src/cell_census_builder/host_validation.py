@@ -87,12 +87,15 @@ if __name__ == "__main__":
     from .build_state import CENSUS_CONFIG_DEFAULTS
 
     def main() -> int:
-        assert (
+        if not (
             check_os()
             and check_physical_memory(CENSUS_CONFIG_DEFAULTS["host_validation_min_physical_memory"])  # type: ignore[arg-type]
             and check_swap_memory(CENSUS_CONFIG_DEFAULTS["host_validation_min_swap_memory"])  # type: ignore[arg-type]
             and check_free_disk(os.getcwd(), CENSUS_CONFIG_DEFAULTS["host_validation_min_free_disk_space"])  # type: ignore[arg-type]
-        )  # assumed working directory is CWD
+        ):  # assumed working directory is CWD
+            print("Host validation FAILURE")
+            return 1
+
         print("Host validation success")
         return 0
 
