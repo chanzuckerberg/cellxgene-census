@@ -43,6 +43,7 @@ dependencies= [
     "gitpython",
     "attrs>=22.2.0",
     "psutil",
+    "pyyaml",
 ]
 
 # [tool.setuptools.packages.find]
