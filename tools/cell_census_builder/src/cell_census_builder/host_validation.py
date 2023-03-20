@@ -8,11 +8,6 @@ import psutil
 from .build_state import CensusBuildArgs
 from .logging import hr_binary_unit, hr_decimal_unit
 
-"""Defaults"""
-MIN_PHYSICAL_MEMORY = 512 * 1024**3  # 512GiB
-MIN_SWAP_MEMORY = 2 * 1024**4  # 2TiB
-MIN_FREE_DISK_SPACE = 1 * 1024**4  # 1 TiB
-
 
 def _check(condition: bool, message: str) -> bool:
     """Like assert, but logs"""
@@ -70,11 +65,18 @@ def check_free_disk(working_dir: Union[str, os.PathLike[str]], min_free_disk_spa
 
 def check_host(args: CensusBuildArgs) -> bool:
     """Verify all host requirments. Return True if OK, False if conditions not met"""
+    if args.config.host_validation_disable:
+        return True
+
     return (
         check_os()
-        and check_physical_memory(args.config.get("min_physical_memory", MIN_PHYSICAL_MEMORY))
-        and check_swap_memory(args.config.get("min_swap_memory", MIN_SWAP_MEMORY))
-        and check_free_disk(args.working_dir, args.config.get("min_free_disk_space", MIN_FREE_DISK_SPACE))
+        and check_physical_memory(
+            args.config.get("min_physical_memory", args.config.host_validation_min_physical_memory)
+        )
+        and check_swap_memory(args.config.get("min_swap_memory", args.config.host_validation_min_swap_memory))
+        and check_free_disk(
+            args.working_dir, args.config.get("min_free_disk_space", args.config.host_validation_min_free_disk_space)
+        )
     )
 
 
@@ -82,13 +84,14 @@ def check_host(args: CensusBuildArgs) -> bool:
 # host which does not validate.
 if __name__ == "__main__":
     """For CLI testing"""
+    from .build_state import CENSUS_CONFIG_DEFAULTS
 
     def main() -> int:
         assert (
             check_os()
-            and check_physical_memory(MIN_PHYSICAL_MEMORY)
-            and check_swap_memory(MIN_SWAP_MEMORY)
-            and check_free_disk(os.getcwd(), MIN_FREE_DISK_SPACE)
+            and check_physical_memory(CENSUS_CONFIG_DEFAULTS["host_validation_min_physical_memory"])  # type: ignore[arg-type]
+            and check_swap_memory(CENSUS_CONFIG_DEFAULTS["host_validation_min_swap_memory"])  # type: ignore[arg-type]
+            and check_free_disk(os.getcwd(), CENSUS_CONFIG_DEFAULTS["host_validation_min_free_disk_space"])  # type: ignore[arg-type]
         )  # assumed working directory is CWD
         print("Host validation success")
         return 0
