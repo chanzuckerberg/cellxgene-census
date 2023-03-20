@@ -1,9 +1,11 @@
+import functools
 from typing import List
 
-from .experiment_builder import ExperimentSpecification
+from .experiment_builder import ExperimentBuilder, ExperimentSpecification
 from .globals import RNA_SEQ
 
 
+@functools.cache
 def make_experiment_specs() -> List[ExperimentSpecification]:
     """
     Define all soma.Experiments to build in the census.
@@ -32,3 +34,8 @@ def make_experiment_specs() -> List[ExperimentSpecification]:
             gene_feature_length_uris=GENE_LENGTH_URIS,
         ),
     ]
+
+
+@functools.cache
+def make_experiment_builders() -> List[ExperimentBuilder]:
+    return [ExperimentBuilder(spec) for spec in make_experiment_specs()]

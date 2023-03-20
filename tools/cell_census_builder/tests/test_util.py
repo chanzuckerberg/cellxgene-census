@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from cell_census_builder.build_soma.util import array_chunker, is_nonnegative_integral, uricat
+from cell_census_builder.build_soma.util import array_chunker, is_nonnegative_integral
+from cell_census_builder.util import urlcat, urljoin
 from scipy.sparse import coo_matrix, csr_matrix, triu
 
 
@@ -119,14 +120,33 @@ def test_array_chunker() -> None:
         list(array_chunker(X))
 
 
-def test_uricat() -> None:
-    assert uricat("path", "to", "somewhere") == "path/to/somewhere"
-    assert uricat("path/", "to/", "somewhere") == "path/to/somewhere"
-    assert uricat("path/", "to/", "somewhere/") == "path/to/somewhere/"
-    assert uricat("file:///path/to", "somewhere") == "file:///path/to/somewhere"
-    assert uricat("file:///path/to/", "somewhere") == "file:///path/to/somewhere"
-    assert uricat("file:///path/to", "somewhere") == "file:///path/to/somewhere"
-    assert uricat("file:///path/to/", "/absolute") == "file:///absolute"
-    assert uricat("file://path/to", "file://somewhere") == "file://somewhere"
-    assert uricat("file:///path/to", "file://somewhere") == "file://somewhere"
-    assert uricat("file:///path/to", "file:///somewhere") == "file:///somewhere"
+def test_urljoin() -> None:
+    assert urljoin("path", "to") == "to"
+    assert urljoin("path/", "to") == "path/to"
+    assert urljoin("path/", "to/") == "path/to/"
+    assert urljoin("file:///path/to", "somewhere") == "file:///path/somewhere"
+    assert urljoin("file:///path/to/", "somewhere") == "file:///path/to/somewhere"
+    assert urljoin("file:///path/to", "somewhere") == "file:///path/somewhere"
+    assert urljoin("file:///path/to/", "/absolute") == "file:///absolute"
+    assert urljoin("file://path/to", "file://somewhere") == "file://somewhere"
+    assert urljoin("file:///path/to", "file://somewhere") == "file://somewhere"
+    assert urljoin("file:///path/to", "file:///somewhere") == "file:///somewhere"
+    assert urljoin("s3://foo", "bar") == "s3://foo/bar"
+    assert urljoin("s3://foo/", "bar") == "s3://foo/bar"
+    assert urljoin("s3://foo", "bar/") == "s3://foo/bar/"
+
+
+def test_urlcat() -> None:
+    assert urlcat("path", "to", "somewhere") == "path/to/somewhere"
+    assert urlcat("path/", "to/", "somewhere") == "path/to/somewhere"
+    assert urlcat("path/", "to/", "somewhere/") == "path/to/somewhere/"
+    assert urlcat("file:///path/to", "somewhere") == "file:///path/to/somewhere"
+    assert urlcat("file:///path/to/", "somewhere") == "file:///path/to/somewhere"
+    assert urlcat("file:///path/to", "somewhere") == "file:///path/to/somewhere"
+    assert urlcat("file:///path/to/", "/absolute") == "file:///absolute"
+    assert urlcat("file://path/to", "file://somewhere") == "file://somewhere"
+    assert urlcat("file:///path/to", "file://somewhere") == "file://somewhere"
+    assert urlcat("file:///path/to", "file:///somewhere") == "file:///somewhere"
+    assert urlcat("s3://foo", "bar", "baz") == "s3://foo/bar/baz"
+    assert urlcat("s3://foo", "bar/", "baz") == "s3://foo/bar/baz"
+    assert urlcat("s3://foo", "bar/", "baz/") == "s3://foo/bar/baz/"

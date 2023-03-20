@@ -1,37 +1,29 @@
 import argparse
-import multiprocessing
+import pathlib
 import sys
 from datetime import datetime
 
+from ..build_state import CensusBuildArgs, CensusBuildConfig
+from ..util import process_init
 from .build import build
-from .experiment_builder import ExperimentBuilder
-from .experiment_specs import make_experiment_specs
-from .mp import process_initializer
-from .util import uricat
 from .validate import validate
 
 
 def main() -> int:
-    parser = create_args_parser()
-    args = parser.parse_args()
-    assert args.subcommand in ["build", "validate"]
+    cli_parser = create_args_parser()
+    cli_args = cli_parser.parse_args()
+    assert cli_args.subcommand in ["build", "validate"]
 
-    process_initializer(args.verbose)
-
-    # normalize our base URI - must include trailing slash
-    soma_path = uricat(args.uri, args.build_tag, "soma")
-    assets_path = uricat(args.uri, args.build_tag, "h5ads")
-
-    # create the experiment specifications and builders
-    experiment_specifications = make_experiment_specs()
-    experiment_builders = [ExperimentBuilder(spec) for spec in experiment_specifications]
+    config = CensusBuildConfig(**cli_args.__dict__)
+    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=config)
+    process_init(args)
 
     cc = 0
-    if args.subcommand == "build":
-        cc = build(args, soma_path, assets_path, experiment_builders)
+    if cli_args.subcommand == "build":
+        cc = build(args)
 
-    if cc == 0 and (args.subcommand == "validate" or args.validate):
-        validate(args, soma_path, assets_path, experiment_specifications)
+    if cc == 0 and (cli_args.subcommand == "validate" or cli_args.validate):
+        validate(args)
 
     return cc
 
@@ -85,8 +77,4 @@ def create_args_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # this is very important to do early, before any use of `concurrent.futures`
-    if multiprocessing.get_start_method(True) != "spawn":
-        multiprocessing.set_start_method("spawn", True)
-
     sys.exit(main())

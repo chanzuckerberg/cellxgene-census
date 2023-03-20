@@ -1,19 +1,17 @@
-import io
 import os
 import pathlib
-from types import ModuleType, SimpleNamespace
+from types import ModuleType
 from typing import List
 from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+import pytest
 import tiledb
 import tiledbsoma as soma
 from cell_census_builder.build_soma.build import build, build_step1_get_source_datasets
 from cell_census_builder.build_soma.datasets import Dataset
-from cell_census_builder.build_soma.experiment_builder import ExperimentBuilder
-from cell_census_builder.build_soma.experiment_specs import make_experiment_specs
 from cell_census_builder.build_soma.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
@@ -21,10 +19,16 @@ from cell_census_builder.build_soma.globals import (
     MEASUREMENT_RNA_NAME,
 )
 from cell_census_builder.build_soma.validate import validate
+from cell_census_builder.build_state import CensusBuildArgs
 
 
+@pytest.mark.parametrize(
+    "census_build_args", [dict(multi_process=False, consolidate=True, build_tag="test_tag", verbose=1)], indirect=True
+)
 def test_base_builder_creation(
-    datasets: List[Dataset], assets_path: str, soma_path: str, tmp_path: pathlib.Path, setup: None
+    datasets: List[Dataset],
+    census_build_args: CensusBuildArgs,
+    setup: None,
 ) -> None:
     """
     Runs the builder, queries the census and performs a set of base assertions.
@@ -34,25 +38,18 @@ def test_base_builder_creation(
     ), patch("cell_census_builder.build_soma.consolidate._run"), patch(
         "cell_census_builder.build_soma.validate.validate_consolidation", return_value=True
     ):
-        # Patching consolidate_tiledb_object, becuase is uses to much memory to run in github actions.
-        experiment_specifications = make_experiment_specs()
-        experiment_builders = [ExperimentBuilder(spec) for spec in experiment_specifications]
-
-        from types import SimpleNamespace
-
-        args = SimpleNamespace(multi_process=False, consolidate=True, build_tag="test_tag", verbose=True)
-        return_value = build(args, soma_path, assets_path, experiment_builders)
+        return_value = build(census_build_args)
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
 
         # validate the cell_census
-        return_value = validate(args, soma_path, assets_path, experiment_specifications)
+        return_value = validate(census_build_args)
         assert return_value is True
 
         # Query the census and do assertions
         with soma.Collection.open(
-            uri=soma_path,
+            uri=census_build_args.soma_path.as_posix(),
             context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": "us-west-2"})),
         ) as census:
             # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
@@ -130,21 +127,24 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
         assert pd_df_in.read().concat().to_pandas()["value"].to_list() == ["Ünicode", "S̈upport"]
 
 
-def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, manifest_csv: io.TextIOWrapper) -> None:
-    import pathlib
-
-    pathlib.Path(tmp_path / "dest").mkdir()
-    args = SimpleNamespace(manifest=manifest_csv, test_first_n=None, verbose=2, multi_process=True)
+@pytest.mark.parametrize(
+    "census_build_args",
+    [dict(manifest=True, test_first_n=None, verbose=2, build_tag="build_tag", multi_process=True)],
+    indirect=True,
+)
+def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:
+    # prereq for build step 1
+    census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
 
     # Call the function
-    datasets = build_step1_get_source_datasets(args, f"{tmp_path}/dest")
+    datasets = build_step1_get_source_datasets(census_build_args)
 
     # Verify that 2 datasets are returned
     assert len(datasets) == 2
 
     # Verify that the datasets have been staged
-    assert pathlib.Path(tmp_path / "dest" / "dataset_id_1.h5ad").exists()
-    assert pathlib.Path(tmp_path / "dest" / "dataset_id_2.h5ad").exists()
+    assert pathlib.Path(tmp_path / "build_tag" / "h5ads" / "dataset_id_1.h5ad").exists()
+    assert pathlib.Path(tmp_path / "build_tag" / "h5ads" / "dataset_id_2.h5ad").exists()
 
 
 def setup_module(module: ModuleType) -> None:

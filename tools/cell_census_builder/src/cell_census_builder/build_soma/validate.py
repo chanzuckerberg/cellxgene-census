@@ -1,4 +1,3 @@
-import argparse
 import concurrent.futures
 import dataclasses
 import logging
@@ -16,10 +15,13 @@ import tiledbsoma as soma
 from scipy import sparse
 from typing_extensions import Self
 
+from ..build_state import CensusBuildArgs
+from ..util import urlcat
 from .anndata import make_anndata_cell_filter, open_anndata
 from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
 from .experiment_builder import ExperimentSpecification
+from .experiment_specs import make_experiment_specs
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_DATASETS_COLUMNS,
@@ -39,7 +41,6 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .mp import create_process_pool_executor, log_on_broken_process_pool
-from .util import uricat
 
 
 @dataclass  # TODO: use attrs
@@ -63,7 +64,7 @@ class EbInfo:
 
 def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experiment:
     """Helper function that knows the Census schema path conventions."""
-    return soma.Experiment.open(uricat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
+    return soma.Experiment.open(urlcat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
 
 
 def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: List[ExperimentSpecification]) -> bool:
@@ -179,7 +180,7 @@ def validate_axis_dataframes(
     soma_path: str,
     datasets: List[Dataset],
     experiment_specifications: List[ExperimentSpecification],
-    args: argparse.Namespace,
+    args: CensusBuildArgs,
 ) -> Dict[str, EbInfo]:
     """ "
     Validate axis dataframes: schema, shape, contents
@@ -205,7 +206,7 @@ def validate_axis_dataframes(
 
     # check shapes & perform weak test of contents
     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
-    if args.multi_process:
+    if args.config.multi_process:
         with create_process_pool_executor(args) as ppe:
             futures = [
                 ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
@@ -397,7 +398,7 @@ def validate_X_layers(
     datasets: List[Dataset],
     experiment_specifications: List[ExperimentSpecification],
     eb_info: Dict[str, EbInfo],
-    args: argparse.Namespace,
+    args: CensusBuildArgs,
 ) -> bool:
     """ "
     Validate all X layers: schema, shape, contents
@@ -429,7 +430,7 @@ def validate_X_layers(
                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                     assert X.shape == (n_obs, n_vars)
 
-    if args.multi_process:
+    if args.config.multi_process:
         with create_process_pool_executor(args) as ppe:
             ROWS_PER_PROCESS = 1_000_000
             dup_coord_futures = [
@@ -479,7 +480,7 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
     # census against the snapshot assets.
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         df = census[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
-        df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: uricat(assets_path, p))
+        df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: urlcat(assets_path, p))
         datasets = Dataset.from_dataframe(df)
         return datasets
 
@@ -487,7 +488,7 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
 def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> bool:
     """Confirm contents of manifest are correct."""
     for d in datasets:
-        p = pathlib.Path(uricat(assets_path, d.dataset_h5ad_path))
+        p = pathlib.Path(urlcat(assets_path, d.dataset_h5ad_path))
         assert p.exists() and p.is_file(), f"{d.dataset_h5ad_path} is missing from the census"
         assert str(p).endswith(".h5ad"), "Expected only H5AD assets"
 
@@ -543,15 +544,19 @@ def validate_relative_path(soma_path: str) -> bool:
     return True
 
 
-def validate(
-    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_specifications: List[ExperimentSpecification]
-) -> bool:
+def validate(args: CensusBuildArgs) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
     """
     logging.info("Validation start")
+
+    experiment_specifications = make_experiment_specs()
+
+    soma_path = args.soma_path.as_posix()
+    assets_path = args.h5ads_path.as_posix()
+
     assert validate_directory_structure(soma_path, assets_path)
 
     assert validate_all_soma_objects_exist(soma_path, experiment_specifications)

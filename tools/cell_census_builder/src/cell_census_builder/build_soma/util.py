@@ -1,6 +1,5 @@
 import os
 import time
-import urllib.parse
 from typing import Any, Iterator, Optional, Union
 
 import numpy as np
@@ -62,21 +61,6 @@ def array_chunker(
         return
 
     raise NotImplementedError("array_chunker: unsupported array type")
-
-
-def uricat(container_uri: str, *paths: str) -> str:
-    """
-    Concat one or more paths, separated with '/'
-
-    Similar to urllib.parse.urljoin except it takes an iterator, and
-    assumes the container_uri is a 'directory'/container, ie, ends in '/'.
-    """
-
-    uri = container_uri
-    for p in paths:
-        uri = uri if uri.endswith("/") else uri + "/"
-        uri = urllib.parse.urljoin(uri, p)
-    return uri
 
 
 def fetch_json(url: str, delay_secs: float = 0.0) -> object:

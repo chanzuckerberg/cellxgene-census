@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 import urllib.parse
@@ -7,11 +6,14 @@ from typing import List, Tuple, cast
 import aiohttp
 import fsspec
 
+from ..build_state import CensusBuildArgs
 from .datasets import Dataset
 from .mp import cpu_count, create_process_pool_executor
 
 
-def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, assets_dir: str) -> None:
+def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
+    assets_dir = args.h5ads_path.as_posix()
+
     logging.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
 
@@ -19,7 +21,7 @@ def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, asset
     datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize, reverse=True)
 
     N = len(datasets)
-    if getattr(args, "multi_process", False):
+    if not args.config.multi_process:
         n_workers = max(min(8, cpu_count()), 64)
         with create_process_pool_executor(args, n_workers) as pe:
             paths = list(

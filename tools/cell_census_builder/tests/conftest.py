@@ -1,5 +1,4 @@
 import io
-import os
 import pathlib
 from typing import List, Optional
 
@@ -13,7 +12,8 @@ from cell_census_builder.build_soma.datasets import Dataset
 from cell_census_builder.build_soma.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
-from cell_census_builder.build_soma.mp import process_initializer
+from cell_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
+from cell_census_builder.util import process_init
 from scipy import sparse
 
 
@@ -94,21 +94,22 @@ def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None) -> anndat
 
 
 @pytest.fixture
-def assets_path(tmp_path: pathlib.Path) -> str:
-    assets_path = f"{tmp_path}/h5ads"
-    os.mkdir(assets_path)
-    return assets_path
+def census_build_args(request: pytest.FixtureRequest, tmp_path: pathlib.Path) -> CensusBuildArgs:
+    # parameterization is optional
+    try:
+        config = request.param
+    except AttributeError:
+        config = {}
+
+    if config.get("manifest") is True:  # if bool True, replace with an IOstream
+        config["manifest"] = request.getfixturevalue("manifest_csv")
+    return CensusBuildArgs(working_dir=tmp_path, config=CensusBuildConfig(**config))
 
 
 @pytest.fixture
-def soma_path(tmp_path: pathlib.Path) -> str:
-    soma_path = f"{tmp_path}/soma"
-    os.mkdir(soma_path)
-    return soma_path
-
-
-@pytest.fixture
-def datasets(assets_path: str) -> List[Dataset]:
+def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
+    census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
+    assets_path = census_build_args.h5ads_path.as_posix()
     datasets = []
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
@@ -165,7 +166,7 @@ def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> io.TextIOWrapper:
 
 
 @pytest.fixture()
-def setup(monkeypatch: MonkeyPatch) -> None:
-    process_initializer()
+def setup(monkeypatch: MonkeyPatch, census_build_args: CensusBuildArgs) -> None:
+    process_init(census_build_args)
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"], "tile", 2)
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2)

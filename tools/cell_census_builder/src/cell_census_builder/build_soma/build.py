@@ -1,12 +1,11 @@
-import argparse
 import gc
 import logging
-import os.path
 from datetime import datetime, timezone
 from typing import List
 
 import tiledbsoma as soma
 
+from ..build_state import CensusBuildArgs
 from .anndata import open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
@@ -16,6 +15,7 @@ from .experiment_builder import (
     populate_X_layers,
     reopen_experiment_builders,
 )
+from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
@@ -29,26 +29,24 @@ from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
 
 
-def prepare_file_system(soma_path: str, assets_path: str, args: argparse.Namespace) -> None:
+def prepare_file_system(args: CensusBuildArgs) -> None:
     """
     Prepares the file system for the builder run
     """
     # Don't clobber an existing census build
-    if os.path.exists(soma_path) or os.path.exists(assets_path):
+    if args.soma_path.exists() or args.h5ads_path.exists():
         raise Exception("Census build path already exists - aborting build")
 
     # Ensure that the git tree is clean
-    if not args.test_disable_dirty_git_check and is_git_repo_dirty():
+    if not args.config.test_disable_dirty_git_check and is_git_repo_dirty():
         raise Exception("The git repo has uncommitted changes - aborting build")
 
     # Create top-level build directories
-    os.makedirs(soma_path, exist_ok=False)
-    os.makedirs(assets_path, exist_ok=False)
+    args.soma_path.mkdir(parents=True, exist_ok=False)
+    args.h5ads_path.mkdir(parents=True, exist_ok=False)
 
 
-def build(
-    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
-) -> int:
+def build(args: CensusBuildArgs) -> int:
     """
     Approximately, build steps are:
     1. Download manifest and copy/stage all source assets
@@ -65,31 +63,29 @@ def build(
         suitable for providing to sys.exit()
     """
 
-    try:
-        prepare_file_system(soma_path, assets_path, args)
-    except Exception as e:
-        logging.error(e)
-        return 1
+    experiment_builders = make_experiment_builders()
+
+    prepare_file_system(args)
 
     # Step 1 - get all source datasets
-    datasets = build_step1_get_source_datasets(args, assets_path)
+    datasets = build_step1_get_source_datasets(args)
 
     # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-    root_collection = build_step2_create_root_collection(soma_path, experiment_builders)
+    root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
     gc.collect()
 
     # Step 3 - populate axes
-    filtered_datasets = build_step3_populate_obs_and_var_axes(assets_path, datasets, experiment_builders)
+    filtered_datasets = build_step3_populate_obs_and_var_axes(args.h5ads_path.as_posix(), datasets, experiment_builders)
 
     # Step 4 - populate X layers
-    build_step4_populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
+    build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
     gc.collect()
 
     # Step 5- write out dataset manifest and summary information
-    build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.build_tag)
+    build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.config.build_tag)
 
     # consolidate TileDB data
-    if args.consolidate:
+    if args.config.consolidate:
         consolidate(args, root_collection.uri)
 
     return 0
@@ -117,22 +113,22 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     return root_collection
 
 
-def build_step1_get_source_datasets(args: argparse.Namespace, assets_path: str) -> List[Dataset]:
+def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    datasets = load_manifest(args.manifest)
+    datasets = load_manifest(args.config.manifest)
     if len(datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
         raise AssertionError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
-    if args.test_first_n is not None and args.test_first_n > 0:
+    if args.config.test_first_n is not None and args.config.test_first_n > 0:
         # Process the N smallest datasets
-        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.test_first_n]
+        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
 
     # Stage all files
-    stage_source_assets(datasets, args, assets_path)
+    stage_source_assets(datasets, args)
 
     logging.info("Build step 1 - get source assets - finished")
     return datasets
@@ -221,7 +217,7 @@ def build_step4_populate_X_layers(
     assets_path: str,
     filtered_datasets: List[Dataset],
     experiment_builders: List[ExperimentBuilder],
-    args: argparse.Namespace,
+    args: CensusBuildArgs,
 ) -> None:
     """
     Populate X layers.

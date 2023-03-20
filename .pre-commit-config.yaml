@@ -54,3 +54,4 @@ repos:
           - numpy
           - typing_extensions
           - types-setuptools
+          - types-PyYAML

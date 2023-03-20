@@ -1,67 +1,96 @@
 import logging
 import os
 import sys
-from typing import Optional
+from typing import Union
 
 import psutil
 
-from cell_census_builder.logging import hr_multibyte_unit, setup_logging
+from .build_state import CensusBuildArgs
+from .logging import hr_binary_unit, hr_decimal_unit
 
-"""Minimum physical RAM"""
-MIN_RAM = 512 * 1024**3  # 512GiB
-
-"""Minimum virtual memory/swap"""
-MIN_SWAP = 2 * 1024**4  # 2TiB
-
-"""Minimum free disk space"""
+"""Defaults"""
+MIN_PHYSICAL_MEMORY = 512 * 1024**3  # 512GiB
+MIN_SWAP_MEMORY = 2 * 1024**4  # 2TiB
 MIN_FREE_DISK_SPACE = 1 * 1024**4  # 1 TiB
 
 
-def check_os() -> None:
+def _check(condition: bool, message: str) -> bool:
+    """Like assert, but logs"""
+    if not condition:
+        logging.critical(message)
+    return condition
+
+
+def check_os() -> bool:
     """
     Check that we run on Posix (Linux, MacOS), as we rely on
     Posix semantics for a few things.
     """
-    assert psutil.POSIX
+    return _check(os.name == "posix" and psutil.POSIX, "Census builder requires Posix OS")
 
 
-def check_memory() -> None:
+def check_physical_memory(min_physical_memory: int) -> bool:
     """
     Check for sufficient physical and virtual memory.
     """
     svmem = psutil.virtual_memory()
-    logging.debug(f"Host: {hr_multibyte_unit(svmem.total)} memory found")
-    assert svmem.total >= MIN_RAM, f"Insufficient memory (found {svmem.total}, require {MIN_RAM})"
+    logging.debug(f"Host: {hr_binary_unit(svmem.total)} memory found")
+    return _check(
+        svmem.total >= min_physical_memory,
+        f"Insufficient memory (found {hr_binary_unit(svmem.total)}, " f"require {hr_binary_unit(min_physical_memory)})",
+    )
 
+
+def check_swap_memory(min_swap_memory: int) -> bool:
+    """
+    Check for sufficient physical and virtual memory.
+    """
     svswap = psutil.swap_memory()
-    logging.debug(f"Host: {hr_multibyte_unit(svswap.total)} swap found")
-    assert svswap.total >= MIN_SWAP, f"Insufficient swap space (found {svswap.total}, require {MIN_SWAP})"
+    logging.debug(f"Host: {hr_binary_unit(svswap.total)} swap found")
+    return _check(
+        svswap.total >= min_swap_memory,
+        f"Insufficient swap space (found {hr_binary_unit(svswap.total)}, "
+        f"require {hr_binary_unit(min_swap_memory)})",
+    )
 
 
-def check_free_disk(working_dir: Optional[str] = ".") -> None:
+def check_free_disk(working_dir: Union[str, os.PathLike[str]], min_free_disk_space: int) -> bool:
     """
     Check for sufficient free disk space.
     """
-    skdiskusage = psutil.disk_usage(working_dir)
-    logging.debug(f"Host: {hr_multibyte_unit(skdiskusage.free)} free disk space found")
-    assert (
-        skdiskusage.free >= MIN_FREE_DISK_SPACE
-    ), f"Insufficient free disk space (found {skdiskusage.free}, require {MIN_FREE_DISK_SPACE})"
+    working_dir_fspath = working_dir.__fspath__() if isinstance(working_dir, os.PathLike) else working_dir
+    skdiskusage = psutil.disk_usage(working_dir_fspath)
+    logging.debug(f"Host: {hr_decimal_unit(skdiskusage.free)} free disk space found")
+    return _check(
+        skdiskusage.free >= min_free_disk_space,
+        f"Insufficient free disk space (found {hr_decimal_unit(skdiskusage.free)}, "
+        f"require {hr_decimal_unit(min_free_disk_space)})",
+    )
 
 
-def run_all_checks() -> int:
-    """
-    Run all host validation checks.  Returns zero or raises an exception.
-    """
-    check_os()
-    check_memory()
-    check_free_disk(os.getcwd())  # assumed working directory is CWD
-    logging.info("Host validation success")
-    return 0
+def check_host(args: CensusBuildArgs) -> bool:
+    """Verify all host requirments. Return True if OK, False if conditions not met"""
+    return (
+        check_os()
+        and check_physical_memory(args.config.get("min_physical_memory", MIN_PHYSICAL_MEMORY))
+        and check_swap_memory(args.config.get("min_swap_memory", MIN_SWAP_MEMORY))
+        and check_free_disk(args.working_dir, args.config.get("min_free_disk_space", MIN_FREE_DISK_SPACE))
+    )
 
 
-# Process MUST return zero on success (all good) or non-zero on a
+# Return zero on success (all good) or non-zero on a
 # host which does not validate.
 if __name__ == "__main__":
-    setup_logging(verbose=1)
-    sys.exit(run_all_checks())
+    """For CLI testing"""
+
+    def main() -> int:
+        assert (
+            check_os()
+            and check_physical_memory(MIN_PHYSICAL_MEMORY)
+            and check_swap_memory(MIN_SWAP_MEMORY)
+            and check_free_disk(os.getcwd(), MIN_FREE_DISK_SPACE)
+        )  # assumed working directory is CWD
+        print("Host validation success")
+        return 0
+
+    sys.exit(main())
