@@ -7,13 +7,45 @@ This tool is not intended for end-users - it is used by CZI to periodically crea
 CELLxGENE data in the above format. The remainder of this document is intended for users of the
 build package.
 
-Please see the top-level [README](../../README.md) for more information on the Cell Census.
+Please see the top-level [README](../../README.md) for more information on the Cell Census and
+using the Cell Census data.
 
 # Overview
 
 This package contains sub-modules, each of which automate elements of the Cell Census build and release process.
-The ultimate intention is to integrate these into an automated multi-step workflow. Until that occurs, individual steps
-are provided as modules with their own `__main__`, to be manually invoked.
+They are wrapped at the package top-leveby by a `__main__` which implements the Cell Census build process,
+with standard defaults.
+
+The top-level build can be invoked as follows:
+
+- Create a working directory, e.g., `census-build` or equivalent.
+- If any configuration defaults need to be overridden, create a `config.yaml` in the working directory containing the default overrides.
+- Run the build as `python -m cell_census_builder your-working_dir`
+
+This will perform four steps (more will be added the future):
+
+- host validation
+- build soma
+- validate soma
+- build reports (eg., summary)
+
+This will result in the following file tree:
+
+```
+working_dir:
+    |
+    +-- config.yaml        # build config (user provided, read-only)
+    +-- state.yaml         # build runtime state (eg., census version tag, etc)
+    +-- build-version      # defaults to current date, e.g., 2023-01-20
+    |   +-- soma
+    |   +-- h5ads
+    +-- logs               # log files from various stages
+    |   +-- build.log
+    |   +-- ...
+    +-- reports
+        +-- census-summary-VERSION.txt
+        +-- census-diff-VERSION.txt
+```
 
 ## `host_validation` module
 

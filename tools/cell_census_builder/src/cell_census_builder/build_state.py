@@ -26,7 +26,6 @@ CENSUS_CONFIG_DEFAULTS = {
     "log_file": "build.log",
     "cell_census_S3_path": "s3://cellxgene-data-public/cell-census",
     "consolidate": True,
-    "validate": True,
     "multi_process": False,
     "max_workers": None,
     "manifest": None,

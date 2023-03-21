@@ -7,29 +7,8 @@ from typing import Callable, List
 import s3fs
 
 from . import __version__
-from .build_soma import build as build_a_soma
-from .build_soma import validate as validate_a_soma
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig
-from .host_validation import check_host
 from .util import process_init, urlcat
-
-"""
-File tree for the build.
-
-working_dir:
-    |
-    +-- config.yaml        # build config (user provided, read-only)
-    +-- state.yaml         # build runtime state (eg., census version tag, etc)
-    +-- soma
-    +-- h5ads
-    +-- logs               # log files from various stages
-    |   +-- build.log
-    |   +-- ...
-    +-- reports
-        +-- census-summary-VERSION.txt
-        +-- census-diff-VERSION.txt
-
-"""
 
 
 def main() -> int:
@@ -98,6 +77,7 @@ def do_prebuild_set_defaults(args: CensusBuildArgs) -> int:
 
 def do_prebuild_checks(args: CensusBuildArgs) -> int:
     """Pre-build checks for host, config, etc. All pre-conditions should go here."""
+    from .host_validation import check_host
 
     # check host configuration, e.g., free disk space
     if not check_host(args):
@@ -116,22 +96,41 @@ def do_prebuild_checks(args: CensusBuildArgs) -> int:
 
 
 def do_build_soma(args: CensusBuildArgs) -> int:
-    if not build_a_soma(args):
-        return 1
+    from .build_soma import build as build_a_soma
+
+    if (cc := build_a_soma(args)) != 0:
+        return cc
+
     args.state["do_build_soma"] = True
     return 0
 
 
 def do_validate_soma(args: CensusBuildArgs) -> int:
+    from .build_soma import validate as validate_a_soma
+
     if not validate_a_soma(args):
+        logging.critical("Validation of the census build has failed.")
         return 1
+
     args.state["do_validate_soma"] = True
     return 0
 
 
 def do_create_reports(args: CensusBuildArgs) -> int:
-    # WIP
-    # args.state["do_create_reports"] = True
+    from .census_summary import display_summary, display_diff
+
+    reports_dir = args.working_dir / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    logging.info("Creating summary report")
+    with open(reports_dir / f"census-summary-{args.build_tag}.txt", mode="w") as f:
+        display_summary(uri=args.soma_path.as_posix(), file=f)
+
+    logging.info("Creating diff report (new build vs 'latest')")
+    with open(reports_dir / f"census-diff-{args.build_tag}.txt", mode="w") as f:
+        display_diff(uri=args.soma_path.as_posix(), previous_census_version="latest", file=f)
+
+    args.state["do_create_reports"] = True
     return 0
 
 
