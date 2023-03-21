@@ -31,7 +31,7 @@ CENSUS_CONFIG_DEFAULTS = {
     "max_workers": None,
     "manifest": None,
     "test_first_n": None,
-    "test_disable_dirty_get_check": False,
+    "test_disable_dirty_git_check": False,
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
     "host_validation_min_swap_space": 2 * 1024**4,  # 2TiB

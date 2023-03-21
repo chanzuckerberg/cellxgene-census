@@ -7,6 +7,8 @@ from typing import Callable, List
 import s3fs
 
 from . import __version__
+from .build_soma import build as build_a_soma
+from .build_soma import validate as validate_a_soma
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig
 from .host_validation import check_host
 from .util import process_init, urlcat
@@ -67,6 +69,7 @@ def do_build(args: CensusBuildArgs) -> int:
         do_prebuild_set_defaults,
         do_prebuild_checks,
         do_build_soma,
+        do_validate_soma,
         do_create_reports,
     ]
     try:
@@ -79,8 +82,8 @@ def do_build(args: CensusBuildArgs) -> int:
                 return cc
             logging.info(f"Build step {build_step.__name__} [{n} of {len(build_steps)}]: complete")
 
-    except Exception as e:
-        logging.critical(f"Caught exception, exiting: {str(e)}")
+    except Exception:
+        logging.critical("Caught exception, exiting", exc_info=True)
         return 1
 
     logging.info("Census build: completed")
@@ -113,8 +116,16 @@ def do_prebuild_checks(args: CensusBuildArgs) -> int:
 
 
 def do_build_soma(args: CensusBuildArgs) -> int:
-    # WIP
-    # args.state["do_build_soma"] = True
+    if not build_a_soma(args):
+        return 1
+    args.state["do_build_soma"] = True
+    return 0
+
+
+def do_validate_soma(args: CensusBuildArgs) -> int:
+    if not validate_a_soma(args):
+        return 1
+    args.state["do_validate_soma"] = True
     return 0
 
 

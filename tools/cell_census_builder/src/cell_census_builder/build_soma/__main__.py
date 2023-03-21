@@ -5,8 +5,8 @@ from datetime import datetime
 
 from ..build_state import CensusBuildArgs, CensusBuildConfig
 from ..util import process_init
-from .build import build
-from .validate import validate
+from .build_soma import build
+from .validate_soma import validate
 
 
 def main() -> int:
