@@ -19,14 +19,15 @@ def main() -> int:
     if not working_dir.is_dir():
         logging.critical("Census builder: unable to find working directory - exiting.")
         return 1
-    if not (working_dir / CENSUS_BUILD_CONFIG).is_file():
-        logging.critical("Census builder: unable to find config.yaml in working directory - exiting.")
-        return 1
     if (working_dir / CENSUS_BUILD_STATE).exists():
         logging.critical("Found pre-existing census build in working directory - aborting census build.")
         return 1
 
-    build_config = CensusBuildConfig.load(working_dir / CENSUS_BUILD_CONFIG)
+    if (working_dir / CENSUS_BUILD_CONFIG).is_file():
+        build_config = CensusBuildConfig.load(working_dir / CENSUS_BUILD_CONFIG)
+    else:
+        build_config = CensusBuildConfig()
+
     build_args = CensusBuildArgs(working_dir=working_dir, config=build_config)
 
     # Process initialization/setup must be done early
