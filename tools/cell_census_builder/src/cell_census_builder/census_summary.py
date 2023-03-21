@@ -142,7 +142,7 @@ def display_diff(
             print("Genes added", file=file)
             print(new_genes, file=file)
         else:
-            "No genes were added."
+            print("No genes were added.", file=file)
             print(file=file)
 
         removed_genes = set(prev_genes["feature_id"]) - set(curr_genes["feature_id"])
@@ -150,7 +150,7 @@ def display_diff(
             print("Genes removed", file=file)
             print(removed_genes, file=file)
         else:
-            "No genes were removed."
+            print("No genes were removed.", file=file)
             print(file=file)
 
     return 0
