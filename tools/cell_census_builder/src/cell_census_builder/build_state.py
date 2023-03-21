@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Any, Iterator, Mapping, Union
 
 import attrs
+import psutil
 import yaml
 from typing_extensions import Self
 
@@ -20,21 +21,33 @@ Defaults for Census configuration.
 CENSUS_BUILD_CONFIG = "config.yaml"
 CENSUS_BUILD_STATE = "state.yaml"
 CENSUS_CONFIG_DEFAULTS = {
-    "build_tag": datetime.now().astimezone().date().isoformat(),
+    # General config
     "verbose": 1,
     "log_dir": "logs",
     "log_file": "build.log",
-    "cell_census_S3_path": "s3://cellxgene-data-public/cell-census",
     "consolidate": True,
-    "multi_process": False,
-    "max_workers": None,
-    "manifest": None,
-    "test_first_n": None,
-    "test_disable_dirty_git_check": False,
+    #
+    # Paths and census version name determined by spec.
+    "cell_census_S3_path": "s3://cellxgene-data-public/cell-census",
+    "build_tag": datetime.now().astimezone().date().isoformat(),
+    #
+    # Default multi-process. Memory scaling based on empirical tests.
+    "multi_process": True,
+    "max_workers": 2 + int(psutil.virtual_memory().total / (96 * 1024**3)),
+    #
+    # XXX TODO: this exposes a bug in the validation pass
+    # "multi_process": False,
+    # "max_workers": None,
+    #
+    # Host minimum resource validation
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
     "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
     "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
+    # For testing convenience only
+    "manifest": None,
+    "test_first_n": None,
+    "test_disable_dirty_git_check": False,
 }
 
 
@@ -129,11 +142,13 @@ class CensusBuildState(MutableNamespace):
     def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
         if isinstance(file, (str, os.PathLike)):
             with open(file) as state_log:
-                documents = yaml.safe_load_all(state_log)
+                documents = list(yaml.safe_load_all(state_log))
         else:
-            documents = yaml.safe_load_all(file)
+            documents = list(yaml.safe_load_all(file))
 
-        return cls(**functools.reduce(lambda acc, r: acc.update(r) or acc, documents, {}))
+        state = cls(**functools.reduce(lambda acc, r: acc.update(r) or acc, documents, {}))
+        state.__dirty_keys.clear()
+        return state
 
     def commit(self, file: Union[str, os.PathLike[str]]) -> None:
         # append dirty elements (atomic on Posix)
