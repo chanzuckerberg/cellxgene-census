@@ -117,7 +117,7 @@ def do_validate_soma(args: CensusBuildArgs) -> int:
 
 
 def do_create_reports(args: CensusBuildArgs) -> int:
-    from .census_summary import display_summary, display_diff
+    from .census_summary import display_diff, display_summary
 
     reports_dir = args.working_dir / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)

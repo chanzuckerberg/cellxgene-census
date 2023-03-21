@@ -1,6 +1,6 @@
 import argparse
 import sys
-from typing import TextIO, Optional
+from typing import Optional, TextIO
 
 import cell_census
 import pandas as pd
