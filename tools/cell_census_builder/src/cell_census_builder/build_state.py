@@ -33,7 +33,7 @@ CENSUS_CONFIG_DEFAULTS = {
     "test_disable_dirty_git_check": False,
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
-    "host_validation_min_swap_space": 2 * 1024**4,  # 2TiB
+    "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
     "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
 }
 
