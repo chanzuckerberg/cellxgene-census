@@ -3,7 +3,7 @@
 This package contains code to build and release the Cell Census in the SOMA format, as specified in the
 [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md).
 
-This tool is not intended for end-users - it is used by CZI to periodically create and release all
+This tool is not intended for end-users - it is used by the CELLxGENE team to periodically create and release all
 CELLxGENE data in the above format. The remainder of this document is intended for users of the
 build package.
 
@@ -65,6 +65,14 @@ $ mkdir /tmp/census-build
 $ chmod ug+s /tmp/census-build   # optional, but makes permissions handling simpler
 $ docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-build' cell-census-builder
 ```
+
+### Build configuration options
+
+To be documented. They are all present in the `build_state.py` file.
+
+### Building the docker image
+
+The image is built by a GHA workflow. For developer builds, there is a target present in `tools/cell_census_builder/Makefile`.
 
 ### Commands to cleanup local Docker state on your ec2 instance (while building an image)
 
