@@ -68,7 +68,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
     logging.info(f"Found {len(datasets)} datasets, in {len(collections)} collections")
 
     # load per-dataset schema version
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as tp:
+    with concurrent.futures.ThreadPoolExecutor() as tp:
         dataset_metadata = tp.map(
             lambda d: fetch_json(
                 f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}"
