@@ -6,6 +6,6 @@ The `cell_census` package provides an API to facilitate the use of the CZ CELLxG
 
 
 ## For More Help
-For more help, please file a issue on the repo, or contact us at soma@chanzuckerberg.com
+For more help, please file a issue on the repo, or contact us at <soma@chanzuckerberg.com>.
 
-If you believe you have found a security issue, we would appreciate notification. Please send email to security@chanzuckerberg.com.
+If you believe you have found a security issue, we would appreciate notification. Please send email to <security@chanzuckerberg.com>.
