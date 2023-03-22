@@ -19,7 +19,7 @@ with standard defaults.
 The top-level build can be invoked as follows:
 
 - Create a working directory, e.g., `census-build` or equivalent.
-- If any configuration defaults need to be overridden, create a `config.yaml` in the working directory containing the default overrides.
+- If any configuration defaults need to be overridden, create a `config.yaml` in the working directory containing the default overrides. _NOTE:_ by default you do not need to create a `config.yaml` file -- the defaults are appropriate to build the full Census.
 - Run the build as `python -m cell_census_builder your-working_dir`
 
 This will perform four steps (more will be added the future):
@@ -66,7 +66,14 @@ $ docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-b
 
 ### Build configuration options
 
-To be documented. Defaults are defined in the `build_state.py` file, and can be passed to the build process by creating a `config.yaml` in the build working directory.
+This is primarily for the use of package developers. The defaults are suitable for the standad Census build, and are defined in the `build_state.py` file.
+
+If you need to override a default, create `config.yaml` in the build working directory and specify the overrides. An example `config.yaml` might look like:
+
+```
+verbose: 2  # debug level logging
+consolidate: false  # disable TileDB consolidation
+```
 
 ### Commands to cleanup local Docker state on your ec2 instance (while building an image)
 
