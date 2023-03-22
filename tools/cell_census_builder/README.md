@@ -10,7 +10,7 @@ build package.
 Please see the top-level [README](../../README.md) for more information on the Cell Census and
 using the Cell Census data.
 
-# Overview
+## Overview
 
 This package contains sub-modules, each of which automate elements of the Cell Census build and release process.
 They are wrapped at the package top-level by by a `__main__` which implements the Cell Census build process,
@@ -47,7 +47,7 @@ working_dir:
         +-- census-diff-VERSION.txt
 ```
 
-# Building and using the Docker container
+## Building and using the Docker container
 
 The standard Census build is expected to be done via a Docker container.
 
@@ -66,9 +66,19 @@ $ chmod ug+s /tmp/census-build   # optional, but makes permissions handling simp
 $ docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-build' cell-census-builder
 ```
 
-# Module-specific notes
+### Commands to cleanup local Docker state on your ec2 instance (while building an image)
 
-## `host_validation` module
+Docker keeps around intermediate layers/images and if your machine doesn't have enough memory, you might run into issues. You can blow away these cached layers/images by running the following commands.
+
+```
+docker system prune
+docker rm -f $(docker ps -aq)
+docker rmi -f $(docker images -q)
+```
+
+## Module-specific notes
+
+### `host_validation` module
 
 Module which provides a set of checks that the current host machine has the requisite capabilities
 to build the census (e.g., free disk space). Raises exception (non-zero process exit) if host is
@@ -76,7 +86,7 @@ unable to meet base requirements.
 
 Stand-alone usage: `python -m cell_census_builder.host_validation`
 
-## `build_soma` module
+### `build_soma` module
 
 Stand-alone use: `python -m cell_census_builder.build_soma ...`
 
@@ -100,7 +110,7 @@ Modes of operation:
 a) (default) creating the entire "cell census" using all files currently in the CELLxGENE repository.
 b) creating a smaller "cell census" from a user-provided list of files (a "manifest")
 
-### Mode (a) - creating the full cell census from the entire CELLxGENE (public) corpus:
+#### Mode (a) - creating the full cell census from the entire CELLxGENE (public) corpus:
 
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
 - To create a cell census at `<census_path>`, execute:
@@ -112,7 +122,7 @@ b) creating a smaller "cell census" from a user-provided list of files (a "manif
 
 If you run out of memory, reduce `--max-workers`. You can also try a higher number if you have lots of CPU & memory.
 
-### Mode (b) - creating a cell census from a user-provided list of H5AD files:
+#### Mode (b) - creating a cell census from a user-provided list of H5AD files:
 
 - Create a manifest file, in CSV format, containing two columns: dataset_id, h5ad_uri. Example:
   ```csv

@@ -1,7 +1,7 @@
-# Build docker container
+# Build docker image. This Makefile is for developer convenience.
 
-.PHONY: container
-container:
+.PHONY: image
+image:
 	python3 -m build .
 	docker build --build-arg=COMMIT_SHA=$(git rev-parse --short HEAD) -t cell-census-builder .
 

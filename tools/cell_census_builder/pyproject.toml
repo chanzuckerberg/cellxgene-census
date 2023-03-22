@@ -46,10 +46,10 @@ dependencies= [
     "pyyaml",
 ]
 
-# [tool.setuptools.packages.find]
-# where = ["src"]
-# include = ["cell_census_builder*"]  # package names should match these glob patterns (["*"] by default)
-# exclude = ["tests*", "scripts*"]  # exclude packages matching these glob patterns (empty by default)
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cell_census_builder*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
 
 [tool.setuptools_scm]
 root = "../.."
