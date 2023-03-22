@@ -35,7 +35,7 @@ def main() -> int:
 
     build_args = CensusBuildArgs(working_dir=working_dir, config=build_config, state=build_state)
 
-    # Process initialization/setup must be done early
+    # Process initialization/setup must be done early. NOTE: do NOT log before this line!
     process_init(build_args)
 
     # Return process exit code (or raise, which exits with a code of `1`)
@@ -50,6 +50,8 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
     exit code or raises.
     """
     logging.info(f"Census build: start [version={__version__}]")
+    logging.info(args)
+
     build_steps: List[Callable[[CensusBuildArgs], bool]] = [
         do_prebuild_set_defaults,
         do_prebuild_checks,

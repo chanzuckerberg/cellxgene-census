@@ -122,6 +122,7 @@ def get_git_commit_sha() -> str:
     commit_sha_var = os.getenv("COMMIT_SHA")
     if commit_sha_var is not None:
         return commit_sha_var
+
     import git  # Scoped import - this requires the git executable to exist on the machine
 
     repo = git.Repo(search_parent_directories=True)

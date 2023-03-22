@@ -26,6 +26,7 @@ CENSUS_CONFIG_DEFAULTS = {
     "log_dir": "logs",
     "log_file": "build.log",
     "consolidate": True,
+    "disable_dirty_git_check": True,
     #
     # Paths and census version name determined by spec.
     "cell_census_S3_path": "s3://cellxgene-data-public/cell-census",
@@ -44,10 +45,10 @@ CENSUS_CONFIG_DEFAULTS = {
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
     "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
     "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
+    #
     # For testing convenience only
     "manifest": None,
     "test_first_n": None,
-    "test_disable_dirty_git_check": False,
 }
 
 

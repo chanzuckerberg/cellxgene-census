@@ -38,7 +38,7 @@ def prepare_file_system(args: CensusBuildArgs) -> None:
         raise Exception("Census build path already exists - aborting build")
 
     # Ensure that the git tree is clean
-    if not args.config.test_disable_dirty_git_check and is_git_repo_dirty():
+    if not args.config.disable_dirty_git_check and is_git_repo_dirty():
         raise Exception("The git repo has uncommitted changes - aborting build")
 
     # Create top-level build directories

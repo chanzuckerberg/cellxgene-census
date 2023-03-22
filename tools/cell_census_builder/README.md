@@ -13,7 +13,7 @@ using the Cell Census data.
 # Overview
 
 This package contains sub-modules, each of which automate elements of the Cell Census build and release process.
-They are wrapped at the package top-leveby by a `__main__` which implements the Cell Census build process,
+They are wrapped at the package top-level by by a `__main__` which implements the Cell Census build process,
 with standard defaults.
 
 The top-level build can be invoked as follows:
@@ -46,6 +46,27 @@ working_dir:
         +-- census-summary-VERSION.txt
         +-- census-diff-VERSION.txt
 ```
+
+# Building and using the Docker container
+
+The standard Census build is expected to be done via a Docker container.
+
+To build the container, do a `git pull` to the version you want to use, and do the following to create a container called `cell-census-builder`:
+
+```
+$ cd tools/cell_census_builder
+$ make container
+```
+
+To use the container to build the _full_ census, with default options, pick a working directory (e.g., /tmp/census-build), and:
+
+```
+$ mkdir /tmp/census-build
+$ chmod ug+s /tmp/census-build   # optional, but makes permissions handling simpler
+$ docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-build' cell-census-builder
+```
+
+# Module-specific notes
 
 ## `host_validation` module
 
@@ -102,15 +123,3 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
   You can specify a file system path or a URI in the second field
 - To create a cell census at `<census_path>`, execute:
   > $ python -m cell_census_builder <census_path> build --manifest <the_manifest_file.csv>
-
-### Other info
-
-There are more options discoverable via the `--help` command line option.
-
-Note on required host resources:
-
-- all H5AD files not on the local disk will be downloaded/cached locally. There must be
-  sufficient local file system space. Location of cache can be controlled with the
-  environment variable `FSSPEC_CACHE_DIR`
-- each H5AD will be read into memory, in its entirety. Sufficient RAM must be present to
-  allow for this (and to do so for multiple H5ADs concurrently if you use the `--multi-process` option)

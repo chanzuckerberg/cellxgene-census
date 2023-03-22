@@ -1,4 +1,3 @@
-import io
 import pathlib
 from typing import List, Optional
 
@@ -131,7 +130,7 @@ def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
 
 
 @pytest.fixture
-def manifest_csv(tmp_path: pathlib.Path) -> io.TextIOWrapper:
+def manifest_csv(tmp_path: pathlib.Path) -> str:
     manifest_content = f"""
     dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
     dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
@@ -144,11 +143,11 @@ def manifest_csv(tmp_path: pathlib.Path) -> io.TextIOWrapper:
     with open(path, "w+") as f:
         f.writelines(manifest_content.strip())
 
-    return open(path)
+    return path
 
 
 @pytest.fixture
-def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> io.TextIOWrapper:
+def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> str:
     manifest_content = f"""
     dataset_id_1, {tmp_path}/data/h5ads/dataset_id_1.h5ad
     dataset_id_2, {tmp_path}/data/h5ads/dataset_id_2.h5ad
@@ -162,7 +161,7 @@ def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> io.TextIOWrapper:
     with open(path, "w+") as f:
         f.writelines(manifest_content.strip())
 
-    return open(path)
+    return path
 
 
 @pytest.fixture()
