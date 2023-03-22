@@ -7,7 +7,7 @@ name = "cell_census"
 dynamic = ["version"]
 description = "API to simplify use of the CZI Science CELLxGENE Cell Census"
 authors = [
-    { name = "Chan Zuckerberg Initiative", email = "cellxgene@chanzuckerberg.com" }
+    { name = "Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com" }
 ]
 license = { text = "MIT" }
 readme = "README.md"

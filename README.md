@@ -1,5 +1,10 @@
 [![codecov](https://codecov.io/gh/chanzuckerberg/cell-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cell-census)
 
+:exclamation: **Status:** pre-release, under rapid development.
+
+:exclamation: **Feature name:** "Cell Census" is a temporary name, final name may change on release.
+
+
 # Cell Census of CZ CELLxGENE Discover
 
 [**CZ CELLxGENE Discover**](https://cellxgene.cziscience.com/)  is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is [standardized](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema/3.0.0)** to include raw counts and a common vocabulary for gene and cell metadata.
@@ -9,8 +14,8 @@ The **Cell Census** provides efficient computational tooling to access, query, a
 Get started on using the Cell Census:
 
 - [Quick start](#Quick-start).
-- [Documentation](https://chanzuckerberg.github.io/cell-census/index.html). *Under development.*
-- [Python tutorials](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
+- [Documentation](https://chanzuckerberg.github.io/cell-census/index.html). 
+- [Python tutorials](https://chanzuckerberg.github.io/cell-census/examples.html).
 - R tutorials. *Coming soon.*
 
 ## Technology
