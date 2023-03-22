@@ -7,7 +7,7 @@ name = "cell_census_builder"
 dynamic = ["version"]
 description = "Build Cell Census"
 authors = [
-    { name = "Chan Zuckerberg Initiative", email = "cellxgene@chanzuckerberg.com" }
+    { name = "Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
