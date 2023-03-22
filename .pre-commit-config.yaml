@@ -54,3 +54,7 @@ repos:
           - numpy
           - typing_extensions
           - types-setuptools
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.6.4
+    hooks:
+      - id: nbqa-black
