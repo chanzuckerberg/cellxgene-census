@@ -5,7 +5,10 @@
 NOTE: This is a (literal) copy of
 https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py
 
-This code should not be duplicated, but rather repackaged to be an importable sub-dependency.
+Please do not modify this file directly here. Instead, modify the original file in single-cell-data-portal, run the unit tests (which exist in that repo),
+get the PR approved and merged, and then port back the changes to this file.
+
+In the future, this code will be part of an ontology service library.
 
 This code contains several places that do not pass the lint/static analysis CI for this pipeline, so the analysis is disabled in this prologue.
 """
