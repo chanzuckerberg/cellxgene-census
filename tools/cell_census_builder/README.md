@@ -49,13 +49,11 @@ working_dir:
 
 ## Building and using the Docker container
 
-The standard Census build is expected to be done via a Docker container.
-
-To build the container, do a `git pull` to the version you want to use, and do the following to create a container called `cell-census-builder`:
+The standard Census build is expected to be done via a Docker container. To build the required image, do a `git pull` to the version you want to use, and do the following to create a docker image called `cell-census-builder`:
 
 ```
 $ cd tools/cell_census_builder
-$ make container
+$ make image
 ```
 
 To use the container to build the _full_ census, with default options, pick a working directory (e.g., /tmp/census-build), and:
@@ -68,11 +66,7 @@ $ docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-b
 
 ### Build configuration options
 
-To be documented. They are all present in the `build_state.py` file.
-
-### Building the docker image
-
-The image is built by a GHA workflow. For developer builds, there is a target present in `tools/cell_census_builder/Makefile`.
+To be documented. Defaults are defined in the `build_state.py` file, and can be passed to the build process by creating a `config.yaml` in the build working directory.
 
 ### Commands to cleanup local Docker state on your ec2 instance (while building an image)
 
