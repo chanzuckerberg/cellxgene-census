@@ -49,19 +49,29 @@ working_dir:
 
 ## Building and using the Docker container
 
+### Prerequisites
+
+You will need:
+
+- Linux - known to work on Ubuntu 20 and 22, and should work fine on most other (modern) Linux distros
+- Docker - [primary installation instructions](https://docs.docker.com/engine/install/ubuntu/#installation-methods) and [important post-install configuration](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
+- Python 3.9+
+
+### Build & run
+
 The standard Census build is expected to be done via a Docker container. To build the required image, do a `git pull` to the version you want to use, and do the following to create a docker image called `cell-census-builder`:
 
-```
-$ cd tools/cell_census_builder
-$ make image
+```shell
+cd tools/cell_census_builder
+make image
 ```
 
 To use the container to build the _full_ census, with default options, pick a working directory (e.g., /tmp/census-build), and:
 
-```
-$ mkdir /tmp/census-build
-$ chmod ug+s /tmp/census-build   # optional, but makes permissions handling simpler
-$ docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-build' cell-census-builder
+```shell
+mkdir /tmp/census-build
+chmod ug+s /tmp/census-build   # optional, but makes permissions handling simpler
+docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-build' cell-census-builder
 ```
 
 ### Build configuration options
@@ -79,7 +89,7 @@ consolidate: false  # disable TileDB consolidation
 
 Docker keeps around intermediate layers/images and if your machine doesn't have enough memory, you might run into issues. You can blow away these cached layers/images by running the following commands.
 
-```
+```shell
 docker system prune
 docker rm -f $(docker ps -aq)
 docker rmi -f $(docker images -q)
