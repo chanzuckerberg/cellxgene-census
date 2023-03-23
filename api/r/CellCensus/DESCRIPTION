@@ -1,12 +1,12 @@
 Package: CellCensus
-Title: CZI Science Cell Census API
+Title: CZ CELLxGENE Discover Cell Census
 Version: 0.0.0.9000
 Authors@R: 
-    person("Chan Zuckerberg Initiative", email = "cellxgene@chanzuckerberg.com",
+    person("Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com",
            role = c("aut", "cre", "cph", "fnd"))
-Description: API to facilitate use of the CZI Science Cell Census. The Cell
-  Census is a versioned container for the single-cell data hosted at CELLxGENE
-  Discover.
+Description: API to facilitate the use of the CZ CELLxGENE Discover Cell 
+  Census. For more information about the API and the project visit
+  https://github.com/chanzuckerberg/cell-census/
 License: MIT + file LICENSE
 URL: https://github.com/chanzuckerberg/cell-census
 BugReports: https://github.com/chanzuckerberg/cell-census/issues
