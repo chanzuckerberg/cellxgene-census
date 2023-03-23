@@ -46,6 +46,11 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
 
     logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) to {dataset_path}")
     fs.get_file(dataset.corpora_asset_h5ad_uri, dataset_path)
+
+    # verify file size is as expected, if we know the size a priori
+    assert (dataset.asset_h5ad_filesize == -1) or (dataset.asset_h5ad_filesize == os.path.getsize(dataset_path))
+    # TODO: add integrity checksum as well. Waiting on feature request chanzuckerberg/single-cell-data-portal#4392
+
     logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) complete")
     return dataset_file_name
 
