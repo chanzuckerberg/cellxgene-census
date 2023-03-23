@@ -1,115 +1,52 @@
-import argparse
 import gc
 import logging
-import multiprocessing
-import os.path
-import sys
 from datetime import datetime, timezone
 from typing import List
 
 import tiledbsoma as soma
 
+from ..build_state import CensusBuildArgs
 from .anndata import open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
-    ExperimentSpecification,
     populate_X_layers,
     reopen_experiment_builders,
 )
+from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
     CENSUS_SCHEMA_VERSION,
     CXG_SCHEMA_VERSION,
-    RNA_SEQ,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import process_initializer
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, is_git_repo_dirty, uricat
-from .validate import validate
+from .util import get_git_commit_sha, is_git_repo_dirty
 
 
-def make_experiment_specs() -> List[ExperimentSpecification]:
-    """
-    Define all soma.Experiments to build in the census.
-
-    Functionally, this defines per-experiment name, anndata filter, etc.
-    It also loads any required per-Experiment assets.
-    """
-    GENE_LENGTH_BASE_URI = (
-        "https://raw.githubusercontent.com/chanzuckerberg/single-cell-curation/"
-        "100f935eac932e1f5f5dadac0627204da3790f6f/cellxgene_schema_cli/cellxgene_schema/ontology_files/"
-    )
-    GENE_LENGTH_URIS = [
-        GENE_LENGTH_BASE_URI + "genes_homo_sapiens.csv.gz",
-        GENE_LENGTH_BASE_URI + "genes_mus_musculus.csv.gz",
-        GENE_LENGTH_BASE_URI + "genes_sars_cov_2.csv.gz",
-    ]
-    return [  # The soma.Experiments we want to build
-        ExperimentSpecification.create(
-            name="homo_sapiens",
-            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:9606", assay_ontology_term_ids=RNA_SEQ),
-            gene_feature_length_uris=GENE_LENGTH_URIS,
-        ),
-        ExperimentSpecification.create(
-            name="mus_musculus",
-            anndata_cell_filter_spec=dict(organism_ontology_term_id="NCBITaxon:10090", assay_ontology_term_ids=RNA_SEQ),
-            gene_feature_length_uris=GENE_LENGTH_URIS,
-        ),
-    ]
-
-
-def main() -> int:
-    parser = create_args_parser()
-    args = parser.parse_args()
-    assert args.subcommand in ["build", "validate"]
-
-    process_initializer(args.verbose)
-
-    # normalize our base URI - must include trailing slash
-    soma_path = uricat(args.uri, args.build_tag, "soma")
-    assets_path = uricat(args.uri, args.build_tag, "h5ads")
-
-    # create the experiment specifications and builders
-    experiment_specifications = make_experiment_specs()
-    experiment_builders = [ExperimentBuilder(spec) for spec in experiment_specifications]
-
-    cc = 0
-    if args.subcommand == "build":
-        cc = build(args, soma_path, assets_path, experiment_builders)
-
-    if cc == 0 and (args.subcommand == "validate" or args.validate):
-        validate(args, soma_path, assets_path, experiment_specifications)
-
-    return cc
-
-
-def prepare_file_system(soma_path: str, assets_path: str, args: argparse.Namespace) -> None:
+def prepare_file_system(args: CensusBuildArgs) -> None:
     """
     Prepares the file system for the builder run
     """
     # Don't clobber an existing census build
-    if os.path.exists(soma_path) or os.path.exists(assets_path):
+    if args.soma_path.exists() or args.h5ads_path.exists():
         raise Exception("Census build path already exists - aborting build")
 
     # Ensure that the git tree is clean
-    if not args.test_disable_dirty_git_check and is_git_repo_dirty():
+    if not args.config.disable_dirty_git_check and is_git_repo_dirty():
         raise Exception("The git repo has uncommitted changes - aborting build")
 
     # Create top-level build directories
-    os.makedirs(soma_path, exist_ok=False)
-    os.makedirs(assets_path, exist_ok=False)
+    args.soma_path.mkdir(parents=True, exist_ok=False)
+    args.h5ads_path.mkdir(parents=True, exist_ok=False)
 
 
-def build(
-    args: argparse.Namespace, soma_path: str, assets_path: str, experiment_builders: List[ExperimentBuilder]
-) -> int:
+def build(args: CensusBuildArgs) -> int:
     """
     Approximately, build steps are:
     1. Download manifest and copy/stage all source assets
@@ -126,31 +63,29 @@ def build(
         suitable for providing to sys.exit()
     """
 
-    try:
-        prepare_file_system(soma_path, assets_path, args)
-    except Exception as e:
-        logging.error(e)
-        return 1
+    experiment_builders = make_experiment_builders()
+
+    prepare_file_system(args)
 
     # Step 1 - get all source datasets
-    datasets = build_step1_get_source_datasets(args, assets_path)
+    datasets = build_step1_get_source_datasets(args)
 
     # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-    root_collection = build_step2_create_root_collection(soma_path, experiment_builders)
+    root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
     gc.collect()
 
     # Step 3 - populate axes
-    filtered_datasets = build_step3_populate_obs_and_var_axes(assets_path, datasets, experiment_builders)
+    filtered_datasets = build_step3_populate_obs_and_var_axes(args.h5ads_path.as_posix(), datasets, experiment_builders)
 
     # Step 4 - populate X layers
-    build_step4_populate_X_layers(assets_path, filtered_datasets, experiment_builders, args)
+    build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
     gc.collect()
 
     # Step 5- write out dataset manifest and summary information
-    build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.build_tag)
+    build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.config.build_tag)
 
     # consolidate TileDB data
-    if args.consolidate:
+    if args.config.consolidate:
         consolidate(args, root_collection.uri)
 
     return 0
@@ -178,22 +113,22 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     return root_collection
 
 
-def build_step1_get_source_datasets(args: argparse.Namespace, assets_path: str) -> List[Dataset]:
+def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    datasets = load_manifest(args.manifest)
+    datasets = load_manifest(args.config.manifest)
     if len(datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
         raise AssertionError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
-    if args.test_first_n is not None and args.test_first_n > 0:
+    if args.config.test_first_n is not None and args.config.test_first_n > 0:
         # Process the N smallest datasets
-        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.test_first_n]
+        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
 
     # Stage all files
-    stage_source_assets(datasets, args, assets_path)
+    stage_source_assets(datasets, args)
 
     logging.info("Build step 1 - get source assets - finished")
     return datasets
@@ -282,7 +217,7 @@ def build_step4_populate_X_layers(
     assets_path: str,
     filtered_datasets: List[Dataset],
     experiment_builders: List[ExperimentBuilder],
-    args: argparse.Namespace,
+    args: CensusBuildArgs,
 ) -> None:
     """
     Populate X layers.
@@ -315,59 +250,3 @@ def build_step5_populate_summary_info(
         create_census_summary(census_info, experiment_builders, build_tag)
 
     logging.info("Build step 5 - Populate summary info - finished")
-
-
-def create_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cell_census_builder")
-    parser.add_argument("uri", type=str, help="Census top-level URI")
-    parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
-    parser.add_argument(
-        "-mp",
-        "--multi-process",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Use multiple processes",
-    )
-    parser.add_argument("--max-workers", type=int, help="Concurrency")
-    parser.add_argument(
-        "--build-tag",
-        type=str,
-        default=datetime.now().astimezone().date().isoformat(),
-        help="Census build tag (default: current date is ISO8601 format)",
-    )
-
-    subparsers = parser.add_subparsers(required=True, dest="subcommand")
-
-    # BUILD
-    build_parser = subparsers.add_parser("build", help="Build Cell Census")
-    build_parser.add_argument(
-        "--manifest",
-        type=argparse.FileType("r"),
-        help="Manifest file",
-    )
-    build_parser.add_argument(
-        "--validate", action=argparse.BooleanOptionalAction, default=True, help="Validate immediately after build"
-    )
-    build_parser.add_argument(
-        "--consolidate",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Consolidate TileDB objects after build",
-    )
-    # hidden option for testing by devs. Will process only the first 'n' datasets
-    build_parser.add_argument("--test-first-n", type=int)
-    # hidden option for testing by devs. Allow for WIP testing by devs.
-    build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
-
-    # VALIDATE
-    subparsers.add_parser("validate", help="Validate an existing cell census build")
-
-    return parser
-
-
-if __name__ == "__main__":
-    # this is very important to do early, before any use of `concurrent.futures`
-    if multiprocessing.get_start_method(True) != "spawn":
-        multiprocessing.set_start_method("spawn", True)
-
-    sys.exit(main())

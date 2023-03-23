@@ -1,4 +1,3 @@
-import argparse
 import concurrent.futures
 import gc
 import io
@@ -18,6 +17,8 @@ from scipy import sparse
 from somacore.options import OpenMode
 from typing_extensions import Self
 
+from ..build_state import CensusBuildArgs
+from ..util import urlcat
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .globals import (
@@ -41,7 +42,6 @@ from .util import (
     anndata_ordered_bool_issue_853_workaround,
     array_chunker,
     is_nonnegative_integral,
-    uricat,
 )
 
 # Contents:
@@ -149,7 +149,7 @@ class ExperimentBuilder:
     def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
 
-        logging.info(f"{self.name}: create experiment at {uricat(census_data.uri, self.name)}")
+        logging.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
         self.experiment_uri = self.experiment.uri
@@ -463,14 +463,14 @@ def _accumulate_X(
 
 
 def populate_X_layers(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: argparse.Namespace
+    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
 ) -> None:
     """
     Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
     """
     # populate X layers
     presence: List[PresenceResult] = []
-    if args.multi_process:
+    if args.config.multi_process:
         with create_process_pool_executor(args) as pe:
             futures = {
                 _accumulate_X(

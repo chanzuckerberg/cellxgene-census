@@ -1,15 +1,15 @@
-import argparse
 import concurrent.futures
 import logging
 from typing import List
 
 import tiledbsoma as soma
 
+from ..build_state import CensusBuildArgs
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
 from .mp import create_process_pool_executor, log_on_broken_process_pool
 
 
-def consolidate(args: argparse.Namespace, uri: str) -> None:
+def consolidate(args: CensusBuildArgs, uri: str) -> None:
     """
     This is a non-portable, TileDB-specific consolidation routine.
     """
@@ -30,7 +30,7 @@ def _gather(uri: str) -> List[str]:
     return uris_to_consolidate
 
 
-def _run(args: argparse.Namespace, uris_to_consolidate: List[str]) -> None:
+def _run(args: CensusBuildArgs, uris_to_consolidate: List[str]) -> None:
     # Queue consolidator for each array
     with create_process_pool_executor(args) as ppe:
         futures = [ppe.submit(consolidate_tiledb_object, uri) for uri in uris_to_consolidate]

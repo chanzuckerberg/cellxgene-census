@@ -5,9 +5,9 @@ import anndata
 import numpy as np
 import pandas as pd
 
+from ..util import urlcat
 from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT, FEATURE_REFERENCE_IGNORE
-from .util import uricat
 
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
@@ -34,7 +34,7 @@ def open_anndata(
         datasets = [datasets]
 
     for h5ad in datasets:
-        path = uricat(base_path, h5ad.dataset_h5ad_path)
+        path = urlcat(base_path, h5ad.dataset_h5ad_path)
         logging.debug(f"open_anndata: {path}")
         ad = anndata.read_h5ad(path, *args, **kwargs)
 

@@ -1,3 +1,5 @@
 pytest
 coverage
 requests-mock
+setuptools
+build

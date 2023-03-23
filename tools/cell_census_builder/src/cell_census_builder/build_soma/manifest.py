@@ -68,7 +68,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
     logging.info(f"Found {len(datasets)} datasets, in {len(collections)} collections")
 
     # load per-dataset schema version
-    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as tp:
+    with concurrent.futures.ThreadPoolExecutor() as tp:
         dataset_metadata = tp.map(
             lambda d: fetch_json(
                 f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}"
@@ -130,13 +130,17 @@ def load_manifest_from_CxG() -> List[Dataset]:
     return [Dataset(**d) for d in datasets.values()]
 
 
-def load_manifest(manifest_fp: Optional[io.TextIOBase] = None) -> List[Dataset]:
+def load_manifest(manifest_fp: Optional[Union[str, io.TextIOBase]] = None) -> List[Dataset]:
     """
     Load dataset manifest from the file pointer if provided, else bootstrap
     the load rom the CELLxGENE REST API.
     """
     if manifest_fp is not None:
-        datasets = load_manifest_from_fp(manifest_fp)
+        if isinstance(manifest_fp, str):
+            with open(manifest_fp) as f:
+                datasets = load_manifest_from_fp(f)
+        else:
+            datasets = load_manifest_from_fp(manifest_fp)
     else:
         datasets = load_manifest_from_CxG()
 

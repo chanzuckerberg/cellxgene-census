@@ -1,28 +1,29 @@
 import pathlib
-from types import ModuleType, SimpleNamespace
+from types import ModuleType
 
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.source_assets import stage_source_assets
+from cell_census_builder.build_soma.datasets import Dataset
+from cell_census_builder.build_soma.source_assets import stage_source_assets
+from cell_census_builder.build_state import CensusBuildArgs
 
 
-def test_source_assets(tmp_path: pathlib.Path) -> None:
+def test_source_assets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:
     """
     `source_assets` should copy the datasets from their `corpora_asset_h5ad_uri` to the specified `assets_dir`
     """
     datasets = []
-    pathlib.Path(tmp_path / "source").mkdir()
-    pathlib.Path(tmp_path / "dest").mkdir()
+    (tmp_path / "source").mkdir()
+    census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     for i in range(10):
         dataset = Dataset(f"dataset_{i}", corpora_asset_h5ad_uri=f"file://{tmp_path}/source/dataset_{i}.h5ad")
-        pathlib.Path(tmp_path / "source" / f"dataset_{i}.h5ad").touch()
+        (tmp_path / "source" / f"dataset_{i}.h5ad").touch()
         datasets.append(dataset)
 
     # Call the function
-    stage_source_assets(datasets, SimpleNamespace(verbose=True), tmp_path / "dest")  # type: ignore
+    stage_source_assets(datasets, census_build_args)
 
     # Verify that the files exist
     for i in range(10):
-        assert pathlib.Path(tmp_path / "dest" / f"dataset_{i}.h5ad").exists()
+        assert (census_build_args.h5ads_path / f"dataset_{i}.h5ad").exists()
 
 
 def setup_module(module: ModuleType) -> None:
