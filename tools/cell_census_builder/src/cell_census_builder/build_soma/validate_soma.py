@@ -213,6 +213,7 @@ def validate_axis_dataframes(
                 for dataset in datasets
             ]
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+                log_on_broken_process_pool(ppe)
                 res = future.result()
                 for eb_name, ebi in res.items():
                     eb_info[eb_name].update(ebi)
