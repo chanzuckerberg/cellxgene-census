@@ -1,14 +1,13 @@
 
-# CELLxGENE Cell Census
+# Cell Census of CZ CELLxGENE Discover
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The `CellCensus` package provides an API to facilitate use of the CZI Science Cell Census. The Cell Census is a versioned container for the single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/).
+
+The `CellCensus` package provides an API to facilitate the use of the CZ CELLxGENE Discover Cell Census. For more information about the API and the project visit the [chanzuckerberg/cell-census GitHub repo](https://github.com/chanzuckerberg/cell-census/).
 
 **Status**: Pre-release, under rapid development. Expect API changes.
-
-For more information, see the [cell_census repo](https://github.com/chanzuckerberg/cell-census/).
 
 Also see the [Python API](https://chanzuckerberg.github.io/cell-census/).
 
@@ -35,6 +34,6 @@ library(CellCensus)
 
 ## For More Help
 
-For more help, please file a issue on the repo, or contact us at <cellxgene@chanzuckerberg.com>
+For more help, please file a issue on the repo, or contact us at <soma@chanzuckerberg.com>
 
 If you believe you have found a security issue, we would appreciate notification. Please send email to <security@chanzuckerberg.com>.
