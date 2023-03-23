@@ -36,10 +36,6 @@ CENSUS_CONFIG_DEFAULTS = {
     "multi_process": True,
     "max_workers": 2 + int(psutil.virtual_memory().total / (96 * 1024**3)),
     #
-    # XXX TODO: this exposes a bug in the validation pass
-    # "multi_process": False,
-    # "max_workers": None,
-    #
     # Host minimum resource validation
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
