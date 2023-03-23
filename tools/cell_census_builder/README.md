@@ -71,7 +71,7 @@ To use the container to build the _full_ census, with default options, pick a wo
 ```shell
 mkdir /tmp/census-build
 chmod ug+s /tmp/census-build   # optional, but makes permissions handling simpler
-docker run --mount type=bind,source="`pwd`/tmp/census-build",target='/census-build' cell-census-builder
+docker run --mount type=bind,source="/tmp/census-build",target='/census-build' cell-census-builder
 ```
 
 ### Build configuration options
