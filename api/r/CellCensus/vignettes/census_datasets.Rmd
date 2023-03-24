@@ -60,7 +60,7 @@ print(paste(
 ))
 ```
 
-Let's pick one dataset to slice out of the census, and turn into a Seurat in-memory object. This can be used with the Seurat toolchain immediately, or stored locally.
+Let's pick one dataset to slice out of the census, and turn into a Seurat in-memory object. (This requires the `Seurat` package to have been installed beforehand.)
 
 ```{r}
 census_datasets[census_datasets$dataset_id == "0bd1a1de-3aee-40e0-b2ec-86c7a30c7149", ]
@@ -76,13 +76,8 @@ expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
   census_data$get("mus_musculus"), "RNA",
   obs_query = obs_query
 )
-print(expt_query)
-# print(expt_query$n_obs)
-# print(expt_query$n_var)
-# FIXME executing expt_query:
-#   Currently unspported type: UTF8
-#   Calls: <Anonymous> ... tiledb_query_condition_init -> libtiledb_query_condition_init
-# TODO: to_seurat
+dataset_seurat <- expt_query$to_seurat(c(counts = "raw"))
+print(dataset_seurat)
 ```
 
 You can also use the `CellCensus::get_source_h5ad_uri()` API to fetch a URI pointing to the H5AD associated with this dataset_id. This is the same H5AD you can download from the CELLxGENE Portal, and may contain additional data-submitter provided information which was not included in the Cell Census.
@@ -93,5 +88,4 @@ The "locator" returned by this API will include a URI and additional information
 CellCensus::get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
 ```
 
-The `CellCensus::download_source_h5ad()` API downloads the H5AD to a local file, which can then be used in R by (TODO).
-
+The `CellCensus::download_source_h5ad()` API downloads the H5AD to a local file, which can then be used in R using [SeuratDisk's anndata converter](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html).
