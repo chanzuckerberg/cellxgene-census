@@ -53,8 +53,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          pip install -r ./tools/scripts/requirements.txt -r ./tools/scripts/requirements-dev.txt
-          pip install -e ./tools/
+          pip install -e ./tools/cell_census_builder/
+          pip install -r ./tools/scripts/requirements-dev.txt
       - name: Test with pytest (builder)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest ./tools/cell_census_builder/tests/

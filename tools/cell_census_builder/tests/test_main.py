@@ -1,4 +1,4 @@
-from tools.cell_census_builder.__main__ import create_args_parser
+from cell_census_builder.build_soma.__main__ import create_args_parser
 
 
 def test_create_args_parser_default_build() -> None:

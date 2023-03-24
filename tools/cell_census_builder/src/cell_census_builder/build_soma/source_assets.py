@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 import urllib.parse
@@ -7,11 +6,14 @@ from typing import List, Tuple, cast
 import aiohttp
 import fsspec
 
+from ..build_state import CensusBuildArgs
 from .datasets import Dataset
 from .mp import cpu_count, create_process_pool_executor
 
 
-def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, assets_dir: str) -> None:
+def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
+    assets_dir = args.h5ads_path.as_posix()
+
     logging.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
 
@@ -19,7 +21,7 @@ def stage_source_assets(datasets: List[Dataset], args: argparse.Namespace, asset
     datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize, reverse=True)
 
     N = len(datasets)
-    if getattr(args, "multi_process", False):
+    if args.config.multi_process:
         n_workers = max(min(8, cpu_count()), 64)
         with create_process_pool_executor(args, n_workers) as pe:
             paths = list(
@@ -44,6 +46,11 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
 
     logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) to {dataset_path}")
     fs.get_file(dataset.corpora_asset_h5ad_uri, dataset_path)
+
+    # verify file size is as expected, if we know the size a priori
+    assert (dataset.asset_h5ad_filesize == -1) or (dataset.asset_h5ad_filesize == os.path.getsize(dataset_path))
+    # TODO: add integrity checksum as well. Waiting on feature request chanzuckerberg/single-cell-data-portal#4392
+
     logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) complete")
     return dataset_file_name
 

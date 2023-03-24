@@ -3,15 +3,15 @@ requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cell_census"
+name = "cell_census_builder"
 dynamic = ["version"]
-description = "API to facilitate the use of the CZ CELLxGENE Discover Cell Census. For more information about the API and the project visit https://github.com/chanzuckerberg/cell-census/"
+description = "Build Cell Census"
 authors = [
     { name = "Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">= 3.7, < 3.11"  # Python 3.11 is pending numba support
+requires-python = ">= 3.9, < 3.11"  # Python 3.11 is pending numba support
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
@@ -22,35 +22,37 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
 dependencies= [
-    "numba>=0.55",
-    "numpy>=1.21",
-    "requests",
-    # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
-    # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
-    # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma==1.0.0",
     "typing_extensions",
+    "pyarrow",
+    "pandas",
+    "anndata>=0.8",
+    "numpy",
+    "cell_census==0.10.0",
+    "scipy",
+    "fsspec",
     "s3fs",
-    "scikit-misc",
+    "requests",
+    "aiohttp",
+    "Cython", # required by owlready2
+    "wheel",  # required by owlready2
+    "owlready2",
+    "gitpython",
+    "attrs>=22.2.0",
+    "psutil",
+    "pyyaml",
 ]
-
-[project.urls]
-homepage = "https://github.com/chanzuckerberg/cell-census"
-repository = "https://github.com/chanzuckerberg/cell-census"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["cell_census*"]  # package names should match these glob patterns (["*"] by default)
+include = ["cell_census_builder*"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
 
 [tool.setuptools_scm]
-root = "../../.."
+root = "../.."
 
 [tool.black]
 line-length = 120
@@ -63,16 +65,8 @@ warn_unreachable = true
 strict = true
 plugins = "numpy.typing.mypy_plugin"
 
-[tool.pytest.ini_options]
-markers = [
-    "live_corpus: runs on the live Cell Census data corpus",
-]
-
 [tool.ruff]
 select = ["E", "F", "B", "I"]
 ignore = ["E501", "E402", "C408", ]
 line-length = 120
 target-version = "py39"
-
-[tool.ruff.isort]
-known-first-party =["cell_census"]

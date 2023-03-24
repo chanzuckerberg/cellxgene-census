@@ -2,13 +2,17 @@ from typing import List
 
 import anndata as ad
 import pytest
+from cell_census_builder.build_soma.datasets import Dataset
+from cell_census_builder.build_state import CensusBuildArgs
 
-from tools.cell_census_builder.datasets import Dataset
-from tools.cell_census_builder.tests.conftest import ORGANISMS, get_h5ad
+from ..conftest import ORGANISMS, get_h5ad
 
 
 @pytest.fixture
-def datasets_with_mixed_feature_reference(assets_path: str) -> List[Dataset]:
+def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) -> List[Dataset]:
+    census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
+    assets_path = census_build_args.h5ads_path.as_posix()
+
     organism = ORGANISMS[0]
     dataset_id = "an_id"
     datasets = []
@@ -31,7 +35,10 @@ def datasets_with_mixed_feature_reference(assets_path: str) -> List[Dataset]:
 
 
 @pytest.fixture
-def datasets_with_larger_raw_layer(assets_path: str) -> List[Dataset]:
+def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> List[Dataset]:
+    census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
+    assets_path = census_build_args.h5ads_path.as_posix()
+
     organism = ORGANISMS[0]
     dataset_id = "an_id"
     datasets = []
@@ -56,7 +63,10 @@ def datasets_with_larger_raw_layer(assets_path: str) -> List[Dataset]:
 
 
 @pytest.fixture
-def datasets_with_incorrect_schema_version(assets_path: str) -> List[Dataset]:
+def datasets_with_incorrect_schema_version(census_build_args: CensusBuildArgs) -> List[Dataset]:
+    census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
+    assets_path = census_build_args.h5ads_path.as_posix()
+
     organism = ORGANISMS[0]
     dataset_id = "an_id"
     datasets = []

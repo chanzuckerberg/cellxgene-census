@@ -1,6 +1,5 @@
 import os
 import time
-import urllib.parse
 from typing import Any, Iterator, Optional, Union
 
 import numpy as np
@@ -64,21 +63,6 @@ def array_chunker(
     raise NotImplementedError("array_chunker: unsupported array type")
 
 
-def uricat(container_uri: str, *paths: str) -> str:
-    """
-    Concat one or more paths, separated with '/'
-
-    Similar to urllib.parse.urljoin except it takes an iterator, and
-    assumes the container_uri is a 'directory'/container, ie, ends in '/'.
-    """
-
-    uri = container_uri
-    for p in paths:
-        uri = uri if uri.endswith("/") else uri + "/"
-        uri = urllib.parse.urljoin(uri, p)
-    return uri
-
-
 def fetch_json(url: str, delay_secs: float = 0.0) -> object:
     response = requests.get(url)
     response.raise_for_status()
@@ -138,6 +122,7 @@ def get_git_commit_sha() -> str:
     commit_sha_var = os.getenv("COMMIT_SHA")
     if commit_sha_var is not None:
         return commit_sha_var
+
     import git  # Scoped import - this requires the git executable to exist on the machine
 
     repo = git.Repo(search_parent_directories=True)
