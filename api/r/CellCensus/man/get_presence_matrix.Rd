@@ -7,7 +7,7 @@
 get_presence_matrix(census, organism, measurement_name = "RNA")
 }
 \arguments{
-\item{census}{The census SOMACollection from which to read the presence matrix.}
+\item{census}{The census object, usually returned by \code{CellCensus::open_soma()}.}
 
 \item{organism}{The organism to query, usually one of \verb{Homo sapiens} or \verb{Mus musculus}}
 
