@@ -19,6 +19,7 @@ Imports:
   httr,
   jsonlite,
   methods,
+  Seurat (>= 4.1.0),
   stats,
   tiledbsoma,
   tiledb
