@@ -32,10 +32,9 @@ test_that("get_presence_matrix", {
   }
 })
 
-test_that("test_get_seurat", {
-  census <- open_soma()
+test_that("get_seurat", {
   seurat <- get_seurat(
-    census,
+    open_soma(),
     "Mus musculus",
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_general == 'vasculature'"),
     obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
@@ -44,11 +43,30 @@ test_that("test_get_seurat", {
   )
 
   expect_s4_class(seurat, "Seurat")
-  seurat_assay <- seurat@assays[["RNA"]]
+  seurat_assay <- seurat[["RNA"]]
   expect_s4_class(seurat_assay, "Assay")
   expect_equal(nrow(seurat_assay), 2)
   expect_gt(ncol(seurat_assay), 0)
   expect_setequal(seurat_assay[[]][, "feature_name"], c("0610010K14Rik", "Gm53058"))
   # FIXME: https://github.com/single-cell-data/TileDB-SOMA/issues/1170
   # expect_equal(sum(seurat[[]][,"tissue_general"] == "vasculature"), ncol(seurat_assay))
+})
+
+test_that("get_seurat coords", {
+  seurat <- get_seurat(
+    open_soma(),
+    "Mus musculus",
+    obs_query = tiledbsoma::SOMAAxisQuery$new(
+      coords = list(soma_joinid = bit64::as.integer64(0:1000))
+    ),
+    var_query = tiledbsoma::SOMAAxisQuery$new(
+      coords = list(soma_joinid = bit64::as.integer64(0:2000))
+    )
+  )
+  expect_equal(nrow(seurat[[]]), 1001)
+  seurat_assay <- seurat[["RNA"]]
+  expect_equal(nrow(seurat_assay[[]]), 2001)
+  # NOTE: seurat assay matrix is var x obs, not obs x var
+  expect_equal(nrow(seurat_assay), 2001)
+  expect_equal(ncol(seurat_assay), 1001)
 })
