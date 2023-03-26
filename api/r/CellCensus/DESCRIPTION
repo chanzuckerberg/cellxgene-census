@@ -19,11 +19,11 @@ Imports:
   httr,
   jsonlite,
   methods,
+  Seurat (>= 4.1.0),
   stats,
   tiledbsoma,
   tiledb
 Suggests: 
   testthat (>= 3.0.0),
-  withr,
-  Seurat (>= 4.1.0)
+  withr
 Config/testthat/edition: 3
