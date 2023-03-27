@@ -1,7 +1,7 @@
-from importlib.metadata import PackageNotFoundError, version
+from importlib import metadata
 
 try:
-    __version__ = version("cell_census_builder")
-except PackageNotFoundError:
+    __version__ = metadata.version("cell_census_builder")
+except metadata.PackageNotFoundError:
     # package is not installed
     __version__ = "0.0.0-unknown"
