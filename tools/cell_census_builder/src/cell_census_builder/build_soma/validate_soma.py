@@ -138,6 +138,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
     gc.collect()
+    log_process_resource_status()
     return True
 
 
