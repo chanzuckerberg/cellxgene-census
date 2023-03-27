@@ -29,6 +29,7 @@ open_soma <- function(census_version = "latest", uri = NULL, tiledbsoma_ctx = NU
   }
 
   cfg <- DEFAULT_TILEDB_CONFIGURATION
+  cfg <- c(cfg, c("vfs.s3.no_sign_request" = "true"))
   if (is.null(tiledbsoma_ctx)) {
     if (!is.null(s3_region)) {
       cfg <- c(cfg, c("vfs.s3.region" = description$soma.s3_region))
