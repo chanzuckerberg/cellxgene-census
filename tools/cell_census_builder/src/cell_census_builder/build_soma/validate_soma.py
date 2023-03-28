@@ -1,5 +1,6 @@
 import concurrent.futures
 import dataclasses
+import gc
 import logging
 import os.path
 import pathlib
@@ -16,7 +17,7 @@ from scipy import sparse
 from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
-from ..util import urlcat
+from ..util import log_process_resource_status, urlcat
 from .anndata import make_anndata_cell_filter, open_anndata
 from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
@@ -136,7 +137,9 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
                 assert sum([c.non_zero_length for c in rna["feature_dataset_presence_matrix"].read().coos()]) > 0
                 # TODO(atolopko): validate 1) shape, 2) joinids exist in datsets and var
 
-        return True
+    gc.collect()
+    log_process_resource_status()
+    return True
 
 
 def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> Dict[str, EbInfo]:
@@ -172,7 +175,9 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
                 ad_obs = ad.obs[list(CXG_OBS_TERM_COLUMNS)].reset_index(drop=True)
                 assert (dataset_obs == ad_obs).all().all(), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
-        return eb_info
+    gc.collect()
+    log_process_resource_status()
+    return eb_info
 
 
 def validate_axis_dataframes(
@@ -361,6 +366,8 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 f"{eb.name}:{dataset.dataset_id} unexpected False " "stored in presence matrix"
             )
 
+    gc.collect()
+    log_process_resource_status()
     return True
 
 
@@ -390,7 +397,9 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
             unique_offsets = np.unique(offsets)
             assert len(offsets) == len(unique_offsets)
 
-        return True
+    gc.collect()
+    log_process_resource_status()
+    return True
 
 
 def validate_X_layers(

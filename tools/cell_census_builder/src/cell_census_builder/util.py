@@ -1,4 +1,7 @@
+import logging
 import multiprocessing
+import platform
+import re
 import urllib.parse
 
 from .build_state import CensusBuildArgs
@@ -44,3 +47,56 @@ def process_init(args: CensusBuildArgs) -> None:
         multiprocessing.set_start_method("spawn", True)
 
     logging_init(args)
+
+
+class ProcessResourceGetter:
+    """
+    Access to process resource state, primary for diagnostic/debugging purposes. Currently
+    provides current and high water mark for:
+    * thread count
+    * mmaps
+
+    Linux-only at the moment.
+    """
+
+    # historical maxima
+    max_thread_count = -1
+    max_map_count = -1
+
+    @property
+    def thread_count(self) -> int:
+        """Return the thread count for the current process. Retain the historical maximum."""
+        if platform.system() != "Linux":
+            return -1
+
+        with open("/proc/self/status") as f:
+            status = f.read()
+            thread_count = int(re.split(".*\nThreads:\t(\d+)\n.*", status)[1])
+            self.max_thread_count = max(thread_count, self.max_thread_count)
+        return thread_count
+
+    @property
+    def map_count(self) -> int:
+        """Return the memory map count for the current process. Retain the historical maximum."""
+        if platform.system() != "Linux":
+            return -1
+
+        with open("/proc/self/maps") as f:
+            maps = f.read()
+            map_count = maps.count("\n")
+            self.max_map_count = max(map_count, self.max_map_count)
+        return map_count
+
+
+_resouce_getter = ProcessResourceGetter()
+
+
+def log_process_resource_status(preface: str = "Resource use:") -> None:
+    """Print current and historical max of thread and (memory) map counts"""
+    if platform.system() == "Linux":
+        logging.debug(
+            f"{preface} threads: {_resouce_getter.thread_count} "
+            f"[max: {_resouce_getter.max_thread_count}], "
+            f"maps: {_resouce_getter.map_count} "
+            f"[max: {_resouce_getter.max_map_count}]"
+        )

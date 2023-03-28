@@ -9,7 +9,7 @@
 .PHONY: image
 image: clean
 	python3 -m build .
-	docker build --build-arg=COMMIT_SHA=$(git rev-parse --short HEAD) -t cell-census-builder .
+	docker build --build-arg=COMMIT_SHA="$$(git describe)" -t cell-census-builder .
 
 # Clean Python build
 .PHONY: clean
@@ -20,5 +20,5 @@ clean:
 .PHONY: prune
 prune:
 	docker system prune -f
-	if [ "$(docker ps -aq)" ]; then docker rm -f $(docker ps -aq) ; fi
-	if [ "$(docker images -q)" ]; then docker rmi -f $(docker images -q) ; fi
+	CONTAINERS="$(docker ps -aq)" && if [ "$$CONTAINERS" ]; then docker rm -f $$CONTAINERS ; fi
+	IMAGES="$(docker images -q)" && if [ "$$IMAGES" ]; then docker rmi -f $$IMAGES ; fi

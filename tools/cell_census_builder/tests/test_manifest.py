@@ -47,14 +47,14 @@ def test_load_manifest_from_cxg() -> None:
             if uri == f"{CXG_BASE_URI}curation/v1/collections":
                 return [
                     {
-                        "id": "collection_1",
+                        "collection_id": "collection_1",
                         "doi": None,
                         "name": "1",
-                        "datasets": [{"id": "dataset_id_1"}, {"id": "dataset_id_2"}],
+                        "datasets": [{"dataset_id": "dataset_id_1"}, {"dataset_id": "dataset_id_2"}],
                     }
                 ]
             elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)$", uri):
-                return {"id": m[2], "schema_version": "3.0.0", "title": f"dataset #{m[2]}"}
+                return {"dataset_id": m[2], "schema_version": "3.0.0", "title": f"dataset #{m[2]}"}
             elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)/assets$", uri):
                 return [{"filetype": "H5AD", "filesize": 1024, "presigned_url": f"https://fake.url/{m[2]}.h5ad"}]
 
@@ -78,15 +78,15 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
             if uri == f"{CXG_BASE_URI}curation/v1/collections":
                 return [
                     {
-                        "id": "collection_1",
+                        "collection_id": "collection_1",
                         "doi": None,
                         "name": "1",
-                        "datasets": [{"id": "dataset_id_1"}, {"id": "dataset_id_2"}],
+                        "datasets": [{"dataset_id": "dataset_id_1"}, {"dataset_id": "dataset_id_2"}],
                     }
                 ]
             elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)$", uri):
                 return {
-                    "id": m[2],
+                    "dataset_id": m[2],
                     "schema_version": "3.0.0" if m[2] == "dataset_id_1" else "2.0.0",
                     "title": f"dataset #{m[2]}",
                 }
@@ -111,14 +111,14 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
             if uri == f"{CXG_BASE_URI}curation/v1/collections":
                 return [
                     {
-                        "id": "collection_1",
+                        "collection_id": "collection_1",
                         "doi": None,
                         "name": "1",
-                        "datasets": [{"id": "dataset_id_1"}, {"id": "dataset_id_2"}],
+                        "datasets": [{"dataset_id": "dataset_id_1"}, {"dataset_id": "dataset_id_2"}],
                     }
                 ]
             elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)$", uri):
-                return {"id": m[2], "schema_version": "3.0.0", "title": f"dataset #{m[2]}"}
+                return {"dataset_id": m[2], "schema_version": "3.0.0", "title": f"dataset #{m[2]}"}
             elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/dataset_id_1/assets$", uri):
                 return [{"filetype": "H5AD", "filesize": 1024, "presigned_url": "https://fake.url/dataset_id_1.h5ad"}]
             elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/dataset_id_2/assets$", uri):
