@@ -63,13 +63,7 @@ def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_incremental_read(organism: str) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
-
-    # open census with a small (default) TileDB buffer size, which both reduces
-    # test memory use, and makes it run faster
-    version = cell_census.get_census_version_description("latest")
-    s3_region = version["soma"].get("s3_region")
-    context = soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": s3_region}))
-    with cell_census.open_soma(census_version="latest", context=context) as census:
+    with cell_census.open_soma(census_version="latest") as census:
         assert table_iter_is_ok(census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]))
         assert table_iter_is_ok(
             census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"])
@@ -80,7 +74,7 @@ def test_incremental_read(organism: str) -> None:
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
-    "obs_value_filter", ["tissue=='tongue'", pytest.param("tissue=='brain'", marks=pytest.mark.expensive)]
+    "obs_value_filter", ["tissue=='aorta'", pytest.param("tissue=='brain'", marks=pytest.mark.expensive)]
 )
 @pytest.mark.parametrize("stop_after", [2, pytest.param(None, marks=pytest.mark.expensive)])
 def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Optional[int]) -> None:
@@ -101,7 +95,7 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
 @pytest.mark.parametrize(
     "obs_value_filter",
     [
-        "tissue_general == 'tongue'",
+        "tissue == 'aorta'",
         pytest.param("cell_type == 'neuron'", marks=pytest.mark.expensive),  # very common cell type
         pytest.param("tissue == 'brain'", marks=pytest.mark.expensive),  # very common tissue
         pytest.param(None, marks=pytest.mark.expensive),  # whole enchilada
