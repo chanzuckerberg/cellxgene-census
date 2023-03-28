@@ -14,7 +14,6 @@ from typing import Iterator, Optional
 
 import pyarrow as pa
 import pytest
-import tiledb
 import tiledbsoma as soma
 
 import cell_census
