@@ -35,11 +35,12 @@ You can also combine them, e.g.,
 
 These tests are periodically run, and are not part of CI due to their overhead.
 
-Please record:
+When run, please record the results below and commit to git:
 
 - date
 - host / instance type
 - Python & package versions and OS (tip: use tiledbsoma.show_package_versions())
+- the Cell Census version used for the test (i.e., the version aliased as `latest`)
 - full output of: `pytest --durations=0 --expensive ./api/python/cell_census/tests/`
 
 ## YYYY-MM-DD
