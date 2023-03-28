@@ -8,11 +8,12 @@ Several of them will not run to completion except on VERY large hosts.
 import collections.abc
 from typing import Optional
 
-import cell_census
 import pyarrow as pa
 import pytest
 import tiledb
 import tiledbsoma as soma
+
+import cell_census
 
 
 @pytest.mark.live_corpus
