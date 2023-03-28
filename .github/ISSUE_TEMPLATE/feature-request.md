@@ -17,7 +17,7 @@ _e.g. in project X I was trying to do this operation and [...]_
 
 ## Impact
 
-Provide your assesment of the impact the current state has on your work.
+Provide your assessment of the impact the current state has on your work.
 _e.g. I found and ad-hoc solution but incorporating it into the code base adds significant value [...]_
 
 ## Ideal behavior 
