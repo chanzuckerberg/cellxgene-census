@@ -56,11 +56,11 @@ def load_manifest_from_CxG() -> List[Dataset]:
     collections = fetch_json(f"{CXG_BASE_URI}curation/v1/collections")
     assert isinstance(collections, list), "Unexpected REST API response, /curation/v1/collections"
     datasets = {
-        dataset["id"]: {
-            "collection_id": collection["id"],
+        dataset["dataset_id"]: {
+            "collection_id": collection["collection_id"],
             "collection_name": null_to_empty_str(collection["name"]),
             "collection_doi": null_to_empty_str(collection["doi"]),
-            "dataset_id": dataset["id"],
+            "dataset_id": dataset["dataset_id"],
         }
         for collection in collections
         for dataset in collection["datasets"]
@@ -77,9 +77,9 @@ def load_manifest_from_CxG() -> List[Dataset]:
         )
     for d in dataset_metadata:
         assert (
-            isinstance(d, dict) and "id" in d
+            isinstance(d, dict) and "dataset_id" in d
         ), "Unexpected REST API response, /curation/v1/collections/.../datasets/..."
-        datasets[d["id"]].update(
+        datasets[d["dataset_id"]].update(
             {
                 "schema_version": d["schema_version"],
                 "dataset_title": null_to_empty_str(d["title"]),

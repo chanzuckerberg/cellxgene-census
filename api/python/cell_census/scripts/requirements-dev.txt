@@ -3,3 +3,4 @@ pytest
 requests-mock
 twine
 coverage
+nbqa
