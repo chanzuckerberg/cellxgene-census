@@ -63,7 +63,7 @@ def test_get_source_h5ad_uri() -> None:
         census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
     rng = np.random.default_rng()
-    for idx in rng.choice(np.arange(len(census_datasets)), size=10, replace=False):
+    for idx in rng.choice(np.arange(len(census_datasets)), size=3, replace=False):
         a_dataset = census_datasets.iloc[idx]
         locator = cell_census.get_source_h5ad_uri(a_dataset.dataset_id)
         assert isinstance(locator, dict)

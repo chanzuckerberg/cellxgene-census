@@ -1,12 +1,16 @@
 """
 Acceptance tests for the Census.
 
-NOTE: those marked `expensive` are not run in the CI as they are, well, expensive.
+NOTE: those marked `expensive` are not run in the CI as they are, well, expensive...
+
 Several of them will not run to completion except on VERY large hosts.
 
+Intended use:  periodically do a manual run, including the expensive tests, on an
+appropriately large host.
+
+See README.md for historical data.
 """
-import collections.abc
-from typing import Optional
+from typing import Iterator, Optional
 
 import pyarrow as pa
 import pytest
@@ -19,7 +23,7 @@ import cell_census
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_load_axes(organism: str) -> None:
-    # Verify axes can be loaded into a Pandas DataFrame
+    """Verify axes can be loaded into a Pandas DataFrame"""
     census = cell_census.open_soma(census_version="latest")
 
     # use subset of columns for speed
@@ -37,8 +41,14 @@ def test_load_axes(organism: str) -> None:
     del var_df
 
 
-def table_iter_is_ok(tbl_iter: collections.abc.Iterator[pa.Table], stop_after: Optional[int] = 2) -> bool:
-    assert isinstance(tbl_iter, collections.abc.Iterator)
+def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2) -> bool:
+    """
+    Utility that verifies that the value is an iterator of pa.Table.
+
+    Will only call __next__ as many times as the `stop_after` param specifies,
+    or will read until end of iteration of it is None.
+    """
+    assert isinstance(tbl_iter, Iterator)
     for n, tbl in enumerate(tbl_iter):
         # keep things speedy by quitting early if stop_after specified
         if stop_after is not None and n > stop_after:
@@ -52,10 +62,7 @@ def table_iter_is_ok(tbl_iter: collections.abc.Iterator[pa.Table], stop_after: O
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_incremental_read(organism: str) -> None:
-    # Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks
-
-    # Note: queries are reduced in scope (i.e., not all column_names or not all chunks read)
-    # to speed up the tests.
+    """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
 
     # open census with a small (default) TileDB buffer size, which both reduces
     # test memory use, and makes it run faster
@@ -72,30 +79,20 @@ def test_incremental_read(organism: str) -> None:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-def test_incremental_query_quick(organism: str) -> None:
+@pytest.mark.parametrize(
+    "obs_value_filter", ["tissue=='tongue'", pytest.param("tissue=='brain'", marks=pytest.mark.expensive)]
+)
+@pytest.mark.parametrize("stop_after", [2, pytest.param(None, marks=pytest.mark.expensive)])
+def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Optional[int]) -> None:
+    """Verify incremental read of query result."""
     # use default TileDB configuration
     with cell_census.open_soma(census_version="latest") as census:
         with census["census_data"][organism].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter="tissue_general == 'tongue'")
+            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
         ) as query:
-            assert table_iter_is_ok(query.obs())
-            assert table_iter_is_ok(query.var())
-            assert table_iter_is_ok(query.X("raw").tables())
-
-
-@pytest.mark.live_corpus
-@pytest.mark.expensive
-@pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-def test_incremental_query_full(organism: str) -> None:
-    """Full (expensive) incremental read."""
-    # use default TileDB configuration
-    with cell_census.open_soma(census_version="latest") as census:
-        with census["census_data"][organism].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter="tissue == 'brain'")
-        ) as query:
-            assert table_iter_is_ok(query.obs(), stop_after=None)
-            assert table_iter_is_ok(query.var(), stop_after=None)
-            assert table_iter_is_ok(query.X("raw").tables(), stop_after=None)
+            assert table_iter_is_ok(query.obs(), stop_after=stop_after)
+            assert table_iter_is_ok(query.var(), stop_after=stop_after)
+            assert table_iter_is_ok(query.X("raw").tables(), stop_after=stop_after)
 
 
 @pytest.mark.live_corpus
@@ -104,13 +101,14 @@ def test_incremental_query_full(organism: str) -> None:
 @pytest.mark.parametrize(
     "obs_value_filter",
     [
-        "cell_type == 'neuron'",  # very common cell type
-        "tissue == 'brain'",  # very common tissue
-        None,  # whole enchilada
+        "tissue_general == 'tongue'",
+        pytest.param("cell_type == 'neuron'", marks=pytest.mark.expensive),  # very common cell type
+        pytest.param("tissue == 'brain'", marks=pytest.mark.expensive),  # very common tissue
+        pytest.param(None, marks=pytest.mark.expensive),  # whole enchilada
     ],
 )
 def test_get_anndata(organism: str, obs_value_filter: str) -> None:
-    """Full (expensive) query and read into AnnData"""
+    """Verify query and read into AnnData"""
     with cell_census.open_soma(census_version="latest") as census:
         ad = cell_census.get_anndata(census, organism, obs_value_filter=obs_value_filter)
         assert ad is not None
