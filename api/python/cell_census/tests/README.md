@@ -19,7 +19,7 @@ There are two Pytest marks you can use from the command line:
 - live_corpus: tests that directly access the `latest` version of the Cell Census. Enabled by default.
 - expensive: tests that are expensive (ie., cpu, memory, time). Disabled by default - enable with `--expensive`. Some of these tests are _very_ expensive, ie., require a very large memory host to succeed.
 
-To enable `expensive` tests:
+By default, only relatively cheap & fast tests are run. To enable `expensive` tests:
 
 > pytest --expensive ...
 
@@ -31,15 +31,17 @@ You can also combine them, e.g.,
 
 > pytest -m 'not live_corpus' --expensive
 
-## Historical Runs
+# Acceptance (expensive) tests
+
+These tests are periodically run, and are not part of CI due to their overhead.
 
 Please record:
 
 - date
 - host / instance type
 - Python & package versions and OS (tip: use tiledbsoma.show_package_versions())
-- full output of `pytest --durations=0 --expensive ./api/python/cell_census/tests/`
+- full output of: `pytest --durations=0 --expensive ./api/python/cell_census/tests/`
 
-### YYYY-MM-DD
+## YYYY-MM-DD
 
 TBD
