@@ -8,7 +8,7 @@ assignees: ""
 
 ## Description
 
-Provide a detailed description of the request.
+Provide a detailed description of the new functionality or change. Explain how you would like the new feature or enhancement to work.
 
 ## Context
 
