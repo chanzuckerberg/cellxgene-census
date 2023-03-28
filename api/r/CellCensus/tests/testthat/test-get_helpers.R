@@ -62,10 +62,41 @@ test_that("get_seurat coords", {
       coords = list(soma_joinid = bit64::as.integer64(0:2000))
     )
   )
-  expect_equal(nrow(seurat[[]]), 1001)
+  expect_equal(nrow(seurat[[]]), 1001) # obs dataframe
   seurat_assay <- seurat[["RNA"]]
-  expect_equal(nrow(seurat_assay[[]]), 2001)
+  expect_equal(nrow(seurat_assay[[]]), 2001) # var dataframe
   # NOTE: seurat assay matrix is var x obs, not obs x var
   expect_equal(nrow(seurat_assay), 2001)
   expect_equal(ncol(seurat_assay), 1001)
+})
+
+test_that("get_seurat allows missing obs or var filter", {
+  census <- open_soma()
+
+  obs_query <- tiledbsoma::SOMAAxisQuery$new(
+    value_filter = "tissue == 'aorta'"
+  )
+  seurat <- get_seurat(census, "Mus musculus",
+    obs_query = obs_query,
+    obs_column_names = c("soma_joinid"),
+    var_column_names = c("soma_joinid")
+  )
+  control_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    get_experiment(census, "Mus musculus"),
+    "RNA",
+    obs_query = obs_query
+  )
+  expect_equal(ncol(seurat[["RNA"]]), control_query$n_obs)
+  expect_equal(nrow(seurat[["RNA"]]), control_query$n_vars)
+
+  seurat <- get_seurat(census, "Mus musculus",
+    obs_query = tiledbsoma::SOMAAxisQuery$new(
+      coords = list(soma_joinid = bit64::as.integer64(0:10000))
+    ),
+    var_query = tiledbsoma::SOMAAxisQuery$new(
+      value_filter = "feature_id == 'ENSMUSG00000069581'"
+    )
+  )
+  expect_equal(ncol(seurat[["RNA"]]), 10001)
+  expect_equal(nrow(seurat[["RNA"]]), 1)
 })
