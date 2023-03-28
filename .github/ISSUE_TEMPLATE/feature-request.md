@@ -12,7 +12,7 @@ Provide a detailed description of the request.
 
 ## Context
 
-Provide the context in which this request was intiated.
+Provide the context in which this request was initiated. What were you trying to accomplish?
 _e.g. in project X I was trying to do this operation and [...]_
 
 ## Impact
