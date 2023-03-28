@@ -37,7 +37,7 @@ def test_load_axes(organism: str) -> None:
     del var_df
 
 
-def table_iter_is_ok(tbl_iter: collections.abc.Iterator[pa.Table], stop_after: Optional[int] = 2) -> None:
+def table_iter_is_ok(tbl_iter: collections.abc.Iterator[pa.Table], stop_after: Optional[int] = 2) -> bool:
     assert isinstance(tbl_iter, collections.abc.Iterator)
     for n, tbl in enumerate(tbl_iter):
         # keep things speedy by quitting early if stop_after specified
@@ -72,7 +72,7 @@ def test_incremental_read(organism: str) -> None:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-def test_incremental_query_quick(organism: str):
+def test_incremental_query_quick(organism: str) -> None:
     # use default TileDB configuration
     with cell_census.open_soma(census_version="latest") as census:
         with census["census_data"][organism].axis_query(
@@ -86,7 +86,7 @@ def test_incremental_query_quick(organism: str):
 @pytest.mark.live_corpus
 @pytest.mark.expensive
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-def test_incremental_query_full(organism: str):
+def test_incremental_query_full(organism: str) -> None:
     """Full (expensive) incremental read."""
     # use default TileDB configuration
     with cell_census.open_soma(census_version="latest") as census:
