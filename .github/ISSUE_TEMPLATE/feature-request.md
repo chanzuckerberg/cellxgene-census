@@ -20,6 +20,10 @@ _e.g. in project X I was trying to do this operation and [...]_
 Provide your assessment of the impact the current state has on your work.
 _e.g. I found and ad-hoc solution but incorporating it into the code base adds significant value [...]_
 
+## Alternatives you've considered
+
+Provide any alternate or temporary solutions you have considered or used.
+
 ## Ideal behavior 
 
 Provide a brief description of the behavior you'd expect.
