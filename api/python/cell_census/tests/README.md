@@ -30,3 +30,16 @@ To disable `live_corpus` tests:
 You can also combine them, e.g.,
 
 > pytest -m 'not live_corpus' --expensive
+
+## Historical Runs
+
+Please record:
+
+- date
+- host / instance type
+- Python & package versions and OS (tip: use tiledbsoma.show_package_versions())
+- full output of `pytest --durations=0 --expensive ./api/python/cell_census/tests/`
+
+### YYYY-MM-DD
+
+TBD
