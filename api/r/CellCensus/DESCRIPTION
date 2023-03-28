@@ -23,7 +23,8 @@ Imports:
   stats,
   tiledbsoma,
   tiledb
-Suggests: 
+Suggests:
+  bit64,
   knitr,
   rmarkdown,
   testthat (>= 3.0.0),

@@ -1,6 +1,6 @@
 #' Read the feature dataset presence matrix.
 #'
-#' @param census The census SOMACollection from which to read the presence matrix.
+#' @param census The census object, usually returned by `CellCensus::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #'
@@ -13,6 +13,46 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
   exp <- get_experiment(census, organism)
   presence <- exp$ms$get(measurement_name)$get("feature_dataset_presence_matrix")
   return(presence$read_sparse_matrix())
+}
+
+#' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
+#' query, and return it as a `Seurat` object.
+#'
+#' @param census The census object, usually returned by `CellCensus::open_soma()`.
+#' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
+#' @param measurement_name The measurement object to query. Defaults to `RNA`.
+#' @param X_name The `X` layer to query. Defaults to `raw`.
+#' @param obs_query A `SOMAAxisQuery` for the `obs` axis.
+#' @param obs_column_names Columns to fetch for the `obs` data frame.
+#' @param var_query A `SOMAAxisQuery` for the `var` axis.
+#' @param var_column_names Columns to fetch for the `var` data frame.
+#'
+#' @return A `Seurat` object containing the sensus slice.
+#' @importFrom tiledbsoma SOMAExperimentAxisQuery
+#' @export
+#'
+#' @examples
+get_seurat <- function(
+    census,
+    organism,
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_query = NULL,
+    obs_column_names = NULL,
+    var_query = NULL,
+    var_column_names = NULL) {
+  expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    get_experiment(census, organism),
+    measurement_name,
+    obs_query = obs_query,
+    var_query = var_query
+  )
+  return(expt_query$to_seurat(
+    # TODO: should we allow selection of the seurat 'counts' or 'data' slot?
+    c(counts = X_name),
+    obs_column_names = obs_column_names,
+    var_column_names = var_column_names
+  ))
 }
 
 #' Get the SOMAExperiment for a named organism
