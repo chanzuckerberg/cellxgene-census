@@ -14,6 +14,7 @@ from typing import Iterator, Optional
 
 import pyarrow as pa
 import pytest
+import tiledb
 import tiledbsoma as soma
 
 import cell_census
@@ -62,7 +63,14 @@ def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_incremental_read(organism: str) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
-    with cell_census.open_soma(census_version="latest") as census:
+
+    # open census with a small (default) TileDB buffer size, which reduces
+    # memory use, and makes it feasible to run in a GHA.
+    version = cell_census.get_census_version_description("latest")
+    s3_region = version["soma"].get("s3_region")
+    context = soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": s3_region}))
+
+    with cell_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]))
         assert table_iter_is_ok(
             census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"])
