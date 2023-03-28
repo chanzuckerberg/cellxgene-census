@@ -48,8 +48,7 @@ test_that("get_seurat", {
   expect_equal(nrow(seurat_assay), 2)
   expect_gt(ncol(seurat_assay), 0)
   expect_setequal(seurat_assay[[]][, "feature_name"], c("0610010K14Rik", "Gm53058"))
-  # FIXME: https://github.com/single-cell-data/TileDB-SOMA/issues/1170
-  # expect_equal(sum(seurat[[]][,"tissue_general"] == "vasculature"), ncol(seurat_assay))
+  expect_equal(sum(seurat[[]][,"tissue_general"] == "vasculature"), ncol(seurat_assay))
 })
 
 test_that("get_seurat coords", {
