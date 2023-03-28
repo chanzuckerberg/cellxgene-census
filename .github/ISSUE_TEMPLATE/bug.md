@@ -22,7 +22,7 @@ A clear and concise description of what you expected to happen.
 
 Provide a description of your system and the software versions.
 
-- Machine:
+- Machine
 - OS
 * Software versions: 
     - Python user: `pip list`
