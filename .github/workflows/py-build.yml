@@ -69,10 +69,12 @@ jobs:
 
   push_docker_container:
     name: Push Docker image for Census Builder
+    runs-on: ubuntu-latest
     permissions: # these permissions must be set for AWS auth to work!
       id-token: write
       contents: read
 
+    steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
