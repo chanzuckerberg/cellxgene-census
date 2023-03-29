@@ -112,7 +112,9 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
         # 10K cells
         pytest.param(None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION, id="First 10K cells"),
         # 100K cells
-        pytest.param(None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, id="First 100K cells"),
+        pytest.param(
+            None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 100K cells"
+        ),
         # 1M cells
         pytest.param(
             None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 1M cells"
