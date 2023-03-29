@@ -80,5 +80,7 @@ jobs:
         run: |
           docker build --build-arg=COMMIT_SHA=$(git rev-parse --short HEAD) -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:latest
+          docker push $REGISTRY/$REPOSITORY:latest
         working-directory: tools/cell_census_builder/
 
