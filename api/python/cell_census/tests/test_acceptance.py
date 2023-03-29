@@ -106,23 +106,37 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
 @pytest.mark.expensive
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
-    ("obs_value_filter", "ctx_config"),
+    ("obs_value_filter", "obs_coords", "ctx_config"),
     [
-        # small query
-        ("tissue == 'aorta'", DEFAULT_TILEDB_CONFIGURATION),
-        # very common cell type, with standard buffers
-        pytest.param("cell_type == 'neuron'", DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-        # very common tissue, with standard buffers
-        pytest.param("tissue == 'brain'", DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-        # all primary cells, with big buffers
-        pytest.param("is_primary_data == True", {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
-        # the whole enchilada, with big buffers
-        pytest.param(None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
+        # small query, should be runable in CI
+        ("tissue == 'aorta'", None, DEFAULT_TILEDB_CONFIGURATION),
+        # 10K cells
+        (None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION),
+        # 100K cells
+        (None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION),
+        # 1M cells
+        pytest.param(None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        # very common cell type, with standard buffer size
+        pytest.param("cell_type == 'neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        # very common tissue, with standard buffer size
+        pytest.param("tissue == 'brain'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        # all primary cells, with big buffer size
+        pytest.param(
+            "is_primary_data == True", None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive
+        ),
+        # the whole enchilada, with big buffer size
+        pytest.param(None, None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
     ],
 )
-def test_get_anndata(organism: str, obs_value_filter: str, ctx_config: Dict[str, Any]) -> None:
+def test_get_anndata(
+    organism: str,
+    obs_value_filter: Optional[str],
+    obs_coords: Optional[slice],
+    ctx_config: Optional[Dict[str, Any]],
+) -> None:
     """Verify query and read into AnnData"""
+    ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
     with cell_census.open_soma(census_version="latest", context=context) as census:
-        ad = cell_census.get_anndata(census, organism, obs_value_filter=obs_value_filter)
+        ad = cell_census.get_anndata(census, organism, obs_value_filter=obs_value_filter, obs_coords=obs_coords)
         assert ad is not None
