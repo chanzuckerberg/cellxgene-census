@@ -76,8 +76,8 @@ jobs:
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: cell-census-builder
-          GIT_SHA: ${{ github.ref_name }}
         run: |
+          GIT_SHA=$(git describe)
           docker build --build-arg=COMMIT_SHA=$GIT_SHA -t $REGISTRY/$REPOSITORY:$GIT_SHA .
 
         working-directory: tools/cell_census_builder/
@@ -88,6 +88,7 @@ jobs:
           REPOSITORY: cell-census-builder
           GIT_SHA: ${{ github.ref_name }}
         run: |
+          GIT_SHA=$(git describe)
           docker push $REGISTRY/$REPOSITORY:$GIT_SHA
           docker tag $REGISTRY/$REPOSITORY:$GIT_SHA $REGISTRY/$REPOSITORY:latest
           docker push $REGISTRY/$REPOSITORY:latest
