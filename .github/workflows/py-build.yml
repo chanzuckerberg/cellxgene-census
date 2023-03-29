@@ -83,6 +83,7 @@ jobs:
         working-directory: tools/cell_census_builder/
 
       - name: Push docker image to Amazon ECR
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: cell-census-builder
