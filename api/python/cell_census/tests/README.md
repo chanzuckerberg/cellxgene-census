@@ -75,101 +75,107 @@ Out[4]:
 
 **Run notes:**
 
-The test `test_acceptance.py::test_get_anndata[None-homo_sapiens]` manifest a large amount of paging activity. It seems likely that memory use has increased significantly since the past (annecdotal) run - I believe this used to run in ~600 seconds on this same EC2 instance type/config.
+The test `test_acceptance.py::test_get_anndata[None-homo_sapiens]` manifest a large amount of paging activity.
 
 **Pytest output:**
 
 ```
 $ pytest -v --durations=0 --expensive ./api/python/cell_census/tests/
-=============================================================== test session starts ===============================================================
+========================================================== test session starts ===========================================================
 platform linux -- Python 3.9.16, pytest-7.2.2, pluggy-1.0.0 -- /home/bruce/cell-census/venv/bin/python
 cachedir: .pytest_cache
 rootdir: /home/bruce/cell-census/api/python/cell_census, configfile: pyproject.toml
 plugins: requests-mock-1.10.0, anyio-3.6.2
-collected 37 items
+collected 39 items
 
-api/python/cell_census/tests/test_acceptance.py::test_load_axes[homo_sapiens] PASSED                                                        [  2%]
-api/python/cell_census/tests/test_acceptance.py::test_load_axes[mus_musculus] PASSED                                                        [  5%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_read[homo_sapiens] PASSED                                                 [  8%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_read[mus_musculus] PASSED                                                 [ 10%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-homo_sapiens] PASSED                              [ 13%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-mus_musculus] PASSED                              [ 16%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-homo_sapiens] PASSED                              [ 18%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-mus_musculus] PASSED                              [ 21%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-homo_sapiens] PASSED                           [ 24%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-mus_musculus] PASSED                           [ 27%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-homo_sapiens] PASSED                           [ 29%]
-api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-mus_musculus] PASSED                           [ 32%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-homo_sapiens] PASSED                                    [ 35%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-mus_musculus] PASSED                                    [ 37%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-homo_sapiens] PASSED                                [ 40%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-mus_musculus] PASSED                                [ 43%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-homo_sapiens] PASSED                                    [ 45%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-mus_musculus] PASSED                                    [ 48%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[None-homo_sapiens] PASSED                                                 [ 51%]
-api/python/cell_census/tests/test_acceptance.py::test_get_anndata[None-mus_musculus] PASSED                                                 [ 54%]
-api/python/cell_census/tests/test_directory.py::test_get_census_version_directory PASSED                                                    [ 56%]
-api/python/cell_census/tests/test_directory.py::test_get_census_version_description_errors PASSED                                           [ 59%]
-api/python/cell_census/tests/test_directory.py::test_live_directory_contents PASSED                                                         [ 62%]
-api/python/cell_census/tests/test_get_anndata.py::test_get_anndata_value_filter PASSED                                                      [ 64%]
-api/python/cell_census/tests/test_get_anndata.py::test_get_anndata_coords PASSED                                                            [ 67%]
-api/python/cell_census/tests/test_get_anndata.py::test_get_anndata_allows_missing_obs_or_var_filter PASSED                                  [ 70%]
-api/python/cell_census/tests/test_get_helpers.py::test_get_experiment PASSED                                                                [ 72%]
-api/python/cell_census/tests/test_get_helpers.py::test_get_presence_matrix[homo_sapiens] PASSED                                             [ 75%]
-api/python/cell_census/tests/test_get_helpers.py::test_get_presence_matrix[mus_musculus] PASSED                                             [ 78%]
-api/python/cell_census/tests/test_open.py::test_open_soma_latest PASSED                                                                     [ 81%]
-api/python/cell_census/tests/test_open.py::test_open_soma_with_context PASSED                                                               [ 83%]
-api/python/cell_census/tests/test_open.py::test_open_soma_errors PASSED                                                                     [ 86%]
-api/python/cell_census/tests/test_open.py::test_get_source_h5ad_uri PASSED                                                                  [ 89%]
-api/python/cell_census/tests/test_open.py::test_get_source_h5ad_uri_errors PASSED                                                           [ 91%]
-api/python/cell_census/tests/test_open.py::test_download_source_h5ad PASSED                                                                 [ 94%]
-api/python/cell_census/tests/test_open.py::test_download_source_h5ad_errors PASSED                                                          [ 97%]
-api/python/cell_census/tests/test_util.py::test_uri_join PASSED                                                                             [100%]
+api/python/cell_census/tests/test_acceptance.py::test_load_axes[homo_sapiens] PASSED                                               [  2%]
+api/python/cell_census/tests/test_acceptance.py::test_load_axes[mus_musculus] PASSED                                               [  5%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_read[homo_sapiens] PASSED                                        [  7%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_read[mus_musculus] PASSED                                        [ 10%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-homo_sapiens] PASSED                     [ 12%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-mus_musculus] PASSED                     [ 15%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-homo_sapiens] PASSED                     [ 17%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-mus_musculus] PASSED                     [ 20%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-homo_sapiens] PASSED                  [ 23%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-mus_musculus] PASSED                  [ 25%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-homo_sapiens] PASSED                  [ 28%]
+api/python/cell_census/tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-mus_musculus] PASSED                  [ 30%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-ctx_config0-homo_sapiens] PASSED               [ 33%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-ctx_config0-mus_musculus] PASSED               [ 35%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-ctx_config1-homo_sapiens] PASSED           [ 38%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-ctx_config1-mus_musculus] PASSED           [ 41%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-ctx_config2-homo_sapiens] PASSED               [ 43%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-ctx_config2-mus_musculus] PASSED               [ 46%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[is_primary_data == True-ctx_config3-homo_sapiens] PASSED         [ 48%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[is_primary_data == True-ctx_config3-mus_musculus] PASSED         [ 51%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[None-ctx_config4-homo_sapiens] PASSED                            [ 53%]
+api/python/cell_census/tests/test_acceptance.py::test_get_anndata[None-ctx_config4-mus_musculus] PASSED                            [ 56%]
+api/python/cell_census/tests/test_directory.py::test_get_census_version_directory PASSED                                           [ 58%]
+api/python/cell_census/tests/test_directory.py::test_get_census_version_description_errors PASSED                                  [ 61%]
+api/python/cell_census/tests/test_directory.py::test_live_directory_contents PASSED                                                [ 64%]
+api/python/cell_census/tests/test_get_anndata.py::test_get_anndata_value_filter PASSED                                             [ 66%]
+api/python/cell_census/tests/test_get_anndata.py::test_get_anndata_coords PASSED                                                   [ 69%]
+api/python/cell_census/tests/test_get_anndata.py::test_get_anndata_allows_missing_obs_or_var_filter PASSED                         [ 71%]
+api/python/cell_census/tests/test_get_helpers.py::test_get_experiment PASSED                                                       [ 74%]
+api/python/cell_census/tests/test_get_helpers.py::test_get_presence_matrix[homo_sapiens] PASSED                                    [ 76%]
+api/python/cell_census/tests/test_get_helpers.py::test_get_presence_matrix[mus_musculus] PASSED                                    [ 79%]
+api/python/cell_census/tests/test_open.py::test_open_soma_latest PASSED                                                            [ 82%]
+api/python/cell_census/tests/test_open.py::test_open_soma_with_context PASSED                                                      [ 84%]
+api/python/cell_census/tests/test_open.py::test_open_soma_errors PASSED                                                            [ 87%]
+api/python/cell_census/tests/test_open.py::test_get_source_h5ad_uri PASSED                                                         [ 89%]
+api/python/cell_census/tests/test_open.py::test_get_source_h5ad_uri_errors PASSED                                                  [ 92%]
+api/python/cell_census/tests/test_open.py::test_download_source_h5ad PASSED                                                        [ 94%]
+api/python/cell_census/tests/test_open.py::test_download_source_h5ad_errors PASSED                                                 [ 97%]
+api/python/cell_census/tests/test_util.py::test_uri_join PASSED                                                                    [100%]
 
-=========================================================++++++=== slowest durations ==============================================================
-5552.78s call     tests/test_acceptance.py::test_get_anndata[None-homo_sapiens]
-391.00s call     tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-homo_sapiens]
-215.23s call     tests/test_acceptance.py::test_get_anndata[None-mus_musculus]
-35.67s call     tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-homo_sapiens]
-26.97s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-homo_sapiens]
-24.33s call     tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-mus_musculus]
-20.07s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-homo_sapiens]
-11.90s call     tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-mus_musculus]
-10.74s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-mus_musculus]
-9.41s call     tests/test_get_anndata.py::test_get_anndata_allows_missing_obs_or_var_filter
-9.39s call     tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-homo_sapiens]
-9.09s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-homo_sapiens]
-8.77s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-mus_musculus]
-7.63s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-homo_sapiens]
-7.17s call     tests/test_acceptance.py::test_incremental_read[homo_sapiens]
-7.02s call     tests/test_acceptance.py::test_load_axes[homo_sapiens]
-5.40s setup    tests/test_open.py::test_download_source_h5ad
-5.31s call     tests/test_directory.py::test_live_directory_contents
-5.00s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-mus_musculus]
-4.91s call     tests/test_get_anndata.py::test_get_anndata_value_filter
-4.90s call     tests/test_open.py::test_get_source_h5ad_uri
-4.58s call     tests/test_get_helpers.py::test_get_presence_matrix[mus_musculus]
-4.56s call     tests/test_get_helpers.py::test_get_presence_matrix[homo_sapiens]
-4.35s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-mus_musculus]
-4.04s call     tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-mus_musculus]
-3.04s call     tests/test_acceptance.py::test_incremental_read[mus_musculus]
-2.54s call     tests/test_get_anndata.py::test_get_anndata_coords
-2.33s call     tests/test_open.py::test_download_source_h5ad
-2.24s call     tests/test_acceptance.py::test_load_axes[mus_musculus]
-1.34s call     tests/test_open.py::test_get_source_h5ad_uri_errors
-1.27s setup    tests/test_get_anndata.py::test_get_anndata_coords
-0.97s setup    tests/test_open.py::test_download_source_h5ad_errors
-0.48s call     tests/test_open.py::test_open_soma_latest
-0.48s call     tests/test_open.py::test_open_soma_with_context
-0.43s call     tests/test_get_helpers.py::test_get_experiment
+=========================================================== slowest durations ============================================================
+5384.37s call     tests/test_acceptance.py::test_get_anndata[None-ctx_config4-homo_sapiens]
+1191.86s call     tests/test_acceptance.py::test_get_anndata[is_primary_data == True-ctx_config3-homo_sapiens]
+396.88s call     tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-ctx_config1-homo_sapiens]
+181.64s call     tests/test_acceptance.py::test_get_anndata[None-ctx_config4-mus_musculus]
+107.21s call     tests/test_acceptance.py::test_get_anndata[is_primary_data == True-ctx_config3-mus_musculus]
+36.18s call     tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-ctx_config2-homo_sapiens]
+27.69s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-homo_sapiens]
+22.58s call     tests/test_acceptance.py::test_get_anndata[cell_type == 'neuron'-ctx_config1-mus_musculus]
+20.50s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-homo_sapiens]
+12.39s call     tests/test_acceptance.py::test_get_anndata[tissue == 'brain'-ctx_config2-mus_musculus]
+11.72s call     tests/test_get_anndata.py::test_get_anndata_allows_missing_obs_or_var_filter
+9.52s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='brain'-mus_musculus]
+8.18s call     tests/test_acceptance.py::test_incremental_read[homo_sapiens]
+8.07s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-homo_sapiens]
+7.25s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-homo_sapiens]
+7.20s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='brain'-mus_musculus]
+6.71s call     tests/test_acceptance.py::test_load_axes[homo_sapiens]
+6.65s call     tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-ctx_config0-homo_sapiens]
+5.94s setup    tests/test_open.py::test_download_source_h5ad
+5.76s call     tests/test_directory.py::test_live_directory_contents
+5.09s call     tests/test_open.py::test_get_source_h5ad_uri
+4.67s call     tests/test_get_anndata.py::test_get_anndata_value_filter
+4.50s call     tests/test_acceptance.py::test_incremental_query[None-tissue=='aorta'-mus_musculus]
+4.13s call     tests/test_open.py::test_open_soma_latest
+4.00s call     tests/test_get_helpers.py::test_get_presence_matrix[homo_sapiens]
+3.91s call     tests/test_acceptance.py::test_incremental_query[2-tissue=='aorta'-mus_musculus]
+3.53s call     tests/test_acceptance.py::test_incremental_read[mus_musculus]
+3.48s call     tests/test_acceptance.py::test_get_anndata[tissue == 'aorta'-ctx_config0-mus_musculus]
+3.00s call     tests/test_get_helpers.py::test_get_presence_matrix[mus_musculus]
+2.83s call     tests/test_get_anndata.py::test_get_anndata_coords
+2.42s call     tests/test_open.py::test_download_source_h5ad
+2.11s call     tests/test_acceptance.py::test_load_axes[mus_musculus]
+1.93s setup    tests/test_get_anndata.py::test_get_anndata_coords
+1.20s call     tests/test_open.py::test_get_source_h5ad_uri_errors
+0.90s setup    tests/test_open.py::test_download_source_h5ad_errors
+0.60s call     tests/test_get_helpers.py::test_get_experiment
+0.44s call     tests/test_open.py::test_open_soma_with_context
 0.31s setup    tests/test_get_anndata.py::test_get_anndata_value_filter
-0.23s setup    tests/test_get_anndata.py::test_get_anndata_allows_missing_obs_or_var_filter
-0.09s call     tests/test_directory.py::test_get_census_version_description_errors
-0.04s setup    tests/test_directory.py::test_get_census_version_directory
-0.02s teardown tests/test_acceptance.py::test_get_anndata[None-homo_sapiens]
-0.02s call     tests/test_directory.py::test_get_census_version_directory
-0.01s setup    tests/test_acceptance.py::test_get_anndata[None-mus_musculus]
+0.24s setup    tests/test_get_anndata.py::test_get_anndata_allows_missing_obs_or_var_filter
+0.05s call     tests/test_directory.py::test_get_census_version_description_errors
+0.03s setup    tests/test_directory.py::test_get_census_version_directory
+0.03s call     tests/test_directory.py::test_get_census_version_directory
+0.02s teardown tests/test_acceptance.py::test_get_anndata[None-ctx_config4-homo_sapiens]
+0.01s setup    tests/test_acceptance.py::test_get_anndata[None-ctx_config4-mus_musculus]
+0.01s setup    tests/test_acceptance.py::test_get_anndata[is_primary_data == True-ctx_config3-mus_musculus]
+0.01s teardown tests/test_acceptance.py::test_get_anndata[is_primary_data == True-ctx_config3-homo_sapiens]
 
-(69 durations < 0.005s hidden.  Use -vv to show these durations.)
-========================================================== 37 passed in 6407.08s (1:46:47) ===========================================================
+(71 durations < 0.005s hidden.  Use -vv to show these durations.)
+==================================================== 39 passed in 7508.82s (2:05:08) =====================================================
 ```
