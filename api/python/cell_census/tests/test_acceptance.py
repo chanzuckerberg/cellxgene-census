@@ -109,13 +109,13 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
     [
         # small query, should be runable in CI
         pytest.param("tissue=='aorta'", None, DEFAULT_TILEDB_CONFIGURATION),
-        # 10K cells
+        # 10K cells, also small enough to run in CI
         pytest.param(None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION, id="First 10K cells"),
-        # 100K cells
+        # 100K cells, standard buffer size
         pytest.param(
             None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 100K cells"
         ),
-        # 1M cells
+        # 1M cells, standard buffer size
         pytest.param(
             None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 1M cells"
         ),
