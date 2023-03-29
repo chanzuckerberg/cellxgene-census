@@ -10,7 +10,7 @@ appropriately large host.
 
 See README.md for historical data.
 """
-from typing import Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 import pyarrow as pa
 import pytest
@@ -18,6 +18,15 @@ import tiledb
 import tiledbsoma as soma
 
 import cell_census
+from cell_census._open import DEFAULT_TILEDB_CONFIGURATION
+
+
+def make_context(census_version: str, config: Optional[Dict[str, Any]] = None) -> soma.SOMATileDBContext:
+    config = config or {}
+    version = cell_census.get_census_version_description(census_version)
+    s3_region = version["soma"].get("s3_region", "us-west-2")
+    config.update({"vfs.s3.region": s3_region})
+    return soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(config))
 
 
 @pytest.mark.live_corpus
@@ -66,10 +75,7 @@ def test_incremental_read(organism: str) -> None:
 
     # open census with a small (default) TileDB buffer size, which reduces
     # memory use, and makes it feasible to run in a GHA.
-    version = cell_census.get_census_version_description("latest")
-    s3_region = version["soma"].get("s3_region")
-    context = soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": s3_region}))
-
+    context = make_context("latest")
     with cell_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]))
         assert table_iter_is_ok(
@@ -97,19 +103,43 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
 
 
 @pytest.mark.live_corpus
-@pytest.mark.expensive
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
-    "obs_value_filter",
+    ("obs_value_filter", "obs_coords", "ctx_config"),
     [
-        "tissue == 'aorta'",
-        pytest.param("cell_type == 'neuron'", marks=pytest.mark.expensive),  # very common cell type
-        pytest.param("tissue == 'brain'", marks=pytest.mark.expensive),  # very common tissue
-        pytest.param(None, marks=pytest.mark.expensive),  # whole enchilada
+        # small query, should be runable in CI
+        pytest.param("tissue=='aorta'", None, DEFAULT_TILEDB_CONFIGURATION),
+        # 10K cells, also small enough to run in CI
+        pytest.param(None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION, id="First 10K cells"),
+        # 100K cells, standard buffer size
+        pytest.param(
+            None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 100K cells"
+        ),
+        # 1M cells, standard buffer size
+        pytest.param(
+            None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 1M cells"
+        ),
+        # very common cell type, with standard buffer size
+        pytest.param("cell_type=='neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        # very common tissue, with standard buffer size
+        pytest.param("tissue=='brain'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        # all primary cells, with big buffer size
+        pytest.param(
+            "is_primary_data==True", None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive
+        ),
+        # the whole enchilada, with big buffer size
+        pytest.param(None, None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
     ],
 )
-def test_get_anndata(organism: str, obs_value_filter: str) -> None:
+def test_get_anndata(
+    organism: str,
+    obs_value_filter: Optional[str],
+    obs_coords: Optional[slice],
+    ctx_config: Optional[Dict[str, Any]],
+) -> None:
     """Verify query and read into AnnData"""
-    with cell_census.open_soma(census_version="latest") as census:
-        ad = cell_census.get_anndata(census, organism, obs_value_filter=obs_value_filter)
+    ctx_config = ctx_config or {}
+    context = make_context("latest", ctx_config)
+    with cell_census.open_soma(census_version="latest", context=context) as census:
+        ad = cell_census.get_anndata(census, organism, obs_value_filter=obs_value_filter, obs_coords=obs_coords)
         assert ad is not None
