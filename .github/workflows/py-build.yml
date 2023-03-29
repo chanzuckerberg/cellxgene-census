@@ -5,6 +5,7 @@ on:
     paths:
       - "api/python/**"
       - "tools/cell_census_builder/**"
+      - ".github/workflows/**"
   push:
     branches: [main]
   workflow_dispatch:
