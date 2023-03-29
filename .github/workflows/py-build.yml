@@ -5,7 +5,7 @@ on:
     paths:
       - "api/python/**"
       - "tools/cell_census_builder/**"
-      - ".github/workflows/**"
+      - ".github/workflows/**" # Re-run if a workflow is modified - useful to test workflow changes in PRs
   push:
     branches: [main]
   workflow_dispatch:
@@ -79,7 +79,6 @@ jobs:
         run: |
           GIT_SHA=$(git describe)
           docker build --build-arg=COMMIT_SHA=$GIT_SHA -t $REGISTRY/$REPOSITORY:$GIT_SHA .
-
         working-directory: tools/cell_census_builder/
 
       - name: Push docker image to Amazon ECR
