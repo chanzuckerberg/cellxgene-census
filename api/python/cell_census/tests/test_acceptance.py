@@ -103,26 +103,27 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
 
 
 @pytest.mark.live_corpus
-@pytest.mark.expensive
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
     ("obs_value_filter", "obs_coords", "ctx_config"),
     [
         # small query, should be runable in CI
-        ("tissue == 'aorta'", None, DEFAULT_TILEDB_CONFIGURATION),
+        pytest.param("tissue=='aorta'", None, DEFAULT_TILEDB_CONFIGURATION),
         # 10K cells
-        (None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION),
+        pytest.param(None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION, id="First 10K cells"),
         # 100K cells
-        (None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION),
+        pytest.param(None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, id="First 100K cells"),
         # 1M cells
-        pytest.param(None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        pytest.param(
+            None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 1M cells"
+        ),
         # very common cell type, with standard buffer size
-        pytest.param("cell_type == 'neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        pytest.param("cell_type=='neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
         # very common tissue, with standard buffer size
-        pytest.param("tissue == 'brain'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        pytest.param("tissue=='brain'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
         # all primary cells, with big buffer size
         pytest.param(
-            "is_primary_data == True", None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive
+            "is_primary_data==True", None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive
         ),
         # the whole enchilada, with big buffer size
         pytest.param(None, None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
