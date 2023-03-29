@@ -28,7 +28,7 @@ as it will keep you from running out of RAM.
 ```
 2. Install the required dependencies:
 ```shell
-  $ pip install -r cell-census/api/python/notebooks/requirements.txt
+  $ pip install -U -r cell-census/api/python/notebooks/requirements.txt
 ```
 ## Verify your installation
 Check that your installation works - this make take a few seconds, as it loads metadata from S3:
