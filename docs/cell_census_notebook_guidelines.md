@@ -19,9 +19,11 @@ Since these assets are user-facing and are one of the main form users get onboar
 Examples:
 
 :white_check_mark: `# Exploring all data from a tissue.`
+
 :white_check_mark: `# Query and extract slices of data.`
 
 :x: `# Census datasets presence` *not self-explanatory, has "Census" in it.*
+
 :x: `# Normalizing full-length gene sequencing data from the Cell Censuse` *it has "Census" in it.*
 
 
