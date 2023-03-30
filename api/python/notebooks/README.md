@@ -26,15 +26,10 @@ as it will keep you from running out of RAM.
   $ python -m venv ./venv
   $ source ./venv/bin/activate
 ```
-2. Install the `cell_census` package using `pip`:
+2. Install the required dependencies:
 ```shell
-  $ pip install -U cell-census
+  $ pip install -U -r cell-census/api/python/notebooks/requirements.txt
 ```
-3. Install other third-party packages needed to run the notebooks:
-```shell
-  $ pip install scikit-misc scvi-tools
-```
-
 ## Verify your installation
 Check that your installation works - this make take a few seconds, as it loads metadata from S3:
 ```shell
