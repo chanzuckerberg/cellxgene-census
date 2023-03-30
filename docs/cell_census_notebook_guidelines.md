@@ -51,13 +51,13 @@ Examples:
 
 Immediately after the the introduction a table of contents must be provided:
 
-* It must be followed by the bolded word **Contents:**. 
+* It must be followed by the bolded word "**Contents:**" . 
 * It must contain an ordered list of the second-level headers (`##`) used for [Sections](#Sections).
 * If necessary it may contain sub-bullets corresponding to lower-level headers (`###`, etc)
 
 Example:
 
-:whitecheckmark:
+:white_check_mark:
 
 > 1. Learning about the lung data.
 >  1. Learning about cells of lung data.
