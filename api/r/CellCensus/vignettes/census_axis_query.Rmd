@@ -1,0 +1,146 @@
+---
+title: "Census Datasets example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{census_axis_query}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 80)
+```
+
+<!--
+THIS VIGNETTE IS BASED ON:
+https://github.com/chanzuckerberg/cell-census/blob/main/api/python/notebooks/api_demo/census_axis_query.ipynb
+-->
+
+# Axis Query Example
+
+*Goal:* demonstrate basic axis metadata handling.
+
+The CZ Cell Census stores obs (cell) metadata in a SOMA DataFrame, which can be queried and read as an R data frame. The Cell Census also has a convenience package which simplifies opening the census.
+
+R data frames are in-memory objects. Take care that queries are small enough for results to fit in memory.
+
+## Opening the census
+
+The `CellCensus` R package contains a convenient API to open the latest version of the Cell Census. TODO: discuss closing the census once API is finalized.
+
+```{r}
+census <- CellCensus::open_soma()
+```
+
+You can learn more about the CellCensus methods by accessing their corresponding documentation. For example `?CellCensus::open_soma`.
+
+## Summarize Census cell metadata
+
+Tips:
+
+* You can read an *entire* SOMA dataframe into R using `as.data.frame(soma_df$read())`.
+* Queries will be much faster if you request only the DataFrame columns required for your analysis (e.g. `column_names = c("soma_joinid", "cell_type_ontology_term_id")`).
+* You can also further refine query results by using a `value_filter`, which will filter the census for matching records.
+
+### Summarize all cell types
+
+This example reads the cell metadata (obs) into an R data frame to summarize in a variety of ways.
+
+```{r}
+human <- census$get("census_data")$get("homo_sapiens")
+
+# Read obs into an R data frame (tibble).
+obs_df <- as.data.frame(human$obs$read(
+  column_names = c("soma_joinid", "cell_type_ontology_term_id")
+))
+
+# Find all unique values in the cell_type_ontology_term_id column.
+unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
+
+cat(paste(
+  "There are",
+  length(unique_cell_type_ontology_term_id),
+  "cell types in the Cell Census! The first few are:"
+))
+head(unique_cell_type_ontology_term_id)
+```
+
+### Summarize a subset of cell types, selected with a `value_filter`
+
+This example utilizes a SOMA "value filter" to read the subset of cells with `tissue_ontology_term_id` equal to `UBERON:0002048` (lung tissue), and summarizes the query result.
+
+```{r}
+# Read cell_type terms for cells which have a specific tissue term
+LUNG_TISSUE <- "UBERON:0002048"
+
+obs_df <- as.data.frame(human$obs$read(
+  column_names = c("cell_type_ontology_term_id"),
+  value_filter = paste("tissue_ontology_term_id == '", LUNG_TISSUE, "'", sep = "")
+))
+
+# Find all unique values in the cell_type_ontology_term_id column as an R data frame.
+unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
+cat(paste(
+  "There are ",
+  length(unique_cell_type_ontology_term_id),
+  " cell types in the Cell Census where tissue_ontology_term_id == ",
+  LUNG_TISSUE,
+  "!\nThe first few are:",
+  sep = ""
+))
+head(unique_cell_type_ontology_term_id)
+
+# Report the 10 most common
+top_10 <- sort(table(obs_df$cell_type_ontology_term_id), decreasing = TRUE)[1:10]
+cat(paste("The top 10 cell types where tissue_ontology_term_id ==", LUNG_TISSUE))
+print(top_10)
+```
+
+You can also define much more complex value filters. For example:
+
+* combine terms with `and` and `or`
+* use the `%in%` operator to query on multiple values
+
+```{r}
+# You can also do more complex queries, such as testing for inclusion in a list of values
+obs_df <- as.data.frame(human$obs$read(
+  column_names = c("cell_type_ontology_term_id"),
+  value_filter = "tissue_ontology_term_id %in% c('UBERON:0002082', 'UBERON:OOO2084', 'UBERON:0002080')"
+))
+
+# Summarize
+top_10 <- sort(table(obs_df$cell_type_ontology_term_id), decreasing = TRUE)[1:10]
+print(top_10)
+```
+
+### Full census stats
+
+This example queries all organisms in the Census, and summarizes the diversity of various metadata labels.
+
+```{r}
+cols_to_query <- c(
+  "cell_type_ontology_term_id",
+  "assay_ontology_term_id",
+  "tissue_ontology_term_id"
+)
+
+total_cells <- 0
+for (organism in census$get("census_data")$names()) {
+  print(organism)
+  obs_df <- as.data.frame(
+    census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)
+  )
+  total_cells <- total_cells + nrow(obs_df)
+  for (col in cols_to_query) {
+    cat(paste("  Unique ", col, " values: ", length(unique(obs_df[[col]])), "\n", sep = ""))
+  }
+}
+cat(paste("Complete cell census contains", total_cells, "cells."))
+```
+
+<!-- TODO: close census -->
+
