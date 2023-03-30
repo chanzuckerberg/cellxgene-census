@@ -6,17 +6,15 @@ API demonstration code that is part of the documentation should be deposited her
 - R vignettes [`cell-census/api/r/CellCensus/vignettes`](https://github.com/chanzuckerberg/cell-census/tree/main/api/r/CellCensus/vignettes)
 
 
-Since these assets are user-facing and are automatically rendered to the doc-sites, they are one of the main form users get onboarded on the product. 
-
-The following guidelines need to be followed to ensure readability and a consistent experience.
+These assets are user-facing and are automatically rendered to the doc-sites, they are one of the main form users get onboarded on the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
 
 ## Guidelines
 
 ### Title
 
 * It must use the highest-level markdown header `#`.
-* Unless needed it, it should not contain the "Cell Census" in it.
-* It should be concise, self-explanatory and if possible indicate an action.
+* Unless needed it, it should not contain "Cell Census" in it.
+* It should be concise, self-explanatory, and if possible indicate an action.
 
 Examples:
 
@@ -47,33 +45,35 @@ Examples:
 >
 >This notebook shows you how to learn about the Cell Census contents and how to query it.
 
-### TOC 
+### Table of Contents 
 
 Immediately after the the introduction a table of contents must be provided:
 
-* It must be followed by the bolded word "**Contents:**" . 
+* It must be placed under the bolded word "**Contents**" . 
 * It must contain an ordered list of the second-level headers (`##`) used for [Sections](#Sections).
-* If necessary it may contain sub-bullets corresponding to lower-level headers (`###`, etc)
+* If necessary it may contain sub-lists corresponding to lower-level headers (`###`, etc)
 
 Example:
 
 :white_check_mark:
 
+> **Contents**
+> 
 > 1. Learning about the lung data.
 > 2. Fetching all human lung data from the Cell Census.
 > 3. Obtaining QC metrics for this data slice.
 
 ### Sections
 
-Content must be organized within sections:
+The rest of the notebook/vignette content must be organized within sections:
 
-* The section title must use the second-level markdown header `##`. **This is important as the python doc-site renders these in the side bar and in the full view of all notebooks.**
-* The section title should be concise, self-explanatory and if possible indicate an action.
-* The section's contents and presence/absence of sub-headers is left to the discretion of the writer
-* The section's non-code context should be kept as succinct as possible.
+* The section title must use the second-level markdown header `##`. **This is important as the python doc-site renders these in the sidebar and in the full view of all notebooks.**
+* The section title should be concise, self-explanatory, and if possible indicate an action.
+* The section's contents and presence or absence of sub-headers are left to the discretion of the writer.
+* The section's non-code content should be kept as succinct as possible.
 
 
-## Example notebook/vignette. 
+## Example notebook/vignette 
 
 ```
 # Integration of data from the Cell Census
@@ -83,7 +83,7 @@ Cell Census datasets using `scvi-tools`. The goal is not to
 provide an exhaustive guide on proper integration, but to showcase 
 what information in the Cell Census can inform data integration.
 
-**Contents:**
+**Contents**
 
 1. Finding and fetching data from mouse liver.
 2. Gene-length normalization of Smart-Seq2 data.
@@ -98,17 +98,17 @@ what information in the Cell Census can inform data integration.
 Let's load all modules needed for this notebook.
 
 \code
-	import cell_census
-	import scanpy as sc
-	import numpy as np
-	import scvi
-	from scipy.sparse import csr_matrix
+  import cell_census
+  import scanpy as sc
+  import numpy as np
+  import scvi
+  from scipy.sparse import csr_matrix
 \code 
 
 Now we can open the Cell Census 
 
 \code 
-	census = cell_census.open_soma(census_version="latest")
+  census = cell_census.open_soma(census_version="latest")
 \code
 
 In this notebook we will use Tabula Muris Senis data 
