@@ -60,8 +60,6 @@ Example:
 :white_check_mark:
 
 > 1. Learning about the lung data.
->    2. Learning about cells of lung data.
->    3. Learning about genes of lung data.
 > 2. Fetching all human lung data from the Cell Census.
 > 3. Obtaining QC metrics for this data slice.
 
