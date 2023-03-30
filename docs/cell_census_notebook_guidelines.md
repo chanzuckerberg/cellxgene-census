@@ -41,7 +41,7 @@ Examples:
 
 > This notebook provides a demonstration for integrating two Cell Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Cell Census can inform data integration.
 
-:white_check_mark: *it contains a long explanation of what the Cell Census is, and the goal is not clear *
+:x: *it contains a long explanation of what the Cell Census is, and the goal is not clear*
 
 > The Cell Census is a versioned container for the single-cell data hosted at CELLxGENE Discover. The Cell Census utilizes SOMA powered by TileDB for storing, accessing, and efficiently filtering data.
 >
