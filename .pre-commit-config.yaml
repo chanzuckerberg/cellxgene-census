@@ -10,8 +10,8 @@ repos:
         args: ["--config", "./api/python/notebooks/pyproject.toml"]
       - id: black
         name: black-cell-census
-        files: ^api/python/cell_census
-        args: ["--config", "./api/python/cell_census/pyproject.toml"]
+        files: ^api/python/cellxgene_census
+        args: ["--config", "./api/python/cellxgene_census/pyproject.toml"]
       - id: black
         name: black-tools
         files: ^tools
@@ -22,8 +22,8 @@ repos:
     hooks:
       - id: ruff
         name: ruff-cell-census
-        files: ^api/python/cell_census
-        args: ["--config=./api/python/cell_census/pyproject.toml", "--fix"]
+        files: ^api/python/cellxgene_census
+        args: ["--config=./api/python/cellxgene_census/pyproject.toml", "--fix"]
       - id: ruff
         name: ruff-tools
         files: ^tools
@@ -34,8 +34,8 @@ repos:
     hooks:
       - id: mypy
         name: mypy-cell-census
-        files: ^api/python/cell_census
-        args: ["--config-file=./api/python/cell_census/pyproject.toml"]
+        files: ^api/python/cellxgene_census
+        args: ["--config-file=./api/python/cellxgene_census/pyproject.toml"]
         additional_dependencies:
           - types-requests
           - pytest
