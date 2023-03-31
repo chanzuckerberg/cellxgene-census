@@ -2,16 +2,29 @@ import logging
 import math
 import pathlib
 import sys
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from .build_state import CensusBuildArgs
 
 
+def logging_init_params(verbose: int, handlers: Optional[List[logging.Handler]] = None) -> None:
+    """
+    Configure the logger from explicit params
+    """
+    level = logging.DEBUG if verbose > 1 else logging.INFO if verbose == 1 else logging.WARNING
+    logging.basicConfig(
+        format="%(asctime)s %(process)-7s %(levelname)-8s %(message)s",
+        level=level,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=handlers,
+    )
+    logging.captureWarnings(True)
+
+
 def logging_init(args: CensusBuildArgs) -> None:
     """
-    Configure the logger.
+    Configure the logger from CensusBuildArgs, including extra handlers.
     """
-    level = logging.DEBUG if args.config.verbose > 1 else logging.INFO if args.config.verbose == 1 else logging.WARNING
     handlers: List[logging.Handler] = [logging.StreamHandler(sys.stderr)]
 
     # Create logging directory if configured appropriately
@@ -21,13 +34,7 @@ def logging_init(args: CensusBuildArgs) -> None:
         logs_file = logs_dir / args.config.log_file
         handlers.insert(0, logging.FileHandler(logs_file))
 
-    logging.basicConfig(
-        format="%(asctime)s %(process)-7s %(levelname)-8s %(message)s",
-        level=level,
-        datefmt="%Y-%m-%d %H:%M:%S",
-        handlers=handlers,
-    )
-    logging.captureWarnings(True)
+    logging_init_params(args.config.verbose, handlers)
 
 
 def _hr_multibyte_unit(n_bytes: int, unit_base: int, unit_size_names: Tuple[str, ...]) -> str:
