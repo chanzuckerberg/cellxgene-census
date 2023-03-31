@@ -1,10 +1,10 @@
-import pytest
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Type
 from unittest import mock
 
-from cell_census_builder.release_manifest import CensusDirectory, CensusVersionName
+import pytest
 from cell_census_builder.release_gc import remove_releases_older_than
+from cell_census_builder.release_manifest import CensusDirectory, CensusVersionName
 
 
 def tag_days_old(days_old: int) -> str:
@@ -108,7 +108,7 @@ def test_remove_releases_older_than(
     ],
 )
 def test_remove_releases_older_than_sanity_checks(
-    release_manifest: CensusDirectory, remove_kwargs: Dict[str, Any], expected_error: Exception
+    release_manifest: CensusDirectory, remove_kwargs: Dict[str, Any], expected_error: Type[Exception]
 ) -> None:
     """Test the expected sanity/error checks"""
     with (

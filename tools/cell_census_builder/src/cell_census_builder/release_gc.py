@@ -7,11 +7,11 @@ from typing import List
 import s3fs
 
 from .release_manifest import (
+    CensusDirectory,
+    CensusVersionName,
     commit_release_manifest,
     get_release_manifest,
     validate_release_manifest,
-    CensusDirectory,
-    CensusVersionName,
 )
 from .util import urlcat
 
@@ -51,7 +51,9 @@ def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool) ->
 
         # Now delete the builds.
         for rls_tag in rls_tags_to_delete:
-            uri = urlcat(release_manifest[rls_tag]["soma"]["uri"], "..")
+            rls_info = release_manifest[rls_tag]
+            assert isinstance(rls_info, dict)
+            uri = urlcat(rls_info["soma"]["uri"], "..")
             _perform_recursive_delete(rls_tag, uri, dryrun)
 
 

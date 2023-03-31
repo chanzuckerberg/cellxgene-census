@@ -1,16 +1,17 @@
-import pytest
 import datetime
+from typing import Type, cast
 
+import pytest
+from cell_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
 from cell_census_builder.release_manifest import (
-    get_release_manifest,
-    validate_release_manifest,
+    CELL_CENSUS_REGION,
     CensusDirectory,
     CensusLocator,
+    CensusVersionDescription,
     CensusVersionName,
-    CELL_CENSUS_REGION,
+    get_release_manifest,
+    validate_release_manifest,
 )
-from cell_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
-
 
 # Should not be a real URL
 TEST_CENSUS_BASE_URL = "s3://bucket/path/"
@@ -56,17 +57,20 @@ def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
         {
             "latest": "2022-01-10",
             **{
-                tag: {
-                    "release_build": tag,
-                    "soma": soma_locator(tag),
-                    "h5ads": h5ads_locator(tag),
-                }
+                tag: cast(
+                    CensusVersionDescription,
+                    {
+                        "release_build": tag,
+                        "soma": soma_locator(tag),
+                        "h5ads": h5ads_locator(tag),
+                    },
+                )
                 for tag in ["2022-01-10", "2023-09-12"]
-            }
+            },
         },
     ],
 )
-def test_validate_release_manifest(release_manifest) -> None:
+def test_validate_release_manifest(release_manifest: CensusDirectory) -> None:
     validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)
 
 
@@ -118,6 +122,8 @@ def test_validate_release_manifest(release_manifest) -> None:
         ),
     ],
 )
-def test_validate_release_manifest_errors(release_manifest: CensusDirectory, expected_error: Exception) -> None:
+def test_validate_release_manifest_errors(
+    release_manifest: CensusDirectory, expected_error: Type[BaseException]
+) -> None:
     with pytest.raises(expected_error):
         validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)

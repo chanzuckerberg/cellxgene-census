@@ -9,7 +9,6 @@ from typing_extensions import TypedDict
 
 from .util import urlcat
 
-
 """
 The release.json schema is a semi-public format, used by all end-user packages.
 """
