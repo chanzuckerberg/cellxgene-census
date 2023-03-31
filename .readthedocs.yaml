@@ -15,5 +15,5 @@ sphinx:
 python:
   install:
     - method: pip
-      path: api/python/cell_census
+      path: api/python/cellxgene_census
     - requirements: docs/requirements.txt
