@@ -4,7 +4,7 @@ from typing import Type, cast
 import pytest
 from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
 from cellxgene_census_builder.release_manifest import (
-    CELL_CENSUS_REGION,
+    CENSUS_AWS_REGION,
     CensusLocator,
     CensusReleaseManifest,
     CensusVersionDescription,
@@ -39,11 +39,11 @@ def test_get_release_manifest_path() -> None:
 
 
 def soma_locator(tag: CensusVersionName) -> CensusLocator:
-    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/soma/", "s3_region": CELL_CENSUS_REGION}
+    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/soma/", "s3_region": CENSUS_AWS_REGION}
 
 
 def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
-    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/h5ads/", "s3_region": CELL_CENSUS_REGION}
+    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/h5ads/", "s3_region": CENSUS_AWS_REGION}
 
 
 @pytest.mark.parametrize(
