@@ -4,8 +4,8 @@ import pytest
 import requests_mock as rm
 import s3fs
 
-import cell_census
-from cell_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
+import cellxgene_census
+from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 DIRECTORY_JSON = {
     "latest": "2022-11-01",
@@ -45,7 +45,7 @@ def directory_mock(requests_mock: rm.Mocker) -> Any:
 
 
 def test_get_census_version_directory(directory_mock: Any) -> None:
-    directory = cell_census.get_census_version_directory()
+    directory = cellxgene_census.get_census_version_directory()
 
     assert isinstance(directory, dict)
     assert len(directory) > 0
@@ -60,12 +60,12 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     assert directory["latest"] == directory["2022-11-01"]
 
     for tag in directory:
-        assert directory[tag] == cell_census.get_census_version_description(tag)
+        assert directory[tag] == cellxgene_census.get_census_version_description(tag)
 
 
 def test_get_census_version_description_errors() -> None:
     with pytest.raises(KeyError):
-        cell_census.get_census_version_description(census_version="no/such/version/exists")
+        cellxgene_census.get_census_version_description(census_version="no/such/version/exists")
 
 
 @pytest.mark.live_corpus
@@ -78,11 +78,11 @@ def test_live_directory_contents() -> None:
 
     fs = s3fs.S3FileSystem(anon=True, cache_regions=True)
 
-    directory = cell_census.get_census_version_directory()
+    directory = cellxgene_census.get_census_version_directory()
     assert "latest" in directory
 
     for version, version_description in directory.items():
-        with cell_census.open_soma(census_version=version) as census:
+        with cellxgene_census.open_soma(census_version=version) as census:
             assert census is not None
 
         assert fs.exists(version_description["soma"]["uri"])
