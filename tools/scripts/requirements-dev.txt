@@ -3,3 +3,4 @@ coverage
 requests-mock
 setuptools
 build
+boto3
