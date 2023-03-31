@@ -1,5 +1,5 @@
 """
-Acceptance tests for the Census.
+Acceptance tests for the CELLxGENE Census.
 
 NOTE: those marked `expensive` are not run in the CI as they are, well, expensive...
 
@@ -17,13 +17,13 @@ import pytest
 import tiledb
 import tiledbsoma as soma
 
-import cell_census
-from cell_census._open import DEFAULT_TILEDB_CONFIGURATION
+import cellxgene_census
+from cellxgene_census._open import DEFAULT_TILEDB_CONFIGURATION
 
 
 def make_context(census_version: str, config: Optional[Dict[str, Any]] = None) -> soma.SOMATileDBContext:
     config = config or {}
-    version = cell_census.get_census_version_description(census_version)
+    version = cellxgene_census.get_census_version_description(census_version)
     s3_region = version["soma"].get("s3_region", "us-west-2")
     config.update({"vfs.s3.region": s3_region})
     return soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(config))
@@ -33,7 +33,7 @@ def make_context(census_version: str, config: Optional[Dict[str, Any]] = None) -
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_load_axes(organism: str) -> None:
     """Verify axes can be loaded into a Pandas DataFrame"""
-    census = cell_census.open_soma(census_version="latest")
+    census = cellxgene_census.open_soma(census_version="latest")
 
     # use subset of columns for speed
     obs_df = (
@@ -76,7 +76,7 @@ def test_incremental_read(organism: str) -> None:
     # open census with a small (default) TileDB buffer size, which reduces
     # memory use, and makes it feasible to run in a GHA.
     context = make_context("latest")
-    with cell_census.open_soma(census_version="latest", context=context) as census:
+    with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]))
         assert table_iter_is_ok(
             census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"])
@@ -93,7 +93,7 @@ def test_incremental_read(organism: str) -> None:
 def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Optional[int]) -> None:
     """Verify incremental read of query result."""
     # use default TileDB configuration
-    with cell_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="latest") as census:
         with census["census_data"][organism].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
         ) as query:
@@ -140,6 +140,6 @@ def test_get_anndata(
     """Verify query and read into AnnData"""
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
-    with cell_census.open_soma(census_version="latest", context=context) as census:
-        ad = cell_census.get_anndata(census, organism, obs_value_filter=obs_value_filter, obs_coords=obs_coords)
+    with cellxgene_census.open_soma(census_version="latest", context=context) as census:
+        ad = cellxgene_census.get_anndata(census, organism, obs_value_filter=obs_value_filter, obs_coords=obs_coords)
         assert ad is not None

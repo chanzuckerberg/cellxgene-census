@@ -1,4 +1,4 @@
-from cell_census._util import _uri_join
+from cellxgene_census._util import _uri_join
 
 
 def test_uri_join() -> None:

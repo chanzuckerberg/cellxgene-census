@@ -1,6 +1,6 @@
-# Cell Census of CZ CELLxGENE Discover
+# CZ CELLxGENE Discover Census
 
-The `cell_census` package provides an API to facilitate the use of the CZ CELLxGENE Discover Cell Census. For more information about the API and the project visit the [chanzuckerberg/cell-census GitHub repo](https://github.com/chanzuckerberg/cell-census/). 
+The `cell_census` package provides an API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit the [chanzuckerberg/cellxgene-census GitHub repo](https://github.com/chanzuckerberg/cellxgene-census/). 
 
 **Status**: Pre-release, under rapid development. Expect API changes.
 
