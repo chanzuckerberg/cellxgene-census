@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "api/python/**"
-      - "tools/cell_census_builder/**"
+      - "tools/cellxgene_census_builder/**"
       - ".github/workflows/**" # Re-run if a workflow is modified - useful to test workflow changes in PRs
   push:
     branches: [main]
@@ -70,7 +70,7 @@ jobs:
 
       - name: Build package
         run: python -m build
-        working-directory: tools/cell_census_builder/
+        working-directory: tools/cellxgene_census_builder/
 
       - name: Build and tag docker image to Amazon ECR
         env:
@@ -79,7 +79,7 @@ jobs:
         run: |
           GIT_SHA=$(git describe)
           docker build --build-arg=COMMIT_SHA=$GIT_SHA -t $REGISTRY/$REPOSITORY:$GIT_SHA .
-        working-directory: tools/cell_census_builder/
+        working-directory: tools/cellxgene_census_builder/
 
       - name: Push docker image to Amazon ECR
         if: ${{ github.ref == 'refs/heads/main' }}

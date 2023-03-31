@@ -53,11 +53,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          pip install -e ./tools/cell_census_builder/
+          pip install -e ./tools/cellxgene_census_builder/
           pip install -r ./tools/scripts/requirements-dev.txt
       - name: Test with pytest (builder)
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest ./tools/cell_census_builder/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest ./tools/cellxgene_census_builder/tests/
       - uses: actions/upload-artifact@v3
         with:
           name: coverage
