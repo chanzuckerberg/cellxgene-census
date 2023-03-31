@@ -1,18 +1,18 @@
 import pytest
 import tiledbsoma as soma
 
-import cell_census
+import cellxgene_census
 
 
 @pytest.fixture
 def census() -> soma.Collection:
-    return cell_census.open_soma(census_version="latest")
+    return cellxgene_census.open_soma(census_version="latest")
 
 
 @pytest.mark.live_corpus
 def test_get_anndata_value_filter(census: soma.Collection) -> None:
     with census:
-        ad = cell_census.get_anndata(
+        ad = cellxgene_census.get_anndata(
             census,
             organism="Mus musculus",
             obs_value_filter="tissue_general == 'vasculature'",
@@ -33,7 +33,7 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
 @pytest.mark.live_corpus
 def test_get_anndata_coords(census: soma.Collection) -> None:
     with census:
-        ad = cell_census.get_anndata(census, organism="Mus musculus", obs_coords=slice(1000), var_coords=slice(2000))
+        ad = cellxgene_census.get_anndata(census, organism="Mus musculus", obs_coords=slice(1000), var_coords=slice(2000))
 
     assert ad is not None
     assert ad.n_vars == 2001
@@ -47,13 +47,13 @@ def test_get_anndata_allows_missing_obs_or_var_filter(census: soma.Collection) -
     with census:
         mouse = census["census_data"]["mus_musculus"]
 
-        adata = cell_census.get_anndata(census, organism="Mus musculus", obs_value_filter="tissue == 'aorta'")
+        adata = cellxgene_census.get_anndata(census, organism="Mus musculus", obs_value_filter="tissue == 'aorta'")
         assert adata.n_obs == len(
             mouse.obs.read(value_filter="tissue == 'aorta'", column_names=["soma_joinid"]).concat()
         )
         assert adata.n_vars == len(mouse.ms["RNA"].var.read(column_names=["soma_joinid"]).concat())
 
-        adata = cell_census.get_anndata(
+        adata = cellxgene_census.get_anndata(
             census,
             organism="Mus musculus",
             obs_coords=slice(10000),
