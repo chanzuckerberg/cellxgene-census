@@ -52,7 +52,7 @@ def get_release_manifest(census_base_url: str) -> CensusDirectory:
     Returns:
         A `CensusDirectory` containing the current release manifest.
     """
-    s3 = s3fs.S3FileSystem(anon=False)
+    s3 = s3fs.S3FileSystem(anon=True)
     with s3.open(urlcat(census_base_url, CELL_CENSUS_RELEASE_FILE)) as f:
         return cast(CensusDirectory, json.loads(f.read()))
 
