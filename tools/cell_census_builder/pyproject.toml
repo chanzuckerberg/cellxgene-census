@@ -73,6 +73,6 @@ target-version = "py39"
 
 [tool.pytest.ini_options]
 markers = [
-    "live_corpus: runs on the live Cell Census data corpus and small enough to run in CI",
+    "live_corpus: runs on the live Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
 ]

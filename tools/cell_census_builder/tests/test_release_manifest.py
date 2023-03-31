@@ -5,8 +5,8 @@ import pytest
 from cell_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
 from cell_census_builder.release_manifest import (
     CELL_CENSUS_REGION,
-    CensusDirectory,
     CensusLocator,
+    CensusReleaseManifest,
     CensusVersionDescription,
     CensusVersionName,
     get_release_manifest,
@@ -73,7 +73,7 @@ def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
         },
     ],
 )
-def test_validate_release_manifest(release_manifest: CensusDirectory) -> None:
+def test_validate_release_manifest(release_manifest: CensusReleaseManifest) -> None:
     validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)
 
 
@@ -126,7 +126,7 @@ def test_validate_release_manifest(release_manifest: CensusDirectory) -> None:
     ],
 )
 def test_validate_release_manifest_errors(
-    release_manifest: CensusDirectory, expected_error: Type[BaseException]
+    release_manifest: CensusReleaseManifest, expected_error: Type[BaseException]
 ) -> None:
     with pytest.raises(expected_error):
         validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)

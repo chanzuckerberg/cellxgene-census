@@ -30,7 +30,7 @@ CensusVersionDescription = TypedDict(
         "h5ads": CensusLocator,  # source H5ADs locator
     },
 )
-CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
+CensusReleaseManifest = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 CELL_CENSUS_REGION = "us-west-2"
 CELL_CENSUS_RELEASE_FILE = "release.json"
@@ -41,7 +41,7 @@ REQUIRED_TAGS = [
 ]
 
 
-def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusDirectory:
+def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusReleaseManifest:
     """
     Fetch the census release manifest.
 
@@ -50,14 +50,14 @@ def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusD
             The base S3 URL of the Census.
 
     Returns:
-        A `CensusDirectory` containing the current release manifest.
+        A `CensusReleaseManifest` containing the current release manifest.
     """
     s3 = s3fs.S3FileSystem(anon=s3_anon)
     with s3.open(urlcat(census_base_url, CELL_CENSUS_RELEASE_FILE)) as f:
-        return cast(CensusDirectory, json.loads(f.read()))
+        return cast(CensusReleaseManifest, json.loads(f.read()))
 
 
-def commit_release_manifest(census_base_url: str, release_manifest: CensusDirectory) -> None:
+def commit_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
     """
     Write a new release manifest to the Census.
     """
@@ -66,7 +66,7 @@ def commit_release_manifest(census_base_url: str, release_manifest: CensusDirect
     _overwrite_release_manifest(census_base_url, release_manifest)
 
 
-def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusDirectory) -> None:
+def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
     # This is a stand-alone function for ease of testing/mocking.
     s3 = s3fs.S3FileSystem(anon=False)
     with s3.open(urlcat(census_base_url, CELL_CENSUS_RELEASE_FILE), mode="w") as f:
@@ -74,7 +74,7 @@ def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusDi
 
 
 def validate_release_manifest(
-    census_base_url: str, release_manifest: CensusDirectory, live_corpus_check: bool = True, s3_anon: bool = False
+    census_base_url: str, release_manifest: CensusReleaseManifest, live_corpus_check: bool = True, s3_anon: bool = False
 ) -> None:
     if not isinstance(release_manifest, dict):
         raise TypeError("Release manifest must be a dictionary")
@@ -94,7 +94,7 @@ def validate_release_manifest(
             # record
             _validate_release_info(rls_tag, rls_info, census_base_url)
             if live_corpus_check:
-                _validate_is_live(rls_info, s3_anon)
+                _validate_exists(rls_info, s3_anon)
 
     for rls_tag in REQUIRED_TAGS:
         if rls_tag not in release_manifest:
@@ -119,7 +119,7 @@ def _validate_release_info(
         raise ValueError(f"Release record for {rls_tag} contained unexpected H5AD locator")
 
 
-def _validate_is_live(rls_info: CensusVersionDescription, s3_anon: bool) -> None:
+def _validate_exists(rls_info: CensusVersionDescription, s3_anon: bool) -> None:
     s3 = s3fs.S3FileSystem(anon=s3_anon)
 
     uri = rls_info["soma"]["uri"]

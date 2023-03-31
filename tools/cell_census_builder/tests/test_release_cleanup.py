@@ -3,8 +3,8 @@ from typing import Any, Dict, Type
 from unittest import mock
 
 import pytest
-from cell_census_builder.release_gc import remove_releases_older_than
-from cell_census_builder.release_manifest import CensusDirectory, CensusVersionName
+from cell_census_builder.release_cleanup import remove_releases_older_than
+from cell_census_builder.release_manifest import CensusReleaseManifest, CensusVersionName
 
 
 def tag_days_old(days_old: int) -> str:
@@ -17,7 +17,7 @@ TAG_100D_OLD = tag_days_old(100)
 
 S3_PREFIX = "s3://bucket/path/"
 
-RELEASE_MANIFEST: CensusDirectory = {
+RELEASE_MANIFEST: CensusReleaseManifest = {
     "latest": TAG_NOW,
     TAG_NOW: {
         "release_build": TAG_NOW,
@@ -55,7 +55,7 @@ RELEASE_MANIFEST: CensusDirectory = {
     ],
 )
 def test_remove_releases_older_than(
-    release_manifest: CensusDirectory,
+    release_manifest: CensusReleaseManifest,
     remove_kwargs: Dict[str, Any],
     dryrun: bool,
     expected_delete_tags: list[CensusVersionName],
@@ -69,7 +69,7 @@ def test_remove_releases_older_than(
 
     with (
         mock.patch(
-            "cell_census_builder.release_gc.get_release_manifest", return_value=release_manifest
+            "cell_census_builder.release_cleanup.get_release_manifest", return_value=release_manifest
         ) as get_release_manifest_patch,
         mock.patch("s3fs.S3FileSystem.isdir", return_value=True),
         mock.patch("cell_census_builder.release_manifest._overwrite_release_manifest") as commit_release_manifest_patch,
@@ -92,7 +92,7 @@ def test_remove_releases_older_than(
     [
         # base path check
         (RELEASE_MANIFEST, dict(days=0, census_base_url="s3://not/the/right/path/", dryrun=False), ValueError),
-        # soma/h5ads are in the same 'directory'
+        # check that soma/h5ads are in the same 'directory'
         (
             {
                 "latest": TAG_NOW,
@@ -108,11 +108,11 @@ def test_remove_releases_older_than(
     ],
 )
 def test_remove_releases_older_than_sanity_checks(
-    release_manifest: CensusDirectory, remove_kwargs: Dict[str, Any], expected_error: Type[Exception]
+    release_manifest: CensusReleaseManifest, remove_kwargs: Dict[str, Any], expected_error: Type[Exception]
 ) -> None:
     """Test the expected sanity/error checks"""
     with (
-        mock.patch("cell_census_builder.release_gc.get_release_manifest", return_value=release_manifest),
+        mock.patch("cell_census_builder.release_cleanup.get_release_manifest", return_value=release_manifest),
         mock.patch("s3fs.S3FileSystem.isdir", return_value=True),
         mock.patch("cell_census_builder.release_manifest._overwrite_release_manifest"),
         mock.patch("s3fs.S3File.write", return_value=0),  # just being paranoid!
