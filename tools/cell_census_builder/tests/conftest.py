@@ -164,8 +164,24 @@ def manifest_csv_with_duplicates(tmp_path: pathlib.Path) -> str:
     return path
 
 
-@pytest.fixture()
+@pytest.fixture
 def setup(monkeypatch: MonkeyPatch, census_build_args: CensusBuildArgs) -> None:
     process_init(census_build_args)
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"], "tile", 2)
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2)
+
+
+def has_aws_credentials() -> bool:
+    """Return true if we have AWS credentials"""
+    import botocore
+
+    try:
+        session = botocore.session.get_session()
+        client = session.create_client("sts")
+        id = client.get_caller_identity()
+        print(id)
+        return True
+    except botocore.exceptions.BotoCoreError as e:
+        print(e)
+
+    return False
