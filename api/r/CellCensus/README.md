@@ -1,15 +1,15 @@
 
-# Cell Census of CZ CELLxGENE Discover
+# CZ CELLxGENE Discover Census
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 
-The `CellCensus` package provides an API to facilitate the use of the CZ CELLxGENE Discover Cell Census. For more information about the API and the project visit the [chanzuckerberg/cell-census GitHub repo](https://github.com/chanzuckerberg/cell-census/).
+The `cellxgene.census` package provides an API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit the [chanzuckerberg/cellxgene-census GitHub repo](https://github.com/chanzuckerberg/cellxgene-census/).
 
 **Status**: Pre-release, under rapid development. Expect API changes.
 
-Also see the [Python API](https://chanzuckerberg.github.io/cell-census/).
+Also see the [Python API](https://cellxgene-census.readthedocs.io/).
 
 ## Installation
 
@@ -17,8 +17,8 @@ You can install the development version of CellCensus from [GitHub](https://gith
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("chanzuckerberg/cell-census/api/r/CellCensus")
-print(CellCensus::open_soma())
+devtools::install_github("chanzuckerberg/cellxgene-census/api/r/cellxgene.census")
+print(cellxgene.census::open_soma())
 ```
 
 (minimal apt dependencies: r-base cmake git)
@@ -28,7 +28,7 @@ print(CellCensus::open_soma())
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(CellCensus)
+library(cellxgene.census)
 ## basic example code
 ```
 
