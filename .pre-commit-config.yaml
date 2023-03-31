@@ -9,7 +9,7 @@ repos:
         files: ^api/python/notebooks
         args: ["--config", "./api/python/notebooks/pyproject.toml"]
       - id: black
-        name: black-cell-census
+        name: black-cellxgene-census
         files: ^api/python/cellxgene_census
         args: ["--config", "./api/python/cellxgene_census/pyproject.toml"]
       - id: black
@@ -21,7 +21,7 @@ repos:
     rev: v0.0.249
     hooks:
       - id: ruff
-        name: ruff-cell-census
+        name: ruff-cellxgene-census
         files: ^api/python/cellxgene_census
         args: ["--config=./api/python/cellxgene_census/pyproject.toml", "--fix"]
       - id: ruff
@@ -33,7 +33,7 @@ repos:
     rev: v1.0.1
     hooks:
       - id: mypy
-        name: mypy-cell-census
+        name: mypy-cellxgene-census
         files: ^api/python/cellxgene_census
         args: ["--config-file=./api/python/cellxgene_census/pyproject.toml"]
         additional_dependencies:

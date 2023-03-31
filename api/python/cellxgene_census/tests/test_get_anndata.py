@@ -33,7 +33,9 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
 @pytest.mark.live_corpus
 def test_get_anndata_coords(census: soma.Collection) -> None:
     with census:
-        ad = cellxgene_census.get_anndata(census, organism="Mus musculus", obs_coords=slice(1000), var_coords=slice(2000))
+        ad = cellxgene_census.get_anndata(
+            census, organism="Mus musculus", obs_coords=slice(1000), var_coords=slice(2000)
+        )
 
     assert ad is not None
     assert ad.n_vars == 2001
