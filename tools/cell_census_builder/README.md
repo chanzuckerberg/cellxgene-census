@@ -74,6 +74,16 @@ chmod ug+s /tmp/census-build   # optional, but makes permissions handling simple
 docker run --mount type=bind,source="/tmp/census-build",target='/census-build' cell-census-builder
 ```
 
+### Pull the Docker image from ECR
+
+Note that a Docker image is pushed to ECR each time `main` gets updated. It is possible to pull an image from the remote repo by running:
+```shell
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $ECR_REGISTRY.dkr.ecr.us-west-2.amazonaws.com
+docker pull $ECR_REGISTRY.dkr.ecr.us-west-2.amazonaws.com/cell-census-builder:latest
+```
+
+Alternatively, a tag corresponding to a git tag can be used to pull a specific version.
+
 ### Build configuration options
 
 This is primarily for the use of package developers. The defaults are suitable for the standad Census build, and are defined in the `build_state.py` file.
