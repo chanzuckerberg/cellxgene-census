@@ -1,9 +1,9 @@
 import pathlib
 from types import ModuleType
 
-from cell_census_builder.build_soma.datasets import Dataset
-from cell_census_builder.build_soma.source_assets import stage_source_assets
-from cell_census_builder.build_state import CensusBuildArgs
+from cellxgene_census_builder.build_soma.datasets import Dataset
+from cellxgene_census_builder.build_soma.source_assets import stage_source_assets
+from cellxgene_census_builder.build_state import CensusBuildArgs
 
 
 def test_source_assets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:

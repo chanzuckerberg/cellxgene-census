@@ -1,26 +1,26 @@
 # README
 
-This package contains code to build and release the Cell Census in the SOMA format, as specified in the
-[data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md).
+This package contains code to build and release the CELLxGENE Census in the SOMA format, as specified in the
+[data schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cell_census_schema.md).
 
 This tool is not intended for end-users - it is used by the CELLxGENE team to periodically create and release all
 CELLxGENE data in the above format. The remainder of this document is intended for users of the
 build package.
 
-Please see the top-level [README](../../README.md) for more information on the Cell Census and
-using the Cell Census data.
+Please see the top-level [README](../../README.md) for more information on the Census and
+using the Census data.
 
 ## Overview
 
-This package contains sub-modules, each of which automate elements of the Cell Census build and release process.
-They are wrapped at the package top-level by by a `__main__` which implements the Cell Census build process,
+This package contains sub-modules, each of which automate elements of the Census build and release process.
+They are wrapped at the package top-level by by a `__main__` which implements the Census build process,
 with standard defaults.
 
 The top-level build can be invoked as follows:
 
 - Create a working directory, e.g., `census-build` or equivalent.
 - If any configuration defaults need to be overridden, create a `config.yaml` in the working directory containing the default overrides. _NOTE:_ by default you do not need to create a `config.yaml` file -- the defaults are appropriate to build the full Census.
-- Run the build as `python -m cell_census_builder your-working_dir`
+- Run the build as `python -m cellxgene_census_builder your-working_dir`
 
 This will perform four steps (more will be added the future):
 
@@ -59,10 +59,10 @@ You will need:
 
 ### Build & run
 
-The standard Census build is expected to be done via a Docker container. To build the required image, do a `git pull` to the version you want to use, and do the following to create a docker image called `cell-census-builder`:
+The standard Census build is expected to be done via a Docker container. To build the required image, do a `git pull` to the version you want to use, and do the following to create a docker image called `cellxgene-census-builder`:
 
 ```shell
-cd tools/cell_census_builder
+cd tools/cellxgene_census_builder
 make image
 ```
 
@@ -70,16 +70,16 @@ To use the container to build the _full_ census, with default options, pick a wo
 
 ```shell
 mkdir /tmp/census-build
-chmod ug+s /tmp/census-build   # optional, but makes permissions handling simpler
-docker run --mount type=bind,source="/tmp/census-build",target='/census-build' cell-census-builder
+docker run -u `id -u`:`id -g` --mount type=bind,source="/tmp/census-build",target='/census-build' cellxgene-census-builder
 ```
 
 ### Pull the Docker image from ECR
 
 Note that a Docker image is pushed to ECR each time `main` gets updated. It is possible to pull an image from the remote repo by running:
+
 ```shell
 aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $ECR_REGISTRY.dkr.ecr.us-west-2.amazonaws.com
-docker pull $ECR_REGISTRY.dkr.ecr.us-west-2.amazonaws.com/cell-census-builder:latest
+docker pull $ECR_REGISTRY.dkr.ecr.us-west-2.amazonaws.com/cellxgene-census-builder:latest
 ```
 
 Alternatively, a tag corresponding to a git tag can be used to pull a specific version.
@@ -113,11 +113,11 @@ Module which provides a set of checks that the current host machine has the requ
 to build the census (e.g., free disk space). Raises exception (non-zero process exit) if host is
 unable to meet base requirements.
 
-Stand-alone usage: `python -m cell_census_builder.host_validation`
+Stand-alone usage: `python -m cellxgene_census_builder.host_validation`
 
 ### `build_soma` module
 
-Stand-alone use: `python -m cell_census_builder.build_soma ...`
+Stand-alone use: `python -m cellxgene_census_builder.build_soma ...`
 
 TL;DR:
 
@@ -133,17 +133,17 @@ The build process:
 - Step 4: Write the X layers for each experiment (parallelized iteration of filtered dataset H5ADs).
 - Step 5: Write datasets manifest and summary info.
 - (Optional) Consolidate TileDB data
-- (Optional) Validate the entire Cell Census, re-reading from storage.
+- (Optional) Validate the entire Census, re-reading from storage.
 
 Modes of operation:
-a) (default) creating the entire "cell census" using all files currently in the CELLxGENE repository.
-b) creating a smaller "cell census" from a user-provided list of files (a "manifest")
+a) (default) creating the entire "census" using all files currently in the CELLxGENE repository.
+b) creating a smaller "census" from a user-provided list of files (a "manifest")
 
 #### Mode (a) - creating the full cell census from the entire CELLxGENE (public) corpus:
 
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
 - To create a cell census at `<census_path>`, execute:
-  > $ python -m cell_census_builder -mp --max-workers 12 <census_path> build
+  > $ python -m cellxgene_census_builder -mp --max-workers 12 <census_path> build
 - Tips:
   - `-v` to view info-level logging during run, or `-v -v` for debug-level logging
   - `--test-first-n <#>` to test build on a subset of datasets
@@ -161,4 +161,4 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
   ```
   You can specify a file system path or a URI in the second field
 - To create a cell census at `<census_path>`, execute:
-  > $ python -m cell_census_builder <census_path> build --manifest <the_manifest_file.csv>
+  > $ python -m cellxgene_census_builder <census_path> build --manifest <the_manifest_file.csv>

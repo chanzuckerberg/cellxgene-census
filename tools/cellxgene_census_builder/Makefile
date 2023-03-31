@@ -9,7 +9,7 @@
 .PHONY: image
 image: clean
 	python3 -m build .
-	docker build --build-arg=COMMIT_SHA="$$(git describe)" -t cell-census-builder .
+	docker build --build-arg=COMMIT_SHA="$$(git describe)" -t cellxgene-census-builder .
 
 # Clean Python build
 .PHONY: clean

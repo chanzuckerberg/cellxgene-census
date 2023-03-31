@@ -29,7 +29,7 @@ def main() -> int:
 
 
 def create_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cell_census_builder.build_soma")
+    parser = argparse.ArgumentParser(prog="cellxgene_census_builder.build_soma")
     parser.add_argument("uri", type=str, help="Census top-level URI")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
     parser.add_argument(

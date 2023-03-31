@@ -2,8 +2,12 @@ from typing import List
 
 import anndata as ad
 import numpy as np
-from cell_census_builder.build_soma.anndata import get_cellxgene_schema_version, make_anndata_cell_filter, open_anndata
-from cell_census_builder.build_soma.datasets import Dataset
+from cellxgene_census_builder.build_soma.anndata import (
+    get_cellxgene_schema_version,
+    make_anndata_cell_filter,
+    open_anndata,
+)
+from cellxgene_census_builder.build_soma.datasets import Dataset
 
 from ..conftest import ORGANISMS
 

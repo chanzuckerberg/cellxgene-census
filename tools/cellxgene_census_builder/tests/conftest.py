@@ -7,12 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from cell_census_builder.build_soma.datasets import Dataset
-from cell_census_builder.build_soma.globals import (
+from cellxgene_census_builder.build_soma.datasets import Dataset
+from cellxgene_census_builder.build_soma.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
-from cell_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
-from cell_census_builder.util import process_init
+from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
+from cellxgene_census_builder.util import process_init
 from scipy import sparse
 
 

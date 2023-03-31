@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cell_census_builder"
+name = "cellxgene_census_builder"
 dynamic = ["version"]
 description = "Build Cell Census"
 authors = [
@@ -31,7 +31,9 @@ dependencies= [
     "pandas",
     "anndata>=0.8",
     "numpy",
-    "cell_census==0.10.0",
+    # IMPORTANT: consider TileDB format compat before advancing this version.
+    # IMPORTANT: do not update to cellxgene_census package until you want a new tiledbsoma/tiledb
+    "cell_census==0.10.0", 
     "scipy",
     "fsspec",
     "s3fs",
@@ -46,9 +48,13 @@ dependencies= [
     "pyyaml",
 ]
 
+[project.urls]
+homepage = "https://github.com/chanzuckerberg/cellxgene-census"
+repository = "https://github.com/chanzuckerberg/cellxgene-census"
+
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["cell_census_builder*"]  # package names should match these glob patterns (["*"] by default)
+include = ["cellxgene_census_builder*"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
 
 [tool.setuptools_scm]

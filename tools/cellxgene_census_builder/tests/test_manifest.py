@@ -2,7 +2,7 @@ import pathlib
 import re
 from unittest.mock import patch
 
-from cell_census_builder.build_soma.manifest import CXG_BASE_URI, load_manifest
+from cellxgene_census_builder.build_soma.manifest import CXG_BASE_URI, load_manifest
 
 
 def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str) -> None:
@@ -41,7 +41,7 @@ def test_load_manifest_from_cxg() -> None:
     """
     If no parameters are specified, `load_manifest` should load the dataset list from Discover API.
     """
-    with patch("cell_census_builder.build_soma.manifest.fetch_json") as m:
+    with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
 
         def mock_call_fn(uri):  # type: ignore
             if uri == f"{CXG_BASE_URI}curation/v1/collections":
@@ -72,7 +72,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
     """
     `load_manifest` should exclude datasets that do not have a current schema version.
     """
-    with patch("cell_census_builder.build_soma.manifest.fetch_json") as m:
+    with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
 
         def mock_call_fn(uri):  # type: ignore
             if uri == f"{CXG_BASE_URI}curation/v1/collections":
@@ -105,7 +105,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
     """
     `load_manifest` should exclude datasets that do not have assets
     """
-    with patch("cell_census_builder.build_soma.manifest.fetch_json") as m:
+    with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
 
         def mock_call_fn(uri):  # type: ignore
             if uri == f"{CXG_BASE_URI}curation/v1/collections":

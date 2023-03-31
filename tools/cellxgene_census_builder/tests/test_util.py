@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from cell_census_builder.build_soma.util import array_chunker, is_nonnegative_integral
-from cell_census_builder.util import urlcat, urljoin
+from cellxgene_census_builder.build_soma.util import array_chunker, is_nonnegative_integral
+from cellxgene_census_builder.util import urlcat, urljoin
 from scipy.sparse import coo_matrix, csr_matrix, triu
 
 

@@ -29,7 +29,7 @@ CENSUS_CONFIG_DEFAULTS = {
     "disable_dirty_git_check": True,
     #
     # Paths and census version name determined by spec.
-    "cell_census_S3_path": "s3://cellxgene-data-public/cell-census",
+    "cellxgene_census_S3_path": "s3://cellxgene-data-public/cell-census",
     "build_tag": datetime.now().astimezone().date().isoformat(),
     #
     # Default multi-process. Memory scaling based on empirical tests.
