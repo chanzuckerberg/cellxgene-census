@@ -1,19 +1,19 @@
 
-# Cell Census of CZ CELLxGENE Discover
+# CZ CELLxGENE Discover Census
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 
-The `CellCensus` package provides an API to facilitate the use of the CZ CELLxGENE Discover Cell Census. For more information about the API and the project visit the [chanzuckerberg/cell-census GitHub repo](https://github.com/chanzuckerberg/cell-census/).
+The `cellxgene.census` package provides an API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit the [chanzuckerberg/cellxgene-census GitHub repo](https://github.com/chanzuckerberg/cellxgene-census/).
 
 **Status**: Pre-release, under rapid development. Expect API changes.
 
-Also see the [Python API](https://chanzuckerberg.github.io/cell-census/).
+Also see the [Python API](https://chanzuckerberg.github.io/cellxgene-census/).
 
 ## Installation
 
-You can install the development version of CellCensus from [GitHub](https://github.com/) with:
+You can install the development version of cellxgene.census from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
