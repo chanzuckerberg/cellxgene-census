@@ -28,16 +28,23 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies= [
+<<<<<<< HEAD:api/python/cellxgene_census/pyproject.toml
     "numba>=0.55",
     "numpy>=1.21",
     "requests",
     # NOTE: the tiledbsoma version must be >= to the version used in the CELLxGENE Census builder, to
+=======
+    # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
+>>>>>>> main:api/python/cell_census/pyproject.toml
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
     "tiledbsoma==1.2.1",
+    "anndata",
+    "numpy>=1.21,<1.24",  # numpy is constrained by numba and the old pip solver
+    "requests",
     "typing_extensions",
     "s3fs",
-    "scikit-misc",
+    "scipy",
 ]
 
 [project.urls]
