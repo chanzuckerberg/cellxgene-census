@@ -20,11 +20,11 @@ TEST_CENSUS_BASE_URL = "s3://bucket/path/"
 @pytest.mark.live_corpus
 def test_get_release_manifest() -> None:
     census_base_url = CENSUS_CONFIG_DEFAULTS["cell_census_S3_path"]
-    release_manifest = get_release_manifest(census_base_url)
+    release_manifest = get_release_manifest(census_base_url, s3_anon=True)
     assert len(release_manifest) > 0
     assert "latest" in release_manifest
     assert release_manifest["latest"] in release_manifest
-    validate_release_manifest(census_base_url, release_manifest)
+    validate_release_manifest(census_base_url, release_manifest, s3_anon=True)
 
 
 def test_get_release_manifest_path() -> None:

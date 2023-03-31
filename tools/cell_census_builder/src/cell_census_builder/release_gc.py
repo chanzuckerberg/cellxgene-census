@@ -16,7 +16,7 @@ from .release_manifest import (
 from .util import urlcat
 
 
-def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool) -> None:
+def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool, s3_anon: bool = False) -> None:
     """
     Remove old releases, commiting the change to release.json.
 
@@ -35,9 +35,9 @@ def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool) ->
     _logit(f"Delete releases older than {days} days old.", dryrun)
 
     # Load the release manifest
-    release_manifest = get_release_manifest(census_base_url=census_base_url)
+    release_manifest = get_release_manifest(census_base_url=census_base_url, s3_anon=s3_anon)
     # validate that the manifest is safe & sane
-    validate_release_manifest(census_base_url, release_manifest, live_corpus_check=True)
+    validate_release_manifest(census_base_url, release_manifest, live_corpus_check=True, s3_anon=s3_anon)
     # select build tags that can be deleted
     rls_tags_to_delete = _find_removal_candidates(release_manifest, days)
 
@@ -123,7 +123,7 @@ def main() -> int:
     parser.add_argument("--days", type=int, default=32, help="Delete releases N days older than this. Default: 32")
     parser.add_argument(
         "--dryrun",
-        action=argparse.BooleanOptionalAction,
+        action="store_true",
         help="Display, but do NOT perform actions. Useful for previewing actions. Default: false",
     )
     parser.add_argument("-v", "--verbose", action="count", default=1, help="Increase logging verbosity")

@@ -41,7 +41,7 @@ REQUIRED_TAGS = [
 ]
 
 
-def get_release_manifest(census_base_url: str) -> CensusDirectory:
+def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusDirectory:
     """
     Fetch the census release manifest.
 
@@ -52,7 +52,7 @@ def get_release_manifest(census_base_url: str) -> CensusDirectory:
     Returns:
         A `CensusDirectory` containing the current release manifest.
     """
-    s3 = s3fs.S3FileSystem(anon=True)
+    s3 = s3fs.S3FileSystem(anon=s3_anon)
     with s3.open(urlcat(census_base_url, CELL_CENSUS_RELEASE_FILE)) as f:
         return cast(CensusDirectory, json.loads(f.read()))
 
@@ -74,7 +74,7 @@ def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusDi
 
 
 def validate_release_manifest(
-    census_base_url: str, release_manifest: CensusDirectory, live_corpus_check: bool = True
+    census_base_url: str, release_manifest: CensusDirectory, live_corpus_check: bool = True, s3_anon: bool = False
 ) -> None:
     if not isinstance(release_manifest, dict):
         raise TypeError("Release manifest must be a dictionary")
@@ -94,7 +94,7 @@ def validate_release_manifest(
             # record
             _validate_release_info(rls_tag, rls_info, census_base_url)
             if live_corpus_check:
-                _validate_is_live(rls_info)
+                _validate_is_live(rls_info, s3_anon)
 
     for rls_tag in REQUIRED_TAGS:
         if rls_tag not in release_manifest:
@@ -119,8 +119,8 @@ def _validate_release_info(
         raise ValueError(f"Release record for {rls_tag} contained unexpected H5AD locator")
 
 
-def _validate_is_live(rls_info: CensusVersionDescription) -> None:
-    s3 = s3fs.S3FileSystem(anon=False)
+def _validate_is_live(rls_info: CensusVersionDescription, s3_anon: bool) -> None:
+    s3 = s3fs.S3FileSystem(anon=s3_anon)
 
     uri = rls_info["soma"]["uri"]
     if not s3.isdir(uri):
