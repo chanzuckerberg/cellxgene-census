@@ -25,7 +25,7 @@ sphinx:
 
 # Optionally declare the Python requirements required to build your docs
 python:
-   install:
-   - method: pip
+  install:
+    - method: pip
       path: api/python/cell_census
-   - requirements: docs/requirements.txt
+    - requirements: docs/requirements.txt
