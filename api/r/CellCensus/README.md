@@ -17,7 +17,7 @@ You can install the development version of cellxgene.census from [GitHub](https:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("chanzuckerberg/cell-census/api/r/CellCensus")
+devtools::install_github("chanzuckerberg/cellxgene-census/api/r/CellCensus")
 print(CellCensus::open_soma())
 ```
 
