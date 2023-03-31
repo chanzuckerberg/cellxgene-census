@@ -1,8 +1,8 @@
-# cellxgene-census Python package release process
+# cellxgene_census Python package release process
 
-The following approach is used to manage releases of the Python cellxgene-census package:
+The following approach is used to manage releases of the Python cellxgene_census package:
 
-1. The cellxgene-census package is automatically built (sdist and wheels) in a GitHub action, and build artifacts are uploaded to GitHub.
+1. The cellxgene_census package is automatically built (sdist and wheels) in a GitHub action, and build artifacts are uploaded to GitHub.
 2. Release candidate testing is done by installing built assets from Github.
 3. Build versions are managed via [`setuptools_scm`](https://github.com/pypa/setuptools_scm) and the version is automatically determined from git tags.
 4. Releases are created and managed via GitHub Releases, leaving a tag in place from which future branches (eg, emergency fixes) can be created.
@@ -12,8 +12,8 @@ The following approach is used to manage releases of the Python cellxgene-census
 
 While not strictly required, this process assumes you have met the following prerequisites:
 
-- You have write access to the chanzuckerberg/cellxgene-census repo
-- You have an account on pypi.org and test.pypi.org, both with access to the cellxgene-census project
+- You have write access to the `chanzuckerberg/cellxgene-census` repo
+- You have an account on pypi.org and test.pypi.org, both with access to the cellxgene_census project
 - You have the Github CLI tool (`gh`) installed. See [documentation](https://cli.github.com/).
 - You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/).
 
