@@ -181,6 +181,7 @@ def has_aws_credentials() -> bool:
         id = client.get_caller_identity()
         print(id)
         return True
-    except botocore.BotoCoreError as e:
+    except botocore.exceptions.BotoCoreError as e:
         print(e)
-        return False
+
+    return False
