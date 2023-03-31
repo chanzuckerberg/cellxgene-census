@@ -7,9 +7,9 @@
 
 [**CZ CELLxGENE Discover**](https://cellxgene.cziscience.com/)  is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is [standardized](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema/3.0.0)** to include raw counts and a common vocabulary for gene and cell metadata.
 
-The **Cellxgene Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
+The **CELLxGENE Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
 
-Get started on using the Cellxgene Census:
+Get started on using the CELLxGENE Census:
 
 - [Quick start](#Quick-start).
 - [Documentation](https://chanzuckerberg.github.io/cellxgene-census/index.html). 
@@ -18,7 +18,7 @@ Get started on using the Cellxgene Census:
 
 ## Technology
 
-The Cellxgene Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
+The CELLxGENE Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
 
 - Cloud-based data storage and access.
 - Efficient access for larger-than-memory slices of data.
@@ -26,13 +26,13 @@ The Cellxgene Census is a data object publicly hosted online and a convenience A
 - R and Python support.
 - Export to AnnData and Seurat.
 
-## Cellxgene Census data releases
+## CELLxGENE Census Data Releases
 
 Starting in mid 2023, Cellxgene Census long-term supported data builds will be released every 6 months and will be publicly accessible for at least 5 years after release. 
 
 In between long-term supported data build releases, weekly builds will be released without any guarantee of permanence. 
 
-## Cellxgene Census data organization
+## CELLxGENE Census Data Organization
 
 The Census follows a specific [data schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cell_census_schema.md). Briefly, the Census is a collection of a variety of **[SOMA objects](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types)** organized with the following hierarchy.
 
@@ -43,7 +43,7 @@ The Census follows a specific [data schema](https://github.com/chanzuckerberg/ce
 
 ### Requirements
 
-The Cellxgene Census requires a Linux or MacOS system with:
+The CELLxGENE Census API requires a Linux or MacOS system with:
 
 - Python 3.7 to Python 3.10. Or R, supported versions TBD.
 - Recommended: >16 GB of memory.
@@ -52,7 +52,7 @@ The Cellxgene Census requires a Linux or MacOS system with:
 
 ### Documentation
 
-The Cellxgene Census [doc-site](https://chanzuckerberg.github.io/cellxgene-census/index.html) (*under development*), contains the reference documentation, data description, and tutorials.
+The CELLxGENE Census [doc-site](https://chanzuckerberg.github.io/cellxgene-census/index.html) (*under development*), contains the reference documentation, data description, and tutorials.
 
 Reference documentation can also be accessed directly from Python or R.
 
@@ -61,7 +61,7 @@ Reference documentation can also be accessed directly from Python or R.
 
 #### Installation
 
-It is recommended to install the Cellxgene Census and all of its dependencies in a new virtual environment via `pip`:
+It is recommended to install the CELLxGENE Census and all of its dependencies in a new virtual environment via `pip`:
 
 ```
 pip install -U cell-census
@@ -71,7 +71,7 @@ pip install -U cell-census
 
 Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks).
 
-Below are 3 examples of common operations you can do with the Cellxgene Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
+Below are 3 examples of common operations you can do with the CELLxGENE Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
 
 ```python
 import cell_census
@@ -217,13 +217,13 @@ And you must close the query.
    - Include Organism-wide embeddings.
    - On-demand information-rich subsampling.
 
-## Projects and tools using CELLxGENE Discover Census
+## Projects and tools using CELLxGENE Census
 
 If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>
 
 ## Reuse
 
-The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the Cellxgene Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
+The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the CELLxGENE Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
 
 
 ## Code of Conduct

@@ -1,4 +1,4 @@
-# Cellxgene Census storage & release policy
+# CZ CELLxGENE Discover Census storage & release policy
 
 **Last edited**: Dec, 2022.
 
@@ -6,11 +6,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ---
 
-The cellxgene census MUST be stored in the following S3 root bucket:
+The CELLxGENE Census MUST be stored in the following S3 root bucket:
 
 `s3://cellxgene-data-public/`
 
-All contents of a Cellxgene Census build data MUST be deposited in a folder named `cell-census`: 
+All contents of a CELLxGENE Census build data MUST be deposited in a folder named `cell-census`: 
 
 `./cell-census/`
 
@@ -23,18 +23,18 @@ This folder MUST contain all public builds and releases defined as:
 * a RELEASE is named with a tag following the conventional format `release-[counter]`:
    `./cell-census/release-[counter]/`
 
-The Cellxgene Census SOMA-related files MUST be deposited within the release folder on a folder named `soma`:
+The CELLxGENE Census SOMA-related files MUST be deposited within the release folder on a folder named `soma`:
 
 `./cell-census/release-[counter]/soma/`
 
-All h5ads used to create the Cellxgene Census MUST be copied within the release folder into a folder named `h5ads`:	
+All H5ADs used to create the CELLxGENE Census MUST be copied within the release folder into a folder named `h5ads`:	
 `./cell-census/release-[counter]/h5ads/`
 
 Any dataset changes, additions, or deletions per release MUST be documented in the following human-readable changelog file name `changelog.txt`:
 
 `./cell-census/changelog.txt`
 
-The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder  for all Cellxgene Census releases  MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available census builds:
+The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder  for all CELLxGENE Census releases  MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available census builds:
 
 
 `./cell-census/releases.json`
