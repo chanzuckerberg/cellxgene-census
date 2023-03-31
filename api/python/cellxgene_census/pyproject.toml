@@ -3,9 +3,9 @@ requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cell_census"
+name = "cellxgene_census"
 dynamic = ["version"]
-description = "API to facilitate the use of the CZ CELLxGENE Discover Cell Census. For more information about the API and the project visit https://github.com/chanzuckerberg/cell-census/"
+description = "API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit https://github.com/chanzuckerberg/cellxgene-census/"
 authors = [
     { name = "Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com" }
 ]
@@ -28,25 +28,25 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies= [
-    "numba>=0.55",
-    "numpy>=1.21",
-    "requests",
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
     "tiledbsoma==1.2.1",
+    "anndata",
+    "numpy>=1.21,<1.24",  # numpy is constrained by numba and the old pip solver
+    "requests",
     "typing_extensions",
     "s3fs",
-    "scikit-misc",
+    "scipy",
 ]
 
 [project.urls]
-homepage = "https://github.com/chanzuckerberg/cell-census"
-repository = "https://github.com/chanzuckerberg/cell-census"
+homepage = "https://github.com/chanzuckerberg/cellxgene-census"
+repository = "https://github.com/chanzuckerberg/cellxgene-census"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["cell_census*"]  # package names should match these glob patterns (["*"] by default)
+include = ["cellxgene_census*"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
 
 [tool.setuptools_scm]
@@ -65,7 +65,7 @@ plugins = "numpy.typing.mypy_plugin"
 
 [tool.pytest.ini_options]
 markers = [
-    "live_corpus: runs on the live Cell Census data corpus and small enough to run in CI",
+    "live_corpus: runs on the live CELLxGENE Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
 ]
 
@@ -76,4 +76,4 @@ line-length = 120
 target-version = "py39"
 
 [tool.ruff.isort]
-known-first-party =["cell_census"]
+known-first-party =["cellxgene_census"]

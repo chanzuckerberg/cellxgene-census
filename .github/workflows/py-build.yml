@@ -30,12 +30,12 @@ jobs:
 
       - name: Build
         run: python -m build
-        working-directory: api/python/cell_census/
+        working-directory: api/python/cellxgene_census/
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          path: api/python/cell_census/dist/*
+          path: api/python/cellxgene_census/dist/*
 
   build_docker_container:
     name: Build Docker image for Census Builder

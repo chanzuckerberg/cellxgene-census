@@ -1,4 +1,4 @@
-name: Python cell_census package unit tests
+name: Python cellxgene_census package unit tests
 
 on:
   pull_request:
@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          pip install -r ./api/python/cell_census/scripts/requirements-dev.txt
-          pip install -e ./api/python/cell_census/
+          pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          pip install -e ./api/python/cellxgene_census/
       - name: Test with pytest (API)
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest --durations=20 ./api/python/cell_census/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest --durations=20 ./api/python/cellxgene_census/tests/
       - uses: actions/upload-artifact@v3
         with:
           name: coverage
