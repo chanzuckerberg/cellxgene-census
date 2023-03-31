@@ -99,7 +99,7 @@ def do_prebuild_checks(args: CensusBuildArgs) -> bool:
     # verify the build tag is not already published/in use
     build_tag = args.config.build_tag
     assert build_tag is not None
-    s3path = urlcat(args.config.cell_census_S3_path, build_tag)
+    s3path = urlcat(args.config.cellxgene_census_S3_path, build_tag)
     if s3fs.S3FileSystem(anon=True).exists(s3path):
         logging.error(f"Build tag {build_tag} already exists at {s3path}.")
         return False
@@ -145,7 +145,7 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
 
 
 def create_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cell_census_builder", description="Build the official cell census.")
+    parser = argparse.ArgumentParser(prog="cellxgene_census_builder", description="Build the official cell census.")
     parser.add_argument("working_dir", type=str, help="Working directory for the build")
     parser.add_argument(
         "--test-resume",

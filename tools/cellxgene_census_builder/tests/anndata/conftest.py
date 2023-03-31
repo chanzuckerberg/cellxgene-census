@@ -2,8 +2,8 @@ from typing import List
 
 import anndata as ad
 import pytest
-from cell_census_builder.build_soma.datasets import Dataset
-from cell_census_builder.build_state import CensusBuildArgs
+from cellxgene_census_builder.build_soma.datasets import Dataset
+from cellxgene_census_builder.build_state import CensusBuildArgs
 
 from ..conftest import ORGANISMS, get_h5ad
 

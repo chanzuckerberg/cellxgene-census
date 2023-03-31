@@ -32,8 +32,8 @@ CensusVersionDescription = TypedDict(
 )
 CensusReleaseManifest = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
-CELL_CENSUS_REGION = "us-west-2"
-CELL_CENSUS_RELEASE_FILE = "release.json"
+CENSUS_AWS_REGION = "us-west-2"
+CENSUS_RELEASE_FILE = "release.json"
 
 # The following tags MUST be in any "valid" Census release.json.  This list may grow.
 REQUIRED_TAGS = [
@@ -53,7 +53,7 @@ def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusR
         A `CensusReleaseManifest` containing the current release manifest.
     """
     s3 = s3fs.S3FileSystem(anon=s3_anon)
-    with s3.open(urlcat(census_base_url, CELL_CENSUS_RELEASE_FILE)) as f:
+    with s3.open(urlcat(census_base_url, CENSUS_RELEASE_FILE)) as f:
         return cast(CensusReleaseManifest, json.loads(f.read()))
 
 
@@ -69,7 +69,7 @@ def commit_release_manifest(census_base_url: str, release_manifest: CensusReleas
 def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
     # This is a stand-alone function for ease of testing/mocking.
     s3 = s3fs.S3FileSystem(anon=False)
-    with s3.open(urlcat(census_base_url, CELL_CENSUS_RELEASE_FILE), mode="w") as f:
+    with s3.open(urlcat(census_base_url, CENSUS_RELEASE_FILE), mode="w") as f:
         f.write(json.dumps(release_manifest))
 
 
@@ -113,9 +113,9 @@ def _validate_release_info(
     if rls_info["release_build"] != rls_tag:
         raise ValueError("release_build must be the same as the release tag")
 
-    if rls_info["soma"] != {"uri": urlcat(census_base_url, rls_tag, "soma/"), "s3_region": CELL_CENSUS_REGION}:
+    if rls_info["soma"] != {"uri": urlcat(census_base_url, rls_tag, "soma/"), "s3_region": CENSUS_AWS_REGION}:
         raise ValueError(f"Release record for {rls_tag} contained unexpected SOMA locator")
-    if rls_info["h5ads"] != {"uri": urlcat(census_base_url, rls_tag, "h5ads/"), "s3_region": CELL_CENSUS_REGION}:
+    if rls_info["h5ads"] != {"uri": urlcat(census_base_url, rls_tag, "h5ads/"), "s3_region": CENSUS_AWS_REGION}:
         raise ValueError(f"Release record for {rls_tag} contained unexpected H5AD locator")
 
 

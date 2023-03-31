@@ -2,9 +2,9 @@ import datetime
 from typing import Type, cast
 
 import pytest
-from cell_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
-from cell_census_builder.release_manifest import (
-    CELL_CENSUS_REGION,
+from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
+from cellxgene_census_builder.release_manifest import (
+    CENSUS_AWS_REGION,
     CensusLocator,
     CensusReleaseManifest,
     CensusVersionDescription,
@@ -21,7 +21,7 @@ TEST_CENSUS_BASE_URL = "s3://bucket/path/"
 
 @pytest.mark.live_corpus
 def test_get_release_manifest() -> None:
-    census_base_url = CENSUS_CONFIG_DEFAULTS["cell_census_S3_path"]
+    census_base_url = CENSUS_CONFIG_DEFAULTS["cellxgene_census_S3_path"]
     release_manifest = get_release_manifest(census_base_url, s3_anon=True)
     assert len(release_manifest) > 0
     assert "latest" in release_manifest
@@ -39,11 +39,11 @@ def test_get_release_manifest_path() -> None:
 
 
 def soma_locator(tag: CensusVersionName) -> CensusLocator:
-    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/soma/", "s3_region": CELL_CENSUS_REGION}
+    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/soma/", "s3_region": CENSUS_AWS_REGION}
 
 
 def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
-    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/h5ads/", "s3_region": CELL_CENSUS_REGION}
+    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/h5ads/", "s3_region": CENSUS_AWS_REGION}
 
 
 @pytest.mark.parametrize(

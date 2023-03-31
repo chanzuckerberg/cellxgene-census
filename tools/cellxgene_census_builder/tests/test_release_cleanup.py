@@ -3,8 +3,8 @@ from typing import Any, Dict, Type
 from unittest import mock
 
 import pytest
-from cell_census_builder.release_cleanup import remove_releases_older_than
-from cell_census_builder.release_manifest import CensusReleaseManifest, CensusVersionName
+from cellxgene_census_builder.release_cleanup import remove_releases_older_than
+from cellxgene_census_builder.release_manifest import CensusReleaseManifest, CensusVersionName
 
 
 def tag_days_old(days_old: int) -> str:
@@ -69,10 +69,12 @@ def test_remove_releases_older_than(
 
     with (
         mock.patch(
-            "cell_census_builder.release_cleanup.get_release_manifest", return_value=release_manifest
+            "cellxgene_census_builder.release_cleanup.get_release_manifest", return_value=release_manifest
         ) as get_release_manifest_patch,
         mock.patch("s3fs.S3FileSystem.isdir", return_value=True),
-        mock.patch("cell_census_builder.release_manifest._overwrite_release_manifest") as commit_release_manifest_patch,
+        mock.patch(
+            "cellxgene_census_builder.release_manifest._overwrite_release_manifest"
+        ) as commit_release_manifest_patch,
         mock.patch("s3fs.S3FileSystem.rm", return_value=None) as delete_patch,
     ):
         remove_releases_older_than(**remove_kwargs, dryrun=dryrun)
@@ -112,9 +114,9 @@ def test_remove_releases_older_than_sanity_checks(
 ) -> None:
     """Test the expected sanity/error checks"""
     with (
-        mock.patch("cell_census_builder.release_cleanup.get_release_manifest", return_value=release_manifest),
+        mock.patch("cellxgene_census_builder.release_cleanup.get_release_manifest", return_value=release_manifest),
         mock.patch("s3fs.S3FileSystem.isdir", return_value=True),
-        mock.patch("cell_census_builder.release_manifest._overwrite_release_manifest"),
+        mock.patch("cellxgene_census_builder.release_manifest._overwrite_release_manifest"),
         mock.patch("s3fs.S3File.write", return_value=0),  # just being paranoid!
         mock.patch("s3fs.S3File.flush", return_value=None),  # just being paranoid!
         mock.patch("s3fs.S3FileSystem.rm", return_value=None),  # just being paranoid!

@@ -114,10 +114,10 @@ def main() -> int:
     description = """Delete Census releases that are older than a user-specified number of days and are not aliased (e.g. 'latest')."""
     epilog = """Example:
 
-    python -m cell_census_builder.release_cleanup s3://cellxgene-data-public/cell-census/ --days 32 --dryrun
+    python -m cellxgene_census_builder.release_cleanup s3://cellxgene-data-public/cell-census/ --days 32 --dryrun
     """
     parser = argparse.ArgumentParser(
-        prog="cell_census_summary.release_cleanup",
+        prog="cellxgene_census_summary.release_cleanup",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=description,
         epilog=epilog,

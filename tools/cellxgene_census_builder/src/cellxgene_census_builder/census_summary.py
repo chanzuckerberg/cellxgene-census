@@ -2,7 +2,7 @@ import argparse
 import sys
 from typing import Optional, TextIO
 
-import cell_census
+import cell_census as cellxgene_census  # the eventual name
 import pandas as pd
 
 from .build_soma.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
@@ -20,7 +20,7 @@ def display_summary(
     uri: Optional[str] = None,
     file: Optional[TextIO] = None,
 ) -> int:
-    census = cell_census.open_soma(census_version=census_version, uri=uri)
+    census = cellxgene_census.open_soma(census_version=census_version, uri=uri)
 
     COLS_TO_QUERY = [
         ("soma_joinid", "cells"),
@@ -56,8 +56,8 @@ def display_diff(
     previous_uri: Optional[str] = None,
     file: Optional[TextIO] = None,
 ) -> int:
-    census = cell_census.open_soma(census_version=census_version, uri=uri)
-    previous_census = cell_census.open_soma(census_version=previous_census_version, uri=previous_uri)
+    census = cellxgene_census.open_soma(census_version=census_version, uri=uri)
+    previous_census = cellxgene_census.open_soma(census_version=previous_census_version, uri=previous_uri)
 
     # Total cell count deltas by experiment (mouse, human)
 
@@ -157,7 +157,7 @@ def display_diff(
 
 
 def create_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cell_census_summary")
+    parser = argparse.ArgumentParser(prog="cellxgene_census_summary")
     parser.add_argument("-c", "--census-version", default="latest", help="Version of the census. Defaults to latest")
     subparsers = parser.add_subparsers(required=True, dest="subcommand")
 
