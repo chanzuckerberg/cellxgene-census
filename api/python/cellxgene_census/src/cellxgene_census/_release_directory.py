@@ -61,7 +61,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         :func:`get_census_version_directory`: returns the entire directory as a dict.
 
     Examples:
-        >>> cell_census.get_census_version_description("latest")
+        >>> cellxgene_census.get_census_version_description("latest")
         {'release_date': None,
         'release_build': '2022-12-01',
         'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
@@ -90,7 +90,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
         :func:`get_census_version_description`: get description by census_version.
 
     Examples:
-        >>> cell_census.get_census_version_directory()
+        >>> cellxgene_census.get_census_version_directory()
         {'latest': {'release_date': None,
         'release_build': '2022-12-01',
         'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',

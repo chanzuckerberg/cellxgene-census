@@ -29,7 +29,7 @@ def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDB
     s3_region = locator.get("s3_region")
 
     if not context:
-        # if no user-defined context, cell_census defaults take precedence over SOMA defaults
+        # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
         context = soma.options.SOMATileDBContext()
         tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
         if s3_region is not None:
@@ -77,28 +77,28 @@ def open_soma(
         Open the default Cell Census version, using a context manager which will automatically
         close the census upon exit of the context.
 
-        >>> with cell_census.open_soma() as census:
+        >>> with cellxgene_census.open_soma() as census:
                 ...
 
         Open and close:
 
-        >>> census = cell_census.open_soma()
+        >>> census = cellxgene_census.open_soma()
             ...
             census.close()
 
         Open a specific Cell Census by version:
 
-        >>> with cell_census.open_soma("2022-12-31") as census:
+        >>> with cellxgene_census.open_soma("2022-12-31") as census:
                 ...
 
         Open a Cell Census by S3 URI, rather than by version.
 
-        >>> with cell_census.open_soma(uri="s3://bucket/path") as census:
+        >>> with cellxgene_census.open_soma(uri="s3://bucket/path") as census:
                 ...
 
         Open a Cell Census by path (file:// URI), rather than by version.
 
-        >>> with cell_census.open_soma(uri="/tmp/census") as census:
+        >>> with cellxgene_census.open_soma(uri="/tmp/census") as census:
                 ...
     """
 
@@ -132,7 +132,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         Experimental.
 
     Examples:
-        >>> cell_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
+        >>> cellxgene_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
         {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d.h5ad',
         's3_region': 'us-west-2'}
     """
