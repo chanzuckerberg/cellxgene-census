@@ -37,7 +37,7 @@ def get_anndata(
 
     Args:
         census:
-            The census object, usually returned by :func:`cell_census.open_soma()`.
+            The census object, usually returned by :func:`cellxgene_census.open_soma()`.
         organism:
             The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
         measurement_name:
