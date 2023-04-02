@@ -13,12 +13,12 @@ Also see the [Python API](https://chanzuckerberg.github.io/cellxgene-census/).
 
 ## Installation
 
-You can install the development version of cellxgene.census from [GitHub](https://github.com/) with:
+You can install the development version of `cellxgene.census` from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("chanzuckerberg/cellxgene-census/api/r/CellCensus")
-print(CellCensus::open_soma())
+devtools::install_github("chanzuckerberg/cellxgene-census/api/r/cellxgene.census")
+print(cellxgene.census::open_soma())
 ```
 
 (minimal apt dependencies: r-base cmake git)
@@ -28,7 +28,7 @@ print(CellCensus::open_soma())
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(CellCensus)
+library(cellxgene.census)
 ## basic example code
 ```
 
