@@ -1,6 +1,6 @@
 #' Read the feature dataset presence matrix.
 #'
-#' @param census The census object, usually returned by `CellCensus::open_soma()`.
+#' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #'
@@ -18,7 +18,7 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
 #' query, and return it as a `Seurat` object.
 #'
-#' @param census The census object, usually returned by `CellCensus::open_soma()`.
+#' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #' @param X_name The `X` layer to query. Defaults to `raw`.
