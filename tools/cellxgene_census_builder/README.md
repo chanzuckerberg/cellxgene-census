@@ -142,7 +142,7 @@ b) creating a smaller "census" from a user-provided list of files (a "manifest")
 #### Mode (a) - creating the full cellxgene census from the entire CELLxGENE (public) corpus:
 
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
-- To create a cellxgene census at `<census_path>`, execute:
+- To create a census at `<census_path>`, execute:
   > $ python -m cellxgene_census_builder -mp --max-workers 12 <census_path> build
 - Tips:
   - `-v` to view info-level logging during run, or `-v -v` for debug-level logging
@@ -151,7 +151,7 @@ b) creating a smaller "census" from a user-provided list of files (a "manifest")
 
 If you run out of memory, reduce `--max-workers`. You can also try a higher number if you have lots of CPU & memory.
 
-#### Mode (b) - creating a cellxgene census from a user-provided list of H5AD files:
+#### Mode (b) - creating a census from a user-provided list of H5AD files:
 
 - Create a manifest file, in CSV format, containing two columns: dataset_id, h5ad_uri. Example:
   ```csv
@@ -160,5 +160,5 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
   5b93b8fc-7c9a-45bd-ad3f-dc883137de30, /files/5b93b8fc-7c9a-45bd-ad3f-dc883137de30.h5ad
   ```
   You can specify a file system path or a URI in the second field
-- To create a cellxgene census at `<census_path>`, execute:
+- To create a census at `<census_path>`, execute:
   > $ python -m cellxgene_census_builder <census_path> build --manifest <the_manifest_file.csv>
