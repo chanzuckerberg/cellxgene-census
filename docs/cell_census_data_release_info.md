@@ -7,7 +7,7 @@
 It is a Cell Census build that is publicly hosted online. A Cell Census build is 
 a [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) collection with the Cell Census data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) as specified in the [Cell Census schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md#data-encoding-and-organization). 
 
-### Long-term supported Cell Census release (LTS)
+### Long-term supported (LTS) Cell Census releases
 
 To enable data stability and scientific reproducibility, [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) plans to perform regular LTS Cell Census data releases:
 
