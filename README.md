@@ -1,26 +1,24 @@
-[![codecov](https://codecov.io/gh/chanzuckerberg/cell-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cell-census)
+[![codecov](https://codecov.io/gh/chanzuckerberg/cellxgene-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cellxgene-census)
 
 :exclamation: **Status:** pre-release, under rapid development.
 
-:exclamation: **Feature name:** "Cell Census" is a temporary name, final name may change on release.
 
-
-# Cell Census of CZ CELLxGENE Discover
+# CZ CELLxGENE Discover Census
 
 [**CZ CELLxGENE Discover**](https://cellxgene.cziscience.com/)  is a free-to-use data portal hosting a growing corpus of more than **700 single-cell datasets** comprising about **50 million cells** from the major human and mouse tissues. The portal provides a set of visual tools to download and explore the data. **All data is [standardized](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema/3.0.0)** to include raw counts and a common vocabulary for gene and cell metadata.
 
-The **Cell Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
+The **CELLxGENE Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
 
-Get started on using the Cell Census:
+Get started on using the CELLxGENE Census:
 
 - [Quick start](#Quick-start).
-- [Documentation](https://chanzuckerberg.github.io/cell-census/index.html). 
-- [Python tutorials](https://chanzuckerberg.github.io/cell-census/examples.html).
+- [Documentation](https://chanzuckerberg.github.io/cellxgene-census/index.html). 
+- [Python tutorials](https://chanzuckerberg.github.io/cellxgene-census/examples.html).
 - R tutorials. *Coming soon.*
 
 ## Technology
 
-The Cell Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Cell Census has all the data capabilities offered by TileDB-SOMA including:
+The CELLxGENE Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
 
 - Cloud-based data storage and access.
 - Efficient access for larger-than-memory slices of data.
@@ -28,15 +26,15 @@ The Cell Census is a data object publicly hosted online and a convenience API to
 - R and Python support.
 - Export to AnnData and Seurat.
 
-## Cell Census data releases
+## CELLxGENE Census Data Releases
 
 The Cell Census data release plans are detailed [here](./docs/cell_census_data_release_info). 
 
 Shortly, starting in mid 2023 Cell Census long-term supported data releases will be publish every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases will be published without any guarantee of permanence. 
 
-## Cell Census data organization
+## CELLxGENE Census Data Organization
 
-The Cell Census follows a specific [data schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md). Briefly, the Cell Census is a collection of a variety of **[SOMA objects](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types)** organized with the following hierarchy.
+The Census follows a specific [data schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cell_census_schema.md). Briefly, the Census is a collection of a variety of **[SOMA objects](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types)** organized with the following hierarchy.
 
 <img src="./docs/cell_census_data_model.svg">
 
@@ -45,16 +43,16 @@ The Cell Census follows a specific [data schema](https://github.com/chanzuckerbe
 
 ### Requirements
 
-The Cell Census requires a Linux or MacOS system with:
+The CELLxGENE Census API requires a Linux or MacOS system with:
 
 - Python 3.7 to Python 3.10. Or R, supported versions TBD.
 - Recommended: >16 GB of memory.
 - Recommended: >5 Mbps internet connection. 
-- Recommended: for increased performance use the API through a AWS-EC2 instance from the region `us-west-2`. The Cell Census data builds are hosted in a AWS-S3 bucket in that region.
+- Recommended: for increased performance use the API through a AWS-EC2 instance from the region `us-west-2`. The Census data builds are hosted in a AWS-S3 bucket in that region.
 
 ### Documentation
 
-The Cell Census [doc-site](https://chanzuckerberg.github.io/cell-census/index.html) (*under development*), contains the reference documentation, data description, and tutorials.
+The CELLxGENE Census [doc-site](https://chanzuckerberg.github.io/cellxgene-census/index.html) (*under development*), contains the reference documentation, data description, and tutorials.
 
 Reference documentation can also be accessed directly from Python or R.
 
@@ -63,7 +61,7 @@ Reference documentation can also be accessed directly from Python or R.
 
 #### Installation
 
-It is recommended to install the Cell Census and all of its dependencies in a new virtual environment via `pip`:
+It is recommended to install the CELLxGENE Census and all of its dependencies in a new virtual environment via `pip`:
 
 ```
 pip install -U cell-census
@@ -71,9 +69,9 @@ pip install -U cell-census
 
 #### Usage examples
 
-Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks).
+Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks).
 
-Below are 3 examples of common operations you can do with the Cell Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
+Below are 3 examples of common operations you can do with the CELLxGENE Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
 
 ```python
 import cell_census
@@ -204,8 +202,8 @@ And you must close the query.
 
 ## Questions, feedback and issues
 
-- Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cell-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://join-cellxgene-users.herokuapp.com/) on Slack and join the `#cell-census-users` channel
-- Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cell-census/issues). 
+- Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://join-cellxgene-users.herokuapp.com/) on Slack and join the `#cell-census-users` channel
+- Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues). 
 - Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <security@chanzuckerberg.com>.
 - You can send any other feedback to <soma@chanzuckerberg.com>
 
@@ -213,19 +211,19 @@ And you must close the query.
 ## Coming soon
 
 - R support!
-- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Cell Census and [PyTorch](https://pytorch.org/).
-- To increase the usability of the Cell Census for research, in 2023 and 2024 we are planning to explore the following areas :
+- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and [PyTorch](https://pytorch.org/).
+- To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas :
    - Include organism-wide normalized layers.
    - Include Organism-wide embeddings.
    - On-demand information-rich subsampling.
 
-## Projects and tools using the Cell Census
+## Projects and tools using CELLxGENE Census
 
 If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>
 
 ## Reuse
 
-The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the Cell Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
+The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the CELLxGENE Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
 
 
 ## Code of Conduct
