@@ -41,7 +41,7 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgen
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
-    """Get release description for given census version, from the Census release directory.
+    """Get release description for given Census version, from the Census release directory.
 
     Args:
         census_version:
@@ -71,7 +71,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     census_directory = get_census_version_directory()
     description = census_directory.get(census_version, None)
     if description is None:
-        raise KeyError(f"Unable to locate census version: {census_version}.")
+        raise KeyError(f"Unable to locate Census version: {census_version}.")
     return description
 
 

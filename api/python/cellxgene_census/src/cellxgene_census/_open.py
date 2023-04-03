@@ -75,7 +75,7 @@ def open_soma(
 
     Examples:
         Open the default Census version, using a context manager which will automatically
-        close the census upon exit of the context.
+        close the Census upon exit of the context.
 
         >>> with cellxgene_census.open_soma() as census:
                 ...

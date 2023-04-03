@@ -1,16 +1,16 @@
 # Test README
 
 This directory contains tests of the cellxgene-census package API, _and_ the use of the API on the
-live "corpus", i.e., data in the public census S3 bucket. The tests use Pytest, and have
+live "corpus", i.e., data in the public Census S3 bucket. The tests use Pytest, and have
 Pytest marks to control which tests are run.
 
 Tests can be run in the usual manner. First, ensure you have cellxgene-census installed, e.g., from the top-level repo directory:
 
-> pip install -e ./api/python/cell_census/
+> pip install -e ./api/python/cellxgene_census/
 
 Then run the tests:
 
-> pytest ./api/python/cell_census/
+> pytest ./api/python/cellxgene_census/
 
 ## Pytest Marks
 
