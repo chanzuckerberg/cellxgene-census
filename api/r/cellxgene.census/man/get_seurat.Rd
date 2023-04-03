@@ -17,7 +17,7 @@ get_seurat(
 )
 }
 \arguments{
-\item{census}{The census object, usually returned by \code{CellCensus::open_soma()}.}
+\item{census}{The census object, usually returned by \code{cellxgene.census::open_soma()}.}
 
 \item{organism}{The organism to query, usually one of \verb{Homo sapiens} or \verb{Mus musculus}}
 

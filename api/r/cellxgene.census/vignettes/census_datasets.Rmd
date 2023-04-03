@@ -25,7 +25,7 @@ https://github.com/chanzuckerberg/cell-census/blob/main/api/python/notebooks/api
 Each Cell Census contains a top-level data frame itemizing the datasets contained therein. You can read this `SOMADataFrame` into an [Arrow Table](https://arrow.apache.org/docs/r/reference/Table.html):
 
 ```{r}
-census <- CellCensus::open_soma()
+census <- cellxgene.census::open_soma()
 census_datasets <- census$get("census_info")$get("datasets")$read()
 print(census_datasets)
 ```
@@ -80,12 +80,12 @@ dataset_seurat <- expt_query$to_seurat(c(counts = "raw"))
 print(dataset_seurat)
 ```
 
-You can also use the `CellCensus::get_source_h5ad_uri()` API to fetch a URI pointing to the H5AD associated with this `dataset_id`. This is the same H5AD you can download from the CELLxGENE Portal, and may contain additional data-submitter provided information which was not included in the Cell Census.
+You can also use the `cellxgene.census::get_source_h5ad_uri()` API to fetch a URI pointing to the H5AD associated with this `dataset_id`. This is the same H5AD you can download from the CELLxGENE Portal, and may contain additional data-submitter provided information which was not included in the Cell Census.
 
 The "locator" returned by this API will include a URI and additional information that may be necessary to use the URI (eg, the S3 region).
 
 ```{r}
-CellCensus::get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
+cellxgene.census::get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
 ```
 
-The `CellCensus::download_source_h5ad()` API downloads the H5AD to a local file, which can then be used in R using [SeuratDisk's anndata converter](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html).
+The `cellxgene.census::download_source_h5ad()` API downloads the H5AD to a local file, which can then be used in R using [SeuratDisk's anndata converter](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html).
