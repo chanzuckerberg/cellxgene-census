@@ -35,7 +35,7 @@ All Cell Census **source h5ads** used to create a specific Cell Census **release
 ## Cell Census release information `json`
 
 
-The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder for all Cell Census releases  MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available census builds:
+The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder for all Cell Census releases MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available census builds:
 
 
 `./cell-census/releases.json`
