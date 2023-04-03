@@ -1,6 +1,6 @@
 # README
 
-This package contains code to build and release the CELLxGENE Census in the SOMA format, as specified in the
+This package contains code to build and release the Census in the SOMA format, as specified in the
 [data schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cell_census_schema.md).
 
 This tool is not intended for end-users - it is used by the CELLxGENE team to periodically create and release all
@@ -139,7 +139,7 @@ Modes of operation:
 a) (default) creating the entire "census" using all files currently in the CELLxGENE repository.
 b) creating a smaller "census" from a user-provided list of files (a "manifest")
 
-#### Mode (a) - creating the full cellxgene census from the entire CELLxGENE (public) corpus:
+#### Mode (a) - creating the full census from the entire CELLxGENE (public) corpus:
 
 - On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
 - To create a census at `<census_path>`, execute:
