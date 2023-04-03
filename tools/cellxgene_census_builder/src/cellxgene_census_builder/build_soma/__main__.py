@@ -71,7 +71,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
 
     # VALIDATE
-    subparsers.add_parser("validate", help="Validate an existing census build")
+    subparsers.add_parser("validate", help="Validate an existing Census build")
 
     return parser
 
