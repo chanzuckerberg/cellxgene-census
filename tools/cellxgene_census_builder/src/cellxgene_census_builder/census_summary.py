@@ -166,7 +166,7 @@ def create_args_parser() -> argparse.ArgumentParser:
 
     # VALIDATE
     diff_parser = subparsers.add_parser("diff", help="Shows the diff with a previous census version")
-    diff_parser.add_argument("-p", "--previous-version", help="Version of the census to diff")
+    diff_parser.add_argument("-p", "--previous-version", help="Version of the Census to diff")
 
     return parser
 
