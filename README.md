@@ -28,9 +28,9 @@ The CELLxGENE Census is a data object publicly hosted online and a convenience A
 
 ## CELLxGENE Census Data Releases
 
-Starting in mid 2023, Cellxgene Census long-term supported data builds will be released every 6 months and will be publicly accessible for at least 5 years after release. 
+The Cell Census data release plans are detailed [here](./docs/cell_census_data_release_info). 
 
-In between long-term supported data build releases, weekly builds will be released without any guarantee of permanence. 
+Shortly, starting in mid 2023 Cell Census long-term supported data releases will be publish every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases will be published without any guarantee of permanence. 
 
 ## CELLxGENE Census Data Organization
 
