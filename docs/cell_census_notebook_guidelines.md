@@ -47,7 +47,7 @@ Examples:
 
 ### Table of Contents 
 
-Immediately after the the introduction a table of contents must be provided:
+Immediately after the introduction a table of contents must be provided:
 
 * It must be placed under the bolded word "**Contents**" . 
 * It must contain an ordered list of the second-level headers (`##`) used for [Sections](#Sections).
