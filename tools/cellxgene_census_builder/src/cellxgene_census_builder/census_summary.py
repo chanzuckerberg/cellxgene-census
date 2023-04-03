@@ -162,7 +162,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(required=True, dest="subcommand")
 
     # BUILD
-    subparsers.add_parser("summarize", help="Summarize the cell census")
+    subparsers.add_parser("summarize", help="Summarize the cellxgene census")
 
     # VALIDATE
     diff_parser = subparsers.add_parser("diff", help="Shows the diff with a previous census version")

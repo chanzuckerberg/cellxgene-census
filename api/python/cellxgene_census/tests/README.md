@@ -1,7 +1,7 @@
 # Test README
 
 This directory contains tests of the cell-census package API, _and_ the use of the API on the
-live "corpus", i.e., data in the public cell census S3 bucket. The tests use Pytest, and have
+live "corpus", i.e., data in the public census S3 bucket. The tests use Pytest, and have
 Pytest marks to control which tests are run.
 
 Tests can be run in the usual manner. First, ensure you have cell-census installed, e.g., from the top-level repo directory:
@@ -16,7 +16,7 @@ Then run the tests:
 
 There are two Pytest marks you can use from the command line:
 
-- live_corpus: tests that directly access the `latest` version of the Cell Census. Enabled by default.
+- live_corpus: tests that directly access the `latest` version of the Cellxgene Census. Enabled by default.
 - expensive: tests that are expensive (ie., cpu, memory, time). Disabled by default - enable with `--expensive`. Some of these tests are _very_ expensive, ie., require a very large memory host to succeed.
 
 By default, only relatively cheap & fast tests are run. To enable `expensive` tests:
@@ -42,7 +42,7 @@ When run, please record the results in this file (below) and commit the change t
   - EC2 instance type and any system config (i.e., swap)
   - host and OS as reported by `uname -a`
   - Python & package versions and OS - suggest capturing the output of `tiledbsoma.show_package_versions()`
-  - The Cell Census version used for the test (i.e., the version aliased as `latest`). This can be easily captured using `cell_census.get_census_version_description('latest')`
+  - The Cellxgene Census version used for the test (i.e., the version aliased as `latest`). This can be easily captured using `cell_census.get_census_version_description('latest')`
   - the cell_census package version (ie., `cell_census.__version__`)
 - any run notes
 - full output of: `pytest -v --durations=0 --expensive ./api/python/cell_census/tests/`

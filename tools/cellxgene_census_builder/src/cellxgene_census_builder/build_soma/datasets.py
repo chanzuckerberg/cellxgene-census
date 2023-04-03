@@ -64,7 +64,7 @@ def assign_dataset_soma_joinids(datasets: List[Dataset]) -> None:
 
 def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dataset]) -> None:
     """
-    Write the Cell Census `census_datasets` dataframe
+    Write the Cellxgene Census `census_datasets` dataframe
     """
     logging.info("Creating dataset_manifest")
     manifest_df = Dataset.to_dataframe(datasets)
