@@ -1,6 +1,6 @@
 # Cell Census storage & release policy
 
-:exclamation: **This document is for internal use only. It's contents may change without public notice.**
+:exclamation: **This document is for internal use only. Its contents may change without notice.**
 
 **Last edited**: April, 2023.
 
