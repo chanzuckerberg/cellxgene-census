@@ -17,7 +17,7 @@ To enable data stability and scientific reproducibility, [CZ CELLxGENE Discover]
 
 ### Weekly Cell Census release (latest)
 
-[CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) ingests a handful of new datasets every week. To quickly enable access to these new data via the Cell Census,  [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) plans to perform weekly Cell Census data releases:
+[CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) ingests a handful of new datasets every week. To quickly enable access to these new data via the Cell Census, [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) plans to perform weekly Cell Census data releases:
 
 * Published online every Monday for public access, except for CZI holidays. 
 * Available for public access for 1 week or until the next latest release is performed, whichever is the longest.
