@@ -2,9 +2,9 @@
 #
 # Licensed under the MIT License.
 
-"""Versioning of Cellxgene Census builds
+"""Versioning of Census builds
 
-Methods to retrieve information about versions of the publicly hosted Cellxgene Census object.
+Methods to retrieve information about versions of the publicly hosted Census object.
 """
 
 from typing import Dict, Optional, Union, cast
@@ -13,7 +13,7 @@ import requests
 from typing_extensions import TypedDict
 
 """
-The following types describe the expected directory of Cellxgene Census builds, used
+The following types describe the expected directory of Census builds, used
 to bootstrap all data location requests.
 """
 CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
@@ -41,8 +41,7 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgen
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
-    """Get release description for given census version, from the Cell
-    Census release directory.
+    """Get release description for given census version, from the Census release directory.
 
     Args:
         census_version:
@@ -78,7 +77,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
 def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of Cellxgene Census releases currently available.
+    Get the directory of Census releases currently available.
 
     Returns:
         A dictionary that contains release names and their corresponding release description.

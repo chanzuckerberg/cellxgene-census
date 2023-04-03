@@ -111,7 +111,7 @@ def test_base_builder_creation(
 def test_unicode_support(tmp_path: pathlib.Path) -> None:
     """
     Regression test that unicode is supported correctly in tiledbsoma.
-    This test is not strictly necessary, but it validates the requirements that Cellxgene Census
+    This test is not strictly necessary, but it validates the requirements that Census
     support unicode in DataFrame columns.
     """
     pd_df = pd.DataFrame(data={"value": ["Ünicode", "S̈upport"]}, columns=["value"])

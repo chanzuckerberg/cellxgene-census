@@ -146,7 +146,7 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="cellxgene_census_builder", description="Build the official cellxgene census."
+        prog="cellxgene_census_builder", description="Build the official census."
     )
     parser.add_argument("working_dir", type=str, help="Working directory for the build")
     parser.add_argument(

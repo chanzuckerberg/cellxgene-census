@@ -4,7 +4,7 @@
 
 """Open census and related datasets
 
-Contains methods to open publicly hosted versions of Cellxgene Census object and access its source datasets.
+Contains methods to open publicly hosted versions of Census object and access its source datasets.
 """
 
 import os.path
@@ -51,7 +51,7 @@ def open_soma(
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
-    """Open the Cellxgene Census by version or URI.
+    """Open the Census by version or URI.
 
     Args:
         census_version:
@@ -74,7 +74,7 @@ def open_soma(
         Experimental.
 
     Examples:
-        Open the default Cellxgene Census version, using a context manager which will automatically
+        Open the default Census version, using a context manager which will automatically
         close the census upon exit of the context.
 
         >>> with cellxgene_census.open_soma() as census:
@@ -86,17 +86,17 @@ def open_soma(
             ...
             census.close()
 
-        Open a specific Cellxgene Census by version:
+        Open a specific Census by version:
 
         >>> with cellxgene_census.open_soma("2022-12-31") as census:
                 ...
 
-        Open a Cellxgene Census by S3 URI, rather than by version.
+        Open a Census by S3 URI, rather than by version.
 
         >>> with cellxgene_census.open_soma(uri="s3://bucket/path") as census:
                 ...
 
-        Open a Cellxgene Census by path (file:// URI), rather than by version.
+        Open a Census by path (file:// URI), rather than by version.
 
         >>> with cellxgene_census.open_soma(uri="/tmp/census") as census:
                 ...
