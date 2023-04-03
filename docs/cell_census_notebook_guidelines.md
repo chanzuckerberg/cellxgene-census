@@ -6,7 +6,7 @@ API demonstration code that is part of the documentation should be deposited her
 - R vignettes [`cell-census/api/r/CellCensus/vignettes`](https://github.com/chanzuckerberg/cell-census/tree/main/api/r/CellCensus/vignettes)
 
 
-These assets are user-facing and are automatically rendered to the doc-sites, they are one of the main form users get onboarded on the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
+These assets are user-facing and are automatically rendered to the doc-sites, they are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
 
 ## Guidelines
 
