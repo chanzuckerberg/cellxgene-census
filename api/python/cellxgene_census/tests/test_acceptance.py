@@ -1,5 +1,5 @@
 """
-Acceptance tests for the CELLxGENE Census.
+Acceptance tests for the Census.
 
 NOTE: those marked `expensive` are not run in the CI as they are, well, expensive...
 

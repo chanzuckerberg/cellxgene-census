@@ -64,7 +64,7 @@ Reference documentation can also be accessed directly from Python or R.
 It is recommended to install the CELLxGENE Census and all of its dependencies in a new virtual environment via `pip`:
 
 ```
-pip install -U cell-census
+pip install -U cellxgene-census
 ```
 
 #### Usage examples

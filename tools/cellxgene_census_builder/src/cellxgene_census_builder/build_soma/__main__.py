@@ -50,7 +50,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(required=True, dest="subcommand")
 
     # BUILD
-    build_parser = subparsers.add_parser("build", help="Build Cell Census")
+    build_parser = subparsers.add_parser("build", help="Build the Census")
     build_parser.add_argument(
         "--manifest",
         type=argparse.FileType("r"),
@@ -71,7 +71,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
 
     # VALIDATE
-    subparsers.add_parser("validate", help="Validate an existing cell census build")
+    subparsers.add_parser("validate", help="Validate an existing Census build")
 
     return parser
 

@@ -158,15 +158,15 @@ def display_diff(
 
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cellxgene_census_summary")
-    parser.add_argument("-c", "--census-version", default="latest", help="Version of the census. Defaults to latest")
+    parser.add_argument("-c", "--census-version", default="latest", help="Version of the Census. Defaults to latest")
     subparsers = parser.add_subparsers(required=True, dest="subcommand")
 
     # BUILD
-    subparsers.add_parser("summarize", help="Summarize the cell census")
+    subparsers.add_parser("summarize", help="Summarize the Census")
 
     # VALIDATE
-    diff_parser = subparsers.add_parser("diff", help="Shows the diff with a previous census version")
-    diff_parser.add_argument("-p", "--previous-version", help="Version of the census to diff")
+    diff_parser = subparsers.add_parser("diff", help="Shows the diff with a previous Census version")
+    diff_parser.add_argument("-p", "--previous-version", help="Version of the Census to diff")
 
     return parser
 

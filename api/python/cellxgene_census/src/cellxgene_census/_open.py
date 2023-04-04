@@ -4,7 +4,7 @@
 
 """Open census and related datasets
 
-Contains methods to open  publicly hosted versions of Cell Census object and access its source datasets.
+Contains methods to open publicly hosted versions of Census object and access its source datasets.
 """
 
 import os.path
@@ -51,7 +51,7 @@ def open_soma(
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
-    """Open the Cell Census by version or URI.
+    """Open the Census by version or URI.
 
     Args:
         census_version:
@@ -74,8 +74,8 @@ def open_soma(
         Experimental.
 
     Examples:
-        Open the default Cell Census version, using a context manager which will automatically
-        close the census upon exit of the context.
+        Open the default Census version, using a context manager which will automatically
+        close the Census upon exit of the context.
 
         >>> with cellxgene_census.open_soma() as census:
                 ...
@@ -86,17 +86,17 @@ def open_soma(
             ...
             census.close()
 
-        Open a specific Cell Census by version:
+        Open a specific Census by version:
 
         >>> with cellxgene_census.open_soma("2022-12-31") as census:
                 ...
 
-        Open a Cell Census by S3 URI, rather than by version.
+        Open a Census by S3 URI, rather than by version.
 
         >>> with cellxgene_census.open_soma(uri="s3://bucket/path") as census:
                 ...
 
-        Open a Cell Census by path (file:// URI), rather than by version.
+        Open a Census by path (file:// URI), rather than by version.
 
         >>> with cellxgene_census.open_soma(uri="/tmp/census") as census:
                 ...
@@ -106,7 +106,7 @@ def open_soma(
         return _open_soma({"uri": uri, "s3_region": None}, context)
 
     if census_version is None:
-        raise ValueError("Must specify either a cell census version or an explicit URI.")
+        raise ValueError("Must specify either a census version or an explicit URI.")
 
     description = get_census_version_description(census_version)  # raises
     return _open_soma(description["soma"], context)
