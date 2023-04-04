@@ -33,7 +33,7 @@ as it will keep you from running out of RAM.
 ## Verify your installation
 Check that your installation works - this make take a few seconds, as it loads metadata from S3:
 ```shell
-$ python -c 'import cell_census; print(cell_census.open_soma().soma_type)'
+$ python -c 'import cellxgene_census; print(cellxgene_census.open_soma().soma_type)'
 SOMACollection
 ```
 
