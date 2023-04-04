@@ -1,4 +1,4 @@
-cell-census
+cellxgene-census
 scikit-misc 
 scvi-tools
 jupyterlab
