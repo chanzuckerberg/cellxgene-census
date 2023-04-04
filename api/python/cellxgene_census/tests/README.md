@@ -43,7 +43,7 @@ When run, please record the results in this file (below) and commit the change t
   - host and OS as reported by `uname -a`
   - Python & package versions and OS - suggest capturing the output of `tiledbsoma.show_package_versions()`
   - The Census version used for the test (i.e., the version aliased as `latest`). This can be easily captured using `cellxgene_census.get_census_version_description('latest')`
-  - the cell_census package version (ie., `cellxgene_census.__version__`)
+  - the cellxgene_census package version (ie., `cellxgene_census.__version__`)
 - any run notes
 - full output of: `pytest -v --durations=0 --expensive ./api/python/cellxgene_census/tests/`
 

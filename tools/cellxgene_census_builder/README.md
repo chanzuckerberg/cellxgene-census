@@ -136,7 +136,7 @@ The build process:
 - (Optional) Validate the entire Census, re-reading from storage.
 
 Modes of operation:
-a) (default) creating the entire "census" using all files currently in the CELLxGENE repository.
+a) (default) creating the entire "Census" using all files currently in the CELLxGENE repository.
 b) creating a smaller "Census" from a user-provided list of files (a "manifest")
 
 #### Mode (a) - creating the full Census from the entire CELLxGENE (public) corpus:
