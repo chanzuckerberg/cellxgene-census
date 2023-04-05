@@ -1,5 +1,6 @@
 import datetime
 from typing import Type, cast
+from unittest import mock
 
 import pytest
 from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
@@ -10,6 +11,7 @@ from cellxgene_census_builder.release_manifest import (
     CensusVersionDescription,
     CensusVersionName,
     get_release_manifest,
+    make_a_release,
     validate_release_manifest,
 )
 
@@ -130,3 +132,95 @@ def test_validate_release_manifest_errors(
 ) -> None:
     with pytest.raises(expected_error):
         validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)
+
+
+@pytest.mark.parametrize(
+    "release_manifest,rls_tag,rls_info,make_latest,expected_new_manifest",
+    [
+        (
+            {
+                "latest": "2022-01-10",
+                "2022-01-10": {
+                    "release_build": "2022-01-10",
+                    "soma": soma_locator("2022-01-10"),
+                    "h5ads": h5ads_locator("2022-01-10"),
+                },
+            },
+            "2022-02-03",
+            {
+                "release_build": "2022-02-03",
+                "soma": soma_locator("2022-02-03"),
+                "h5ads": h5ads_locator("2022-02-03"),
+            },
+            True,
+            {
+                "latest": "2022-02-03",
+                "2022-01-10": {
+                    "release_build": "2022-01-10",
+                    "soma": soma_locator("2022-01-10"),
+                    "h5ads": h5ads_locator("2022-01-10"),
+                },
+                "2022-02-03": {
+                    "release_build": "2022-02-03",
+                    "soma": soma_locator("2022-02-03"),
+                    "h5ads": h5ads_locator("2022-02-03"),
+                },
+            },
+        ),
+        (
+            {
+                "latest": "2022-01-10",
+                "2022-01-10": {
+                    "release_build": "2022-01-10",
+                    "soma": soma_locator("2022-01-10"),
+                    "h5ads": h5ads_locator("2022-01-10"),
+                },
+            },
+            "2022-02-03",
+            {
+                "release_build": "2022-02-03",
+                "soma": soma_locator("2022-02-03"),
+                "h5ads": h5ads_locator("2022-02-03"),
+            },
+            False,
+            {
+                "latest": "2022-01-10",
+                "2022-01-10": {
+                    "release_build": "2022-01-10",
+                    "soma": soma_locator("2022-01-10"),
+                    "h5ads": h5ads_locator("2022-01-10"),
+                },
+                "2022-02-03": {
+                    "release_build": "2022-02-03",
+                    "soma": soma_locator("2022-02-03"),
+                    "h5ads": h5ads_locator("2022-02-03"),
+                },
+            },
+        ),
+    ],
+)
+@pytest.mark.parametrize("dryrun", [True, False])
+def test_make_a_release(
+    release_manifest: CensusReleaseManifest,
+    rls_tag: CensusVersionName,
+    rls_info: CensusVersionDescription,
+    expected_new_manifest: CensusReleaseManifest,
+    make_latest: bool,
+    dryrun: bool,
+) -> None:
+    with (
+        mock.patch(
+            "cellxgene_census_builder.release_manifest.get_release_manifest", return_value=release_manifest.copy()
+        ) as get_release_manifest_patch,
+        mock.patch("s3fs.S3FileSystem.isdir", return_value=True),
+        mock.patch(
+            "cellxgene_census_builder.release_manifest._overwrite_release_manifest"
+        ) as commit_release_manifest_patch,
+    ):
+        make_a_release(TEST_CENSUS_BASE_URL, rls_tag, rls_info, make_latest, dryrun=dryrun)
+        assert get_release_manifest_patch.called
+        if dryrun:
+            assert commit_release_manifest_patch.call_count == 0
+        else:
+            assert commit_release_manifest_patch.call_count == 1
+            assert commit_release_manifest_patch.call_args == ((TEST_CENSUS_BASE_URL, expected_new_manifest),)

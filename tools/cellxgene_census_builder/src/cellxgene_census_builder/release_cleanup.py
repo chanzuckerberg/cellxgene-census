@@ -19,7 +19,7 @@ from .util import urlcat
 
 def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool, s3_anon: bool = False) -> None:
     """
-    Remove old releases, commiting the change to release.json.
+    Remove old releases, committing the change to release.json.
 
     Current rules - delete releases where:
     * Tag is a date older than `days` in age
@@ -74,7 +74,7 @@ def _update_release_manifest(
     latest_tag = new_manifest["latest"]
     _log_it(f"Commiting updated release.json with latest={latest_tag}", dryrun)
     if not dryrun:
-        commit_release_manifest(census_base_url, new_manifest)
+        commit_release_manifest(census_base_url, new_manifest, dryrun=dryrun)
 
 
 def _perform_recursive_delete(rls_tag: CensusVersionName, uri: str, dryrun: bool) -> None:
@@ -117,7 +117,7 @@ def main() -> int:
     python -m cellxgene_census_builder.release_cleanup s3://cellxgene-data-public/cell-census/ --days 32 --dryrun
     """
     parser = argparse.ArgumentParser(
-        prog="cellxgene_census_summary.release_cleanup",
+        prog="cellxgene_census_builder.release_cleanup",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=description,
         epilog=epilog,
