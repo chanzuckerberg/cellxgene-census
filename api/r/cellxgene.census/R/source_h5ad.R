@@ -19,17 +19,11 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
     )
   )
 
-  # FIXME execution of value_filter:
-  #   Error: Currently unsupported type: UTF8
-  # dataset <- as.data.frame(
-  #   census$get("census_info")$get("datasets")$read(
-  #     value_filter=paste("dataset_id == '", dataset_id, "'", sep="")
-  # ))
-  # should replace retrieving the entire datasets dataframe:
-  dataset <- as.data.frame(census$get("census_info")$get("datasets")$read(
-    column_names = c("dataset_id", "dataset_h5ad_path")
-  ))
-  dataset <- dataset[dataset$dataset_id == dataset_id, ]
+  dataset <- as.data.frame(
+    census$get("census_info")$get("datasets")$read(
+      value_filter = paste("dataset_id == '", dataset_id, "'", sep = "")
+    )
+  )
   stopifnot("Unknown dataset_id" = nrow(dataset) == 1)
   dataset <- as.list(dataset[1, ])
 
