@@ -1,5 +1,5 @@
 ---
-title: "Census Datasets example"
+title: "Axis Query Example"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{census_axis_query}
