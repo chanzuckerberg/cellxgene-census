@@ -58,6 +58,11 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         do_build_soma,
         do_validate_soma,
         do_create_reports,
+        # TODO: enable these when all are ready-to-go
+        # do_data_copy,
+        # do_the_release,
+        # do_old_release_cleanup
+        # do_log_copy
     ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
@@ -141,6 +146,61 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
     with open(reports_dir / f"census-diff-{args.build_tag}.txt", mode="w") as f:
         display_diff(uri=args.soma_path.as_posix(), previous_census_version="latest", file=f)
 
+    return True
+
+
+def do_data_copy(args: CensusBuildArgs) -> bool:
+    """Copy data to S3"""
+    from .data_copy import sync_to_S3
+
+    sync_to_S3(
+        args.working_dir / args.build_tag,
+        urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
+def do_the_release(args: CensusBuildArgs) -> bool:
+    from .release_manifest import CensusVersionDescription, make_a_release
+
+    release: CensusVersionDescription = {
+        "release_date": None,
+        "release_build": args.build_tag,
+        "soma": {
+            "uri": urlcat(args.config.cellxgene_census_S3_path, "soma"),
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": urlcat(args.config.cellxgene_census_S3_path, "h5ads"),
+            "s3_region": "us-west-2",
+        },
+    }
+    make_a_release(args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True)
+    return True
+
+
+def do_old_release_cleanup(args: CensusBuildArgs) -> bool:
+    """Clean up old releases"""
+    from .release_cleanup import remove_releases_older_than
+
+    remove_releases_older_than(
+        days=args.config.release_cleanup_days,
+        census_base_url=args.config.cellxgene_census_S3_path,
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
+def do_log_copy(args: CensusBuildArgs) -> bool:
+    """Copy logs to S3 for posterity.  Should be the final step, to capture full output of build"""
+    from .data_copy import sync_to_S3
+
+    sync_to_S3(
+        args.working_dir / "logs",
+        urlcat(args.config.logs_S3_path, args.build_tag),
+        dryrun=args.config.dryrun,
+    )
     return True
 
 
