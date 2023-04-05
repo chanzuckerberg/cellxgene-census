@@ -70,7 +70,7 @@ def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusRe
     # This is a stand-alone function for ease of testing/mocking.
     s3 = s3fs.S3FileSystem(anon=False)
     with s3.open(urlcat(census_base_url, CENSUS_RELEASE_FILE), mode="w") as f:
-        f.write(json.dumps(release_manifest))
+        f.write(json.dumps(release_manifest, indent=2))
 
 
 def validate_release_manifest(
