@@ -74,7 +74,7 @@ def _update_release_manifest(
     latest_tag = new_manifest["latest"]
     _log_it(f"Commiting updated release.json with latest={latest_tag}", dryrun)
     if not dryrun:
-        commit_release_manifest(census_base_url, new_manifest)
+        commit_release_manifest(census_base_url, new_manifest, dryrun=dryrun)
 
 
 def _perform_recursive_delete(rls_tag: CensusVersionName, uri: str, dryrun: bool) -> None:

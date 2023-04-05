@@ -25,9 +25,10 @@ CENSUS_CONFIG_DEFAULTS = {
     "verbose": 1,
     "log_dir": "logs",
     "log_file": "build.log",
+    "reports_dir": "reports",
     "consolidate": True,
     "disable_dirty_git_check": True,
-    "dryrun": False,  # if True, will disable copy of data/logs/etc to S3 buckets
+    "dryrun": False,  # if True, will disable copy of data/logs/reports to S3 buckets
     #
     # Paths and census version name determined by spec.
     "cellxgene_census_S3_path": "s3://cellxgene-data-public/cell-census",

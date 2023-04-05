@@ -60,6 +60,7 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         do_create_reports,
         do_data_copy,
         do_the_release,
+        do_report_copy,
         do_old_release_cleanup,
     ]
     try:
@@ -137,7 +138,7 @@ def do_validate_soma(args: CensusBuildArgs) -> bool:
 def do_create_reports(args: CensusBuildArgs) -> bool:
     from .census_summary import display_diff, display_summary
 
-    reports_dir = args.working_dir / "reports"
+    reports_dir = args.working_dir / args.config.reports_dir
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     logging.info("Creating summary report")
@@ -152,7 +153,7 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
 
 
 def do_data_copy(args: CensusBuildArgs) -> bool:
-    """Copy data to S3"""
+    """Copy data to S3, in preparation for a release"""
     from .data_copy import sync_to_S3
 
     sync_to_S3(
@@ -178,7 +179,21 @@ def do_the_release(args: CensusBuildArgs) -> bool:
             "s3_region": "us-west-2",
         },
     }
-    make_a_release(args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True)
+    make_a_release(
+        args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun
+    )
+    return True
+
+
+def do_report_copy(args: CensusBuildArgs) -> bool:
+    """Copy build summary reports to S3 for posterity."""
+    from .data_copy import sync_to_S3
+
+    sync_to_S3(
+        args.working_dir / args.config.reports_dir,
+        urlcat(args.config.logs_S3_path, args.build_tag, args.config.reports_dir),
+        dryrun=args.config.dryrun,
+    )
     return True
 
 
@@ -199,8 +214,8 @@ def do_log_copy(args: CensusBuildArgs) -> bool:
     from .data_copy import sync_to_S3
 
     sync_to_S3(
-        args.working_dir / "logs",
-        urlcat(args.config.logs_S3_path, args.build_tag),
+        args.working_dir / args.config.log_dir,
+        urlcat(args.config.logs_S3_path, args.build_tag, args.config.log_dir),
         dryrun=args.config.dryrun,
     )
     return True
@@ -218,4 +233,5 @@ def create_args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())

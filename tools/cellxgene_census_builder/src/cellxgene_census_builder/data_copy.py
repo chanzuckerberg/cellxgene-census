@@ -29,6 +29,7 @@ def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: b
     try:
         _log_it(f"Starting copy {from_path.as_posix()} -> {to_path}", dryrun)
         with subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True) as proc:
+            print(proc.returncode)
             if proc.stdout is not None:
                 for line in proc.stdout:
                     logging.info(line)
@@ -63,7 +64,7 @@ def main() -> int:
         "--dryrun",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Display, but do NOT perform actions. Useful for previewing actions. Default: True",
+        help="Skips S3 data copies. Useful for previewing actions. Default: True",
     )
     parser.add_argument("-v", "--verbose", action="count", default=1, help="Increase logging verbosity")
     args = parser.parse_args()

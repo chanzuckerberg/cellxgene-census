@@ -199,22 +199,28 @@ def test_validate_release_manifest_errors(
         ),
     ],
 )
+@pytest.mark.parametrize("dryrun", [True, False])
 def test_make_a_release(
     release_manifest: CensusReleaseManifest,
     rls_tag: CensusVersionName,
     rls_info: CensusVersionDescription,
     expected_new_manifest: CensusReleaseManifest,
     make_latest: bool,
+    dryrun: bool,
 ) -> None:
     with (
         mock.patch(
-            "cellxgene_census_builder.release_manifest.get_release_manifest", return_value=release_manifest
+            "cellxgene_census_builder.release_manifest.get_release_manifest", return_value=release_manifest.copy()
         ) as get_release_manifest_patch,
         mock.patch("s3fs.S3FileSystem.isdir", return_value=True),
         mock.patch(
             "cellxgene_census_builder.release_manifest._overwrite_release_manifest"
         ) as commit_release_manifest_patch,
     ):
-        make_a_release(TEST_CENSUS_BASE_URL, rls_tag, rls_info, make_latest)
+        make_a_release(TEST_CENSUS_BASE_URL, rls_tag, rls_info, make_latest, dryrun=dryrun)
         assert get_release_manifest_patch.called
-        assert commit_release_manifest_patch.call_args == ((TEST_CENSUS_BASE_URL, expected_new_manifest),)
+        if dryrun:
+            assert commit_release_manifest_patch.call_count == 0
+        else:
+            assert commit_release_manifest_patch.call_count == 1
+            assert commit_release_manifest_patch.call_args == ((TEST_CENSUS_BASE_URL, expected_new_manifest),)

@@ -57,13 +57,16 @@ def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusR
         return cast(CensusReleaseManifest, json.loads(f.read()))
 
 
-def commit_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
+def commit_release_manifest(
+    census_base_url: str, release_manifest: CensusReleaseManifest, dryrun: bool = False
+) -> None:
     """
     Write a new release manifest to the Census.
     """
     # Out of an abundance of caution, validate the contents
     validate_release_manifest(census_base_url, release_manifest)
-    _overwrite_release_manifest(census_base_url, release_manifest)
+    if not dryrun:
+        _overwrite_release_manifest(census_base_url, release_manifest)
 
 
 def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
@@ -131,7 +134,11 @@ def _validate_exists(rls_info: CensusVersionDescription, s3_anon: bool) -> None:
 
 
 def make_a_release(
-    census_base_url: str, rls_tag: CensusVersionName, rls_info: CensusVersionDescription, make_latest: bool
+    census_base_url: str,
+    rls_tag: CensusVersionName,
+    rls_info: CensusVersionDescription,
+    make_latest: bool,
+    dryrun: bool = False,
 ) -> None:
     """
     Make a release and optionally alias release as `latest`
@@ -146,4 +153,4 @@ def make_a_release(
         manifest["latest"] = rls_tag
 
     # Will validate, and raise on anything suspicious
-    commit_release_manifest(census_base_url, manifest)
+    commit_release_manifest(census_base_url, manifest, dryrun=dryrun)
