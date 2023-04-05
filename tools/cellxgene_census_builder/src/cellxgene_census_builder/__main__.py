@@ -61,7 +61,6 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         do_data_copy,
         do_the_release,
         do_old_release_cleanup,
-        do_log_copy
     ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
@@ -79,11 +78,15 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
             args.state.commit(args.working_dir / CENSUS_BUILD_STATE)
             logging.info(f"{step_n_of}: complete")
 
+        logging.info("Census build: completed")
+
+        # And last, last, last ... stash the logs
+        do_log_copy(args)
+
     except Exception:
         logging.critical("Caught exception, exiting", exc_info=True)
         return 1
 
-    logging.info("Census build: completed")
     return 0
 
 
