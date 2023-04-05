@@ -1,10 +1,10 @@
-name: R CellCensus package checks
+name: R cellxgene.census package checks
 
 on:
   pull_request:
     paths-ignore:
       - "api/python/**"
-      - "tools/cell_census_builder/**"
+      - "tools/cellxgene_census_builder/**"
   push:
     branches: [main]
 
@@ -18,7 +18,7 @@ jobs:
           extra-repositories: https://tiledb-inc.r-universe.dev
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          working-directory: ./api/r/CellCensus
+          working-directory: ./api/r/cellxgene.census
           extra-packages: any::rcmdcheck, any::styler
           needs: check
           # Disable dependency caching so long as we depend on bleeding-edge
@@ -26,8 +26,8 @@ jobs:
           # number isn't routinely updated to invalidate our cache.
           cache: false
       - name: styler
-        run: Rscript -e 'library("styler"); style_pkg("api/r/CellCensus", dry="fail")'
+        run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
       - uses: r-lib/actions/check-r-package@v2
         with:
-          working-directory: ./api/r/CellCensus
+          working-directory: ./api/r/cellxgene.census
           args: 'c("--no-manual", "--as-cran")'
