@@ -1,6 +1,6 @@
 # A known-good Cell Census version. This may need updating if the version used
 # is withdrawn for any reason.
-KNOWN_CENSUS_VERSION <- "2023-02-13"
+KNOWN_CENSUS_VERSION <- "2023-04-04"
 KNOWN_CENSUS_URI <- paste(
   "s3://cellxgene-data-public/cell-census/",
   KNOWN_CENSUS_VERSION,
