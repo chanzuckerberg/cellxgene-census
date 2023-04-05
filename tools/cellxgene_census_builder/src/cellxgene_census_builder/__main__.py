@@ -58,11 +58,10 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         do_build_soma,
         do_validate_soma,
         do_create_reports,
-        # TODO: enable these when all are ready-to-go
-        # do_data_copy,
-        # do_the_release,
-        # do_old_release_cleanup
-        # do_log_copy
+        do_data_copy,
+        do_the_release,
+        do_old_release_cleanup,
+        do_log_copy
     ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
@@ -105,7 +104,7 @@ def do_prebuild_checks(args: CensusBuildArgs) -> bool:
     build_tag = args.config.build_tag
     assert build_tag is not None
     s3path = urlcat(args.config.cellxgene_census_S3_path, build_tag)
-    if s3fs.S3FileSystem(anon=True).exists(s3path):
+    if s3fs.S3FileSystem(anon=False).exists(s3path):
         logging.error(f"Build tag {build_tag} already exists at {s3path}.")
         return False
 
@@ -168,11 +167,11 @@ def do_the_release(args: CensusBuildArgs) -> bool:
         "release_date": None,
         "release_build": args.build_tag,
         "soma": {
-            "uri": urlcat(args.config.cellxgene_census_S3_path, "soma"),
+            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "soma/"),
             "s3_region": "us-west-2",
         },
         "h5ads": {
-            "uri": urlcat(args.config.cellxgene_census_S3_path, "h5ads"),
+            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "h5ads/"),
             "s3_region": "us-west-2",
         },
     }
