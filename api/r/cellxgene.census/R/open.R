@@ -36,7 +36,7 @@ open_soma <- function(census_version = "latest", uri = NULL, tiledbsoma_ctx = NU
   } else {
     # FIXME: we should use something like SOMATileDBContext$replace() (yet to
     # exist) in case the user context has other important fields besides config
-    cfg <- as.vector(tiledb::config(tiledbsoma_ctx$get_tiledb_context()))
+    cfg <- as.vector(tiledb::config(tiledbsoma_ctx$context()))
     if (!is.null(s3_region)) {
       cfg["vfs.s3.region"] <- s3_region
     }

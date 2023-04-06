@@ -57,20 +57,23 @@ def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusR
         return cast(CensusReleaseManifest, json.loads(f.read()))
 
 
-def commit_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
+def commit_release_manifest(
+    census_base_url: str, release_manifest: CensusReleaseManifest, dryrun: bool = False
+) -> None:
     """
     Write a new release manifest to the Census.
     """
     # Out of an abundance of caution, validate the contents
     validate_release_manifest(census_base_url, release_manifest)
-    _overwrite_release_manifest(census_base_url, release_manifest)
+    if not dryrun:
+        _overwrite_release_manifest(census_base_url, release_manifest)
 
 
 def _overwrite_release_manifest(census_base_url: str, release_manifest: CensusReleaseManifest) -> None:
     # This is a stand-alone function for ease of testing/mocking.
     s3 = s3fs.S3FileSystem(anon=False)
     with s3.open(urlcat(census_base_url, CENSUS_RELEASE_FILE), mode="w") as f:
-        f.write(json.dumps(release_manifest))
+        f.write(json.dumps(release_manifest, indent=2))
 
 
 def validate_release_manifest(
@@ -128,3 +131,26 @@ def _validate_exists(rls_info: CensusVersionDescription, s3_anon: bool) -> None:
     uri = rls_info["h5ads"]["uri"]
     if not s3.isdir(uri):
         raise ValueError(f"H5ADS URL in release.json does not exist {uri}")
+
+
+def make_a_release(
+    census_base_url: str,
+    rls_tag: CensusVersionName,
+    rls_info: CensusVersionDescription,
+    make_latest: bool,
+    dryrun: bool = False,
+) -> None:
+    """
+    Make a release and optionally alias release as `latest`
+    """
+
+    manifest = get_release_manifest(census_base_url)
+    if rls_tag in manifest:
+        raise ValueError(f"Release version {rls_tag} is already in the release manifest")
+    manifest[rls_tag] = rls_info
+
+    if make_latest:
+        manifest["latest"] = rls_tag
+
+    # Will validate, and raise on anything suspicious
+    commit_release_manifest(census_base_url, manifest, dryrun=dryrun)

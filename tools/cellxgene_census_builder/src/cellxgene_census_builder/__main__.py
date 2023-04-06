@@ -58,6 +58,10 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         do_build_soma,
         do_validate_soma,
         do_create_reports,
+        do_data_copy,
+        do_the_release,
+        do_report_copy,
+        do_old_release_cleanup,
     ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
@@ -75,11 +79,15 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
             args.state.commit(args.working_dir / CENSUS_BUILD_STATE)
             logging.info(f"{step_n_of}: complete")
 
+        logging.info("Census build: completed")
+
+        # And last, last, last ... stash the logs
+        do_log_copy(args)
+
     except Exception:
         logging.critical("Caught exception, exiting", exc_info=True)
         return 1
 
-    logging.info("Census build: completed")
     return 0
 
 
@@ -100,7 +108,7 @@ def do_prebuild_checks(args: CensusBuildArgs) -> bool:
     build_tag = args.config.build_tag
     assert build_tag is not None
     s3path = urlcat(args.config.cellxgene_census_S3_path, build_tag)
-    if s3fs.S3FileSystem(anon=True).exists(s3path):
+    if s3fs.S3FileSystem(anon=False).exists(s3path):
         logging.error(f"Build tag {build_tag} already exists at {s3path}.")
         return False
 
@@ -130,7 +138,7 @@ def do_validate_soma(args: CensusBuildArgs) -> bool:
 def do_create_reports(args: CensusBuildArgs) -> bool:
     from .census_summary import display_diff, display_summary
 
-    reports_dir = args.working_dir / "reports"
+    reports_dir = args.working_dir / args.config.reports_dir
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     logging.info("Creating summary report")
@@ -141,6 +149,75 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
     with open(reports_dir / f"census-diff-{args.build_tag}.txt", mode="w") as f:
         display_diff(uri=args.soma_path.as_posix(), previous_census_version="latest", file=f)
 
+    return True
+
+
+def do_data_copy(args: CensusBuildArgs) -> bool:
+    """Copy data to S3, in preparation for a release"""
+    from .data_copy import sync_to_S3
+
+    sync_to_S3(
+        args.working_dir / args.build_tag,
+        urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
+def do_the_release(args: CensusBuildArgs) -> bool:
+    from .release_manifest import CensusVersionDescription, make_a_release
+
+    release: CensusVersionDescription = {
+        "release_date": None,
+        "release_build": args.build_tag,
+        "soma": {
+            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "soma/"),
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "h5ads/"),
+            "s3_region": "us-west-2",
+        },
+    }
+    make_a_release(
+        args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun
+    )
+    return True
+
+
+def do_report_copy(args: CensusBuildArgs) -> bool:
+    """Copy build summary reports to S3 for posterity."""
+    from .data_copy import sync_to_S3
+
+    sync_to_S3(
+        args.working_dir / args.config.reports_dir,
+        urlcat(args.config.logs_S3_path, args.build_tag, args.config.reports_dir),
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
+def do_old_release_cleanup(args: CensusBuildArgs) -> bool:
+    """Clean up old releases"""
+    from .release_cleanup import remove_releases_older_than
+
+    remove_releases_older_than(
+        days=args.config.release_cleanup_days,
+        census_base_url=args.config.cellxgene_census_S3_path,
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
+def do_log_copy(args: CensusBuildArgs) -> bool:
+    """Copy logs to S3 for posterity.  Should be the final step, to capture full output of build"""
+    from .data_copy import sync_to_S3
+
+    sync_to_S3(
+        args.working_dir / args.config.log_dir,
+        urlcat(args.config.logs_S3_path, args.build_tag, args.config.log_dir),
+        dryrun=args.config.dryrun,
+    )
     return True
 
 
@@ -156,4 +233,5 @@ def create_args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())
