@@ -1,0 +1,70 @@
+---
+title: "Census query & extract subsets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{census_datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 80)
+```
+
+<!--
+THIS VIGNETTE IS BASED ON:
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
+-->
+
+*Goal:* demonstrate the ability to query subsets of the Census based upon user-defined obs/var metadata, and extract those slices into in-memory data structures for further analysis.
+
+**NOTE:** all examples in this vignette assume that sufficient memory exists on the host machine to store query results. In fact, we will increase the memory available to `tiledbsoma` as we open the Census. There are other notebooks which provide examples for out-of-core processing.
+
+```{r}
+ctx <- tiledbsoma::SOMATileDBContext$new(
+  config = c("soma.init_buffer_bytes" = "4294967296")
+)
+census <- cellxgene.census::open_soma(tiledbsoma_ctx = ctx)
+```
+
+The Census includes SOMA Experiments for both human and mouse. These experiments can be queried based upon metadata values (eg, tissue type), and the query result can be extracted into a variety of formats.
+
+Basic idea:
+
+- define per-axis (i.e., obs, var) query criteria
+- specify the experiment and measurement name to be queried
+- specify the column names you want as part of the results
+- and read the query result into an in-memory format.
+
+This utilizes the SOMA `value_filter` query language. Keep in mind that the results must fit into memory, so it is best to define a selective query *and* only fetch those axis metadata columns which are necessary.
+
+The `cellxgene.census` package includes a convenience function to extract a slice of the Census and read into a Seurat object. This function accepts a variety of arguments, including:
+
+- the organism to slice
+- the per-axis slice criteria
+- the columns to fetch and include in the Seurat metadata
+
+For more complex query scenarios, there is an advanced query API demonstrated in other vignettes.
+
+```{r}
+obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_ontology_term_id=='UBERON:0002048' && sex_ontology_term_id=='PATO:0000383' && cell_type_ontology_term_id %in% c('CL:0002063', 'CL:0000499')")
+adata <- cellxgene.census::get_seurat(census, "Homo sapiens", obs_query = obs_query)
+print(adata)
+```
+```{r}
+# You can also query on both axis. This example adds a var-axis query for a handful of genes, and queries the mouse experiment.
+obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue == 'brain'")
+var_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "feature_name %in% c('Gm16259', 'Dcaf5', 'Gm53058')")
+adata <- cellxgene.census::get_seurat(
+  census,
+  "Mus musculus",
+  obs_query = obs_query,
+  obs_column_names = c("tissue", "cell_type", "sex"),
+  var_query = var_query
+)
+print(adata)
+```

@@ -17,7 +17,7 @@ options(width = 80)
 
 <!--
 THIS VIGNETTE IS BASED ON:
-https://github.com/chanzuckerberg/cell-census/blob/main/api/python/notebooks/api_demo/census_datasets.ipynb
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_datasets.ipynb
 -->
 
 *Goal:* demonstrate basic use of the `census_datasets` data frame.
