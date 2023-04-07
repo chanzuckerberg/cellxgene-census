@@ -57,7 +57,7 @@ print(adata)
 ```
 
 ```{r, include=FALSE}
-rm(adata)  # free up memory before next op
+rm(adata) # free up memory before next op
 ```
 
 ```{r}
