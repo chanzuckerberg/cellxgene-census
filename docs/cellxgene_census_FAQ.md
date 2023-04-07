@@ -62,7 +62,7 @@ Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standar
 
 ## Can I query human and mouse data in a single query?
 
-At the moment it is not possible to query both mouse and human data in one query. This is due to the data from these organisms using different [organism-specific gene annotations](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations).
+It is not possible to query both mouse and human data in a single query. This is due to the data from these organisms using different [organism-specific gene annotations](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations).
 
 ## Where are the Census data hosted?
 
