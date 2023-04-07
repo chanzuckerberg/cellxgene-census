@@ -39,11 +39,11 @@ For example you could easily get "*all T-cells from Lung with COVID-19*" into an
 - Access all data from a single dataset.
 - Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
 
-For all of these cases you should perform web downloads from the [CZ CELLxGENE Discover site](https://cellxgene.cziscience.com/datasets), you can find instruction to so [here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data). 
+For all of these cases you should perform web downloads from the [CZ CELLxGENE Discover site](https://cellxgene.cziscience.com/datasets), you can find instructions to do so [here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data). 
 
 ## What data is contained in the Census?
 
-Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and its organization in the [schema description](https://cellxgene-census.readthedocs.io/en/latest/schema.html) or you can use the APIs to explore the data as indicated in this [tutorial](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html). 
+Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and their organization in the [schema description](https://cellxgene-census.readthedocs.io/en/latest/schema.html) or you can use the APIs to explore the data as indicated in this [tutorial](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html). 
 
 ## How do I cite the use of the Census for a publication?
 
