@@ -61,7 +61,7 @@ If you have any suggestions for methods that our team should explore please shar
 
 ## How does the Census differentiate from other services?
 
-The Census differentiates from existing single-cell services by providing access to the largest corpus of standardized single-cell data from via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose). 
+The Census differentiates from existing single-cell services by providing access to the largest corpus of standardized single-cell data via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose). 
 
 Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations is at your finger tips to:
 
