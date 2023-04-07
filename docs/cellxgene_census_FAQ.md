@@ -4,7 +4,7 @@ Last updated: Apr, 2023.
 
 - [Why should I use the Census?](#Why-should-I-use-the-Census)
 - [Why does the Census not have a normalized layer or embeddings?](#Why-does-the-Census-not-have-a-normalized-layer-or-embeddings)
-- [How does the Census differentiate from other services?](#How-does-the-Census-differentiate-from-other-services?)
+- [How does the Census differentiate from other services?](#How-does-the-Census-differentiate-from-other-services)
 - [Can I query human and mouse data in a single query?](#Can-I-query-human-and-mouse-data-in-a-single-query)
 - [Where are the Census data hosted?](#Where-are-the-Census-data-hosted)
 - [How can I increase the performance of my queries?](#How-can-I-increase-the-performance-of-my-queries)
@@ -18,23 +18,23 @@ Last updated: Apr, 2023.
 
 The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). 
 
-To accelerate your computational research, **you should use the Census**:
+To accelerate your computational research, **you should use the Census if you want to**:
 
-- If you want to easily get slices of data from more than 400 single-cell datasets spanning about 50 mi cells from >60 K genes.
-- If you want easy access to a subset of data from a dataset or from multiple datasets.
-- If you want to get these data with standardized and harmonized cell and gene metadata.
-- If you want to easily load multi-dataset slices into Scanpy or Seurat.
-- If you want to implement out-of-core (a.k.a online) operations for larger-than-memory processes.
+- Easily get slices of data from more than 400 single-cell datasets spanning about 50 M cells from >60 K genes from human or mouse.
+- Get these data with standardized and harmonized cell and gene metadata.
+- Easily load multi-dataset slices into Scanpy or Seurat.
+- Implement out-of-core (a.k.a online) operations for larger-than-memory processes.
 
 
 For example you could easily get "*all T-cells from Lung with COVID-19*" into an [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/). 
 
 
-**You should not use the Census:**
+**You should not use the Census if you want to:**
 
-- If you want access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
-- If you want access to the author-contributed normalized expression vaues.
-- If you want access to all data from a single dataset.
+- Access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
+- Access to the author-contributed normalized expression values or embeddings.
+- Access to all data from a single dataset.
+- Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
 
 ## Why does the Census not have a normalized layer or embeddings?
 
