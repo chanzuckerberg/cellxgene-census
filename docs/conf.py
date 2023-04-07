@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'cell-census'
+project = 'cellxgene-census'
 copyright = '2022-2023 Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
