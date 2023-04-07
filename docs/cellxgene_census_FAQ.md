@@ -107,5 +107,5 @@ You first need to inquire submitting your data to [CZ CELLxGENE Discover](https:
 
 You may get this error if you are trying to open a Census data build with an old version of the Census API. Please update your Python or R Census package.
 
-If the error persists please file a [github issue ](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose).
+If the error persists please file a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose).
 
