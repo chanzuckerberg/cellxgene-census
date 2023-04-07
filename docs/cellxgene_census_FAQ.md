@@ -32,24 +32,26 @@ For example you could easily get "*all T-cells from Lung with COVID-19*" into an
 **You should not use the Census if you want to:**
 
 - Access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
-- Access to the author-contributed normalized expression values or embeddings.
+- Access to the author-contributed normalized expression values or embeddings. 
 - Access to all data from a single dataset.
 - Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
+
+For all of these case you should perform web downloads from the [CZ CELLxGENE Discover site](https://cellxgene.cziscience.com/datasets). 
 
 ## Why does the Census not have a normalized layer or embeddings?
 
 The Census does not have normalized counts or embeddings because:
 
 - The original normalized values and embeddings are not harmonized or integrated across datasets and therefore numerically incompatible.
-- We have not chosen nor implemented a general-purpose normalization or embedding generation method to be used across all Census data.
+- We have not implemented a general-purpose normalization or embedding generation method to be used across all Census data.
 
 If you have any suggestions for methods that our team should explore please share them with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
 
 ## How does the Census differentiate from other services?
 
-The Census differentiates from existing single-cell services by providing access to the largest corpus of standardized single-cell data from CZ CELLxGENE Discover via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose). 
+The Census differentiates from existing single-cell services by providing access to the largest corpus of standardized single-cell data from via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose). 
 
-Thus, single-cell data from about 50 mi cells across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations is at your finger tips to:
+Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations is at your finger tips to:
 
 - Open and read data at low latency from the cloud.
 - Query and access data using metadata filters.
@@ -79,7 +81,7 @@ We recommend the following to increase query efficency:
 
 ## Can I use conda to install the Census Python API?
 
-Currently there is not conda package available for `cellxgene-census`. However you can use conda in combination with `pip` to install the package in a conda environment:
+There is not a conda package available for `cellxgene-census`. However you can use conda in combination with `pip` to install the package in a conda environment:
 
 ```bash
 conda create -n census_env python=3.10
@@ -97,9 +99,9 @@ You can submit a [feature request in the github repository](https://github.com/c
 
 ## How can I contribute my data to the Census?
 
-You first need to submit your data to [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/), then it will automatically get included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included). 
+To inquire submitting your data to CZ CELLxGENE Discover you need to follow these [instructions](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). 
 
-To submit your data to CZ CELLxGENE Discover you need to follow these [instructions](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). 
+You first need to inquire submitting your data to [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/), then if the process goes through the data will automatically get included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included). 
 
 ## Why do I get an `ArraySchema` error when opening the Census?
 
