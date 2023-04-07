@@ -3,10 +3,13 @@
 Last updated: Apr, 2023.
 
 - [Why should I use the Census?](#Why-should-I-use-the-Census)
+- [What data is contained in the Census?](#What-data-is-contained-in-the-Census)
+- [How do I cite the use of the Census for a publication?](#How-do-I-cite-the-use-of-the-Census-for-a-publication)
 - [Why does the Census not have a normalized layer or embeddings?](#Why-does-the-Census-not-have-a-normalized-layer-or-embeddings)
 - [How does the Census differentiate from other services?](#How-does-the-Census-differentiate-from-other-services)
 - [Can I query human and mouse data in a single query?](#Can-I-query-human-and-mouse-data-in-a-single-query)
 - [Where are the Census data hosted?](#Where-are-the-Census-data-hosted)
+- [Can I retrieve the original H5AD datasets from which the Census was built?](#Can-I-retrieve-the-original-H5AD-datasets-from-which-the-Census-was-built)
 - [How can I increase the performance of my queries?](#How-can-I-increase-the-performance-of-my-queries)
 - [Can I use conda to install the Census Python API?](#Can-I-use-conda-to-install-the-Census-Python-API)
 - [How can I ask for support?](#How-can-I-ask-for-support)
@@ -36,7 +39,16 @@ For example you could easily get "*all T-cells from Lung with COVID-19*" into an
 - Access to all data from a single dataset.
 - Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
 
-For all of these case you should perform web downloads from the [CZ CELLxGENE Discover site](https://cellxgene.cziscience.com/datasets). 
+For all of these cases you should perform web downloads from the [CZ CELLxGENE Discover site](https://cellxgene.cziscience.com/datasets), you can find instruction to so [here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data). 
+
+## What data is contained in the Census?
+
+Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and its organization in the [schema description](https://cellxgene-census.readthedocs.io/en/latest/schema.html) or you can use the APIs to explore the data as indicated in this [tutorial](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html). 
+
+## How do I cite the use of the Census for a publication?
+
+Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
+
 
 ## Why does the Census not have a normalized layer or embeddings?
 
@@ -67,6 +79,24 @@ It is not possible to query both mouse and human data in a single query. This is
 ## Where are the Census data hosted?
 
 The Census data is publicly hosted free-of-cost in an Amazon Web Services (AWS) S3 bucket in the [`us-west-2` region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions).
+
+## Can I retrieve the original H5AD datasets from which the Census was built?
+
+Yes, you can use the API function `download_source_h5ad` to do so. For usage see the reference documentation at the [doc-site](https://cellxgene-census.readthedocs.io/en/) or directly from Python or R:
+
+Python
+
+```python
+import cellxgene_census
+help(cellxgene_census.download_source_h5ad)
+```
+
+R
+
+```
+library(cellxgene.census)
+?download_source_h5ad
+```
 
 ## How can I increase the performance of my queries?
 
