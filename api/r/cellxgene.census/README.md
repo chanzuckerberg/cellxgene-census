@@ -9,7 +9,7 @@ The `cellxgene.census` package provides an API to facilitate the use of the CZ C
 
 **Status**: Pre-release, under rapid development. Expect API changes.
 
-Also see the [Python API](https://chanzuckerberg.github.io/cellxgene-census/).
+Also see the [Python API](https://cellxgene-census.readthedocs.io/).
 
 ## Installation
 
