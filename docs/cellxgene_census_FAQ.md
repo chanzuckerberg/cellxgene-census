@@ -42,7 +42,7 @@ For all of these case you should perform web downloads from the [CZ CELLxGENE Di
 
 The Census does not have normalized counts or embeddings because:
 
-- The original normalized values and embeddings are not harmonized or integrated across datasets and therefore numerically incompatible.
+- The original normalized values and embeddings are not harmonized or integrated across datasets and are therefore numerically incompatible.
 - We have not implemented a general-purpose normalization or embedding generation method to be used across all Census data.
 
 If you have any suggestions for methods that our team should explore please share them with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
