@@ -93,7 +93,7 @@ help(cellxgene_census.download_source_h5ad)
 
 R
 
-```
+```r
 library(cellxgene.census)
 ?download_source_h5ad
 ```
