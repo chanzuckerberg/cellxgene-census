@@ -76,8 +76,8 @@ expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
   census_data$get("mus_musculus"), "RNA",
   obs_query = obs_query
 )
-# dataset_seurat <- expt_query$to_seurat(c(counts = "raw"))
-# print(dataset_seurat)
+dataset_seurat <- expt_query$to_seurat(c(counts = "raw"))
+print(dataset_seurat)
 ```
 
 You can also use the `cellxgene.census::get_source_h5ad_uri()` API to fetch a URI pointing to the H5AD associated with this `dataset_id`. This is the same H5AD you can download from the CELLxGENE Portal, and may contain additional data-submitter provided information which was not included in the Cell Census.

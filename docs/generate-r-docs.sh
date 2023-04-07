@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../api/r/CellCensus
+cd ../api/r/cellxgene.census
 # Rscript -e 'install.packages("pkgdown")'
 # Rscript -e 'install.packages("usethis")'
 # Rscript -e 'usethis::use_pkgdown()'
