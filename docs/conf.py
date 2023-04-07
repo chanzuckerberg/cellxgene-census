@@ -49,5 +49,9 @@ import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
+html_js_files = [
+    ('https://plausible.io/js/script.js', {"data-domain": "cellxgene-census.readthedocs.io", "defer": "defer"}),
+]
+
 def setup(app):
     app.add_css_file("custom.css")
