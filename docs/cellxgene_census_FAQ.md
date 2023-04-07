@@ -34,9 +34,9 @@ For example you could easily get "*all T-cells from Lung with COVID-19*" into an
 
 **You should not use the Census if you want to:**
 
-- Access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
-- Access to the author-contributed normalized expression values or embeddings. 
-- Access to all data from a single dataset.
+- Access non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
+- Access the author-contributed normalized expression values or embeddings. 
+- Access all data from a single dataset.
 - Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
 
 For all of these cases you should perform web downloads from the [CZ CELLxGENE Discover site](https://cellxgene.cziscience.com/datasets), you can find instruction to so [here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data). 
