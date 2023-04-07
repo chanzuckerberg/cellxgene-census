@@ -20,14 +20,14 @@ The Census provides efficient low-latency access via Python and R APIs to most s
 
 To accelerate your computational research, **you should use the Census**:
 
-- If you want easily get slices of data from more than 400 single-cell datasets spanning about 50 mi cells from >60 K genes.
+- If you want to easily get slices of data from more than 400 single-cell datasets spanning about 50 mi cells from >60 K genes.
 - If you want easy access to a subset of data from a dataset or from multiple datasets.
 - If you want to get these data with standardized and harmonized cell and gene metadata.
 - If you want to easily load multi-dataset slices into Scanpy or Seurat.
-- If you want to implement out-of-core (a.k.a online) operations for larger than  memory processes.
+- If you want to implement out-of-core (a.k.a online) operations for larger-than-memory processes.
 
 
-For example you could easily get "all T-cells from Lung with COVID-19" into an [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [Arrow](https://arrow.apache.org/). 
+For example you could easily get "*all T-cells from Lung with COVID-19*" into an [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/). 
 
 
 **You should not use the Census:**
@@ -43,7 +43,7 @@ The Census does not have normalized counts or embeddings because:
 - The original normalized values and embeddings are not harmonized or integrated across datasets and therefore numerically incompatible.
 - We have not chosen nor implemented a general-purpose normalization or embedding generation method to be used across all Census data.
 
-If you have any suggestions for methods that our team should explore please share with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
+If you have any suggestions for methods that our team should explore please share them with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
 
 ## How does the Census differentiate from other services?
 
@@ -89,7 +89,7 @@ pip install cellxgene-census
 
 ## How can I ask for support?
 
-You can either submit a [github issue ](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose)or join post in the slack channel `#cellxgene-census-users` at the [CZI Slack community](https://cziscience.slack.com/join/shared_invite/zt-czl1kp2v-sgGpY4RxO3bPYmFg2XlbZA#/shared-invite/email)
+You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose) or post in the slack channel `#cellxgene-census-users` at the [CZI Slack community](https://cziscience.slack.com/join/shared_invite/zt-czl1kp2v-sgGpY4RxO3bPYmFg2XlbZA#/shared-invite/email).
 
 ## How can I ask for new features?
 
