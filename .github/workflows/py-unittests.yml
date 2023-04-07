@@ -1,9 +1,9 @@
-name: Python cell_census package unit tests
+name: Python cellxgene_census package unit tests
 
 on:
   pull_request:
     paths-ignore:
-      - "apis/r/**"
+      - "api/r/**"
   push:
     branches: [main]
 
@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          pip install -r ./api/python/cell_census/scripts/requirements-dev.txt
-          pip install -e ./api/python/cell_census/
+          pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          pip install -e ./api/python/cellxgene_census/
       - name: Test with pytest (API)
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest ./api/python/cell_census/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
       - uses: actions/upload-artifact@v3
         with:
           name: coverage
@@ -53,11 +53,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          pip install -r ./tools/scripts/requirements.txt -r ./tools/scripts/requirements-dev.txt
-          pip install -e ./tools/
+          pip install -e ./tools/cellxgene_census_builder/
+          pip install -r ./tools/scripts/requirements-dev.txt
       - name: Test with pytest (builder)
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest ./tools/cell_census_builder/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP ./tools/cellxgene_census_builder/tests/
       - uses: actions/upload-artifact@v3
         with:
           name: coverage

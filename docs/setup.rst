@@ -57,6 +57,6 @@ If you want to work with the latest development version of cell-census, you can 
 and, from the root directory, install locally via pip:
 ::
 
-  $ git clone https://github.com/chanzuckerberg/cell-census.git
-  $ cd cell-census
+  $ git clone https://github.com/chanzuckerberg/cellxgene-census.git
+  $ cd cellxgene-census
   $ pip install -e api/python/cell_census/

@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'cell-census'
+project = 'cellxgene-census'
 copyright = '2022-2023 Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
@@ -17,6 +17,8 @@ release = "0.5.0"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx", 'sphinx.ext.napoleon']
+
+napoleon_custom_sections = ["Lifecycle"]
 
 tiledb_version = "latest"
 

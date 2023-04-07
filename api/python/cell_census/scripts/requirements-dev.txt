@@ -1,5 +1,0 @@
-numpy
-pytest
-requests-mock
-twine
-coverage
