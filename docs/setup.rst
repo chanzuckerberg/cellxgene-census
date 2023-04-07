@@ -30,10 +30,10 @@ Set up Python environment
   $ python -m venv ./venv
   $ source ./venv/bin/activate
 
-2. Install the ``cell_census`` package using ``pip``:
+2. Install the ``cellxgene_census`` package using ``pip``:
 ::
 
-  $ pip install -U cell-census
+  $ pip install -U cellxgene-census
 
 3. Install other third-party packages needed to run the notebooks:
 ::
@@ -47,16 +47,16 @@ Verify your installation
 Check that your installation works - this make take a few seconds, as it loads metadata from S3:
 ::
 
-  $ python -c 'import cell_census; print(cell_census.open_soma().soma_type)'
+  $ python -c 'import cellxgene_census; print(cellxgene_census.open_soma().soma_type)'
   SOMACollection
 
 Latest development version
 ----
 
-If you want to work with the latest development version of cell-census, you can simply clone the repository 
+If you want to work with the latest development version of cellxgene-census, you can simply clone the repository 
 and, from the root directory, install locally via pip:
 ::
 
   $ git clone https://github.com/chanzuckerberg/cellxgene-census.git
   $ cd cellxgene-census
-  $ pip install -e api/python/cell_census/
+  $ pip install -e api/python/cellxgene_census/
