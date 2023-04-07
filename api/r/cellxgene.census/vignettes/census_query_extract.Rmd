@@ -55,6 +55,11 @@ obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_ontology_term_
 adata <- cellxgene.census::get_seurat(census, "Homo sapiens", obs_query = obs_query)
 print(adata)
 ```
+
+```{r, include=FALSE}
+rm(adata)  # free up memory before next op
+```
+
 ```{r}
 # You can also query on both axis. This example adds a var-axis query for a handful of genes, and queries the mouse experiment.
 obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue == 'brain'")
