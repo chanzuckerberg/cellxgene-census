@@ -57,7 +57,7 @@ Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standar
 - Query and access data using metadata filters.
 - Load and create AnnData objects.
 - Load and create Seurat objects.
-- From Python create PyArrow objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.
+- From Python create PyArrow objects, SciPy sparse matrices, NumPy arrays, and Pandas data frames.
 - From R create R Arrow objects, sparse matrices (via the Matrix package), and standard data frames and (dense) matrices.
 
 ## Can I query human and mouse data in a single query?
