@@ -3,6 +3,16 @@
 Last updated: Apr, 2023.
 
 - [Why should I use the Census?](#Why-should-I-use-the-Census)
+- [Why does the Census not have a normalized layer or embeddings?](#Why-does-the-Census-not-have-a-normalized-layer-or-embeddings)
+- [How does the Census differentiate from other services?](#How-does-the-Census-differentiate-from-other-services?)
+- [Can I query human and mouse data in a single query?](#Can-I-query-human-and-mouse-data-in-a-single-query)
+- [Where are the Census data hosted?](#Where-are-the-Census-data-hosted)
+- [How can I increase the performance of my queries?](#How-can-I-increase-the-performance-of-my-queries)
+- [Can I use conda to install the Census Python API?](#Can-I-use-conda-to-install-the-Census-Python-API)
+- [How can I ask for support?](#How-can-I-ask-for-support)
+- [How can I ask for new features?](#How-can-I-ask-for-new-features)
+- [How can I contribute my data to the Census?](#How-can-I-contribute-my-data-to-the-Census)
+- [Why do I get an `ArraySchema` error when opening the Census?](#Why-do-I-get-an-ArraySchema-error-when-opening-the-Census)
 
 ## Why should I use the Census?
 
@@ -47,7 +57,6 @@ Thus, single-cell data from about 50 mi cells across >60 K genes, with 11 standa
 - Load and create Seurat objects.
 - From Python create PyArrow objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.
 - From R create R Arrow objects, sparse matrices (via the Matrix package), and standard data frames and (dense) matrices.
-
 
 ## Can I query human and mouse data in a single query?
 
