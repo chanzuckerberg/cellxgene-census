@@ -18,6 +18,9 @@ options(width = 80)
 <!--
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
+
+We modified the first query example to reduce the result set size to allow this
+notebook to be built in the limited memory of GitHub Actions workers.
 -->
 
 *Goal:* demonstrate the ability to query subsets of the Census based upon user-defined obs/var metadata, and extract those slices into in-memory data structures for further analysis.
@@ -26,7 +29,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 
 ```{r}
 ctx <- tiledbsoma::SOMATileDBContext$new(
-  config = c("soma.init_buffer_bytes" = "1610612736")
+  config = c("soma.init_buffer_bytes" = "1073741824")
 )
 census <- cellxgene.census::open_soma(tiledbsoma_ctx = ctx)
 ```
@@ -51,7 +54,7 @@ The `cellxgene.census` package includes a convenience function to extract a slic
 For more complex query scenarios, there is an advanced query API demonstrated in other vignettes.
 
 ```{r}
-obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_ontology_term_id=='UBERON:0002048' && sex_ontology_term_id=='PATO:0000383' && cell_type_ontology_term_id %in% c('CL:0002063', 'CL:0000499')")
+obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_ontology_term_id=='UBERON:0002048' && sex_ontology_term_id=='PATO:0000383' && cell_type_ontology_term_id == 'CL:0000499'")
 adata <- cellxgene.census::get_seurat(census, "Homo sapiens", obs_query = obs_query)
 print(adata)
 ```
