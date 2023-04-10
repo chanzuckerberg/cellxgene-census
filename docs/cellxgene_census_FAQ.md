@@ -129,7 +129,7 @@ You can submit a [feature request in the github repository](https://github.com/c
 
 ## How can I contribute my data to the Census?
 
-To inquire submitting your data to CZ CELLxGENE Discover you need to follow these [instructions](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). 
+To inquire about submitting your data to CZ CELLxGENE Discover you need to follow these [instructions](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). 
 
 You first need to inquire submitting your data to [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/), then if the process goes through the data will automatically get included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included). 
 
