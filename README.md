@@ -13,7 +13,7 @@ Get started on using the CELLxGENE Census:
 
 - [Quick start](#Quick-start).
 - [Documentation](https://cellxgene-census.readthedocs.io/). 
-- [Python tutorials](https://chanzuckerberg.github.io/cellxgene-census/examples.html).
+- [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html).
 - R tutorials. *Coming soon.*
 
 ## Technology
