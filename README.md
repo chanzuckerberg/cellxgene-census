@@ -12,7 +12,7 @@ The **CELLxGENE Census** provides efficient computational tooling to access, que
 Get started on using the CELLxGENE Census:
 
 - [Quick start](#Quick-start).
-- [Documentation](https://chanzuckerberg.github.io/cellxgene-census/index.html). 
+- [Documentation](https://cellxgene-census.readthedocs.io/). 
 - [Python tutorials](https://chanzuckerberg.github.io/cellxgene-census/examples.html).
 - R tutorials. *Coming soon.*
 
