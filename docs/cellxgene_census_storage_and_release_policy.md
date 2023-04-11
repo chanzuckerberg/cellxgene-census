@@ -8,43 +8,43 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Definitions
 
-* **Cell Census build**: a SOMA collection with the Cell Census data [as specified in the Cell Census schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md#data-encoding-and-organization). 
-* **Cell Census source H5AD files**: the set of H5AD files used to create a Cell Census build.
-* **Cell Census release**: a Cell Census build that is publicly hosted online.
-* **Cell Census release `tag`**:  a label for a Cell Census release, it MUST be a string of printable ASCII characters.
+* **Census build**: a SOMA collection with the Census data [as specified in the Census schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md#data-encoding-and-organization). 
+* **Census source H5AD files**: the set of H5AD files used to create a Census build.
+* **Census release**: a Census build that is publicly hosted online.
+* **Census release `tag`**:  a label for a Census release, it MUST be a string of printable ASCII characters.
 
-## Cell Census data storage policy
+## Census data storage policy
 
-The following S3 bucket MUST be used as the root to store Cell Census data:
+The following S3 bucket MUST be used as the root to store Census data:
 
 `s3://cellxgene-data-public/`
 
-Cell Census data MUST be deposited under a folder named `cell-census` of the root S3 bucket:
+Census data MUST be deposited under a folder named `cell-census` of the root S3 bucket:
  
  `./cell-census`
  
-All data related to a Cell Census **release** MUST be deposited in a folder named with the **tag** of the release:
+All data related to a Census **release** MUST be deposited in a folder named with the **tag** of the release:
 
  `./cell-census/[tag]/`
 
-The Cell Census **release** MUST be deposited in a folder named `soma`:
+The Census **release** MUST be deposited in a folder named `soma`:
 
 `./cell-census/[tag]/soma/`
 
-All Cell Census **source h5ads** used to create a specific Cell Census **release** MUST be copied into a folder named `h5ads`:	
+All Census **source h5ads** used to create a specific Census **release** MUST be copied into a folder named `h5ads`:	
 `./cell-census/[tag]/h5ads/`
 
-## Cell Census release information `json`
+## Census release information `json`
 
 
-The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder for all Cell Census releases MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available census builds:
+The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder for all Census releases MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available Census builds:
 
 
 `./cell-census/releases.json`
 
 * This file MUST be in `json` formats where the parent keys are release identifiers (alias or name). 
-* The alias `latest` MUST be present and MUST point to the **Weekly Cell Census release**. 
-* The prefix `V` MUST be used followed by an integer counter to label long-term supported Cell Census releases, e.g. `V1`.
+* The alias `latest` MUST be present and MUST point to the **Weekly Census release**. 
+* The prefix `V` MUST be used followed by an integer counter to label long-term supported Census releases, e.g. `V1`.
 
 
 ```
@@ -52,7 +52,7 @@ The publication date along with the full URI paths for the `soma` folder and the
    [release_alias]: [release_name|release_alias],
    [release_name]: {	#defines a given release
       “release_date”: [yyyy-mm-dd]  #optional, ISO 8601 date, may be null
-      “release_build”: [yyyy-mm-dd] #required, ISO 8601 date, date of census build
+      “release_build”: [yyyy-mm-dd] #required, ISO 8601 date, date of Census build
       “soma”: {
          “uri”: [uri] #URI of top-level SOMA collection
          “s3_region”: [s3_region] #optional, S3 region if uri is s3://…
