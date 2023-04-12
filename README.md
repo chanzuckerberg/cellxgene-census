@@ -69,7 +69,7 @@ pip install -U cellxgene-census
 
 #### Usage examples
 
-Demonstration notebooks can be found [here](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks).
+Tutorials can be found [here](https://cellxgene-census.readthedocs.io/en/latest/examples.html).
 
 Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
 
@@ -156,7 +156,7 @@ AnnData object with n_obs × n_vars = 299622 × 2
 
 This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
 
-First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or used called in a context manager — `with ...`.
+First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or called in a context manager — `with ...`.
 
 ```python
 import cellxgene_census
