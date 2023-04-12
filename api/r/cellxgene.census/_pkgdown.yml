@@ -1,4 +1,6 @@
 url: ~
 template:
   bootstrap: 5
+  includes:
+    in_header: <script defer data-domain="chanzuckerberg.github.io/cellxgene-census/r" src="https://plausible.io/js/script.js"></script>
 

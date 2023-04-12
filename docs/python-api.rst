@@ -1,6 +1,3 @@
-.. meta::
-   :name=robots: noindex
-
 Python API
 ==============================
 
