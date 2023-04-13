@@ -38,8 +38,6 @@ get_seurat(
 \item{var_coords}{Same as \code{obs_coords} but for \code{var}.}
 
 \item{var_column_names}{Columns to fetch for the \code{var} data frame.}
-
-\item{var_query}{A \code{SOMAAxisQuery} for the \code{var} axis.}
 }
 \value{
 A \code{Seurat} object containing the sensus slice.

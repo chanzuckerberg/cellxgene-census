@@ -27,7 +27,6 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @param obs_column_names Columns to fetch for the `obs` data frame.
 #' @param var_value_filter Same as `obs_value_filter` but for `var`.
 #' @param var_coords Same as `obs_coords` but for `var`.
-#' @param var_query A `SOMAAxisQuery` for the `var` axis.
 #' @param var_column_names Columns to fetch for the `var` data frame.
 #'
 #' @return A `Seurat` object containing the sensus slice.
