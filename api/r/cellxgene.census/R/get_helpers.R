@@ -22,8 +22,11 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #' @param X_name The `X` layer to query. Defaults to `raw`.
-#' @param obs_query A `SOMAAxisQuery` for the `obs` axis.
+#' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
+#' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
 #' @param obs_column_names Columns to fetch for the `obs` data frame.
+#' @param var_value_filter Same as `obs_value_filter` but for `var`.
+#' @param var_coords Same as `obs_coords` but for `var`.
 #' @param var_query A `SOMAAxisQuery` for the `var` axis.
 #' @param var_column_names Columns to fetch for the `var` data frame.
 #'
@@ -37,15 +40,17 @@ get_seurat <- function(
     organism,
     measurement_name = "RNA",
     X_name = "raw",
-    obs_query = NULL,
+    obs_value_filter = NULL,
+    obs_coords = NULL,
     obs_column_names = NULL,
-    var_query = NULL,
+    var_value_filter = NULL,
+    var_coords = NULL,
     var_column_names = NULL) {
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     get_experiment(census, organism),
     measurement_name,
-    obs_query = obs_query,
-    var_query = var_query
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter, coords = obs_coords),
+    var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
   )
   return(expt_query$to_seurat(
     # TODO: should we allow selection of the seurat 'counts' or 'data' slot?
