@@ -2,3 +2,32 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+.navbar-cxg {
+
+}
+
+.navbar-cxg-link {
+    display: inline-block;
+    background: none;
+    border-radius: 0;
+    color: #A7B6C2;
+    font-size: 13px;
+    font-weight: 500;
+    height: 22px;
+    letter-spacing: -0.1px;
+    line-height: 22px;
+    min-height: 22px;
+    padding: 0;
+}
+
+.navbar-cxg-anchor {
+    color: #A7B6C2;
+}
+
+.navbar-cxg-anchor:visited {
+    color: #A7B6C2;
+}
+
+.navbar-cxg-anchor:hover {
+    color: white;
+}
