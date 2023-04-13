@@ -1,0 +1,218 @@
+# CZ CELLxGENE Discover Census
+
+The CZ CELLxGENE Discover **Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. 
+
+Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data across datasets through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
+
+Get started on using the Census:
+
+- [Quick start](#Quick-start).
+- [Installation](https://cellxgene-census.readthedocs.io/en/latest/installation).
+- [Census data organization and schema](https://cellxgene-census.readthedocs.io/en/latest/schema.html).
+- [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html).
+- R tutorials. *Coming soon.*
+
+## Census Capabilities
+
+The Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
+
+**Data access patterns at scale**
+
+- Cloud-based data storage and access.
+- Efficient access for larger-than-memory slices of data.
+- Query and access data based on cell or gene metadata at low latency.
+
+**Interoperability with existing single-cell toolkits**
+
+- Load and create [AnnData](https://anndata.readthedocs.io/en/latest/) objects.
+- Load and create [Seurat](https://satijalab.org/seurat/) objects. Coming soon.
+
+**Interoperability with existing Python or R data structures**
+
+- From Python create [PyArrow](https://arrow.apache.org/docs/python/index.html) objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.
+- From R create [R Arrow](https://arrow.apache.org/docs/r/index.html) objects, sparse matrices (via the [Matrix](https://cran.r-project.org/package=Matrix) package), and standard data frames and (dense) matrices.
+
+## Census Data Releases
+
+The Census data release plans are detailed [here](https://cellxgene-census.readthedocs.io/en/latest/data_release.html). 
+
+Shortly, starting in mid 2023 Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases will be published without any guarantee of permanence. 
+
+## Quick start
+
+This page provides some examples to get you going with using the Census. For more detailed usage please take a look at the [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html) or R vignettes (*coming soon*).
+
+## Installation
+
+
+First make sure to install the Census API following the [installation instructions.](https://cellxgene-census.readthedocs.io/en/latest/installation)
+
+### Python
+
+#### Installation
+
+
+
+#### Usage examples
+
+Tutorials can be found [here](https://cellxgene-census.readthedocs.io/en/latest/examples.html).
+
+Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via `help()`:
+
+```python
+import cellxgene_census
+
+help(cellxgene_census)
+help(cellxgene_census.get_anndata)
+# etc
+```
+
+##### Querying a slice of cell metadata.
+
+The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type`, `tissue`, `tissue_general`, `suspension_type`, and `disease`.
+
+```python
+import cellxgene_census
+
+with cellxgene_census.open_soma() as census:
+    
+    # Reads SOMADataFrame as a slice
+    cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
+        value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
+        column_names = ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]
+    )
+    
+    # Concatenates results to pyarrow.Table
+    cell_metadata = cell_metadata.concat()
+    
+    # Converts to pandas.DataFrame
+    cell_metadata = cell_metadata.to_pandas()
+    
+    print(cell_metadata)
+```
+
+The output is a `pandas.DataFrame` with about 300K cells meeting our query criteria and the selected columns.
+
+```bash
+            assay        cell_type           tissue tissue_general suspension_type disease     sex
+0       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+1       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+2       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+3       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+4       10x 3' v3  microglial cell              eye            eye            cell  normal  female
+...           ...              ...              ...            ...             ...     ...     ...
+299617  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299618  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299619  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299620  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+299621  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+
+[299622 rows x 7 columns]
+```
+
+##### Obtaining a slice as AnnData 
+
+The following creates an `anndata.AnnData` object on-demand with the same cell filtering criteria as above and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
+
+```python
+import cellxgene_census
+
+with cellxgene_census.open_soma() as census:
+    adata = cellxgene_census.get_anndata(
+        census = census,
+        organism = "Homo sapiens",
+        var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
+        obs_value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
+        column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
+    )
+    
+    print(adata)
+    
+```
+
+The output with about 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
+
+``` bash
+AnnData object with n_obs × n_vars = 299622 × 2
+    obs: 'assay', 'cell_type', 'tissue', 'tissue_general', 'suspension_type', 'disease', 'sex'
+    var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'
+```
+
+##### Memory-efficient queries
+
+This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
+
+First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or called in a context manager — `with ...`.
+
+```python
+import cellxgene_census
+
+with cellxgene_census.open_soma() as census:
+    
+    human = census["census_data"]["homo_sapiens"]
+    query = human.axis_query(
+    measurement_name = "RNA",
+    obs_query = tiledbsoma.AxisQuery(
+        value_filter = "tissue == 'brain' and sex == 'male'"
+    )
+    
+    # Continued below
+
+```
+
+Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
+
+```python
+    # Continued from above 
+    
+    iterator = query.X("raw").tables()
+    
+    # Get an iterative slice as pyarrow.Table
+    raw_slice = next (iterator) 
+    ...
+```
+
+And you can now perform operations on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop.
+
+And you must close the query.
+
+```
+    # Continued from above
+    query.close()
+```
+
+### R quick start
+
+*Coming soon.*
+
+
+## Questions, feedback and issues
+
+- Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://czi.co/science-slack) on Slack and join the `#cellxgene-census-users` channel
+- Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues). 
+- Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <security@chanzuckerberg.com>.
+- You can send any other feedback to <soma@chanzuckerberg.com>
+
+
+## Coming soon
+
+- R support!
+- We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and [PyTorch](https://pytorch.org/).
+- To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas :
+   - Include organism-wide normalized layers.
+   - Include Organism-wide embeddings.
+   - On-demand information-rich subsampling.
+
+## Projects and tools using Census
+
+If you are interested in listing a project here, please reach out to us at <soma@chanzuckerberg.com>
+
+## Reuse
+
+The contents of this Github repository are freely available for reuse under the [MIT license](https://opensource.org/licenses/MIT). Data in the Census are available for re-use under the [CC-BY license](https://creativecommons.org/licenses/by/4.0/).
+
+
+## Code of Conduct
+
+This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to <opensource@chanzuckerberg.com>.
+
