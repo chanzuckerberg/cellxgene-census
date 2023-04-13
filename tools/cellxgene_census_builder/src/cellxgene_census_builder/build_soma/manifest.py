@@ -1,4 +1,3 @@
-import concurrent.futures
 import csv
 import io
 import logging
@@ -53,81 +52,42 @@ def load_manifest_from_CxG() -> List[Dataset]:
     logging.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
-    collections = fetch_json(f"{CXG_BASE_URI}curation/v1/collections")
-    assert isinstance(collections, list), "Unexpected REST API response, /curation/v1/collections"
-    datasets = {
-        dataset["dataset_id"]: {
-            "collection_id": collection["collection_id"],
-            "collection_name": null_to_empty_str(collection["name"]),
-            "collection_doi": null_to_empty_str(collection["doi"]),
-            "dataset_id": dataset["dataset_id"],
-        }
-        for collection in collections
-        for dataset in collection["datasets"]
-    }
-    logging.info(f"Found {len(datasets)} datasets, in {len(collections)} collections")
+    datasets = fetch_json(f"{CXG_BASE_URI}curation/v1/datasets")
+    assert isinstance(datasets, list), "Unexpected REST API response, /curation/v1/datasets"
 
-    # load per-dataset schema version
-    with concurrent.futures.ThreadPoolExecutor() as tp:
-        dataset_metadata = tp.map(
-            lambda d: fetch_json(
-                f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}"
-            ),
-            datasets.values(),
-        )
-    for d in dataset_metadata:
-        assert (
-            isinstance(d, dict) and "dataset_id" in d
-        ), "Unexpected REST API response, /curation/v1/collections/.../datasets/..."
-        datasets[d["dataset_id"]].update(
-            {
-                "schema_version": d["schema_version"],
-                "dataset_title": null_to_empty_str(d["title"]),
-            }
-        )
+    response = []
 
-    # Remove any datasets that don't match our target schema version
-    obsolete_dataset_ids = [id for id in datasets if datasets[id]["schema_version"] not in CXG_SCHEMA_VERSION_IMPORT]
-    if len(obsolete_dataset_ids) > 0:
-        logging.warning(f"Dropping {len(obsolete_dataset_ids)} datasets due to unsupported schema version")
-        for id in obsolete_dataset_ids:
-            logging.info(f"Dropping dataset_id {id} due to schema version.")
-            datasets.pop(id)
+    for dataset in datasets:
+        dataset_id = dataset["dataset_id"]
+        schema_version = dataset["schema_version"]
 
-    # Grab the asset URI for each dataset
-    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as tp:
-        dataset_assets = tp.map(
-            lambda d: (
-                d["dataset_id"],
-                fetch_json(
-                    f"{CXG_BASE_URI}curation/v1/collections/{d['collection_id']}/datasets/{d['dataset_id']}/assets"
-                ),
-            ),
-            datasets.values(),
-        )
-    no_asset_found = []
-    for dataset_id, assets in dataset_assets:
-        assert isinstance(
-            assets, list
-        ), "Unexpected REST API response, /curation/v1/collections/.../datasets/.../assets"
+        if schema_version not in CXG_SCHEMA_VERSION_IMPORT:
+            logging.warning(f"Dropping dataset {dataset_id} due to unsupported schema version")
+            continue
+
+        assets = dataset.get("assets", [])
         assets_h5ad = [a for a in assets if a["filetype"] == "H5AD"]
-        if len(assets_h5ad) == 0:
+        if not assets_h5ad:
             logging.error(f"Unable to find H5AD asset for dataset id {dataset_id} - ignoring this dataset")
-            no_asset_found.append(dataset_id)
-        else:
-            asset = assets_h5ad[0]
-            datasets[dataset_id].update(
-                {
-                    "corpora_asset_h5ad_uri": asset["presigned_url"],
-                    "asset_h5ad_filesize": asset["filesize"],
-                }
-            )
+            continue
+        asset_h5ad_uri = assets[0]["url"]
+        asset_h5ad_filesize = assets[0]["filesize"]
 
-    # drop any datasets where we could not find an asset
-    for id in no_asset_found:
-        datasets.pop(id, None)
+        d = Dataset(
+            dataset_id=dataset_id,
+            corpora_asset_h5ad_uri=asset_h5ad_uri,
+            dataset_title=null_to_empty_str(dataset["title"]),
+            collection_id=dataset["collection_id"],
+            collection_name=null_to_empty_str(dataset["collection_name"]),
+            collection_doi=null_to_empty_str(dataset["collection_doi"]),
+            asset_h5ad_filesize=asset_h5ad_filesize,
+            schema_version=schema_version,
+        )
+        response.append(d)
 
-    return [Dataset(**d) for d in datasets.values()]
+    logging.info(f"Found {len(datasets)} datasets")
+
+    return response
 
 
 def load_manifest(manifest_fp: Optional[Union[str, io.TextIOBase]] = None) -> List[Dataset]:

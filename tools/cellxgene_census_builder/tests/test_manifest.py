@@ -1,8 +1,7 @@
 import pathlib
-import re
 from unittest.mock import patch
 
-from cellxgene_census_builder.build_soma.manifest import CXG_BASE_URI, load_manifest
+from cellxgene_census_builder.build_soma.manifest import load_manifest
 
 
 def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str) -> None:
@@ -42,23 +41,26 @@ def test_load_manifest_from_cxg() -> None:
     If no parameters are specified, `load_manifest` should load the dataset list from Discover API.
     """
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
-
-        def mock_call_fn(uri):  # type: ignore
-            if uri == f"{CXG_BASE_URI}curation/v1/collections":
-                return [
-                    {
-                        "collection_id": "collection_1",
-                        "doi": None,
-                        "name": "1",
-                        "datasets": [{"dataset_id": "dataset_id_1"}, {"dataset_id": "dataset_id_2"}],
-                    }
-                ]
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)$", uri):
-                return {"dataset_id": m[2], "schema_version": "3.0.0", "title": f"dataset #{m[2]}"}
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)/assets$", uri):
-                return [{"filetype": "H5AD", "filesize": 1024, "presigned_url": f"https://fake.url/{m[2]}.h5ad"}]
-
-        m.side_effect = mock_call_fn
+        m.return_value = [
+            {
+                "dataset_id": "dataset_id_1",
+                "collection_id": "collection_1",
+                "collection_name": "1",
+                "collection_doi": None,
+                "title": "dataset #1",
+                "schema_version": "3.0.0",
+                "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+            },
+            {
+                "dataset_id": "dataset_id_2",
+                "collection_id": "collection_1",
+                "collection_name": "1",
+                "collection_doi": None,
+                "title": "dataset #2",
+                "schema_version": "3.0.0",
+                "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
+            },
+        ]
 
         manifest = load_manifest(None)
         assert len(manifest) == 2
@@ -73,27 +75,26 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
     `load_manifest` should exclude datasets that do not have a current schema version.
     """
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
-
-        def mock_call_fn(uri):  # type: ignore
-            if uri == f"{CXG_BASE_URI}curation/v1/collections":
-                return [
-                    {
-                        "collection_id": "collection_1",
-                        "doi": None,
-                        "name": "1",
-                        "datasets": [{"dataset_id": "dataset_id_1"}, {"dataset_id": "dataset_id_2"}],
-                    }
-                ]
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)$", uri):
-                return {
-                    "dataset_id": m[2],
-                    "schema_version": "3.0.0" if m[2] == "dataset_id_1" else "2.0.0",
-                    "title": f"dataset #{m[2]}",
-                }
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)/assets$", uri):
-                return [{"filetype": "H5AD", "filesize": 1024, "presigned_url": f"https://fake.url/{m[2]}.h5ad"}]
-
-        m.side_effect = mock_call_fn
+        m.return_value = [
+            {
+                "dataset_id": "dataset_id_1",
+                "collection_id": "collection_1",
+                "collection_name": "1",
+                "collection_doi": None,
+                "title": "dataset #1",
+                "schema_version": "3.0.0",
+                "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+            },
+            {
+                "dataset_id": "dataset_id_2",
+                "collection_id": "collection_1",
+                "collection_name": "1",
+                "collection_doi": None,
+                "title": "dataset #2",
+                "schema_version": "2.0.0",  # Old schema version
+                "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
+            },
+        ]
 
         manifest = load_manifest(None)
         assert len(manifest) == 1
@@ -106,25 +107,26 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
     `load_manifest` should exclude datasets that do not have assets
     """
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
-
-        def mock_call_fn(uri):  # type: ignore
-            if uri == f"{CXG_BASE_URI}curation/v1/collections":
-                return [
-                    {
-                        "collection_id": "collection_1",
-                        "doi": None,
-                        "name": "1",
-                        "datasets": [{"dataset_id": "dataset_id_1"}, {"dataset_id": "dataset_id_2"}],
-                    }
-                ]
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/(\w+)$", uri):
-                return {"dataset_id": m[2], "schema_version": "3.0.0", "title": f"dataset #{m[2]}"}
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/dataset_id_1/assets$", uri):
-                return [{"filetype": "H5AD", "filesize": 1024, "presigned_url": "https://fake.url/dataset_id_1.h5ad"}]
-            elif m := re.match(rf"{CXG_BASE_URI}curation/v1/collections/(\w+)/datasets/dataset_id_2/assets$", uri):
-                return []
-
-        m.side_effect = mock_call_fn
+        m.return_value = [
+            {
+                "dataset_id": "dataset_id_1",
+                "collection_id": "collection_1",
+                "collection_name": "1",
+                "collection_doi": None,
+                "title": "dataset #1",
+                "schema_version": "3.0.0",
+                "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+            },
+            {
+                "dataset_id": "dataset_id_2",
+                "collection_id": "collection_1",
+                "collection_name": "1",
+                "collection_doi": None,
+                "title": "dataset #2",
+                "schema_version": "3.0.0",
+                "assets": [],
+            },
+        ]
 
         manifest = load_manifest(None)
         assert len(manifest) == 1
