@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="css/custom.css" type="text/css" />
+    </head>
+    <body>
+        <div>
+            <div style="width: 100%; height: 48px; background-color: black;">TESTING TESTING</div>
+            <div>
+                <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                    {# MOBILE NAV, TRIGGLES SIDE NAV ON TOGGLE #}
+                    <nav class="wy-nav-top" aria-label="top navigation">
+                        {% block mobile_nav %}
+                        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+                        <a href="{{ pathto(master_doc) }}">{{ project }}</a>
+                        {% endblock %}
+                    </nav>
+            
+            
+                    <div class="wy-nav-content">
+                    {%- block content %}
+                        {% if theme_style_external_links|tobool %}
+                        <div class="rst-content style-external-links">
+                        {% else %}
+                        <div class="rst-content">
+                        {% endif %}
+                        {% include "breadcrumbs.html" %}
+                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+                        {%- block document %}
+                        <div itemprop="articleBody">
+                            {% block body %}{% endblock %}
+                        </div>
+                        {% if self.comments()|trim %}
+                        <div class="articleComments">
+                            {% block comments %}{% endblock %}
+                        </div>
+                        {% endif%}
+                        </div>
+                        {%- endblock %}
+                        {% include "footer.html" %}
+                        </div>
+                    {%- endblock %}
+                    </div>
+            
+                    </section>
+            </div>
+        </div>
+    </body>
+</html>
