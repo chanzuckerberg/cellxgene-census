@@ -49,7 +49,7 @@ The Census is a data object publicly hosted online and a convenience API to open
 
 The Census data release plans are detailed [here](https://cellxgene-census.readthedocs.io/en/latest/data_release.html). 
 
-Shortly, starting in mid 2023 Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases will be published without any guarantee of permanence. 
+Shortly, starting in May 15, 2023, Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases are published without any guarantee of permanence. 
 
 
 ## Questions, feedback and issues
