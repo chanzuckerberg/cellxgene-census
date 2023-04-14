@@ -1,6 +1,6 @@
 # Census data releases 
 
-**Last edited**: March, 2023.
+**Last edited**: April, 2023.
 
 ## What is a Census data release?
 
