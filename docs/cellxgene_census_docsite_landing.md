@@ -1,4 +1,4 @@
-:exclamation: **R API is still in beta and unstable.**
+:exclamation: **R API in beta and unstable.**
 
 
 # CZ CELLxGENE Discover Census
