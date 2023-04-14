@@ -3,6 +3,9 @@
 
 # CZ CELLxGENE Discover Census
 
+<img src="./cellxgene_census_docsite_workflow.svg">
+
+
 The CZ CELLxGENE Discover **Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. 
 
 Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data across datasets through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
