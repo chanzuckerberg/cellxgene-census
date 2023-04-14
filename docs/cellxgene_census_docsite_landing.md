@@ -12,8 +12,14 @@ Get started on using the Census:
 - [Installation](https://cellxgene-census.readthedocs.io/en/latest/installation.html)
 - [R & Python quick start](https://cellxgene-census.readthedocs.io/en/latest/quick-start.html)
 - [Census data and schema](https://cellxgene-census.readthedocs.io/en/latest/schema.html)
+- [FAQ](https://cellxgene-census.readthedocs.io/en/latest/faq.html)
 - [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html)
 - R tutorials. *Coming soon.*
+
+
+## Citing the Census
+
+Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
 
 ## Census Capabilities
 
