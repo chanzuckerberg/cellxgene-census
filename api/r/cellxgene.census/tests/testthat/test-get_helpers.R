@@ -55,7 +55,7 @@ test_that("get_seurat coords", {
   seurat <- get_seurat(
     open_soma(),
     "Mus musculus",
-    obs_coords =list(soma_joinid = bit64::as.integer64(0:1000)),
+    obs_coords = list(soma_joinid = bit64::as.integer64(0:1000)),
     var_coords = list(soma_joinid = bit64::as.integer64(0:2000))
   )
   expect_equal(nrow(seurat[[]]), 1001) # obs dataframe
@@ -68,8 +68,8 @@ test_that("get_seurat coords", {
 
 test_that("get_seurat allows missing obs or var filter", {
   census <- open_soma()
-  
-  obs_value_filter = "tissue == 'aorta'"
+
+  obs_value_filter <- "tissue == 'aorta'"
 
   obs_query <- tiledbsoma::SOMAAxisQuery$new(
     value_filter = obs_value_filter

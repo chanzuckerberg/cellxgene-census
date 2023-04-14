@@ -19,7 +19,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ./api/r/cellxgene.census
-          extra-packages: any::rcmdcheck, any::styler
+          extra-packages: any::rcmdcheck, any::styler, any::roxygen2
           needs: check
           # Disable dependency caching so long as we depend on bleeding-edge
           # builds of tiledbsoma from r-universe. Its DESCRIPTION version
