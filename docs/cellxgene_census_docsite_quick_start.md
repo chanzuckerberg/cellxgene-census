@@ -197,7 +197,7 @@ The output is a `tibble` with about 300K cells meeting our query criteria and th
 
 ### Obtaining a slice as a Seurat object 
 
-The following creates an `anndata.AnnData` object on-demand with the same cell filtering criteria as above and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
+The following creates an Seurat object on-demand with the smaller set of cells  and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
 
 ```python
 library("cellxgene.census")
@@ -209,62 +209,54 @@ seurat_obj = get_seurat(
    organism = "Homo sapiens",
    var_value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
    obs_value_filter = "sex == 'female' & cell_type %in% c('microglial cell', 'neuron')",
-        column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
-with cellxgene_census.open_soma() as census:
-    adata = cellxgene_census.get_anndata(
-        census = census,
-        organism = "Homo sapiens",
-        var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
-        obs_value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
-        column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
-    )
-    
-    print(adata)
-    
+   obs_column_names = c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
+)
+
+print(seurat_obj)
 ```
 
-The output with about 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
+The output with about 5K cells and 2 genes can be now used for downstream analysis using [Seurat](https://satijalab.org/seurat/).
 
-``` bash
-AnnData object with n_obs × n_vars = 299622 × 2
-    obs: 'assay', 'cell_type', 'tissue', 'tissue_general', 'suspension_type', 'disease', 'sex'
-    var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'
+``` shell
+An object of class Seurat 
+2 features across 5876 samples within 1 assay 
+Active assay: RNA (2 features, 0 variable features)
 ```
 
 ### Memory-efficient queries
 
 This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
 
-First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or called in a context manager — `with ...`.
+First we initiate a lazy-evaluation query to access all brain and male cells from human.
 
-```python
-import cellxgene_census
+```r
+library("cellxgene.census")
+library("tiledbsoma")
 
-with cellxgene_census.open_soma() as census:
-    
-    human = census["census_data"]["homo_sapiens"]
-    query = human.axis_query(
-    measurement_name = "RNA",
-    obs_query = tiledbsoma.AxisQuery(
-        value_filter = "tissue == 'brain' and sex == 'male'"
-    )
-    
-    # Continued below
+census = open_soma()
+human_experiment = census$get("census_data")$get("homo_sapiens")
+query = SOMAExperimentAxisQuery$new(
+	experiment = human_experiment,
+	measurement_name = "RNA",
+	obs_query = SOMAAxisQuery$new(value_filter = "tissue == 'brain' & sex == 'male'")
+)
+
+# Continued below
 
 ```
 
 Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
 
-```python
+```r
     # Continued from above 
     
-    iterator = query.X("raw").tables()
+    iterator = query.X("raw", iterated = TRUE)
     
     # Get an iterative slice as pyarrow.Table
-    raw_slice = next (iterator) 
+    raw_slice = iterator$read_next() 
     ...
 ```
 
-And you can now perform operations on each iteration slice. As with any any Python iterator this logic can be wrapped around a `for` loop.
+And you can now perform operations on each iteration slice. You can loop this in a for loop and check for the boolean flag `iterator$read_complete()` until completion.
 
 
