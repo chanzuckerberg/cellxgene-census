@@ -3,8 +3,9 @@
 
 # CZ CELLxGENE Discover Census
 
-<img align="center" src="./cellxgene_census_docsite_workflow.svg">
-
+<p align="center">
+	<img align="center" src="./cellxgene_census_docsite_workflow.svg">
+</p>
 
 The CZ CELLxGENE Discover **Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. 
 
