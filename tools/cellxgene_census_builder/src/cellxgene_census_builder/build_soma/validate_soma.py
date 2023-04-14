@@ -490,7 +490,7 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
     # census against the snapshot assets.
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         df = census[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
-        df["corpora_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: urlcat(assets_path, p))
+        df["dataset_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: urlcat(assets_path, p))
         datasets = Dataset.from_dataframe(df)
         return datasets
 

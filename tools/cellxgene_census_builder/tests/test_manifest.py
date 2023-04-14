@@ -12,16 +12,16 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str) -> N
     assert len(manifest) == 2
     assert manifest[0].dataset_id == "dataset_id_1"
     assert manifest[1].dataset_id == "dataset_id_2"
-    assert manifest[0].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_1.h5ad"
-    assert manifest[1].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
+    assert manifest[0].dataset_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_1.h5ad"
+    assert manifest[1].dataset_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
 
     with open(manifest_csv) as fp:
         manifest = load_manifest(fp)
         assert len(manifest) == 2
         assert manifest[0].dataset_id == "dataset_id_1"
         assert manifest[1].dataset_id == "dataset_id_2"
-        assert manifest[0].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_1.h5ad"
-        assert manifest[1].corpora_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
+        assert manifest[0].dataset_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_1.h5ad"
+        assert manifest[1].dataset_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
 
 
 def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str) -> None:
@@ -49,7 +49,10 @@ def test_load_manifest_from_cxg() -> None:
                 "collection_doi": None,
                 "title": "dataset #1",
                 "schema_version": "3.0.0",
-                "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+                "assets": [
+                    {"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"},
+                    {"filesize": 234, "filetype": "RDS", "url": "https://fake.url/dataset_id_1.rds"},
+                ],
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -66,8 +69,10 @@ def test_load_manifest_from_cxg() -> None:
         assert len(manifest) == 2
         assert manifest[0].dataset_id == "dataset_id_1"
         assert manifest[1].dataset_id == "dataset_id_2"
-        assert manifest[0].corpora_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
-        assert manifest[1].corpora_asset_h5ad_uri == "https://fake.url/dataset_id_2.h5ad"
+        assert manifest[0].dataset_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
+        assert manifest[0].asset_h5ad_filesize == 123
+        assert manifest[1].dataset_asset_h5ad_uri == "https://fake.url/dataset_id_2.h5ad"
+        assert manifest[1].asset_h5ad_filesize == 456
 
 
 def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
@@ -99,7 +104,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
         manifest = load_manifest(None)
         assert len(manifest) == 1
         assert manifest[0].dataset_id == "dataset_id_1"
-        assert manifest[0].corpora_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
+        assert manifest[0].dataset_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
 
 
 def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
@@ -131,4 +136,4 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
         manifest = load_manifest(None)
         assert len(manifest) == 1
         assert manifest[0].dataset_id == "dataset_id_1"
-        assert manifest[0].corpora_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
+        assert manifest[0].dataset_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"

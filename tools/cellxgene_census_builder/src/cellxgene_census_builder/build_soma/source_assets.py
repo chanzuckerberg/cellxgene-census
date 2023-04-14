@@ -36,7 +36,7 @@ def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
 
 def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
     HTTP_GET_TIMEOUT_SEC = 2 * 60 * 60  # just a very big timeout
-    protocol = urllib.parse.urlparse(dataset.corpora_asset_h5ad_uri).scheme
+    protocol = urllib.parse.urlparse(dataset.dataset_asset_h5ad_uri).scheme
     fs = fsspec.filesystem(
         protocol,
         client_kwargs={"timeout": aiohttp.ClientTimeout(total=HTTP_GET_TIMEOUT_SEC, connect=None)},
@@ -45,7 +45,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
     dataset_path = f"{asset_dir}/{dataset_file_name}"
 
     logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) to {dataset_path}")
-    fs.get_file(dataset.corpora_asset_h5ad_uri, dataset_path)
+    fs.get_file(dataset.dataset_asset_h5ad_uri, dataset_path)
 
     # verify file size is as expected, if we know the size a priori
     assert (dataset.asset_h5ad_filesize == -1) or (dataset.asset_h5ad_filesize == os.path.getsize(dataset_path))
