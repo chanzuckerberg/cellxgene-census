@@ -36,9 +36,9 @@ test_that("get_seurat", {
   seurat <- get_seurat(
     open_soma(),
     "Mus musculus",
-    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_general == 'vasculature'"),
+    obs_value_filter = "tissue_general == 'vasculature'",
     obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
-    var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
     var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
   )
 
@@ -55,12 +55,8 @@ test_that("get_seurat coords", {
   seurat <- get_seurat(
     open_soma(),
     "Mus musculus",
-    obs_query = tiledbsoma::SOMAAxisQuery$new(
-      coords = list(soma_joinid = bit64::as.integer64(0:1000))
-    ),
-    var_query = tiledbsoma::SOMAAxisQuery$new(
-      coords = list(soma_joinid = bit64::as.integer64(0:2000))
-    )
+    obs_coords = list(soma_joinid = bit64::as.integer64(0:1000)),
+    var_coords = list(soma_joinid = bit64::as.integer64(0:2000))
   )
   expect_equal(nrow(seurat[[]]), 1001) # obs dataframe
   seurat_assay <- seurat[["RNA"]]
@@ -73,11 +69,13 @@ test_that("get_seurat coords", {
 test_that("get_seurat allows missing obs or var filter", {
   census <- open_soma()
 
+  obs_value_filter <- "tissue == 'aorta'"
+
   obs_query <- tiledbsoma::SOMAAxisQuery$new(
-    value_filter = "tissue == 'aorta'"
+    value_filter = obs_value_filter
   )
   seurat <- get_seurat(census, "Mus musculus",
-    obs_query = obs_query,
+    obs_value_filter = obs_value_filter,
     obs_column_names = c("soma_joinid"),
     var_column_names = c("soma_joinid")
   )
@@ -90,12 +88,8 @@ test_that("get_seurat allows missing obs or var filter", {
   expect_equal(nrow(seurat[["RNA"]]), control_query$n_vars)
 
   seurat <- get_seurat(census, "Mus musculus",
-    obs_query = tiledbsoma::SOMAAxisQuery$new(
-      coords = list(soma_joinid = bit64::as.integer64(0:10000))
-    ),
-    var_query = tiledbsoma::SOMAAxisQuery$new(
-      value_filter = "feature_id == 'ENSMUSG00000069581'"
-    )
+    obs_coords = list(soma_joinid = bit64::as.integer64(0:10000)),
+    var_value_filter = "feature_id == 'ENSMUSG00000069581'"
   )
   expect_equal(ncol(seurat[["RNA"]]), 10001)
   expect_equal(nrow(seurat[["RNA"]]), 1)

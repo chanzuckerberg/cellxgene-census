@@ -10,9 +10,11 @@ get_seurat(
   organism,
   measurement_name = "RNA",
   X_name = "raw",
-  obs_query = NULL,
+  obs_value_filter = NULL,
+  obs_coords = NULL,
   obs_column_names = NULL,
-  var_query = NULL,
+  var_value_filter = NULL,
+  var_coords = NULL,
   var_column_names = NULL
 )
 }
@@ -25,11 +27,15 @@ get_seurat(
 
 \item{X_name}{The \code{X} layer to query. Defaults to \code{raw}.}
 
-\item{obs_query}{A \code{SOMAAxisQuery} for the \code{obs} axis.}
+\item{obs_value_filter}{A SOMA \code{value_filter} across columns in the \code{obs} dataframe, expressed as string.}
+
+\item{obs_coords}{A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.}
 
 \item{obs_column_names}{Columns to fetch for the \code{obs} data frame.}
 
-\item{var_query}{A \code{SOMAAxisQuery} for the \code{var} axis.}
+\item{var_value_filter}{Same as \code{obs_value_filter} but for \code{var}.}
+
+\item{var_coords}{Same as \code{obs_coords} but for \code{var}.}
 
 \item{var_column_names}{Columns to fetch for the \code{var} data frame.}
 }
