@@ -49,7 +49,7 @@ All data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) that ad
 
 ## SOMA objects 
 
-You can find the full SOMA specification [here]((https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types).
+You can find the full SOMA specification [here](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types).
 
 The following is short description of the main SOMA objects used by the Census:
 
