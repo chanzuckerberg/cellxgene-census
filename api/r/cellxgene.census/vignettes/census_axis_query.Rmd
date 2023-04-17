@@ -24,7 +24,7 @@ https://github.com/chanzuckerberg/cell-census/blob/main/api/python/notebooks/api
 
 *Goal:* demonstrate basic axis metadata handling.
 
-The CZ CELLxGENE Census stores obs (cell) metadata in a SOMA DataFrame, which can be queried and read as an R data frame. The Cell Census also has a convenience package which simplifies opening the census.
+The CZ CELLxGENE Census stores obs (cell) metadata in a SOMA DataFrame, which can be queried and read as an R data frame. The Census also has a convenience package which simplifies opening the census.
 
 R data frames are in-memory objects. Take care that queries are small enough for results to fit in memory.
 
@@ -64,7 +64,7 @@ unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
 cat(paste(
   "There are",
   length(unique_cell_type_ontology_term_id),
-  "cell types in the Cell Census! The first few are:"
+  "cell types in the Census! The first few are:"
 ))
 head(unique_cell_type_ontology_term_id)
 ```
@@ -87,7 +87,7 @@ unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
 cat(paste(
   "There are ",
   length(unique_cell_type_ontology_term_id),
-  " cell types in the Cell Census where tissue_ontology_term_id == ",
+  " cell types in the Census where tissue_ontology_term_id == ",
   LUNG_TISSUE,
   "!\nThe first few are:",
   sep = ""
@@ -139,5 +139,5 @@ for (organism in census$get("census_data")$names()) {
     cat(paste("  Unique ", col, " values: ", length(unique(obs_df[[col]])), "\n", sep = ""))
   }
 }
-cat(paste("Complete cell census contains", total_cells, "cells."))
+cat(paste("Complete Census contains", total_cells, "cells."))
 ```
