@@ -1,4 +1,4 @@
-# Census Quick start
+# Quick start
 
 This page provides some examples to get you going with using the Census. For more detailed usage please take a look at the [Python tutorials](examples.rst) or R vignettes (*coming soon*).
 

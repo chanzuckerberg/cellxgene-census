@@ -52,6 +52,7 @@ Shortly, starting in May 15, 2023, Census long-term supported data releases will
 
 ## Questions, feedback and issues
 
+- Check out  the [FAQ](cellxgene_census_docsite_FAQ.md).
 - Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://czi.co/science-slack) on Slack and join the `#cellxgene-census-users` channel
 - Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues). 
 - Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <security@chanzuckerberg.com>.

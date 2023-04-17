@@ -1,4 +1,4 @@
-# Frequently Asked Questions for CZ CELLxGENE Discover Census
+# FAQ
 
 Last updated: Apr, 2023.
 
