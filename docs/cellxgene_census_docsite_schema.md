@@ -5,12 +5,12 @@ This page provides a user-friendly overview of the Census contents and its schem
 **Contents**
 
 1. [Schema](#schema)
-2. [Data included in the Census](#Data-included-in-the-Census)
-1. [SOMA objects](#SOMA-objects)
+2. [Data included in the Census](data-included-in-the-census)
+1. [SOMA objects](#soma-objects)
 
 ## Schema
 
-The Census is a collection of a variety of **[SOMA objects](#SOMA-objects)** organized with the following hierarchy.
+The Census is a collection of a variety of **[SOMA objects](#soma-objects)** organized with the following hierarchy.
 
 ![image](cellxgene_census_docsite_model.svg)
 

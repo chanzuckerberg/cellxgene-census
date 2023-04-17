@@ -50,7 +50,7 @@ Examples:
 Immediately after the introduction a table of contents must be provided:
 
 * It must be placed under the bolded word "**Contents**" . 
-* It must contain an ordered list of the second-level headers (`##`) used for [Sections](#Sections).
+* It must contain an ordered list of the second-level headers (`##`) used for [Sections](#sections).
 * If necessary it may contain sub-lists corresponding to lower-level headers (`###`, etc)
 
 Example:
