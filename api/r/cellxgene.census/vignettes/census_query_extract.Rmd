@@ -54,8 +54,8 @@ The `cellxgene.census` package includes a convenience function to extract a slic
 For more complex query scenarios, there is an advanced query API demonstrated in other vignettes.
 
 ```{r}
-obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue_ontology_term_id=='UBERON:0002048' && sex_ontology_term_id=='PATO:0000383' && cell_type_ontology_term_id == 'CL:0000499'")
-adata <- cellxgene.census::get_seurat(census, "Homo sapiens", obs_query = obs_query)
+ovf <- "tissue_ontology_term_id=='UBERON:0002048' && sex_ontology_term_id=='PATO:0000383' && cell_type_ontology_term_id == 'CL:0000499'"
+adata <- cellxgene.census::get_seurat(census, "Homo sapiens", obs_value_filter = ovf)
 print(adata)
 ```
 
@@ -65,14 +65,12 @@ rm(adata) # free up memory before next op
 
 ```{r}
 # You can also query on both axis. This example adds a var-axis query for a handful of genes, and queries the mouse experiment.
-obs_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue == 'brain'")
-var_query <- tiledbsoma::SOMAAxisQuery$new(value_filter = "feature_name %in% c('Gm16259', 'Dcaf5', 'Gm53058')")
 adata <- cellxgene.census::get_seurat(
   census,
   "Mus musculus",
-  obs_query = obs_query,
+  obs_value_filter = "tissue == 'brain'",
   obs_column_names = c("tissue", "cell_type", "sex"),
-  var_query = var_query
+  var_value_filter = "feature_name %in% c('Gm16259', 'Dcaf5', 'Gm53058')"
 )
 print(adata)
 ```
