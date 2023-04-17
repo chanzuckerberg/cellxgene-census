@@ -2,7 +2,7 @@
 title: "Census query & extract subsets"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{census_query_extract}
+  %\VignetteIndexEntry{Census query & extract subsets}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

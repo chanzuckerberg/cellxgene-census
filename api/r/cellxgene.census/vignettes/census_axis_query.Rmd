@@ -2,7 +2,7 @@
 title: "Axis Query Example"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{census_axis_query}
+  %\VignetteIndexEntry{Axis Query Example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
