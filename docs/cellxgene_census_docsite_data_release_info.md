@@ -5,7 +5,7 @@
 ## What is a Census data release?
 
 It is a Census build that is publicly hosted online. A Census build is 
-a [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) collection with the Census data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) as specified in the [Census schema](https://cellxgene-census.readthedocs.io/en/latest/schema.html). 
+a [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) collection with the Census data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) as specified in the [Census schema](cellxgene_census_docsite_schema.md). 
 
 ### Long-term supported (LTS) Cell Census releases
 

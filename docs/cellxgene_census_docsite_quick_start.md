@@ -1,6 +1,6 @@
-# Census Quick start
+# Quick start
 
-This page provides some examples to get you going with using the Census. For more detailed usage please take a look at the [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html) or R vignettes (*coming soon*).
+This page provides some examples to get you going with using the Census. For more detailed usage please take a look at the [Python tutorials](examples.rst) or R vignettes (*coming soon*).
 
 **Contents**
 
@@ -11,7 +11,7 @@ This page provides some examples to get you going with using the Census. For mor
 ## Installation
 
 
-First make sure to install the Census API following the [installation instructions.](https://cellxgene-census.readthedocs.io/en/latest/installation)
+First make sure to install the Census API following the [installation instructions.](cellxgene_census_docsite_installation.md)
 
 ## Python quick start
 

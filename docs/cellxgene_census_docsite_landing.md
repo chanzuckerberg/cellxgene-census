@@ -1,11 +1,9 @@
-:exclamation: **R API in beta.**
+❗ **R API in beta.**
 
 
 # CZ CELLxGENE Discover Census
 
-<p align="center">
-	<img align="center" src="./cellxgene_census_docsite_workflow.svg">
-</p>
+![image](cellxgene_census_docsite_workflow.svg)
 
 The CZ CELLxGENE Discover **Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. 
 
@@ -13,11 +11,11 @@ Using a **new access paradigm of cell-based slicing and querying**, you can inte
 
 Get started on using the Census:
 
-- [Installation](https://cellxgene-census.readthedocs.io/en/latest/installation.html)
-- [R & Python quick start](https://cellxgene-census.readthedocs.io/en/latest/quick-start.html)
-- [Census data and schema](https://cellxgene-census.readthedocs.io/en/latest/schema.html)
-- [FAQ](https://cellxgene-census.readthedocs.io/en/latest/faq.html)
-- [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html)
+- [Installation](cellxgene_census_docsite_installation.md)
+- [R & Python quick start](cellxgene_census_docsite_quick_start.md)
+- [Census data and schema](cellxgene_census_docsite_schema.md)
+- [FAQ](cellxgene_census_docsite_FAQ.md)
+- [Python tutorials](examples.rst)
 - R tutorials. *Coming soon.*
 
 
@@ -47,13 +45,14 @@ The Census is a data object publicly hosted online and a convenience API to open
 
 ## Census Data Releases
 
-The Census data release plans are detailed [here](https://cellxgene-census.readthedocs.io/en/latest/data_release.html). 
+The Census data release plans are detailed [here](cell_census_notebook_guidelines.md). 
 
 Shortly, starting in May 15, 2023, Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases are published without any guarantee of permanence. 
 
 
 ## Questions, feedback and issues
 
+- Check out  the [FAQ](cellxgene_census_docsite_FAQ.md).
 - Questions: we encourage you to ask questions via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://czi.co/science-slack) on Slack and join the `#cellxgene-census-users` channel
 - Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues). 
 - Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <security@chanzuckerberg.com>.
