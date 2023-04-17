@@ -43,7 +43,7 @@ For all of these cases you should perform web downloads from the [CZ CELLxGENE D
 
 ## What data is contained in the Census?
 
-Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and their organization in the [schema description](https://cellxgene-census.readthedocs.io/en/latest/schema.html) or you can use the APIs to explore the data as indicated in this [tutorial](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html). 
+Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and their organization in the [schema description](cellxgene_census_docsite_schema.md) or you can use the APIs to explore the data as indicated in this [tutorial](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html). 
 
 ## How do I cite the use of the Census for a publication?
 

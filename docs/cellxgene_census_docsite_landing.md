@@ -13,11 +13,11 @@ Using a **new access paradigm of cell-based slicing and querying**, you can inte
 
 Get started on using the Census:
 
-- [Installation](https://cellxgene-census.readthedocs.io/en/latest/installation.html)
-- [R & Python quick start](https://cellxgene-census.readthedocs.io/en/latest/quick-start.html)
-- [Census data and schema](https://cellxgene-census.readthedocs.io/en/latest/schema.html)
-- [FAQ](https://cellxgene-census.readthedocs.io/en/latest/faq.html)
-- [Python tutorials](https://cellxgene-census.readthedocs.io/en/latest/examples.html)
+- [Installation](cellxgene_census_docsite_installation.md)
+- [R & Python quick start](cellxgene_census_docsite_quick_start.md)
+- [Census data and schema](cellxgene_census_docsite_schema.md)
+- [FAQ](cellxgene_census_docsite_FAQ.md)
+- [Python tutorials](examples.rst)
 - R tutorials. *Coming soon.*
 
 
@@ -47,7 +47,7 @@ The Census is a data object publicly hosted online and a convenience API to open
 
 ## Census Data Releases
 
-The Census data release plans are detailed [here](https://cellxgene-census.readthedocs.io/en/latest/data_release.html). 
+The Census data release plans are detailed [here](cell_census_notebook_guidelines.md). 
 
 Shortly, starting in May 15, 2023, Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases are published without any guarantee of permanence. 
 
