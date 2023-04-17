@@ -2,7 +2,7 @@
 title: "Census Datasets example"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{census_datasets}
+  %\VignetteIndexEntry{Census Datasets example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
