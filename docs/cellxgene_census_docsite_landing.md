@@ -1,11 +1,9 @@
-:exclamation: **R API in beta.**
+❗ **R API in beta.**
 
 
 # CZ CELLxGENE Discover Census
 
-<p align="center">
-	<img align="center" src="./cellxgene_census_docsite_workflow.svg">
-</p>
+![image](cellxgene_census_docsite_workflow.svg)
 
 The CZ CELLxGENE Discover **Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. 
 

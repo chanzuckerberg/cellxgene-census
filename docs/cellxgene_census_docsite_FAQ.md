@@ -2,20 +2,20 @@
 
 Last updated: Apr, 2023.
 
-- [Why should I use the Census?](#Why-should-I-use-the-Census)
-- [What data is contained in the Census?](#What-data-is-contained-in-the-Census)
-- [How do I cite the use of the Census for a publication?](#How-do-I-cite-the-use-of-the-Census-for-a-publication)
-- [Why does the Census not have a normalized layer or embeddings?](#Why-does-the-Census-not-have-a-normalized-layer-or-embeddings)
-- [How does the Census differentiate from other services?](#How-does-the-Census-differentiate-from-other-services)
-- [Can I query human and mouse data in a single query?](#Can-I-query-human-and-mouse-data-in-a-single-query)
-- [Where are the Census data hosted?](#Where-are-the-Census-data-hosted)
-- [Can I retrieve the original H5AD datasets from which the Census was built?](#Can-I-retrieve-the-original-H5AD-datasets-from-which-the-Census-was-built)
-- [How can I increase the performance of my queries?](#How-can-I-increase-the-performance-of-my-queries)
-- [Can I use conda to install the Census Python API?](#Can-I-use-conda-to-install-the-Census-Python-API)
-- [How can I ask for support?](#How-can-I-ask-for-support)
-- [How can I ask for new features?](#How-can-I-ask-for-new-features)
-- [How can I contribute my data to the Census?](#How-can-I-contribute-my-data-to-the-Census)
-- [Why do I get an `ArraySchema` error when opening the Census?](#Why-do-I-get-an-ArraySchema-error-when-opening-the-Census)
+- [Why should I use the Census?](#why-should-i-use-the-census)
+- [What data is contained in the Census?](#what-data-is-contained-in-the-census)
+- [How do I cite the use of the Census for a publication?](#how-do-i-cite-the-use-of-the-census-for-a-publication)
+- [Why does the Census not have a normalized layer or embeddings?](#why-does-the-census-not-have-a-normalized-layer-or-embeddings)
+- [How does the Census differentiate from other services?](#how-does-the-census-differentiate-from-other-services)
+- [Can I query human and mouse data in a single query?](#can-i-query-human-and-mouse-data-in-a-single-query)
+- [Where are the Census data hosted?](#where-are-the-census-data-hosted)
+- [Can I retrieve the original H5AD datasets from which the Census was built?](#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built)
+- [How can I increase the performance of my queries?](#how-can-i-increase-the-performance-of-my-queries)
+- [Can I use conda to install the Census Python API?](#can-i-use-conda-to-install-the-census-python-api)
+- [How can I ask for support?](#how-can-i-ask-for-support)
+- [How can I ask for new features?](#how-can-i-ask-for-new-features)
+- [How can I contribute my data to the Census?](#how-can-i-contribute-my-data-to-the-census)
+- [Why do I get an `ArraySchema` error when opening the Census?](#why-do-i-get-an-arrayschema-error-when-opening-the-census)
 
 ## Why should I use the Census?
 

@@ -12,7 +12,7 @@ This page provides a user-friendly overview of the Census contents and its schem
 
 The Census is a collection of a variety of **[SOMA objects](#SOMA-objects)** organized with the following hierarchy.
 
-<img src="./cellxgene_census_docsite_model.svg">
+![image](cellxgene_census_docsite_model.svg)
 
 As you can see the Census data is a SOMACollection with two high-level items:
 
