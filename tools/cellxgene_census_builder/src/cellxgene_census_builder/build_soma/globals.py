@@ -8,6 +8,9 @@ import tiledbsoma as soma
 CENSUS_SCHEMA_VERSION = "0.1.1"
 
 CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
+# NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
+# hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
+CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2022-08-19/uberon.owl"
 CXG_SCHEMA_VERSION_IMPORT = [CXG_SCHEMA_VERSION]  # versions we can ingest
 
 # Columns expected in the census_datasets dataframe

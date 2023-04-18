@@ -93,7 +93,7 @@ class ExperimentSpecification:
         """Factory method. Do not instantiate the class directly."""
         gene_feature_length = cls._load_gene_feature_length(gene_feature_length_uris)
         logging.info(f"Loaded gene lengths external reference for {name}, {len(gene_feature_length)} genes.")
-        return cls(name, anndata_cell_filter_spec, gene_feature_length_uris, gene_feature_length)
+        return cls(name, anndata_cell_filter_spec, gene_feature_length_uris, gene_feature_length)  # type: ignore[call-arg]
 
     @classmethod
     def _load_gene_feature_length(cls, gene_feature_length_uris: Sequence[str]) -> pd.DataFrame:
