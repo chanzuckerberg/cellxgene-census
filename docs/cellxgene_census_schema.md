@@ -279,15 +279,9 @@ This `SOMADataFrame` MUST have the following rows:
 1. Census build date:
 	1. label: `"census_build_date"`
 	1. value: The date this Census was built in ISO 8601 date format
-1. Census git commit SHA:
-	1. label: `"census_build_git_commit_sha"`
-	1. value: The commit SHA of [https://github.com/chanzuckerberg/cellxgene-census](https://github.com/chanzuckerberg/cellxgene-census) at build time.
-1. Census R API version:
-	1. label: `"census_r_api_version"`
-	1. value: The R API semver at build time, which guarantees API-data compatibility.
-1. Census Python API version:
-	1. label: `"census_python_api_version"`
-	1. value: The Python API semver at build time, which guarantees API-data compatibility.
+1. Dataset schema version:
+	1. label: `"dataset_schema_version"`
+	1. value: The CELLxGENE Discover schema version of the source H5AD files.
 1. Total number of cells included in this Census build:
 	1. label: `"total_cell_count"`
 	1. value: Cell count
@@ -320,16 +314,8 @@ An example of this `SOMADataFrame` is shown below:
     <td>2022-11-30</td>
   </tr>
   <tr>
-    <td>census_build_git_commit_sha</td>
-    <td>v1.0.0-9-g40266c8</td>
-  </tr>
-  <tr>
-    <td>census_r_api_version</td>
-    <td>1.0.0</td>
-  </tr>
-  <tr>
-    <td>census_python_api_version </td>
-    <td>1.0.0</td>
+    <td>dataset_schema_version </td>
+    <td>3.0.0</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -858,10 +844,9 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 * Updates `census["census_info"]["summary"]` to reflect official name in the column `label`:
    * From `"cell_census_build_date"` to `"census_build_date"`.
    * From `"cell_census_schema_version"` to `"census_schema_version"`.
-* Adds the following rows to `census["census_info"]["summary"]`:
-   * `"census_build_git_commit_sha"`
-   * `"census_r_api_version"`
-   * `"census_python_api_version"`
+* Adds the following row to `census["census_info"]["summary"]`:
+   * `"dataset_schema_version"`
+
 
 ### Version 0.1.1
 * Adds clarifying text for "Feature Dataset Presence Matrix"
