@@ -28,7 +28,7 @@ The following terms are used throughout this document:
 
 The Census Schema follows [Semver](https://semver.org/) for its versioning:
 
-* Major: any schema changes that make the Census incompatible with public API(s) or SOMA. Examples:
+* Major: any schema changes that make the Census incompatible with the Census API or SOMA API. Examples:
 	* Column deletion in Census `obs`
 	* Addition of new modality
 * Minor: schema additions that are compatible with public API(s) and SOMA. Examples:
