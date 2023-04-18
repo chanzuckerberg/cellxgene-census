@@ -320,7 +320,7 @@ An example of this `SOMADataFrame` is shown below:
     <td>2022-11-30</td>
   </tr>
   <tr>
-    <td>ccensus_build_git_commit_sha</td>
+    <td>census_build_git_commit_sha</td>
     <td>v1.0.0-9-g40266c8</td>
   </tr>
   <tr>
