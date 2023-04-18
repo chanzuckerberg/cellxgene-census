@@ -271,7 +271,7 @@ Census metadata MUST be stored as a `SOMADataFrame` with two columns:
 </tbody>
 </table>
 
-This `SOMADataFrame` MUST have the following rows::
+This `SOMADataFrame` MUST have the following rows:
  
 1. Census schema version:
 	1. label: `"census_schema_version"`
