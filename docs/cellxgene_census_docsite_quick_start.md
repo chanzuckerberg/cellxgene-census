@@ -4,9 +4,9 @@ This page provides some examples to get you going with using the Census. For mor
 
 **Contents**
 
-1. [Installation](#Installation).
-2. [Python quick start](Python-quick-start).
-3. [R quick start](R-quick-start).
+1. [Installation](#installation).
+2. [Python quick start](python-quick-start).
+3. [R quick start](r-quick-start).
 
 ## Installation
 
