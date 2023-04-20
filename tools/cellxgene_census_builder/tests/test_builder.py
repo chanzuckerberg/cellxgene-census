@@ -16,6 +16,9 @@ from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_soma.globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CENSUS_SCHEMA_VERSION,
+    CENSUS_SUMMARY_NAME,
+    CXG_SCHEMA_VERSION,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
 )
@@ -80,6 +83,17 @@ def test_base_builder_creation(
                 "mus_musculus_0",
                 "mus_musculus_1",
             ]
+
+            # Census summary has the correct metadata
+            census_summary = census[CENSUS_INFO_NAME][CENSUS_SUMMARY_NAME].read().concat().to_pandas()
+            assert (
+                census_summary.loc[census_summary["label"] == "census_schema_version"].iloc[0]["value"]
+                == CENSUS_SCHEMA_VERSION
+            )
+            assert (
+                census_summary.loc[census_summary["label"] == "dataset_schema_version"].iloc[0]["value"]
+                == CXG_SCHEMA_VERSION
+            )
 
             # Presence matrix should exist with the correct dimensions
             for exp_name in ["homo_sapiens", "mus_musculus"]:

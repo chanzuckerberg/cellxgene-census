@@ -77,7 +77,7 @@ jobs:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: cellxgene-census-builder
         run: |
-          GIT_SHA=$(git describe)
+          GIT_SHA=$(git rev-parse --short HEAD)
           docker build --build-arg=COMMIT_SHA=$GIT_SHA -t $REGISTRY/$REPOSITORY:$GIT_SHA .
         working-directory: tools/cellxgene_census_builder/
 
@@ -87,7 +87,7 @@ jobs:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: cellxgene-census-builder
         run: |
-          GIT_SHA=$(git describe)
+          GIT_SHA=$(git rev-parse --short HEAD)
           docker push $REGISTRY/$REPOSITORY:$GIT_SHA
           docker tag $REGISTRY/$REPOSITORY:$GIT_SHA $REGISTRY/$REPOSITORY:latest
           docker push $REGISTRY/$REPOSITORY:latest
