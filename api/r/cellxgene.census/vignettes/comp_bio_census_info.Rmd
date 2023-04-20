@@ -1,0 +1,238 @@
+---
+title: "Learning about the CZ CELLxGENE Census"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Learning about the CZ CELLxGENE Census}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 88)
+```
+
+This notebook showcases the Census contents and how to obtain high-level information about it. It covers the organization of data within the Census, what cell and gene metadata are available, and it provides simple demonstrations to summarize cell counts across cell metadata.
+
+**Contents**
+- Opening the census
+- Census organization
+- Cell metadata
+- Gene metadata
+- Census summary content tables
+- Understanding Census contents beyond the summary tables
+
+## Opening the Census
+
+The `cellxgene.census` R package  contains a convenient `open_soma()` API to open any version of the Census (the latest by default).
+
+```{r}
+census <- cellxgene.census::open_soma()
+```
+
+You can learn more about the cellxgene.census methods by accessing their corresponding documentation, for example `?cellxgene.census::open_soma`.
+
+## Census organization
+
+The [Census schema](https://cellxgene-census.readthedocs.io/en/latest/schema.html) defines the structure of the Census. In short, you can think of the Census as a structured collection of items that stores different pieces of information. All of these items and the parent collection are SOMA objects of various types and can all be accessed with the [TileDB-SOMA API](https://github.com/single-cell-data/TileDB-SOMA) ([documentation](https://tiledbsoma.readthedocs.io/en/latest/)).
+
+The `cellxgene.census` package contains some convenient wrappers of the TileDB-SOMA API. An example of this is the function we used to open the Census: `cellxgene_census.open_soma()`.
+
+### Main Census components
+
+With the command above you created `census`, which is a `SOMACollection`, an R6 class supplying providing a key-value associative map. Its `get()` method can access the two top-level collection members, `census_info` and `census_data`, each themselves instances of `SOMACollection`.
+
+### Census summary info
+
+- `census$get("census_info")`: A collection of data frames providing information of the census as a whole.
+  - `census$get("census_info")$get("summary")`: A data frame with high-level information of this Census, e.g. build date, total cell count, etc.
+  - `census$get("census_info")$get("datasets")`: A data frame with all datasets from [CELLxGENE Discover](https://cellxgene.cziscience.com/) used to create the Census.
+  - `census$get("census_info")$get("summary_cell_counts")`: A data frame with cell counts stratified by **relevant** cell metadata
+-
+### Census data
+
+Data for each organism is stored in independent `SOMAExperiment` objects which are a specialized form of a `SOMACollection`. Each of these store a data matrix (cell by genes), cell metadata, gene metadata, and some other useful components not covered in this notebook.
+
+This is how the data is organized for one organism -- *Homo sapiens*:
+
+- `census$get("census_data")$get("homo_sapiens")$obs`: Cell metadata
+- `census$get("census_data")$get("homo_sapiens")$ms$get("RNA")`: Data matrices, currently only...
+- `census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$X$get("raw")`: a matrix of raw counts as a `SOMASparseNDArray`
+- `census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var`: Gene Metadata
+
+## Cell metadata
+
+You can obtain all cell metadata variables by directly querying the columns of the corresponding `SOMADataFrame`.
+
+All of these variables can be used for querying the Census in case you want to work with specific cells.
+
+```{r}
+census$get("census_data")$get("homo_sapiens")$obs$colnames()
+```
+
+All of these variables are defined in the [CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#obs-cell-metadata) except for the following:
+
+- `soma_joinid`: a SOMA-defined value use for join operations.
+- `dataset_id`: the dataset id as encoded in `census$get("census_info")$get("datasets")`.
+- `tissue_general` and `tissue_general_ontology_term_id`: the high-level tissue mapping.
+
+## Gene metadata
+
+Similarly, we can obtain all gene metadata variables by directly querying the columns of the corresponding `SOMADataFrame`.
+
+These are the variables you can use for querying the Census in case there are specific genes you are interested in.
+
+```{r}
+census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var$colnames()
+```
+
+All of these variables are defined in the CELLxGENE dataset schema except for the following:
+
+- `soma_joinid`: a SOMA-defined value use for join operations.
+- `feature_length`: the length in base pairs of the gene.
+
+## Census summary content tables
+
+You can take a quick look at the high-level Census information by looking at `census$get("census_info")$get("summary")`:
+
+```{r}
+as.data.frame(census$get("census_info")$get("summary")$read())
+```
+
+Of special interest are the label-value combinations for :
+
+- `total_cell_count` is the total number of cells in the Census.
+- `unique_cell_count` is the number of unique cells, as some cells may be present twice due to meta-analysis or consortia-like data.
+- `number_donors_homo_sapiens` and `number_donors_mus_musculus` are the number of individuals for human and mouse. These are not guaranteed to be unique as one individual ID may be present or identical in different datasets.
+
+### Cell counts by cell metadata
+
+By looking at `census$get("census_info)$get("summary_cell_counts")` you can get a general idea of cell counts stratified by **some relevant** cell metadata. Not all cell metadata is included in this table, you can take a look at all cell and gene metadata available in the sections below "Cell metadata" and "Gene metadata".
+
+The line below retrieves this table and casts it into an R data frame:
+
+```{r}
+census_counts <- as.data.frame(census$get("census_info")$get("summary_cell_counts")$read())
+census_counts
+```
+
+For each combination of `organism` and values for each `category` of cell metadata you can take a look at `total_cell_count` and `unique_cell_count` for the cell counts of that combination.
+
+The values for each `category` are specified in `ontology_term_id` and `label`, which are the value's IDs and labels, respectively.
+
+#### Example: cell metadata included in the summary counts table
+
+To get all the available cell metadata in the summary counts table you can do the following. Remember this is not all the cell metadata available, as some variables were omitted in the creation of this table.
+
+```{r}
+t(table(census_counts$organism, census_counts$category))
+```
+
+
+#### Example: cell counts for each sequencing assay in human data
+
+To get the cell counts for each sequencing assay type in human data, you can perform the following operations:
+
+```{r}
+human_assay_counts <- census_counts[census_counts$organism == 'Homo sapiens' & census_counts$category == 'assay',]
+human_assay_counts <- human_assay_counts[order(human_assay_counts$total_cell_count, decreasing=TRUE),]
+```
+
+#### Example: number of microglial cells in the Census
+
+If you have a specific term from any of the categories shown above you can directly find out the number of cells for that term.
+
+```{r}
+census_counts[census_counts$label == 'microglial cell',]
+```
+
+## Understanding Census contents beyond the summary tables
+
+While using the pre-computed tables in `census$get("census_info")` is an easy and quick way to understand the contents of the Census, it falls short if you want to learn more about certain slices of the Census.
+
+For example, you may want to learn more about:
+
+- What are the cell types available for human liver?
+- What are the total number of cells in all lung datasets stratified by sequencing technology?
+- What is the sex distribution of all cells from brain in mouse?
+- What are the diseases available for T cells?
+
+All of these questions can be answered by directly querying the cell metadata as shown in the examples below.
+
+### Example: all cell types available in human
+
+To exemplify the process of accessing and slicing cell metadata for summary stats, let's start with a trivial example and take a look at all human cell types available in the Census:
+
+```{r}
+as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(column_names=c("cell_type", "is_primary_data")))
+```
+
+The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data framet.
+
+In addition, we will only focus on cells that are marked with `is_primary_data=TRUE` as this ensures we de-duplicate cells that appear more than once in CELLxGENE Discover.
+
+```{r}
+human_cell_types <- as.data.frame(
+  census$get("census_data")$get("homo_sapiens")$obs$read(
+    column_names="cell_type",
+    value_filter="is_primary_data == TRUE")
+)$cell_type
+dim(human_cell_types)
+```
+
+This is the number of unique cells. Now let's look at the counts per cell type:
+
+```{r}
+human_cell_type_counts <- table(human_cell_types)
+t(human_cell_type_counts)
+```
+
+
+This shows you that the most abundant cell types are "glutamatergic neuron", "CD8-positive, alpha-beta T cell", and "CD4-positive, alpha-beta T cell".
+
+Now let's take a look at the number of unique cell types:
+
+```{r}
+dim(human_cell_type_counts)
+```
+
+That is the total number of different cell types for human.
+
+All the information in this example can be quickly obtained from the summary table at `census$get("census-info")$get("summary_cell_counts")`.
+
+The examples below are more complex and can only be achieved by accessing the cell metadata.
+
+### Example: cell types available in human liver
+
+Similar to the example above, we can learn what cell types are available for a specific tissue, e.g. liver.
+
+To achieve this goal we just need to limit our cell metadata to that tissue. We will use the information in the cell metadata variable `tissue_general`. This variable contains the high-level tissue label for all cells in the Census:
+
+```{r}
+human_liver_cell_types <- as.data.frame(
+  census$get("census_data")$get("homo_sapiens")$obs$read(
+    column_names="cell_type",
+    value_filter="is_primary_data == TRUE && tissue_general == 'liver")
+)$cell_type
+t(table(human_liver_cell_types))
+```
+
+These are the cell types and their cell counts in the human liver.
+
+### Example: diseased T cells in human tissues
+
+In this example we are going to get the counts for all diseased cells annotated as T cells. For the sake of the example we will focus on "CD8-positive, alpha-beta T cell" and "CD4-positive, alpha-beta T cell":
+
+```{r}
+t_cells_diseased <- as.data.frame(
+  census$get("census_data")$get("homo_sapiens")$obs$read(
+    column_names=c("disease","tissue_general"),
+    value_filter="is_primary_data == TRUE && disease != 'normal' && cell_type %in% c('CD8-positive, alpha-beta T cell', 'CD4-positive, alpha-beta T cell')"))
+t(table(t_cells_diseased))
+```
+
+These are the cell counts annotated with the indicated disease across human tissues for "CD8-positive, alpha-beta T cell" or "CD4-positive, alpha-beta T cell".
+
