@@ -84,8 +84,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert soma.Collection.exists(census.uri)
-        assert census.metadata["cxg_schema_version"] == CXG_SCHEMA_VERSION
-        assert census.metadata["census_schema_version"] == CENSUS_SCHEMA_VERSION
         assert datetime.fromisoformat(census.metadata["created_on"])
         assert "git_commit_sha" in census.metadata
 
@@ -102,6 +100,16 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
             list(CENSUS_SUMMARY_CELL_COUNTS_COLUMNS) + ["soma_joinid"]
         )
         assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
+
+        census_summary = census[CENSUS_INFO_NAME][CENSUS_SUMMARY_NAME].read().concat().to_pandas()
+        assert (
+            census_summary.loc[census_summary["label"] == "census_schema_version"].iloc[0]["value"]
+            == CENSUS_SCHEMA_VERSION
+        )
+        assert (
+            census_summary.loc[census_summary["label"] == "dataset_schema_version"].iloc[0]["value"]
+            == CXG_SCHEMA_VERSION
+        )
 
         # verify required dataset fields are set
         df: pd.DataFrame = census_info[CENSUS_DATASETS_NAME].read().concat().to_pandas()
