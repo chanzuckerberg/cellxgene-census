@@ -1,5 +1,5 @@
 ---
-title: "Census query & extract subsets"
+title: "Integrating multi-dataset slices of data with Seurat"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Census query & extract subsets}
@@ -11,8 +11,9 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7,
-  fig.height = 7
+  fig.width = 5,
+  fig.height = 5,
+  fig.align='center'
 )
 options(width = 80)
 ```
@@ -21,8 +22,6 @@ options(width = 80)
 THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_data_integration_scvi.ipynb
 
 -->
-
-# Integrating multi-dataset slices of data
 
 The Census contains data from multiple studies providing an opportunity to perform inter-dataset analysis. To this end integration of data has to be performed first to account for batch effects.
 
@@ -143,7 +142,7 @@ p1 <- DimPlot(seurat_obj, reduction = "umap", group.by = "assay")
 p1
 ```
 
-```{r}
+```{r, fig.width = 7, fig.height = 5}
 # By cell type
 p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "cell_type")
 p2
@@ -210,7 +209,7 @@ p1
 ```
 
 
-```{r}
+```{r, fig.width = 7, fig.height = 5}
 # By cell type
 p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
 p2
@@ -261,10 +260,11 @@ Plot the UMAP.
 ```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 # By assay
 p1 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "assay")
+p1
 ```
 
 
-```{r}
+```{r, fig.width = 7, fig.height = 5}
 # By cell type
 p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
 p2
