@@ -250,7 +250,7 @@ Now we can iterate over the matrix count, as well as the cell and gene metadata.
 ```r
     # Continued from above 
     
-    iterator = query.X("raw", iterated = TRUE)
+    iterator = query$X("raw", iterated = TRUE)
     
     # Get an iterative slice as pyarrow.Table
     raw_slice = iterator$read_next() 
