@@ -41,7 +41,7 @@ This notebook provides a demonstration for integrating two Census datasets using
 
 Let's load all modules needed for this notebook.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(cellxgene.census)
 library(Seurat)
 library(patchwork)
@@ -61,7 +61,6 @@ In this notebook we will use Tabula Muris Senis data from the liver as it contai
 Let's query the `datasets` table of the Census by filtering on `collection_name` for "Tabula Muris Senis" and `dataset_title` for "liver". 
 
 ```{r}
-
 census_datasets <- census$get("census_info")$get("datasets")
 census_datasets <- census_datasets$read(value_filter="collection_name == 'Tabula Muris Senis'")
 census_datasets <- as.data.frame(census_datasets)
@@ -72,14 +71,13 @@ census_datasets [grep("Liver", census_datasets$dataset_title), ]
 
 Now we can use the values from `dataset_id` to query and load an AnnData object with all the cells from those datasets. 
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 tabula_muris_liver_ids <- c("4546e757-34d0-4d17-be06-538318925fcd", "6202a243-b713-4e12-9ced-c387f8483dea")
 
 seurat_obj = cellxgene.census::get_seurat(
     census, organism="Mus musculus", 
     obs_value_filter="dataset_id %in% c('4546e757-34d0-4d17-be06-538318925fcd', '6202a243-b713-4e12-9ced-c387f8483dea')"
 )
-
 ```
 
 We can check the cell counts for both 10X Genomics and Smart-Seq2 data by looking at `assay` in the metadata.
@@ -126,13 +124,13 @@ Let's take a look at the strength of batch effects in our data. For that we will
 
 Let's do basic data normalization and variable gene selection
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 seurat_obj <- SCTransform(seurat_obj)
 seurat_obj <- FindVariableFeatures(seurat_obj, selection.method = "vst", nfeatures = 2000)
 ```
 
 And now perform PCA and UMAP
-```{r}
+```{r, warning=FALSE, message=FALSE}
 seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj))
 seurat_obj <- RunUMAP(seurat_obj, dims = 1:10)
 ```
@@ -147,11 +145,6 @@ p1 <- DimPlot(seurat_obj, reduction = "umap", group.by = "assay")
 p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "cell_type")
 
 p1 + p2 
-```
-
-```{r}
-Idents(object = seurat_obj) <- seurat_obj$cell_type
-DimPlot(seurat_obj, reduction = "umap")
 ```
 
 You can see that **batch effects are strong** as cells cluster primarily by `assay` and then by `cell_type`. Properly integrated embedding would in principle cluster primarily by `cell_type`, `assay` should at best randomly distributed. 
@@ -174,7 +167,7 @@ So let's run a Seurat integration pipeline. First we define our model with batch
 
 Firs normalize and select variable genes seperated by our batch key `dataset_id`
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 # split the dataset into a list of two seurat objects for each dataset
 seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
@@ -189,7 +182,7 @@ features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
 
 Now we perform integration.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
 seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
 seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
@@ -197,7 +190,7 @@ seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalizati
 
 Let's inspect the results by doing normalization and then UMAP visulization.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 DefaultAssay(seurat_obj.combined) <- "integrated"
 
 # Run the standard workflow for visualization and clustering
@@ -208,7 +201,7 @@ seurat_obj.combined <- RunUMAP(seurat_obj.combined, reduction = "pca", dims = 1:
 
 And plot the UMAP.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 # By assay
 #Idents(object = seurat_obj) <- seurat_obj$assay
 p1 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "assay")
@@ -228,7 +221,7 @@ Similar to `dataset_id`, all cells in Census are annotated with `donor_id`. The 
 Because `donor_id` is not guaranteed to be unique across all cells of the Census, we strongly recommend concatenating `dataset_id` and `donor_id` and use that as the batch separator for Seurat
 
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 # split the dataset into a list of two seurat objects for each dataset
 seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
@@ -287,20 +280,21 @@ This how the implementation would look line
 
 ```{r, eval=FALSE}
 # EXAMPLE, DON'T RUN.
-
-# split the dataset into a list of seurat objects for each dataset
-seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
-
-# normalize each dataset independently controlling for batch
-seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
-})
-
-# select features for integration
-features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
-
-# integrate
-seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
-seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
-seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
+if(FALSE) {
+  # split the dataset into a list of seurat objects for each dataset
+  seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
+  
+  # normalize each dataset independently controlling for batch
+  seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
+      x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
+  })
+  
+  # select features for integration
+  features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
+  
+  # integrate
+  seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
+  seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
+  seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
+}
 ```
