@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 7
 )
 options(width = 80)
 ```
@@ -71,7 +73,7 @@ census_datasets [grep("Liver", census_datasets$dataset_title), ]
 
 Now we can use the values from `dataset_id` to query and load an AnnData object with all the cells from those datasets. 
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 tabula_muris_liver_ids <- c("4546e757-34d0-4d17-be06-538318925fcd", "6202a243-b713-4e12-9ced-c387f8483dea")
 
 seurat_obj = cellxgene.census::get_seurat(
@@ -124,27 +126,27 @@ Let's take a look at the strength of batch effects in our data. For that we will
 
 Let's do basic data normalization and variable gene selection
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 seurat_obj <- SCTransform(seurat_obj)
 seurat_obj <- FindVariableFeatures(seurat_obj, selection.method = "vst", nfeatures = 2000)
 ```
 
 And now perform PCA and UMAP
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj))
 seurat_obj <- RunUMAP(seurat_obj, dims = 1:10)
 ```
 
 ```{r}
 # By assay
-#Idents(object = seurat_obj) <- seurat_obj$assay
 p1 <- DimPlot(seurat_obj, reduction = "umap", group.by = "assay")
+p1
+```
 
+```{r}
 # By cell type
-#Idents(object = seurat_obj) <- seurat_obj$cell_type
 p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "cell_type")
-
-p1 + p2 
+p2
 ```
 
 You can see that **batch effects are strong** as cells cluster primarily by `assay` and then by `cell_type`. Properly integrated embedding would in principle cluster primarily by `cell_type`, `assay` should at best randomly distributed. 
@@ -167,7 +169,7 @@ So let's run a Seurat integration pipeline. First we define our model with batch
 
 Firs normalize and select variable genes seperated by our batch key `dataset_id`
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 # split the dataset into a list of two seurat objects for each dataset
 seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
@@ -182,7 +184,7 @@ features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
 
 Now we perform integration.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
 seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
 seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
@@ -190,7 +192,7 @@ seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalizati
 
 Let's inspect the results by doing normalization and then UMAP visulization.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 DefaultAssay(seurat_obj.combined) <- "integrated"
 
 # Run the standard workflow for visualization and clustering
@@ -201,17 +203,19 @@ seurat_obj.combined <- RunUMAP(seurat_obj.combined, reduction = "pca", dims = 1:
 
 And plot the UMAP.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 # By assay
-#Idents(object = seurat_obj) <- seurat_obj$assay
 p1 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "assay")
-
-# By cell type
-#Idents(object = seurat_obj) <- seurat_obj$cell_type
-p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
-
-p1 + p2 
+p1
 ```
+
+
+```{r}
+# By cell type
+p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
+p2
+```
+
 Great! You can see that the clustering is no longer mainly driven by assay, albeit still contributing to it.
 
 #### Integration across datasets using `dataset_id` and controlling for batch using `donor_id`
@@ -221,7 +225,7 @@ Similar to `dataset_id`, all cells in Census are annotated with `donor_id`. The 
 Because `donor_id` is not guaranteed to be unique across all cells of the Census, we strongly recommend concatenating `dataset_id` and `donor_id` and use that as the batch separator for Seurat
 
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 # split the dataset into a list of two seurat objects for each dataset
 seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
@@ -254,16 +258,16 @@ seurat_obj.combined <- RunUMAP(seurat_obj.combined, reduction = "pca", dims = 1:
 
 Plot the UMAP.
 
-```{r}
+```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 # By assay
-#Idents(object = seurat_obj) <- seurat_obj$assay
 p1 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "assay")
+```
 
+
+```{r}
 # By cell type
-#Idents(object = seurat_obj) <- seurat_obj$cell_type
 p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
-
-p1 + p2
+p2
 ```
 
 As you can see using `dataset_id` and `donor_id` as batch the cells now mostly cluster by cell type. 
@@ -280,21 +284,20 @@ This how the implementation would look line
 
 ```{r, eval=FALSE}
 # EXAMPLE, DON'T RUN.
-if(FALSE) {
-  # split the dataset into a list of seurat objects for each dataset
-  seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
-  
-  # normalize each dataset independently controlling for batch
-  seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-      x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
-  })
-  
-  # select features for integration
-  features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
-  
-  # integrate
-  seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
-  seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
-  seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
-}
+
+# split the dataset into a list of seurat objects for each dataset
+seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
+
+# normalize each dataset independently controlling for batch
+seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
+    x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
+})
+
+# select features for integration
+features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
+
+# integrate
+seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
+seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
+seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
 ```
