@@ -1,0 +1,306 @@
+---
+title: "Census query & extract subsets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Census query & extract subsets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 80)
+```
+
+<!--
+THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_data_integration_scvi.ipynb
+
+-->
+
+# Integrating multi-dataset slices of data
+
+The Census contains data from multiple studies providing an opportunity to perform inter-dataset analysis. To this end integration of data has to be performed first to account for batch effects.
+
+This notebook provides a demonstration for integrating two Census datasets using [`Seurat`](https://satijalab.org/seurat/articles/integration_introduction.html). **The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.**
+
+**Contents**
+
+1. Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2).
+2. Gene-length normalization of Smart-Seq2 data.
+3. Integration with `Seurat`.
+   1. Inspecting data prior to integration.
+   2. Integration across datasets using `dataset_id`.
+   3. Integration across datasets using `dataset_id` and controlling for batch using `donor_id`.
+   4. Integration across datasets using `dataset_id` and controlling for batch using `donor_id` + `assay_ontology_term_id` + `suspension_type`.
+.
+
+## Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2)
+
+Let's load all modules needed for this notebook.
+
+```{r}
+library(cellxgene.census)
+library(Seurat)
+library(patchwork)
+```
+
+Now we can open the Census.
+
+```{r}
+ctx <- tiledbsoma::SOMATileDBContext$new(
+  config = c("soma.init_buffer_bytes" = "1073741824")
+)
+census <- cellxgene.census::open_soma(tiledbsoma_ctx = ctx)
+```
+
+In this notebook we will use Tabula Muris Senis data from the liver as it contains cells from both 10X Genomics and Smart-Seq2 technologies.
+
+Let's query the `datasets` table of the Census by filtering on `collection_name` for "Tabula Muris Senis" and `dataset_title` for "liver". 
+
+```{r}
+
+census_datasets <- census$get("census_info")$get("datasets")
+census_datasets <- census_datasets$read(value_filter="collection_name == 'Tabula Muris Senis'")
+census_datasets <- as.data.frame(census_datasets)
+
+# Print rows with liver data
+census_datasets [grep("Liver", census_datasets$dataset_title), ] 
+```
+
+Now we can use the values from `dataset_id` to query and load an AnnData object with all the cells from those datasets. 
+
+```{r}
+tabula_muris_liver_ids <- c("4546e757-34d0-4d17-be06-538318925fcd", "6202a243-b713-4e12-9ced-c387f8483dea")
+
+seurat_obj = cellxgene.census::get_seurat(
+    census, organism="Mus musculus", 
+    obs_value_filter="dataset_id %in% c('4546e757-34d0-4d17-be06-538318925fcd', '6202a243-b713-4e12-9ced-c387f8483dea')"
+)
+
+```
+
+We can check the cell counts for both 10X Genomics and Smart-Seq2 data by looking at `assay` in the metadata.
+
+```{r}
+table(seurat_obj$assay)
+```
+
+
+## Gene-length normalization of Smart-Seq2 data.
+
+Smart-seq2 read counts have to be normalized by gene length. For full details on gene-length normalization take a look at the notebook [Normalizing full-length gene sequencing data from the Census](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html).
+
+Lets first get the gene lengths from `var.feature_length`.
+
+```{r}
+smart_seq_gene_lengths <- seurat_obj[["RNA"]]@meta.features$feature_length
+```
+
+
+Now we can use those to normalize Smart-seq data. So let's  split the object by assay.
+
+```{r}
+seurat_obj.list <- SplitObject(seurat_obj, split.by = "assay")
+```
+
+
+An normalize the Smart-seq slice using the gene lengths and merge them back into a single object.
+
+```{r}
+seurat_obj.list[["Smart-seq2"]][["RNA"]]@counts <- seurat_obj.list[["Smart-seq2"]][["RNA"]]@counts / smart_seq_gene_lengths
+seurat_obj <- merge(seurat_obj.list[[1]], seurat_obj.list[[2]])
+```
+
+## Integration with Seurat
+
+Here we will use the native integration capabilities of Seurat.
+
+**For comprehensive usage and best practices of Seurat intergation please refer to the [doc site](https://satijalab.org/seurat/articles/integration_introduction.html) of `Seurat`.**
+
+### Inspecting data prior to integration
+
+Let's take a look at the strength of batch effects in our data. For that we will perform embedding visualization via UMAP.
+
+Let's do basic data normalization and variable gene selection
+
+```{r}
+seurat_obj <- SCTransform(seurat_obj)
+seurat_obj <- FindVariableFeatures(seurat_obj, selection.method = "vst", nfeatures = 2000)
+```
+
+And now perform PCA and UMAP
+```{r}
+seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj))
+seurat_obj <- RunUMAP(seurat_obj, dims = 1:10)
+```
+
+```{r}
+# By assay
+#Idents(object = seurat_obj) <- seurat_obj$assay
+p1 <- DimPlot(seurat_obj, reduction = "umap", group.by = "assay")
+
+# By cell type
+#Idents(object = seurat_obj) <- seurat_obj$cell_type
+p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "cell_type")
+
+p1 + p2 
+```
+
+```{r}
+Idents(object = seurat_obj) <- seurat_obj$cell_type
+DimPlot(seurat_obj, reduction = "umap")
+```
+
+You can see that **batch effects are strong** as cells cluster primarily by `assay` and then by `cell_type`. Properly integrated embedding would in principle cluster primarily by `cell_type`, `assay` should at best randomly distributed. 
+
+### Data integration with Seurat
+
+Whenever you query and fetch Census data from multiple datasets then integration needs to be performed as evidenced by the batch effects we observed.
+
+**The paramaters for Seurat used in this notebook were selected to the model run quickly.** For best practices on integration of single-cell data using [`Seurat`](https://satijalab.org/seurat/index.html) please refer to their documentation page. 
+
+Additionally we recommend reading the article [An integrated cell atlas of the human lung in health and disease](https://www.biorxiv.org/content/10.1101/2022.03.10.483747v1) by Sikkema et al. whom perfomed integration of 43 datasets from Lung.
+
+Here we focus on the metadata from the Census that can be as batch information for integration.
+
+#### Integration across datasets using `dataset_id`
+
+All cells in the Census are annotated with the dataset they come from in `"dataset_id"`. This is a great place to start for integration.
+
+So let's run a Seurat integration pipeline. First we define our model with batch set as `dataset_id`.
+
+Firs normalize and select variable genes seperated by our batch key `dataset_id`
+
+```{r}
+# split the dataset into a list of two seurat objects for each dataset
+seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
+
+# normalize each dataset independently
+seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
+    x <- SCTransform(x)
+})
+
+# select features for integration
+features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
+```
+
+Now we perform integration.
+
+```{r}
+seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
+seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
+seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
+```
+
+Let's inspect the results by doing normalization and then UMAP visulization.
+
+```{r}
+DefaultAssay(seurat_obj.combined) <- "integrated"
+
+# Run the standard workflow for visualization and clustering
+seurat_obj.combined <- ScaleData(seurat_obj.combined, verbose = FALSE)
+seurat_obj.combined <- RunPCA(seurat_obj.combined, npcs = 30, verbose = FALSE)
+seurat_obj.combined <- RunUMAP(seurat_obj.combined, reduction = "pca", dims = 1:30)
+```
+
+And plot the UMAP.
+
+```{r}
+# By assay
+#Idents(object = seurat_obj) <- seurat_obj$assay
+p1 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "assay")
+
+# By cell type
+#Idents(object = seurat_obj) <- seurat_obj$cell_type
+p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
+
+p1 + p2 
+```
+Great! You can see that the clustering is no longer mainly driven by assay, albeit still contributing to it.
+
+#### Integration across datasets using `dataset_id` and controlling for batch using `donor_id`
+
+Similar to `dataset_id`, all cells in Census are annotated with `donor_id`. The definition of `donor_id` depends on the dataset and it is left to the discretion of data curators. However it is still rich in information and can be used as a batch variable during integration.
+
+Because `donor_id` is not guaranteed to be unique across all cells of the Census, we strongly recommend concatenating `dataset_id` and `donor_id` and use that as the batch separator for Seurat
+
+
+```{r}
+# split the dataset into a list of two seurat objects for each dataset
+seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
+
+# normalize each dataset independently controlling for batch
+seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
+    x <- SCTransform(x, vars.to.regress = "donor_id")
+})
+
+# select features for integration
+features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
+```
+
+Now we perform integration.
+
+```{r}
+seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
+seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
+seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
+```
+
+And inspect the new results by UMAP.
+
+```{r}
+DefaultAssay(seurat_obj.combined) <- "integrated"
+
+# Run the standard workflow for visualization and clustering
+seurat_obj.combined <- RunPCA(seurat_obj.combined, npcs = 30, verbose = FALSE)
+seurat_obj.combined <- RunUMAP(seurat_obj.combined, reduction = "pca", dims = 1:30)
+```
+
+Plot the UMAP.
+
+```{r}
+# By assay
+#Idents(object = seurat_obj) <- seurat_obj$assay
+p1 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "assay")
+
+# By cell type
+#Idents(object = seurat_obj) <- seurat_obj$cell_type
+p2 <- DimPlot(seurat_obj.combined, reduction = "umap", group.by = "cell_type")
+
+p1 + p2
+```
+
+As you can see using `dataset_id` and `donor_id` as batch the cells now mostly cluster by cell type. 
+
+#### Integration across datasets using `dataset_id` and controlling for batch using `donor_id` + `assay_ontology_term_id` + `suspension_type`.
+
+In some cases one dataset may contain multiple assay types and/or multiple suspension types (cell vs nucleus), and for those it is important to consider these metadata as batches. 
+
+Therefore, the most comprehensive definition of batch in the Census can be accomplished by combining the cell metadata of `dataset_id`, `donor_id`, `assay_ontology_term_id` and `suspension_type`, the latter will encode the `EFO` ids for assay types.
+
+In our example, the two datasets that we used only contain cells from one assay each, and one suspension type for all of them. Thus it would not make a difference to include these metadata as part of batch.
+
+This how the implementation would look line
+
+```{r, eval=FALSE}
+# EXAMPLE, DON'T RUN.
+
+# split the dataset into a list of seurat objects for each dataset
+seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
+
+# normalize each dataset independently controlling for batch
+seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
+    x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
+})
+
+# select features for integration
+features <- SelectIntegrationFeatures(object.list = seurat_obj.list)
+
+# integrate
+seurat_obj.list <- PrepSCTIntegration(seurat_obj.list, anchor.features = features)
+seurat_obj.anchors <- FindIntegrationAnchors(object.list = seurat_obj.list, anchor.features = features, normalization.method = "SCT")
+seurat_obj.combined <- IntegrateData(anchorset = seurat_obj.anchors, normalization.method = "SCT")
+```
