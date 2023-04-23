@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 5,
   fig.height = 5,
-  fig.align='center'
+  fig.align = "center"
 )
 options(width = 80)
 ```
@@ -63,11 +63,11 @@ Let's query the `datasets` table of the Census by filtering on `collection_name`
 
 ```{r}
 census_datasets <- census$get("census_info")$get("datasets")
-census_datasets <- census_datasets$read(value_filter="collection_name == 'Tabula Muris Senis'")
+census_datasets <- census_datasets$read(value_filter = "collection_name == 'Tabula Muris Senis'")
 census_datasets <- as.data.frame(census_datasets)
 
 # Print rows with liver data
-census_datasets [grep("Liver", census_datasets$dataset_title), ] 
+census_datasets[grep("Liver", census_datasets$dataset_title), ]
 ```
 
 Now we can use the values from `dataset_id` to query and load an AnnData object with all the cells from those datasets. 
@@ -75,9 +75,10 @@ Now we can use the values from `dataset_id` to query and load an AnnData object 
 ```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 tabula_muris_liver_ids <- c("4546e757-34d0-4d17-be06-538318925fcd", "6202a243-b713-4e12-9ced-c387f8483dea")
 
-seurat_obj = cellxgene.census::get_seurat(
-    census, organism="Mus musculus", 
-    obs_value_filter="dataset_id %in% c('4546e757-34d0-4d17-be06-538318925fcd', '6202a243-b713-4e12-9ced-c387f8483dea')"
+seurat_obj <- cellxgene.census::get_seurat(
+  census,
+  organism = "Mus musculus",
+  obs_value_filter = "dataset_id %in% c('4546e757-34d0-4d17-be06-538318925fcd', '6202a243-b713-4e12-9ced-c387f8483dea')"
 )
 ```
 
@@ -174,7 +175,7 @@ seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
 # normalize each dataset independently
 seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x)
+  x <- SCTransform(x)
 })
 
 # select features for integration
@@ -230,7 +231,7 @@ seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
 # normalize each dataset independently controlling for batch
 seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x, vars.to.regress = "donor_id")
+  x <- SCTransform(x, vars.to.regress = "donor_id")
 })
 
 # select features for integration
@@ -290,7 +291,7 @@ seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
 # normalize each dataset independently controlling for batch
 seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
+  x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
 })
 
 # select features for integration
