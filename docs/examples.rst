@@ -1,7 +1,4 @@
-.. meta::
-    :name=robots: noindex
-   
-Examples
+Tutorials
 ==========
 
 API

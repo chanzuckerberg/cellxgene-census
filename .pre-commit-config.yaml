@@ -9,9 +9,9 @@ repos:
         files: ^api/python/notebooks
         args: ["--config", "./api/python/notebooks/pyproject.toml"]
       - id: black
-        name: black-cell-census
-        files: ^api/python/cell_census
-        args: ["--config", "./api/python/cell_census/pyproject.toml"]
+        name: black-cellxgene-census
+        files: ^api/python/cellxgene_census
+        args: ["--config", "./api/python/cellxgene_census/pyproject.toml"]
       - id: black
         name: black-tools
         files: ^tools
@@ -21,9 +21,9 @@ repos:
     rev: v0.0.249
     hooks:
       - id: ruff
-        name: ruff-cell-census
-        files: ^api/python/cell_census
-        args: ["--config=./api/python/cell_census/pyproject.toml", "--fix"]
+        name: ruff-cellxgene-census
+        files: ^api/python/cellxgene_census
+        args: ["--config=./api/python/cellxgene_census/pyproject.toml", "--fix"]
       - id: ruff
         name: ruff-tools
         files: ^tools
@@ -33,9 +33,9 @@ repos:
     rev: v1.0.1
     hooks:
       - id: mypy
-        name: mypy-cell-census
-        files: ^api/python/cell_census
-        args: ["--config-file=./api/python/cell_census/pyproject.toml"]
+        name: mypy-cellxgene-census
+        files: ^api/python/cellxgene_census
+        args: ["--config-file=./api/python/cellxgene_census/pyproject.toml"]
         additional_dependencies:
           - types-requests
           - pytest
@@ -54,3 +54,9 @@ repos:
           - numpy
           - typing_extensions
           - types-setuptools
+          - types-PyYAML
+
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.6.4
+    hooks:
+      - id: nbqa-black

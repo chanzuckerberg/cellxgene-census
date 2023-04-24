@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+
+[project]
+name = "cell_census"
+dynamic = ["version"]
+description = "cell-census is now cellxgene-census"
+readme = "README.md"
+authors = [
+    { name = "Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com" }
+]
+dependencies = [
+    "cellxgene-census"
+]
+classifiers = [
+    "Development Status :: 7 - Inactive",
+]
+
+[tool.setuptools_scm]
+root = "../../.."
