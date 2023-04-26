@@ -38,6 +38,8 @@ dependencies= [
     "typing_extensions",
     "s3fs",
     "scipy",
+    # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
+    "certifi",
 ]
 
 [project.urls]
