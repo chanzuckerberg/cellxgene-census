@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Exploring the Census Datasets table &mdash; cellxgene-census 0.5.0 documentation</title>
+  
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Querying and fetching the single-cell data and cell/gene metadata." href="census_query_extract.html" />
+    <link rel="prev" title="Genes measured in each cell (dataset presence matrix)" href="census_dataset_presence.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    0.5
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Exploring the Census Datasets table</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Fetching-the-datasets-table">Fetching the datasets table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Fetching-the-expression-data-from-a-single-dataset">Fetching the expression data from a single dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Downloading-the-original-source-H5AD-file-of-a-dataset.">Downloading the original source H5AD file of a dataset.</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Exploring the Census Datasets table</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_datasets.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Exploring-the-Census-Datasets-table">
+<h1>Exploring the Census Datasets table<a class="headerlink" href="#Exploring-the-Census-Datasets-table" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial demonstrates basic use of the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe that contains metadata of the Census source datasets. This metadata can be joined to the cell metadata dataframe (<code class="docutils literal notranslate"><span class="pre">obs</span></code>) via the column <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>,</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Fetching the datasets table.</p></li>
+<li><p>Fetching the expression data from a single dataset.</p></li>
+<li><p>Downloading the original source H5AD file of a dataset.</p></li>
+</ol>
+<section id="Fetching-the-datasets-table">
+<h2>Fetching the datasets table<a class="headerlink" href="#Fetching-the-datasets-table" title="Permalink to this heading">¶</a></h2>
+<p>Each Census contains a top-level dataframe itemizing the datasets contained therein. You can read this into a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
+
+census = cellxgene_census.open_soma()
+census_datasets = census[&quot;census_info&quot;][&quot;datasets&quot;].read().concat().to_pandas()
+
+# for convenience, indexing on the soma_joinid which links this to other census data.
+census_datasets = census_datasets.set_index(&quot;soma_joinid&quot;)
+
+census_datasets
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>collection_id</th>
+      <th>collection_name</th>
+      <th>collection_doi</th>
+      <th>dataset_id</th>
+      <th>dataset_title</th>
+      <th>dataset_h5ad_path</th>
+      <th>dataset_total_cell_count</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>43d4bb39-21af-4d05-b973-4c1fed7b916c</td>
+      <td>Transcriptional Programming of Normal and Infl...</td>
+      <td>10.1016/j.celrep.2018.09.006</td>
+      <td>f512b8b6-369d-4a85-a695-116e0806857f</td>
+      <td>Skin</td>
+      <td>f512b8b6-369d-4a85-a695-116e0806857f.h5ad</td>
+      <td>68036</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2b02dff7-e427-4cdc-96fb-c0f354c099aa</td>
+      <td>Single-Cell Analysis of Crohn’s Disease Lesion...</td>
+      <td>10.1016/j.cell.2019.08.008</td>
+      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
+      <td>Ileum</td>
+      <td>36c867a7-be10-4e69-9b39-5de12b0af6da.h5ad</td>
+      <td>32458</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>e9eec7f5-8519-42f6-99b4-6dbd9cc5ef03</td>
+      <td>Humoral immunity at the brain borders in homeo...</td>
+      <td>10.1016/j.coi.2022.102188</td>
+      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</td>
+      <td>A scRNA-seq atlas of immune cells at the CNS b...</td>
+      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff.h5ad</td>
+      <td>130908</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>a72afd53-ab92-4511-88da-252fb0e26b9a</td>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>10.1038/s41591-020-0944-y</td>
+      <td>456e8b9b-f872-488b-871d-94534090a865</td>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>456e8b9b-f872-488b-871d-94534090a865.h5ad</td>
+      <td>44721</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>e4c9ed14-e560-4900-a3bf-b0f8d2ce6a10</td>
+      <td>A molecular single-cell lung atlas of lethal C...</td>
+      <td>10.1038/s41586-021-03569-1</td>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
+      <td>A molecular single-cell lung atlas of lethal C...</td>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f.h5ad</td>
+      <td>116313</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>524</th>
+      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
+      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
+      <td></td>
+      <td>30498543-4fdd-4f86-9e1b-05c1a1454a6a</td>
+      <td>B cells -- CV19 infection, vaccination and HC</td>
+      <td>30498543-4fdd-4f86-9e1b-05c1a1454a6a.h5ad</td>
+      <td>20727</td>
+    </tr>
+    <tr>
+      <th>525</th>
+      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
+      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
+      <td></td>
+      <td>b5191f01-f67d-44b8-bc8d-511a4ecd07bb</td>
+      <td>innate T cells -- CV19 infection, vaccination ...</td>
+      <td>b5191f01-f67d-44b8-bc8d-511a4ecd07bb.h5ad</td>
+      <td>33415</td>
+    </tr>
+    <tr>
+      <th>526</th>
+      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
+      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
+      <td></td>
+      <td>e463dae9-3fc1-476d-870e-d98a04c56cd6</td>
+      <td>M cells -- CV19 infection, vaccination and HC</td>
+      <td>e463dae9-3fc1-476d-870e-d98a04c56cd6.h5ad</td>
+      <td>41130</td>
+    </tr>
+    <tr>
+      <th>527</th>
+      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
+      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
+      <td></td>
+      <td>1b699e04-1127-42ea-998b-011ace4a5b81</td>
+      <td>T cells -- CV19 infection, vaccination and HC</td>
+      <td>1b699e04-1127-42ea-998b-011ace4a5b81.h5ad</td>
+      <td>98068</td>
+    </tr>
+    <tr>
+      <th>528</th>
+      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
+      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
+      <td></td>
+      <td>87ce26ed-e5d1-44b4-81cc-cc5b709a169f</td>
+      <td>Circulating Immune cells -- CV19 infection, va...</td>
+      <td>87ce26ed-e5d1-44b4-81cc-cc5b709a169f.h5ad</td>
+      <td>195632</td>
+    </tr>
+  </tbody>
+</table>
+<p>529 rows × 7 columns</p>
+</div></div>
+</div>
+<p>The sum cells across all datasets should match the number of cells across all SOMA experiments (human, mouse).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Count cells across all experiments
+all_experiments = (
+    (organism_name, organism_experiment) for organism_name, organism_experiment in census[&quot;census_data&quot;].items()
+)
+experiments_total_cells = 0
+print(&quot;Count by experiment:&quot;)
+for organism_name, organism_experiment in all_experiments:
+    num_cells = len(organism_experiment.obs.read(column_names=[&quot;soma_joinid&quot;]).concat().to_pandas())
+    print(f&quot;\t{num_cells} cells in {organism_name}&quot;)
+    experiments_total_cells += num_cells
+
+print(f&quot;\nFound {experiments_total_cells} cells in all experiments.&quot;)
+
+# Count cells across all datasets
+print(f&quot;Found {census_datasets.dataset_total_cell_count.sum()} cells in all datasets.&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Count by experiment:
+        46050829 cells in homo_sapiens
+        3922090 cells in mus_musculus
+
+Found 49972919 cells in all experiments.
+Found 49972919 cells in all datasets.
+</pre></div></div>
+</div>
+</section>
+<section id="Fetching-the-expression-data-from-a-single-dataset">
+<h2>Fetching the expression data from a single dataset<a class="headerlink" href="#Fetching-the-expression-data-from-a-single-dataset" title="Permalink to this heading">¶</a></h2>
+<p>Lets pick one dataset to slice out of the census, and turn into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> in-memory object. This can be used with the <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/">ScanPy</a> toolchain. You can also save this AnnData locally using the AnnData <code class="docutils literal notranslate"><span class="pre">`write</span></code> &lt;<a class="reference external" href="https://anndata.readthedocs.io/en/latest/api.html#writing">https://anndata.readthedocs.io/en/latest/api.html#writing</a>&gt;`__ API.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_datasets[census_datasets.dataset_id == &quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;]
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>collection_id</th>
+      <th>collection_name</th>
+      <th>collection_doi</th>
+      <th>dataset_id</th>
+      <th>dataset_title</th>
+      <th>dataset_h5ad_path</th>
+      <th>dataset_total_cell_count</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>197</th>
+      <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>
+      <td>Tabula Muris Senis</td>
+      <td>10.1038/s41586-020-2496-1</td>
+      <td>0bd1a1de-3aee-40e0-b2ec-86c7a30c7149</td>
+      <td>Bone marrow - A single-cell transcriptomic atl...</td>
+      <td>0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad</td>
+      <td>40220</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Create a query on the mouse experiment, “RNA” measurement, for the dataset_id.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>adata = cellxgene_census.get_anndata(
+    census, organism=&quot;Mus musculus&quot;, obs_value_filter=&quot;dataset_id == &#39;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&#39;&quot;
+)
+
+adata
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 40220 × 52392
+    obs: &#39;soma_joinid&#39;, &#39;dataset_id&#39;, &#39;assay&#39;, &#39;assay_ontology_term_id&#39;, &#39;cell_type&#39;, &#39;cell_type_ontology_term_id&#39;, &#39;development_stage&#39;, &#39;development_stage_ontology_term_id&#39;, &#39;disease&#39;, &#39;disease_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;is_primary_data&#39;, &#39;self_reported_ethnicity&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex&#39;, &#39;sex_ontology_term_id&#39;, &#39;suspension_type&#39;, &#39;tissue&#39;, &#39;tissue_ontology_term_id&#39;, &#39;tissue_general&#39;, &#39;tissue_general_ontology_term_id&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
+</pre></div></div>
+</div>
+</section>
+<section id="Downloading-the-original-source-H5AD-file-of-a-dataset.">
+<h2>Downloading the original source H5AD file of a dataset.<a class="headerlink" href="#Downloading-the-original-source-H5AD-file-of-a-dataset." title="Permalink to this heading">¶</a></h2>
+<p>You can download the original H5AD file for any given dataset. This is the same H5AD you can download from the <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>, and may contain additional data-submitter provided information which was not included in the Census.</p>
+<p>To do this you can fetch the location in the cloud or directly download to your system using the <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Option 1: Direct download
+cellxgene_census.download_source_h5ad(
+    &quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;, to_path=&quot;Tabula_Muris_Senis-bone_marrow.h5ad&quot;
+)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Option 2: Get location and download via preferred method
+uri = cellxgene_census.get_source_h5ad_uri(&quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;)
+uri
+
+# you can now download the H5AD in shell via AWS CLI e.g. `aws s3 cp uri ./`
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2023-04-10/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad&#39;,
+ &#39;s3_region&#39;: &#39;us-west-2&#39;}
+</pre></div></div>
+</div>
+<p>Close the census</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_dataset_presence.html" class="btn btn-neutral float-left" title="Genes measured in each cell (dataset presence matrix)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_query_extract.html" class="btn btn-neutral float-right" title="Querying and fetching the single-cell data and cell/gene metadata." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

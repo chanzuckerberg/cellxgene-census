@@ -1,0 +1,867 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Computing on X using online (incremental) algorithms &mdash; cellxgene-census 0.5.0 documentation</title>
+  
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Genes measured in each cell (dataset presence matrix)" href="census_dataset_presence.html" />
+    <link rel="prev" title="Tutorials" href="../../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    0.5
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Computing on X using online (incremental) algorithms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Incremental-count-and-mean-calculation.">Incremental count and mean calculation.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Incremental-variance-calculation">Incremental variance calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Counting-cells-per-gene,-grouped-by-dataset_id">Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Computing on X using online (incremental) algorithms</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_compute_over_X.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Computing-on-X-using-online-(incremental)-algorithms">
+<h1>Computing on X using online (incremental) algorithms<a class="headerlink" href="#Computing-on-X-using-online-(incremental)-algorithms" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial showcases computing a variety of per-gene and per-cell statistics for a user-defined query using out-of-core operations.</p>
+<p><em>NOTE</em>: when query results are small enough to fit in memory, it may be easier to use the <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> Query class to extract an AnnData, and then just compute over that. This tutorial shows means of incrementally processing larger-than-core (RAM) data, where incremental (online) algorithms are used.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Incremental count and mean calculation.</p></li>
+<li><p>Incremental variance calculation.</p></li>
+<li><p>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import pandas as pd
+
+import cellxgene_census
+import tiledbsoma as soma
+from tiledbsoma.experiment_query import X_as_series
+</pre></div>
+</div>
+</div>
+<section id="Incremental-count-and-mean-calculation.">
+<h2>Incremental count and mean calculation.<a class="headerlink" href="#Incremental-count-and-mean-calculation." title="Permalink to this heading">¶</a></h2>
+<p>Many statistics, such as <code class="docutils literal notranslate"><span class="pre">mean</span></code>, are easy to calculate incrementally. This cell demonstrates a query on the <code class="docutils literal notranslate"><span class="pre">X['raw']</span></code> sparse nD array, which will return results in batches. Accumulate the sum and count incrementally, into <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_n</span></code>, and then compute mean.</p>
+<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names: * <code class="docutils literal notranslate"><span class="pre">soma_data</span></code> - the X value (float32) * <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> - the obs coordinate (int64) * <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> - the var coordinate (int64)</p>
+<p><strong>Important</strong>: the X matrices are joined to var/obs axis DataFrames by an integer join “id” (aka <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>). They are <em>NOT</em> positionally indexed, and any given cell or gene may have a <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> of any value (e.g., a large integer). In other words, for any given <code class="docutils literal notranslate"><span class="pre">X</span></code> value, the <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe, and the <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> coordinate corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
+<p>For convenience, the query package contains a utility function to simplify operations on query slices. <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> returns an indexer that can be used to wrap the output of <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>, converting from <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> to positional indexing. Positions are <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">N)</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code> are the number of results on the query for any given axis (equivalent to the Pandas <code class="docutils literal notranslate"><span class="pre">.iloc</span></code> of the axis dataframe).</p>
+<p>Key points: * it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations. * by default, data in the census is indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> and not positionally. Use <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> if you want positions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with cellxgene_census.open_soma() as census:
+    mouse = census[&quot;census_data&quot;][&quot;mus_musculus&quot;]
+    with mouse.axis_query(
+        measurement_name=&quot;RNA&quot;,
+        obs_query=soma.AxisQuery(value_filter=&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;),
+    ) as query:
+        var_df = query.var().concat().to_pandas().set_index(&quot;soma_joinid&quot;)
+        n_vars = len(var_df)
+
+        raw_n = np.zeros((n_vars,), dtype=np.int64)  # accumulate number of non-zero X values
+        raw_sum = np.zeros((n_vars,), dtype=np.float64)  # accumulate the sum of expression
+
+        # query.X() returns an iterator of pyarrow.Table, with X data in COO format.
+        # You can request an indexer from the query that will map it to positional indices
+        indexer = query.indexer
+        for arrow_tbl in query.X(&quot;raw&quot;).tables():
+            var_dim = indexer.by_var(arrow_tbl[&quot;soma_dim_1&quot;])
+            data = arrow_tbl[&quot;soma_data&quot;]
+            np.add.at(raw_n, var_dim, 1)
+            np.add.at(raw_sum, var_dim, data)
+
+    with np.errstate(divide=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
+        raw_mean = raw_sum / query.n_obs
+    raw_mean[np.isnan(raw_mean)] = 0
+
+    var_df = var_df.assign(raw_n=pd.Series(data=raw_n, index=var_df.index))
+    var_df = var_df.assign(raw_mean=pd.Series(data=raw_mean, index=var_df.index))
+
+    display(var_df)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>raw_n</th>
+      <th>raw_mean</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ENSMUSG00000051951</td>
+      <td>Xkr4</td>
+      <td>6094</td>
+      <td>398</td>
+      <td>1.283861</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ENSMUSG00000089699</td>
+      <td>Gm1992</td>
+      <td>250</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ENSMUSG00000102343</td>
+      <td>Gm37381</td>
+      <td>1364</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ENSMUSG00000025900</td>
+      <td>Rp1</td>
+      <td>12311</td>
+      <td>144</td>
+      <td>0.291416</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ENSMUSG00000025902</td>
+      <td>Sox17</td>
+      <td>4772</td>
+      <td>4213</td>
+      <td>60.741540</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>52387</th>
+      <td>ENSMUSG00000118631</td>
+      <td>Gm53019</td>
+      <td>794</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52388</th>
+      <td>ENSMUSG00000118645</td>
+      <td>ENSMUSG00000118645</td>
+      <td>480</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52389</th>
+      <td>ENSMUSG00000118646</td>
+      <td>RP23-380K24.5</td>
+      <td>383</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52390</th>
+      <td>ENSMUSG00000118652</td>
+      <td>RP23-43L14.2</td>
+      <td>358</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52391</th>
+      <td>ENSMUSG00000118670</td>
+      <td>Muc19</td>
+      <td>22800</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+<p>52392 rows × 5 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Incremental-variance-calculation">
+<h2>Incremental variance calculation<a class="headerlink" href="#Incremental-variance-calculation" title="Permalink to this heading">¶</a></h2>
+<p>Other statistics are not as simple when implemented as an online algorithm. This cell demonstrates an implementation of an online computation of <code class="docutils literal notranslate"><span class="pre">variance</span></code>, using <a class="reference external" href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">Welford’s online calculation of mean and variance</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numba
+import numpy.typing as npt
+
+
+class OnlineMatrixMeanVariance:
+    n_samples: int
+    n_variables: int
+
+    def __init__(self, n_samples: int, n_variables: int):
+        &quot;&quot;&quot;
+        Compute mean and variance for n_variables over n_samples, encoded
+        in a COO format. Equivalent to:
+            numpy.mean(data, axis=0)
+            numpy.var(data, axix=0)
+        where the input `data` is of shape (n_samples, n_variables)
+        &quot;&quot;&quot;
+        self.n_samples = n_samples
+        self.n_variables = n_variables
+
+        self.n_a = np.zeros((n_variables,), dtype=np.int32)
+        self.u_a = np.zeros((n_variables,), dtype=np.float64)
+        self.M2_a = np.zeros((n_variables,), dtype=np.float64)
+
+    def update(self, coord_vec: npt.NDArray[np.int64], value_vec: npt.NDArray[np.float32]) -&gt; None:
+        _mean_variance_update(coord_vec, value_vec, self.n_a, self.u_a, self.M2_a)
+
+    def finalize(self) -&gt; tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        &quot;&quot;&quot;
+        Returns tuple containing mean and variance
+        &quot;&quot;&quot;
+        u, M2 = _mean_variance_finalize(self.n_samples, self.n_a, self.u_a, self.M2_a)
+
+        # compute sample variance
+        var = M2 / max(1, (self.n_samples - 1))
+
+        return u, var
+
+
+@numba.jit(nopython=True)
+def _mean_variance_update(
+    col_arr: npt.NDArray[np.int64],
+    val_arr: npt.NDArray[np.float32],
+    n: npt.NDArray[np.int32],
+    u: npt.NDArray[np.float64],
+    M2: npt.NDArray[np.float64],
+):
+    &quot;&quot;&quot;
+    Incrementally accumulate mean and sum of square of distance from mean using
+    Welford&#39;s online method.
+    &quot;&quot;&quot;
+    for col, val in zip(col_arr, val_arr):
+        u_prev = u[col]
+        M2_prev = M2[col]
+        n[col] += 1
+        u[col] = u_prev + (val - u_prev) / n[col]
+        M2[col] = M2_prev + (val - u_prev) * (val - u[col])
+
+
+@numba.jit(nopython=True)
+def _mean_variance_finalize(
+    n_samples: int, n_a: npt.NDArray[np.int32], u_a: npt.NDArray[np.float64], M2_a: npt.NDArray[np.float64]
+):
+    &quot;&quot;&quot;
+    Finalize incremental values, acconting for missing elements (due to sparse input).
+    Non-sparse and sparse combined using Chan&#39;s parallel adaptation of Welford&#39;s.
+    The code assumes the sparse elements are all zero and ignores those terms.
+    &quot;&quot;&quot;
+    n_b = n_samples - n_a
+    delta = -u_a  # assumes u_b == 0
+    u = (n_a * u_a) / n_samples
+    M2 = M2_a + delta**2 * n_a * n_b / n_samples  # assumes M2_b == 0
+    return u, M2
+
+
+with cellxgene_census.open_soma() as census:
+    mouse = census[&quot;census_data&quot;][&quot;mus_musculus&quot;]
+    with mouse.axis_query(
+        measurement_name=&quot;RNA&quot;,
+        obs_query=soma.AxisQuery(value_filter=&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;),
+    ) as query:
+        var_df = query.var().concat().to_pandas().set_index(&quot;soma_joinid&quot;)
+        n_vars = len(var_df)
+
+        indexer = query.indexer
+        mvn = OnlineMatrixMeanVariance(query.n_obs, n_vars)
+        for arrow_tbl in query.X(&quot;raw&quot;).tables():
+            var_dim = indexer.by_var(arrow_tbl[&quot;soma_dim_1&quot;])
+            data = arrow_tbl[&quot;soma_data&quot;].to_numpy()
+            mvn.update(var_dim, data)
+
+        u, v = mvn.finalize()
+
+    var_df = var_df.assign(raw_mean=pd.Series(data=u, index=var_df.index))
+    var_df = var_df.assign(raw_variance=pd.Series(data=v, index=var_df.index))
+
+    display(var_df)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>raw_mean</th>
+      <th>raw_variance</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ENSMUSG00000051951</td>
+      <td>Xkr4</td>
+      <td>6094</td>
+      <td>1.283861</td>
+      <td>1054.385124</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ENSMUSG00000089699</td>
+      <td>Gm1992</td>
+      <td>250</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ENSMUSG00000102343</td>
+      <td>Gm37381</td>
+      <td>1364</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ENSMUSG00000025900</td>
+      <td>Rp1</td>
+      <td>12311</td>
+      <td>0.291416</td>
+      <td>210.326410</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ENSMUSG00000025902</td>
+      <td>Sox17</td>
+      <td>4772</td>
+      <td>60.741540</td>
+      <td>346890.414437</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>52387</th>
+      <td>ENSMUSG00000118631</td>
+      <td>Gm53019</td>
+      <td>794</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52388</th>
+      <td>ENSMUSG00000118645</td>
+      <td>ENSMUSG00000118645</td>
+      <td>480</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52389</th>
+      <td>ENSMUSG00000118646</td>
+      <td>RP23-380K24.5</td>
+      <td>383</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52390</th>
+      <td>ENSMUSG00000118652</td>
+      <td>RP23-43L14.2</td>
+      <td>358</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52391</th>
+      <td>ENSMUSG00000118670</td>
+      <td>Muc19</td>
+      <td>22800</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+<p>52392 rows × 5 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Counting-cells-per-gene,-grouped-by-dataset_id">
+<h2>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code><a class="headerlink" href="#Counting-cells-per-gene,-grouped-by-dataset_id" title="Permalink to this heading">¶</a></h2>
+<p>This example demonstrates a more complex example where the goal is to count the number of cells per gene, grouped by cell dataset_id. The result is a Pandas DataFrame indexed by <code class="docutils literal notranslate"><span class="pre">obs.dataset_id</span></code> and <code class="docutils literal notranslate"><span class="pre">var.feature_id</span></code>, containing the number of cells per pair.</p>
+<p>This example does not use positional indexing, but rather demonstrates the use of Pandas DataFrame <code class="docutils literal notranslate"><span class="pre">join</span></code> to join on the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>. For the sake of this example we will query only 4 genes, but this can be expanded to all genes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with cellxgene_census.open_soma() as census:
+    mouse = census[&quot;census_data&quot;][&quot;mus_musculus&quot;]
+
+    with mouse.axis_query(
+        measurement_name=&quot;RNA&quot;,
+        obs_query=soma.AxisQuery(value_filter=&quot;tissue==&#39;brain&#39;&quot;),
+        var_query=soma.AxisQuery(value_filter=&quot;feature_name in [&#39;Malat1&#39;, &#39;Ptprd&#39;, &#39;Dlg2&#39;, &#39;Pcdh9&#39;]&quot;),
+    ) as query:
+        obs_df = query.obs(column_names=[&quot;soma_joinid&quot;, &quot;dataset_id&quot;]).concat().to_pandas().set_index(&quot;soma_joinid&quot;)
+        var_df = query.var().concat().to_pandas().set_index(&quot;soma_joinid&quot;)
+        n_cells_by_dataset = pd.Series(
+            0,
+            index=pd.MultiIndex.from_product(
+                (var_df.index, obs_df.dataset_id.unique()), names=[&quot;soma_joinid&quot;, &quot;dataset_id&quot;]
+            ),
+            dtype=np.int64,
+            name=&quot;n_cells&quot;,
+        )
+
+        for X_tbl in query.X(&quot;raw&quot;).tables():
+            # Group by dataset_id and count unique (genes, dataset_id)
+            value_counts = (
+                X_as_series(X_tbl)
+                .to_frame()
+                .join(obs_df[[&quot;dataset_id&quot;]], on=&quot;soma_dim_0&quot;)
+                .reset_index(level=1)
+                .drop(columns=[&quot;soma_data&quot;])
+                .value_counts()
+            )
+            np.add.at(
+                n_cells_by_dataset, n_cells_by_dataset.index.get_indexer(value_counts.index), value_counts.to_numpy()
+            )
+
+    # drop any combinations that are not observed
+    n_cells_by_dataset = n_cells_by_dataset[n_cells_by_dataset &gt; 0]
+
+    # and join with var_df to pick up feature_id and feature_name
+    n_cells_by_dataset = (
+        n_cells_by_dataset.to_frame()
+        .reset_index(level=1)
+        .join(var_df[[&quot;feature_id&quot;, &quot;feature_name&quot;]])
+        .set_index([&quot;dataset_id&quot;, &quot;feature_id&quot;])
+    )
+
+    display(n_cells_by_dataset)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>n_cells</th>
+      <th>feature_name</th>
+    </tr>
+    <tr>
+      <th>dataset_id</th>
+      <th>feature_id</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000028399</th>
+      <td>474</td>
+      <td>Ptprd</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000028399</th>
+      <td>79578</td>
+      <td>Ptprd</td>
+    </tr>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000052572</th>
+      <td>81</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000052572</th>
+      <td>856</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
+      <th>ENSMUSG00000052572</th>
+      <td>908</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>ENSMUSG00000052572</th>
+      <td>52</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000052572</th>
+      <td>79513</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000055421</th>
+      <td>125</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000055421</th>
+      <td>2910</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
+      <th>ENSMUSG00000055421</th>
+      <td>3027</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>ENSMUSG00000055421</th>
+      <td>117</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000055421</th>
+      <td>79476</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000092341</th>
+      <td>12622</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000092341</th>
+      <td>7102</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
+      <th>ENSMUSG00000092341</th>
+      <td>20094</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>ENSMUSG00000092341</th>
+      <td>12992</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000092341</th>
+      <td>79667</td>
+      <td>Malat1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../examples.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_dataset_presence.html" class="btn btn-neutral float-right" title="Genes measured in each cell (dataset presence matrix)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
