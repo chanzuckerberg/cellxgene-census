@@ -1,3 +1,4 @@
 nbsphinx
 myst-parser
 sphinx-rtd-theme
+pandoc
