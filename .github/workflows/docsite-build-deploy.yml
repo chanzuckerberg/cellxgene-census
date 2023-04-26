@@ -15,7 +15,7 @@ jobs:
 
       - name: Install Python deps 🔧 
         run: |
-          pip install -e ./api/python/cellxgene_census
+          pip install ./api/python/cellxgene_census
           mkdir -p docsite
           touch docsite/.nojekyll
 
