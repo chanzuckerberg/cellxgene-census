@@ -1,0 +1,460 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quick start &mdash; cellxgene-census 0.5.0 documentation</title>
+  
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="examples.html" />
+    <link rel="prev" title="Installation" href="cellxgene_census_docsite_installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    0.5
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-quick-start">Python quick start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#querying-a-slice-of-cell-metadata">Querying a slice of cell metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#obtaining-a-slice-as-anndata">Obtaining a slice as AnnData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-efficient-queries">Memory-efficient queries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#r-quick-start">R quick start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Querying a slice of cell metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#obtaining-a-slice-as-a-seurat-object">Obtaining a slice as a Seurat object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Memory-efficient queries</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quick start</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cellxgene_census_docsite_quick_start.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="quick-start">
+<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
+<p>This page provides some examples to get you going with using the Census. For more detailed usage please take a look at the <a class="reference internal" href="examples.html"><span class="std std-doc">Python tutorials</span></a> or R vignettes (<em>coming soon</em>).</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#installation"><span class="xref myst">Installation</span></a>.</p></li>
+<li><p><a class="reference internal" href="#python-quick-start"><span class="xref myst">Python quick start</span></a>.</p></li>
+<li><p><a class="reference internal" href="#r-quick-start"><span class="xref myst">R quick start</span></a>.</p></li>
+</ol>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<p>First make sure to install the Census API following the <a class="reference internal" href="cellxgene_census_docsite_installation.html"><span class="std std-doc">installation instructions.</span></a></p>
+</section>
+<section id="python-quick-start">
+<h2>Python quick start<a class="headerlink" href="#python-quick-start" title="Permalink to this heading">¶</a></h2>
+<p>Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via <code class="docutils literal notranslate"><span class="pre">help()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">cellxgene_census</span><span class="p">)</span>
+<span class="n">help</span><span class="p">(</span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">)</span>
+<span class="c1"># etc</span>
+</pre></div>
+</div>
+<section id="querying-a-slice-of-cell-metadata">
+<h3>Querying a slice of cell metadata.<a class="headerlink" href="#querying-a-slice-of-cell-metadata" title="Permalink to this heading">¶</a></h3>
+<p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    
+    <span class="c1"># Reads SOMADataFrame as a slice</span>
+    <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span> <span class="o">=</span> <span class="s2">&quot;sex == &#39;female&#39; and cell_type in [&#39;microglial cell&#39;, &#39;neuron&#39;]&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Concatenates results to pyarrow.Table</span>
+    <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    
+    <span class="c1"># Converts to pandas.DataFrame</span>
+    <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">cell_metadata</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output is a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> with about 300K cells meeting our query criteria and the selected columns.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">            </span>assay<span class="w">        </span>cell_type<span class="w">           </span>tissue<span class="w"> </span>tissue_general<span class="w"> </span>suspension_type<span class="w"> </span>disease<span class="w">     </span>sex
+<span class="m">0</span><span class="w">       </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3  microglial cell              eye            eye            cell  normal  female</span>
+<span class="s1">1       10x 3&#39;</span><span class="w"> </span>v3<span class="w">  </span>microglial<span class="w"> </span>cell<span class="w">              </span>eye<span class="w">            </span>eye<span class="w">            </span>cell<span class="w">  </span>normal<span class="w">  </span>female
+<span class="m">2</span><span class="w">       </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3  microglial cell              eye            eye            cell  normal  female</span>
+<span class="s1">3       10x 3&#39;</span><span class="w"> </span>v3<span class="w">  </span>microglial<span class="w"> </span>cell<span class="w">              </span>eye<span class="w">            </span>eye<span class="w">            </span>cell<span class="w">  </span>normal<span class="w">  </span>female
+<span class="m">4</span><span class="w">       </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3  microglial cell              eye            eye            cell  normal  female</span>
+<span class="s1">...           ...              ...              ...            ...             ...     ...     ...</span>
+<span class="s1">299617  10x 3&#39;</span><span class="w"> </span>v3<span class="w">           </span>neuron<span class="w">  </span>cerebral<span class="w"> </span>cortex<span class="w">          </span>brain<span class="w">         </span>nucleus<span class="w">  </span>normal<span class="w">  </span>female
+<span class="m">299618</span><span class="w">  </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3           neuron  cerebral cortex          brain         nucleus  normal  female</span>
+<span class="s1">299619  10x 3&#39;</span><span class="w"> </span>v3<span class="w">           </span>neuron<span class="w">  </span>cerebral<span class="w"> </span>cortex<span class="w">          </span>brain<span class="w">         </span>nucleus<span class="w">  </span>normal<span class="w">  </span>female
+<span class="m">299620</span><span class="w">  </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3           neuron  cerebral cortex          brain         nucleus  normal  female</span>
+<span class="s1">299621  10x 3&#39;</span><span class="w"> </span>v3<span class="w">           </span>neuron<span class="w">  </span>cerebral<span class="w"> </span>cortex<span class="w">          </span>brain<span class="w">         </span>nucleus<span class="w">  </span>normal<span class="w">  </span>female
+
+<span class="o">[</span><span class="m">299622</span><span class="w"> </span>rows<span class="w"> </span>x<span class="w"> </span><span class="m">7</span><span class="w"> </span>columns<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="obtaining-a-slice-as-anndata">
+<h3>Obtaining a slice as AnnData<a class="headerlink" href="#obtaining-a-slice-as-anndata" title="Permalink to this heading">¶</a></h3>
+<p>The following creates an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object on-demand with the same cell filtering criteria as above and filtering only the genes <code class="docutils literal notranslate"><span class="pre">ENSG00000161798</span></code>, <code class="docutils literal notranslate"><span class="pre">ENSG00000188229</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+        <span class="n">census</span> <span class="o">=</span> <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+        <span class="n">var_value_filter</span> <span class="o">=</span> <span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;sex == &#39;female&#39; and cell_type in [&#39;microglial cell&#39;, &#39;neuron&#39;]&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">]},</span>
+    <span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+    
+</pre></div>
+</div>
+<p>The output with about 300K cells and 2 genes can be now used for downstream analysis using <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/">scanpy</a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AnnData<span class="w"> </span>object<span class="w"> </span>with<span class="w"> </span>n_obs<span class="w"> </span>×<span class="w"> </span><span class="nv">n_vars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">299622</span><span class="w"> </span>×<span class="w"> </span><span class="m">2</span>
+<span class="w">    </span>obs:<span class="w"> </span><span class="s1">&#39;assay&#39;</span>,<span class="w"> </span><span class="s1">&#39;cell_type&#39;</span>,<span class="w"> </span><span class="s1">&#39;tissue&#39;</span>,<span class="w"> </span><span class="s1">&#39;tissue_general&#39;</span>,<span class="w"> </span><span class="s1">&#39;suspension_type&#39;</span>,<span class="w"> </span><span class="s1">&#39;disease&#39;</span>,<span class="w"> </span><span class="s1">&#39;sex&#39;</span>
+<span class="w">    </span>var:<span class="w"> </span><span class="s1">&#39;soma_joinid&#39;</span>,<span class="w"> </span><span class="s1">&#39;feature_id&#39;</span>,<span class="w"> </span><span class="s1">&#39;feature_name&#39;</span>,<span class="w"> </span><span class="s1">&#39;feature_length&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-efficient-queries">
+<h3>Memory-efficient queries<a class="headerlink" href="#memory-efficient-queries" title="Permalink to this heading">¶</a></h3>
+<p>This example provides a demonstration to access the data for larger-than-memory operations using <strong>TileDB-SOMA</strong> operations.</p>
+<p>First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — <code class="docutils literal notranslate"><span class="pre">query.close()</span></code> — or called in a context manager — <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">...</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    
+    <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+    <span class="n">measurement_name</span> <span class="o">=</span> <span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">obs_query</span> <span class="o">=</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span>
+        <span class="n">value_filter</span> <span class="o">=</span> <span class="s2">&quot;tissue == &#39;brain&#39; and sex == &#39;male&#39;&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Continued below</span>
+
+</pre></div>
+</div>
+<p>Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Continued from above </span>
+    
+    <span class="n">iterator</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">()</span>
+    
+    <span class="c1"># Get an iterative slice as pyarrow.Table</span>
+    <span class="n">raw_slice</span> <span class="o">=</span> <span class="nb">next</span> <span class="p">(</span><span class="n">iterator</span><span class="p">)</span> 
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>And you can now perform operations on each iteration slice. As with any any Python iterator this logic can be wrapped around a <code class="docutils literal notranslate"><span class="pre">for</span></code> loop.</p>
+<p>And you must close the query.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Continued from above</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="r-quick-start">
+<h2>R quick start<a class="headerlink" href="#r-quick-start" title="Permalink to this heading">¶</a></h2>
+<p>Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via <code class="docutils literal notranslate"><span class="pre">?</span></code>:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+
+<span class="o">?</span><span class="n">cellxgene.census</span><span class="o">::</span><span class="n">get_seurat</span>
+</pre></div>
+</div>
+<section id="id1">
+<h3>Querying a slice of cell metadata.<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> package uses <a class="reference external" href="https://r6.r-lib.org/articles/Introduction.html">R6</a> classes and we recommend you to get familiar with their usage.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+
+<span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">open_soma</span><span class="p">()</span>
+
+<span class="c1"># Open obs SOMADataFrame</span>
+<span class="n">cell_metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;census_data&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;homo_sapiens&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;obs&quot;</span><span class="p">)</span>
+
+<span class="c1"># Read as Arrow Table</span>
+<span class="n">cell_metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_metadata</span><span class="o">$</span><span class="nf">read</span><span class="p">(</span>
+<span class="w">   </span><span class="n">value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;sex == &#39;female&#39; &amp; cell_type %in% c(&#39;microglial cell&#39;, &#39;neuron&#39;)&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="n">column_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;assay&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cell_type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sex&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;tissue&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;tissue_general&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;suspension_type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;disease&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Convert to R tibble (dataframe)</span>
+<span class="n">cell_metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">as.data.frame</span><span class="p">(</span><span class="n">cell_metadata</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">cell_metadata</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output is a <code class="docutils literal notranslate"><span class="pre">tibble</span></code> with about 300K cells meeting our query criteria and the selected columns.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># A tibble: 305,735 × 7</span>
+<span class="w">   </span>assay<span class="w">     </span>cell_type<span class="w"> </span>sex<span class="w">    </span>tissue<span class="w"> </span>tissue_general<span class="w"> </span>suspension_type<span class="w"> </span>disease
+<span class="w">   </span>&lt;chr&gt;<span class="w">     </span>&lt;chr&gt;<span class="w">     </span>&lt;chr&gt;<span class="w">  </span>&lt;chr&gt;<span class="w">  </span>&lt;chr&gt;<span class="w">          </span>&lt;chr&gt;<span class="w">           </span>&lt;chr&gt;<span class="w">  </span>
+<span class="w"> </span><span class="m">1</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 neuron    female lung   lung           nucleus         normal </span>
+<span class="s1"> 2 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>neuron<span class="w">    </span>female<span class="w"> </span>lung<span class="w">   </span>lung<span class="w">           </span>nucleus<span class="w">         </span>normal<span class="w"> </span>
+<span class="w"> </span><span class="m">3</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 neuron    female lung   lung           nucleus         normal </span>
+<span class="s1"> 4 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>neuron<span class="w">    </span>female<span class="w"> </span>lung<span class="w">   </span>lung<span class="w">           </span>nucleus<span class="w">         </span>normal<span class="w"> </span>
+<span class="w"> </span><span class="m">5</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 neuron    female lung   lung           nucleus         normal </span>
+<span class="s1"> 6 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>neuron<span class="w">    </span>female<span class="w"> </span>lung<span class="w">   </span>lung<span class="w">           </span>nucleus<span class="w">         </span>normal<span class="w"> </span>
+<span class="w"> </span><span class="m">7</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 neuron    female lung   lung           nucleus         normal </span>
+<span class="s1"> 8 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>neuron<span class="w">    </span>female<span class="w"> </span>lung<span class="w">   </span>lung<span class="w">           </span>nucleus<span class="w">         </span>normal<span class="w"> </span>
+<span class="w"> </span><span class="m">9</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 neuron    female lung   lung           nucleus         normal </span>
+<span class="s1">10 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>neuron<span class="w">    </span>female<span class="w"> </span>lung<span class="w">   </span>lung<span class="w">           </span>nucleus<span class="w">         </span>normal<span class="w"> </span>
+<span class="c1"># ℹ 305,725 more rows</span>
+<span class="c1"># ℹ Use `print(n = ...)` to see more rows</span>
+</pre></div>
+</div>
+</section>
+<section id="obtaining-a-slice-as-a-seurat-object">
+<h3>Obtaining a slice as a Seurat object<a class="headerlink" href="#obtaining-a-slice-as-a-seurat-object" title="Permalink to this heading">¶</a></h3>
+<p>The following creates an Seurat object on-demand with the smaller set of cells  and filtering only the genes <code class="docutils literal notranslate"><span class="pre">ENSG00000161798</span></code>, <code class="docutils literal notranslate"><span class="pre">ENSG00000188229</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">library</span><span class="p">(</span><span class="s2">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">open_soma</span><span class="p">()</span>
+
+<span class="n">seurat_obj</span> <span class="o">=</span> <span class="n">get_seurat</span><span class="p">(</span>
+   <span class="n">census</span> <span class="o">=</span> <span class="n">census</span><span class="p">,</span>
+   <span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+   <span class="n">var_value_filter</span> <span class="o">=</span> <span class="s2">&quot;feature_id </span><span class="si">%i</span><span class="s2">n</span><span class="si">% c</span><span class="s2">(&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;)&quot;</span><span class="p">,</span>
+   <span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;sex == &#39;female&#39; &amp; cell_type </span><span class="si">%i</span><span class="s2">n</span><span class="si">% c</span><span class="s2">(&#39;microglial cell&#39;, &#39;neuron&#39;)&quot;</span><span class="p">,</span>
+   <span class="n">obs_column_names</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">seurat_obj</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output with about 5K cells and 2 genes can be now used for downstream analysis using <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>An<span class="w"> </span>object<span class="w"> </span>of<span class="w"> </span>class<span class="w"> </span>Seurat<span class="w"> </span>
+<span class="m">2</span><span class="w"> </span>features<span class="w"> </span>across<span class="w"> </span><span class="m">5876</span><span class="w"> </span>samples<span class="w"> </span>within<span class="w"> </span><span class="m">1</span><span class="w"> </span>assay<span class="w"> </span>
+Active<span class="w"> </span>assay:<span class="w"> </span>RNA<span class="w"> </span><span class="o">(</span><span class="m">2</span><span class="w"> </span>features,<span class="w"> </span><span class="m">0</span><span class="w"> </span>variable<span class="w"> </span>features<span class="o">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>Memory-efficient queries<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p>This example provides a demonstration to access the data for larger-than-memory operations using <strong>TileDB-SOMA</strong> operations.</p>
+<p>First we initiate a lazy-evaluation query to access all brain and male cells from human.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;tiledbsoma&quot;</span><span class="p">)</span>
+
+<span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">open_soma</span><span class="p">()</span>
+<span class="n">human_experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;census_data&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;homo_sapiens&quot;</span><span class="p">)</span>
+<span class="n">query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SOMAExperimentAxisQuery</span><span class="o">$</span><span class="nf">new</span><span class="p">(</span>
+<span class="w">	</span><span class="n">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">human_experiment</span><span class="p">,</span>
+<span class="w">	</span><span class="n">measurement_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;RNA&quot;</span><span class="p">,</span>
+<span class="w">	</span><span class="n">obs_query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SOMAAxisQuery</span><span class="o">$</span><span class="nf">new</span><span class="p">(</span><span class="n">value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;tissue == &#39;brain&#39; &amp; sex == &#39;male&#39;&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Continued below</span>
+</pre></div>
+</div>
+<p>Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="c1"># Continued from above </span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">query.X</span><span class="p">(</span><span class="s">&quot;raw&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">iterated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c1"># Get an iterative slice as pyarrow.Table</span>
+<span class="w">    </span><span class="n">raw_slice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iterator</span><span class="o">$</span><span class="nf">read_next</span><span class="p">()</span><span class="w"> </span>
+<span class="w">    </span><span class="kc">...</span>
+</pre></div>
+</div>
+<p>And you can now perform operations on each iteration slice. You can loop this in a for loop and check for the boolean flag <code class="docutils literal notranslate"><span class="pre">iterator$read_complete()</span></code> until completion.</p>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cellxgene_census_docsite_installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,614 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exploring the Census Datasets table\n",
+    "\n",
+    "This tutorial demonstrates basic use of the `census_datasets` dataframe that contains metadata of the Census source datasets. This metadata can be joined to the cell metadata dataframe (`obs`) via the column `dataset_id`, \n",
+    "\n",
+    "**Contents**\n",
+    "\n",
+    "1. Fetching the datasets table.\n",
+    "2. Fetching the expression data from a single dataset.\n",
+    "3. Downloading the original source H5AD file of a dataset.\n",
+    "\n",
+    "\n",
+    "\n",
+    "## Fetching the datasets table\n",
+    "\n",
+    "\n",
+    "Each Census contains a top-level dataframe itemizing the datasets contained therein. You can read this into a `pandas.DataFrame`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-04-05T14:16:06.870394Z",
+     "iopub.status.busy": "2023-04-05T14:16:06.870253Z",
+     "iopub.status.idle": "2023-04-05T14:16:08.429975Z",
+     "shell.execute_reply": "2023-04-05T14:16:08.429264Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>collection_id</th>\n",
+       "      <th>collection_name</th>\n",
+       "      <th>collection_doi</th>\n",
+       "      <th>dataset_id</th>\n",
+       "      <th>dataset_title</th>\n",
+       "      <th>dataset_h5ad_path</th>\n",
+       "      <th>dataset_total_cell_count</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>soma_joinid</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>43d4bb39-21af-4d05-b973-4c1fed7b916c</td>\n",
+       "      <td>Transcriptional Programming of Normal and Infl...</td>\n",
+       "      <td>10.1016/j.celrep.2018.09.006</td>\n",
+       "      <td>f512b8b6-369d-4a85-a695-116e0806857f</td>\n",
+       "      <td>Skin</td>\n",
+       "      <td>f512b8b6-369d-4a85-a695-116e0806857f.h5ad</td>\n",
+       "      <td>68036</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2b02dff7-e427-4cdc-96fb-c0f354c099aa</td>\n",
+       "      <td>Single-Cell Analysis of Crohn’s Disease Lesion...</td>\n",
+       "      <td>10.1016/j.cell.2019.08.008</td>\n",
+       "      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>\n",
+       "      <td>Ileum</td>\n",
+       "      <td>36c867a7-be10-4e69-9b39-5de12b0af6da.h5ad</td>\n",
+       "      <td>32458</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>e9eec7f5-8519-42f6-99b4-6dbd9cc5ef03</td>\n",
+       "      <td>Humoral immunity at the brain borders in homeo...</td>\n",
+       "      <td>10.1016/j.coi.2022.102188</td>\n",
+       "      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</td>\n",
+       "      <td>A scRNA-seq atlas of immune cells at the CNS b...</td>\n",
+       "      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff.h5ad</td>\n",
+       "      <td>130908</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>a72afd53-ab92-4511-88da-252fb0e26b9a</td>\n",
+       "      <td>Single-cell atlas of peripheral immune respons...</td>\n",
+       "      <td>10.1038/s41591-020-0944-y</td>\n",
+       "      <td>456e8b9b-f872-488b-871d-94534090a865</td>\n",
+       "      <td>Single-cell atlas of peripheral immune respons...</td>\n",
+       "      <td>456e8b9b-f872-488b-871d-94534090a865.h5ad</td>\n",
+       "      <td>44721</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>e4c9ed14-e560-4900-a3bf-b0f8d2ce6a10</td>\n",
+       "      <td>A molecular single-cell lung atlas of lethal C...</td>\n",
+       "      <td>10.1038/s41586-021-03569-1</td>\n",
+       "      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>\n",
+       "      <td>A molecular single-cell lung atlas of lethal C...</td>\n",
+       "      <td>d8da613f-e681-4c69-b463-e94f5e66847f.h5ad</td>\n",
+       "      <td>116313</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>524</th>\n",
+       "      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>\n",
+       "      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>\n",
+       "      <td></td>\n",
+       "      <td>30498543-4fdd-4f86-9e1b-05c1a1454a6a</td>\n",
+       "      <td>B cells -- CV19 infection, vaccination and HC</td>\n",
+       "      <td>30498543-4fdd-4f86-9e1b-05c1a1454a6a.h5ad</td>\n",
+       "      <td>20727</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>525</th>\n",
+       "      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>\n",
+       "      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>\n",
+       "      <td></td>\n",
+       "      <td>b5191f01-f67d-44b8-bc8d-511a4ecd07bb</td>\n",
+       "      <td>innate T cells -- CV19 infection, vaccination ...</td>\n",
+       "      <td>b5191f01-f67d-44b8-bc8d-511a4ecd07bb.h5ad</td>\n",
+       "      <td>33415</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>526</th>\n",
+       "      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>\n",
+       "      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>\n",
+       "      <td></td>\n",
+       "      <td>e463dae9-3fc1-476d-870e-d98a04c56cd6</td>\n",
+       "      <td>M cells -- CV19 infection, vaccination and HC</td>\n",
+       "      <td>e463dae9-3fc1-476d-870e-d98a04c56cd6.h5ad</td>\n",
+       "      <td>41130</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>527</th>\n",
+       "      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>\n",
+       "      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>\n",
+       "      <td></td>\n",
+       "      <td>1b699e04-1127-42ea-998b-011ace4a5b81</td>\n",
+       "      <td>T cells -- CV19 infection, vaccination and HC</td>\n",
+       "      <td>1b699e04-1127-42ea-998b-011ace4a5b81.h5ad</td>\n",
+       "      <td>98068</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>528</th>\n",
+       "      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>\n",
+       "      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>\n",
+       "      <td></td>\n",
+       "      <td>87ce26ed-e5d1-44b4-81cc-cc5b709a169f</td>\n",
+       "      <td>Circulating Immune cells -- CV19 infection, va...</td>\n",
+       "      <td>87ce26ed-e5d1-44b4-81cc-cc5b709a169f.h5ad</td>\n",
+       "      <td>195632</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>529 rows × 7 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                                    collection_id   \n",
+       "soma_joinid                                         \n",
+       "0            43d4bb39-21af-4d05-b973-4c1fed7b916c  \\\n",
+       "1            2b02dff7-e427-4cdc-96fb-c0f354c099aa   \n",
+       "2            e9eec7f5-8519-42f6-99b4-6dbd9cc5ef03   \n",
+       "3            a72afd53-ab92-4511-88da-252fb0e26b9a   \n",
+       "4            e4c9ed14-e560-4900-a3bf-b0f8d2ce6a10   \n",
+       "...                                           ...   \n",
+       "524          e3f391f6-5a75-4e96-8450-da47c3d2a939   \n",
+       "525          e3f391f6-5a75-4e96-8450-da47c3d2a939   \n",
+       "526          e3f391f6-5a75-4e96-8450-da47c3d2a939   \n",
+       "527          e3f391f6-5a75-4e96-8450-da47c3d2a939   \n",
+       "528          e3f391f6-5a75-4e96-8450-da47c3d2a939   \n",
+       "\n",
+       "                                               collection_name   \n",
+       "soma_joinid                                                      \n",
+       "0            Transcriptional Programming of Normal and Infl...  \\\n",
+       "1            Single-Cell Analysis of Crohn’s Disease Lesion...   \n",
+       "2            Humoral immunity at the brain borders in homeo...   \n",
+       "3            Single-cell atlas of peripheral immune respons...   \n",
+       "4            A molecular single-cell lung atlas of lethal C...   \n",
+       "...                                                        ...   \n",
+       "524          COVID-19 mRNA vaccine elicits a potent adaptiv...   \n",
+       "525          COVID-19 mRNA vaccine elicits a potent adaptiv...   \n",
+       "526          COVID-19 mRNA vaccine elicits a potent adaptiv...   \n",
+       "527          COVID-19 mRNA vaccine elicits a potent adaptiv...   \n",
+       "528          COVID-19 mRNA vaccine elicits a potent adaptiv...   \n",
+       "\n",
+       "                           collection_doi   \n",
+       "soma_joinid                                 \n",
+       "0            10.1016/j.celrep.2018.09.006  \\\n",
+       "1              10.1016/j.cell.2019.08.008   \n",
+       "2               10.1016/j.coi.2022.102188   \n",
+       "3               10.1038/s41591-020-0944-y   \n",
+       "4              10.1038/s41586-021-03569-1   \n",
+       "...                                   ...   \n",
+       "524                                         \n",
+       "525                                         \n",
+       "526                                         \n",
+       "527                                         \n",
+       "528                                         \n",
+       "\n",
+       "                                       dataset_id   \n",
+       "soma_joinid                                         \n",
+       "0            f512b8b6-369d-4a85-a695-116e0806857f  \\\n",
+       "1            36c867a7-be10-4e69-9b39-5de12b0af6da   \n",
+       "2            58b01044-c5e5-4b0f-8a2d-6ebf951e01ff   \n",
+       "3            456e8b9b-f872-488b-871d-94534090a865   \n",
+       "4            d8da613f-e681-4c69-b463-e94f5e66847f   \n",
+       "...                                           ...   \n",
+       "524          30498543-4fdd-4f86-9e1b-05c1a1454a6a   \n",
+       "525          b5191f01-f67d-44b8-bc8d-511a4ecd07bb   \n",
+       "526          e463dae9-3fc1-476d-870e-d98a04c56cd6   \n",
+       "527          1b699e04-1127-42ea-998b-011ace4a5b81   \n",
+       "528          87ce26ed-e5d1-44b4-81cc-cc5b709a169f   \n",
+       "\n",
+       "                                                 dataset_title   \n",
+       "soma_joinid                                                      \n",
+       "0                                                         Skin  \\\n",
+       "1                                                        Ileum   \n",
+       "2            A scRNA-seq atlas of immune cells at the CNS b...   \n",
+       "3            Single-cell atlas of peripheral immune respons...   \n",
+       "4            A molecular single-cell lung atlas of lethal C...   \n",
+       "...                                                        ...   \n",
+       "524              B cells -- CV19 infection, vaccination and HC   \n",
+       "525          innate T cells -- CV19 infection, vaccination ...   \n",
+       "526              M cells -- CV19 infection, vaccination and HC   \n",
+       "527              T cells -- CV19 infection, vaccination and HC   \n",
+       "528          Circulating Immune cells -- CV19 infection, va...   \n",
+       "\n",
+       "                                     dataset_h5ad_path   \n",
+       "soma_joinid                                              \n",
+       "0            f512b8b6-369d-4a85-a695-116e0806857f.h5ad  \\\n",
+       "1            36c867a7-be10-4e69-9b39-5de12b0af6da.h5ad   \n",
+       "2            58b01044-c5e5-4b0f-8a2d-6ebf951e01ff.h5ad   \n",
+       "3            456e8b9b-f872-488b-871d-94534090a865.h5ad   \n",
+       "4            d8da613f-e681-4c69-b463-e94f5e66847f.h5ad   \n",
+       "...                                                ...   \n",
+       "524          30498543-4fdd-4f86-9e1b-05c1a1454a6a.h5ad   \n",
+       "525          b5191f01-f67d-44b8-bc8d-511a4ecd07bb.h5ad   \n",
+       "526          e463dae9-3fc1-476d-870e-d98a04c56cd6.h5ad   \n",
+       "527          1b699e04-1127-42ea-998b-011ace4a5b81.h5ad   \n",
+       "528          87ce26ed-e5d1-44b4-81cc-cc5b709a169f.h5ad   \n",
+       "\n",
+       "             dataset_total_cell_count  \n",
+       "soma_joinid                            \n",
+       "0                               68036  \n",
+       "1                               32458  \n",
+       "2                              130908  \n",
+       "3                               44721  \n",
+       "4                              116313  \n",
+       "...                               ...  \n",
+       "524                             20727  \n",
+       "525                             33415  \n",
+       "526                             41130  \n",
+       "527                             98068  \n",
+       "528                            195632  \n",
+       "\n",
+       "[529 rows x 7 columns]"
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import cellxgene_census\n",
+    "\n",
+    "census = cellxgene_census.open_soma()\n",
+    "census_datasets = census[\"census_info\"][\"datasets\"].read().concat().to_pandas()\n",
+    "\n",
+    "# for convenience, indexing on the soma_joinid which links this to other census data.\n",
+    "census_datasets = census_datasets.set_index(\"soma_joinid\")\n",
+    "\n",
+    "census_datasets"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The sum cells across all datasets should match the number of cells across all SOMA experiments (human, mouse)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-04-05T14:16:08.433551Z",
+     "iopub.status.busy": "2023-04-05T14:16:08.433229Z",
+     "iopub.status.idle": "2023-04-05T14:16:10.695889Z",
+     "shell.execute_reply": "2023-04-05T14:16:10.694701Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Count by experiment:\n",
+      "\t46050829 cells in homo_sapiens\n",
+      "\t3922090 cells in mus_musculus\n",
+      "\n",
+      "Found 49972919 cells in all experiments.\n",
+      "Found 49972919 cells in all datasets.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Count cells across all experiments\n",
+    "all_experiments = (\n",
+    "    (organism_name, organism_experiment) for organism_name, organism_experiment in census[\"census_data\"].items()\n",
+    ")\n",
+    "experiments_total_cells = 0\n",
+    "print(\"Count by experiment:\")\n",
+    "for organism_name, organism_experiment in all_experiments:\n",
+    "    num_cells = len(organism_experiment.obs.read(column_names=[\"soma_joinid\"]).concat().to_pandas())\n",
+    "    print(f\"\\t{num_cells} cells in {organism_name}\")\n",
+    "    experiments_total_cells += num_cells\n",
+    "\n",
+    "print(f\"\\nFound {experiments_total_cells} cells in all experiments.\")\n",
+    "\n",
+    "# Count cells across all datasets\n",
+    "print(f\"Found {census_datasets.dataset_total_cell_count.sum()} cells in all datasets.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Fetching the expression data from a single dataset\n",
+    "\n",
+    "Lets pick one dataset to slice out of the census, and turn into an [AnnData](https://anndata.readthedocs.io/en/latest/) in-memory object. This can be used with the [ScanPy](https://scanpy.readthedocs.io/en/stable/) toolchain. You can also save this AnnData locally using the AnnData [`write`](https://anndata.readthedocs.io/en/latest/api.html#writing) API."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-04-05T14:16:10.698870Z",
+     "iopub.status.busy": "2023-04-05T14:16:10.698723Z",
+     "iopub.status.idle": "2023-04-05T14:16:10.705249Z",
+     "shell.execute_reply": "2023-04-05T14:16:10.704865Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>collection_id</th>\n",
+       "      <th>collection_name</th>\n",
+       "      <th>collection_doi</th>\n",
+       "      <th>dataset_id</th>\n",
+       "      <th>dataset_title</th>\n",
+       "      <th>dataset_h5ad_path</th>\n",
+       "      <th>dataset_total_cell_count</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>soma_joinid</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>197</th>\n",
+       "      <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>\n",
+       "      <td>Tabula Muris Senis</td>\n",
+       "      <td>10.1038/s41586-020-2496-1</td>\n",
+       "      <td>0bd1a1de-3aee-40e0-b2ec-86c7a30c7149</td>\n",
+       "      <td>Bone marrow - A single-cell transcriptomic atl...</td>\n",
+       "      <td>0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad</td>\n",
+       "      <td>40220</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                                    collection_id     collection_name   \n",
+       "soma_joinid                                                             \n",
+       "197          0b9d8a04-bb9d-44da-aa27-705bb65b54eb  Tabula Muris Senis  \\\n",
+       "\n",
+       "                        collection_doi                            dataset_id   \n",
+       "soma_joinid                                                                    \n",
+       "197          10.1038/s41586-020-2496-1  0bd1a1de-3aee-40e0-b2ec-86c7a30c7149  \\\n",
+       "\n",
+       "                                                 dataset_title   \n",
+       "soma_joinid                                                      \n",
+       "197          Bone marrow - A single-cell transcriptomic atl...  \\\n",
+       "\n",
+       "                                     dataset_h5ad_path   \n",
+       "soma_joinid                                              \n",
+       "197          0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad  \\\n",
+       "\n",
+       "             dataset_total_cell_count  \n",
+       "soma_joinid                            \n",
+       "197                             40220  "
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "census_datasets[census_datasets.dataset_id == \"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149\"]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Create a query on the mouse experiment, \"RNA\" measurement, for the dataset_id."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-04-05T14:16:10.708327Z",
+     "iopub.status.busy": "2023-04-05T14:16:10.708138Z",
+     "iopub.status.idle": "2023-04-05T14:16:16.535563Z",
+     "shell.execute_reply": "2023-04-05T14:16:16.534127Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "AnnData object with n_obs × n_vars = 40220 × 52392\n",
+       "    obs: 'soma_joinid', 'dataset_id', 'assay', 'assay_ontology_term_id', 'cell_type', 'cell_type_ontology_term_id', 'development_stage', 'development_stage_ontology_term_id', 'disease', 'disease_ontology_term_id', 'donor_id', 'is_primary_data', 'self_reported_ethnicity', 'self_reported_ethnicity_ontology_term_id', 'sex', 'sex_ontology_term_id', 'suspension_type', 'tissue', 'tissue_ontology_term_id', 'tissue_general', 'tissue_general_ontology_term_id'\n",
+       "    var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "adata = cellxgene_census.get_anndata(\n",
+    "    census, organism=\"Mus musculus\", obs_value_filter=\"dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'\"\n",
+    ")\n",
+    "\n",
+    "adata"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Downloading the original source H5AD file of a dataset.\n",
+    "\n",
+    "You can download the original H5AD file for any given dataset. This is the same H5AD you can download from the [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/), and may contain additional data-submitter provided information which was not included in the Census.\n",
+    "\n",
+    "To do this you can fetch the location in the cloud or directly download to your system using the `cellxgene-census`"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-04-05T14:16:16.538348Z",
+     "iopub.status.busy": "2023-04-05T14:16:16.538198Z",
+     "iopub.status.idle": "2023-04-05T14:16:17.522754Z",
+     "shell.execute_reply": "2023-04-05T14:16:17.521535Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Option 1: Direct download\n",
+    "cellxgene_census.download_source_h5ad(\n",
+    "    \"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149\", to_path=\"Tabula_Muris_Senis-bone_marrow.h5ad\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'uri': 's3://cellxgene-data-public/cell-census/2023-04-10/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad',\n",
+       " 's3_region': 'us-west-2'}"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Option 2: Get location and download via preferred method\n",
+    "uri = cellxgene_census.get_source_h5ad_uri(\"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149\")\n",
+    "uri\n",
+    "\n",
+    "# you can now download the H5AD in shell via AWS CLI e.g. `aws s3 cp uri ./`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Close the census"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-04-05T14:16:17.526268Z",
+     "iopub.status.busy": "2023-04-05T14:16:17.525298Z",
+     "iopub.status.idle": "2023-04-05T14:16:17.530894Z",
+     "shell.execute_reply": "2023-04-05T14:16:17.529051Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "census.close()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.10"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "3da8ec1c162cd849e59e6ea2824b2e353dce799884e910aae99411be5277f953"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

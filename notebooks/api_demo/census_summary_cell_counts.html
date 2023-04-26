@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Exploring pre-calculated summary cell counts &mdash; cellxgene-census 0.5.0 documentation</title>
+  
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Learning about the CZ CELLxGENE Census" href="../analysis_demo/comp_bio_census_info.html" />
+    <link rel="prev" title="Querying and fetching the single-cell data and cell/gene metadata." href="census_query_extract.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    0.5
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Exploring pre-calculated summary cell counts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Fetching-the-census_summary_cell_counts-dataframe">Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Creating-summary-counts-beyond-pre-calculated-values.">Creating summary counts beyond pre-calculated values.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Exploring pre-calculated summary cell counts</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_summary_cell_counts.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Exploring-pre-calculated-summary-cell-counts">
+<h1>Exploring pre-calculated summary cell counts<a class="headerlink" href="#Exploring-pre-calculated-summary-cell-counts" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial describes how to access pre-calculated summary cell counts. Each Census contains a top-level dataframe summarizing counts of various cell labels, this is the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe . You can read this into a Pandas DataFrame</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe.</p></li>
+<li><p>Creating summary counts beyond pre-calculated values.</p></li>
+</ol>
+<section id="Fetching-the-census_summary_cell_counts-dataframe">
+<h2>Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe<a class="headerlink" href="#Fetching-the-census_summary_cell_counts-dataframe" title="Permalink to this heading">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="n">census_summary_cell_counts</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;summary_cell_counts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="c1"># Dropping the soma_joinid column as it isn&#39;t useful in this demo</span>
+<span class="n">census_summary_cell_counts</span> <span class="o">=</span> <span class="n">census_summary_cell_counts</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span>
+
+<span class="n">census_summary_cell_counts</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>organism</th>
+      <th>category</th>
+      <th>ontology_term_id</th>
+      <th>unique_cell_count</th>
+      <th>total_cell_count</th>
+      <th>label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Homo sapiens</td>
+      <td>all</td>
+      <td>na</td>
+      <td>29817108</td>
+      <td>46050829</td>
+      <td>na</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Homo sapiens</td>
+      <td>assay</td>
+      <td>EFO:0008722</td>
+      <td>206279</td>
+      <td>260396</td>
+      <td>Drop-seq</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Homo sapiens</td>
+      <td>assay</td>
+      <td>EFO:0008780</td>
+      <td>25652</td>
+      <td>51304</td>
+      <td>inDrop</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Homo sapiens</td>
+      <td>assay</td>
+      <td>EFO:0008913</td>
+      <td>133511</td>
+      <td>133511</td>
+      <td>single-cell RNA sequencing</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Homo sapiens</td>
+      <td>assay</td>
+      <td>EFO:0008919</td>
+      <td>44721</td>
+      <td>161998</td>
+      <td>Seq-Well</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1263</th>
+      <td>Mus musculus</td>
+      <td>tissue_general</td>
+      <td>UBERON:0002113</td>
+      <td>164881</td>
+      <td>188361</td>
+      <td>kidney</td>
+    </tr>
+    <tr>
+      <th>1264</th>
+      <td>Mus musculus</td>
+      <td>tissue_general</td>
+      <td>UBERON:0002365</td>
+      <td>15577</td>
+      <td>31154</td>
+      <td>exocrine gland</td>
+    </tr>
+    <tr>
+      <th>1265</th>
+      <td>Mus musculus</td>
+      <td>tissue_general</td>
+      <td>UBERON:0002367</td>
+      <td>37715</td>
+      <td>130135</td>
+      <td>prostate gland</td>
+    </tr>
+    <tr>
+      <th>1266</th>
+      <td>Mus musculus</td>
+      <td>tissue_general</td>
+      <td>UBERON:0002368</td>
+      <td>13322</td>
+      <td>26644</td>
+      <td>endocrine gland</td>
+    </tr>
+    <tr>
+      <th>1267</th>
+      <td>Mus musculus</td>
+      <td>tissue_general</td>
+      <td>UBERON:0002371</td>
+      <td>90225</td>
+      <td>144962</td>
+      <td>bone marrow</td>
+    </tr>
+  </tbody>
+</table>
+<p>1268 rows × 6 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Creating-summary-counts-beyond-pre-calculated-values.">
+<h2>Creating summary counts beyond pre-calculated values.<a class="headerlink" href="#Creating-summary-counts-beyond-pre-calculated-values." title="Permalink to this heading">¶</a></h2>
+<p>The dataframe above is precomputed from the experiments in the Census, providing a quick overview of the Census contents.</p>
+<p>You can do similar group statistics using Pandas <code class="docutils literal notranslate"><span class="pre">groupby</span></code> functions.</p>
+<p>The code below reproduces the above counts using full <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe in the <code class="docutils literal notranslate"><span class="pre">Homo_sapiens</span></code> experiment.</p>
+<p>Keep in mind that the Census is very large, and any queries will return significant amount of data. You can manage that by narrowing the query request using <code class="docutils literal notranslate"><span class="pre">column_names</span></code> and <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> in your query.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">obs_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cell_type_ontology_term_id</th>
+      <th>cell_type</th>
+      <th>size</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CL:0000001</td>
+      <td>primary cultured cell</td>
+      <td>80</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CL:0000003</td>
+      <td>native cell</td>
+      <td>778811</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CL:0000006</td>
+      <td>neuronal receptor cell</td>
+      <td>2502</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CL:0000019</td>
+      <td>sperm</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CL:0000031</td>
+      <td>neuroblast (sensu Vertebrata)</td>
+      <td>2355</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>585</th>
+      <td>CL:4023070</td>
+      <td>caudal ganglionic eminence derived GABAergic c...</td>
+      <td>8463</td>
+    </tr>
+    <tr>
+      <th>586</th>
+      <td>CL:4028002</td>
+      <td>alveolar capillary type 1 endothelial cell</td>
+      <td>16048</td>
+    </tr>
+    <tr>
+      <th>587</th>
+      <td>CL:4028003</td>
+      <td>alveolar capillary type 2 endothelial cell</td>
+      <td>7157</td>
+    </tr>
+    <tr>
+      <th>588</th>
+      <td>CL:4028006</td>
+      <td>alveolar type 2 fibroblast cell</td>
+      <td>4670</td>
+    </tr>
+    <tr>
+      <th>589</th>
+      <td>CL:4030006</td>
+      <td>fallopian tube secretory epithelial cell</td>
+      <td>463461</td>
+    </tr>
+  </tbody>
+</table>
+<p>590 rows × 3 columns</p>
+</div></div>
+</div>
+<p>Close the census when complete.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_query_extract.html" class="btn btn-neutral float-left" title="Querying and fetching the single-cell data and cell/gene metadata." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../analysis_demo/comp_bio_census_info.html" class="btn btn-neutral float-right" title="Learning about the CZ CELLxGENE Census" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,867 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Computing on X using online (incremental) algorithms &mdash; cellxgene-census 0.5.0 documentation</title>
+  
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Genes measured in each cell (dataset presence matrix)" href="census_dataset_presence.html" />
+    <link rel="prev" title="Tutorials" href="../../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    0.5
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Computing on X using online (incremental) algorithms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Incremental-count-and-mean-calculation.">Incremental count and mean calculation.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Incremental-variance-calculation">Incremental variance calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Counting-cells-per-gene,-grouped-by-dataset_id">Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Computing on X using online (incremental) algorithms</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_compute_over_X.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Computing-on-X-using-online-(incremental)-algorithms">
+<h1>Computing on X using online (incremental) algorithms<a class="headerlink" href="#Computing-on-X-using-online-(incremental)-algorithms" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial showcases computing a variety of per-gene and per-cell statistics for a user-defined query using out-of-core operations.</p>
+<p><em>NOTE</em>: when query results are small enough to fit in memory, it may be easier to use the <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> Query class to extract an AnnData, and then just compute over that. This tutorial shows means of incrementally processing larger-than-core (RAM) data, where incremental (online) algorithms are used.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Incremental count and mean calculation.</p></li>
+<li><p>Incremental variance calculation.</p></li>
+<li><p>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">from</span> <span class="nn">tiledbsoma.experiment_query</span> <span class="kn">import</span> <span class="n">X_as_series</span>
+</pre></div>
+</div>
+</div>
+<section id="Incremental-count-and-mean-calculation.">
+<h2>Incremental count and mean calculation.<a class="headerlink" href="#Incremental-count-and-mean-calculation." title="Permalink to this heading">¶</a></h2>
+<p>Many statistics, such as <code class="docutils literal notranslate"><span class="pre">mean</span></code>, are easy to calculate incrementally. This cell demonstrates a query on the <code class="docutils literal notranslate"><span class="pre">X['raw']</span></code> sparse nD array, which will return results in batches. Accumulate the sum and count incrementally, into <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_n</span></code>, and then compute mean.</p>
+<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names: * <code class="docutils literal notranslate"><span class="pre">soma_data</span></code> - the X value (float32) * <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> - the obs coordinate (int64) * <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> - the var coordinate (int64)</p>
+<p><strong>Important</strong>: the X matrices are joined to var/obs axis DataFrames by an integer join “id” (aka <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>). They are <em>NOT</em> positionally indexed, and any given cell or gene may have a <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> of any value (e.g., a large integer). In other words, for any given <code class="docutils literal notranslate"><span class="pre">X</span></code> value, the <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe, and the <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> coordinate corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
+<p>For convenience, the query package contains a utility function to simplify operations on query slices. <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> returns an indexer that can be used to wrap the output of <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>, converting from <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> to positional indexing. Positions are <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">N)</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code> are the number of results on the query for any given axis (equivalent to the Pandas <code class="docutils literal notranslate"><span class="pre">.iloc</span></code> of the axis dataframe).</p>
+<p>Key points: * it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations. * by default, data in the census is indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> and not positionally. Use <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> if you want positions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
+
+        <span class="n">raw_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_vars</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>  <span class="c1"># accumulate number of non-zero X values</span>
+        <span class="n">raw_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_vars</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>  <span class="c1"># accumulate the sum of expression</span>
+
+        <span class="c1"># query.X() returns an iterator of pyarrow.Table, with X data in COO format.</span>
+        <span class="c1"># You can request an indexer from the query that will map it to positional indices</span>
+        <span class="n">indexer</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">indexer</span>
+        <span class="k">for</span> <span class="n">arrow_tbl</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">():</span>
+            <span class="n">var_dim</span> <span class="o">=</span> <span class="n">indexer</span><span class="o">.</span><span class="n">by_var</span><span class="p">(</span><span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_dim_1&quot;</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_data&quot;</span><span class="p">]</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">raw_n</span><span class="p">,</span> <span class="n">var_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">raw_sum</span><span class="p">,</span> <span class="n">var_dim</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+        <span class="n">raw_mean</span> <span class="o">=</span> <span class="n">raw_sum</span> <span class="o">/</span> <span class="n">query</span><span class="o">.</span><span class="n">n_obs</span>
+    <span class="n">raw_mean</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">raw_mean</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_n</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">raw_n</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_mean</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">raw_mean</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+
+    <span class="n">display</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>raw_n</th>
+      <th>raw_mean</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ENSMUSG00000051951</td>
+      <td>Xkr4</td>
+      <td>6094</td>
+      <td>398</td>
+      <td>1.283861</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ENSMUSG00000089699</td>
+      <td>Gm1992</td>
+      <td>250</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ENSMUSG00000102343</td>
+      <td>Gm37381</td>
+      <td>1364</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ENSMUSG00000025900</td>
+      <td>Rp1</td>
+      <td>12311</td>
+      <td>144</td>
+      <td>0.291416</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ENSMUSG00000025902</td>
+      <td>Sox17</td>
+      <td>4772</td>
+      <td>4213</td>
+      <td>60.741540</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>52387</th>
+      <td>ENSMUSG00000118631</td>
+      <td>Gm53019</td>
+      <td>794</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52388</th>
+      <td>ENSMUSG00000118645</td>
+      <td>ENSMUSG00000118645</td>
+      <td>480</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52389</th>
+      <td>ENSMUSG00000118646</td>
+      <td>RP23-380K24.5</td>
+      <td>383</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52390</th>
+      <td>ENSMUSG00000118652</td>
+      <td>RP23-43L14.2</td>
+      <td>358</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52391</th>
+      <td>ENSMUSG00000118670</td>
+      <td>Muc19</td>
+      <td>22800</td>
+      <td>0</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+<p>52392 rows × 5 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Incremental-variance-calculation">
+<h2>Incremental variance calculation<a class="headerlink" href="#Incremental-variance-calculation" title="Permalink to this heading">¶</a></h2>
+<p>Other statistics are not as simple when implemented as an online algorithm. This cell demonstrates an implementation of an online computation of <code class="docutils literal notranslate"><span class="pre">variance</span></code>, using <a class="reference external" href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">Welford’s online calculation of mean and variance</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+
+
+<span class="k">class</span> <span class="nc">OnlineMatrixMeanVariance</span><span class="p">:</span>
+    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute mean and variance for n_variables over n_samples, encoded</span>
+<span class="sd">        in a COO format. Equivalent to:</span>
+<span class="sd">            numpy.mean(data, axis=0)</span>
+<span class="sd">            numpy.var(data, axix=0)</span>
+<span class="sd">        where the input `data` is of shape (n_samples, n_variables)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_variables</span> <span class="o">=</span> <span class="n">n_variables</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coord_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span> <span class="n">value_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_mean_variance_update</span><span class="p">(</span><span class="n">coord_vec</span><span class="p">,</span> <span class="n">value_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns tuple containing mean and variance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">M2</span> <span class="o">=</span> <span class="n">_mean_variance_finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
+
+        <span class="c1"># compute sample variance</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">M2</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">u</span><span class="p">,</span> <span class="n">var</span>
+
+
+<span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_mean_variance_update</span><span class="p">(</span>
+    <span class="n">col_arr</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span>
+    <span class="n">val_arr</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
+    <span class="n">n</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span>
+    <span class="n">u</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+    <span class="n">M2</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Incrementally accumulate mean and sum of square of distance from mean using</span>
+<span class="sd">    Welford&#39;s online method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">col_arr</span><span class="p">,</span> <span class="n">val_arr</span><span class="p">):</span>
+        <span class="n">u_prev</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">M2_prev</span> <span class="o">=</span> <span class="n">M2</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">n</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_prev</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">u_prev</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">M2</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">M2_prev</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">u_prev</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+
+
+<span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_mean_variance_finalize</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span> <span class="n">u_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">M2_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finalize incremental values, acconting for missing elements (due to sparse input).</span>
+<span class="sd">    Non-sparse and sparse combined using Chan&#39;s parallel adaptation of Welford&#39;s.</span>
+<span class="sd">    The code assumes the sparse elements are all zero and ignores those terms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_b</span> <span class="o">=</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="n">n_a</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="o">-</span><span class="n">u_a</span>  <span class="c1"># assumes u_b == 0</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_a</span> <span class="o">*</span> <span class="n">u_a</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_samples</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">M2_a</span> <span class="o">+</span> <span class="n">delta</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_a</span> <span class="o">*</span> <span class="n">n_b</span> <span class="o">/</span> <span class="n">n_samples</span>  <span class="c1"># assumes M2_b == 0</span>
+    <span class="k">return</span> <span class="n">u</span><span class="p">,</span> <span class="n">M2</span>
+
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
+
+        <span class="n">indexer</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">indexer</span>
+        <span class="n">mvn</span> <span class="o">=</span> <span class="n">OnlineMatrixMeanVariance</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="n">n_vars</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arrow_tbl</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">():</span>
+            <span class="n">var_dim</span> <span class="o">=</span> <span class="n">indexer</span><span class="o">.</span><span class="n">by_var</span><span class="p">(</span><span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_dim_1&quot;</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">mvn</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">var_dim</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">mvn</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_mean</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_variance</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+
+    <span class="n">display</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>raw_mean</th>
+      <th>raw_variance</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ENSMUSG00000051951</td>
+      <td>Xkr4</td>
+      <td>6094</td>
+      <td>1.283861</td>
+      <td>1054.385124</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ENSMUSG00000089699</td>
+      <td>Gm1992</td>
+      <td>250</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ENSMUSG00000102343</td>
+      <td>Gm37381</td>
+      <td>1364</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ENSMUSG00000025900</td>
+      <td>Rp1</td>
+      <td>12311</td>
+      <td>0.291416</td>
+      <td>210.326410</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ENSMUSG00000025902</td>
+      <td>Sox17</td>
+      <td>4772</td>
+      <td>60.741540</td>
+      <td>346890.414437</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>52387</th>
+      <td>ENSMUSG00000118631</td>
+      <td>Gm53019</td>
+      <td>794</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52388</th>
+      <td>ENSMUSG00000118645</td>
+      <td>ENSMUSG00000118645</td>
+      <td>480</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52389</th>
+      <td>ENSMUSG00000118646</td>
+      <td>RP23-380K24.5</td>
+      <td>383</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52390</th>
+      <td>ENSMUSG00000118652</td>
+      <td>RP23-43L14.2</td>
+      <td>358</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>52391</th>
+      <td>ENSMUSG00000118670</td>
+      <td>Muc19</td>
+      <td>22800</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+<p>52392 rows × 5 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Counting-cells-per-gene,-grouped-by-dataset_id">
+<h2>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code><a class="headerlink" href="#Counting-cells-per-gene,-grouped-by-dataset_id" title="Permalink to this heading">¶</a></h2>
+<p>This example demonstrates a more complex example where the goal is to count the number of cells per gene, grouped by cell dataset_id. The result is a Pandas DataFrame indexed by <code class="docutils literal notranslate"><span class="pre">obs.dataset_id</span></code> and <code class="docutils literal notranslate"><span class="pre">var.feature_id</span></code>, containing the number of cells per pair.</p>
+<p>This example does not use positional indexing, but rather demonstrates the use of Pandas DataFrame <code class="docutils literal notranslate"><span class="pre">join</span></code> to join on the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>. For the sake of this example we will query only 4 genes, but this can be expanded to all genes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39;&quot;</span><span class="p">),</span>
+        <span class="n">var_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name in [&#39;Malat1&#39;, &#39;Ptprd&#39;, &#39;Dlg2&#39;, &#39;Pcdh9&#39;]&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">obs_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">dataset_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()),</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;n_cells&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">X_tbl</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">():</span>
+            <span class="c1"># Group by dataset_id and count unique (genes, dataset_id)</span>
+            <span class="n">value_counts</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">X_as_series</span><span class="p">(</span><span class="n">X_tbl</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">obs_df</span><span class="p">[[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]],</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;soma_dim_0&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_data&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span>
+                <span class="n">n_cells_by_dataset</span><span class="p">,</span> <span class="n">n_cells_by_dataset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_indexer</span><span class="p">(</span><span class="n">value_counts</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">value_counts</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="p">)</span>
+
+    <span class="c1"># drop any combinations that are not observed</span>
+    <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="n">n_cells_by_dataset</span><span class="p">[</span><span class="n">n_cells_by_dataset</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># and join with var_df to pick up feature_id and feature_name</span>
+    <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">n_cells_by_dataset</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_df</span><span class="p">[[</span><span class="s2">&quot;feature_id&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_name&quot;</span><span class="p">]])</span>
+        <span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_id&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="n">display</span><span class="p">(</span><span class="n">n_cells_by_dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>n_cells</th>
+      <th>feature_name</th>
+    </tr>
+    <tr>
+      <th>dataset_id</th>
+      <th>feature_id</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000028399</th>
+      <td>474</td>
+      <td>Ptprd</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000028399</th>
+      <td>79578</td>
+      <td>Ptprd</td>
+    </tr>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000052572</th>
+      <td>81</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000052572</th>
+      <td>856</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
+      <th>ENSMUSG00000052572</th>
+      <td>908</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>ENSMUSG00000052572</th>
+      <td>52</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000052572</th>
+      <td>79513</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000055421</th>
+      <td>125</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000055421</th>
+      <td>2910</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
+      <th>ENSMUSG00000055421</th>
+      <td>3027</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>ENSMUSG00000055421</th>
+      <td>117</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000055421</th>
+      <td>79476</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
+      <th>ENSMUSG00000092341</th>
+      <td>12622</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000092341</th>
+      <td>7102</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
+      <th>ENSMUSG00000092341</th>
+      <td>20094</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>ENSMUSG00000092341</th>
+      <td>12992</td>
+      <td>Malat1</td>
+    </tr>
+    <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000092341</th>
+      <td>79667</td>
+      <td>Malat1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../examples.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_dataset_presence.html" class="btn btn-neutral float-right" title="Genes measured in each cell (dataset presence matrix)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
