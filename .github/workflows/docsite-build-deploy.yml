@@ -13,7 +13,42 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
 
+      - name: Install Python deps 🔧 
+        run: |
+          pip install -e ./api/python/cellxgene_census
+          mkdir -p docsite
+          touch docsite/.nojekyll
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          extra-repositories: https://tiledb-inc.r-universe.dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: ./api/r/cellxgene.census
+          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::pkgdown
+          needs: check
+          # Disable dependency caching so long as we depend on bleeding-edge
+          # builds of tiledbsoma from r-universe. Its DESCRIPTION version
+          # number isn't routinely updated to invalidate our cache.
+          cache: false
+
+      - name: Build Sphinx website
+        run: |
+          cd docs/
+          make clean && make html
+          cp -r _build/html/* ../docsite/.
+
+      - name: Build pkgdown website
+        run: |
+          cd api/r/cellxgene.census
+          Rscript -e 'pkgdown::build_site()'
+          cd /
+          mkdir -p docsite/r
+          cp api/r/cellxgene.census/docs docsite/r/.
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: docs-artifacts # The folder the action should deploy.
+          folder: docsite # The folder the action should deploy.
+          branch: gh-pages-test
