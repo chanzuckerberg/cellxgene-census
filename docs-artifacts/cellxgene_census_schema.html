@@ -1,0 +1,1095 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>CZ CELLxGENE Discover Census Schema &mdash; cellxgene-census 0.5.0 documentation</title>
+  
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    0.5
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">CZ CELLxGENE Discover Census Schema</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cellxgene_census_schema.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="cz-cellxgene-discover-census-schema">
+<h1>CZ CELLxGENE Discover Census Schema<a class="headerlink" href="#cz-cellxgene-discover-census-schema" title="Permalink to this heading">¶</a></h1>
+<p><strong>Version</strong>: 1.0.0.</p>
+<p><strong>Last edited</strong>: Apr, 2023.</p>
+<p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED” “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <a class="reference external" href="https://tools.ietf.org/html/bcp14">BCP 14</a>, <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc2119.txt">RFC2119</a>, and <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc8174.txt">RFC8174</a> when, and only when, they appear in all capitals, as shown here.</p>
+<section id="census-overview">
+<h2>Census overview<a class="headerlink" href="#census-overview" title="Permalink to this heading">¶</a></h2>
+<p>The CZ CELLxGENE Discover Census, hereafter referred as Census, is a versioned data object and API for most of the single-cell data hosted at <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To learn more about the Census visit the <code class="docutils literal notranslate"><span class="pre">chanzuckerberg/cellxgene-census</span></code> <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census">github repository</a></p>
+<p>To better understand this document the reader should be familiar with the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">CELLxGENE dataset schema</a> and <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md">SOMA</a>.</p>
+</section>
+<section id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this heading">¶</a></h2>
+<p>The following terms are used throughout this document:</p>
+<ul class="simple">
+<li><p>adata – generic variable name that refers to an <a class="reference external" href="https://anndata.readthedocs.io/"><code class="docutils literal notranslate"><span class="pre">AnnData</span></code></a> object.</p></li>
+<li><p>CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">CELLxGENE dataset schema version is 3.0.X</a></p></li>
+<li><p>census_obj – the Census root object, a SOMACollection.</p></li>
+<li><p>Census data release – a versioned Census object deposited in a public bucket and accessible by APIs.</p></li>
+<li><p>tissue – original tissue annotation.</p></li>
+<li><p>tissue_general – high-level mapping of a tissue, e.g. “Heart” is the tissue_general of “Heart left ventricle” .</p></li>
+</ul>
+</section>
+<section id="census-schema-versioning">
+<h2>Census Schema versioning<a class="headerlink" href="#census-schema-versioning" title="Permalink to this heading">¶</a></h2>
+<p>The Census Schema follows <a class="reference external" href="https://semver.org/">Semver</a> for its versioning:</p>
+<ul class="simple">
+<li><p>Major: any schema changes that make the Census incompatible with the Census API or SOMA API. Examples:</p>
+<ul>
+<li><p>Column deletion in Census <code class="docutils literal notranslate"><span class="pre">obs</span></code></p></li>
+<li><p>Addition of new modality</p></li>
+</ul>
+</li>
+<li><p>Minor: schema additions that are compatible with public API(s) and SOMA. Examples:</p>
+<ul>
+<li><p>New column to Census <code class="docutils literal notranslate"><span class="pre">obs</span></code> is added</p></li>
+<li><p>tissue/tissue_general mapping changes</p></li>
+</ul>
+</li>
+<li><p>Patch: schema fixes. Examples:</p>
+<ul>
+<li><p>Editorial schema changes</p></li>
+</ul>
+</li>
+</ul>
+<p>Changes MUST be documented in the schema <a class="reference external" href="https://docs.python.org/3/whatsnew/changelog.html#changelog" title="Python 3.11"><span class="xref myst">Changelog</span></a> at the end of this document.</p>
+<p>Census data releases are versioned separately from the schema.</p>
+</section>
+<section id="schema">
+<h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading">¶</a></h2>
+<section id="data-included">
+<h3>Data included<a class="headerlink" href="#data-included" title="Permalink to this heading">¶</a></h3>
+<p>All datasets included in the Census MUST be of <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">CELLxGENE dataset schema version 3.0.X</a>. The following data constraints are imposed on top of the CELLxGENE dataset schema.</p>
+<section id="species">
+<h4>Species<a class="headerlink" href="#species" title="Permalink to this heading">¶</a></h4>
+<p>The Census MUST only contain observations (cells) with an  <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included.</p>
+<p>The Census MUST only contain features (genes) with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included</p>
+</section>
+<section id="multi-species-data-constraints">
+<h4>Multi-species data constraints<a class="headerlink" href="#multi-species-data-constraints" title="Permalink to this heading">¶</a></h4>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#general-requirements">multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one</a>, as defined in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> and <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> respectively.</p>
+<p>For a given multi-species dataset, the table below shows all possible combinations of organisms for both observations and features. For each combination, inclusion criteria for the Census is provided.</p>
+<table>
+<thead>
+  <tr>
+    <th>Observations (cells) from</th>
+    <th>Features (genes) from</th>
+    <th>Inclusion criteria</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:9606" for Homo sapiens</td>
+    <td>The Census MUST only contain observations from "NCBITaxon:9606" for <i>Homo sapiens</i></td>
+  </tr>
+  <tr>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>The Census MUST only contain observations from <i>Mus musculus</i></td>
+  </tr>
+  <tr>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>All observations MUST NOT be included</td>
+  </tr>
+</tbody>
+</table>
+</section>
+<section id="assays">
+<h4>Assays<a class="headerlink" href="#assays" title="Permalink to this heading">¶</a></h4>
+<p>Assays are defined in the CELLxGENE dataset schema in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#assay_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code></a>. The Census MUST only contain cells with
+an <code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code> value from the list below:</p>
+<table>
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Label</th>
+    <th>Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>EFO:0008720</td>
+    <td>DroNc-seq</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008722</td>
+    <td>Drop-seq</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008780</td>
+    <td>inDrop</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008913</td>
+    <td>single-cell RNA sequencing</td>
+    <td>Refers to "TruDrop" from this <a href="https://cellxgene.cziscience.com/collections/a48f5033-3438-4550-8574-cdff3263fdfd">collection</a> which is not included in EFO at the moment.</td>
+  </tr>
+  <tr>
+    <td>EFO:0008919</td>
+    <td>Seq-Well</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008930</td>
+    <td>Smart-seq</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008931</td>
+    <td>Smart-seq2</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008953</td>
+    <td>STRT-seq</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0008995</td>
+    <td>10x technology</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0009899</td>
+    <td>10x 3' v2</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0009900</td>
+    <td>10x 5' v2</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0009901</td>
+    <td>10x 3' v1</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0009922</td>
+    <td>10x 3' v3</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0010010</td>
+    <td>CEL-seq2</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0010183</td>
+    <td>single cell library construction</td>
+    <td>Refers to "GEXSCOPE" from this <a href="https://cellxgene.cziscience.com/collections/edb893ee-4066-4128-9aec-5eb2b03f8287">collection</a> which is not included in EFO at the moment.</td>
+  </tr>
+  <tr>
+    <td>EFO:0010550</td>
+    <td>sci-RNA-seq</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0011025</td>
+    <td>10x 5' v1</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0030002</td>
+    <td>microwell-seq</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0030003</td>
+    <td>10x 3' transcription profiling</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0030004</td>
+    <td>10x 5' transcription profiling</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0030019</td>
+    <td>Seq-Well S3</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0700003</td>
+    <td>BD Rhapsody Whole Transcriptome Analysis</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0700004</td>
+    <td>BD Rhapsody Targeted mRNA</td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+<p>Additional Notes:</p>
+<ul class="simple">
+<li><p>EFO:0030026 “sci-Plex” is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include.</p></li>
+<li><p>EFO:0009920 and EFO:0030062 “Slide-seq” and “Slide-seqV2”, respectively, are not included as coverage is low compared to other assays and data lacks context without spatial metadata not included in CELLxGENE dataset schema.</p></li>
+</ul>
+</section>
+<section id="data-matrix-types">
+<h4>Data matrix types<a class="headerlink" href="#data-matrix-types" title="Permalink to this heading">¶</a></h4>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. Author-normalized data layers <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">as defined in the CELLxGENE dataset schema</a> MUST NOT be included in the Census.</p>
+</section>
+<section id="sample-types">
+<h4>Sample types<a class="headerlink" href="#sample-types" title="Permalink to this heading">¶</a></h4>
+<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#tissue_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">tissue_ontology_term_id</span></code></a> value of  “ontology_term_id (organoid)” or “ontology_term_id (cell line)” MUST NOT be included.</p>
+</section>
+<section id="repeated-data">
+<h4>Repeated data<a class="headerlink" href="#repeated-data" title="Permalink to this heading">¶</a></h4>
+<p>When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data"><code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code></a>. This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.</p>
+</section>
+</section>
+<section id="data-encoding-and-organization">
+<h3>Data encoding and organization<a class="headerlink" href="#data-encoding-and-organization" title="Permalink to this heading">¶</a></h3>
+<p>The Census MUST be encoded as a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code> which will be referenced  as <code class="docutils literal notranslate"><span class="pre">census_obj</span></code> in the following sections. <code class="docutils literal notranslate"><span class="pre">census_obj</span></code>  MUST have two keys <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code> whose contents are defined in the sections below.</p>
+<section id="census-information-census-obj-census-info-somacollection">
+<h4>Census information <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;]</span></code> - <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code><a class="headerlink" href="#census-information-census-obj-census-info-somacollection" title="Permalink to this heading">¶</a></h4>
+<p>A series of summary and metadata tables MUST be included in this <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>:</p>
+<section id="census-metadata-census-obj-census-info-summary-somadataframe">
+<h5>Census metadata – <code class="docutils literal notranslate"><span class="pre">census_obj​​[&quot;census_info&quot;][&quot;summary&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#census-metadata-census-obj-census-info-summary-somadataframe" title="Permalink to this heading">¶</a></h5>
+<p>Census metadata MUST be stored as a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> with two columns:</p>
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>label</td>
+    <td>string</td>
+    <td>Human readable label of metadata variable</td>
+  </tr>
+  <tr>
+    <td>value </td>
+    <td>string</td>
+    <td>Value associated to metadata variable</td>
+  </tr>
+</tbody>
+</table>
+<p>This <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> MUST have the following rows:</p>
+<ol class="arabic simple">
+<li><p>Census schema version:</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;census_schema_version&quot;</span></code></p></li>
+<li><p>value: Semver schema version.</p></li>
+</ol>
+</li>
+<li><p>Census build date:</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;census_build_date&quot;</span></code></p></li>
+<li><p>value: The date this Census was built in ISO 8601 date format</p></li>
+</ol>
+</li>
+<li><p>Dataset schema version:</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;dataset_schema_version&quot;</span></code></p></li>
+<li><p>value: The CELLxGENE Discover schema version of the source H5AD files.</p></li>
+</ol>
+</li>
+<li><p>Total number of cells included in this Census build:</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;total_cell_count&quot;</span></code></p></li>
+<li><p>value: Cell count</p></li>
+</ol>
+</li>
+<li><p>Unique number of cells included in this Census build (is_primary_data == True)</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;unique_cell_count&quot;</span></code></p></li>
+<li><p>value: Cell count</p></li>
+</ol>
+</li>
+<li><p>Number of human donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;number_donors_homo_sapiens&quot;</span></code></p></li>
+<li><p>value: Donor count</p></li>
+</ol>
+</li>
+<li><p>Number of mouse donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.</p>
+<ol class="arabic simple">
+<li><p>label: <code class="docutils literal notranslate"><span class="pre">&quot;number_donors_mus_musculus&quot;</span></code></p></li>
+<li><p>value: Donor count</p></li>
+</ol>
+</li>
+</ol>
+<p>An example of this <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> is shown below:</p>
+<table>
+<thead>
+  <tr>
+    <th>label</th>
+    <th>value</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>census_schema_version</td>
+    <td>0.0.1</td>
+  </tr>
+  <tr>
+    <td>census_build_date</td>
+    <td>2022-11-30</td>
+  </tr>
+  <tr>
+    <td>dataset_schema_version </td>
+    <td>3.0.0</td>
+  </tr>
+  <tr>
+    <td>total_cell_count</td>
+    <td>10000</td>
+  </tr>
+  <tr>
+    <td>unique_cell_count</td>
+    <td>1000</td>
+  </tr>
+  <tr>
+    <td>number_donors_homo_sapiens</td>
+    <td>100</td>
+  </tr>
+  <tr>
+    <td>number_donors_mus_musculus</td>
+    <td>100</td>
+  </tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="census-table-of-cellxgene-discover-datasets-census-obj-census-info-datasets-somadataframe">
+<h4>Census table of CELLxGENE Discover datasets – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#census-table-of-cellxgene-discover-datasets-census-obj-census-info-datasets-somadataframe" title="Permalink to this heading">¶</a></h4>
+<p>All datasets used to build the Census MUST be included in a table modeled as a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code>. Each row MUST correspond to an individual dataset with the following columns:</p>
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>collection_id</td>
+    <td>string</td>
+    <td rowspan="5">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
+  </tr>
+  <tr>
+    <td>collection_name</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>collection_doi</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>dataset_id</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>dataset_title</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>dataset_h5ad_path</td>
+    <td>string</td>
+    <td>Relative path to the source h5ad file in the Census storage bucket.</td>
+  </tr>
+  <tr>
+    <td>dataset_total_cell_count</td>
+    <td>int</td>
+    <td>Total number of cells from the dataset included in the Census.</td>
+  </tr>
+</tbody>
+</table>
+</section>
+<section id="census-summary-cell-counts-census-obj-census-info-summary-cell-counts-somadataframe">
+<h4>Census summary cell counts  – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;summary_cell_counts&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataframe</span></code><a class="headerlink" href="#census-summary-cell-counts-census-obj-census-info-summary-cell-counts-somadataframe" title="Permalink to this heading">¶</a></h4>
+<p>Summary cell counts grouped by organism and relevant cell metadata MUST be modeled as a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> in <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;summary_cell_counts&quot;]</span></code>. Each row of MUST correspond to a combination of organism and metadata variables with the following columns:</p>
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>organism</td>
+    <td>string</td>
+    <td>Organism label as shown in NCBITaxon  <code>"Homo sapiens"</code> or <code>"Mus musculus"</code></td>
+  </tr>
+  <tr>
+    <td>category</td>
+    <td>string</td>
+    <td>Cell metadata used for grouping, one of the following:
+        <ul>
+          <li><code>all</code> (special case, no grouping)</li>
+          <li><code>cell_type</code></li>
+          <li><code>assay</code></li>
+          <li><code>tissue</code></li>
+          <li><code>tissue_general</code> (high-level mapping of a tissue)</li>
+          <li><code>disease</code></li>
+          <li><code>self_reported_ethnicity</code></li>
+          <li><code>sex</code></li>
+          <li><code>suspension_type</code></li>
+        </ul>
+  </tr>
+  <tr>
+    <td>label</td>
+    <td>string</td>
+    <td>Label associated to instance of metadata (e.g. <code>"lung"</code> if <code>category</code> is <code>"tissue"</code>). <code>"na"</code> if none.</td>
+  </tr>
+  <tr>
+    <td>ontology_term_id</td>
+    <td>string</td>
+    <td>ID associated to instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td> 
+  </tr>
+  <tr>
+    <td>total_cell_count</td>
+    <td>int</td>
+    <td>Total number of cell counts for the combination of values of all other fields above.</td>
+  </tr>
+  <tr>
+    <td>unique_cell_count</td>
+    <td>int</td>
+    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
+  </tr>
+</tbody>
+</table>
+<p>Example of this <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code>:</p>
+<table>
+<thead>
+  <tr>
+    <th>organism</th>
+    <th>category</th>
+    <th>label</th>
+    <th>ontology_term_id</th>
+    <th>total_cell_count</th>
+    <th>unique_cell_count</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>all</td>
+    <td>na</td>
+    <td>na</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>cell_type</td>
+    <td>cell_type_a</td>
+    <td>CL:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>cell_type</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>cell_type</td>
+    <td>cell_type_N</td>
+    <td>CL:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>assay</td>
+    <td>assay_a</td>
+    <td>EFO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>assay</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>assay</td>
+    <td>assay_N</td>
+    <td>EFO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>tissue</td>
+    <td>tissue_a</td>
+    <td>UBERON:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>tissue</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>tissue</td>
+    <td>tissue_N</td>
+    <td>UBERON:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>tissue_general</td>
+    <td>tissue_general_a</td>
+    <td>UBERON:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>tissue_general</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>tissue_general</td>
+    <td>tissue_general_N</td>
+    <td>UBERON:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>disease</td>
+    <td>disease_a</td>
+    <td>MONDO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>disease</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>disease</td>
+    <td>disease_N</td>
+    <td>MONDO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>self_reported_ethnicity</td>
+    <td>self_reported_ethnicity_a</td>
+    <td>HANCESTRO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>self_reported_ethnicity</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>self_reported_ethnicity</td>
+    <td>self_reported_ethnicity_N</td>
+    <td>HANCESTRO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>sex</td>
+    <td>sex_a</td>
+    <td>PATO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>sex</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>sex</td>
+    <td>sex_N</td>
+    <td>PATO:XXXXX</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>suspension_type</td>
+    <td>suspension_type_a</td>
+    <td>na</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>suspension_type</td>
+    <td>…</td>
+    <td>…</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+  <tr>
+    <td>[Homo sapiens|Mus musculus]</td>
+    <td>suspension_type</td>
+    <td>suspension_type_N</td>
+    <td>na</td>
+    <td>x</td>
+    <td>x</td>
+  </tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="census-data-census-obj-census-data-organism-somaexperiment">
+<h3>Census Data – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code><a class="headerlink" href="#census-data-census-obj-census-data-organism-somaexperiment" title="Permalink to this heading">¶</a></h3>
+<p>Data for <em>Homo sapiens</em> MUST be stored as a <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> in <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;homo_sapiens&quot;]</span></code>.</p>
+<p>Data for <em>Mus musculus</em> MUST be stored as a <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> in <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;mus_musculus&quot;]</span></code>.</p>
+<p>For each organism the <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> MUST contain the following:</p>
+<ul class="simple">
+<li><p>Cell metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].obs</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code></p></li>
+<li><p>Data  –  <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. This <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code> MUST only contain one <code class="docutils literal notranslate"><span class="pre">SOMAMeasurement</span></code> in <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;]</span></code> with the following:</p>
+<ul>
+<li><p>Matrix  data –  <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. It MUST contain exactly one layer:</p>
+<ul>
+<li><p>Count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code></p></li>
+</ul>
+</li>
+<li><p>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMAIndexedDataFrame</span></code></p></li>
+<li><p>Feature dataset presence matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray">
+<h4>Matrix Data, count (raw) matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray" title="Permalink to this heading">¶</a></h4>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. These counts MUST be encoded as <code class="docutils literal notranslate"><span class="pre">float32</span></code> in this <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code> with a fill value of zero (0), and no explicitly stored zero values.</p>
+</section>
+<section id="feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe">
+<h4>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe" title="Permalink to this heading">¶</a></h4>
+<p>The Census MUST only contain features with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_biotype"><code class="docutils literal notranslate"><span class="pre">feature_biotype</span></code></a> value of “gene”.</p>
+<p>The <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene references are pinned</a> as defined in the CELLxGENE dataset schema.</p>
+<p>The following columns MUST be included:</p>
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>feature_id</td>
+    <td>str</td>
+    <td>Index of <code>adata.var</code> as defined in CELLxGENE dataset schema</td>
+  </tr>
+  <tr>
+    <td>feature_name</td>
+    <td>str</td>
+    <td>As defined in CELLxGENE dataset schema </td>
+  </tr>
+  <tr>
+    <td>feature_length</td>
+    <td>int</td>
+    <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+  </tr>
+</tbody>
+</table>
+</section>
+<section id="feature-dataset-presence-matrix-census-obj-census-data-organism-ms-rna-feature-dataset-presence-matrix-somasparsendarray">
+<h4>Feature dataset presence matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#feature-dataset-presence-matrix-census-obj-census-data-organism-ms-rna-feature-dataset-presence-matrix-somasparsendarray" title="Permalink to this heading">¶</a></h4>
+<p>In some datasets, there are features not included in the source data. To clarify the difference between features that were not included and features that were not measured, for each <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> the Census MUST include a presence matrix encoded as a <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code>.</p>
+<p>For all features included in the Census, the dataset presence matrix MUST indicate what features are included in each dataset of the Census. This information MUST be encoded as a boolean matrix, <code class="docutils literal notranslate"><span class="pre">True</span></code> indicates the feature was included in the dataset, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise. This is a two-dimensional matrix and it MUST be <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">x</span> <span class="pre">M</span></code> where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of datasets in the <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> and <code class="docutils literal notranslate"><span class="pre">M</span></code> is the number of features. The matrix is indexed by the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value of  <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code>.</p>
+<p>If the feature has at least one cell with a value greater than zero in the count data matrix X in the dataset of origin, the value MUST be <code class="docutils literal notranslate"><span class="pre">True</span></code>; otherwise, it MUST be <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>An example of this matrix is shown below:</p>
+<table>
+<thead>
+  <tr>
+    <th></th>
+    <th>Feature_1</th>
+    <th>…</th>
+    <th>Feature_M</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><b>Dataset_soma_joinid_1</b></td>
+    <td>[<code>True</code>|<code>False</code>]</td>
+    <td>…</td>
+    <td>[<code>True</code>|<code>False</code>]</td>
+  </tr>
+  <tr>
+    <td>…</td>
+    <td>…</td>
+    <td>…</td>
+    <td>…</td>
+  </tr>
+  <tr>
+    <td><b> Dataset_soma_joinid_N</b></td>
+    <td>[<code>True</code>|<code>False</code>]</td>
+    <td>…</td>
+    <td>[<code>True</code>|<code>False</code>]</td>
+  </tr>
+</tbody>
+</table>
+</section>
+<section id="cell-metadata-census-obj-census-data-organism-obs-somadataframe">
+<h4>Cell metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].obs</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#cell-metadata-census-obj-census-data-organism-obs-somadataframe" title="Permalink to this heading">¶</a></h4>
+<p>Cell metadata MUST be encoded as a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> with the following columns:</p>
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>dataset_id</td>
+    <td>string</td>
+    <td>CELLxGENE dataset ID</td>
+  </tr>
+  <tr>
+    <td>tissue_general_ontology_term_id</td>
+    <td>string</td>
+    <td>High-level tissue UBERON ID as implemented <a href="https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py">here</a></td>
+  </tr>
+  <tr>
+    <td>tissue_general</td>
+    <td>string</td>
+    <td>High-level tissue label as implemented <a href="https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py">here</a></td>
+  </tr>
+  <tr>
+    <td>assay_ontology_term_id</td>
+    <td colspan="2" rowspan="17">As defined in CELLxGENE dataset schema</td>
+  </tr>
+  <tr>
+    <td>assay</td>
+  </tr>
+  <tr>
+    <td>cell_type_ontology_term_id</td>
+  </tr>
+  <tr>
+    <td>cell_type</td>
+  </tr>
+  <tr>
+    <td>development_stage_ontology_term_id</td>
+  </tr>
+  <tr>
+    <td>development_stage</td>
+  </tr>
+  <tr>
+    <td>disease_ontology_term_id</td>
+  </tr>
+  <tr>
+    <td>disease</td>
+  </tr>
+  <tr>
+    <td>donor_id</td>
+  </tr>
+  <tr>
+    <td>is_primary_data</td>
+  </tr>
+  <tr>
+    <td>self_reported_ethnicity_ontology_term_id</td>
+  </tr>
+  <tr>
+    <td>self_reported_ethnicity</td>
+  </tr>
+  <tr>
+    <td>sex_ontology_term_id</td>
+  </tr>
+  <tr>
+    <td>sex</td>
+  </tr>
+  <tr>
+    <td>suspension_type</td>
+  </tr>
+  <tr>
+    <td>tissue_ontology_term_id</td>
+  </tr>
+  <tr>
+    <td>tissue</td>
+  </tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h2>
+<section id="version-1-0-0">
+<h3>Version 1.0.0<a class="headerlink" href="#version-1-0-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Updates text to reflect official name: CZ CELLxGENE Discover Census.</p></li>
+<li><p>Updates <code class="docutils literal notranslate"><span class="pre">census[&quot;census_info&quot;][&quot;summary&quot;]</span></code> to reflect official name in the column <code class="docutils literal notranslate"><span class="pre">label</span></code>:</p>
+<ul>
+<li><p>From <code class="docutils literal notranslate"><span class="pre">&quot;cell_census_build_date&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;census_build_date&quot;</span></code>.</p></li>
+<li><p>From <code class="docutils literal notranslate"><span class="pre">&quot;cell_census_schema_version&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;census_schema_version&quot;</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Adds the following row to <code class="docutils literal notranslate"><span class="pre">census[&quot;census_info&quot;][&quot;summary&quot;]</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;dataset_schema_version&quot;</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="version-0-1-1">
+<h3>Version 0.1.1<a class="headerlink" href="#version-0-1-1" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Adds clarifying text for “Feature Dataset Presence Matrix”</p></li>
+</ul>
+</section>
+<section id="version-0-1-0">
+<h3>Version 0.1.0<a class="headerlink" href="#version-0-1-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>The “Dataset Presence Matrix” was renamed to “Feature Dataset Presence Matrix” and moved from  <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].varp[&quot;dataset_presence_matrix&quot;]</span></code>  to <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code>.</p></li>
+<li><p>Editorial: changes all double quotes in the schema to ASCII quotes 0x22.</p></li>
+</ul>
+</section>
+<section id="version-0-0-1">
+<h3>Version 0.0.1<a class="headerlink" href="#version-0-0-1" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Initial Census schema is published.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
