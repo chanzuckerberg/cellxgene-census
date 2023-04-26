@@ -36,8 +36,8 @@ CensusVersionDescription = TypedDict(
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 
-# URL for the default top-level directory of all public data, formatted as a CensusDirectory
-CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgene-data-public/cell-census/release.json"
+# URL for the default top-level directory of all public data
+CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://census.cellxgene.cziscience.com/cell-census/release.json"
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:

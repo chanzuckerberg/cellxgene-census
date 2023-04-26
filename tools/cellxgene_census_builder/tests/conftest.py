@@ -121,7 +121,7 @@ def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
                     dataset_title=f"title_{organism.name}",
                     collection_id=f"id_{organism.name}",
                     collection_name=f"collection_{organism.name}",
-                    corpora_asset_h5ad_uri="mock",
+                    dataset_asset_h5ad_uri="mock",
                     dataset_h5ad_path=h5ad_path,
                 ),
             )

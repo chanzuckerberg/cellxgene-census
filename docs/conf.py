@@ -16,7 +16,7 @@ release = "0.5.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx", 'sphinx.ext.napoleon']
+extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx", 'sphinx.ext.napoleon', 'myst_parser']
 
 napoleon_custom_sections = ["Lifecycle"]
 
@@ -37,13 +37,16 @@ intersphinx_mapping = {
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+source_suffix = ['.rst', '.md']
+
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # html_theme = 'alabaster'
-# html_static_path = ['_static']
+# Inject custom css files in `/_static/css/*`
+html_static_path = ['_static']
 
 import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
@@ -54,4 +57,4 @@ html_js_files = [
 ]
 
 def setup(app):
-    app.add_css_file("custom.css")
+    app.add_css_file("css/custom.css")
