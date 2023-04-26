@@ -11,6 +11,7 @@ import os.path
 import urllib.parse
 from typing import Any, Dict, Optional
 
+import certifi
 import s3fs
 import tiledbsoma as soma
 
@@ -21,6 +22,8 @@ DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
+    # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
+    "vfs.s3.ca_file": certifi.where(),
 }
 
 
