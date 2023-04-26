@@ -57,9 +57,9 @@ The Census does not have normalized counts or embeddings because:
 
 If you have any suggestions for methods that our team should explore please share them with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
 
-## How does the Census differentiate from other services?
+## How does the Census differentiate from other tools?
 
-The Census differentiates from existing single-cell services by providing access to the largest corpus of standardized single-cell data via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose). Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations accessible and ready for:
+The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data – CZ CELLxGENE Discover –  via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose).  Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:
 
 * Opening and reading data at low latency from the cloud.
 * Querying and accessing data using metadata filters.
@@ -79,7 +79,7 @@ The Census data is publicly hosted free-of-cost in an Amazon Web Services (AWS) 
 
 ## Can I retrieve the original H5AD datasets from which the Census was built?
 
-Yes, you can use the API function `download_source_h5ad` to do so. For usage, please see the reference documentation at the [doc-site](https://cellxgene-census.readthedocs.io/en/) or directly from Python or R:
+Yes, you can use the API function `download_source_h5ad` to do so. For usage, please see the reference documentation at the [doc-site](https://chanzuckerberg.github.io/cellxgene-census/) or directly from Python or R:
 
 Python
 
@@ -116,7 +116,7 @@ pip install cellxgene-census
 
 ## How can I ask for support?
 
-You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose) or post in the slack channel `#cellxgene-census-users` at the [CZI Slack community](https://cziscience.slack.com/join/shared_invite/zt-czl1kp2v-sgGpY4RxO3bPYmFg2XlbZA#/shared-invite/email).
+You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose), or for quick support you can join the CZI Science Community on Slack ([czi.co/science-slack](czi.co/science-slack)) and ask questions in the `#cellxgene-census-users` channel.
 
 ## How can I ask for new features?
 

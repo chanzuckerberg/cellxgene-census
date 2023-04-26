@@ -1,22 +1,17 @@
 ❗ **R API in beta.**
 
-![image](cellxgene_census_docsite_workflow.svg)
-
 # CZ CELLxGENE Discover Census
 
-The CZ CELLxGENE Discover **Census** provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover. 
-
-Using a **new access paradigm of cell-based slicing and querying**, you can interact with the data across datasets through [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA), or get slices in [AnnData](https://anndata.readthedocs.io/) or [Seurat](https://satijalab.org/seurat/) objects.
+CZ CELLxGENE Census provides efficient computational tooling to **access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover**. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data wrangling.
 
 Get started on using the Census:
 
-- [Installation](cellxgene_census_docsite_installation.md)
-- [R & Python quick start](cellxgene_census_docsite_quick_start.md)
+- [Quick start (Python and R)](cellxgene_census_docsite_quick_start.md)
 - [Census data and schema](cellxgene_census_docsite_schema.md)
-- [FAQ](cellxgene_census_docsite_FAQ.md)
 - [Python tutorials](examples.rst)
-- R tutorials. *Coming soon.*
+- *Coming soon: R tutorials.*
 
+![image](cellxgene_census_docsite_workflow.svg)
 
 ## Citing the Census
 
@@ -24,7 +19,7 @@ Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08
 
 ## Census Capabilities
 
-The Census is a data object publicly hosted online and a convenience API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
+The Census is a data object publicly hosted online and an API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
 
 **Data access at scale**
 
@@ -42,16 +37,21 @@ The Census is a data object publicly hosted online and a convenience API to open
 - From Python create [PyArrow](https://arrow.apache.org/docs/python/index.html) objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.
 - From R create [R Arrow](https://arrow.apache.org/docs/r/index.html) objects, sparse matrices (via the [Matrix](https://cran.r-project.org/package=Matrix) package), and standard data frames and (dense) matrices.
 
+## Census Data
+
+A description of the census data and its schema is detailed [here](cellxgene_census_docsite_schema.md). Note that the data includes raw counts for both **full-gene sequencing reads (e.g. Smart-Seq2) and molecule counts (e.g. 10X).**
+
 ## Census Data Releases
 
 The Census data release plans are detailed [here](cellxgene_census_docsite_data_release_info.md). 
 
-Shortly, starting in May 15, 2023, Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases are published without any guarantee of permanence. 
-
+Starting in May 15th, 2023, Census data releases with long-term support will be published every six months. These releases will be publicly accessible for at least five years. In addition, weekly releases may be published without any guarantee of permanence.
+ 
 
 ## Questions, feedback and issues
 
-- Users are encouraged to submit questions and feature requests about the Census via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). Alternatively, for quick support you can join the [CZI Science Community](https://czi.co/science-slack) on Slack and join the `#cellxgene-census-users` channel
+- Users are encouraged to submit questions and feature requests about the Census via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). 
+- For quick support, you can join the CZI Science Community on Slack ([czi.co/science-slack](https://czi.co/science-slack)) and ask questions in the `#cellxgene-census-users` channel.
 - Users are encouraged to share their feedback by emailing <soma@chanzuckerberg.com>.
 - Bugs can be submitted via [github issues](https://github.com/chanzuckerberg/cellxgene-census/issues). 
 -  If you believe you have found a security issue, please disclose it by contacting <security@chanzuckerberg.com>.
@@ -63,7 +63,7 @@ Shortly, starting in May 15, 2023, Census long-term supported data releases will
 - We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and [PyTorch](https://pytorch.org/).
 - To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas:
    - Include organism-wide normalized layers.
-   - Include Organism-wide embeddings.
+   - Include organism-wide embeddings.
    - On-demand information-rich subsampling.
 
 ## Projects and tools using Census
