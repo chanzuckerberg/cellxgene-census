@@ -4,23 +4,22 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Axis Query Example &mdash; cell-census 0.5.0 documentation</title>
+  <title>Querying axis metadata &mdash; cellxgene-census 0.5.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -37,7 +36,7 @@
           
           
           <a href="../../index.html" class="icon icon-home">
-            cell-census
+            cellxgene-census
           </a>
               <div class="version">
                 0.5
@@ -54,21 +53,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../soma.html">What is SOMA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cell-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../schema.html">Schema</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Axis Query Example</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Opening-the-census">Opening the census</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Summarize-Census-cell-metadata">Summarize Census cell metadata</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Full-census-stats">Full census stats</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Querying axis metadata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Opening-the-Census">Opening the Census</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Summarizing-cell-metadata">Summarizing cell metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Full-Census-metadata-stats">Full Census metadata stats</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X: using online algorithms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Census datasets presence</a></li>
 <li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Census Datasets example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Cell Census query &amp; extract subsets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_rank_gene_groups.html">Cell Census - demo ScanPy rank_gene_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Census query &amp; extract subsets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_rank_gene_groups.html">Census - demo ScanPy rank_gene_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Census summary cell counts example</a></li>
 </ul>
 </li>
@@ -83,7 +82,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">cell-census</a>
+          <a href="../../index.html">cellxgene-census</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -92,7 +91,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
-      <li class="breadcrumb-item active">Axis Query Example</li>
+      <li class="breadcrumb-item active">Querying axis metadata</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/api_demo/census_axis_query.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -102,321 +101,53 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Axis-Query-Example">
-<h1>Axis Query Example<a class="headerlink" href="#Axis-Query-Example" title="Permalink to this heading">¶</a></h1>
-<p><em>Goal:</em> demonstrate basic axis metadata handling using Pandas.</p>
-<p>The CZ Cell Census stores obs (cell) metadata in a SOMA DataFrame, which can be queried and read as a Pandas DataFrame. The Cell Census also has a convenience package which simplifies opening the census.</p>
-<p>Pandas DataFrame is an in-memory object. Take care that queries are small enough for results to fit in memory.</p>
-<section id="Opening-the-census">
-<h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">cell_census</span></code> python package contains a convenient API to open the latest version of the Cell Census. If you open the census, you should close it. <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> returns a context, so you can open/close it in several ways, like a Python file handle. The context manager is preferred, as it will automatically close upon an error raise.</p>
-<p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cell_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cell_census.open_soma)</span></code>.</p>
+  <section id="Querying-axis-metadata">
+<h1>Querying axis metadata<a class="headerlink" href="#Querying-axis-metadata" title="Permalink to this heading">¶</a></h1>
+<p>This notebook provides examples for basic axis metadata handling using Pandas. The Census stores <code class="docutils literal notranslate"><span class="pre">obs</span></code> (cell) and <code class="docutils literal notranslate"><span class="pre">var</span></code> (gene) metadata in <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> objects via the <code class="docutils literal notranslate"><span class="pre">`TileDB-SOMA</span></code> API &lt;<a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">https://github.com/single-cell-data/TileDB-SOMA</a>&gt;`__ (<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">documentation</a>), which can be queried and read as a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> using <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code>.</p>
+<p>Note that Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> is an in-memory object, therefore queries should be small enough for results to fit in memory.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Opening the Census</p></li>
+<li><p>Summarizing cell metadata</p>
+<ol class="arabic simple">
+<li><p>Example: Summarize all cell types</p></li>
+<li><p>Example: Summarize a subset of cell types, selected with a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code></p></li>
+</ol>
+</li>
+<li><p>Full Census metadata stats</p></li>
+</ol>
+<section id="Opening-the-Census">
+<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census. If you open the Census, you should close it. <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> returns a context, so you can open/close it in several ways, like a Python file handle. The context manager is preferred, as it will automatically close upon an error raise.</p>
+<p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cell_census</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="c1"># Preferred: use a Python context manager</span>
-<span class="k">with</span> <span class="n">cell_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
     <span class="o">...</span>
 
 <span class="c1"># or, directly open the census (don&#39;t forget to close it!)</span>
-<span class="n">census</span> <span class="o">=</span> <span class="n">cell_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </section>
-<section id="Summarize-Census-cell-metadata">
-<h2>Summarize Census cell metadata<a class="headerlink" href="#Summarize-Census-cell-metadata" title="Permalink to this heading">¶</a></h2>
+<section id="Summarizing-cell-metadata">
+<h2>Summarizing cell metadata<a class="headerlink" href="#Summarizing-cell-metadata" title="Permalink to this heading">¶</a></h2>
+<p>Once the Census is open you can use its <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code> methods as it is itself a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. You can thus access the metadata <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> objects encoding cell and gene metadata.</p>
 <p>Tips:</p>
 <ul class="simple">
-<li><p>You can read an <em>entire</em> SOMA dataframe into a Pandas DataFrame using <code class="docutils literal notranslate"><span class="pre">soma_df.read().concat().to_pandas()</span></code>, allowing the use of the standard Pandas API.</p></li>
+<li><p>You can read an <em>entire</em> <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> into a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> using <code class="docutils literal notranslate"><span class="pre">soma_df.read().concat().to_pandas()</span></code>, allowing the use of the standard Pandas API.</p></li>
 <li><p>Queries will be much faster if you request only the DataFrame columns required for your analysis (e.g., <code class="docutils literal notranslate"><span class="pre">column_names=[&quot;cell_type_ontology_term_id&quot;]</span></code>).</p></li>
 <li><p>You can also further refine query results by using a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code>, which will filter the census for matching records.</p></li>
 </ul>
-<section id="Example-1---Summarize-all-cell-types">
-<h3>Example 1 - Summarize all cell types<a class="headerlink" href="#Example-1---Summarize-all-cell-types" title="Permalink to this heading">¶</a></h3>
-<p>This example reads the cell metadata (obs) into a Pandas DataFrame, and summarizes in a variety of ways using Pandas API.</p>
+<section id="Example:-Summarize-all-cell-types">
+<h3>Example: Summarize all cell types<a class="headerlink" href="#Example:-Summarize-all-cell-types" title="Permalink to this heading">¶</a></h3>
+<p>This example reads the cell metadata (<code class="docutils literal notranslate"><span class="pre">obs</span></code>) into a Pandas DataFrame, and summarizes in a variety of ways using Pandas API.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -431,7 +162,7 @@ div.rendered_html tbody tr:hover {
 
 <span class="c1"># Display only the first 10, as there are a LOT!</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_cell_type_ontology_term_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> cell types in the Cell Census! The first 10 are:&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_cell_type_ontology_term_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> cell types in the Census! The first 10 are:&quot;</span><span class="p">,</span>
     <span class="n">unique_cell_type_ontology_term_id</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
 <span class="p">)</span>
 
@@ -447,25 +178,26 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-There are 573 cell types in the Cell Census! The first 10 are: [&#39;CL:0000649&#39;, &#39;CL:0002187&#39;, &#39;CL:0000148&#39;, &#39;CL:0000312&#39;, &#39;CL:0000242&#39;, &#39;CL:0000988&#39;, &#39;CL:2000092&#39;, &#39;CL:0002189&#39;, &#39;CL:0000499&#39;, &#39;CL:0000623&#39;]
+There are 588 cell types in the Census! The first 10 are: [&#39;CL:0000649&#39;, &#39;CL:0002187&#39;, &#39;CL:0000148&#39;, &#39;CL:0000312&#39;, &#39;CL:0000242&#39;, &#39;CL:0000988&#39;, &#39;CL:2000092&#39;, &#39;CL:0002189&#39;, &#39;CL:0000499&#39;, &#39;CL:0000623&#39;]
 
 The top 10 cell types and their counts are:
-CL:0000540    5177999
+cell_type_ontology_term_id
+CL:0000540    5186967
 CL:0000679    1889047
-CL:0000128    1744101
-CL:0000235    1394897
-CL:0000624    1286352
+CL:0000128    1744548
+CL:0000235    1458460
+CL:0000624    1343608
+CL:0000625    1285307
 CL:0000860    1251739
-CL:0000625    1243990
-CL:0000623    1027877
-CL:0000057     982731
-CL:0000236     959462
-Name: cell_type_ontology_term_id, dtype: int64
+CL:0000057    1075053
+CL:0000623    1040446
+CL:0000236     986032
+Name: count, dtype: int64
 </pre></div></div>
 </div>
 </section>
-<section id="Summarize-a-subset-of-cell-types,-selected-with-a-value_filter">
-<h3>Summarize a subset of cell types, selected with a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code><a class="headerlink" href="#Summarize-a-subset-of-cell-types,-selected-with-a-value_filter" title="Permalink to this heading">¶</a></h3>
+<section id="Example:-Summarize-a-subset-of-cell-types,-selected-with-a-value_filter">
+<h3>Example: Summarize a subset of cell types, selected with a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code><a class="headerlink" href="#Example:-Summarize-a-subset-of-cell-types,-selected-with-a-value_filter" title="Permalink to this heading">¶</a></h3>
 <p>This example utilizes a SOMA “value filter” to read the subset of cells with <code class="docutils literal notranslate"><span class="pre">tissue_ontology_term_id</span></code> equal to <code class="docutils literal notranslate"><span class="pre">UBERON:0002048</span></code> (lung tissue), and summarizes the query result using Pandas.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -490,7 +222,7 @@ Name: cell_type_ontology_term_id, dtype: int64
 <span class="n">unique_cell_type_ontology_term_id</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">cell_type_ontology_term_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_cell_type_ontology_term_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> cell types in the Cell Census where tissue_ontology_term_id == </span><span class="si">{</span><span class="n">LUNG_TISSUE</span><span class="si">}</span><span class="s2">! The first 10 are:&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_cell_type_ontology_term_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> cell types in the Census where tissue_ontology_term_id == </span><span class="si">{</span><span class="n">LUNG_TISSUE</span><span class="si">}</span><span class="s2">! The first 10 are:&quot;</span><span class="p">,</span>
     <span class="n">unique_cell_type_ontology_term_id</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
 <span class="p">)</span>
 
@@ -506,20 +238,21 @@ Name: cell_type_ontology_term_id, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-There are 176 cell types in the Cell Census where tissue_ontology_term_id == UBERON:0002048! The first 10 are: [&#39;CL:0002325&#39;, &#39;CL:0000064&#39;, &#39;CL:0000875&#39;, &#39;CL:0000236&#39;, &#39;CL:0000623&#39;, &#39;CL:0000235&#39;, &#39;CL:0000084&#39;, &#39;CL:0000003&#39;, &#39;CL:0000186&#39;, &#39;CL:0000115&#39;]
+There are 179 cell types in the Census where tissue_ontology_term_id == UBERON:0002048! The first 10 are: [&#39;CL:1000271&#39;, &#39;CL:0000583&#39;, &#39;CL:0002063&#39;, &#39;CL:0000359&#39;, &#39;CL:1000143&#39;, &#39;CL:0000235&#39;, &#39;CL:4023054&#39;, &#39;CL:0000451&#39;, &#39;CL:0000623&#39;, &#39;CL:0000115&#39;]
 
 Top 10 cell types where tissue_ontology_term_id == UBERON:0002048
-CL:0000235    514828
-CL:0000583    317503
-CL:0000624    265512
-CL:0000625    248053
+cell_type_ontology_term_id
+CL:0000235    524362
+CL:0000583    330014
+CL:0000624    273098
+CL:0000625    251614
+CL:0000623    168957
 CL:0000003    168203
-CL:0000623    164002
+CL:0002063    163561
 CL:0000860    160365
 CL:0001064    149067
-CL:0002063    142612
 CL:0002632    126058
-Name: cell_type_ontology_term_id, dtype: int64
+Name: count, dtype: int64
 </pre></div></div>
 </div>
 <p>You can also define much more complex value filters. For example: * combine terms with <code class="docutils literal notranslate"><span class="pre">and</span></code> and <code class="docutils literal notranslate"><span class="pre">or</span></code> * use the <code class="docutils literal notranslate"><span class="pre">in</span></code> operator to query on multiple values</p>
@@ -552,6 +285,7 @@ Name: cell_type_ontology_term_id, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+cell_type_ontology_term_id
 CL:0000746    159096
 CL:0008034     84750
 CL:0002548     79618
@@ -562,13 +296,13 @@ CL:0000669     27515
 CL:0000003     22707
 CL:0000057     20117
 CL:0002144     18593
-Name: cell_type_ontology_term_id, dtype: int64
+Name: count, dtype: int64
 </pre></div></div>
 </div>
 </section>
 </section>
-<section id="Full-census-stats">
-<h2>Full census stats<a class="headerlink" href="#Full-census-stats" title="Permalink to this heading">¶</a></h2>
+<section id="Full-Census-metadata-stats">
+<h2>Full Census metadata stats<a class="headerlink" href="#Full-Census-metadata-stats" title="Permalink to this heading">¶</a></h2>
 <p>This example queries all organisms in the Census, and summarizes the diversity of various metadata lables.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -586,7 +320,7 @@ Name: cell_type_ontology_term_id, dtype: int64
 <span class="p">}</span>
 
 <span class="c1"># Use Pandas API to summarize each organism</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Complete cell census contains </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">obs_df</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s2"> cells.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Complete census contains </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">obs_df</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s2"> cells.&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">organism</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">organism</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">COLS_TO_QUERY</span><span class="p">:</span>
@@ -599,11 +333,11 @@ Name: cell_type_ontology_term_id, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Complete cell census contains 47754398 cells.
+Complete census contains 49423515 cells.
 homo_sapiens
-        Unique cell_type_ontology_term_id values: 573
+        Unique cell_type_ontology_term_id values: 588
         Unique assay_ontology_term_id values: 20
-        Unique tissue_ontology_term_id values: 204
+        Unique tissue_ontology_term_id values: 216
 mus_musculus
         Unique cell_type_ontology_term_id values: 211
         Unique assay_ontology_term_id values: 9

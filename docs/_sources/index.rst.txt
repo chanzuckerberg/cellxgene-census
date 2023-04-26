@@ -1,31 +1,15 @@
-.. cell-census documentation master file, created by
-   sphinx-quickstart on Thu Feb 16 11:22:43 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-.. meta::
-   :name=robots: noindex
-
-Welcome to cell-census documentation!
-=======================================
-
-Note: this site is currently under construction. The location will change in the future, so don't bookmark it.
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Contents
---------
+.. include:: cellxgene_census_docsite_landing.md
+   :parser: myst_parser.sphinx_
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
-   setup
-   soma
-   python-api
-   R API <https://chanzuckerberg.github.io/cell-census/r/index.html>
-   schema
+   cellxgene_census_docsite_installation.md
+   cellxgene_census_docsite_quick_start.md
    examples
+   cellxgene_census_docsite_schema.md
+   cellxgene_census_docsite_data_release_info.md
+   python-api
+   R API <https://chanzuckerberg.github.io/cellxgene-census/r/index.html>
+   cellxgene_census_docsite_FAQ.md

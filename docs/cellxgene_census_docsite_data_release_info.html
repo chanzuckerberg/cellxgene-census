@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>Census data releases &mdash; cellxgene-census 0.5.0 documentation</title>
   
 
   
@@ -26,7 +27,6 @@
   
 
   
-    
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -42,10 +42,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-    <script src="_static/searchtools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Python API" href="python-api.html" />
+    <link rel="prev" title="Census data and schema" href="cellxgene_census_docsite_schema.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -103,7 +103,7 @@
 
             
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -121,12 +121,19 @@
                 
                 
                 
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Census data releases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-a-census-data-release">What is a Census data release?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#long-term-supported-lts-cell-census-releases">Long-term supported (LTS) Cell Census releases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#weekly-census-release-latest">Weekly Census release (latest)</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
@@ -157,8 +164,9 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Search</li>
+      <li class="breadcrumb-item active">Census data releases</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cellxgene_census_docsite_data_release_info.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -166,23 +174,40 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search functionality.
-    </p>
-  </div>
-  </noscript>
+  <section id="census-data-releases">
+<h1>Census data releases<a class="headerlink" href="#census-data-releases" title="Permalink to this heading">¶</a></h1>
+<p><strong>Last edited</strong>: April, 2023.</p>
+<section id="what-is-a-census-data-release">
+<h2>What is a Census data release?<a class="headerlink" href="#what-is-a-census-data-release" title="Permalink to this heading">¶</a></h2>
+<p>It is a Census build that is publicly hosted online. A Census build is
+a <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a> collection with the Census data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> as specified in the <a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">Census schema</span></a>.</p>
+<section id="long-term-supported-lts-cell-census-releases">
+<h3>Long-term supported (LTS) Cell Census releases<a class="headerlink" href="#long-term-supported-lts-cell-census-releases" title="Permalink to this heading">¶</a></h3>
+<p>To enable data stability and scientific reproducibility, <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> plans to perform regular LTS Census data releases:</p>
+<ul class="simple">
+<li><p>Published online every six months for public access, starting on May 15, 2023.</p></li>
+<li><p>Available for public access for at least 5 years upon publication.</p></li>
+</ul>
+</section>
+<section id="weekly-census-release-latest">
+<h3>Weekly Census release (latest)<a class="headerlink" href="#weekly-census-release-latest" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> plans to perform weekly Census data releases:</p>
+<ul class="simple">
+<li><p>Published online every Monday for public access, except for CZI holidays.</p></li>
+<li><p>Available for public access for 1 week or until the next latest release is performed, whichever is the longest.</p></li>
+</ul>
+</section>
+</section>
+</section>
 
-  
-  <div id="search-results">
-  
-  </div>
 
             </div>
             
             </div>
-            <footer>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cellxgene_census_docsite_schema.html" class="btn btn-neutral float-left" title="Census data and schema" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="python-api.html" class="btn btn-neutral float-right" title="Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
@@ -214,14 +239,7 @@
   
   
     
-  
-  <script>
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script id="searchindexloader"></script>
    
-
 
 </body>
 </html>
