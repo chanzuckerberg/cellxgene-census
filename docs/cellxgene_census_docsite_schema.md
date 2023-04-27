@@ -5,7 +5,7 @@ This page provides a user-friendly overview of the Census contents and its schem
 **Contents**
 
 1. [Schema](#schema)
-2. [Data included in the Census](data-included-in-the-census)
+2. [Data included in the Census](#data-included-in-the-census)
 1. [SOMA objects](#soma-objects)
 
 ## Schema
