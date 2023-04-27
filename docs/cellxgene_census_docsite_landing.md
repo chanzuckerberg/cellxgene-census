@@ -19,7 +19,7 @@ Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08
 
 ## Census Capabilities
 
-The Census is a data object publicly hosted online and an API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API and data model via its implementation [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
+The Census is a data object publicly hosted online and an API to open it. The object is built using the [SOMA](https://github.com/single-cell-data/SOMA) API specification and data model, and it is implemented via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA). As such, the Census has all the data capabilities offered by TileDB-SOMA including:
 
 **Data access at scale**
 
@@ -50,7 +50,7 @@ A description of the census data and its schema is detailed [here](cellxgene_cen
 
 The Census data release plans are detailed [here](cellxgene_census_docsite_data_release_info.md). 
 
-Starting in May 15th, 2023, Census data releases with long-term support will be published every six months. These releases will be publicly accessible for at least five years. In addition, weekly releases may be published without any guarantee of permanence.
+Starting May 15th, 2023, Census data releases with long-term support will be published every six months. These releases will be publicly accessible for at least five years. In addition, weekly releases may be published without any guarantee of permanence.
  
 
 ## Questions, feedback and issues

@@ -32,12 +32,12 @@ For example, a user can more easily get “*all T-cells from Lung with COVID-19*
 
 The Census isn’t suited for:
 
-- Access non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
-- Access the author-contributed normalized expression values or embeddings. 
-- Access all data from just one dataset.
-- Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
+- Access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
+- Access to the author-contributed normalized expression values or embeddings. 
+- Access to all data from just one dataset.
+- Access to non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
 
-If you’d like to perform any of the above tasks, you can access web downloads directly from the [CZ CELLxGENE Discover Datasets](https://cellxgene.cziscience.com/datasets) feature. Click [here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data) for more information about downloading published data on CELLxGENE Discover. 
+If you’d like to perform any of the above tasks, you can access web downloads directly from the [CZ CELLxGENE Discover Datasets](https://cellxgene.cziscience.com/datasets) feature. [Click here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data) for more information about downloading published data on CELLxGENE Discover. 
 
 ## What data is contained in the Census?
 
@@ -116,7 +116,7 @@ pip install cellxgene-census
 
 ## How can I ask for support?
 
-You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose), or for quick support you can join the CZI Science Community on Slack ([czi.co/science-slack](czi.co/science-slack)) and ask questions in the `#cellxgene-census-users` channel.
+You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose), or for quick support you can join the CZI Science Community on Slack ([czi.co/science-slack](https://czi.co/science-slack)) and ask questions in the `#cellxgene-census-users` channel.
 
 ## How can I ask for new features?
 
