@@ -1,10 +1,6 @@
 [![codecov](https://codecov.io/gh/chanzuckerberg/cellxgene-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cellxgene-census)
 
-:exclamation: **Status:** pre-release, under rapid development.
-
-
 # CZ CELLxGENE Discover Census
-
 
 The Census of [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is a free-to-use service (API + Data) that allows for querying its single-cell data corpus at low-latency directly into Python or R.
 
