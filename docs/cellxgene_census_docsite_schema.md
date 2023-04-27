@@ -44,9 +44,14 @@ All data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) that ad
 
 - Cells from human or mouse.
 - Non-spatial RNA data, see full list of sequencing technologies included [here](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#assays).
-- Both **full-gene sequencing reads (e.g. Smart-Seq2) and molecule counts (e.g. 10X).**
 - Raw counts.
 - Only standardized cell and gene metadata as described in the CELLxGENE Discover dataset [schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md).
+
+:warning: Note that the data includes: 
+
+* **Full-gene sequencing reads** (e.g. Smart-Seq2) and **molecule counts** (e.g. 10X).
+* **Duplicate cells** present across multiple datasets, these can be filtered in or out using the cell metadata variable `is_primary_data`.
+
 
 ## SOMA objects 
 
