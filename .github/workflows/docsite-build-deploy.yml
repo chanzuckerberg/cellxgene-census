@@ -1,13 +1,14 @@
 name: Build and Deploy Docsite
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
+  workflow_dispatch: # Used to make post-release docfixes
 permissions:
   contents: write
 jobs:
   build-and-deploy:
-    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
