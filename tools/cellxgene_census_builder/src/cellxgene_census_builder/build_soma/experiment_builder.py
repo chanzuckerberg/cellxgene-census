@@ -373,7 +373,7 @@ def _accumulate_all_X_layers(
             assert (row >= 0).all()
             col = local_var_joinids[X.col]
             assert (col >= 0).all()
-            X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
+            X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs + 1, eb.n_var + 1))
             X_remap.eliminate_zeros()
             with soma.Experiment.open(eb.experiment_uri, "w") as experiment:
                 experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
