@@ -39,7 +39,7 @@ The Census is a data object publicly hosted online and an API to open it. The ob
 
 ## Census Data
 
-A description of the census data and its schema is detailed [here](cellxgene_census_docsite_schema.md). 
+A description of the Census data and its schema is detailed [here](cellxgene_census_docsite_schema.md). 
 
 :warning: Note that the data includes: 
 
