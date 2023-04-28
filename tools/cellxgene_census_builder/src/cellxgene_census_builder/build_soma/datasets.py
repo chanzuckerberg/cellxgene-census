@@ -58,8 +58,8 @@ class Dataset:
 
 
 def assign_dataset_soma_joinids(datasets: List[Dataset]) -> None:
-    for joinid, dataset in enumerate(datasets):
-        dataset.soma_joinid = joinid
+    for joinid_minus_one, dataset in enumerate(datasets):
+        dataset.soma_joinid = joinid_minus_one + 1
 
 
 def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dataset]) -> None:

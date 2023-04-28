@@ -191,7 +191,7 @@ class ExperimentBuilder:
         # requires 'organism', do be careful not to delete that.
         obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]].reset_index(drop=True).copy()
 
-        obs_df["soma_joinid"] = range(self.n_obs, self.n_obs + len(obs_df))
+        obs_df["soma_joinid"] = range(self.n_obs + 1, self.n_obs + len(obs_df) + 1)
         obs_df["dataset_id"] = dataset.dataset_id
 
         # high-level tissue mapping
@@ -242,7 +242,7 @@ class ExperimentBuilder:
         # if is possible there is nothing to write
         if len(self.var_df) > 0:
             # persist var
-            self.var_df["soma_joinid"] = range(len(self.var_df))
+            self.var_df["soma_joinid"] = range(1, len(self.var_df) + 1)
             self.var_df = self.var_df.join(self.gene_feature_length["feature_length"], on="feature_id")
             self.var_df.feature_length.fillna(0, inplace=True)
 
@@ -380,7 +380,7 @@ def _accumulate_all_X_layers(
             gc.collect()
 
         # Save presence information by dataset_id
-        assert dataset.soma_joinid >= 0  # i.e., it was assigned prior to this step
+        assert dataset.soma_joinid > 0  # i.e., it was assigned prior to this step
         pres_data = raw_X.sum(axis=0) > 0
         if isinstance(pres_data, np.matrix):
             pres_data = pres_data.A

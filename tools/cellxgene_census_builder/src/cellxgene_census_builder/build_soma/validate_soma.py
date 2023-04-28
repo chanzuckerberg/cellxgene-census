@@ -255,18 +255,18 @@ def validate_axis_dataframes(
             assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
             assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
-            # Validate that all obs soma_joinids are unique and in the range [0, n).
+            # Validate that all obs soma_joinids are unique and in the range (0, n].
             obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
             assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
             assert (len(obs_unique_joinids) == 0) or (
-                (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
+                (obs_unique_joinids[0] == 1) and (obs_unique_joinids[-1] == len(obs_unique_joinids))
             )
 
-            # Validate that all var soma_joinids are unique and in the range [0, n).
+            # Validate that all var soma_joinids are unique and in the range (0, n].
             var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
             assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
             assert (len(var_unique_joinids) == 0) or (
-                (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
+                (var_unique_joinids[0] == 1) and var_unique_joinids[-1] == len(var_unique_joinids)
             )
 
     return eb_info
