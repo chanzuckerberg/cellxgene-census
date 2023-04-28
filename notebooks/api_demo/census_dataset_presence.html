@@ -72,6 +72,10 @@
                     <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
                     </span>
+                    <hr class="navbar-divider">
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                  </span>
                 </span>
             </span>
 
@@ -211,11 +215,11 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+from scipy import sparse
+import cellxgene_census
 
-<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+census = cellxgene_census.open_soma()
 </pre></div>
 </div>
 </div>
@@ -227,14 +231,14 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Grab the experiment containing human data, and the measurement therein with RNA</span>
-<span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-<span class="n">human_rna</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Grab the experiment containing human data, and the measurement therein with RNA
+human = census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
+human_rna = human.ms[&quot;RNA&quot;]
 
-<span class="c1"># The census-wide datasets</span>
-<span class="n">datasets_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+# The census-wide datasets
+datasets_df = census[&quot;census_info&quot;][&quot;datasets&quot;].read().concat().to_pandas()
 
-<span class="n">datasets_df</span>
+datasets_df
 </pre></div>
 </div>
 </div>
@@ -407,9 +411,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_presence_matrix</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span> <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>presence_matrix = cellxgene_census.get_presence_matrix(census, organism=&quot;Homo sapiens&quot;, measurement_name=&quot;RNA&quot;)
 
-<span class="n">presence_matrix</span>
+presence_matrix
 </pre></div>
 </div>
 </div>
@@ -428,9 +432,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_df</span> <span class="o">=</span> <span class="n">human_rna</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>var_df = human_rna.var.read().concat().to_pandas()
 
-<span class="n">var_df</span>
+var_df
 </pre></div>
 </div>
 </div>
@@ -556,10 +560,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_joinid</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">var_df</span><span class="o">.</span><span class="n">feature_id</span> <span class="o">==</span> <span class="s2">&quot;ENSG00000286096&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
-<span class="n">dataset_joinid</span> <span class="o">=</span> <span class="n">datasets_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">datasets_df</span><span class="o">.</span><span class="n">dataset_id</span> <span class="o">==</span> <span class="s2">&quot;97a17473-e2b1-4f31-a544-44a60773e2dd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
-<span class="n">is_present</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">dataset_joinid</span><span class="p">,</span> <span class="n">var_joinid</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Feature is </span><span class="si">{</span><span class="s2">&quot;present&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">is_present</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;not present&quot;</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>var_joinid = var_df.loc[var_df.feature_id == &quot;ENSG00000286096&quot;].soma_joinid
+dataset_joinid = datasets_df.loc[datasets_df.dataset_id == &quot;97a17473-e2b1-4f31-a544-44a60773e2dd&quot;].soma_joinid
+is_present = presence_matrix[dataset_joinid, var_joinid][0, 0]
+print(f&#39;Feature is {&quot;present&quot; if is_present else &quot;not present&quot;}.&#39;)
 </pre></div>
 </div>
 </div>
@@ -579,15 +583,15 @@ Feature is present.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Grab the feature&#39;s soma_joinid from the var dataframe</span>
-<span class="n">var_joinid</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">var_df</span><span class="o">.</span><span class="n">feature_id</span> <span class="o">==</span> <span class="s2">&quot;ENSG00000286096&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Grab the feature&#39;s soma_joinid from the var dataframe
+var_joinid = var_df.loc[var_df.feature_id == &quot;ENSG00000286096&quot;].soma_joinid
 
-<span class="c1"># The presence matrix is indexed by the joinids of the dataset and var dataframes,</span>
-<span class="c1"># so slice out the feature of interest by its joinid.</span>
-<span class="n">dataset_joinids</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[:,</span> <span class="n">var_joinid</span><span class="p">]</span><span class="o">.</span><span class="n">tocoo</span><span class="p">()</span><span class="o">.</span><span class="n">row</span>
+# The presence matrix is indexed by the joinids of the dataset and var dataframes,
+# so slice out the feature of interest by its joinid.
+dataset_joinids = presence_matrix[:, var_joinid].tocoo().row
 
-<span class="c1"># From the datasets dataframe, slice out the datasets which have a joinid in the list</span>
-<span class="n">datasets_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">datasets_df</span><span class="o">.</span><span class="n">soma_joinid</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">dataset_joinids</span><span class="p">)]</span>
+# From the datasets dataframe, slice out the datasets which have a joinid in the list
+datasets_df.loc[datasets_df.soma_joinid.isin(dataset_joinids)]
 </pre></div>
 </div>
 </div>
@@ -901,14 +905,14 @@ Feature is present.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Slice the dataset(s) of interest, and get the joinid(s)</span>
-<span class="n">dataset_joinids</span> <span class="o">=</span> <span class="n">datasets_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">datasets_df</span><span class="o">.</span><span class="n">collection_id</span> <span class="o">==</span> <span class="s2">&quot;17481d16-ee44-49e5-bcf0-28c0780d8c4a&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">soma_joinid</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Slice the dataset(s) of interest, and get the joinid(s)
+dataset_joinids = datasets_df.loc[datasets_df.collection_id == &quot;17481d16-ee44-49e5-bcf0-28c0780d8c4a&quot;].soma_joinid
 
-<span class="c1"># Slice the presence matrix by the first dimension, i.e., by dataset</span>
-<span class="n">var_joinids</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">dataset_joinids</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">tocoo</span><span class="p">()</span><span class="o">.</span><span class="n">col</span>
+# Slice the presence matrix by the first dimension, i.e., by dataset
+var_joinids = presence_matrix[dataset_joinids, :].tocoo().col
 
-<span class="c1"># From the feature (var) dataframe, slice out features which have a joinid in the list.</span>
-<span class="n">var_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">var_df</span><span class="o">.</span><span class="n">soma_joinid</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">var_joinids</span><span class="p">)]</span>
+# From the feature (var) dataframe, slice out features which have a joinid in the list.
+var_df.loc[var_df.soma_joinid.isin(var_joinids)]
 </pre></div>
 </div>
 </div>

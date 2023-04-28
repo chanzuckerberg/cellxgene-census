@@ -72,6 +72,10 @@
                     <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
                     </span>
+                    <hr class="navbar-divider">
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                  </span>
                 </span>
             </span>
 
@@ -204,12 +208,12 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">csr_matrix</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
+import scanpy as sc
+import numpy as np
+from scipy.sparse import csr_matrix
 
-<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+census = cellxgene_census.open_soma()
 </pre></div>
 </div>
 </div>
@@ -227,15 +231,15 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_dataset</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span>
-    <span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;dataset_title == &#39;Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2&#39;&quot;</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-<span class="p">)</span>
-<span class="n">liver_dataset</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_dataset = (
+    census[&quot;census_info&quot;][&quot;datasets&quot;]
+    .read(
+        value_filter=&quot;dataset_title == &#39;Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2&#39;&quot;
+    )
+    .concat()
+    .to_pandas()
+)
+liver_dataset
 </pre></div>
 </div>
 </div>
@@ -293,10 +297,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;4546e757-34d0-4d17-be06-538318925fcd&quot;</span>
-<span class="n">liver_adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
-    <span class="n">census</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span> <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id==&#39;</span><span class="si">{</span><span class="n">liver_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_dataset_id = &quot;4546e757-34d0-4d17-be06-538318925fcd&quot;
+liver_adata = cellxgene_census.get_anndata(
+    census, organism=&quot;Mus musculus&quot;, obs_value_filter=f&quot;dataset_id==&#39;{liver_dataset_id}&#39;&quot;
+)
 </pre></div>
 </div>
 </div>
@@ -305,7 +309,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_adata.obs[&quot;assay&quot;].value_counts()
 </pre></div>
 </div>
 </div>
@@ -327,7 +331,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
 </pre></div>
 </div>
 </div>
@@ -340,7 +344,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_adata</span><span class="o">.</span><span class="n">n_vars</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_adata.n_vars
 </pre></div>
 </div>
 </div>
@@ -358,13 +362,13 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_dataset_id</span> <span class="o">=</span> <span class="n">liver_dataset</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_dataset_id = liver_dataset[&quot;soma_joinid&quot;][0]
 
-<span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_presence_matrix</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
-<span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">liver_dataset_id</span><span class="p">,</span> <span class="p">:]</span>
-<span class="n">gene_presence</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+presence_matrix = cellxgene_census.get_presence_matrix(census, &quot;Mus musculus&quot;, &quot;RNA&quot;)
+presence_matrix = presence_matrix[liver_dataset_id, :]
+gene_presence = presence_matrix.nonzero()[1]
 
-<span class="n">liver_adata</span> <span class="o">=</span> <span class="n">liver_adata</span><span class="p">[:,</span> <span class="n">gene_presence</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+liver_adata = liver_adata[:, gene_presence].copy()
 </pre></div>
 </div>
 </div>
@@ -372,7 +376,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_adata</span><span class="o">.</span><span class="n">n_vars</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_adata.n_vars
 </pre></div>
 </div>
 </div>
@@ -391,7 +395,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_adata</span><span class="o">.</span><span class="n">X</span><span class="p">[:</span><span class="mi">5</span><span class="p">,</span> <span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_adata.X[:5, :5].toarray()
 </pre></div>
 </div>
 </div>
@@ -413,8 +417,8 @@ array([[0.000e+00, 0.000e+00, 0.000e+00, 0.000e+00, 0.000e+00],
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_lengths</span> <span class="o">=</span> <span class="n">liver_adata</span><span class="o">.</span><span class="n">var</span><span class="p">[[</span><span class="s2">&quot;feature_length&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-<span class="n">liver_adata</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">((</span><span class="n">liver_adata</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">gene_lengths</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gene_lengths = liver_adata.var[[&quot;feature_length&quot;]].to_numpy()
+liver_adata.X = csr_matrix((liver_adata.X.T / gene_lengths).T)
 </pre></div>
 </div>
 </div>
@@ -422,7 +426,7 @@ array([[0.000e+00, 0.000e+00, 0.000e+00, 0.000e+00, 0.000e+00],
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_adata</span><span class="o">.</span><span class="n">X</span><span class="p">[:</span><span class="mi">5</span><span class="p">,</span> <span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>liver_adata.X[:5, :5].toarray()
 </pre></div>
 </div>
 </div>
@@ -454,8 +458,8 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_cells</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">,</span> <span class="n">min_genes</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.filter_cells(liver_adata, min_genes=500)
+sc.pp.filter_genes(liver_adata, min_cells=5)
 </pre></div>
 </div>
 </div>
@@ -464,8 +468,8 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.normalize_total(liver_adata, target_sum=1e4)
+sc.pp.log1p(liver_adata)
 </pre></div>
 </div>
 </div>
@@ -474,8 +478,8 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">liver_adata</span> <span class="o">=</span> <span class="n">liver_adata</span><span class="p">[:,</span> <span class="n">liver_adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.highly_variable_genes(liver_adata, n_top_genes=1000)
+liver_adata = liver_adata[:, liver_adata.var.highly_variable].copy()
 </pre></div>
 </div>
 </div>
@@ -484,7 +488,7 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.scale(liver_adata, max_value=10)
 </pre></div>
 </div>
 </div>
@@ -493,10 +497,10 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">liver_adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.tl.pca(liver_adata)
+sc.pp.neighbors(liver_adata)
+sc.tl.umap(liver_adata)
+sc.pl.umap(liver_adata, color=&quot;cell_type&quot;)
 </pre></div>
 </div>
 </div>
