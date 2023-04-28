@@ -30,7 +30,7 @@ The Census provides efficient low-latency access via Python and R APIs to most s
 For example, a user can easily get “*all T-cells from Lung with COVID-19*” into [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/). 
 
 
-The Census isn’t suited for:
+The Census is not suited for:
 
 - Access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
 - Access to the author-contributed normalized expression values or embeddings. 
