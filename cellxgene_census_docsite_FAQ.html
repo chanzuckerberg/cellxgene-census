@@ -137,7 +137,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#what-data-is-contained-in-the-census">What data is contained in the Census?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-cite-the-use-of-the-census-for-a-publication">How do I cite the use of the Census for a publication?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#why-does-the-census-not-have-a-normalized-layer-or-embeddings">Why does the Census not have a normalized layer or embeddings?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-does-the-census-differentiate-from-other-services">How does the Census differentiate from other services?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-does-the-census-differentiate-from-other-tools">How does the Census differentiate from other tools?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#can-i-query-human-and-mouse-data-in-a-single-query">Can I query human and mouse data in a single query?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#where-are-the-census-data-hosted">Where are the Census data hosted?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built">Can I retrieve the original H5AD datasets from which the Census was built?</a></li>
@@ -207,23 +207,22 @@
 </ul>
 <section id="why-should-i-use-the-census">
 <h2>Why should I use the Census?<a class="headerlink" href="#why-should-i-use-the-census" title="Permalink to this heading">¶</a></h2>
-<p>The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>.</p>
-<p>To accelerate your computational research, <strong>you should use the Census if you want to</strong>:</p>
+<p>The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To accelerate computational research, the Census enables researchers to:</p>
 <ul class="simple">
-<li><p>Easily get slices of data from more than 400 single-cell datasets spanning about 50 M cells from &gt;60 K genes from human or mouse.</p></li>
-<li><p>Get these data with standardized and harmonized cell and gene metadata.</p></li>
+<li><p>Access slices of data from more than 500 single-cell datasets spanning about 50 M cells from &gt;60 K genes from human or mice.</p></li>
+<li><p>Access to data with standardized cell and gene metadata with harmonized labels.</p></li>
 <li><p>Easily load multi-dataset slices into Scanpy or Seurat.</p></li>
 <li><p>Implement out-of-core (a.k.a online) operations for larger-than-memory processes.</p></li>
 </ul>
-<p>For example you could easily get “<em>all T-cells from Lung with COVID-19</em>” into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a>, <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a>, or into memory-sufficient data chunks via <a class="reference external" href="https://arrow.apache.org/docs/python/index.html">PyArrow</a> or <a class="reference external" href="https://arrow.apache.org/docs/r/">R Arrow</a>.</p>
-<p><strong>You should not use the Census if you want to:</strong></p>
+<p>For example, a user can easily get “<em>all T-cells from Lung with COVID-19</em>” into <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a>, <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a>, or into memory-sufficient data chunks via <a class="reference external" href="https://arrow.apache.org/docs/python/index.html">PyArrow</a> or <a class="reference external" href="https://arrow.apache.org/docs/r/">R Arrow</a>.</p>
+<p>The Census is not suited for:</p>
 <ul class="simple">
-<li><p>Access non-standardized cell metadata and gene metadata available in the original <a class="reference external" href="https://cellxgene.cziscience.com/datasets">datasets</a>.</p></li>
-<li><p>Access the author-contributed normalized expression values or embeddings.</p></li>
-<li><p>Access all data from a single dataset.</p></li>
-<li><p>Access non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census.</p></li>
+<li><p>Access to non-standardized cell metadata and gene metadata available in the original <a class="reference external" href="https://cellxgene.cziscience.com/datasets">datasets</a>.</p></li>
+<li><p>Access to the author-contributed normalized expression values or embeddings.</p></li>
+<li><p>Access to all data from just one dataset.</p></li>
+<li><p>Access to non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census.</p></li>
 </ul>
-<p>For all of these cases you should perform web downloads from the <a class="reference external" href="https://cellxgene.cziscience.com/datasets">CZ CELLxGENE Discover site</a>, you can find instructions to do so <a class="reference external" href="https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data">here</a>.</p>
+<p>If you’d like to perform any of the above tasks, you can access web downloads directly from the <a class="reference external" href="https://cellxgene.cziscience.com/datasets">CZ CELLxGENE Discover Datasets</a> feature. <a class="reference external" href="https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data">Click here</a> for more information about downloading published data on CELLxGENE Discover.</p>
 </section>
 <section id="what-data-is-contained-in-the-census">
 <h2>What data is contained in the Census?<a class="headerlink" href="#what-data-is-contained-in-the-census" title="Permalink to this heading">¶</a></h2>
@@ -242,17 +241,16 @@
 </ul>
 <p>If you have any suggestions for methods that our team should explore please share them with us via a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&amp;amp;labels=user+request&amp;amp;template=feature-request.md&amp;amp;title=">feature request in the github repository</a>.</p>
 </section>
-<section id="how-does-the-census-differentiate-from-other-services">
-<h2>How does the Census differentiate from other services?<a class="headerlink" href="#how-does-the-census-differentiate-from-other-services" title="Permalink to this heading">¶</a></h2>
-<p>The Census differentiates from existing single-cell services by providing access to the largest corpus of standardized single-cell data via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose">TileDB-SOMA</a>.</p>
-<p>Thus, single-cell data from about 50 M cells across &gt;60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations is at your finger tips to:</p>
+<section id="how-does-the-census-differentiate-from-other-tools">
+<h2>How does the Census differentiate from other tools?<a class="headerlink" href="#how-does-the-census-differentiate-from-other-tools" title="Permalink to this heading">¶</a></h2>
+<p>The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data – CZ CELLxGENE Discover –  via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose">TileDB-SOMA</a>.  Thus, single-cell data from about 50 M cells across &gt;60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:</p>
 <ul class="simple">
-<li><p>Open and read data at low latency from the cloud.</p></li>
-<li><p>Query and access data using metadata filters.</p></li>
-<li><p>Load and create AnnData objects.</p></li>
-<li><p>Load and create Seurat objects.</p></li>
-<li><p>From Python create PyArrow objects, SciPy sparse matrices, NumPy arrays, and Pandas data frames.</p></li>
-<li><p>From R create R Arrow objects, sparse matrices (via the Matrix package), and standard data frames and (dense) matrices.</p></li>
+<li><p>Opening and reading data at low latency from the cloud.</p></li>
+<li><p>Querying and accessing data using metadata filters.</p></li>
+<li><p>Loading and creating AnnData objects.</p></li>
+<li><p>Loading and creating Seurat objects.</p></li>
+<li><p>From Python, creating PyArrow objects, SciPy sparse matrices, NumPy arrays, and Pandas data frames.</p></li>
+<li><p>From R, creating R Arrow objects, sparse matrices (via the Matrix package), and standard data frames and (dense) matrices.</p></li>
 </ul>
 </section>
 <section id="can-i-query-human-and-mouse-data-in-a-single-query">
@@ -265,7 +263,7 @@
 </section>
 <section id="can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built">
 <h2>Can I retrieve the original H5AD datasets from which the Census was built?<a class="headerlink" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built" title="Permalink to this heading">¶</a></h2>
-<p>Yes, you can use the API function <code class="docutils literal notranslate"><span class="pre">download_source_h5ad</span></code> to do so. For usage see the reference documentation at the <a class="reference external" href="https://cellxgene-census.readthedocs.io/en/">doc-site</a> or directly from Python or R:</p>
+<p>Yes, you can use the API function <code class="docutils literal notranslate"><span class="pre">download_source_h5ad</span></code> to do so. For usage, please see the reference documentation at the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">doc-site</a> or directly from Python or R:</p>
 <p>Python</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 <span class="n">help</span><span class="p">(</span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">download_source_h5ad</span><span class="p">)</span>
@@ -279,16 +277,12 @@
 </section>
 <section id="how-can-i-increase-the-performance-of-my-queries">
 <h2>How can I increase the performance of my queries?<a class="headerlink" href="#how-can-i-increase-the-performance-of-my-queries" title="Permalink to this heading">¶</a></h2>
-<p>Since the access patterns are via the internet, usually the main limiting step for data queries is bandwidth and client location.</p>
-<p>We recommend the following to increase query efficency:</p>
+<p>Since the access patterns are via the internet, usually the main limiting step for data queries is bandwidth and client location. We recommend the following tactics to increase query efficiency:</p>
 <ul class="simple">
 <li><p>Utilize a computer connected to high-speed internet.</p></li>
 <li><p>Utilize an ethernet connection and not a wifi connection.</p></li>
-<li><p>If possible utilize online computing located in the west coast of the US.</p>
-<ul>
+<li><p>If possible utilize online computing located in the west coast of the US.</p></li>
 <li><p>Highly recommended: <a class="reference external" href="https://aws.amazon.com/ec2/">EC2 AWS instances</a> in the <code class="docutils literal notranslate"><span class="pre">us-west-2</span></code> region.</p></li>
-</ul>
-</li>
 </ul>
 </section>
 <section id="can-i-use-conda-to-install-the-census-python-api">
@@ -302,7 +296,7 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
 </section>
 <section id="how-can-i-ask-for-support">
 <h2>How can I ask for support?<a class="headerlink" href="#how-can-i-ask-for-support" title="Permalink to this heading">¶</a></h2>
-<p>You can either submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a> or post in the slack channel <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> at the <a class="reference external" href="https://cziscience.slack.com/join/shared_invite/zt-czl1kp2v-sgGpY4RxO3bPYmFg2XlbZA#/shared-invite/email">CZI Slack community</a>.</p>
+<p>You can either submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a>, or for quick support you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p>
 </section>
 <section id="how-can-i-ask-for-new-features">
 <h2>How can I ask for new features?<a class="headerlink" href="#how-can-i-ask-for-new-features" title="Permalink to this heading">¶</a></h2>
@@ -310,8 +304,7 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
 </section>
 <section id="how-can-i-contribute-my-data-to-the-census">
 <h2>How can I contribute my data to the Census?<a class="headerlink" href="#how-can-i-contribute-my-data-to-the-census" title="Permalink to this heading">¶</a></h2>
-<p>To inquire about submitting your data to CZ CELLxGENE Discover you need to follow these <a class="reference external" href="https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data">instructions</a>.</p>
-<p>If you data request is accepted, upon submission the data will automatically get included in the Census if it meets the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included">biological criteria defined in the Census schema</a>.</p>
+<p>To inquire about submitting your data to CZ CELLxGENE Discover, <a class="reference external" href="https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data">click here</a>. If your data request is accepted, the data will automatically be included in the Census if it meets the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included">biological criteria defined in the Census schema</a>.</p>
 </section>
 <section id="why-do-i-get-an-arrayschema-error-when-opening-the-census">
 <h2>Why do I get an <code class="docutils literal notranslate"><span class="pre">ArraySchema</span></code> error when opening the Census?<a class="headerlink" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census" title="Permalink to this heading">¶</a></h2>

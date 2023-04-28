@@ -228,6 +228,11 @@
 <li><p>Raw counts.</p></li>
 <li><p>Only standardized cell and gene metadata as described in the CELLxGENE Discover dataset <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">schema</a>.</p></li>
 </ul>
+<p>:warning: Note that the data includes:</p>
+<ul class="simple">
+<li><p><strong>Full-gene sequencing reads</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
+<li><p><strong>Duplicate cells</strong> present across multiple datasets, these can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>
+</ul>
 </section>
 <section id="soma-objects">
 <h2>SOMA objects<a class="headerlink" href="#soma-objects" title="Permalink to this heading">¶</a></h2>

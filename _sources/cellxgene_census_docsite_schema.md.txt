@@ -47,6 +47,12 @@ All data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) that ad
 - Raw counts.
 - Only standardized cell and gene metadata as described in the CELLxGENE Discover dataset [schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md).
 
+:warning: Note that the data includes: 
+
+* **Full-gene sequencing reads** (e.g. Smart-Seq2) and **molecule counts** (e.g. 10X).
+* **Duplicate cells** present across multiple datasets, these can be filtered in or out using the cell metadata variable `is_primary_data`.
+
+
 ## SOMA objects 
 
 You can find the full SOMA specification [here](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types).
