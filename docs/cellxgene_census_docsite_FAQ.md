@@ -124,7 +124,7 @@ You can submit a [feature request in the github repository](https://github.com/c
 
 ## How can I contribute my data to the Census?
 
-To inquire about submitting your data to CZ CELLxGENE Discover, [click here](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). If you data request is accepted, the data will automatically be included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included). 
+To inquire about submitting your data to CZ CELLxGENE Discover, [click here](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). If your data request is accepted, the data will automatically be included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included). 
 
 ## Why do I get an `ArraySchema` error when opening the Census?
 
