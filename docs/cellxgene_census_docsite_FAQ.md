@@ -27,7 +27,7 @@ The Census provides efficient low-latency access via Python and R APIs to most s
 - Implement out-of-core (a.k.a online) operations for larger-than-memory processes.
 
 
-For example, a user can more easily get “*all T-cells from Lung with COVID-19*” into [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/). 
+For example, a user can easily get “*all T-cells from Lung with COVID-19*” into [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/). 
 
 
 The Census isn’t suited for:
