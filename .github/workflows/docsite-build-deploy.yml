@@ -1,11 +1,9 @@
 name: Build and Deploy Docsite
 on:
   push:
-    tags:
-      - '*'
     push:
-      branches: [ebezzi/fix-docsite-build]
-  workflow_dispatch: # Used to make post-release docfixes
+      branches:  
+        - ebezzi/fix-docsite-build
 permissions:
   contents: write
 jobs:
