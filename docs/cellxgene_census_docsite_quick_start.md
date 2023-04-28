@@ -141,6 +141,8 @@ And you must close the query.
 
 ## R quick start
 
+❗ **API is in beta and under rapid development.**
+
 Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via `?`:
 
 ```r
@@ -225,38 +227,5 @@ Active assay: RNA (2 features, 0 variable features)
 
 ### Memory-efficient queries
 
-This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
-
-First we initiate a lazy-evaluation query to access all brain and male cells from human.
-
-```r
-library("cellxgene.census")
-library("tiledbsoma")
-
-census = open_soma()
-human_experiment = census$get("census_data")$get("homo_sapiens")
-query = SOMAExperimentAxisQuery$new(
-	experiment = human_experiment,
-	measurement_name = "RNA",
-	obs_query = SOMAAxisQuery$new(value_filter = "tissue == 'brain' & sex == 'male'")
-)
-
-# Continued below
-
-```
-
-Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
-
-```r
-    # Continued from above 
-    
-    iterator = query.X("raw", iterated = TRUE)
-    
-    # Get an iterative slice as pyarrow.Table
-    raw_slice = iterator$read_next() 
-    ...
-```
-
-And you can now perform operations on each iteration slice. You can loop this in a for loop and check for the boolean flag `iterator$read_complete()` until completion.
-
+Memory-efficient capabilities of the R API are still under active development. 
 
