@@ -279,7 +279,7 @@ class ExperimentBuilder:
                 rna_measurement["X"].add_new_sparse_ndarray(
                     layer_name,
                     type=CENSUS_X_LAYERS[layer_name],
-                    shape=(self.n_obs, self.n_var),
+                    shape=(self.n_obs + 1, self.n_var + 1),
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
 
@@ -309,7 +309,7 @@ class ExperimentBuilder:
             assert pm.dtype == bool
 
             fdpm = self.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var)
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var + 1)
             )
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
