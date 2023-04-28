@@ -298,7 +298,7 @@ class ExperimentBuilder:
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
 
             # LIL is fast way to create spmatrix
-            pm = sparse.lil_array((max_dataset_joinid + 1, self.n_var), dtype=bool)
+            pm = sparse.lil_array((max_dataset_joinid + 1, self.n_var + 1), dtype=bool)
             for dataset_joinid, presence in self.presence.items():
                 data, cols = presence
                 pm[dataset_joinid, cols] = data
