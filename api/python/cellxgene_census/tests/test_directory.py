@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 import pytest
 import requests_mock as rm
@@ -8,6 +8,7 @@ import cellxgene_census
 from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 DIRECTORY_JSON = {
+    "stable": "2022-10-01",
     "latest": "2022-11-01",
     "2022-11-01": {
         "release_date": "2022-11-30",
@@ -52,12 +53,13 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     assert all((type(k) == str for k in directory.keys()))
     assert all((type(v) == dict for v in directory.values()))
 
-    for tag in DIRECTORY_JSON:
-        assert tag[0] == "_" or tag in directory
-        if isinstance(DIRECTORY_JSON[tag], dict):
-            assert directory[tag] == DIRECTORY_JSON[tag]
+    assert "_dangling" not in directory
 
-    assert directory["latest"] == directory["2022-11-01"]
+    assert directory["2022-11-01"] == DIRECTORY_JSON["2022-11-01"] | {"alias": None}
+    assert directory["2022-10-01"] == DIRECTORY_JSON["2022-10-01"] | {"alias": None}
+
+    assert directory["latest"] == DIRECTORY_JSON["2022-11-01"] | {"alias": "latest"}
+    assert directory["stable"] == DIRECTORY_JSON["2022-10-01"] | {"alias": "stable"}
 
     for tag in directory:
         assert directory[tag] == cellxgene_census.get_census_version_description(tag)
