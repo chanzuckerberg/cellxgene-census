@@ -193,14 +193,14 @@
 <h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading">¶</a></h2>
 <p>The Census is a collection of a variety of <strong><a class="reference internal" href="#soma-objects"><span class="xref myst">SOMA objects</span></a></strong> organized with the following hierarchy.</p>
 <p><img alt="image" src="_images/cellxgene_census_docsite_model.svg" /></p>
-<p>As you can see the Census data is a SOMACollection with two high-level items:</p>
+<p>As you can see the Census data is a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code> with two high-level items:</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code> for the census summary info.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code> for the single-cell data and metadata.</p></li>
 </ol>
 <section id="census-summary-info-census-info">
 <h3>Census summary info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code><a class="headerlink" href="#census-summary-info-census-info" title="Permalink to this heading">¶</a></h3>
-<p>A SOMAcollection with tables providing information of the census as a whole, it has the following items:</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">SOMAcollection</span></code> with tables providing information of the census as a whole, it has the following items:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary&quot;</span></code>: high-level information of this Census, e.g. build date, total cell count, etc.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;datasets&quot;</span></code>: A table with all datasets from CELLxGENE Discover used to create the Census.
@@ -228,7 +228,7 @@
 <li><p>Raw counts.</p></li>
 <li><p>Only standardized cell and gene metadata as described in the CELLxGENE Discover dataset <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">schema</a>.</p></li>
 </ul>
-<p>:warning: Note that the data includes:</p>
+<p>⚠️ Note that the data includes:</p>
 <ul class="simple">
 <li><p><strong>Full-gene sequencing reads</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
 <li><p><strong>Duplicate cells</strong> present across multiple datasets, these can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>

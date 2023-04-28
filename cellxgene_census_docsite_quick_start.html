@@ -313,6 +313,7 @@
 </section>
 <section id="r-quick-start">
 <h2>R quick start<a class="headerlink" href="#r-quick-start" title="Permalink to this heading">¶</a></h2>
+<p>❗ <strong>API is in beta and under rapid development.</strong></p>
 <p>Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via <code class="docutils literal notranslate"><span class="pre">?</span></code>:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
 
@@ -388,33 +389,7 @@ Active<span class="w"> </span>assay:<span class="w"> </span>RNA<span class="w"> 
 </section>
 <section id="id2">
 <h3>Memory-efficient queries<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
-<p>This example provides a demonstration to access the data for larger-than-memory operations using <strong>TileDB-SOMA</strong> operations.</p>
-<p>First we initiate a lazy-evaluation query to access all brain and male cells from human.</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
-<span class="nf">library</span><span class="p">(</span><span class="s">&quot;tiledbsoma&quot;</span><span class="p">)</span>
-
-<span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">open_soma</span><span class="p">()</span>
-<span class="n">human_experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;census_data&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;homo_sapiens&quot;</span><span class="p">)</span>
-<span class="n">query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SOMAExperimentAxisQuery</span><span class="o">$</span><span class="nf">new</span><span class="p">(</span>
-<span class="w">	</span><span class="n">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">human_experiment</span><span class="p">,</span>
-<span class="w">	</span><span class="n">measurement_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;RNA&quot;</span><span class="p">,</span>
-<span class="w">	</span><span class="n">obs_query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SOMAAxisQuery</span><span class="o">$</span><span class="nf">new</span><span class="p">(</span><span class="n">value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;tissue == &#39;brain&#39; &amp; sex == &#39;male&#39;&quot;</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="c1"># Continued below</span>
-</pre></div>
-</div>
-<p>Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="c1"># Continued from above </span>
-<span class="w">    </span>
-<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">query.X</span><span class="p">(</span><span class="s">&quot;raw&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">iterated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="c1"># Get an iterative slice as pyarrow.Table</span>
-<span class="w">    </span><span class="n">raw_slice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iterator</span><span class="o">$</span><span class="nf">read_next</span><span class="p">()</span><span class="w"> </span>
-<span class="w">    </span><span class="kc">...</span>
-</pre></div>
-</div>
-<p>And you can now perform operations on each iteration slice. You can loop this in a for loop and check for the boolean flag <code class="docutils literal notranslate"><span class="pre">iterator$read_complete()</span></code> until completion.</p>
+<p>Memory-efficient capabilities of the R API are still under active development.</p>
 </section>
 </section>
 </section>
