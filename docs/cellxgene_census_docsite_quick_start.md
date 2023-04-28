@@ -143,7 +143,6 @@ And you must close the query.
 
 ❗ **API is in beta and under rapid development.**
 
-
 Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via `?`:
 
 ```r
