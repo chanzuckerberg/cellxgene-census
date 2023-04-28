@@ -213,13 +213,13 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
-import scanpy as sc
-import pandas as pd
-import numpy as np
-from scipy.sparse import coo_matrix
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">coo_matrix</span>
 
-census = cellxgene_census.open_soma()
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -228,9 +228,9 @@ census = cellxgene_census.open_soma()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>summary_table = census[&quot;census_info&quot;][&quot;summary_cell_counts&quot;].read().concat().to_pandas()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_table</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;summary_cell_counts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
-summary_table.query(&quot;organism == &#39;Homo sapiens&#39; &amp; category == &#39;tissue_general&#39; &amp; label ==&#39;lung&#39;&quot;)
+<span class="n">summary_table</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;organism == &#39;Homo sapiens&#39; &amp; category == &#39;tissue_general&#39; &amp; label ==&#39;lung&#39;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -290,13 +290,13 @@ summary_table.query(&quot;organism == &#39;Homo sapiens&#39; &amp; category == &
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs = (
-    census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
-    .obs.read(value_filter=&quot;tissue_general == &#39;lung&#39; and is_primary_data == True&quot;)
-    .concat()
-    .to_pandas()
-)
-lung_obs
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;lung&#39; and is_primary_data == True&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">lung_obs</span>
 </pre></div>
 </div>
 </div>
@@ -624,14 +624,14 @@ lung_obs
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_datasets = (
-    census[&quot;census_info&quot;][&quot;datasets&quot;]
-    .read(column_names=[&quot;collection_name&quot;, &quot;dataset_title&quot;, &quot;dataset_id&quot;, &quot;soma_joinid&quot;])
-    .concat()
-    .to_pandas()
-)
-census_datasets = census_datasets.set_index(&quot;dataset_id&quot;)
-census_datasets
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_datasets</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;collection_name&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_title&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">census_datasets</span> <span class="o">=</span> <span class="n">census_datasets</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">)</span>
+<span class="n">census_datasets</span>
 </pre></div>
 </div>
 </div>
@@ -747,11 +747,11 @@ census_datasets
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>dataset_cell_counts = pd.DataFrame(lung_obs[[&quot;dataset_id&quot;]].value_counts())
-dataset_cell_counts = dataset_cell_counts.rename(columns={0: &quot;cell_counts&quot;})
-dataset_cell_counts = dataset_cell_counts.merge(census_datasets, on=&quot;dataset_id&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_cell_counts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+<span class="n">dataset_cell_counts</span> <span class="o">=</span> <span class="n">dataset_cell_counts</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;cell_counts&quot;</span><span class="p">})</span>
+<span class="n">dataset_cell_counts</span> <span class="o">=</span> <span class="n">dataset_cell_counts</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">census_datasets</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">)</span>
 
-dataset_cell_counts
+<span class="n">dataset_cell_counts</span>
 </pre></div>
 </div>
 </div>
@@ -987,7 +987,7 @@ dataset_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;assay&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;assay&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1022,7 +1022,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;disease&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;disease&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1052,7 +1052,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;sex&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;sex&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1077,7 +1077,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;suspension_type&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;suspension_type&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1101,7 +1101,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;cell_type&quot;]].value_counts().head(20)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1143,7 +1143,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;tissue&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;tissue&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1171,8 +1171,8 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_var = census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var.read().concat().to_pandas()
-lung_var
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_var</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">lung_var</span>
 </pre></div>
 </div>
 </div>
@@ -1296,8 +1296,8 @@ lung_var
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>presence_matrix = cellxgene_census.get_presence_matrix(census, &quot;Homo sapiens&quot;, &quot;RNA&quot;)
-presence_matrix = presence_matrix[dataset_cell_counts.soma_joinid, :]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_presence_matrix</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
+<span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">dataset_cell_counts</span><span class="o">.</span><span class="n">soma_joinid</span><span class="p">,</span> <span class="p">:]</span>
 </pre></div>
 </div>
 </div>
@@ -1305,7 +1305,7 @@ presence_matrix = presence_matrix[dataset_cell_counts.soma_joinid, :]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>presence_matrix.sum(axis=1).A1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">presence_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">A1</span>
 </pre></div>
 </div>
 </div>
@@ -1324,9 +1324,9 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>genes_measured = presence_matrix.sum(axis=1).A1
-dataset_cell_counts[&quot;genes_measured&quot;] = genes_measured
-dataset_cell_counts
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">genes_measured</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">A1</span>
+<span class="n">dataset_cell_counts</span><span class="p">[</span><span class="s2">&quot;genes_measured&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genes_measured</span>
+<span class="n">dataset_cell_counts</span>
 </pre></div>
 </div>
 </div>
@@ -1578,7 +1578,7 @@ dataset_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>var_somaid = np.nonzero(presence_matrix.sum(axis=0).A1 == presence_matrix.shape[0])[0].tolist()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_somaid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">presence_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">A1</span> <span class="o">==</span> <span class="n">presence_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1586,8 +1586,8 @@ dataset_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_var = lung_var.query(f&quot;soma_joinid in {var_somaid}&quot;)
-lung_var
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_var</span> <span class="o">=</span> <span class="n">lung_var</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;soma_joinid in </span><span class="si">{</span><span class="n">var_somaid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">lung_var</span>
 </pre></div>
 </div>
 </div>
@@ -1730,8 +1730,8 @@ lung_var
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_cell_subsampled_n = 100000
-lung_cell_subsampled_ids = lung_obs[&quot;soma_joinid&quot;].sample(lung_cell_subsampled_n, random_state=1).tolist()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_cell_subsampled_n</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="n">lung_cell_subsampled_ids</span> <span class="o">=</span> <span class="n">lung_obs</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">lung_cell_subsampled_n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1740,15 +1740,15 @@ lung_cell_subsampled_ids = lung_obs[&quot;soma_joinid&quot;].sample(lung_cell_su
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_gene_ids = lung_var[&quot;soma_joinid&quot;].to_numpy()
-lung_adata = cellxgene_census.get_anndata(
-    census,
-    organism=&quot;Homo sapiens&quot;,
-    obs_coords=lung_cell_subsampled_ids,
-    var_coords=lung_gene_ids,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_gene_ids</span> <span class="o">=</span> <span class="n">lung_var</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">lung_adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+    <span class="n">obs_coords</span><span class="o">=</span><span class="n">lung_cell_subsampled_ids</span><span class="p">,</span>
+    <span class="n">var_coords</span><span class="o">=</span><span class="n">lung_gene_ids</span><span class="p">,</span>
+<span class="p">)</span>
 
-lung_adata.var_names = lung_adata.var[&quot;feature_name&quot;]
+<span class="n">lung_adata</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -1756,7 +1756,7 @@ lung_adata.var_names = lung_adata.var[&quot;feature_name&quot;]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_adata
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_adata</span>
 </pre></div>
 </div>
 </div>
@@ -1776,8 +1776,8 @@ AnnData object with n_obs × n_vars = 100000 × 11516
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
-del census
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">del</span> <span class="n">census</span>
 </pre></div>
 </div>
 </div>
@@ -1790,7 +1790,7 @@ del census
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.highest_expr_genes(lung_adata, n_top=20)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">highest_expr_genes</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">n_top</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1806,8 +1806,8 @@ del census
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.calculate_qc_metrics(lung_adata, percent_top=None, log1p=False, inplace=True)
-sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot;, jitter=0.4, rotation=90)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">calculate_qc_metrics</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">percent_top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log1p</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="s2">&quot;n_genes_by_counts&quot;</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1823,7 +1823,7 @@ sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.violin(lung_adata, &quot;total_counts&quot;, groupby=&quot;assay&quot;, jitter=0.4, rotation=90)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="s2">&quot;total_counts&quot;</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1839,13 +1839,13 @@ sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.violin(
-    lung_adata[lung_adata.obs[&quot;assay&quot;] != &quot;Smart-seq2&quot;,],
-    &quot;total_counts&quot;,
-    groupby=&quot;assay&quot;,
-    jitter=0.4,
-    rotation=90,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span>
+    <span class="n">lung_adata</span><span class="p">[</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Smart-seq2&quot;</span><span class="p">,],</span>
+    <span class="s2">&quot;total_counts&quot;</span><span class="p">,</span>
+    <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span>
+    <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1864,8 +1864,8 @@ sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_adata = lung_adata[lung_adata.obs[&quot;assay&quot;] != &quot;Smart-seq2&quot;,].copy()
-lung_adata.layers[&quot;counts&quot;] = lung_adata.X
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_adata</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="p">[</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Smart-seq2&quot;</span><span class="p">,]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">lung_adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="s2">&quot;counts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">X</span>
 </pre></div>
 </div>
 </div>
@@ -1880,11 +1880,11 @@ lung_adata.layers[&quot;counts&quot;] = lung_adata.X
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.normalize_total(lung_adata, target_sum=1e4)
-sc.pp.log1p(lung_adata)
-sc.pp.highly_variable_genes(lung_adata, n_top_genes=500, flavor=&quot;seurat_v3&quot;, layer=&quot;counts&quot;)
-lung_adata = lung_adata[:, lung_adata.var.highly_variable]
-sc.pp.scale(lung_adata, max_value=10)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;seurat_v3&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;counts&quot;</span><span class="p">)</span>
+<span class="n">lung_adata</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="p">[:,</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1904,9 +1904,9 @@ sc.pp.scale(lung_adata, max_value=10)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.tl.pca(lung_adata)
-sc.pp.neighbors(lung_adata)
-sc.tl.umap(lung_adata)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1923,14 +1923,14 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n_cell_types = len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_cell_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())</span>
 
-from random import randint
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 
-colors = []
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
 
-for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
-    colors.append(&quot;#%06X&quot; % randint(0, 0xFFFFFF))
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())):</span>
+    <span class="n">colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#</span><span class="si">%06X</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0xFFFFFF</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1938,7 +1938,7 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.umap(lung_adata, color=&quot;cell_type&quot;, palette=colors, legend_loc=None)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">legend_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1963,7 +1963,7 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.umap(lung_adata, color=&quot;assay&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1988,8 +1988,8 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>top_cell_types = lung_adata.obs[&quot;cell_type&quot;].value_counts()
-top_cell_types = list(top_cell_types.reset_index().head(20)[&quot;cell_type&quot;])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top_cell_types</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">top_cell_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">top_cell_types</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1997,8 +1997,8 @@ top_cell_types = list(top_cell_types.reset_index().head(20)[&quot;cell_type&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_adata_top_cell_types = lung_adata[[i in top_cell_types for i in lung_adata.obs[&quot;cell_type&quot;]], :]
-sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_adata_top_cell_types</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="p">[[</span><span class="n">i</span> <span class="ow">in</span> <span class="n">top_cell_types</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]],</span> <span class="p">:]</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata_top_cell_types</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2023,7 +2023,7 @@ sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.umap(lung_adata_top_cell_types, color=&quot;assay&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata_top_cell_types</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

@@ -207,15 +207,15 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
-census = cellxgene_census.open_soma()
-census_datasets = census[&quot;census_info&quot;][&quot;datasets&quot;].read().concat().to_pandas()
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="n">census_datasets</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
-# for convenience, indexing on the soma_joinid which links this to other census data.
-census_datasets = census_datasets.set_index(&quot;soma_joinid&quot;)
+<span class="c1"># for convenience, indexing on the soma_joinid which links this to other census data.</span>
+<span class="n">census_datasets</span> <span class="o">=</span> <span class="n">census_datasets</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
 
-census_datasets
+<span class="n">census_datasets</span>
 </pre></div>
 </div>
 </div>
@@ -382,21 +382,21 @@ census_datasets
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Count cells across all experiments
-all_experiments = (
-    (organism_name, organism_experiment) for organism_name, organism_experiment in census[&quot;census_data&quot;].items()
-)
-experiments_total_cells = 0
-print(&quot;Count by experiment:&quot;)
-for organism_name, organism_experiment in all_experiments:
-    num_cells = len(organism_experiment.obs.read(column_names=[&quot;soma_joinid&quot;]).concat().to_pandas())
-    print(f&quot;\t{num_cells} cells in {organism_name}&quot;)
-    experiments_total_cells += num_cells
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Count cells across all experiments</span>
+<span class="n">all_experiments</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="n">organism_name</span><span class="p">,</span> <span class="n">organism_experiment</span><span class="p">)</span> <span class="k">for</span> <span class="n">organism_name</span><span class="p">,</span> <span class="n">organism_experiment</span> <span class="ow">in</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">experiments_total_cells</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Count by experiment:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">organism_name</span><span class="p">,</span> <span class="n">organism_experiment</span> <span class="ow">in</span> <span class="n">all_experiments</span><span class="p">:</span>
+    <span class="n">num_cells</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">organism_experiment</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="n">num_cells</span><span class="si">}</span><span class="s2"> cells in </span><span class="si">{</span><span class="n">organism_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">experiments_total_cells</span> <span class="o">+=</span> <span class="n">num_cells</span>
 
-print(f&quot;\nFound {experiments_total_cells} cells in all experiments.&quot;)
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Found </span><span class="si">{</span><span class="n">experiments_total_cells</span><span class="si">}</span><span class="s2"> cells in all experiments.&quot;</span><span class="p">)</span>
 
-# Count cells across all datasets
-print(f&quot;Found {census_datasets.dataset_total_cell_count.sum()} cells in all datasets.&quot;)
+<span class="c1"># Count cells across all datasets</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="n">census_datasets</span><span class="o">.</span><span class="n">dataset_total_cell_count</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> cells in all datasets.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -421,7 +421,7 @@ Found 49972919 cells in all datasets.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_datasets[census_datasets.dataset_id == &quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_datasets</span><span class="p">[</span><span class="n">census_datasets</span><span class="o">.</span><span class="n">dataset_id</span> <span class="o">==</span> <span class="s2">&quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -487,11 +487,11 @@ Found 49972919 cells in all datasets.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>adata = cellxgene_census.get_anndata(
-    census, organism=&quot;Mus musculus&quot;, obs_value_filter=&quot;dataset_id == &#39;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&#39;&quot;
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span> <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;dataset_id == &#39;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&#39;&quot;</span>
+<span class="p">)</span>
 
-adata
+<span class="n">adata</span>
 </pre></div>
 </div>
 </div>
@@ -515,10 +515,10 @@ AnnData object with n_obs × n_vars = 40220 × 52392
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Option 1: Direct download
-cellxgene_census.download_source_h5ad(
-    &quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;, to_path=&quot;Tabula_Muris_Senis-bone_marrow.h5ad&quot;
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Option 1: Direct download</span>
+<span class="n">cellxgene_census</span><span class="o">.</span><span class="n">download_source_h5ad</span><span class="p">(</span>
+    <span class="s2">&quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;</span><span class="p">,</span> <span class="n">to_path</span><span class="o">=</span><span class="s2">&quot;Tabula_Muris_Senis-bone_marrow.h5ad&quot;</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -526,11 +526,11 @@ cellxgene_census.download_source_h5ad(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Option 2: Get location and download via preferred method
-uri = cellxgene_census.get_source_h5ad_uri(&quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;)
-uri
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Option 2: Get location and download via preferred method</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_source_h5ad_uri</span><span class="p">(</span><span class="s2">&quot;0bd1a1de-3aee-40e0-b2ec-86c7a30c7149&quot;</span><span class="p">)</span>
+<span class="n">uri</span>
 
-# you can now download the H5AD in shell via AWS CLI e.g. `aws s3 cp uri ./`
+<span class="c1"># you can now download the H5AD in shell via AWS CLI e.g. `aws s3 cp uri ./`</span>
 </pre></div>
 </div>
 </div>
@@ -549,7 +549,7 @@ uri
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

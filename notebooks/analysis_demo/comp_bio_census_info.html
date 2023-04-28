@@ -212,16 +212,16 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
-# Preferred: use a Python context manager
-with cellxgene_census.open_soma() as census:
-    ...
+<span class="c1"># Preferred: use a Python context manager</span>
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="o">...</span>
 
-# or
-census = cellxgene_census.open_soma()
-...
-census.close()
+<span class="c1"># or</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="o">...</span>
+<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -230,7 +230,7 @@ census.close()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census = cellxgene_census.open_soma()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -275,9 +275,9 @@ census.close()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>keys = list(census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].obs.keys())
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-keys
+<span class="n">keys</span>
 </pre></div>
 </div>
 </div>
@@ -325,9 +325,9 @@ keys
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>keys = list(census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var.keys())
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-keys
+<span class="n">keys</span>
 </pre></div>
 </div>
 </div>
@@ -349,9 +349,9 @@ keys
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_info = census[&quot;census_info&quot;][&quot;summary&quot;].read().concat().to_pandas()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_info</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;summary&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
-census_info
+<span class="n">census_info</span>
 </pre></div>
 </div>
 </div>
@@ -442,9 +442,9 @@ census_info
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_counts = census[&quot;census_info&quot;][&quot;summary_cell_counts&quot;].read().concat().to_pandas()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_counts</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;summary_cell_counts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
-census_counts
+<span class="n">census_counts</span>
 </pre></div>
 </div>
 </div>
@@ -605,7 +605,7 @@ census_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_counts[[&quot;organism&quot;, &quot;category&quot;]].value_counts(sort=False)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_counts</span><span class="p">[[</span><span class="s2">&quot;organism&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -645,8 +645,8 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_human_assays = census_counts.query(&quot;organism == &#39;Homo sapiens&#39; &amp; category == &#39;assay&#39;&quot;)
-census_human_assays.sort_values(&quot;total_cell_count&quot;, ascending=False)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_human_assays</span> <span class="o">=</span> <span class="n">census_counts</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;organism == &#39;Homo sapiens&#39; &amp; category == &#39;assay&#39;&quot;</span><span class="p">)</span>
+<span class="n">census_human_assays</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;total_cell_count&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -895,7 +895,7 @@ census_human_assays.sort_values(&quot;total_cell_count&quot;, ascending=False)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_counts.query(&quot;label == &#39;microglial cell&#39;&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_counts</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;label == &#39;microglial cell&#39;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -977,10 +977,10 @@ census_human_assays.sort_values(&quot;total_cell_count&quot;, ascending=False)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>human_cell_types = (
-    census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].obs.read(column_names=[&quot;cell_type&quot;, &quot;is_primary_data&quot;]).concat().to_pandas()
-)
-human_cell_types
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human_cell_types</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">human_cell_types</span>
 </pre></div>
 </div>
 </div>
@@ -1078,15 +1078,15 @@ human_cell_types
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>human_cell_types = (
-    census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
-    .obs.read(column_names=[&quot;cell_type&quot;], value_filter=&quot;is_primary_data == True&quot;)
-    .concat()
-    .to_pandas()
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human_cell_types</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;is_primary_data == True&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
 
-human_cell_types = human_cell_types[[&quot;cell_type&quot;]]
-human_cell_types.shape
+<span class="n">human_cell_types</span> <span class="o">=</span> <span class="n">human_cell_types</span><span class="p">[[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]]</span>
+<span class="n">human_cell_types</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
 </div>
@@ -1104,8 +1104,8 @@ human_cell_types.shape
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>human_cell_type_counts = human_cell_types.value_counts()
-human_cell_type_counts
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human_cell_type_counts</span> <span class="o">=</span> <span class="n">human_cell_types</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">human_cell_type_counts</span>
 </pre></div>
 </div>
 </div>
@@ -1136,7 +1136,7 @@ Name: count, Length: 574, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>human_cell_type_counts.shape
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human_cell_type_counts</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
 </div>
@@ -1161,14 +1161,14 @@ Name: count, Length: 574, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>human_liver_cell_types = (
-    census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
-    .obs.read(column_names=[&quot;cell_type&quot;], value_filter=&quot;is_primary_data == True and tissue_general == &#39;liver&#39;&quot;)
-    .concat()
-    .to_pandas()
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human_liver_cell_types</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;is_primary_data == True and tissue_general == &#39;liver&#39;&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
 
-human_liver_cell_types[&quot;cell_type&quot;].value_counts()
+<span class="n">human_liver_cell_types</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1202,20 +1202,20 @@ Name: count, Length: 123, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>t_cells_list = [&quot;CD8-positive, alpha-beta T cell&quot;, &quot;CD4-positive, alpha-beta T cell&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t_cells_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CD8-positive, alpha-beta T cell&quot;</span><span class="p">,</span> <span class="s2">&quot;CD4-positive, alpha-beta T cell&quot;</span><span class="p">]</span>
 
-t_cells_diseased = (
-    census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
-    .obs.read(
-        column_names=[&quot;disease&quot;, &quot;tissue_general&quot;],
-        value_filter=f&quot;is_primary_data == True and cell_type in {t_cells_list} and disease != &#39;normal&#39;&quot;,
-    )
-    .concat()
-    .to_pandas()
-)
+<span class="n">t_cells_diseased</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disease&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">],</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;is_primary_data == True and cell_type in </span><span class="si">{</span><span class="n">t_cells_list</span><span class="si">}</span><span class="s2"> and disease != &#39;normal&#39;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
 
-t_cells_diseased = t_cells_diseased[[&quot;disease&quot;, &quot;tissue_general&quot;]].value_counts(sort=False)
-t_cells_diseased
+<span class="n">t_cells_diseased</span> <span class="o">=</span> <span class="n">t_cells_diseased</span><span class="p">[[</span><span class="s2">&quot;disease&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">t_cells_diseased</span>
 </pre></div>
 </div>
 </div>
@@ -1258,8 +1258,8 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
-del census
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">del</span> <span class="n">census</span>
 </pre></div>
 </div>
 </div>
