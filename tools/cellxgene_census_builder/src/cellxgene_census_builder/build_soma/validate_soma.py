@@ -446,7 +446,7 @@ def validate_X_layers(
                     assert X.schema.field("soma_dim_0").type == pa.int64()
                     assert X.schema.field("soma_dim_1").type == pa.int64()
                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
-                    assert X.shape == (n_obs, n_vars)
+                    assert X.shape == (n_obs + 1, n_vars + 1)
 
     if args.config.multi_process:
         with create_process_pool_executor(args) as ppe:
