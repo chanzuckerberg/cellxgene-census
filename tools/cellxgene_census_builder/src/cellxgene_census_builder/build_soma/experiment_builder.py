@@ -309,7 +309,7 @@ class ExperimentBuilder:
             assert pm.dtype == bool
 
             fdpm = self.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
-                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid + 1, self.n_var + 1)
+                FEATURE_DATASET_PRESENCE_MATRIX_NAME, type=pa.bool_(), shape=(max_dataset_joinid, self.n_var + 1)
             )
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 

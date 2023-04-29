@@ -355,7 +355,9 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             # a joinid not in the AnnData.
             assert (
                 all_var_ids.var_joinid_in_adata.all()
-                or not pd.Series(X_raw_var_joinids).isin(all_var_ids[~all_var_ids.var_joinid_in_adata].soma_joinid).any()
+                or not pd.Series(X_raw_var_joinids)
+                .isin(all_var_ids[~all_var_ids.var_joinid_in_adata].soma_joinid)
+                .any()
             ), f"{eb.name}:{dataset.dataset_id} unexpected values present in the X matrix."
 
             # Assertion 3- the contents of the presence matrix match the features present
@@ -366,7 +368,9 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 .tables()
                 .concat()
             )
-            assert all_var_ids.loc[all_var_ids.soma_joinid.isin(presence["soma_dim_1"].to_numpy())].var_joinid_in_adata.all(), (
+            assert all_var_ids.loc[
+                all_var_ids.soma_joinid.isin(presence["soma_dim_1"].to_numpy())
+            ].var_joinid_in_adata.all(), (
                 f"{eb.name}:{dataset.dataset_id} the anndata and presence matrix "
                 "container a different number of genes."
             )
