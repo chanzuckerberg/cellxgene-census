@@ -330,10 +330,10 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             # get the joinids for the var axis
             all_var_ids = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
-            )
+            ).set_index("soma_joinid")
             # mask defines which feature_ids are in the AnnData
-            var_joinid_in_adata = all_var_ids.feature_id.isin(expected_ad_var.index)
-            assert ad.n_vars == var_joinid_in_adata.sum()
+            all_var_ids["var_joinid_in_adata"] = all_var_ids.feature_id.isin(expected_ad_var.index)
+            assert ad.n_vars == all_var_ids.var_joinid_in_adata.sum()
 
             # positionally re-index the vars/cols using the feature_id as the join key.
             cols_by_position = (
@@ -354,8 +354,8 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             # NOT present in the AnnData. Test by asserting that no col IDs contain
             # a joinid not in the AnnData.
             assert (
-                var_joinid_in_adata.all()
-                or not pd.Series(X_raw_var_joinids).isin(all_var_ids[~var_joinid_in_adata].soma_joinid).any()
+                all_var_ids.var_joinid_in_adata.all()
+                or not pd.Series(X_raw_var_joinids).isin(all_var_ids[~all_var_ids.var_joinid_in_adata].soma_joinid).any()
             ), f"{eb.name}:{dataset.dataset_id} unexpected values present in the X matrix."
 
             # Assertion 3- the contents of the presence matrix match the features present
@@ -366,7 +366,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 .tables()
                 .concat()
             )
-            assert var_joinid_in_adata[presence["soma_dim_1"].to_numpy()].all(), (
+            assert all_var_ids.loc[all_var_ids.soma_joinid.isin(presence["soma_dim_1"].to_numpy())].var_joinid_in_adata.all(), (
                 f"{eb.name}:{dataset.dataset_id} the anndata and presence matrix "
                 "container a different number of genes."
             )
