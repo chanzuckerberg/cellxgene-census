@@ -108,11 +108,11 @@ def test_base_builder_creation(
 
                 # All rows indexed by a Dataframe's soma_joinid that does not belong to the experiment contain all zeros
                 dense_pm = fdpm_matrix.to_scipy().todense()
-                for i, dataset in returned_datasets.iterrows():
+                for _, dataset in returned_datasets.iterrows():
                     if dataset["dataset_id"].startswith(exp_name):
-                        assert np.count_nonzero(dense_pm[i]) > 0
+                        assert np.count_nonzero(dense_pm[dataset["soma_joinid"]]) > 0
                     else:
-                        assert np.count_nonzero(dense_pm[i]) == 0
+                        assert np.count_nonzero(dense_pm[dataset["soma_joinid"]]) == 0
 
                 fdpm_df = fdpm.read().tables().concat().to_pandas()
                 n_datasets = fdpm_df["soma_dim_0"].nunique()
