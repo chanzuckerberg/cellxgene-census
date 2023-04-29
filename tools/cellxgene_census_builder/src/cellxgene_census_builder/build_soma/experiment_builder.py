@@ -364,15 +364,15 @@ def _accumulate_all_X_layers(
             f"({progress[0]} of {progress[1]})"
         )
         local_var_joinids = raw_var.join(eb.global_var_joinids).soma_joinid.to_numpy()
-        assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
+        assert (local_var_joinids > 0).all(), f"Illegal join id, {dataset.dataset_id}"
 
         for n, X in enumerate(array_chunker(raw_X), start=1):
             logging.debug(f"{eb.name}/{layer_name}: X chunk {n} {dataset.dataset_id}")
             # remap to match axes joinids
             row = X.row.astype(np.int64) + dataset_obs_joinid_start
-            assert (row >= 0).all()
+            assert (row > 0).all()
             col = local_var_joinids[X.col]
-            assert (col >= 0).all()
+            assert (col > 0).all()
             X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs + 1, eb.n_var + 1))
             X_remap.eliminate_zeros()
             with soma.Experiment.open(eb.experiment_uri, "w") as experiment:
