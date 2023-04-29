@@ -206,7 +206,7 @@ class ExperimentBuilder:
 
         self.populate_obs_axis(obs_df)
 
-        self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs
+        self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs + 1
 
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
