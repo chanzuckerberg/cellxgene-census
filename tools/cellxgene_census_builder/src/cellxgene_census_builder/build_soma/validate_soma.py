@@ -318,11 +318,14 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             X_raw_data = X_raw["soma_data"].to_numpy()
             X_raw_obs_joinids = X_raw["soma_dim_0"].to_numpy()
             X_raw_var_joinids = X_raw["soma_dim_1"].to_numpy()
+            assert all(elt > 0 for elt in X_raw_obs_joinids)
+            assert all(elt > 0 for elt in X_raw_var_joinids)
 
             # positionally (re)index obs/rows. We _know_ that the Census assigns
             # obs soma_joinids in the obs position order of the original AnnData, so
             # leverage that for simplicity and speed.
             rows_by_position = obs_joinids.set_index("soma_joinid").index.get_indexer(X_raw_obs_joinids)
+            assert all(elt >= 0 for elt in rows_by_position)
 
             # get the joinids for the var axis
             all_var_ids = (
@@ -338,6 +341,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
                 .set_index("soma_joinid")
                 .index.get_indexer(X_raw_var_joinids)
             )
+            assert all(elt >= 0 for elt in cols_by_position)
 
             # Assertion 1 - the contents of the X matrix are EQUAL for all var values
             # present in the AnnData
