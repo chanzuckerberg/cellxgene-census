@@ -104,7 +104,7 @@ def test_base_builder_creation(
                 dim_0 = fdpm_matrix.to_scipy().row
                 assert all(dim_0 > 0)
                 assert all(dim_0 <= max(returned_datasets.soma_joinid))
-                assert fdpm_matrix.shape[0] == max(returned_datasets.soma_joinid)
+                assert fdpm_matrix.shape[0] == max(returned_datasets.soma_joinid) + 1
 
                 # All rows indexed by a Dataframe's soma_joinid that does not belong to the experiment contain all zeros
                 dense_pm = fdpm_matrix.to_scipy().todense()
