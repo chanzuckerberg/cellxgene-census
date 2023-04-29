@@ -330,7 +330,7 @@ def _validate_X_layers_contents_by_dataset(args: Tuple[str, str, Dataset, List[E
             # get the joinids for the var axis
             all_var_ids = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
-            ).set_index("soma_joinid")
+            ).set_index("soma_joinid", drop=False)
             # mask defines which feature_ids are in the AnnData
             all_var_ids["var_joinid_in_adata"] = all_var_ids.feature_id.isin(expected_ad_var.index)
             assert ad.n_vars == all_var_ids.var_joinid_in_adata.sum()
