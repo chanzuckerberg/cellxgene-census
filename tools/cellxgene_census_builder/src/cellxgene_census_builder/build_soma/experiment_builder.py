@@ -191,7 +191,7 @@ class ExperimentBuilder:
         # requires 'organism', do be careful not to delete that.
         obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]].reset_index(drop=True).copy()
 
-        obs_df["soma_joinid"] = range(self.n_obs + 1, self.n_obs + len(obs_df) + 1)
+        obs_df["soma_joinid"] = range(self.n_obs + 1, self.n_obs + len(obs_df) + 1) # start from 1
         obs_df["dataset_id"] = dataset.dataset_id
 
         # high-level tissue mapping
@@ -206,7 +206,7 @@ class ExperimentBuilder:
 
         self.populate_obs_axis(obs_df)
 
-        self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs + 1
+        self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs + 1 # start from 1
 
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
@@ -242,7 +242,7 @@ class ExperimentBuilder:
         # if is possible there is nothing to write
         if len(self.var_df) > 0:
             # persist var
-            self.var_df["soma_joinid"] = range(1, len(self.var_df) + 1)
+            self.var_df["soma_joinid"] = range(1, len(self.var_df) + 1) # start from 1
             self.var_df = self.var_df.join(self.gene_feature_length["feature_length"], on="feature_id")
             self.var_df.feature_length.fillna(0, inplace=True)
 

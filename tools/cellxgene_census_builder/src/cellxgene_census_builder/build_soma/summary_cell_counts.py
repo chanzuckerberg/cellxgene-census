@@ -25,7 +25,7 @@ def create_census_summary_cell_counts(
         .groupby(by=["organism", "category", "ontology_term_id"], as_index=False, observed=True)
         .agg({"unique_cell_count": "sum", "total_cell_count": "sum", "label": "first"})
     )
-    df["soma_joinid"] = 1 + df.index.astype(np.int64)
+    df["soma_joinid"] = df.index.astype(np.int64) + 1 # start from 1
 
     df = anndata_ordered_bool_issue_853_workaround(df)
 
