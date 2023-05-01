@@ -54,7 +54,7 @@ def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDB
 
 def open_soma(
     *,
-    census_version: Optional[str] = None,
+    census_version: Optional[str] = "stable",
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
@@ -113,24 +113,29 @@ def open_soma(
         return _open_soma({"uri": uri, "s3_region": None}, context)
 
     if census_version is None:
-        census_version = "stable"
+        raise ValueError("Must specify either a census version or an explicit URI.")
 
     try:
         description = get_census_version_description(census_version)  # raises
     except KeyError:
+        # TODO: After the first "stable" is available, this conditional can be removed (keep the 'else' logic)
         if census_version == "stable":
             description = get_census_version_description("latest")
             api_logger.warning(
-                f"The \"{census_version}\" Census version is not yet available. Using {description['release_build']} Census version."
+                f'The "{census_version}" Census version is not yet available. Using "latest" Census version '
+                f"instead."
             )
         else:
             raise ValueError(
-                f'The "{census_version}" Census version is not valid. Use get_census_version_directory() to retrieve available versions.'
-            )
+                f'The "{census_version}" Census version is not valid. Use get_census_version_directory() to retrieve '
+                f"available versions."
+            ) from None
 
     if description["alias"]:
         api_logger.info(
-            f"""The \"{description['alias']}\" release is currently {description['release_build']}. Specify `census_version=\"{description['release_build']}\"` in future calls to open_soma() to ensure data consistency"""
+            f"The \"{description['alias']}\" release is currently {description['release_build']}. Specify "
+            f"'census_version=\"{description['release_build']}\"' in future calls to open_soma() to ensure data "
+            "consistency."
         )
 
     return _open_soma(description["soma"], context)

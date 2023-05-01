@@ -15,17 +15,32 @@ from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_UR
 
 
 @pytest.mark.live_corpus
+def test_open_soma_stable() -> None:
+    # There should _always_ be a 'stable'
+    with cellxgene_census.open_soma(census_version="stable") as census:
+        assert census is not None
+        assert isinstance(census, soma.Collection)
+
+    # and it should be the latest, until the first "stable" build is available
+    with cellxgene_census.open_soma() as default_census:
+        assert default_census.uri == census.uri
+        for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
+            assert census.context.tiledb_ctx.config()[k] == str(v)
+
+    # TODO: After the first "stable" build is available, this commented-out code can be replace this above block
+    # and it should always be the default
+    # with cellxgene_census.open_soma() as default_census:
+    #     assert default_census.uri == census.uri
+    #     for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
+    #         assert census.context.tiledb_ctx.config()[k] == str(v)
+
+
+@pytest.mark.live_corpus
 def test_open_soma_latest() -> None:
     # There should _always_ be a 'latest'
     with cellxgene_census.open_soma(census_version="latest") as census:
         assert census is not None
         assert isinstance(census, soma.Collection)
-
-    # and it should always be the default
-    with cellxgene_census.open_soma() as default_census:
-        assert default_census.uri == census.uri
-        for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
-            assert census.context.tiledb_ctx.config()[k] == str(v)
 
 
 @pytest.mark.live_corpus
@@ -54,6 +69,14 @@ def test_open_soma_with_context() -> None:
         assert census.uri == uri
         assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
+
+
+def test_open_soma_invalid_args() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Must specify either a census version or an explicit URI."),
+    ):
+        cellxgene_census.open_soma(census_version=None)
 
 
 def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
