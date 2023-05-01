@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any, Mapping, cast
 
 import pytest
 import requests_mock as rm
@@ -55,11 +55,11 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     assert "_dangling" not in directory
 
-    assert directory["2022-11-01"] == DIRECTORY_JSON["2022-11-01"] | {"alias": None}
-    assert directory["2022-10-01"] == DIRECTORY_JSON["2022-10-01"] | {"alias": None}
+    assert directory["2022-11-01"] == cast(Mapping[str, Any], DIRECTORY_JSON["2022-11-01"]) | {"alias": None}
+    assert directory["2022-10-01"] == cast(Mapping[str, Any], DIRECTORY_JSON["2022-10-01"]) | {"alias": None}
 
-    assert directory["latest"] == DIRECTORY_JSON["2022-11-01"] | {"alias": "latest"}
-    assert directory["stable"] == DIRECTORY_JSON["2022-10-01"] | {"alias": "stable"}
+    assert directory["latest"] == cast(Mapping[str, Any], DIRECTORY_JSON["2022-11-01"]) | {"alias": "latest"}
+    assert directory["stable"] == cast(Mapping[str, Any], DIRECTORY_JSON["2022-10-01"]) | {"alias": "stable"}
 
     for tag in directory:
         assert directory[tag] == cellxgene_census.get_census_version_description(tag)

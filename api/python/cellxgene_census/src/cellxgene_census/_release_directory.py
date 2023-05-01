@@ -129,7 +129,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
 
         if isinstance(points_at, dict):
             directory[census_version] = points_at.copy()
-            directory[census_version]["alias"] = alias
+            cast(CensusVersionDescription, directory[census_version])["alias"] = alias
 
     # Cast is safe, as we have removed all aliases
     return cast(Dict[CensusVersionName, CensusVersionDescription], directory)
