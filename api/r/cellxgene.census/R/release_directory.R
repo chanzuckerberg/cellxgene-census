@@ -1,4 +1,4 @@
-CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/cell-census/release.json"
+CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/cellxgene-census/release.json"
 
 
 #' Get release description for given census version
