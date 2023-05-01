@@ -28,16 +28,16 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0;
 }
 
-.navbar-cxg-anchor {
-    color: #A7B6C2;
-}
-
 .navbar-divider {
     background-color: #767676;
     height: auto;
     border: none;
     width: 1px;
     margin: 0;
+}
+
+.navbar-cxg-anchor {
+    color: #A7B6C2;
 }
 
 .navbar-cxg-anchor:visited {
