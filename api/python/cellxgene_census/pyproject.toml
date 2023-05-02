@@ -40,6 +40,8 @@ dependencies= [
     "scipy",
     # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
     "certifi",
+    # Temporary fix for https://github.com/single-cell-data/TileDB-SOMA/issues/1322, remove when we update to tiledbsoma>1.2.2
+    "tiledb>=0.21.3",
 ]
 
 [project.urls]
