@@ -10,8 +10,7 @@ project = 'cellxgene-census'
 copyright = '2022-2023 Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
-version = "0.5"
-release = "0.5.0"
+version = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
