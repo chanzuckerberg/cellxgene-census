@@ -1,0 +1,1059 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Querying data using the gget cellxgene module &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Querying and fetching the single-cell data and cell/gene metadata." href="census_query_extract.html" />
+    <link rel="prev" title="Understanding and filtering out duplicate cells" href="census_duplicated_cells.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                    <hr class="navbar-divider">
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    1.0.0
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_duplicated_cells.html">Understanding and filtering out duplicate cells</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Querying data using the gget cellxgene module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Install-gget">Install gget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)">Fetch an AnnData object by selecting gene(s), tissue(s) and cell type(s)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression">Plot a dot plot similar to those shown on the CZ CELLxGENE Discover Gene Expression</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)">Fetch only cell metadata (corresponds to AnnData.obs)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Use-gget-cellxgene-from-the-command-line">Use gget cellxgene from the command line</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Querying data using the gget cellxgene module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_gget_demo.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <p><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></p>
+<section id="Querying-data-using-the-gget-cellxgene-module">
+<h1>Querying data using the gget cellxgene module<a class="headerlink" href="#Querying-data-using-the-gget-cellxgene-module" title="Permalink to this heading">¶</a></h1>
+<p><em>By Laura Luebbert, lauraluebbert&#64;caltech.edu.</em></p>
+<p><a class="reference external" href="https://github.com/pachterlab/gget">gget</a> is a free, open-source command-line tool and Python package that enables efficient querying of genomic databases. gget consists of a collection of separate but interoperable modules, each designed to facilitate one type of database querying in a single line of code.</p>
+<p>The <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> module builds on the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">CZ CELLxGENE Discover Census</a> to query data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. This notebook briefly introduces the <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> module by providing one simple example for each supported query type.</p>
+<p>If you use gget cellxgene in a publication, please <a class="reference external" href="https://pachterlab.github.io/gget/cite.html">cite gget</a> in addition to <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citing CZ CELLxGENE</a>.</p>
+<div class="line-block">
+<div class="line"><strong>Contents</strong></div>
+<div class="line">1. Install gget. 2. Fetch an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object by selecting gene(s), tissue(s) and cell type(s). 3. Plot a dot plot similar to those shown on the CZ CELLxGENE Discover <a class="reference external" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>. 4. Fetch only cell metadata (corresponds to AnnData.obs). 5. Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line.</div>
+</div>
+<section id="Install-gget">
+<h2>Install gget<a class="headerlink" href="#Install-gget" title="Permalink to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The cellxgene module was added to gget in release 0.25.6</span>
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>gget<span class="w"> </span>&gt;<span class="o">=</span><span class="m">0</span>.25.6
+<span class="kn">import</span> <span class="nn">gget</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display all options of the cellxgene gget module</span>
+<span class="n">help</span><span class="p">(</span><span class="n">gget</span><span class="o">.</span><span class="n">cellxgene</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on function cellxgene in module gget.gget_cellxgene:
+
+cellxgene(species=&#39;homo_sapiens&#39;, gene=None, ensembl=False, column_names=[&#39;dataset_id&#39;, &#39;assay&#39;, &#39;suspension_type&#39;, &#39;sex&#39;, &#39;tissue_general&#39;, &#39;tissue&#39;, &#39;cell_type&#39;], meta_only=False, tissue=None, cell_type=None, development_stage=None, disease=None, sex=None, is_primary_data=True, dataset_id=None, tissue_general_ontology_term_id=None, tissue_general=None, assay_ontology_term_id=None, assay=None, cell_type_ontology_term_id=None, development_stage_ontology_term_id=None, disease_ontology_term_id=None, donor_id=None, self_reported_ethnicity_ontology_term_id=None, self_reported_ethnicity=None, sex_ontology_term_id=None, suspension_type=None, tissue_ontology_term_id=None, verbose=True, out=None)
+    Query data from CZ CELLxGENE Discover (https://cellxgene.cziscience.com/) using the
+    CZ CELLxGENE Discover Census (https://github.com/chanzuckerberg/cellxgene-census).
+
+    NOTE: Querying large datasets requires a large amount of RAM. Use the cell metadata attributes
+    to define the (sub)dataset of interest.
+    The CZ CELLxGENE Discover Census recommends &gt;16 GB of memory and a &gt;5 Mbps internet connection.
+
+    General args:
+        - species       Choice of &#39;homo_sapiens&#39; or &#39;mus_musculus&#39;. Default: &#39;homo_sapiens&#39;.
+        - gene          Str or list of gene name(s) or Ensembl ID(s), e.g. [&#39;ACE2&#39;, &#39;SLC5A1&#39;] or [&#39;ENSG00000130234&#39;, &#39;ENSG00000100170&#39;]. Default: None.
+                        NOTE: Set ensembl=True when providing Ensembl ID(s) instead of gene name(s).
+                        See https://cellxgene.cziscience.com/gene-expression for examples of available genes.
+        - ensembl       True/False (default: False). Set to True when genes are provided as Ensembl IDs.
+        - column_names  List of metadata columns to return (stored in AnnData.obs when meta_only=False).
+                        Default: [&#34;dataset_id&#34;, &#34;assay&#34;, &#34;suspension_type&#34;, &#34;sex&#34;, &#34;tissue_general&#34;, &#34;tissue&#34;, &#34;cell_type&#34;]
+                        For more options see: https://api.cellxgene.cziscience.com/curation/ui/#/ -&gt; Schemas -&gt; dataset
+        - meta_only     True/False (default: False). If True, returns only metadata dataframe (corresponds to AnnData.obs).
+        - verbose       True/False whether to print progress information. Default True.
+        - out           If provided, saves the generated AnnData h5ad (or csv when meta_only=True) file with the specified path. Default: None.
+
+    Cell metadata attributes:
+        - tissue                          Str or list of tissue(s), e.g. [&#39;lung&#39;, &#39;blood&#39;]. Default: None.
+                                          See https://cellxgene.cziscience.com/gene-expression for examples of available tissues.
+        - cell_type                       Str or list of celltype(s), e.g. [&#39;mucus secreting cell&#39;, &#39;neuroendocrine cell&#39;]. Default: None.
+                                          See https://cellxgene.cziscience.com/gene-expression and select a tissue to see examples of available celltypes.
+        - development_stage               Str or list of development stage(s). Default: None.
+        - disease                         Str or list of disease(s). Default: None.
+        - sex                             Str or list of sex(es), e.g. &#39;female&#39;. Default: None.
+        - is_primary_data                 True/False (default: True). If True, returns only the canonical instance of the cellular observation.
+                                          This is commonly set to False for meta-analyses reusing data or for secondary views of data.
+        - dataset_id                      Str or list of CELLxGENE dataset ID(s). Default: None.
+        - tissue_general_ontology_term_id Str or list of high-level tissue UBERON ID(s). Default: None.
+                                          Also see: https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py
+        - tissue_general                  Str or list of high-level tissue label(s). Default: None.
+                                          Also see: https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py
+        - tissue_ontology_term_id         Str or list of tissue ontology term ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - assay_ontology_term_id          Str or list of assay ontology term ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - assay                           Str or list of assay(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - cell_type_ontology_term_id      Str or list of celltype ontology term ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - development_stage_ontology_term_id        Str or list of development stage ontology term ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - disease_ontology_term_id        Str or list of disease ontology term ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - donor_id                        Str or list of donor ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - self_reported_ethnicity_ontology_term_id  Str or list of self reported ethnicity ontology ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - self_reported_ethnicity         Str or list of self reported ethnicity as defined in the CELLxGENE dataset schema. Default: None.
+        - sex_ontology_term_id            Str or list of sex ontology ID(s) as defined in the CELLxGENE dataset schema. Default: None.
+        - suspension_type                 Str or list of suspension type(s) as defined in the CELLxGENE dataset schema. Default: None.
+
+    Returns AnnData object (when meta_only=False) or dataframe (when meta_only=True).
+
+</pre></div></div>
+</div>
+</section>
+<section id="Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)">
+<h2>Fetch an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object by selecting gene(s), tissue(s) and cell type(s)<a class="headerlink" href="#Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)" title="Permalink to this heading">¶</a></h2>
+<p>You can use all of the options listed above to filter for data of interest. Here, we will demonstrate the module by fetching a small dataset containing only three genes and two lung cell types:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fetch AnnData object based on specified genes, tissue and cell types</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">gget</span><span class="o">.</span><span class="n">cellxgene</span><span class="p">(</span>
+    <span class="n">gene</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ACE2&quot;</span><span class="p">,</span> <span class="s2">&quot;ABCA1&quot;</span><span class="p">,</span> <span class="s2">&quot;SLC5A1&quot;</span><span class="p">],</span> <span class="n">tissue</span><span class="o">=</span><span class="s2">&quot;lung&quot;</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mucus secreting cell&quot;</span><span class="p">,</span> <span class="s2">&quot;neuroendocrine cell&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s look at some of the features of the AnnData object we just fetched:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 3322 × 3
+    obs: &#39;dataset_id&#39;, &#39;assay&#39;, &#39;suspension_type&#39;, &#39;sex&#39;, &#39;tissue_general&#39;, &#39;tissue&#39;, &#39;cell_type&#39;, &#39;is_primary_data&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
+</pre></div></div>
+</div>
+<p>A few thousand cells from CZ CELLxGENE Discover matched the filters specified above and their ACE2, ABCA1, and SLC5A1 expression matrix in lung mucus secreting and neuroendocrine cells was fetched. The <code class="docutils literal notranslate"><span class="pre">.var</span></code> and <code class="docutils literal notranslate"><span class="pre">.obs</span></code> layers contain additional information about each gene and cell, respectively:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">var</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+  <div id="df-18bd1d75-678e-49b8-b78b-a1b3ecceef4b">
+    <div class="colab-df-container">
+      <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>soma_joinid</th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2192</td>
+      <td>ENSG00000100170</td>
+      <td>SLC5A1</td>
+      <td>5081</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>6159</td>
+      <td>ENSG00000130234</td>
+      <td>ACE2</td>
+      <td>9739</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>11349</td>
+      <td>ENSG00000165029</td>
+      <td>ABCA1</td>
+      <td>11343</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-18bd1d75-678e-49b8-b78b-a1b3ecceef4b')"
+              title="Convert this dataframe to an interactive table."
+              style="display:none;">
+
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
+       width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"/>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"/><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"/>
+  </svg>
+      </button>
+
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-18bd1d75-678e-49b8-b78b-a1b3ecceef4b button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-18bd1d75-678e-49b8-b78b-a1b3ecceef4b');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+  <div id="df-029ed3b1-43ce-431f-a7d9-265fda497ce2">
+    <div class="colab-df-container">
+      <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>dataset_id</th>
+      <th>assay</th>
+      <th>suspension_type</th>
+      <th>sex</th>
+      <th>tissue_general</th>
+      <th>tissue</th>
+      <th>cell_type</th>
+      <th>is_primary_data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
+      <td>10x 3' v3</td>
+      <td>nucleus</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
+      <td>10x 3' v3</td>
+      <td>nucleus</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
+      <td>10x 3' v3</td>
+      <td>nucleus</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
+      <td>10x 3' v3</td>
+      <td>nucleus</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
+      <td>10x 3' v3</td>
+      <td>nucleus</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>3317</th>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3318</th>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3319</th>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3320</th>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3321</th>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>female</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mucus secreting cell</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>3322 rows × 8 columns</p>
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-029ed3b1-43ce-431f-a7d9-265fda497ce2')"
+              title="Convert this dataframe to an interactive table."
+              style="display:none;">
+
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
+       width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"/>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"/><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"/>
+  </svg>
+      </button>
+
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-029ed3b1-43ce-431f-a7d9-265fda497ce2 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-029ed3b1-43ce-431f-a7d9-265fda497ce2');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div></div>
+</div>
+</section>
+<section id="Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression">
+<h2>Plot a dot plot similar to those shown on the CZ CELLxGENE Discover <a class="reference external" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a><a class="headerlink" href="#Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression" title="Permalink to this heading">¶</a></h2>
+<p>Using the data we just fetched, we can plot a dot plot using <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/">scanpy</a>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+
+<span class="c1"># retina increases the resolution of plots displayed in notebooks</span>
+<span class="o">%</span><span class="k">config</span> InlineBackend.figure_format=&quot;retina&quot;
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">dotplot</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="n">gene_symbols</span><span class="o">=</span><span class="s2">&quot;feature_name&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_gget_demo_14_0.png" class="no-scaled-link" src="../../_images/notebooks_api_demo_census_gget_demo_14_0.png" style="width: 351px; height: 266px;" />
+</div>
+</div>
+</section>
+<section id="Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)">
+<h2>Fetch only cell metadata (corresponds to AnnData.obs)<a class="headerlink" href="#Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)" title="Permalink to this heading">¶</a></h2>
+<p>By setting <code class="docutils literal notranslate"><span class="pre">meta_only=True</span></code> and again filtering by the cell metadata attributes listed above, you can also fetch only the cell metadata:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">gget</span><span class="o">.</span><span class="n">cellxgene</span><span class="p">(</span>
+    <span class="n">meta_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gene</span><span class="o">=</span><span class="s2">&quot;ENSMUSG00000015405&quot;</span><span class="p">,</span>
+    <span class="n">ensembl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Setting &#39;ensembl=True&#39; here since the gene is passed as an Ensembl ID</span>
+    <span class="n">tissue</span><span class="o">=</span><span class="s2">&quot;lung&quot;</span><span class="p">,</span>
+    <span class="n">species</span><span class="o">=</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>  <span class="c1"># Let&#39;s switch up the species</span>
+<span class="p">)</span>
+
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+  <div id="df-ec0b9563-2dce-4a0f-a202-96281e2e8130">
+    <div class="colab-df-container">
+      <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>dataset_id</th>
+      <th>assay</th>
+      <th>suspension_type</th>
+      <th>sex</th>
+      <th>tissue_general</th>
+      <th>tissue</th>
+      <th>cell_type</th>
+      <th>is_primary_data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>047d57f2-4d14-45de-aa98-336c6f583750</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>unknown</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mesenchymal stem cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>047d57f2-4d14-45de-aa98-336c6f583750</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>unknown</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>progenitor cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>047d57f2-4d14-45de-aa98-336c6f583750</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>unknown</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mesenchymal cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>047d57f2-4d14-45de-aa98-336c6f583750</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>unknown</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mesenchymal stem cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>047d57f2-4d14-45de-aa98-336c6f583750</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>unknown</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>mesenchymal cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>97547</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>male</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>fibroblast of lung</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>97548</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>male</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>natural killer cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>97549</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>male</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>pulmonary interstitial fibroblast</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>97550</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>male</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>adventitial cell</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>97551</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>cell</td>
+      <td>male</td>
+      <td>lung</td>
+      <td>lung</td>
+      <td>fibroblast of lung</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>97552 rows × 8 columns</p>
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-ec0b9563-2dce-4a0f-a202-96281e2e8130')"
+              title="Convert this dataframe to an interactive table."
+              style="display:none;">
+
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
+       width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"/>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"/><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"/>
+  </svg>
+      </button>
+
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-ec0b9563-2dce-4a0f-a202-96281e2e8130 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-ec0b9563-2dce-4a0f-a202-96281e2e8130');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div></div>
+</div>
+</section>
+<section id="Use-gget-cellxgene-from-the-command-line">
+<h2>Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line<a class="headerlink" href="#Use-gget-cellxgene-from-the-command-line" title="Permalink to this heading">¶</a></h2>
+<p>All gget modules support use from the command line. Note that the command line interface requires the <code class="docutils literal notranslate"><span class="pre">-o/--out</span></code> argument to specify a path to save the fetched data. Here are the command line versions of the queries demonstrated above:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># # Fetch AnnData object based on specified genes, tissue and cell types</span>
+<span class="c1"># !gget cellxgene --gene ACE2 ABCA1 SLC5A1 --tissue lung --cell_type &#39;mucus secreting cell&#39; &#39;neuroendocrine cell&#39; -o example_adata.h5ad</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># # Fetch only metadata</span>
+<span class="c1"># !gget cellxgene --meta_only --gene ENSMUSG00000015405 --ensembl --tissue lung --species mus_musculus -o example_meta.csv</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_duplicated_cells.html" class="btn btn-neutral float-left" title="Understanding and filtering out duplicate cells" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_query_extract.html" class="btn btn-neutral float-right" title="Querying and fetching the single-cell data and cell/gene metadata." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
