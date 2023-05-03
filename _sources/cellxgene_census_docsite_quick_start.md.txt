@@ -1,6 +1,6 @@
 # Quick start
 
-This page provides details to start using the Census. Click [here] (examples.rst) for more detailed Python tutorials (R vignettes coming soon).
+This page provides details to start using the Census. Click [here](examples.rst) for more detailed Python tutorials (R vignettes coming soon).
 
 **Contents**
 

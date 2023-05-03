@@ -21,7 +21,7 @@ Last updated: Apr, 2023.
 
 The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). To accelerate computational research, the Census enables researchers to:
 
-- Access slices of data from more than 500 single-cell datasets spanning about 50 M cells from >60 K genes from human or mice.
+- Access slices of data from more than 500 single-cell datasets spanning about 33M unique cells (50M total) from >60K genes from human or mice.
 - Access to data with standardized cell and gene metadata with harmonized labels.
 - Easily load multi-dataset slices into Scanpy or Seurat.
 - Implement out-of-core (a.k.a online) operations for larger-than-memory processes.
@@ -55,11 +55,11 @@ The Census does not have normalized counts or embeddings because:
 - The original normalized values and embeddings are not harmonized or integrated across datasets and are therefore numerically incompatible.
 - We have not implemented a general-purpose normalization or embedding generation method to be used across all Census data.
 
-If you have any suggestions for methods that our team should explore please share them with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
+If you have any suggestions for methods that our team should explore, please share them with us via a [feature request in the github repository](https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&labels=user+request&template=feature-request.md&title=).
 
 ## How does the Census differentiate from other tools?
 
-The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data – CZ CELLxGENE Discover –  via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose).  Thus, single-cell data from about 50 M cells across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:
+The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data from CZ CELLxGENE Discover via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose).  Thus, single-cell data from about 33M unique cells (50M total) across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:
 
 * Opening and reading data at low latency from the cloud.
 * Querying and accessing data using metadata filters.
@@ -116,7 +116,7 @@ pip install cellxgene-census
 
 ## How can I ask for support?
 
-You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose), or for quick support you can join the CZI Science Community on Slack ([czi.co/science-slack](https://czi.co/science-slack)) and ask questions in the `#cellxgene-census-users` channel.
+You can either submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose), or for quick support, you can join the CZI Science Community on Slack ([czi.co/science-slack](https://czi.co/science-slack)) and ask questions in the `#cellxgene-census-users` channel.
 
 ## How can I ask for new features?
 

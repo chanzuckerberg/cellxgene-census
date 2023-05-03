@@ -211,7 +211,7 @@
 <h2>Why should I use the Census?<a class="headerlink" href="#why-should-i-use-the-census" title="Permalink to this heading">¶</a></h2>
 <p>The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To accelerate computational research, the Census enables researchers to:</p>
 <ul class="simple">
-<li><p>Access slices of data from more than 500 single-cell datasets spanning about 50 M cells from &gt;60 K genes from human or mice.</p></li>
+<li><p>Access slices of data from more than 500 single-cell datasets spanning about 33M unique cells (50M total) from &gt;60K genes from human or mice.</p></li>
 <li><p>Access to data with standardized cell and gene metadata with harmonized labels.</p></li>
 <li><p>Easily load multi-dataset slices into Scanpy or Seurat.</p></li>
 <li><p>Implement out-of-core (a.k.a online) operations for larger-than-memory processes.</p></li>
@@ -241,11 +241,11 @@
 <li><p>The original normalized values and embeddings are not harmonized or integrated across datasets and are therefore numerically incompatible.</p></li>
 <li><p>We have not implemented a general-purpose normalization or embedding generation method to be used across all Census data.</p></li>
 </ul>
-<p>If you have any suggestions for methods that our team should explore please share them with us via a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&amp;amp;labels=user+request&amp;amp;template=feature-request.md&amp;amp;title=">feature request in the github repository</a>.</p>
+<p>If you have any suggestions for methods that our team should explore, please share them with us via a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&amp;amp;labels=user+request&amp;amp;template=feature-request.md&amp;amp;title=">feature request in the github repository</a>.</p>
 </section>
 <section id="how-does-the-census-differentiate-from-other-tools">
 <h2>How does the Census differentiate from other tools?<a class="headerlink" href="#how-does-the-census-differentiate-from-other-tools" title="Permalink to this heading">¶</a></h2>
-<p>The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data – CZ CELLxGENE Discover –  via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose">TileDB-SOMA</a>.  Thus, single-cell data from about 50 M cells across &gt;60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:</p>
+<p>The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data from CZ CELLxGENE Discover via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose">TileDB-SOMA</a>.  Thus, single-cell data from about 33M unique cells (50M total) across &gt;60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:</p>
 <ul class="simple">
 <li><p>Opening and reading data at low latency from the cloud.</p></li>
 <li><p>Querying and accessing data using metadata filters.</p></li>
@@ -298,7 +298,7 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
 </section>
 <section id="how-can-i-ask-for-support">
 <h2>How can I ask for support?<a class="headerlink" href="#how-can-i-ask-for-support" title="Permalink to this heading">¶</a></h2>
-<p>You can either submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a>, or for quick support you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p>
+<p>You can either submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a>, or for quick support, you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p>
 </section>
 <section id="how-can-i-ask-for-new-features">
 <h2>How can I ask for new features?<a class="headerlink" href="#how-can-i-ask-for-new-features" title="Permalink to this heading">¶</a></h2>

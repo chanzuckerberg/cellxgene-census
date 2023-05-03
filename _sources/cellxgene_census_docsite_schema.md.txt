@@ -49,7 +49,7 @@ All data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) that ad
 
 ⚠️ Note that the data includes: 
 
-* **Full-gene sequencing reads** (e.g. Smart-Seq2) and **molecule counts** (e.g. 10X).
+* **Full-gene sequencing read counts** (e.g. Smart-Seq2) and **molecule counts** (e.g. 10X).
 * **Duplicate cells** present across multiple datasets, these can be filtered in or out using the cell metadata variable `is_primary_data`.
 
 

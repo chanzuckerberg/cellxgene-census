@@ -174,8 +174,8 @@
   <p>❗ <strong>R API in beta.</strong></p>
 <section id="cz-cellxgene-discover-census">
 <h1>CZ CELLxGENE Discover Census<a class="headerlink" href="#cz-cellxgene-discover-census" title="Permalink to this heading">¶</a></h1>
-<p>CZ CELLxGENE Census provides efficient computational tooling to <strong>access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover</strong>. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data wrangling.</p>
-<p>Get started on using the Census:</p>
+<p>The Census provides efficient computational tooling to <strong>access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover</strong>. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data harmonization.</p>
+<p>Get started:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="cellxgene_census_docsite_quick_start.html"><span class="std std-doc">Quick start (Python and R)</span></a></p></li>
 <li><p><a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">Census data and schema</span></a></p></li>
@@ -199,7 +199,7 @@
 <p><strong>Interoperability with existing single-cell toolkits</strong></p>
 <ul class="simple">
 <li><p>Load and create <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> objects.</p></li>
-<li><p>Load and create <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> objects. Coming soon.</p></li>
+<li><p>Load and create <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> objects.</p></li>
 </ul>
 <p><strong>Interoperability with existing Python or R data structures</strong></p>
 <ul class="simple">
@@ -207,12 +207,12 @@
 <li><p>From R create <a class="reference external" href="https://arrow.apache.org/docs/r/index.html">R Arrow</a> objects, sparse matrices (via the <a class="reference external" href="https://cran.r-project.org/package=Matrix">Matrix</a> package), and standard data frames and (dense) matrices.</p></li>
 </ul>
 </section>
-<section id="census-data">
-<h2>Census Data<a class="headerlink" href="#census-data" title="Permalink to this heading">¶</a></h2>
+<section id="census-data-and-schema">
+<h2>Census Data and Schema<a class="headerlink" href="#census-data-and-schema" title="Permalink to this heading">¶</a></h2>
 <p>A description of the Census data and its schema is detailed <a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">here</span></a>.</p>
 <p>⚠️ Note that the data includes:</p>
 <ul class="simple">
-<li><p><strong>Full-gene sequencing reads</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
+<li><p><strong>Full-gene sequencing read counts</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
 <li><p><strong>Duplicate cells</strong> present across multiple datasets, these can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>
 </ul>
 </section>
@@ -222,7 +222,7 @@
 <p>Starting May 15th, 2023, Census data releases with long-term support will be published every six months. These releases will be publicly accessible for at least five years. In addition, weekly releases may be published without any guarantee of permanence.</p>
 </section>
 <section id="questions-feedback-and-issues">
-<h2>Questions, feedback and issues<a class="headerlink" href="#questions-feedback-and-issues" title="Permalink to this heading">¶</a></h2>
+<h2>Questions, Feedback and Issues<a class="headerlink" href="#questions-feedback-and-issues" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Users are encouraged to submit questions and feature requests about the Census via <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issues</a>.</p></li>
 <li><p>For quick support, you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p></li>
@@ -233,7 +233,7 @@
 </ul>
 </section>
 <section id="coming-soon">
-<h2>Coming soon<a class="headerlink" href="#coming-soon" title="Permalink to this heading">¶</a></h2>
+<h2>Coming Soon!<a class="headerlink" href="#coming-soon" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and <a class="reference external" href="https://pytorch.org/">PyTorch</a>.</p></li>
 <li><p>To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas:</p>
@@ -246,7 +246,7 @@
 </ul>
 </section>
 <section id="projects-and-tools-using-census">
-<h2>Projects and tools using Census<a class="headerlink" href="#projects-and-tools-using-census" title="Permalink to this heading">¶</a></h2>
+<h2>Projects and Tools Using Census<a class="headerlink" href="#projects-and-tools-using-census" title="Permalink to this heading">¶</a></h2>
 <p>If you are interested in listing a project here, please reach out to us at <a class="reference external" href="mailto:soma&#37;&#52;&#48;chanzuckerberg&#46;com">soma<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a></p>
 </section>
 </section>
