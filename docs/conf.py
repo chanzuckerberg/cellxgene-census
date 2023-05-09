@@ -10,8 +10,7 @@ project = 'cellxgene-census'
 copyright = '2022-2023 Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
-version = "0.5"
-release = "0.5.0"
+version = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -53,7 +52,7 @@ html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 html_js_files = [
-    ('https://plausible.io/js/script.js', {"data-domain": "cellxgene-census.readthedocs.io", "defer": "defer"}),
+    ('https://plausible.io/js/script.js', {"data-domain": "chanzuckerberg.github.io/cellxgene-census", "defer": "defer"}),
 ]
 
 def setup(app):

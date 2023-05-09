@@ -60,7 +60,7 @@ To learn what metadata columns are available for fetching and filtering we can d
 census$get("census_data")$get("homo_sapiens")$obs$colnames()
 ```
 
-`soma_joinid` is a special `SOMADataFrame` column that is used for join operations. The definition for all other columns can be found at the [Census schema](https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html).
+`soma_joinid` is a special `SOMADataFrame` column that is used for join operations. The definition for all other columns can be found at the [Census schema](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html).
 
 All of these can be used to fetch specific columns or specific rows matching a condition. For the latter we need to know the values we are looking for *a priori*.
 
