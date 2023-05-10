@@ -191,6 +191,7 @@ def test_download_source_h5ad_errors(tmp_path: pathlib.Path, small_dataset_id: s
         cellxgene_census.download_source_h5ad(small_dataset_id, "/tmp/dirname/", census_version="latest")
 
 
+@pytest.mark.live_corpus
 def test_can_open_with_anonymous_access() -> None:
     """
     With anonymous access, `open_soma` must be able to access the census even with bogus credentials
