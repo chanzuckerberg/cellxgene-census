@@ -19,7 +19,7 @@ test_that("open_soma with custom context", {
 })
 
 test_that("open_soma does not sign AWS S3 requests", {
-  Sys.setenv(AWS_ACCESS_KEY_ID="fake_id", AWS_SECRET_ACCESS_KEY="fake_key")
+  Sys.setenv(AWS_ACCESS_KEY_ID = "fake_id", AWS_SECRET_ACCESS_KEY = "fake_key")
   coll <- open_soma("latest")
   expect_true(coll$exists())
   expect_true(coll$get("census_data")$get("homo_sapiens")$exists())
