@@ -1,3 +1,4 @@
+import os
 import pathlib
 import re
 import time
@@ -188,3 +189,23 @@ def test_download_source_h5ad_errors(tmp_path: pathlib.Path, small_dataset_id: s
 
     with pytest.raises(ValueError):
         cellxgene_census.download_source_h5ad(small_dataset_id, "/tmp/dirname/", census_version="latest")
+
+
+@pytest.mark.live_corpus
+def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
+    os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
+    # Passing an empty context
+    with pytest.raises(Exception):
+        cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
+
+
+def test_can_open_with_anonymous_access() -> None:
+    """
+    With anonymous access, `open_soma` must be able to access the census even with bogus credentials
+    """
+    os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
+    with cellxgene_census.open_soma(census_version="latest") as census:
+        assert census is not None
+        assert isinstance(census, soma.Collection)

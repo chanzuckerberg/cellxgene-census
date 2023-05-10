@@ -41,6 +41,8 @@ def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDB
         tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
         if s3_region is not None:
             tiledb_config["vfs.s3.region"] = s3_region
+        # S3 requests should not be signed, since we want to allow anonymous access
+        tiledb_config["vfs.s3.no_sign_request"] = "true"
         context = context.replace(tiledb_config=tiledb_config)
     else:
         # if specified, the user context takes precedence _except_ for AWS Region in locator
