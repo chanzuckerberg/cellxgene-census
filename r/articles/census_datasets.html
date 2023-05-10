@@ -90,7 +90,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Table</span></span>
-<span><span class="co">#&gt; 540 rows x 8 columns</span></span>
+<span><span class="co">#&gt; 549 rows x 8 columns</span></span>
 <span><span class="co">#&gt; $soma_joinid &lt;int64 not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_id &lt;large_string not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_name &lt;large_string not null&gt;</span></span>
@@ -107,15 +107,15 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  <span class="st">"dataset_title"</span>,</span>
 <span>  <span class="st">"dataset_total_cell_count"</span></span>
 <span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 540 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 549 × 3</span></span></span>
 <span><span class="co">#&gt;   dataset_id                           dataset_title      dataset_total_cell_c…¹</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> c2876b1b-06d8-4d96-a56b-5304f815b99a Whole Taxonomy - …                1<span style="text-decoration: underline;">226</span>855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3f32121d-126b-4e8d-9f69-d86502d2a1b1 fetal and neonata…                  <span style="text-decoration: underline;">36</span>359</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> be46dfdc-0f99-4731-8957-64ca37364985 Mouse Somatic Cel…                  <span style="text-decoration: underline;">50</span>933</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ac2fea99-ce08-4fca-8d03-a19f37bf21a3 Human Immune Cell…                  <span style="text-decoration: underline;">20</span>556</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> a13bda79-9134-46c9-9ed1-a2858be9aafe Mouse Male                          <span style="text-decoration: underline;">32</span>889</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 535 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> b0e547f0-462b-4f81-b31b-5b0a5d96f537 AIDA Phase 1: Chi…                1<span style="text-decoration: underline;">058</span>909</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> d41f45c1-1b7b-4573-a998-ac5c5acb1647 Transcriptional c…                  <span style="text-decoration: underline;">82</span>991</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> f801b7a9-80a6-4d09-9161-71474deb58ae normal - Single-c…                   <span style="text-decoration: underline;">6</span>044</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> be39785b-67cb-4177-be19-a40ee3747e45 ccRCC - Single-ce…                  <span style="text-decoration: underline;">20</span>509</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 4c6f9f26-5470-455b-8933-c408232fbf56 chRCC - Single-ce…                   <span style="text-decoration: underline;">2</span>576</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 544 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​dataset_total_cell_count</span></span></span></code></pre></div>
 <p>The sum of cell counts across all datasets should match the number of cells across all SOMA experiments (human, mouse).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -124,13 +124,13 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_experiments</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $homo_sapiens</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
-<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-04-25/soma/census_data/homo_sapiens </span></span>
+<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-05-08/soma/census_data/homo_sapiens </span></span>
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms* </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $mus_musculus</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
-<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-04-25/soma/census_data/mus_musculus </span></span>
+<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-05-08/soma/census_data/mus_musculus </span></span>
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms*</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -138,19 +138,19 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">it</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Found"</span>, <span class="va">experiments_total_cells</span>, <span class="st">"cells in all experiments."</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Found 51572909 cells in all experiments."</span></span>
+<span><span class="co">#&gt; [1] "Found 54335014 cells in all experiments."</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Found"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_total_cell_count</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="st">"cells in all datasets."</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Found 51572909 cells in all datasets."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Found 54335014 cells in all datasets."</span></span></code></pre></div>
 <p>Let’s pick one dataset to slice out of the census, and turn into a Seurat in-memory object. (This requires the <code>Seurat</code> package to have been installed beforehand.)</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_datasets</span><span class="op">[</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">#&gt;   soma_joinid collection_id            collection_name collection_doi dataset_id</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         469 0b9d8a04-bb9d-44da-aa27… Tabula Muris S… 10.1038/s4158… 0bd1a1de-…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         478 0b9d8a04-bb9d-44da-aa27… Tabula Muris S… 10.1038/s4158… 0bd1a1de-…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: dataset_title &lt;chr&gt;, dataset_h5ad_path &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
 <p>Create a query on the mouse experiment, “RNA” measurement, for the <code>dataset_id</code>.</p>
@@ -174,7 +174,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_source_h5ad_uri.html">get_source_h5ad_uri</a></span><span class="op">(</span><span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $uri</span></span>
-<span><span class="co">#&gt; [1] "s3://cellxgene-data-public/cell-census/2023-04-25/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
+<span><span class="co">#&gt; [1] "s3://cellxgene-data-public/cell-census/2023-05-08/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $s3_region</span></span>
 <span><span class="co">#&gt; [1] "us-west-2"</span></span></code></pre></div>

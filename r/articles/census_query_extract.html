@@ -151,8 +151,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 1</span></span></span>
 <span><span class="co">#&gt;   sex    </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> female </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> male   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> male   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> female </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> unknown</span></span></code></pre></div>
 <p>As you can see there are only three different values for sex, that is <code>"male"</code>, <code>"female"</code> and <code>"unknown"</code>.</p>
 <p>With this information we can fetch all cell metatadata for a specific sex value, for example <code>"unknown"</code>.</p>
@@ -161,16 +161,16 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2,112,935 × 21</span></span></span>
 <span><span class="co">#&gt;    soma_joinid dataset_id  assay assay_ontology_term_id cell_type cell_type_ontology_t…¹</span></span>
 <span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1<span style="text-decoration: underline;">226</span>855 3f32121d-1… 10x … EFO:0009899            endothel… CL:0002138            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1<span style="text-decoration: underline;">226</span>856 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1<span style="text-decoration: underline;">226</span>857 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1<span style="text-decoration: underline;">226</span>858 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1<span style="text-decoration: underline;">226</span>859 3f32121d-1… 10x … EFO:0009899            T cell    CL:0000084            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1<span style="text-decoration: underline;">226</span>860 3f32121d-1… 10x … EFO:0009899            macropha… CL:0000235            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1<span style="text-decoration: underline;">226</span>861 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     1<span style="text-decoration: underline;">226</span>862 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1<span style="text-decoration: underline;">226</span>863 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1<span style="text-decoration: underline;">226</span>864 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     3<span style="text-decoration: underline;">988</span>960 3f32121d-1… 10x … EFO:0009899            endothel… CL:0002138            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     3<span style="text-decoration: underline;">988</span>961 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3<span style="text-decoration: underline;">988</span>962 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     3<span style="text-decoration: underline;">988</span>963 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     3<span style="text-decoration: underline;">988</span>964 3f32121d-1… 10x … EFO:0009899            T cell    CL:0000084            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     3<span style="text-decoration: underline;">988</span>965 3f32121d-1… 10x … EFO:0009899            macropha… CL:0000235            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     3<span style="text-decoration: underline;">988</span>966 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     3<span style="text-decoration: underline;">988</span>967 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     3<span style="text-decoration: underline;">988</span>968 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     3<span style="text-decoration: underline;">988</span>969 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2,112,925 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​cell_type_ontology_term_id</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 15 more variables: development_stage &lt;chr&gt;,</span></span></span>
@@ -191,7 +191,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; chronic obstructive pulmonary disease                              COVID-19 </span></span>
 <span><span class="co">#&gt;                                  4166                                  1104 </span></span>
 <span><span class="co">#&gt;                   lung adenocarcinoma         non-small cell lung carcinoma </span></span>
-<span><span class="co">#&gt;                                 50228                                 17484 </span></span>
+<span><span class="co">#&gt;                                 58397                                 17484 </span></span>
 <span><span class="co">#&gt;                                normal                   pulmonary emphysema </span></span>
 <span><span class="co">#&gt;                                 17046                                  1512 </span></span>
 <span><span class="co">#&gt;             small cell lung carcinoma          squamous cell lung carcinoma </span></span>
@@ -218,8 +218,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
 <span><span class="co">#&gt;   feature_name feature_length</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AQP5                   <span style="text-decoration: underline;">1</span>884</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TUBB4B                 <span style="text-decoration: underline;">2</span>037</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TUBB4B                 <span style="text-decoration: underline;">2</span>037</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AQP5                   <span style="text-decoration: underline;">1</span>884</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="querying-expression-data">Querying expression data<a class="anchor" aria-label="anchor" href="#querying-expression-data"></a>
@@ -258,24 +258,24 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
-<span><span class="co">#&gt; cell3308854 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309254 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309571 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309597 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309750 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309768 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell6070959 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell6071359 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell6071676 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell6071702 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell6071855 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell6071873 SeuratProject          0            0    B cell           lung COVID-19</span></span>
 <span><span class="co">#&gt;              sex</span></span>
-<span><span class="co">#&gt; cell3308854 male</span></span>
-<span><span class="co">#&gt; cell3309254 male</span></span>
-<span><span class="co">#&gt; cell3309571 male</span></span>
-<span><span class="co">#&gt; cell3309597 male</span></span>
-<span><span class="co">#&gt; cell3309750 male</span></span>
-<span><span class="co">#&gt; cell3309768 male</span></span></code></pre></div>
+<span><span class="co">#&gt; cell6070959 male</span></span>
+<span><span class="co">#&gt; cell6071359 male</span></span>
+<span><span class="co">#&gt; cell6071676 male</span></span>
+<span><span class="co">#&gt; cell6071702 male</span></span>
+<span><span class="co">#&gt; cell6071855 male</span></span>
+<span><span class="co">#&gt; cell6071873 male</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">@</span><span class="va">meta.features</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                   feature_id feature_name feature_length</span></span>
-<span><span class="co">#&gt; feature10493 ENSG00000161798         AQP5           1884</span></span>
-<span><span class="co">#&gt; feature16068 ENSG00000188229       TUBB4B           2037</span></span></code></pre></div>
+<span><span class="co">#&gt; feature17366 ENSG00000188229       TUBB4B           2037</span></span>
+<span><span class="co">#&gt; feature21547 ENSG00000161798         AQP5           1884</span></span></code></pre></div>
 <p>For a full description refer to <code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
