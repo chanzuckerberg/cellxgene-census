@@ -21,7 +21,8 @@ test_that("get_presence_matrix", {
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read())
   for (org in c("homo_sapiens", "mus_musculus")) {
     pm <- get_presence_matrix(census, org)
-    expect_s4_class(pm, "sparseMatrix")
+    expect_true(inherits(pm, "matrixZeroBasedView"))
+    expect_s4_class(as.one.based(pm), "sparseMatrix")
     expect_equal(nrow(pm), nrow(datasets))
     expect_equal(
       ncol(pm),
