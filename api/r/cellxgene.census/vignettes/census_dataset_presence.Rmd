@@ -61,7 +61,7 @@ print(var_df)
 ```{r}
 var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 dataset_joinid <- datasets_df$soma_joinid[datasets_df$dataset_id == "97a17473-e2b1-4f31-a544-44a60773e2dd"]
-is_present <- presence_matrix[dataset_joinid + 1, var_joinid + 1]
+is_present <- presence_matrix[dataset_joinid, var_joinid]
 cat(paste("Feature is", if (is_present) "present." else "not present."))
 ```
 
@@ -75,9 +75,9 @@ var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 
 # The presence matrix is indexed by the joinids of the dataset and var dataframes,
 # so slice out the feature of interest by its joinid.
-dataset_joinids <- datasets_df$soma_joinid[presence_matrix[, var_joinid + 1] != 0]
+dataset_joinids <- datasets_df$soma_joinid[presence_matrix[, var_joinid] != 0]
 
-print(datasets_df[dataset_joinids + 1, ])
+print(datasets_df[dataset_joinids, ])
 ```
 
 ## What features are in a dataset?
@@ -92,7 +92,7 @@ This example also demonstrates the ability to do the query on multiple datasets.
 dataset_joinids <- datasets_df$soma_joinid[datasets_df$collection_id == "17481d16-ee44-49e5-bcf0-28c0780d8c4a"]
 
 # Slice the presence matrix by the first dimension, i.e., by dataset
-var_joinids <- var_df$soma_joinid[which(Matrix::colSums(presence_matrix[dataset_joinids + 1, ]) > 0)]
+var_joinids <- var_df$soma_joinid[which(Matrix::colSums(presence_matrix[dataset_joinids, ]) > 0)]
 
-print(var_df[var_joinids + 1, ])
+print(var_df[var_joinids, ])
 ```
