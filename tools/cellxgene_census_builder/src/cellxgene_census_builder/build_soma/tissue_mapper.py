@@ -12,9 +12,11 @@ In the future, this code will be part of an ontology service library.
 
 This code contains several places that do not pass the lint/static analysis CI for this pipeline, so the analysis is disabled in this prologue.
 """
+from typing import List
 
 import owlready2
-from typing import List
+
+from .globals import CXG_UBERON_ONTOLOGY_URL
 
 
 class TissueMapper:
@@ -120,12 +122,10 @@ class TissueMapper:
         "UBERON_0001062",  # anatomical entity
     ]
 
-    def __init__(self, uberon_ontology: str = "http://purl.obolibrary.org/obo/uberon.owl"):
-        # TODO: use the pinned ontology at `single-cell-curation`
-        self._uberon = owlready2.get_ontology(uberon_ontology)
-        self._uberon.load()
+    def __init__(self):
         self._cached_tissues = {}
         self._cached_labels = {}
+        self._uberon = owlready2.get_ontology(CXG_UBERON_ONTOLOGY_URL).load()
 
     def get_high_level_tissue(self, tissue_ontology_term_id: str) -> str:
         """
@@ -246,7 +246,6 @@ class TissueMapper:
         """
         Given a readable ontology term id (e.g. "UBERON_0002048"), it returns the associated ontology entity
         """
-        # TODO: use the pinned ontology at `single-cell-curation`
         return self._uberon.search_one(iri=f"http://purl.obolibrary.org/obo/{ontology_term_id}")
 
     @staticmethod

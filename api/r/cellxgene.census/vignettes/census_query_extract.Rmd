@@ -1,8 +1,8 @@
 ---
-title: "Census query & extract subsets"
+title: "Querying and fetching the single-cell data and cell/gene metadata"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Census query & extract subsets}
+  %\VignetteIndexEntry{Querying and fetching the single-cell data and cell/gene metadata}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,65 +12,142 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 80)
+options(width = 88)
 ```
 
 <!--
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
-
-We modified the first query example to reduce the result set size to allow this
-notebook to be built in the limited memory of GitHub Actions workers.
 -->
 
-*Goal:* demonstrate the ability to query subsets of the Census based upon user-defined obs/var metadata, and extract those slices into in-memory data structures for further analysis.
+This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames and Seurat assays.
 
-**NOTE:** all examples in this vignette assume that sufficient memory exists on the host machine to store query results. In fact, we will increase the memory available to `tiledbsoma` as we open the Census. There are other notebooks which provide examples for out-of-core processing.
+**Contents**
+
+1. Opening the census.
+2. Querying cell metadata (obs).
+3. Querying gene metadata (var).
+4. Querying expression data.
+
+## Opening the census
+
+The `cellxgene.census` R package contains a convenient API to open the latest version of the Census.
 
 ```{r}
-ctx <- tiledbsoma::SOMATileDBContext$new(
-  config = c("soma.init_buffer_bytes" = "1073741824")
+census <- cellxgene.census::open_soma()
+```
+
+You can learn more about the `cellxgene.census` methods by accessing their corresponding documentation, for example `?cellxgene.census::open_soma`.
+
+## Querying cell metadata (obs)
+
+The human gene metadata of the Census, for RNA assays, is located at `census$get("census_data")$get("homo_sapiens")$obs`. This is a `SOMADataFrame` and as such it can be materialized as an R data frame (tibble) using `as.data.frame(obs$read())`.
+
+The mouse cell metadata is at `census$get("census_data")$get("mus_musculus").obs`.
+
+For slicing the cell metadata there are two relevant arguments that can be passed through `read():`
+
+- `column_names` — character vector indicating what metadata columns to fetch.
+- `value_filter` — R expression with selection conditions to fetch rows.
+  - Expressions are one or more comparisons
+  - Comparisons are one of `<column> <op> <value>` or `<column> <op> <column>`
+  - Expressions can combine comparisons using && or ||
+  - op is one of < | > | <= | >= | == | != or %in%
+
+To learn what metadata columns are available for fetching and filtering we can directly look at the keys of the cell metadata.
+
+```{r}
+census$get("census_data")$get("homo_sapiens")$obs$colnames()
+```
+
+`soma_joinid` is a special `SOMADataFrame` column that is used for join operations. The definition for all other columns can be found at the [Census schema](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html).
+
+All of these can be used to fetch specific columns or specific rows matching a condition. For the latter we need to know the values we are looking for *a priori*.
+
+For example let's see what are the possible values available for `sex`. To this we can load all cell metadata but fetching only for the column `sex`.
+
+```{r}
+unique(as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(column_names = "sex")))
+```
+
+As you can see there are only three different values for sex, that is `"male"`, `"female"` and `"unknown"`.
+
+With this information we can fetch all cell metatadata for a specific sex value, for example `"unknown"`.
+
+```{r}
+as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(value_filter = "sex == 'unknown'"))
+```
+
+You can use both `column_names` and `value_filter` to perform specific queries. For example let's fetch the `disease` column for the `cell_type` `"B cell"` in the `tissue_general` `"lung"`.
+
+```{r}
+cell_metadata_b_cell <- as.data.frame(
+  census$get("census_data")$get("homo_sapiens")$obs$read(
+    value_filter = "cell_type == 'B cell' && tissue_general == 'lung'",
+    column_names = "disease"
+  )
 )
-census <- cellxgene.census::open_soma(tiledbsoma_ctx = ctx)
+table(cell_metadata_b_cell)
 ```
 
-The Census includes SOMA Experiments for both human and mouse. These experiments can be queried based upon metadata values (eg, tissue type), and the query result can be extracted into a variety of formats.
+## Querying gene metadata (var)
 
-Basic idea:
+The human gene metadata of the Census is located at `census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var`. Similarly to the cell metadata, it is a `SOMADataFrame` and thus we can also use its method `read()`.
 
-- define per-axis (i.e., obs, var) query criteria
-- specify the experiment and measurement name to be queried
-- specify the column names you want as part of the results
-- and read the query result into an in-memory format.
+The mouse gene metadata is at `census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var`.
 
-This utilizes the SOMA `value_filter` query language. Keep in mind that the results must fit into memory, so it is best to define a selective query *and* only fetch those axis metadata columns which are necessary.
-
-The `cellxgene.census` package includes a convenience function to extract a slice of the Census and read into a Seurat object. This function accepts a variety of arguments, including:
-
-- the organism to slice
-- the per-axis slice criteria
-- the columns to fetch and include in the Seurat metadata
-
-For more complex query scenarios, there is an advanced query API demonstrated in other vignettes.
+Let's take a look at the metadata available for column selection and row filtering.
 
 ```{r}
-ovf <- "tissue_ontology_term_id=='UBERON:0002048' && sex_ontology_term_id=='PATO:0000383' && cell_type_ontology_term_id == 'CL:0000499'"
-adata <- cellxgene.census::get_seurat(census, "Homo sapiens", obs_value_filter = ovf)
-print(adata)
+census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var$colnames()
 ```
 
-```{r, include=FALSE}
-rm(adata) # free up memory before next op
-```
+With the exception of soma_joinid these columns are defined in the [Census schema](https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html). Similarly to the cell metadata, we can use the same operations to learn and fetch gene metadata.
+
+For example, to get the `feature_name` and `feature_length` of the genes `"ENSG00000161798"` and `"ENSG00000188229"` we can do the following.
 
 ```{r}
-# You can also query on both axis. This example adds a var-axis query for a handful of genes, and queries the mouse experiment.
-adata <- cellxgene.census::get_seurat(
-  census,
-  "Mus musculus",
-  obs_value_filter = "tissue == 'brain'",
-  obs_column_names = c("tissue", "cell_type", "sex"),
-  var_value_filter = "feature_name %in% c('Gm16259', 'Dcaf5', 'Gm53058')"
+as.data.frame(
+  census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var$read(
+    value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
+    column_names = c("feature_name", "feature_length")
+  )
 )
-print(adata)
 ```
+## Querying expression data
+
+A convenient way to query and fetch expression data is to use the `get_seurat` method of the `cellxgene.census` API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.
+
+The method will return a `Seurat` object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:
+
+- `obs_column_names` — character vector indicating the columns to select for cell metadata.
+- `obs_value_filter` — expression with selection conditions to fetch cells meeting a criteria.
+- `var_column_names` — character vector indicating the columns to select for gene metadata.
+- `var_value_filter` — expression with selection conditions to fetch genes meeting a criteria.
+
+For example if we want to fetch the expression data for:
+
+- Genes `"ENSG00000161798"` and `"ENSG00000188229"`.
+- All `"B cells"` of `"lung"` with `"COVID-19"`.
+- With all gene metadata and adding `sex` cell metadata.
+
+```{r}
+seurat_obj <- cellxgene.census::get_seurat(
+  census, "Homo sapiens",
+  obs_column_names = c("cell_type", "tissue_general", "disease", "sex"),
+  var_value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
+  obs_value_filter = "cell_type == 'B cell' && tissue_general == 'lung' && disease == 'COVID-19'"
+)
+seurat_obj
+```
+
+```{r}
+head(seurat_obj@meta.data)
+```
+
+
+```{r}
+head(seurat_obj$RNA@meta.features)
+```
+
+For a full description refer to `?cellxgene.census::get_seurat`.

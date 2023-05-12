@@ -19,8 +19,6 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
-    CENSUS_SCHEMA_VERSION,
-    CXG_SCHEMA_VERSION,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
@@ -100,8 +98,6 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
 
     # Set root metadata for the experiment
     root_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
-    root_collection.metadata["cxg_schema_version"] = CXG_SCHEMA_VERSION
-    root_collection.metadata["census_schema_version"] = CENSUS_SCHEMA_VERSION
 
     sha = get_git_commit_sha()
     root_collection.metadata["git_commit_sha"] = sha

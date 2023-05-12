@@ -6,7 +6,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .experiment_builder import ExperimentBuilder, get_summary_stats
-from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME
+from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, CXG_SCHEMA_VERSION
 
 
 def create_census_summary(
@@ -16,8 +16,9 @@ def create_census_summary(
 
     summary_stats = get_summary_stats(experiment_builders)
     data = [
-        ("cell_census_schema_version", CENSUS_SCHEMA_VERSION),
-        ("cell_census_build_date", build_tag),
+        ("census_schema_version", CENSUS_SCHEMA_VERSION),
+        ("census_build_date", build_tag),
+        ("dataset_schema_version", CXG_SCHEMA_VERSION),
         ("total_cell_count", str(summary_stats["total_cell_count"])),
         ("unique_cell_count", str(summary_stats["unique_cell_count"])),
         ("number_donors_homo_sapiens", str(summary_stats["number_donors"]["homo_sapiens"])),
