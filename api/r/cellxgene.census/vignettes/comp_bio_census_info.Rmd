@@ -18,6 +18,7 @@ options(width = 88)
 This notebook showcases the Census contents and how to obtain high-level information about it. It covers the organization of data within the Census, what cell and gene metadata are available, and it provides simple demonstrations to summarize cell counts across cell metadata.
 
 **Contents**
+
 - Opening the census
 - Census organization
 - Cell metadata
