@@ -44,7 +44,7 @@ The `cellxgene.census` package contains some convenient wrappers of the TileDB-S
 
 ### Main Census components
 
-With the command above you created `census`, which is a `SOMACollection`, an R6 class supplying providing a key-value associative map. Its `get()` method can access the two top-level collection members, `census_info` and `census_data`, each themselves instances of `SOMACollection`.
+With the command above you created `census`, which is a `SOMACollection`, an R6 class providing a key-value associative map. Its `get()` method can access the two top-level collection members, `census_info` and `census_data`, each themselves instances of `SOMACollection`.
 
 ### Census summary info
 
