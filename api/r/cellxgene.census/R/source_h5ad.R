@@ -15,7 +15,7 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
     census_version,
     uri = description$soma.uri,
     tiledbsoma_ctx = tiledbsoma::SOMATileDBContext$new(
-      config = c("vfs.s3.region" = description$soma.s3_region)
+      config = c("vfs.s3.region" = description$soma.s3_region, "vfs.s3.no_sign_request" = "true"))
     )
   )
 
