@@ -103,7 +103,7 @@ You can take a quick look at the high-level Census information by looking at `ce
 as.data.frame(census$get("census_info")$get("summary")$read())
 ```
 
-Of special interest are the label-value combinations for :
+Of special interest are the label-value combinations for:
 
 - `total_cell_count` is the total number of cells in the Census.
 - `unique_cell_count` is the number of unique cells, as some cells may be present twice due to meta-analysis or consortia-like data.
