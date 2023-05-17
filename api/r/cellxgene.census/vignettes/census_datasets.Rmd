@@ -99,8 +99,9 @@ To do this you can fetch the location in the cloud or directly download to your 
 ```{r}
 # Option 1: Direct download
 cellxgene.census::download_source_h5ad("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149",
-                                       file = "/tmp/Tabula_Muris_Senis-bone_marrow.h5ad",
-                                       overwrite = TRUE)
+  file = "/tmp/Tabula_Muris_Senis-bone_marrow.h5ad",
+  overwrite = TRUE
+)
 ```
 ```{r}
 # Option 2: Get location and download via preferred method
