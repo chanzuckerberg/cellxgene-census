@@ -10,7 +10,10 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #'            precedence over `census_version`.
 #' @param tiledbsoma_ctx A custom `tiledbsoma::SOMATileDBContext`
 #'
-#' @return Top-level `tiledbsoma::SOMACollection` object
+#' @return Top-level `tiledbsoma::SOMACollection` object. After use, the census
+#'         should be closed to release memory and other resources, usually with
+#'         `on.exit(census$close(), add = TRUE)`. Closing the top-level census
+#'         will also close all SOMA objects accessed through it.
 #' @importFrom tiledbsoma SOMACollection
 #' @importFrom tiledbsoma SOMATileDBContext
 #' @export
