@@ -65,6 +65,7 @@ OS version                    Linux 5.19.0-1022-aws
   '1.0.2.dev2+g1598cfd'
 >>> cellxgene_census.get_census_version_description('latest')
 {'release_date': None, 'release_build': '2023-05-15', 'soma': {'uri': 's3://cellxgene-data-public/cell-census/2023-05-15/soma/', 's3_region': 'us-west-2'}, 'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2023-05-15/h5ads/', 's3_region': 'us-west-2'}, 'alias': 'latest'}
+```
 
 **Pytest output:**
 
