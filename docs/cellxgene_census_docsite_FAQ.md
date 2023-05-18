@@ -16,7 +16,7 @@ Last updated: May, 2023.
 - [How can I ask for new features?](#how-can-i-ask-for-new-features)
 - [How can I contribute my data to the Census?](#how-can-i-contribute-my-data-to-the-census)
 - [Why do I get an `ArraySchema` error when opening the Census?](#why-do-i-get-an-arrayschema-error-when-opening-the-census)
-- [Why do I get an error when running `import cellxgene_census` on Databricks?](#why-do-i-get-an-error-when-running-import-cellxgene_census-on-databricks)
+- [Why do I get an error when running `import cellxgene_census` on Databricks?](#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks)
 
 ## Why should I use the Census?
 
