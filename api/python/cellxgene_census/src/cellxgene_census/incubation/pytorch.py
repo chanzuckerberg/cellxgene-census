@@ -23,6 +23,8 @@ ObsDatum = Tuple[Tensor, torch.sparse_coo_tensor]
 
 DEFAULT_BUFFER_BYTES = 1024**3
 
+DEFAULT_WORKER_TIMEOUT = 120
+
 
 @attrs
 class Stats:
@@ -200,7 +202,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         num_workers: int = 0,
         buffer_bytes: int = 1024**3,
     ) -> None:
-        if num_workers > 0 and not dense_X:
+        if num_workers > 1 and not dense_X:
             raise NotImplementedError(
                 "torch does not work with sparse tensors in multi-processing mode "
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
@@ -310,8 +312,9 @@ def experiment_dataloader(
     batch_sampler, collate_fn).
     """
 
-    if {"sampler", "batch_sampler"}.intersection(dataloader_kwargs.keys()):
-        raise ValueError("The 'sampler' and 'batch_sampler' DataLoader params are not supported")
+    unsupported_dataloader_args = ["sampler", "batch_sampler", "collate_fn"]
+    if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
+        raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
     exp_datapipe = ExperimentDataPipe(
         exp_uri=exp_uri,
@@ -325,10 +328,14 @@ def experiment_dataloader(
         num_workers=num_workers,
         buffer_bytes=buffer_bytes,
     )
+
+    if "batch_size" in dataloader_kwargs:
+        del dataloader_kwargs["batch_size"]
     return (
         DataLoader(
             exp_datapipe,
-            timeout=num_workers or (120 if num_workers > 0 else 0),
+            timeout=dataloader_kwargs.get("timeout", DEFAULT_WORKER_TIMEOUT if num_workers > 1 else 0),
+            batch_size=None,
             # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
             collate_fn=collate_noop,
             **dataloader_kwargs,

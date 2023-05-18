@@ -12,7 +12,7 @@ from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
 from torch import Tensor
 
-from cellxgene_census.incubation.pytorch import ExperimentDataPipe
+from cellxgene_census.incubation.pytorch import ExperimentDataPipe, experiment_dataloader
 
 
 def pytorch_x_value_gen(shape: Tuple[int, int]) -> spmatrix:
@@ -228,3 +228,39 @@ def test_encoders(soma_experiment: Experiment) -> None:
     labels_encoded = batch[0][:, 1]
     labels_decoded = exp_data_pipe.obs_encoders()["label"].inverse_transform(labels_encoded)
     assert labels_decoded.tolist() == ["0", "1", "2"]
+
+
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
+def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
+    dl, stats = experiment_dataloader(soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    torch_data = [row for row in dl]
+
+    assert torch_data[0][0].tolist() == [0, 0]
+    assert torch_data[0][1].to_dense().tolist() == [0, 1, 0]
+
+
+# noinspection PyTestParametrized,,DuplicatedCode
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
+    dl, stats = experiment_dataloader(
+        soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+    )
+    torch_data = [row for row in dl]
+
+    assert torch_data[0][0].tolist() == [[0, 0], [1, 1], [2, 2]]
+    assert torch_data[0][1].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+
+
+def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
+    with pytest.raises(NotImplementedError):
+        experiment_dataloader(
+            "some_uri", ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=False
+        )
+
+
+def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
+    dl = experiment_dataloader(
+        "some_uri", ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
+    )
+    assert dl is not None
