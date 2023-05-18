@@ -139,11 +139,11 @@ This can occur if the `cellxgene_census` Python package is installed in a Databr
 
 To fix, simply install using one of the following Databricks notebook "magic" commands:
 ```
-pip install cellxgene-census
+pip install -U cellxgene-census
 ```
 or
 ```
-%pip install cellxgene-census
+%pip install -U cellxgene-census
 ```
 These commands restart the Python process after installing the `cellxgene-census` package, similar to using `dbutils.library.restartPython()`. Additionally, these magic commands also ensure that the package is installed on all nodes of a multi-node cluster. 
 
