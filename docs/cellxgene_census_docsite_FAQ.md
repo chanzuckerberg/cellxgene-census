@@ -152,6 +152,3 @@ See also:
 * https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip
 
 Alternately, you can configure your cluster to install the `cellxgene-census` package each time it is started by adding this package to the "Libraries" tab on the cluster configuration page per these [instructions](https://docs.databricks.com/libraries/cluster-libraries.html).
-
-
-
