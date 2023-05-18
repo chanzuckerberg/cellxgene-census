@@ -1,6 +1,6 @@
 # FAQ
 
-Last updated: Apr, 2023.
+Last updated: May, 2023.
 
 - [Why should I use the Census?](#why-should-i-use-the-census)
 - [What data is contained in the Census?](#what-data-is-contained-in-the-census)
