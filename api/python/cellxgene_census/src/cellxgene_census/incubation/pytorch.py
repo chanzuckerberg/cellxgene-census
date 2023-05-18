@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import scipy
+import tiledbsoma as soma
 import torch
 from attr import attrs
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore import BatchSize
 from somacore.query import AxisQuery, _fast_csr
-from tiledbsoma import Experiment
 from tiledbsoma._read_iters import TableReadIter
 from torch import Tensor
 from torch.utils.data import DataLoader, IterDataPipe
@@ -21,9 +21,11 @@ from torch.utils.data.dataset import Dataset
 
 ObsDatum = Tuple[Tensor, torch.sparse_coo_tensor]
 
+DEFAULT_BUFFER_BYTES = 1024**3
+
 
 @attrs
-class _Stats:
+class Stats:
     n_obs: int = 0
     """The total number of obs rows retrieved"""
 
@@ -66,12 +68,12 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self,
         obs_joinids: pa.Array,
         var_joinids: pa.Array,
-        exp: Experiment,
+        exp: soma.Experiment,
         measurement_name: str,
         X_layer_name: str,
         batch_size: int,
         encoders: Dict[str, LabelEncoder],
-        stats: _Stats,
+        stats: Stats,
         obs_column_names: Sequence[str],
         dense_X: bool,
     ) -> None:
@@ -90,7 +92,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
     def __next__(self) -> ObsDatum:
         # read the torch batch, possibly across multiple soma batches
         obs: pd.DataFrame = pd.DataFrame()
-        X: sparse.csr_matrix = sparse.csr_matrix([])
+        X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)))
 
         while len(obs) < self.batch_size:
             try:
@@ -163,8 +165,8 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
             raise StopIteration
         self.X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
         self.i = 0
-        self.stats.n_obs += self.stats.n_obs + self.X_batch.shape[0]
-        self.stats.nnz += self.stats.nnz + self.X_batch.nnz
+        self.stats.n_obs += self.X_batch.shape[0]
+        self.stats.nnz += self.X_batch.nnz
         self.stats.elapsed = int(self.stats.elapsed + (time() - start_time))
         self.stats.n_soma_batches += 1
         print(f"Retrieved batch: shape={self.X_batch.shape}, {self.stats}")
@@ -183,7 +185,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
     _encoders: Dict[str, LabelEncoder] = {}
 
-    _stats: _Stats = _Stats()
+    _stats: Stats = Stats()
 
     def __init__(
         self,
@@ -196,6 +198,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         batch_size: int = 1,
         dense_X: bool = False,
         num_workers: int = 0,
+        buffer_bytes: int = 1024**3,
     ) -> None:
         if num_workers > 0 and not dense_X:
             raise NotImplementedError(
@@ -211,18 +214,22 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
         self.dense_X = dense_X
+        self.buffer_bytes = buffer_bytes
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
 
     def __iter__(self) -> Iterator[ObsDatum]:
-        # TODO: Move into somacore.ExperimentAxisQuery
         # TODO: support multiple layers, per somacore.query.query.ExperimentAxisQuery.to_anndata()
 
         # TODO: handle closing of exp when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
         # TODO: for dev-time use, specify smaller batch size via platform_config, once supported
-        exp = Experiment.open(self.exp_uri, platform_config={})
+        context = soma.options.SOMATileDBContext().replace(
+            tiledb_config={"py.init_buffer_bytes": self.buffer_bytes, "soma.init_buffer_bytes": self.buffer_bytes}
+        )
+
+        exp = soma.Experiment.open(self.exp_uri, platform_config={}, context=context)
         query = exp.axis_query(
             measurement_name=self.ms_name,
             obs_query=self.obs_query,
@@ -274,13 +281,60 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def obs_encoders(self) -> Dict[str, LabelEncoder]:
         return self._encoders
 
-    def stats(self) -> _Stats:
+    def stats(self) -> Stats:
         return self._stats
 
 
 # Note: must be a top-level function (and not a lambda), to place nice with multiprocessing (pickling)
 def collate_noop(x: Any) -> Any:
     return x
+
+
+# TODO: Move into somacore.ExperimentAxisQuery
+def experiment_dataloader(
+    exp_uri: str,
+    ms_name: str,
+    layer_name: str,
+    obs_query: Optional[AxisQuery] = None,
+    var_query: Optional[AxisQuery] = None,
+    obs_column_names: Sequence[str] = (),
+    dense_X: bool = False,
+    batch_size: int = 1,
+    num_workers: int = 1,
+    buffer_bytes: int = DEFAULT_BUFFER_BYTES,
+    **dataloader_kwargs: Dict[str, Any],
+) -> Tuple[DataLoader, Stats]:
+    """
+    Factory method for PyTorch DataLoader. Provides a safer, more convenient interface for instantiating a DataLoader
+    that works with the ExperimentDataPipe, since not all of DataLoader's params can be used (batch_size, samples,
+    batch_sampler, collate_fn).
+    """
+
+    if {"sampler", "batch_sampler"}.intersection(dataloader_kwargs.keys()):
+        raise ValueError("The 'sampler' and 'batch_sampler' DataLoader params are not supported")
+
+    exp_datapipe = ExperimentDataPipe(
+        exp_uri=exp_uri,
+        obs_query=obs_query,
+        var_query=var_query,
+        ms_name=ms_name,
+        layer_name=layer_name,
+        dense_X=dense_X,
+        obs_column_names=obs_column_names,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        buffer_bytes=buffer_bytes,
+    )
+    return (
+        DataLoader(
+            exp_datapipe,
+            timeout=num_workers or (120 if num_workers > 0 else 0),
+            # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
+            collate_fn=collate_noop,
+            **dataloader_kwargs,
+        ),
+        exp_datapipe.stats(),
+    )
 
 
 # For testing only
@@ -290,40 +344,29 @@ if __name__ == "__main__":
     (
         soma_experiment_uri,
         measurement_name,
-        layer_name,
-        obs_value_filter,
-        column_names,
+        layer_name_arg,
+        obs_value_filter_arg,
+        column_names_arg,
         dense_X_arg,
         torch_batch_size_arg,
         num_workers_arg,
     ) = sys.argv[1:]
-    dense_X: bool = dense_X_arg.lower() == "dense"
-    num_workers: int = int(num_workers_arg)
-    torch_batch_size: int = int(torch_batch_size_arg)
-
-    context = soma.options.SOMATileDBContext().replace(
-        tiledb_config={"py.init_buffer_bytes": 1 * 1024**2, "soma.init_buffer_bytes": 1 * 1024**2}
-    )
-
-    exp_datapipe = ExperimentDataPipe(
+    dl, stats = experiment_dataloader(
         exp_uri=soma_experiment_uri,
-        obs_query=AxisQuery(value_filter=(obs_value_filter or None)),
-        var_query=AxisQuery(coords=(slice(1, 9),)),  # TODO: parameterize
         ms_name=measurement_name,
-        layer_name=layer_name,
-        dense_X=dense_X,
-        obs_column_names=column_names.split(","),
-        batch_size=torch_batch_size or 1,
-        num_workers=num_workers,
+        layer_name=layer_name_arg,
+        obs_query=AxisQuery(value_filter=(obs_value_filter_arg or None)),
+        var_query=AxisQuery(coords=(slice(1, 9),)),
+        obs_column_names=column_names_arg.split(","),
+        dense_X=dense_X_arg.lower() == "dense",
+        batch_size=int(torch_batch_size_arg),
+        num_workers=int(num_workers_arg),
+        buffer_bytes=2**12,
     )
-    dl = DataLoader(
-        exp_datapipe,
-        num_workers=num_workers,
-        timeout=120 if num_workers > 0 else 0,
-        # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
-        collate_fn=collate_noop,
-    )
+
+    i = 0
+    datum = None
     for i, datum in enumerate(dl):
         if i + 1 % 1000 == 0:
-            print(f"Received {i} torch batches, {exp_datapipe.stats()}:\n{datum}")
-    print(f"Received {i} torch batches, {exp_datapipe.stats()}:\n{datum}")
+            print(f"Received {i} torch batches, {stats}:\n{datum}")
+    print(f"Received {i} torch batches, {stats}:\n{datum}")
