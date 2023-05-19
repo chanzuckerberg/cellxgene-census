@@ -183,11 +183,11 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def __getitem__(self, index: int) -> ObsDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
 
-    _obs_and_x_iter: Optional[_ObsAndXIterator] = None
+    _obs_and_x_iter: Optional[_ObsAndXIterator]
 
-    _encoders: Dict[str, LabelEncoder] = {}
+    _encoders: Dict[str, LabelEncoder]
 
-    _stats: Stats = Stats()
+    _stats: Stats
 
     def __init__(
         self,
@@ -217,6 +217,8 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.batch_size = batch_size
         self.dense_X = dense_X
         self.buffer_bytes = buffer_bytes
+        self._stats = Stats()
+        self._encoders = {}
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
