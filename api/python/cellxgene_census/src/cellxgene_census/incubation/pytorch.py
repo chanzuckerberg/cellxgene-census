@@ -169,7 +169,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.i = 0
         self.stats.n_obs += self.X_batch.shape[0]
         self.stats.nnz += self.X_batch.nnz
-        self.stats.elapsed = int(self.stats.elapsed + (time() - start_time))
+        self.stats.elapsed += int(time() - start_time)
         self.stats.n_soma_batches += 1
         print(f"Retrieved batch: shape={self.X_batch.shape}, {self.stats}")
         return self.obs_batch_
@@ -230,7 +230,11 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         #  but not clear how we can do that when used by DataLoader
         # TODO: for dev-time use, specify smaller batch size via platform_config, once supported
         context = soma.options.SOMATileDBContext().replace(
-            tiledb_config={"py.init_buffer_bytes": self.buffer_bytes, "soma.init_buffer_bytes": self.buffer_bytes}
+            tiledb_config={
+                "py.init_buffer_bytes": self.buffer_bytes,
+                "soma.init_buffer_bytes": self.buffer_bytes,
+                "vfs.s3.no_sign_request": "true",
+            }
         )
 
         exp = soma.Experiment.open(self.exp_uri, platform_config={}, context=context)
@@ -289,7 +293,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         return self._stats
 
 
-# Note: must be a top-level function (and not a lambda), to place nice with multiprocessing (pickling)
+# Note: must be a top-level function (and not a lambda), to play nice with multiprocessing (pickling)
 def collate_noop(x: Any) -> Any:
     return x
 
@@ -305,6 +309,9 @@ def experiment_dataloader(
     dense_X: bool = False,
     batch_size: int = 1,
     num_workers: int = 1,
+    # TODO: This will control the obs SOMA batch sizes, and should be replaced with a row count once TileDB-SOMA
+    #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
+    #  should be tuned independently.
     buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     **dataloader_kwargs: Dict[str, Any],
 ) -> Tuple[DataLoader, Stats]:
@@ -336,7 +343,8 @@ def experiment_dataloader(
     return (
         DataLoader(
             exp_datapipe,
-            batch_size=None,
+            batch_size=None,  # batching is handled by our ExperimentDataPipe
+            num_workers=num_workers,
             # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
             collate_fn=collate_noop,
             **dataloader_kwargs,
