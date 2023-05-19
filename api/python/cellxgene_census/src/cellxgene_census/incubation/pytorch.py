@@ -336,7 +336,6 @@ def experiment_dataloader(
     return (
         DataLoader(
             exp_datapipe,
-            timeout=dataloader_kwargs.get("timeout", DEFAULT_WORKER_TIMEOUT if num_workers > 1 else 0),
             batch_size=None,
             # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
             collate_fn=collate_noop,
@@ -376,6 +375,6 @@ if __name__ == "__main__":
     i = 0
     datum = None
     for i, datum in enumerate(dl):
-        if i + 1 % 1000 == 0:
+        if (i + 1) % 1000 == 0:
             print(f"Received {i} torch batches, {stats}:\n{datum}")
     print(f"Received {i} torch batches, {stats}:\n{datum}")
