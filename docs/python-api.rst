@@ -1,6 +1,10 @@
 Python API
 ==============================
 
+.. currentmodule:: cellxgene_census
+
+.. automodule:: cellxgene_census
+
 Open/retrieve Cell Census data
 ------------------------------
 
