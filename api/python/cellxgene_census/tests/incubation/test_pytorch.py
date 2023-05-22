@@ -119,8 +119,8 @@ def test_non_batched(soma_experiment: Experiment) -> None:
     row_iter = iter(exp_data_pipe)
 
     row = next(row_iter)
-    assert row[0].tolist() == [0, 0]
-    assert row[1].to_dense().tolist() == [0, 1, 0]
+    assert row[0].to_dense().tolist() == [0, 1, 0]
+    assert row[1].tolist() == [0, 0]
 
 
 # noinspection PyTestParametrized,DuplicatedCode
@@ -132,12 +132,12 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
     batch_iter = iter(exp_data_pipe)
 
     batch = next(batch_iter)
-    assert batch[0].tolist() == [[0, 0], [1, 1], [2, 2]]
-    assert batch[1].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 
     batch = next(batch_iter)
-    assert batch[0].tolist() == [[3, 3], [4, 4], [5, 5]]
-    assert batch[1].to_dense().tolist() == [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+    assert batch[0].to_dense().tolist() == [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+    assert batch[1].tolist() == [[3, 3], [4, 4], [5, 5]]
 
     with pytest.raises(StopIteration):
         next(batch_iter)
@@ -153,7 +153,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
 
     next(batch_iter)
     batch = next(batch_iter)
-    assert batch[1].to_dense().tolist() == [[1, 0, 1], [0, 1, 0]]
+    assert batch[0].to_dense().tolist() == [[1, 0, 1], [0, 1, 0]]
 
     with pytest.raises(StopIteration):
         next(batch_iter)
@@ -168,8 +168,8 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
     batch_iter = iter(exp_data_pipe)
 
     batch = next(batch_iter)
-    assert batch[0].tolist() == [[0, 0], [1, 1], [2, 2]]
-    assert batch[1].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 
     with pytest.raises(StopIteration):
         next(batch_iter)
@@ -207,7 +207,7 @@ def test_dense_output(soma_experiment: Experiment) -> None:
 
     batch = next(batch_iter)
     assert isinstance(batch[1], Tensor)
-    assert batch[1].tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[0].tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
 
 
 # noinspection PyTestParametrized
@@ -223,9 +223,9 @@ def test_encoders(soma_experiment: Experiment) -> None:
     batch_iter = iter(exp_data_pipe)
 
     batch = next(batch_iter)
-    assert isinstance(batch[0], Tensor)
+    assert isinstance(batch[1], Tensor)
 
-    labels_encoded = batch[0][:, 1]
+    labels_encoded = batch[1][:, 1]
     labels_decoded = exp_data_pipe.obs_encoders()["label"].inverse_transform(labels_encoded)
     assert labels_decoded.tolist() == ["0", "1", "2"]
 
@@ -233,23 +233,25 @@ def test_encoders(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
-    dl, stats = experiment_dataloader(soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dl, _ = experiment_dataloader(soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
     torch_data = [row for row in dl]
 
-    assert torch_data[0][0].tolist() == [0, 0]
-    assert torch_data[0][1].to_dense().tolist() == [0, 1, 0]
+    row = torch_data[0]
+    assert row[0].to_dense().tolist() == [0, 1, 0]
+    assert row[1].tolist() == [0, 0]
 
 
 # noinspection PyTestParametrized,,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
-    dl, stats = experiment_dataloader(
+    dl, _ = experiment_dataloader(
         soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
     )
     torch_data = [row for row in dl]
 
-    assert torch_data[0][0].tolist() == [[0, 0], [1, 1], [2, 2]]
-    assert torch_data[0][1].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    batch = torch_data[0]
+    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 
 
 def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
@@ -260,7 +262,12 @@ def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
 
 
 def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
-    dl = experiment_dataloader(
+    dl, _ = experiment_dataloader(
         "some_uri", ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
     )
     assert dl is not None
+
+
+def test_experiment_data_loader__unsupported_params__fails() -> None:
+    # TODO
+    pass

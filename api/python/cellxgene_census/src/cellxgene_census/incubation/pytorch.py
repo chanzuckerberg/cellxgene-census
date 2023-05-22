@@ -21,6 +21,8 @@ from torch.utils.data.dataset import Dataset
 
 ObsDatum = Tuple[Tensor, torch.sparse_coo_tensor]
 
+Encoders = Dict[str, LabelEncoder]
+
 DEFAULT_BUFFER_BYTES = 1024**3
 
 DEFAULT_WORKER_TIMEOUT = 120
@@ -81,7 +83,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
     ) -> None:
         self.obs_joinids = obs_joinids
         self.var_joinids = var_joinids
-        self.exp = exp
+        self.exp = exp  # holding reference to SOMA object prevents it from being closed
         self.X: soma.SparseNDArray = exp.ms[measurement_name].X[X_layer_name]
         self.batch_size = batch_size
         self.dense_X = dense_X
@@ -120,7 +122,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
         obs_tensor = torch.Tensor(obs_encoded.to_numpy()).int()
         if self.dense_X:
-            return obs_tensor, torch.Tensor(X.todense())
+            return torch.Tensor(X.todense()), obs_tensor
         else:
             coo = X.tocoo()
 
@@ -132,10 +134,10 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
             )
 
             if self.batch_size == 1:
-                obs_tensor = obs_tensor[0]
                 X_tensor = X_tensor[0]
+                obs_tensor = obs_tensor[0]
 
-            return obs_tensor, X_tensor
+            return X_tensor, obs_tensor
 
     def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, sparse.csr_matrix]:
         safe_batch_size = min(batch_size, len(self.obs_batch) - self.i)
@@ -185,7 +187,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
     _obs_and_x_iter: Optional[_ObsAndXIterator]
 
-    _encoders: Dict[str, LabelEncoder]
+    _encoders: Encoders
 
     _stats: Stats
 
@@ -308,16 +310,16 @@ def experiment_dataloader(
     obs_column_names: Sequence[str] = (),
     dense_X: bool = False,
     batch_size: int = 1,
-    num_workers: int = 1,
+    num_workers: int = 0,
     # TODO: This will control the obs SOMA batch sizes, and should be replaced with a row count once TileDB-SOMA
     #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
     #  should be tuned independently.
     buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     **dataloader_kwargs: Dict[str, Any],
-) -> Tuple[DataLoader, Stats]:
+) -> Tuple[DataLoader, ExperimentDataPipe]:
     """
     Factory method for PyTorch DataLoader. Provides a safer, more convenient interface for instantiating a DataLoader
-    that works with the ExperimentDataPipe, since not all of DataLoader's params can be used (batch_size, samples,
+    that works with the ExperimentDataPipe, since not all of DataLoader's params can be used (batch_size, sampler,
     batch_sampler, collate_fn).
     """
 
@@ -349,7 +351,7 @@ def experiment_dataloader(
             collate_fn=collate_noop,
             **dataloader_kwargs,
         ),
-        exp_datapipe.stats(),
+        exp_datapipe,
     )
 
 
@@ -367,7 +369,8 @@ if __name__ == "__main__":
         torch_batch_size_arg,
         num_workers_arg,
     ) = sys.argv[1:]
-    dl, stats = experiment_dataloader(
+
+    dl, dp = experiment_dataloader(
         exp_uri=soma_experiment_uri,
         ms_name=measurement_name,
         layer_name=layer_name_arg,
@@ -384,5 +387,5 @@ if __name__ == "__main__":
     datum = None
     for i, datum in enumerate(dl):
         if (i + 1) % 1000 == 0:
-            print(f"Received {i} torch batches, {stats}:\n{datum}")
-    print(f"Received {i} torch batches, {stats}:\n{datum}")
+            print(f"Received {i} torch batches, {dp.stats()}:\n{datum}")
+    print(f"Received {i} torch batches, {dp.stats()}:\n{datum}")

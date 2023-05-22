@@ -1,10 +1,11 @@
-import pandas as pd
-import torch
 import numpy as np
+import tiledbsoma as soma
+import torch
 from anndata import AnnData
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 import cellxgene_census
+from cellxgene_census.incubation.pytorch import experiment_dataloader
 
 
 class LogisticRegression(torch.nn.Module):
@@ -28,6 +29,8 @@ def train_epoch(model, train_dataloader, loss_fn, optimizer, device):
     for batch in train_dataloader:
         optimizer.zero_grad()
         X_batch, y_batch = batch
+        # exclude the soma_joinid of the y_batch, which is in the first column
+        y_batch = y_batch[:, 1:]
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
 
@@ -52,11 +55,7 @@ def train_epoch(model, train_dataloader, loss_fn, optimizer, device):
     return train_loss, train_accuracy  # , p, r, f1
 
 
-def train(
-    model, model_filename, train_dataset, device, learning_rate, batch_size, weight_decay, num_epochs, precision=7
-):
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
+def train(model, model_filename, train_dataloader, device, learning_rate, weight_decay, num_epochs, precision=7):
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     losses = []
@@ -105,41 +104,7 @@ def get_train_test_data(adata: AnnData, pred_field):
     y_mapping = {v: i for i, v in enumerate(labels)}
     # y_cat = [y_mapping[i] for i in y]
 
-    # TODO
-    data_train, data_test = adata, adata  # train_test_split(data, test_size=test_size, random_state=12, stratify=y_cat)
-    X_train_arr = data_train.X.toarray()
-
-    X_train = torch.Tensor(X_train_arr)
-    y_train = [y_mapping[i] for i in data_train.obs[pred_field].values]
-
-    X_test_arr = data_test.X.toarray()
-    X_test = torch.Tensor(X_test_arr)
-    y_test = [y_mapping[i] for i in data_test.obs[pred_field].values]
-
-    train_dataset = CustomDataset(X_train, y_train)
-    test_dataset = CustomDataset(X_test, y_test)
-
-    labels = set(y_train)
-    labels_cat = np.arange(len(labels))
-
-    return X_train, y_train, X_test, y_test, train_dataset, test_dataset, data_train, data_test, labels_cat, y_mapping
-
-
-def get_train_test_data(adata: AnnData, pred_field):
-    # Normalize anndata raw counts
-    # sc.pp.normalize_total(data, layer='raw_counts', target_sum=TARGET_SUM,
-    #                       exclude_highly_expressed=True)  # normalized values stored in the raw_counts layer
-    # sc.pp.log1p(data, layer='raw_counts')
-
-    # X = data.layers['raw_counts']
-    y = adata.obs[pred_field].values
-
-    labels = np.array(list(set(y)))
-
-    y_mapping = {v: i for i, v in enumerate(labels)}
-    # y_cat = [y_mapping[i] for i in y]
-
-    # TODO
+    # TODO: support train/test split
     data_train, data_test = adata, adata  # train_test_split(data, test_size=test_size, random_state=12, stratify=y_cat)
     X_train_arr = data_train.X.toarray()
 
@@ -240,37 +205,42 @@ BATCH_SIZES = [16]
 WEIGHT_DECAYS = [0.0]
 
 
-def main():
+def main(measurement_name="RNA", layer_name="raw", obs_value_filter=None, column_names=None, dense_X=False):
+    if column_names is None:
+        column_names = [PRED_FIELD]
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    census_adata = get_census_data(NUM_DATA_CELLS_SUBSAMPLED, MAX_SAMPLES)
 
-    (
-        X_train,
-        y_train,
-        X_test,
-        y_test,
-        train_dataset,
-        test_dataset,
-        data_train,
-        data_test,
-        labels_categorical,
-        y_mapping,
-    ) = get_train_test_data(census_adata, PRED_FIELD)
+    census = cellxgene_census.open_soma(
+        # TODO: parameterize
+        uri="/Users/atolopko/cxg/cell-census/data/cell-census-small/soma/2023-03-29/soma"
+    )
 
-    input_dim = X_train.shape[1]
-    output_dim = len(labels_categorical)
+    train_dataloader, experiment_datapipe = experiment_dataloader(
+        exp_uri=census["census_data"]["homo_sapiens"].uri,
+        ms_name=measurement_name,
+        layer_name=layer_name,
+        obs_query=soma.AxisQuery(value_filter=(obs_value_filter or None)),
+        var_query=soma.AxisQuery(),
+        obs_column_names=column_names,
+        dense_X=True,
+        batch_size=16,
+        num_workers=0,
+        buffer_bytes=2**12,
+    )
+    # census_adata = get_census_data(NUM_DATA_CELLS_SUBSAMPLED, MAX_SAMPLES)
+
+    input_dim, output_dim = experiment_datapipe.shape
 
     model = LogisticRegression(input_dim, output_dim).to(device)
     model = train(
         model,
         "model.pt",
-        train_dataset,
+        train_dataloader,
         device,
         learning_rate=LEARNING_RATE,
-        batch_size=BATCH_SIZE,
         weight_decay=WEIGHT_DECAY,
         num_epochs=NUM_EPOCHS,
     )
