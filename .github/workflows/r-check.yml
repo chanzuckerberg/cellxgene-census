@@ -31,3 +31,4 @@ jobs:
         with:
           working-directory: ./api/r/cellxgene.census
           args: 'c("--no-manual", "--as-cran", "--no-build-vignettes")'
+          build_args: 'c("--no-manual", "--no-build-vignettes")'
