@@ -3,7 +3,9 @@
 #' @param census_version The version of the Census, e.g., "latest".
 #' @param uri The URI containing the Census SOMA objects. If specified, takes
 #'            precedence over `census_version`.
-#' @param tiledbsoma_ctx A custom `tiledbsoma::SOMATileDBContext`
+#' @param tiledbsoma_ctx A `tiledbsoma::SOMATileDBContext` built using
+#'        `new_SOMATileDBContext_for_census()`. Optional (created automatically)
+#'        if using `census_version` and the context does not need to be reused.
 #'
 #' @return Top-level `tiledbsoma::SOMACollection` object. After use, the census
 #'         should be closed to release memory and other resources, usually with
@@ -33,6 +35,20 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
   "soma.init_buffer_bytes" = paste(1 * 1024**3)
 )
 
+#' Create SOMATileDBContext for Cell Census
+#' @description Create a SOMATileDBContext suitable for using with `open_soma()`.
+#' Typically `open_soma()` creates a context automatically, but it can be created
+#' separately in order to set custom configuration option or to share it between
+#' multiple open Census handles.
+#'
+#' @param census_version_description The result of `get_census_version_description()`
+#'        for the desired Census version.
+#' @param ... Custom configuration options.
+#'
+#' @return
+#' @export
+#'
+#' @examples
 new_SOMATileDBContext_for_census <- function(census_version_description, ...) {
   # start with default configuration
   cfg <- DEFAULT_TILEDB_CONFIGURATION
