@@ -240,7 +240,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
     assert row[1].tolist() == [0, 0]
 
 
-# noinspection PyTestParametrized,,DuplicatedCode
+# noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
     dl, _ = experiment_dataloader(
@@ -267,6 +267,24 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
         mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
     )
     assert dl is not None
+
+
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
+def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experiment) -> None:
+    """
+    If the DataPipe is accessed prior to multiprocessing (num_workers > 0), its internal _query will be
+    initialized. But since it cannot be pickled, we must ensure it is ignored during pickling in multiprocessing mode.
+    This test verifies the correct pickling behavior is in place.
+    """
+
+    dl, dp = experiment_dataloader(
+        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=1, dense_X=True
+    )
+    dp.obs_encoders()  # trigger query building
+    row = next(iter(dl))  # trigger multiprocessing
+
+    assert row is not None
 
 
 @pytest.mark.skip(reason="TODO")

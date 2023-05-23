@@ -63,7 +63,6 @@ def _open_experiment(
     return soma.Experiment.open(uri, context=context)
 
 
-# wrap in dataset iterator
 class _ObsAndXIterator(Iterator[ObsDatum]):
     """
     Iterates through a set of obs and related X rows, specified as `soma_joinid`s. Encapsulates the batch-based data
@@ -112,7 +111,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.stats = stats
 
     def __next__(self) -> ObsDatum:
-        # read the torch batch, possibly across multiple soma batches
+        # read the next torch batch, possibly across multiple soma batches
         obs: pd.DataFrame = pd.DataFrame()
         X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)))
 
@@ -305,6 +304,16 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def __getitem__(self, index: int) -> ObsDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
 
+    def __getstate__(self) -> Dict[str, Any]:
+        state = self.__dict__.copy()
+        # Don't pickle `_query`
+        del state["_query"]
+        return state
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._query = None
+
     def obs_encoders(self) -> Encoders:
         if self._encoders is not None:
             return self._encoders
@@ -352,7 +361,7 @@ def experiment_dataloader(
     #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
     #  should be tuned independently.
     buffer_bytes: int = DEFAULT_BUFFER_BYTES,
-    **dataloader_kwargs: Dict[str, Any],
+    **dataloader_kwargs: Any,
 ) -> Tuple[DataLoader, ExperimentDataPipe]:
     """
     Factory method for PyTorch DataLoader. Provides a safer, more convenient interface for instantiating a DataLoader
