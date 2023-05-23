@@ -275,20 +275,20 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         worker_info = torch.utils.data.get_worker_info()
         if worker_info:
-            partition, partitions = worker_info.id, worker_info.num_workers
+            partition, num_partitions = worker_info.id, worker_info.num_workers
         else:
-            partition, partitions = 0, 1
+            partition, num_partitions = 0, 1
 
-        if partitions is not None:
+        if num_partitions is not None:
             # partitioned data loading
             # NOTE: Can alternately use a `worker_init_fn` to split among workers split workload
-            partition_size = len(obs_joinids) // partitions
+            partition_size = len(obs_joinids) // num_partitions
             partition_start = partition_size * partition
             partition_end_excl = min(len(obs_joinids), partition_start + partition_size)
             self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl]
 
             pytorch_logger.debug(
-                f"Process {os.getpid()} handling partition {partition + 1} of {partitions}, "
+                f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
                 f"range={partition_start}:{partition_end_excl}, "
                 f"{partition_size:}"
             )
