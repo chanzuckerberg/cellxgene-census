@@ -74,14 +74,11 @@ def train(model, model_filename, train_dataloader, device, learning_rate, weight
 def run():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    census = cellxgene_census.open_soma(
-        # TODO: parameterize
-        uri="/Users/atolopko/cxg/cell-census/data/cell-census-small/soma/2023-03-29/soma"
-    )
+    census = cellxgene_census.open_soma()
 
     predicted_label = "cell_type"
 
-    obs_value_filter = ""
+    obs_value_filter = "tissue_general == 'tongue' and is_primary_data == True"
     var_value_filter = ""
 
     train_dataloader, experiment_datapipe = experiment_dataloader(
@@ -110,7 +107,7 @@ def run():
         device,
         learning_rate=1e-4,
         weight_decay=0.0,
-        num_epochs=10,
+        num_epochs=3,
     )
     return model
 
