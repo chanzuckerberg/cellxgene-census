@@ -1,3 +1,5 @@
+import logging
+import os
 import sys
 from datetime import timedelta
 from time import time
@@ -28,6 +30,9 @@ Encoders = Dict[str, LabelEncoder]
 DEFAULT_BUFFER_BYTES = 1024**3
 
 DEFAULT_WORKER_TIMEOUT = 120
+
+pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
+pytorch_logger.setLevel(logging.INFO)
 
 
 @attrs
@@ -176,7 +181,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         if 0 <= self.i < len(self.obs_batch_):
             return self.obs_batch_
 
-        print("Retrieving next TileDB-SOMA batch...")
+        pytorch_logger.debug("Retrieving next TileDB-SOMA batch...")
         start_time = time()
         # If no more batch to iterate through, raise StopIteration, as all iterators do when at end
         obs_table = next(self.obs_tables_iter)
@@ -190,7 +195,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.stats.nnz += self.X_batch.nnz
         self.stats.elapsed += int(time() - start_time)
         self.stats.n_soma_batches += 1
-        print(f"Retrieved batch: shape={self.X_batch.shape}, {self.stats}")
+        pytorch_logger.debug(f"Retrieved batch: shape={self.X_batch.shape}, cum_stats: {self.stats}")
         return self.obs_batch_
 
 
@@ -277,8 +282,9 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             partition_start = partition_size * partition
             partition_end_excl = min(len(obs_joinids), partition_start + partition_size)
             self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl]
-            print(
-                f"Partition {partition + 1} of {partitions}, range={partition_start}:{partition_end_excl}, "
+
+            pytorch_logger.debug(
+                f"Process {os.getpid()} handling partition {partition + 1} of {partitions}, range={partition_start}:{partition_end_excl}, "
                 f"{partition_size:}"
             )
 
