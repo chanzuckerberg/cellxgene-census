@@ -87,7 +87,7 @@ def run():
     var_value_filter = ""
 
     train_dataloader, experiment_datapipe = experiment_dataloader(
-        exp_uri=census["census_data"]["homo_sapiens"].uri,
+        census["census_data"]["homo_sapiens"],
         ms_name="RNA",
         layer_name="raw",
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter or None)),

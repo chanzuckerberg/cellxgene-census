@@ -1,5 +1,6 @@
 import pathlib
 from typing import Callable, List, Optional, Sequence, Tuple
+from unittest.mock import Mock
 
 import numpy as np
 import pyarrow as pa
@@ -113,9 +114,7 @@ def soma_experiment(
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_non_batched(soma_experiment: Experiment) -> None:
-    exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"]
-    )
+    exp_data_pipe = ExperimentDataPipe(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
     row_iter = iter(exp_data_pipe)
 
     row = next(row_iter)
@@ -127,7 +126,7 @@ def test_non_batched(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -147,7 +146,7 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(5, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -163,7 +162,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -179,7 +178,7 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri,
+        soma_experiment,
         ms_name="RNA",
         layer_name="raw",
         obs_query=AxisQuery(coords=([],)),
@@ -196,7 +195,7 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_dense_output(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri,
+        soma_experiment,
         ms_name="RNA",
         layer_name="raw",
         obs_column_names=["label"],
@@ -214,7 +213,7 @@ def test_dense_output(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_encoders(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        exp_uri=soma_experiment.uri,
+        soma_experiment,
         ms_name="RNA",
         layer_name="raw",
         obs_column_names=["label"],
@@ -233,7 +232,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
-    dl, _ = experiment_dataloader(soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dl, _ = experiment_dataloader(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
     torch_data = [row for row in dl]
 
     row = torch_data[0]
@@ -245,7 +244,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
     dl, _ = experiment_dataloader(
-        soma_experiment.uri, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
     )
     torch_data = [row for row in dl]
 
@@ -255,19 +254,21 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
 
 
 def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
+    mock_experiment = Mock(spec=Experiment)
     with pytest.raises(NotImplementedError):
         experiment_dataloader(
-            "some_uri", ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=False
+            mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=False
         )
 
 
 def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
+    mock_experiment = Mock(spec=Experiment)
     dl, _ = experiment_dataloader(
-        "some_uri", ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
+        mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
     )
     assert dl is not None
 
 
+@pytest.mark.skip(reason="TODO")
 def test_experiment_data_loader__unsupported_params__fails() -> None:
-    # TODO
     pass

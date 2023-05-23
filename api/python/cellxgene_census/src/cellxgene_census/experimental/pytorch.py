@@ -18,6 +18,9 @@ from torch import Tensor
 from torch.utils.data import DataLoader, IterDataPipe
 from torch.utils.data.dataset import Dataset
 
+import cellxgene_census
+from cellxgene_census._open import _build_soma_tiledb_context
+
 ObsDatum = Tuple[Tensor, torch.sparse_coo_tensor]
 
 Encoders = Dict[str, LabelEncoder]
@@ -48,15 +51,16 @@ class Stats:
         )
 
 
-def _open_experiment(uri: str, buffer_bytes: int) -> soma.Experiment:
-    context = soma.options.SOMATileDBContext().replace(
+def _open_experiment(
+    uri: str, aws_region: Optional[str] = None, buffer_bytes: int = DEFAULT_BUFFER_BYTES
+) -> soma.Experiment:
+    context = _build_soma_tiledb_context(aws_region).replace(
         tiledb_config={
             "py.init_buffer_bytes": buffer_bytes,
             "soma.init_buffer_bytes": buffer_bytes,
-            "vfs.s3.no_sign_request": "true",
         }
     )
-    return soma.Experiment.open(uri, platform_config={}, context=context)
+    return soma.Experiment.open(uri, context=context)
 
 
 # wrap in dataset iterator
@@ -83,6 +87,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         obs_joinids: pa.Array,
         var_joinids: pa.Array,
         exp_uri: str,
+        aws_region: Optional[str],
         measurement_name: str,
         X_layer_name: str,
         batch_size: int,
@@ -98,7 +103,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.dense_X = dense_X
 
         # holding reference to SOMA object prevents it from being closed
-        self.exp = _open_experiment(exp_uri, buffer_bytes=buffer_bytes)
+        self.exp = _open_experiment(exp_uri, aws_region, buffer_bytes=buffer_bytes)
         self.X: soma.SparseNDArray = self.exp.ms[measurement_name].X[X_layer_name]
         self.obs_tables_iter = self.exp.obs.read(
             coords=(obs_joinids,), batch_size=somacore.BatchSize(), column_names=obs_column_names
@@ -207,7 +212,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
     def __init__(
         self,
-        exp_uri: str,
+        experiment: soma.Experiment,
         ms_name: str,
         layer_name: str,
         obs_query: Optional[soma.AxisQuery] = None,
@@ -224,7 +229,8 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
             )
 
-        self.exp_uri = exp_uri
+        self.exp_uri = experiment.uri
+        self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
         self.ms_name = ms_name
         self.layer_name = layer_name
         self.obs_query = obs_query
@@ -249,7 +255,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         # TODO: handle closing of exp when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
-        exp = _open_experiment(self.exp_uri, buffer_bytes=self.buffer_bytes)
+        exp = _open_experiment(self.exp_uri, self.aws_region, buffer_bytes=self.buffer_bytes)
 
         self._query = exp.axis_query(
             measurement_name=self.ms_name,
@@ -285,6 +291,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             obs_joinids=self._obs_joinids_partitioned or self._query.obs_joinids(),
             var_joinids=self._query.var_joinids(),
             exp_uri=self.exp_uri,
+            aws_region=self.aws_region,
             measurement_name=self.ms_name,
             X_layer_name=self.layer_name,
             batch_size=self.batch_size,
@@ -332,7 +339,7 @@ def collate_noop(x: Any) -> Any:
 
 # TODO: Move into somacore.ExperimentAxisQuery
 def experiment_dataloader(
-    exp_uri: str,
+    experiment: soma.Experiment,
     ms_name: str,
     layer_name: str,
     obs_query: Optional[soma.AxisQuery] = None,
@@ -358,7 +365,7 @@ def experiment_dataloader(
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
     exp_datapipe = ExperimentDataPipe(
-        exp_uri=exp_uri,
+        experiment=experiment,
         obs_query=obs_query,
         var_query=var_query,
         ms_name=ms_name,
@@ -390,7 +397,8 @@ if __name__ == "__main__":
     import tiledbsoma as soma
 
     (
-        soma_experiment_uri,
+        census_uri_arg,
+        organism_arg,
         measurement_name_arg,
         layer_name_arg,
         obs_value_filter_arg,
@@ -400,8 +408,9 @@ if __name__ == "__main__":
         num_workers_arg,
     ) = sys.argv[1:]
 
+    census = cellxgene_census.open_soma(uri=census_uri_arg)
     dl, dp = experiment_dataloader(
-        exp_uri=soma_experiment_uri,
+        experiment=census["census_data"]["homo_sapiens"],
         ms_name=measurement_name_arg,
         layer_name=layer_name_arg,
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter_arg or None)),
