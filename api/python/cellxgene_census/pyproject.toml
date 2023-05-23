@@ -42,6 +42,10 @@ dependencies= [
     "certifi",
     # Temporary fix for https://github.com/single-cell-data/TileDB-SOMA/issues/1322, remove when we update to tiledbsoma>1.2.2
     "tiledb",
+]
+
+[project.optional-dependencies]
+experimental = [
     "torch==2.0.1",
     "torchdata==0.6.1"
 ]
