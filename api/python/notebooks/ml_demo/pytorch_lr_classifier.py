@@ -5,6 +5,8 @@ import torch
 import cellxgene_census
 from cellxgene_census.experimental.pytorch import experiment_dataloader, ExperimentDataPipe
 
+# TODO: Convert this to a notebook
+
 
 class LogisticRegression(torch.nn.Module):
     def __init__(self, input_dim, output_dim, dropout_prob=0.2):
@@ -77,7 +79,6 @@ def run():
     census = cellxgene_census.open_soma()
 
     predicted_label = "cell_type"
-
     obs_value_filter = "tissue_general == 'tongue' and is_primary_data == True"
     var_value_filter = ""
 
