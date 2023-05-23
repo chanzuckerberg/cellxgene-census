@@ -3,7 +3,7 @@ import tiledbsoma as soma
 import torch
 
 import cellxgene_census
-from cellxgene_census.experimental.pytorch import experiment_dataloader, ExperimentDataPipe
+from cellxgene_census.experimental.ml.pytorch import experiment_dataloader, ExperimentDataPipe
 
 # TODO: Convert this to a notebook
 
