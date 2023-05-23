@@ -28,11 +28,9 @@ def train_epoch(model, train_dataloader, loss_fn, optimizer, device):
         optimizer.zero_grad()
         X_batch, y_batch = batch
 
-        # TODO: allow correct types to be specified to experiment_dataloader()
-
         # exclude the soma_joinid of the y_batch, which is in the first column
+        # TODO: allow correct types to be specified to experiment_dataloader()
         y_batch = y_batch[:, 1:].flatten().long()
-        X_batch = X_batch
 
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -93,10 +91,11 @@ def run():
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter or None)),
         var_query=soma.AxisQuery(value_filter=(var_value_filter or None)),
         obs_column_names=[predicted_label],
+        # TODO: sparse not working with LogisticRegression
         dense_X=True,
         batch_size=16,
         num_workers=0,
-        buffer_bytes=2**12,
+        shuffle=True,
     )
 
     pred_field_encoder = experiment_datapipe.obs_encoders()[predicted_label]
