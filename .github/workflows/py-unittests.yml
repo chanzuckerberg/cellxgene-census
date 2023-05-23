@@ -9,12 +9,12 @@ on:
 
 jobs:
   unit_tests_python_api:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    runs-on: ${{matrix.os}}
 
     steps:
       - uses: actions/checkout@v3
@@ -37,12 +37,12 @@ jobs:
           retention-days: 3
 
   unit_tests_builder:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.10"]
+
+    runs-on: ${{matrix.os}}
 
     steps:
       - uses: actions/checkout@v3
