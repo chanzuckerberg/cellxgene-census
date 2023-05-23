@@ -18,6 +18,7 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
       config = c("vfs.s3.region" = description$soma.s3_region, "vfs.s3.no_sign_request" = "true")
     )
   )
+  on.exit(census$close(), add = TRUE)
 
   dataset <- as.data.frame(
     census$get("census_info")$get("datasets")$read(
