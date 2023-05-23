@@ -49,6 +49,17 @@ class Stats:
         )
 
 
+def _open_experiment(uri: str, buffer_bytes: int) -> soma.Experiment:
+    context = soma.options.SOMATileDBContext().replace(
+        tiledb_config={
+            "py.init_buffer_bytes": buffer_bytes,
+            "soma.init_buffer_bytes": buffer_bytes,
+            "vfs.s3.no_sign_request": "true",
+        }
+    )
+    return soma.Experiment.open(uri, platform_config={}, context=context)
+
+
 # wrap in dataset iterator
 class _ObsAndXIterator(Iterator[ObsDatum]):
     """
@@ -72,7 +83,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self,
         obs_joinids: pa.Array,
         var_joinids: pa.Array,
-        exp: soma.Experiment,
+        exp_uri: str,
         measurement_name: str,
         X_layer_name: str,
         batch_size: int,
@@ -80,14 +91,17 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         stats: Stats,
         obs_column_names: Sequence[str],
         dense_X: bool,
+        buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     ) -> None:
         self.obs_joinids = obs_joinids
         self.var_joinids = var_joinids
-        self.exp = exp  # holding reference to SOMA object prevents it from being closed
-        self.X: soma.SparseNDArray = exp.ms[measurement_name].X[X_layer_name]
         self.batch_size = batch_size
         self.dense_X = dense_X
-        self.obs_tables_iter = exp.obs.read(
+
+        # holding reference to SOMA object prevents it from being closed
+        self.exp = _open_experiment(exp_uri, buffer_bytes=buffer_bytes)
+        self.X: soma.SparseNDArray = self.exp.ms[measurement_name].X[X_layer_name]
+        self.obs_tables_iter = self.exp.obs.read(
             coords=(obs_joinids,), batch_size=BatchSize(), column_names=obs_column_names
         )
         self.encoders = encoders
@@ -185,9 +199,13 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def __getitem__(self, index: int) -> ObsDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
 
+    _query: Optional[soma.ExperimentAxisQuery]
+
+    _obs_joinids_partitioned: Optional[pa.Array]
+
     _obs_and_x_iter: Optional[_ObsAndXIterator]
 
-    _encoders: Encoders
+    _encoders: Optional[Encoders]
 
     _stats: Stats
 
@@ -219,42 +237,31 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.batch_size = batch_size
         self.dense_X = dense_X
         self.buffer_bytes = buffer_bytes
+        self._query = None
         self._stats = Stats()
-        self._encoders = {}
+        self._encoders = None
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
 
-    def __iter__(self) -> Iterator[ObsDatum]:
+    def _init(self) -> None:
+        if self._query is not None:
+            return
+
         # TODO: support multiple layers, per somacore.query.query.ExperimentAxisQuery.to_anndata()
+        # TODO: for dev-time use, specify smaller batch size via platform_config, once supported
 
         # TODO: handle closing of exp when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
-        # TODO: for dev-time use, specify smaller batch size via platform_config, once supported
-        context = soma.options.SOMATileDBContext().replace(
-            tiledb_config={
-                "py.init_buffer_bytes": self.buffer_bytes,
-                "soma.init_buffer_bytes": self.buffer_bytes,
-                "vfs.s3.no_sign_request": "true",
-            }
-        )
+        exp = _open_experiment(self.exp_uri, buffer_bytes=self.buffer_bytes)
 
-        exp = soma.Experiment.open(self.exp_uri, platform_config={}, context=context)
-        query = exp.axis_query(
+        self._query = exp.axis_query(
             measurement_name=self.ms_name,
             obs_query=self.obs_query,
             var_query=self.var_query,
         )
 
-        obs_joinids = query.obs_joinids()
-        var_joinids = query.var_joinids()
-
-        obs = query.obs(column_names=self.obs_column_names).concat()
-        for col in self.obs_column_names:
-            if obs[col].type in (pa.string(), pa.large_string()):
-                enc = LabelEncoder()
-                enc.fit(obs[col].combine_chunks().unique())
-                self._encoders[col] = enc
+        obs_joinids = self._query.obs_joinids()
 
         worker_info = torch.utils.data.get_worker_info()
         if worker_info:
@@ -268,31 +275,55 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             partition_size = len(obs_joinids) // partitions
             partition_start = partition_size * partition
             partition_end_excl = min(len(obs_joinids), partition_start + partition_size)
-            obs_joinids = obs_joinids[partition_start:partition_end_excl]
+            self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl]
             print(
                 f"Partition {partition + 1} of {partitions}, range={partition_start}:{partition_end_excl}, "
                 f"{partition_size:}"
             )
 
-        self._obs_and_x_iter = _ObsAndXIterator(
-            obs_joinids=obs_joinids,
-            var_joinids=var_joinids,
-            exp=exp,
+    def __iter__(self) -> Iterator[ObsDatum]:
+        self._init()
+        assert self._query is not None
+
+        return _ObsAndXIterator(
+            obs_joinids=self._obs_joinids_partitioned or self._query.obs_joinids(),
+            var_joinids=self._query.var_joinids(),
+            exp_uri=self.exp_uri,
             measurement_name=self.ms_name,
             X_layer_name=self.layer_name,
             batch_size=self.batch_size,
+            encoders=self.obs_encoders(),
+            stats=self._stats,
             obs_column_names=self.obs_column_names,
             dense_X=self.dense_X,
-            encoders=self._encoders,
-            stats=self._stats,
+            buffer_bytes=self.buffer_bytes,
         )
-        return self._obs_and_x_iter
 
-    def obs_encoders(self) -> Dict[str, LabelEncoder]:
+    def obs_encoders(self) -> Encoders:
+        if self._encoders is not None:
+            return self._encoders
+
+        self._init()
+        assert self._query is not None
+
+        obs = self._query.obs(column_names=self.obs_column_names).concat()
+        self._encoders = {}
+        for col in self.obs_column_names:
+            if obs[col].type in (pa.string(), pa.large_string()):
+                enc = LabelEncoder()
+                enc.fit(obs[col].combine_chunks().unique())
+                self._encoders[col] = enc
+
         return self._encoders
 
     def stats(self) -> Stats:
         return self._stats
+
+    def experiment_axis_query(self) -> soma.ExperimentAxisQuery:
+        self._init()
+        assert self._query is not None
+
+        return self._query
 
 
 # Note: must be a top-level function (and not a lambda), to play nice with multiprocessing (pickling)
