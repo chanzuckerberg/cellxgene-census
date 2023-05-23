@@ -17,7 +17,16 @@ version = cellxgene_census.__version__
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', "nbsphinx", "sphinx.ext.intersphinx", 'sphinx.ext.napoleon', 'myst_parser']
+extensions = [
+    'sphinx.ext.autodoc', 
+    "nbsphinx", 
+    "sphinx.ext.intersphinx", 
+    'sphinx.ext.napoleon', 
+    'sphinx.ext.autosummary', 
+    'myst_parser'
+    ]
+
+autosummary_generate = True
 
 napoleon_custom_sections = ["Lifecycle"]
 
