@@ -3,7 +3,7 @@ import tiledbsoma as soma
 import torch
 
 import cellxgene_census
-from cellxgene_census.experimental.pytorch import experiment_dataloader
+from cellxgene_census.experimental.pytorch import experiment_dataloader, ExperimentDataPipe
 
 
 class LogisticRegression(torch.nn.Module):
@@ -81,7 +81,7 @@ def run():
     obs_value_filter = "tissue_general == 'tongue' and is_primary_data == True"
     var_value_filter = ""
 
-    train_dataloader, experiment_datapipe = experiment_dataloader(
+    exp_dp = ExperimentDataPipe(
         census["census_data"]["homo_sapiens"],
         ms_name="RNA",
         layer_name="raw",
@@ -91,19 +91,26 @@ def run():
         # TODO: sparse not working with LogisticRegression
         dense_X=True,
         batch_size=16,
-        num_workers=0,
-        shuffle=True,
     )
 
-    pred_field_encoder = experiment_datapipe.obs_encoders()[predicted_label]
+    dp = exp_dp.shuffle(buffer_size=len(exp_dp))
+    dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=RANDOM_SEED)
+
+    dl_train = experiment_dataloader(
+        dp_train,
+        # >= 1 uses multiprocessing to load data
+        num_workers=0,
+    )
+
+    pred_field_encoder = exp_dp.obs_encoders()[predicted_label]
     output_dim = len(pred_field_encoder.classes_)
-    input_dim = experiment_datapipe.experiment_axis_query().n_vars
+    input_dim = exp_dp.shape[1]
 
     model = LogisticRegression(input_dim, output_dim).to(device)
     model = train(
         model,
         "model.pt",
-        train_dataloader,
+        dl_train,
         device,
         learning_rate=1e-4,
         weight_decay=0.0,

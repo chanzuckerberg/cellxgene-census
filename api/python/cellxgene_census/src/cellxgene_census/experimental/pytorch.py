@@ -12,12 +12,13 @@ import scipy
 import somacore
 import tiledbsoma as soma
 import torch
+import torchdata.datapipes.iter as pipes
 from attr import attrs
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore.query import _fast_csr
 from torch import Tensor
-from torch.utils.data import DataLoader, IterDataPipe
+from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 
 import cellxgene_census
@@ -199,7 +200,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         return self.obs_batch_
 
 
-class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
+class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """
     An iterable-style data pipe.
     """
@@ -225,7 +226,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         batch_size: int = 1,
         dense_X: bool = False,
         num_workers: int = 0,
-        buffer_bytes: int = 1024**3,
+        buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     ) -> None:
         if num_workers > 1 and not dense_X:
             raise NotImplementedError(
@@ -242,6 +243,9 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
         self.dense_X = dense_X
+        # TODO: This will control the obs SOMA batch sizes, and should be replaced with a row count once TileDB-SOMA
+        #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
+        #  should be tuned independently.
         self.buffer_bytes = buffer_bytes
         self._query = None
         self._stats = Stats()
@@ -284,7 +288,8 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl]
 
             pytorch_logger.debug(
-                f"Process {os.getpid()} handling partition {partition + 1} of {partitions}, range={partition_start}:{partition_end_excl}, "
+                f"Process {os.getpid()} handling partition {partition + 1} of {partitions}, "
+                f"range={partition_start}:{partition_end_excl}, "
                 f"{partition_size:}"
             )
 
@@ -306,6 +311,12 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             dense_X=self.dense_X,
             buffer_bytes=self.buffer_bytes,
         )
+
+    def __len__(self) -> int:
+        self._init()
+        assert self._query is not None
+
+        return int(self._query.n_obs)
 
     def __getitem__(self, index: int) -> ObsDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
@@ -340,11 +351,12 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def stats(self) -> Stats:
         return self._stats
 
-    def experiment_axis_query(self) -> soma.ExperimentAxisQuery:
+    @property
+    def shape(self) -> Tuple[int, int]:
         self._init()
         assert self._query is not None
 
-        return self._query
+        return self._query.n_obs, self._query.n_vars
 
 
 # Note: must be a top-level function (and not a lambda), to play nice with multiprocessing pickling
@@ -354,21 +366,10 @@ def collate_noop(x: Any) -> Any:
 
 # TODO: Move into somacore.ExperimentAxisQuery
 def experiment_dataloader(
-    experiment: soma.Experiment,
-    ms_name: str,
-    layer_name: str,
-    obs_query: Optional[soma.AxisQuery] = None,
-    var_query: Optional[soma.AxisQuery] = None,
-    obs_column_names: Sequence[str] = (),
-    dense_X: bool = False,
-    batch_size: int = 1,
+    datapipe: pipes.IterDataPipe,
     num_workers: int = 0,
-    # TODO: This will control the obs SOMA batch sizes, and should be replaced with a row count once TileDB-SOMA
-    #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
-    #  should be tuned independently.
-    buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     **dataloader_kwargs: Any,
-) -> Tuple[DataLoader, ExperimentDataPipe]:
+) -> DataLoader:
     """
     Factory method for PyTorch DataLoader. Provides a safer, more convenient interface for instantiating a DataLoader
     that works with the ExperimentDataPipe, since not all of DataLoader's params can be used (batch_size, sampler,
@@ -379,31 +380,16 @@ def experiment_dataloader(
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
-    exp_datapipe = ExperimentDataPipe(
-        experiment=experiment,
-        obs_query=obs_query,
-        var_query=var_query,
-        ms_name=ms_name,
-        layer_name=layer_name,
-        dense_X=dense_X,
-        obs_column_names=obs_column_names,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        buffer_bytes=buffer_bytes,
-    )
-
     if "batch_size" in dataloader_kwargs:
         del dataloader_kwargs["batch_size"]
-    return (
-        DataLoader(
-            exp_datapipe,
-            batch_size=None,  # batching is handled by our ExperimentDataPipe
-            num_workers=num_workers,
-            # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
-            collate_fn=collate_noop,
-            **dataloader_kwargs,
-        ),
-        exp_datapipe,
+
+    return DataLoader(
+        datapipe,
+        batch_size=None,  # batching is handled by our ExperimentDataPipe
+        num_workers=num_workers,
+        # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
+        collate_fn=collate_noop,
+        **dataloader_kwargs,
     )
 
 
@@ -424,22 +410,28 @@ if __name__ == "__main__":
     ) = sys.argv[1:]
 
     census = cellxgene_census.open_soma(uri=census_uri_arg)
-    dl, dp = experiment_dataloader(
+
+    exp_datapipe = ExperimentDataPipe(
         experiment=census["census_data"]["homo_sapiens"],
         ms_name=measurement_name_arg,
         layer_name=layer_name_arg,
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter_arg or None)),
         var_query=soma.AxisQuery(coords=(slice(1, 9),)),
         obs_column_names=column_names_arg.split(","),
-        dense_X=dense_X_arg.lower() == "dense",
         batch_size=int(torch_batch_size_arg),
         num_workers=int(num_workers_arg),
         buffer_bytes=2**12,
+        dense_X=dense_X_arg.lower() == "dense",
     )
+
+    dp_shuffle = exp_datapipe.shuffle(buffer_size=len(exp_datapipe))
+    dp_train, dp_test = dp_shuffle.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
+
+    dl = experiment_dataloader(dp_train, num_workers=int(num_workers_arg))
 
     i = 0
     datum = None
     for i, datum in enumerate(dl):
         if (i + 1) % 1000 == 0:
-            print(f"Received {i} torch batches, {dp.stats()}:\n{datum}")
-    print(f"Received {i} torch batches, {dp.stats()}:\n{datum}")
+            print(f"Received {i} torch batches, {exp_datapipe.stats()}:\n{datum}")
+    print(f"Received {i} torch batches, {exp_datapipe.stats()}:\n{datum}")

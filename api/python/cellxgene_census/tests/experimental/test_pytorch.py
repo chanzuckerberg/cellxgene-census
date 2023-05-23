@@ -232,7 +232,8 @@ def test_encoders(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
-    dl, _ = experiment_dataloader(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dp = ExperimentDataPipe(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dl = experiment_dataloader(dp)
     torch_data = [row for row in dl]
 
     row = torch_data[0]
@@ -243,9 +244,8 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
-    dl, _ = experiment_dataloader(
-        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
-    )
+    dp = ExperimentDataPipe(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3)
+    dl = experiment_dataloader(dp)
     torch_data = [row for row in dl]
 
     batch = torch_data[0]
@@ -256,17 +256,43 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
 def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
     mock_experiment = Mock(spec=Experiment)
     with pytest.raises(NotImplementedError):
-        experiment_dataloader(
+        ExperimentDataPipe(
             mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=False
         )
 
 
 def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
     mock_experiment = Mock(spec=Experiment)
-    dl, _ = experiment_dataloader(
+    dp = ExperimentDataPipe(
         mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
     )
-    assert dl is not None
+    assert dp is not None
+
+
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
+def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
+    dl = experiment_dataloader(dp_train)
+
+    all_rows = list(iter(dl))
+    assert len(all_rows) == 7
+
+
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
+def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dp = dp.shuffle()
+    dl = experiment_dataloader(dp)
+
+    data1 = list(iter(dl))
+    data2 = list(iter(dl))
+
+    data1_soma_joinids = [row[1][0].item() for row in data1]
+    data2_soma_joinids = [row[1][0].item() for row in data2]
+    assert data1_soma_joinids != data2_soma_joinids
 
 
 # noinspection PyTestParametrized,DuplicatedCode
@@ -278,9 +304,10 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
     This test verifies the correct pickling behavior is in place.
     """
 
-    dl, dp = experiment_dataloader(
+    dp = ExperimentDataPipe(
         soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=1, dense_X=True
     )
+    dl = experiment_dataloader(dp)
     dp.obs_encoders()  # trigger query building
     row = next(iter(dl))  # trigger multiprocessing
 
