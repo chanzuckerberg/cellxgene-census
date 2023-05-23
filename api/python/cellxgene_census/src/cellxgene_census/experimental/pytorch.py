@@ -7,14 +7,13 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import scipy
+import somacore
 import tiledbsoma as soma
 import torch
 from attr import attrs
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
-from somacore import BatchSize
-from somacore.query import AxisQuery, _fast_csr
-from tiledbsoma._read_iters import TableReadIter
+from somacore.query import _fast_csr
 from torch import Tensor
 from torch.utils.data import DataLoader, IterDataPipe
 from torch.utils.data.dataset import Dataset
@@ -67,7 +66,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
     fetching from TileDB-SOMA objects, providing row-based iteration.
     """
 
-    obs_tables_iter: TableReadIter
+    obs_tables_iter: somacore.ReadIter[pa.Table]
     """Iterates the TileDB-SOMA batches (tables) of obs data"""
 
     obs_batch_: pd.DataFrame = pd.DataFrame()
@@ -102,7 +101,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.exp = _open_experiment(exp_uri, buffer_bytes=buffer_bytes)
         self.X: soma.SparseNDArray = self.exp.ms[measurement_name].X[X_layer_name]
         self.obs_tables_iter = self.exp.obs.read(
-            coords=(obs_joinids,), batch_size=BatchSize(), column_names=obs_column_names
+            coords=(obs_joinids,), batch_size=somacore.BatchSize(), column_names=obs_column_names
         )
         self.encoders = encoders
         self.stats = stats
@@ -196,9 +195,6 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     An iterable-style data pipe.
     """
 
-    def __getitem__(self, index: int) -> ObsDatum:
-        raise NotImplementedError("IterDataPipe can only be iterated")
-
     _query: Optional[soma.ExperimentAxisQuery]
 
     _obs_joinids_partitioned: Optional[pa.Array]
@@ -214,8 +210,8 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         exp_uri: str,
         ms_name: str,
         layer_name: str,
-        obs_query: Optional[AxisQuery] = None,
-        var_query: Optional[AxisQuery] = None,
+        obs_query: Optional[soma.AxisQuery] = None,
+        var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
         dense_X: bool = False,
@@ -299,6 +295,9 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             buffer_bytes=self.buffer_bytes,
         )
 
+    def __getitem__(self, index: int) -> ObsDatum:
+        raise NotImplementedError("IterDataPipe can only be iterated")
+
     def obs_encoders(self) -> Encoders:
         if self._encoders is not None:
             return self._encoders
@@ -326,7 +325,7 @@ class ExperimentDataPipe(IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         return self._query
 
 
-# Note: must be a top-level function (and not a lambda), to play nice with multiprocessing (pickling)
+# Note: must be a top-level function (and not a lambda), to play nice with multiprocessing pickling
 def collate_noop(x: Any) -> Any:
     return x
 
@@ -336,8 +335,8 @@ def experiment_dataloader(
     exp_uri: str,
     ms_name: str,
     layer_name: str,
-    obs_query: Optional[AxisQuery] = None,
-    var_query: Optional[AxisQuery] = None,
+    obs_query: Optional[soma.AxisQuery] = None,
+    var_query: Optional[soma.AxisQuery] = None,
     obs_column_names: Sequence[str] = (),
     dense_X: bool = False,
     batch_size: int = 1,
@@ -392,7 +391,7 @@ if __name__ == "__main__":
 
     (
         soma_experiment_uri,
-        measurement_name,
+        measurement_name_arg,
         layer_name_arg,
         obs_value_filter_arg,
         column_names_arg,
@@ -403,10 +402,10 @@ if __name__ == "__main__":
 
     dl, dp = experiment_dataloader(
         exp_uri=soma_experiment_uri,
-        ms_name=measurement_name,
+        ms_name=measurement_name_arg,
         layer_name=layer_name_arg,
-        obs_query=AxisQuery(value_filter=(obs_value_filter_arg or None)),
-        var_query=AxisQuery(coords=(slice(1, 9),)),
+        obs_query=soma.AxisQuery(value_filter=(obs_value_filter_arg or None)),
+        var_query=soma.AxisQuery(coords=(slice(1, 9),)),
         obs_column_names=column_names_arg.split(","),
         dense_X=dense_X_arg.lower() == "dense",
         batch_size=int(torch_batch_size_arg),

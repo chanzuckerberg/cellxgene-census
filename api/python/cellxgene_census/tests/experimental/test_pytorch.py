@@ -12,7 +12,7 @@ from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
 from torch import Tensor
 
-from cellxgene_census.incubation.pytorch import ExperimentDataPipe, experiment_dataloader
+from cellxgene_census.experimental.pytorch import ExperimentDataPipe, experiment_dataloader
 
 
 def pytorch_x_value_gen(shape: Tuple[int, int]) -> spmatrix:

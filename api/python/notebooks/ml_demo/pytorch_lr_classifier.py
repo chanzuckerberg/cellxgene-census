@@ -3,7 +3,7 @@ import tiledbsoma as soma
 import torch
 
 import cellxgene_census
-from cellxgene_census.incubation.pytorch import experiment_dataloader
+from cellxgene_census.experimental.pytorch import experiment_dataloader
 
 
 class LogisticRegression(torch.nn.Module):
