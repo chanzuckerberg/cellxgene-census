@@ -37,11 +37,11 @@ jobs:
       - name: Test with pytest (API)
         if: matrix.python-version != '3.10'
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 -m "not experimental" ./api/python/cellxgene_census/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
       - name: Test with pytest (API, with experimental)
         if: matrix.python-version == '3.10'
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 -m "experimental" ./api/python/cellxgene_census/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 --experimental ./api/python/cellxgene_census/tests/
       - uses: actions/upload-artifact@v3
         with:
           name: coverage
