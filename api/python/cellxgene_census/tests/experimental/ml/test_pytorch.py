@@ -12,7 +12,7 @@ from somacore import AxisQuery
 from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
 
-# conditionally import pytorch, as it is not a dependency of cellxgene-census
+# conditionally import torch, as it will not be available in all test environments
 try:
     from torch import Tensor
 
