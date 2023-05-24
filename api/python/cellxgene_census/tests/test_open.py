@@ -200,6 +200,7 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
         cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
 
 
+@pytest.mark.live_corpus
 def test_can_open_with_anonymous_access() -> None:
     """
     With anonymous access, `open_soma` must be able to access the census even with bogus credentials
