@@ -28,4 +28,3 @@ def pytest_configure(config: pytest.Config) -> None:
     if config.option.markexpr and excluded_markexprs:
         config.option.markexpr += " and "
     config.option.markexpr += " and ".join([f"not {m}" for m in excluded_markexprs])
-    print(config.option.markexpr)
