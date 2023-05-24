@@ -26,7 +26,7 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
-          pip install -e ./api/python/cellxgene_census/
+          pip install -e './api/python/cellxgene_census/[experimental]'
       - name: Test with pytest (API)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
