@@ -11,9 +11,15 @@ from scipy.sparse import coo_matrix, spmatrix
 from somacore import AxisQuery
 from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
-from torch import Tensor
 
-from cellxgene_census.experimental.ml.pytorch import ExperimentDataPipe, experiment_dataloader
+# conditionally import torch, as it will not be available in all test environments
+try:
+    from torch import Tensor
+
+    from cellxgene_census.experimental.ml.pytorch import ExperimentDataPipe, experiment_dataloader
+except ImportError:
+    # this should only occur when not running `experimental`-marked tests
+    pass
 
 
 def pytorch_x_value_gen(shape: Tuple[int, int]) -> spmatrix:
@@ -111,6 +117,7 @@ def soma_experiment(
     return _factory.open((tmp_path / "exp").as_posix())
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_non_batched(soma_experiment: Experiment) -> None:
@@ -122,6 +129,7 @@ def test_non_batched(soma_experiment: Experiment) -> None:
     assert row[1].tolist() == [0, 0]
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
@@ -142,6 +150,7 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
         next(batch_iter)
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(5, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None:
@@ -158,6 +167,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
         next(batch_iter)
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
@@ -174,6 +184,7 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
         next(batch_iter)
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
@@ -191,6 +202,7 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
         next(batch_iter)
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
@@ -208,6 +220,7 @@ def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
     assert batch[0].to_dense().tolist() == [0, 1, 0]
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_sparse_output__batched(soma_experiment: Experiment) -> None:
@@ -226,6 +239,7 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
     assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_encoders(soma_experiment: Experiment) -> None:
@@ -246,6 +260,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
     assert labels_decoded.tolist() == ["0", "1", "2"]
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
@@ -258,6 +273,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
     assert row[1].tolist() == [0, 0]
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
@@ -270,6 +286,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
     assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 
 
+@pytest.mark.experimental
 def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
     mock_experiment = Mock(spec=Experiment)
     with pytest.raises(NotImplementedError):
@@ -278,6 +295,7 @@ def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
         )
 
 
+@pytest.mark.experimental
 def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
     mock_experiment = Mock(spec=Experiment)
     dp = ExperimentDataPipe(
@@ -286,6 +304,7 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
     assert dp is not None
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
@@ -297,6 +316,7 @@ def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
     assert len(all_rows) == 7
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
@@ -312,6 +332,7 @@ def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
     assert data1_soma_joinids != data2_soma_joinids
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experiment) -> None:
@@ -331,6 +352,7 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
     assert row is not None
 
 
+@pytest.mark.experimental
 @pytest.mark.skip(reason="TODO")
 def test_experiment_data_loader__unsupported_params__fails() -> None:
     pass

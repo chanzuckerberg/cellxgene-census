@@ -14,14 +14,19 @@ Then run the tests:
 
 ## Pytest Marks
 
-There are two Pytest marks you can use from the command line:
+There are various Pytest marks you can use from the command line:
 
 - live_corpus: tests that directly access the `latest` version of the Census. Enabled by default.
 - expensive: tests that are expensive (ie., cpu, memory, time). Disabled by default - enable with `--expensive`. Some of these tests are _very_ expensive, ie., require a very large memory host to succeed.
+- experimental: tests that are for code in the `experimental` package. Disabled by default - enable with `--experimental`. These tests require installation the optional Python packages installed via pip `pip install -e ./api/python/cellxgene_census/[experimental]`
 
 By default, only relatively cheap & fast tests are run. To enable `expensive` tests:
 
 > pytest --expensive ...
+
+To enable `experimental` tests:
+
+> pytest --experimental ...
 
 To disable `live_corpus` tests:
 
@@ -29,7 +34,7 @@ To disable `live_corpus` tests:
 
 You can also combine them, e.g.,
 
-> pytest -m 'not live_corpus' --expensive
+> pytest -m 'not live_corpus' --expensive --experimental
 
 # Acceptance (expensive) tests
 
