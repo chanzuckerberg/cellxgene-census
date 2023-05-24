@@ -31,7 +31,7 @@ This tutorial showcases the easiest ways to query the expression data and cell/g
 
 ## Opening the census
 
-The `cellxgene.census` R package contains a convenient API to open the latest version of the Census.
+The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
 
 ```{r}
 census <- cellxgene.census::open_soma()
@@ -151,3 +151,13 @@ head(seurat_obj$RNA@meta.features)
 ```
 
 For a full description refer to `?cellxgene.census::get_seurat`.
+
+### Close the census
+
+After use, the census object should be closed to release memory and other resources.
+
+```{r}
+census$close()
+```
+
+This also closes all SOMA objects accessed via the top-level `census`. Closing can be automated using `on.exit(census$close(), add = TRUE)` immediately after `census <- open_soma()`.

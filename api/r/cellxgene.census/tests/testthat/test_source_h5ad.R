@@ -1,6 +1,7 @@
 test_that("get_source_h5ad_uri", {
   census_region <- get_census_version_description("latest")$soma.s3_region
-  census <- open_soma("latest")
+  census <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  on.exit(census$close(), add = TRUE)
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
     column_names = c("dataset_id", "dataset_h5ad_path")
   ))
@@ -22,7 +23,8 @@ test_that("get_source_h5ad_uri", {
 
 test_that("download_source_h5ad", {
   # find the ~smallest dataset
-  census <- open_soma()
+  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
+  on.exit(census$close(), add = TRUE)
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
     column_names = c("dataset_id", "dataset_total_cell_count")
   ))
