@@ -25,3 +25,14 @@ test_that("open_soma with custom context/config", {
   )
   expect_error(open_soma(tiledbsoma_ctx = ctx), "Error while listing")
 })
+
+test_that("open_soma does not sign AWS S3 requests", {
+  Sys.setenv(AWS_ACCESS_KEY_ID = "fake_id", AWS_SECRET_ACCESS_KEY = "fake_key")
+  coll <- open_soma("latest")
+  on.exit(coll$close(), add = TRUE)
+  expect_true(coll$exists())
+  expect_true(coll$get("census_data")$get("homo_sapiens")$exists())
+  # Reset the access key and secret - this is necessary because `download_source_h5ad` doesn't support
+  # anonymous access and a bogus key will cause the test to fail
+  Sys.setenv(AWS_ACCESS_KEY_ID = "", AWS_SECRET_ACCESS_KEY = "")
+})
