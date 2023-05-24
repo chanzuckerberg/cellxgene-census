@@ -11,9 +11,15 @@ from scipy.sparse import coo_matrix, spmatrix
 from somacore import AxisQuery
 from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
-from torch import Tensor
 
-from cellxgene_census.experimental.ml.pytorch import ExperimentDataPipe, experiment_dataloader
+# conditionally import pytorch, as it is not a dependency of cellxgene-census
+try:
+    from torch import Tensor
+
+    from cellxgene_census.experimental.ml.pytorch import ExperimentDataPipe, experiment_dataloader
+except ImportError:
+    # this should only occur when not running `experimental`-marked tests
+    pass
 
 
 def pytorch_x_value_gen(shape: Tuple[int, int]) -> spmatrix:
