@@ -117,6 +117,7 @@ def soma_experiment(
     return _factory.open((tmp_path / "exp").as_posix())
 
 
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_non_batched(soma_experiment: Experiment) -> None:
