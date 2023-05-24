@@ -99,13 +99,13 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
         obs_column_names: Sequence[str],
-        dense_X: bool,
+        sparse_X: bool,
         buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     ) -> None:
         self.obs_joinids = obs_joinids
         self.var_joinids = var_joinids
         self.batch_size = batch_size
-        self.dense_X = dense_X
+        self.sparse_X = sparse_X
 
         # holding reference to SOMA object prevents it from being closed
         self.exp = _open_experiment(exp_uri, aws_region, buffer_bytes=buffer_bytes)
@@ -144,8 +144,8 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
             obs_encoded[col] = enc.transform(obs[col])
 
         obs_tensor = torch.Tensor(obs_encoded.to_numpy()).int()
-        if self.dense_X:
-            return torch.Tensor(X.todense()), obs_tensor
+        if not self.sparse_X:
+            X_tensor = torch.Tensor(X.todense())
         else:
             coo = X.tocoo()
 
@@ -156,11 +156,11 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
                 size=coo.shape,
             )
 
-            if self.batch_size == 1:
-                X_tensor = X_tensor[0]
-                obs_tensor = obs_tensor[0]
+        if self.batch_size == 1:
+            X_tensor = X_tensor[0]
+            obs_tensor = obs_tensor[0]
 
-            return X_tensor, obs_tensor
+        return X_tensor, obs_tensor
 
     def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, sparse.csr_matrix]:
         safe_batch_size = min(batch_size, len(self.obs_batch) - self.i)
@@ -224,11 +224,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
-        dense_X: bool = False,
+        sparse_X: bool = False,
         num_workers: int = 0,
         buffer_bytes: int = DEFAULT_BUFFER_BYTES,
     ) -> None:
-        if num_workers > 1 and not dense_X:
+        if num_workers > 1 and sparse_X:
             raise NotImplementedError(
                 "torch does not work with sparse tensors in multi-processing mode "
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
@@ -242,7 +242,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.var_query = var_query
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
-        self.dense_X = dense_X
+        self.sparse_X = sparse_X
         # TODO: This will control the obs SOMA batch sizes, and should be replaced with a row count once TileDB-SOMA
         #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
         #  should be tuned independently.
@@ -308,7 +308,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             encoders=self.obs_encoders(),
             stats=self._stats,
             obs_column_names=self.obs_column_names,
-            dense_X=self.dense_X,
+            sparse_X=self.sparse_X,
             buffer_bytes=self.buffer_bytes,
         )
 
@@ -404,7 +404,7 @@ if __name__ == "__main__":
         layer_name_arg,
         obs_value_filter_arg,
         column_names_arg,
-        dense_X_arg,
+        sparse_X_arg,
         torch_batch_size_arg,
         num_workers_arg,
     ) = sys.argv[1:]
@@ -421,7 +421,7 @@ if __name__ == "__main__":
         batch_size=int(torch_batch_size_arg),
         num_workers=int(num_workers_arg),
         buffer_bytes=2**12,
-        dense_X=dense_X_arg.lower() == "dense",
+        sparse_X=sparse_X_arg.lower() == "sparse",
     )
 
     dp_shuffle = exp_datapipe.shuffle(buffer_size=len(exp_datapipe))

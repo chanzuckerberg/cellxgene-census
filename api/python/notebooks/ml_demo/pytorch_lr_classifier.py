@@ -90,7 +90,7 @@ def run():
         var_query=soma.AxisQuery(value_filter=(var_value_filter or None)),
         obs_column_names=[predicted_label],
         # TODO: sparse not working with LogisticRegression
-        dense_X=True,
+        sparse_X=True,
         batch_size=16,
     )
 

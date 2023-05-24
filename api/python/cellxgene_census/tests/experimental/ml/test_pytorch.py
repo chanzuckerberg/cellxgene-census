@@ -118,7 +118,7 @@ def test_non_batched(soma_experiment: Experiment) -> None:
     row_iter = iter(exp_data_pipe)
 
     row = next(row_iter)
-    assert row[0].to_dense().tolist() == [0, 1, 0]
+    assert row[0].int().tolist() == [0, 1, 0]
     assert row[1].tolist() == [0, 0]
 
 
@@ -131,11 +131,11 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
     batch_iter = iter(exp_data_pipe)
 
     batch = next(batch_iter)
-    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[0].int().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
     assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 
     batch = next(batch_iter)
-    assert batch[0].to_dense().tolist() == [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+    assert batch[0].int().tolist() == [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
     assert batch[1].tolist() == [[3, 3], [4, 4], [5, 5]]
 
     with pytest.raises(StopIteration):
@@ -152,7 +152,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
 
     next(batch_iter)
     batch = next(batch_iter)
-    assert batch[0].to_dense().tolist() == [[1, 0, 1], [0, 1, 0]]
+    assert batch[0].int().tolist() == [[1, 0, 1], [0, 1, 0]]
 
     with pytest.raises(StopIteration):
         next(batch_iter)
@@ -167,7 +167,7 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
     batch_iter = iter(exp_data_pipe)
 
     batch = next(batch_iter)
-    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[0].int().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
     assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 
     with pytest.raises(StopIteration):
@@ -193,20 +193,37 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
 
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
-def test_dense_output(soma_experiment: Experiment) -> None:
+def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        ms_name="RNA",
+        layer_name="raw",
+        obs_column_names=["label"],
+        sparse_X=True,
+    )
+    batch_iter = iter(exp_data_pipe)
+
+    batch = next(batch_iter)
+    assert isinstance(batch[1], Tensor)
+    assert batch[0].to_dense().tolist() == [0, 1, 0]
+
+
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+def test_sparse_output__batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         ms_name="RNA",
         layer_name="raw",
         obs_column_names=["label"],
         batch_size=3,
-        dense_X=True,
+        sparse_X=True,
     )
     batch_iter = iter(exp_data_pipe)
 
     batch = next(batch_iter)
     assert isinstance(batch[1], Tensor)
-    assert batch[0].tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
 
 
 # noinspection PyTestParametrized
@@ -257,14 +274,14 @@ def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
     mock_experiment = Mock(spec=Experiment)
     with pytest.raises(NotImplementedError):
         ExperimentDataPipe(
-            mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=False
+            mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, sparse_X=True
         )
 
 
 def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
     mock_experiment = Mock(spec=Experiment)
     dp = ExperimentDataPipe(
-        mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, dense_X=True
+        mock_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=2, sparse_X=False
     )
     assert dp is not None
 
@@ -305,7 +322,7 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
     """
 
     dp = ExperimentDataPipe(
-        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=1, dense_X=True
+        soma_experiment, ms_name="RNA", layer_name="raw", obs_column_names=["label"], num_workers=1, sparse_X=True
     )
     dl = experiment_dataloader(dp)
     dp.obs_encoders()  # trigger query building
