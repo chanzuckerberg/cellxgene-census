@@ -26,9 +26,9 @@ test_that("get_presence_matrix", {
     expect_true(inherits(pm, "matrixZeroBasedView"))
     pm1 <- pm$get_one_based_matrix()
     expect_s4_class(pm1, "sparseMatrix")
-    expect_equal(pm1$nrow(), nrow(datasets))
+    expect_equal(pm$nrow(), nrow(datasets))
     expect_equal(
-      pm1$ncol(),
+      pm$ncol(),
       nrow(census$get("census_data")$get(org)$ms$get("RNA")$var$read(column_names = "soma_joinid"))
     )
     expect_equal(min(pm1), 0)
