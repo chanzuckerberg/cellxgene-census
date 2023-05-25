@@ -196,14 +196,15 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.stats.nnz += self.X_batch.nnz
         self.stats.elapsed += int(time() - start_time)
         self.stats.n_soma_batches += 1
+        # TODO: also show per-batch stats (non-cumulative)
         pytorch_logger.debug(f"Retrieved batch: shape={self.X_batch.shape}, cum_stats: {self.stats}")
         return self.obs_batch_
 
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """
-    An iterable-style data pipe that reads obs and X data from a SOMA Experiment, and returns an iterator of tuples of
-    torch tensors:
+    An iterable-style PyTorch data pipe that reads obs and X data from a SOMA Experiment, and returns an iterator of
+    tuples of torch tensors:
 
     (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
      tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
@@ -239,7 +240,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def __init__(
         self,
         experiment: soma.Experiment,
-        ms_name: str,
+        measurement_name: str,
         layer_name: str,
         obs_query: Optional[soma.AxisQuery] = None,
         var_query: Optional[soma.AxisQuery] = None,
@@ -249,15 +250,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         num_workers: int = 0,
         soma_buffer_bytes: Optional[int] = None,
     ) -> None:
-        if num_workers > 1 and sparse_X:
-            raise NotImplementedError(
-                "torch does not work with sparse tensors in multi-processing mode "
-                "(see https://github.com/pytorch/pytorch/issues/20248)"
-            )
-
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
-        self.ms_name = ms_name
+        self.measurement_name = measurement_name
         self.layer_name = layer_name
         self.obs_query = obs_query
         self.var_query = var_query
@@ -279,14 +274,12 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             return
 
         # TODO: support multiple layers, per somacore.query.query.ExperimentAxisQuery.to_anndata()
-        # TODO: for dev-time use, specify smaller batch size via platform_config, once supported
-
         # TODO: handle closing of exp when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
         exp = _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes)
 
         self._query = exp.axis_query(
-            measurement_name=self.ms_name,
+            measurement_name=self.measurement_name,
             obs_query=self.obs_query,
             var_query=self.var_query,
         )
@@ -296,7 +289,15 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         worker_info = torch.utils.data.get_worker_info()
         if worker_info:
             # multi-processing mode
+
+            if worker_info.num_workers > 0 and self.sparse_X:
+                raise NotImplementedError(
+                    "torch does not work with sparse tensors in multi-processing mode "
+                    "(see https://github.com/pytorch/pytorch/issues/20248)"
+                )
+
             partition, num_partitions = worker_info.id, worker_info.num_workers
+
         else:
             partition, num_partitions = 0, 1
 
@@ -323,7 +324,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             var_joinids=self._query.var_joinids(),
             exp_uri=self.exp_uri,
             aws_region=self.aws_region,
-            measurement_name=self.ms_name,
+            measurement_name=self.measurement_name,
             X_layer_name=self.layer_name,
             batch_size=self.batch_size,
             encoders=self.obs_encoders(),
@@ -431,13 +432,12 @@ if __name__ == "__main__":
 
     exp_datapipe = ExperimentDataPipe(
         experiment=census["census_data"]["homo_sapiens"],
-        ms_name=measurement_name_arg,
+        measurement_name=measurement_name_arg,
         layer_name=layer_name_arg,
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter_arg or None)),
         var_query=soma.AxisQuery(coords=(slice(1, 9),)),
         obs_column_names=column_names_arg.split(","),
         batch_size=int(torch_batch_size_arg),
-        num_workers=int(num_workers_arg),
         soma_buffer_bytes=2**12,
         sparse_X=sparse_X_arg.lower() == "sparse",
     )
