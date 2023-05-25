@@ -237,11 +237,13 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
     _stats: Stats
 
+    # TODO: Consider aligning params with get_anndata() params, but consider that this code may also end up in
+    #  TileDB-SOMA, in which case it should be aligned with ExperimentAxisQuery param
     def __init__(
         self,
         experiment: soma.Experiment,
         measurement_name: str,
-        layer_name: str,
+        X_name: str,
         obs_query: Optional[soma.AxisQuery] = None,
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
@@ -253,7 +255,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
         self.measurement_name = measurement_name
-        self.layer_name = layer_name
+        self.layer_name = X_name
         self.obs_query = obs_query
         self.var_query = var_query
         self.obs_column_names = obs_column_names
@@ -274,7 +276,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             return
 
         # TODO: support multiple layers, per somacore.query.query.ExperimentAxisQuery.to_anndata()
-        # TODO: handle closing of exp when iterator is no longer in use; may need be used as a ContextManager,
+        # TODO: handle closing of `_query` (and transitively, `exp`) when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
         exp = _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes)
 
@@ -433,7 +435,7 @@ if __name__ == "__main__":
     exp_datapipe = ExperimentDataPipe(
         experiment=census["census_data"]["homo_sapiens"],
         measurement_name=measurement_name_arg,
-        layer_name=layer_name_arg,
+        X_name=layer_name_arg,
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter_arg or None)),
         var_query=soma.AxisQuery(coords=(slice(1, 9),)),
         obs_column_names=column_names_arg.split(","),

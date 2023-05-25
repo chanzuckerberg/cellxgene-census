@@ -121,7 +121,7 @@ def soma_experiment(
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_non_batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"]
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"]
     )
     row_iter = iter(exp_data_pipe)
 
@@ -135,7 +135,7 @@ def test_non_batched(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -156,7 +156,7 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(5, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -173,7 +173,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -192,7 +192,7 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
-        layer_name="raw",
+        X_name="raw",
         obs_query=AxisQuery(coords=([],)),
         obs_column_names=["label"],
         batch_size=3,
@@ -210,7 +210,7 @@ def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
-        layer_name="raw",
+        X_name="raw",
         obs_column_names=["label"],
         sparse_X=True,
     )
@@ -228,7 +228,7 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
-        layer_name="raw",
+        X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
         sparse_X=True,
@@ -247,7 +247,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
-        layer_name="raw",
+        X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
     )
@@ -265,7 +265,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dl = experiment_dataloader(dp)
     torch_data = [row for row in dl]
 
@@ -279,7 +279,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
     )
     dl = experiment_dataloader(dp)
     torch_data = [row for row in dl]
@@ -305,7 +305,7 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
     dl = experiment_dataloader(dp_train)
 
@@ -317,7 +317,7 @@ def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", layer_name="raw", obs_column_names=["label"])
+    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dp = dp.shuffle()
     dl = experiment_dataloader(dp)
 
@@ -342,7 +342,7 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
     dp = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
-        layer_name="raw",
+        X_name="raw",
         obs_column_names=["label"],
         num_workers=1,
         sparse_X=True,

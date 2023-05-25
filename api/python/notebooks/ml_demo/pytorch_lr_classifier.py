@@ -85,7 +85,7 @@ def run():
     exp_dp = ExperimentDataPipe(
         census["census_data"]["homo_sapiens"],
         measurement_name="RNA",
-        layer_name="raw",
+        X_name="raw",
         obs_query=soma.AxisQuery(value_filter=(obs_value_filter or None)),
         var_query=soma.AxisQuery(value_filter=(var_value_filter or None)),
         obs_column_names=[predicted_label],
