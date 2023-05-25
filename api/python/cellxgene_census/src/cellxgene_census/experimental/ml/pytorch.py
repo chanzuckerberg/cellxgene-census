@@ -28,10 +28,6 @@ ObsDatum = Tuple[Tensor, torch.sparse_coo_tensor]
 
 Encoders = Dict[str, LabelEncoder]
 
-DEFAULT_BUFFER_BYTES = 1024**3
-
-DEFAULT_WORKER_TIMEOUT = 120
-
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 pytorch_logger.setLevel(logging.INFO)
 
@@ -58,14 +54,18 @@ class Stats:
 
 
 def _open_experiment(
-    uri: str, aws_region: Optional[str] = None, buffer_bytes: int = DEFAULT_BUFFER_BYTES
+    uri: str, aws_region: Optional[str] = None, soma_buffer_bytes: Optional[int] = None
 ) -> soma.Experiment:
-    context = _build_soma_tiledb_context(aws_region).replace(
-        tiledb_config={
-            "py.init_buffer_bytes": buffer_bytes,
-            "soma.init_buffer_bytes": buffer_bytes,
-        }
-    )
+    context = _build_soma_tiledb_context(aws_region)
+
+    if soma_buffer_bytes is not None:
+        context = context.replace(
+            tiledb_config={
+                "py.init_buffer_bytes": soma_buffer_bytes,
+                "soma.init_buffer_bytes": soma_buffer_bytes,
+            }
+        )
+
     return soma.Experiment.open(uri, context=context)
 
 
@@ -100,7 +100,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         stats: Stats,
         obs_column_names: Sequence[str],
         sparse_X: bool,
-        buffer_bytes: int = DEFAULT_BUFFER_BYTES,
+        soma_buffer_bytes: Optional[int] = None,
     ) -> None:
         self.obs_joinids = obs_joinids
         self.var_joinids = var_joinids
@@ -108,7 +108,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         self.sparse_X = sparse_X
 
         # holding reference to SOMA object prevents it from being closed
-        self.exp = _open_experiment(exp_uri, aws_region, buffer_bytes=buffer_bytes)
+        self.exp = _open_experiment(exp_uri, aws_region, soma_buffer_bytes=soma_buffer_bytes)
         self.X: soma.SparseNDArray = self.exp.ms[measurement_name].X[X_layer_name]
         self.obs_tables_iter = self.exp.obs.read(
             coords=(obs_joinids,), batch_size=somacore.BatchSize(), column_names=obs_column_names
@@ -247,7 +247,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         batch_size: int = 1,
         sparse_X: bool = False,
         num_workers: int = 0,
-        buffer_bytes: int = DEFAULT_BUFFER_BYTES,
+        soma_buffer_bytes: Optional[int] = None,
     ) -> None:
         if num_workers > 1 and sparse_X:
             raise NotImplementedError(
@@ -264,10 +264,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
         self.sparse_X = sparse_X
-        # TODO: This will control the obs SOMA batch sizes, and should be replaced with a row count once TileDB-SOMA
-        #  supports `batch_size` param. Unfortunately, the buffer_bytes also impacts the X data fetch efficiency, which
-        #  should be tuned independently.
-        self.buffer_bytes = buffer_bytes
+        # TODO: This will control the SOMA batch sizes, and could be replaced with a row count once TileDB-SOMA
+        #  supports `batch_size` param. It affects both the obs and X read operations.
+        self.soma_buffer_bytes = soma_buffer_bytes
         self._query = None
         self._stats = Stats()
         self._encoders = None
@@ -284,7 +283,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         # TODO: handle closing of exp when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
-        exp = _open_experiment(self.exp_uri, self.aws_region, buffer_bytes=self.buffer_bytes)
+        exp = _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes)
 
         self._query = exp.axis_query(
             measurement_name=self.ms_name,
@@ -331,7 +330,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             stats=self._stats,
             obs_column_names=self.obs_column_names,
             sparse_X=self.sparse_X,
-            buffer_bytes=self.buffer_bytes,
+            soma_buffer_bytes=self.soma_buffer_bytes,
         )
 
     def __len__(self) -> int:
@@ -398,12 +397,9 @@ def experiment_dataloader(
     batch_sampler, collate_fn).
     """
 
-    unsupported_dataloader_args = ["sampler", "batch_sampler", "collate_fn"]
+    unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
-
-    if "batch_size" in dataloader_kwargs:
-        del dataloader_kwargs["batch_size"]
 
     return DataLoader(
         datapipe,
@@ -442,7 +438,7 @@ if __name__ == "__main__":
         obs_column_names=column_names_arg.split(","),
         batch_size=int(torch_batch_size_arg),
         num_workers=int(num_workers_arg),
-        buffer_bytes=2**12,
+        soma_buffer_bytes=2**12,
         sparse_X=sparse_X_arg.lower() == "sparse",
     )
 
