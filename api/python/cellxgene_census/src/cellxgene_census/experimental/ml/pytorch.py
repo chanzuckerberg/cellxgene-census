@@ -237,8 +237,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
     _stats: Stats
 
-    # TODO: Consider aligning params with get_anndata() params, but consider that this code may also end up in
-    #  TileDB-SOMA, in which case it should be aligned with ExperimentAxisQuery param
+    # TODO: Consider adding another convenience method wrapper to construct this object whose signature is more closely
+    #  aligned with get_anndata() params (i.e. "exploded" AxisQuery params).
     def __init__(
         self,
         experiment: soma.Experiment,
