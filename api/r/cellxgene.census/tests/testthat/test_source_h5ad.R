@@ -1,6 +1,6 @@
 test_that("get_source_h5ad_uri", {
-  census_region <- get_census_version_description("latest")$soma.s3_region
-  census <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census_region <- get_census_version_description("stable")$soma.s3_region
+  census <- open_soma("stable", tiledbsoma_ctx = test_tiledbsoma_ctx)
   on.exit(census$close(), add = TRUE)
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
     column_names = c("dataset_id", "dataset_h5ad_path")
@@ -10,7 +10,7 @@ test_that("get_source_h5ad_uri", {
   apply(datasets, 1, function(dataset) {
     dataset <- as.list(dataset)
 
-    loc <- get_source_h5ad_uri(dataset$dataset_id)
+    loc <- get_source_h5ad_uri(dataset$dataset_id, census = census)
 
     expect_true(endsWith(loc$uri, paste("/", dataset$dataset_h5ad_path, sep = "")))
     expect_equal(loc$s3_region, census_region)
@@ -35,13 +35,13 @@ test_that("download_source_h5ad", {
   withr::defer(unlink(fn))
   expect_false(file.exists(fn))
 
-  download_source_h5ad(dataset$dataset_id, fn)
+  download_source_h5ad(dataset$dataset_id, fn, census = census)
   expect_true(file.exists(fn))
   expect_gt(file.size(fn), 0)
 
   # refuse overwrite
-  expect_error(download_source_h5ad(dataset$dataset_id, fn))
+  expect_error(download_source_h5ad(dataset$dataset_id, fn, census = census))
 
   # refuse directory
-  expect_error(download_source_h5ad(dataset$dataset_id, tempdir()))
+  expect_error(download_source_h5ad(dataset$dataset_id, tempdir(), census = census))
 })

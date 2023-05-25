@@ -1,5 +1,5 @@
 test_that("open_soma", {
-  coll <- open_soma("latest")
+  coll <- open_soma("stable")
   on.exit(coll$close(), add = TRUE)
   expect_true(coll$is_open())
   expect_equal(coll$mode(), "READ")
@@ -8,12 +8,12 @@ test_that("open_soma", {
   expect_true(coll$get("census_data")$get("homo_sapiens")$exists())
 })
 
-test_that("open_soma latest/default", {
+test_that("open_soma stable/default", {
   coll_default <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
   on.exit(coll_default$close(), add = TRUE)
-  coll_latest <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
-  on.exit(coll_latest$close(), add = TRUE)
-  expect_equal(coll_default$uri, coll_latest$uri)
+  coll_stable <- open_soma("stable", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  on.exit(coll_stable$close(), add = TRUE)
+  expect_equal(coll_default$uri, coll_stable$uri)
 })
 
 test_that("open_soma with custom context/config", {
@@ -28,7 +28,7 @@ test_that("open_soma with custom context/config", {
 
 test_that("open_soma does not sign AWS S3 requests", {
   Sys.setenv(AWS_ACCESS_KEY_ID = "fake_id", AWS_SECRET_ACCESS_KEY = "fake_key")
-  coll <- open_soma("latest")
+  coll <- open_soma("stable")
   on.exit(coll$close(), add = TRUE)
   expect_true(coll$exists())
   expect_true(coll$get("census_data")$get("homo_sapiens")$exists())
