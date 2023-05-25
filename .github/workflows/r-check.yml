@@ -27,6 +27,8 @@ jobs:
           cache: false
       - name: styler
         run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
+      - name: check session info
+        run: Rscript -e 'sessionInfo()'
       - uses: r-lib/actions/check-r-package@v2
         with:
           working-directory: ./api/r/cellxgene.census

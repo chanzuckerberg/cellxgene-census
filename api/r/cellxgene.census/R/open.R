@@ -60,6 +60,9 @@ new_SOMATileDBContext_for_census <- function(census_version_description, ...) {
     cfg <- c(cfg, c("vfs.s3.region" = census_version_description$soma.s3_region))
   }
 
+  # Add unsigned requests
+  cfg <- c(cfg, c("vfs.s3.no_sign_request" = "true"))
+
   # merge any additional config from args
   config_args <- list(...)
   for (key in names(config_args)) {
