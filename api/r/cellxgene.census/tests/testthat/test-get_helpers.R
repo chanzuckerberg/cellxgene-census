@@ -24,11 +24,11 @@ test_that("get_presence_matrix", {
   for (org in c("homo_sapiens", "mus_musculus")) {
     pm <- get_presence_matrix(census, org)
     expect_true(inherits(pm, "matrixZeroBasedView"))
-    pm1 <- tiledbsoma::as.one.based(pm)
+    pm1 <- pm$get_one_based_matrix()
     expect_s4_class(pm1, "sparseMatrix")
-    expect_equal(nrow(pm), nrow(datasets))
+    expect_equal(pm1$nrow(), nrow(datasets))
     expect_equal(
-      ncol(pm),
+      pm1$ncol(),
       nrow(census$get("census_data")$get(org)$ms$get("RNA")$var$read(column_names = "soma_joinid"))
     )
     expect_equal(min(pm1), 0)
