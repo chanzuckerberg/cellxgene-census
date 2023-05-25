@@ -202,10 +202,31 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """
-    An iterable-style data pipe.
+    An iterable-style data pipe that reads obs and X data from a SOMA Experiment, and returns an iterator of tuples of
+    torch tensors:
+
+    (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
+     tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
+
+    Supports batching via `batch_size` param:
+    DataLoader(..., batch_size=3, ...):
+
+    (tensor([[0., 0., 0., 0., 0., 1., 0., 0., 0.],     # X batch
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.]]),
+     tensor([[2415,    0,    0],                       # obs batch
+             [2416,    0,    4],
+             [2417,    0,    3]], dtype=torch.int32))
+
+    Obs attribute values are encoded as categoricals. Values can be decoded by obtaining the encoder for a given
+    attribute:
+
+    exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
     """
 
     _query: Optional[soma.ExperimentAxisQuery]
+    """In multi-processing mode (i.e. num_workers > 0), this ExperimentAxisQuery object will *not* be pickled; 
+    each worker will instantiate a new query"""
 
     _obs_joinids_partitioned: Optional[pa.Array]
 
@@ -275,6 +296,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         worker_info = torch.utils.data.get_worker_info()
         if worker_info:
+            # multi-processing mode
             partition, num_partitions = worker_info.id, worker_info.num_workers
         else:
             partition, num_partitions = 0, 1
