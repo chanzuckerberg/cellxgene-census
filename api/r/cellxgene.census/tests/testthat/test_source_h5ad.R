@@ -4,7 +4,7 @@ test_that("get_source_h5ad_uri", {
   on.exit(census$close(), add = TRUE)
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
     column_names = c("dataset_id", "dataset_h5ad_path")
-  ))
+  )$concat())
   datasets <- datasets[sample(nrow(datasets), 10), ]
 
   apply(datasets, 1, function(dataset) {
@@ -31,7 +31,7 @@ test_that("download_source_h5ad", {
   on.exit(census$close(), add = TRUE)
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read(
     column_names = c("dataset_id", "dataset_total_cell_count")
-  ))
+  )$concat())
   dataset <- as.list(datasets[which.min(datasets$dataset_total_cell_count), ])
 
   # fetch its h5ad

@@ -26,7 +26,7 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "stable", census = 
   dataset <- as.data.frame(
     census$get("census_info")$get("datasets")$read(
       value_filter = paste("dataset_id == '", dataset_id, "'", sep = "")
-    )
+    )$concat()
   )
   stopifnot("Unknown dataset_id" = nrow(dataset) == 1)
   dataset <- as.list(dataset[1, ])

@@ -29,7 +29,7 @@ test_that("get_presence_matrix", {
     expect_equal(pm$nrow(), nrow(datasets))
     expect_equal(
       pm$ncol(),
-      nrow(census$get("census_data")$get(org)$ms$get("RNA")$var$read(column_names = "soma_joinid"))
+      nrow(census$get("census_data")$get(org)$ms$get("RNA")$var$read(column_names = "soma_joinid")$concat())
     )
     expect_equal(min(pm1), 0)
     expect_equal(max(pm1), 1)
