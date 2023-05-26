@@ -10,7 +10,11 @@ test_that("get_source_h5ad_uri", {
   apply(datasets, 1, function(dataset) {
     dataset <- as.list(dataset)
 
-    loc <- get_source_h5ad_uri(dataset$dataset_id, census = census)
+    loc <- get_source_h5ad_uri(
+      dataset$dataset_id,
+      census_version = "latest",
+      census = census
+    )
 
     expect_true(endsWith(loc$uri, paste("/", dataset$dataset_h5ad_path, sep = "")))
     expect_equal(loc$s3_region, census_region)
@@ -35,13 +39,28 @@ test_that("download_source_h5ad", {
   withr::defer(unlink(fn))
   expect_false(file.exists(fn))
 
-  download_source_h5ad(dataset$dataset_id, fn, census = census)
+  download_source_h5ad(
+    dataset$dataset_id,
+    fn,
+    census_version = "latest",
+    census = census
+  )
   expect_true(file.exists(fn))
   expect_gt(file.size(fn), 0)
 
   # refuse overwrite
-  expect_error(download_source_h5ad(dataset$dataset_id, fn, census = census))
+  expect_error(download_source_h5ad(
+    dataset$dataset_id,
+    fn,
+    census_version = "latest",
+    census = census
+  ))
 
   # refuse directory
-  expect_error(download_source_h5ad(dataset$dataset_id, tempdir(), census = census))
+  expect_error(download_source_h5ad(
+    dataset$dataset_id,
+    tempdir(),
+    census_version = "latest",
+    census = census
+  ))
 })
