@@ -1,5 +1,5 @@
 test_that("get_experiment", {
-  census <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
   on.exit(census$close(), add = TRUE)
 
   cases <- list(
@@ -18,7 +18,7 @@ test_that("get_experiment", {
 })
 
 test_that("get_presence_matrix", {
-  census <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
   on.exit(census$close(), add = TRUE)
   datasets <- as.data.frame(census$get("census_info")$get("datasets")$read())
   for (org in c("homo_sapiens", "mus_musculus")) {
@@ -37,7 +37,7 @@ test_that("get_presence_matrix", {
 })
 
 test_that("get_seurat", {
-  census <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
   on.exit(census$close(), add = TRUE)
   seurat <- get_seurat(
     census,
@@ -58,7 +58,7 @@ test_that("get_seurat", {
 })
 
 test_that("get_seurat coords", {
-  census <- open_soma("latest", tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
   on.exit(census$close(), add = TRUE)
   seurat <- get_seurat(
     census,
