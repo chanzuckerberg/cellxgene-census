@@ -1,5 +1,5 @@
 test_that("get_experiment", {
-  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
 
   cases <- list(
@@ -18,18 +18,18 @@ test_that("get_experiment", {
 })
 
 test_that("get_presence_matrix", {
-  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
-  datasets <- as.data.frame(census$get("census_info")$get("datasets")$read())
+  datasets <- as.data.frame(census$get("census_info")$get("datasets")$read()$concat())
   for (org in c("homo_sapiens", "mus_musculus")) {
     pm <- get_presence_matrix(census, org)
-    expect_true(inherits(pm, "matrixZeroBasedView"))
-    pm1 <- tiledbsoma::as.one.based(pm)
+    expect_true("matrixZeroBasedView" %in% class(pm))
+    pm1 <- pm$get_one_based_matrix()
     expect_s4_class(pm1, "sparseMatrix")
-    expect_equal(nrow(pm), nrow(datasets))
+    expect_equal(pm$nrow(), nrow(datasets))
     expect_equal(
-      ncol(pm),
-      nrow(census$get("census_data")$get(org)$ms$get("RNA")$var$read(column_names = "soma_joinid"))
+      pm$ncol(),
+      nrow(census$get("census_data")$get(org)$ms$get("RNA")$var$read(column_names = "soma_joinid")$concat())
     )
     expect_equal(min(pm1), 0)
     expect_equal(max(pm1), 1)
@@ -37,7 +37,7 @@ test_that("get_presence_matrix", {
 })
 
 test_that("get_seurat", {
-  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   seurat <- get_seurat(
     census,
@@ -58,7 +58,7 @@ test_that("get_seurat", {
 })
 
 test_that("get_seurat coords", {
-  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   seurat <- get_seurat(
     census,
@@ -75,7 +75,7 @@ test_that("get_seurat coords", {
 })
 
 test_that("get_seurat allows missing obs or var filter", {
-  census <- open_soma(tiledbsoma_ctx = test_tiledbsoma_ctx)
+  census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
 
   obs_value_filter <- "tissue == 'aorta'"

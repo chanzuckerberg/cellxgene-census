@@ -1,6 +1,6 @@
 #' Open the Cell Census
 #'
-#' @param census_version The version of the Census, e.g., "latest".
+#' @param census_version The version of the Census, e.g., "stable".
 #' @param uri The URI containing the Census SOMA objects. If specified, takes
 #'            precedence over `census_version`.
 #' @param tiledbsoma_ctx A `tiledbsoma::SOMATileDBContext` built using
@@ -16,9 +16,17 @@
 #' @export
 #'
 #' @examples
-open_soma <- function(census_version = "latest", uri = NULL, tiledbsoma_ctx = NULL) {
+open_soma <- function(census_version = "stable", uri = NULL, tiledbsoma_ctx = NULL) {
   if (is.null(uri) || is.null(tiledbsoma_ctx)) {
     description <- get_census_version_description(census_version)
+    if (nchar(description$alias) > 0) {
+      message(paste("The ", description$alias, " Census release is currently ",
+        description$release_build, ". Specify census_version = \"",
+        description$release_build,
+        "\" in future calls to open_soma() to ensure data consistency.",
+        sep = ""
+      ))
+    }
     if (is.null(uri)) {
       uri <- description$soma.uri
     }
@@ -38,7 +46,7 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #' Create SOMATileDBContext for Cell Census
 #' @description Create a SOMATileDBContext suitable for using with `open_soma()`.
 #' Typically `open_soma()` creates a context automatically, but it can be created
-#' separately in order to set custom configuration option or to share it between
+#' separately in order to set custom configuration options or to share it between
 #' multiple open Census handles.
 #'
 #' @param census_version_description The result of `get_census_version_description()`

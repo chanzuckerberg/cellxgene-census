@@ -8,7 +8,8 @@ download_source_h5ad(
   dataset_id,
   file,
   overwrite = FALSE,
-  census_version = "latest"
+  census_version = "stable",
+  census = NULL
 )
 }
 \arguments{
@@ -18,7 +19,11 @@ download_source_h5ad(
 
 \item{overwrite}{TRUE to allow overwriting an existing file.}
 
-\item{census_version}{The census version.}
+\item{census_version}{The desired Census version.}
+
+\item{census}{An open Census handle for \code{census_version}. If not provided, then
+it will be opened and closed automatically; but it's more efficient
+to reuse a handle if calling \code{download_source_h5ad()} multiple times.}
 }
 \description{
 Download source H5AD to local file name.
