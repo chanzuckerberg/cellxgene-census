@@ -14,10 +14,9 @@ get_presence_matrix(census, organism, measurement_name = "RNA")
 \item{measurement_name}{The measurement object to query. Defaults to \code{RNA}.}
 }
 \value{
-A sparse matrix-like object with dataset join id & feature join id dimensions,
-filled with 1s indicating presence. The sparse matrix is accessed with zero-based
-indexes, since the join id's may be zero. However, any vector- or matrix-valued
-slices taken from the zero-based view will be conventional one-based R objects.
+A \code{tiledbsoma::matrixZeroBasedView} object with dataset join id & feature
+join id dimensions, filled with 1s indicating presence. The sparse matrix
+is accessed with zero-based indexes since the join id's may be zero.
 }
 \description{
 Read the feature dataset presence matrix.

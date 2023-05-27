@@ -4,17 +4,16 @@
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #'
-#' @return A sparse matrix-like object with dataset join id & feature join id dimensions,
-#'         filled with 1s indicating presence. The sparse matrix is accessed with zero-based
-#'         indexes, since the join id's may be zero. However, any vector- or matrix-valued
-#'         slices taken from the zero-based view will be conventional one-based R objects.
+#' @return A `tiledbsoma::matrixZeroBasedView` object with dataset join id & feature
+#'         join id dimensions, filled with 1s indicating presence. The sparse matrix
+#'         is accessed with zero-based indexes since the join id's may be zero.
 #' @export
 #'
 #' @examples
 get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
   exp <- get_experiment(census, organism)
   presence <- exp$ms$get(measurement_name)$get("feature_dataset_presence_matrix")
-  return(presence$read_sparse_matrix_zero_based())
+  return(presence$read()$sparse_matrix(zero_based = TRUE)$concat())
 }
 
 #' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a

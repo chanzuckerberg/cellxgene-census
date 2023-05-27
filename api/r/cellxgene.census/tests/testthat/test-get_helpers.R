@@ -20,10 +20,10 @@ test_that("get_experiment", {
 test_that("get_presence_matrix", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
-  datasets <- as.data.frame(census$get("census_info")$get("datasets")$read())
+  datasets <- as.data.frame(census$get("census_info")$get("datasets")$read()$concat())
   for (org in c("homo_sapiens", "mus_musculus")) {
     pm <- get_presence_matrix(census, org)
-    expect_true(inherits(pm, "matrixZeroBasedView"))
+    expect_true("matrixZeroBasedView" %in% class(pm))
     pm1 <- pm$get_one_based_matrix()
     expect_s4_class(pm1, "sparseMatrix")
     expect_equal(pm$nrow(), nrow(datasets))
