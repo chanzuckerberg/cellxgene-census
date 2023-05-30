@@ -33,7 +33,17 @@ api_logger.addHandler(logging.StreamHandler())
 
 def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
     """Private. Merge config defaults and return open census as a soma Collection/context."""
-    s3_region = locator.get("s3_region")
+    context = _build_soma_tiledb_context(locator.get("s3_region"), context)
+    return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
+
+
+def _build_soma_tiledb_context(
+    s3_region: Optional[str] = None, context: Optional[soma.options.SOMATileDBContext] = None
+) -> soma.options.SOMATileDBContext:
+    """
+    Private. Build a SOMATileDBContext with sensible defaults. If user-defined context is provided, only update the
+    `vfs.s3.region` only.
+    """
 
     if not context:
         # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
@@ -50,8 +60,7 @@ def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDB
             tiledb_config = context.tiledb_ctx.config()
             tiledb_config["vfs.s3.region"] = s3_region
             context = context.replace(tiledb_config=tiledb_config)
-
-    return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
+    return context
 
 
 def open_soma(

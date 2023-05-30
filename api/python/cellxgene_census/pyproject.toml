@@ -42,6 +42,13 @@ dependencies= [
     "certifi",
 ]
 
+[project.optional-dependencies]
+experimental = [
+    "torch==2.0.1",
+    "torchdata==0.6.1",
+    "scikit-learn==1.2.2",
+]
+
 [project.urls]
 homepage = "https://github.com/chanzuckerberg/cellxgene-census"
 repository = "https://github.com/chanzuckerberg/cellxgene-census"
@@ -69,6 +76,7 @@ plugins = "numpy.typing.mypy_plugin"
 markers = [
     "live_corpus: runs on the live CELLxGENE Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
+    "experimental: tests for the `experimental` package",
 ]
 
 [tool.ruff]
