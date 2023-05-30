@@ -38,7 +38,7 @@ def get_presence_matrix(
         ValueError: if the organism cannot be found.
 
     Lifecycle:
-        Maturing.
+        maturing
 
     Examples:
         >>> get_presence_matrix(census, "Homo sapiens", "RNA")

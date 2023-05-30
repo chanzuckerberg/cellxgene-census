@@ -63,7 +63,7 @@ def get_anndata(
         An :class:`anndata.AnnData` object containing the census slice.
 
     Lifecycle:
-        Maturing.
+        maturing
 
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")

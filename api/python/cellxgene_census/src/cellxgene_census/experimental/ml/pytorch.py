@@ -38,7 +38,7 @@ class Stats:
     Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API.
 
     Lifecycle:
-        Experimental.
+        experimental
     """
 
     n_obs: int = 0
@@ -232,7 +232,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
 
     Lifecycle:
-        Experimental.
+        experimental
     """
 
     _query: Optional[soma.ExperimentAxisQuery]
@@ -273,7 +273,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         Examples:
 
         Lifecycle:
-            Experimental.
+            experimental
         """
 
         self.exp_uri = experiment.uri
@@ -391,7 +391,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         Examples:
 
         Lifecycle:
-            Experimental.
+            experimental
         """
         if self._encoders is not None:
             return self._encoders
@@ -421,7 +421,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         Examples:
 
         Lifecycle:
-            Experimental.
+            experimental
         """
         return self._stats
 
@@ -441,7 +441,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         Examples:
 
         Lifecycle:
-            Experimental.
+            experimental
         """
         self._init()
         assert self._query is not None
@@ -473,7 +473,7 @@ def experiment_dataloader(
     Examples:
 
     Lifecycle:
-        Experimental.
+        experimental
     """
 
     unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
