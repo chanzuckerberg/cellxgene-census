@@ -34,6 +34,13 @@ pytorch_logger.setLevel(logging.INFO)
 
 @attrs
 class Stats:
+    """
+    Statistics about the data retrieved by ExperimentDataPipe from TileDB-SOMA.
+
+    Lifecycle:
+        Maturing.
+    """
+
     n_obs: int = 0
     """The total number of obs rows retrieved"""
 
@@ -223,6 +230,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     attribute:
 
     exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
+
+    Lifecycle:
+        Maturing.
     """
 
     _query: Optional[soma.ExperimentAxisQuery]
@@ -252,6 +262,19 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         num_workers: int = 0,
         soma_buffer_bytes: Optional[int] = None,
     ) -> None:
+        """
+        Construct a new ExperimentDataPipe.
+
+        Args:
+
+        Returns: ExperimentDataPipe
+
+        Examples:
+
+        Lifecycle:
+            Experimental.
+        """
+
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
         self.measurement_name = measurement_name
@@ -356,6 +379,18 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self._query = None
 
     def obs_encoders(self) -> Encoders:
+        """
+        Returns the encoders were used to encode obs column values and that are needed to decode them.
+
+        Args:
+
+        Returns: ```Dict[str, LabelEncoder]``` mapping column names to ```LabelEncoder```s.
+
+        Examples:
+
+        Lifecycle:
+            Experimental.
+        """
         if self._encoders is not None:
             return self._encoders
 
@@ -373,10 +408,37 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         return self._encoders
 
     def stats(self) -> Stats:
+        """
+        Get data loading stats for this ExperimentDataPipe.
+
+        Args: None.
+
+        Returns: ```Stats``` object
+
+        Examples:
+
+        Lifecycle:
+            Experimental.
+        """
         return self._stats
 
     @property
     def shape(self) -> Tuple[int, int]:
+        """
+        Get the shape of the data that will be returned by this ExperimentDataPipe. This is the number of
+        observations (cells) and variables (features) in the returned data. If used in multiprocessing mode
+        (i.e. DataLoader instantiated with num_workers > 0), the observations (cell) count will reflect the size of the
+        partition of the data that is handled by ths active process.
+
+        Args:
+
+        Returns: 2-Tuple of ints, for obs and var counts, respectively
+
+        Examples:
+
+        Lifecycle:
+            Experimental.
+        """
         self._init()
         assert self._query is not None
 
@@ -384,7 +446,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
 
 # Note: must be a top-level function (and not a lambda), to play nice with multiprocessing pickling
-def collate_noop(x: Any) -> Any:
+def _collate_noop(x: Any) -> Any:
     return x
 
 
@@ -398,6 +460,15 @@ def experiment_dataloader(
     Factory method for PyTorch DataLoader. Provides a safer, more convenient interface for instantiating a DataLoader
     that works with the ExperimentDataPipe, since not all of DataLoader's params can be used (batch_size, sampler,
     batch_sampler, collate_fn).
+
+    Args: TODO
+
+    Returns: PyTorch ```DataLoader```
+
+    Examples:
+
+    Lifecycle:
+        Experimental.
     """
 
     unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
@@ -409,7 +480,7 @@ def experiment_dataloader(
         batch_size=None,  # batching is handled by our ExperimentDataPipe
         num_workers=num_workers,
         # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
-        collate_fn=collate_noop,
+        collate_fn=_collate_noop,
         **dataloader_kwargs,
     )
 
