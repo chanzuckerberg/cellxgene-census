@@ -265,12 +265,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         """
         Construct a new ``ExperimentDataPipe``.
 
-        Args:
-
         Returns:
             ``ExperimentDataPipe``.
-
-        Examples:
 
         Lifecycle:
             experimental
@@ -383,12 +379,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         """
         Returns the encoders that were used to encode obs column values and that are needed to decode them.
 
-        Args:
-
         Returns:
             ``Dict[str, LabelEncoder]`` mapping column names to ``LabelEncoder``s.
-
-        Examples:
 
         Lifecycle:
             experimental
@@ -418,8 +410,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         Returns:
             ``Stats`` object.
 
-        Examples:
-
         Lifecycle:
             experimental
         """
@@ -433,12 +423,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         (i.e. DataLoader instantiated with num_workers > 0), the obs (cell) count will reflect the size of the
         partition of the data assigned to the active process.
 
-        Args:
-
         Returns:
             2-tuple of ``int``s, for obs and var counts, respectively.
-
-        Examples:
 
         Lifecycle:
             experimental
@@ -465,12 +451,8 @@ def experiment_dataloader(
     ``DataLoader`` that works with the ``ExperimentDataPipe``, since not all of ``DataLoader``'s params can be
     used (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
 
-    Args: TODO
-
     Returns:
         PyTorch ``DataLoader``.
-
-    Examples:
 
     Lifecycle:
         experimental
