@@ -54,7 +54,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         KeyError: if unknown census_version value.
 
     Lifecycle:
-        Experimental.
+        Maturing.
 
     See Also:
         :func:`get_census_version_directory`: returns the entire directory as a dict.
@@ -83,7 +83,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
         A dictionary that contains release names and their corresponding release description.
 
     Lifecycle:
-        Experimental.
+        Maturing.
 
     See Also:
         :func:`get_census_version_description`: get description by census_version.

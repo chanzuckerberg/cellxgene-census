@@ -89,7 +89,7 @@ def open_soma(
             or a version are specified.
 
     Lifecycle:
-        Experimental.
+        Maturing.
 
     Examples:
         Open the default Census version, using a context manager which will automatically
@@ -169,7 +169,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         KeyError: if either `dataset_id` or `census_version` do not exist.
 
     Lifecycle:
-        Experimental.
+        Maturing.
 
     Examples:
         >>> cellxgene_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
@@ -206,7 +206,7 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
             an existing file), or is not a file.
 
     Lifecycle:
-        Experimental.
+        Maturing.
 
     See Also:
         :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.
