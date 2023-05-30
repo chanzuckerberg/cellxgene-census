@@ -34,6 +34,13 @@ pytorch_logger.setLevel(logging.INFO)
 
 @attrs
 class Stats:
+    """
+    Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API.
+
+    Lifecycle:
+        experimental
+    """
+
     n_obs: int = 0
     """The total number of obs rows retrieved"""
 
@@ -71,21 +78,21 @@ def _open_experiment(
 
 class _ObsAndXIterator(Iterator[ObsDatum]):
     """
-    Iterates through a set of obs and related X rows, specified as `soma_joinid`s. Encapsulates the batch-based data
-    fetching from TileDB-SOMA objects, providing row-based iteration.
+    Iterates through a set of obs and related X rows, specified as ``soma_joinid``s. Encapsulates the batch-based data
+    fetching from SOMA objects, providing row-based iteration.
     """
 
     obs_tables_iter: somacore.ReadIter[pa.Table]
-    """Iterates the TileDB-SOMA batches (tables) of obs data"""
+    """Iterates the SOMA batches (tables) of obs data"""
 
     obs_batch_: pd.DataFrame = pd.DataFrame()
-    """The current TileDB-SOMA batch of obs data"""
+    """The current SOMA batch of obs data"""
 
     X_batch: scipy.matrix = None
-    """All X data for the soma_joinids of the current obs - batch"""
+    """All X data for the ``soma_joinid``s of the current obs - batch"""
 
     i: int = -1
-    """Index into current obs TileDB-SOMA batch"""
+    """Index into current obs ``SOMA`` batch"""
 
     def __init__(
         self,
@@ -177,7 +184,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         Returns the current SOMA batch of obs rows.
         If the current SOMA batch has been fully iterated, loads the next SOMA batch of both obs and X data and returns
         the new obs batch (only).
-        Raises StopIteration if there are no more SOMA batches to retrieve.
+        Raises ``StopIteration`` if there are no more SOMA batches to retrieve.
         """
         if 0 <= self.i < len(self.obs_batch_):
             return self.obs_batch_
@@ -203,30 +210,33 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """
-    An iterable-style PyTorch data pipe that reads obs and X data from a SOMA Experiment, and returns an iterator of
-    tuples of torch tensors:
+    An iterable-style PyTorch ``DataPipe`` that reads obs and X data from a SOMA Experiment, and returns an iterator of
+    tuples of PyTorch ``Tensor``s:
 
-    (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
-     tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
+    >>> (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
+        tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
 
     Supports batching via `batch_size` param:
-    DataLoader(..., batch_size=3, ...):
 
-    (tensor([[0., 0., 0., 0., 0., 1., 0., 0., 0.],     # X batch
-             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
-             [0., 0., 0., 0., 0., 0., 0., 0., 0.]]),
-     tensor([[2415,    0,    0],                       # obs batch
-             [2416,    0,    4],
-             [2417,    0,    3]], dtype=torch.int32))
+    >>> DataLoader(..., batch_size=3, ...):
+        (tensor([[0., 0., 0., 0., 0., 1., 0., 0., 0.],     # X batch
+                 [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                 [0., 0., 0., 0., 0., 0., 0., 0., 0.]]),
+         tensor([[2415,    0,    0],                       # obs batch
+                 [2416,    0,    4],
+                 [2417,    0,    3]], dtype=torch.int32))
 
     Obs attribute values are encoded as categoricals. Values can be decoded by obtaining the encoder for a given
     attribute:
 
-    exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
+    >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
+
+    Lifecycle:
+        experimental
     """
 
     _query: Optional[soma.ExperimentAxisQuery]
-    """In multi-processing mode (i.e. num_workers > 0), this ExperimentAxisQuery object will *not* be pickled; 
+    """In multi-processing mode (i.e. num_workers > 0), this ``ExperimentAxisQuery`` object will *not* be pickled; 
     each worker will instantiate a new query"""
 
     _obs_joinids_partitioned: Optional[pa.Array]
@@ -252,6 +262,16 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         num_workers: int = 0,
         soma_buffer_bytes: Optional[int] = None,
     ) -> None:
+        """
+        Construct a new ``ExperimentDataPipe``.
+
+        Returns:
+            ``ExperimentDataPipe``.
+
+        Lifecycle:
+            experimental
+        """
+
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
         self.measurement_name = measurement_name
@@ -356,6 +376,15 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self._query = None
 
     def obs_encoders(self) -> Encoders:
+        """
+        Returns the encoders that were used to encode obs column values and that are needed to decode them.
+
+        Returns:
+            ``Dict[str, LabelEncoder]`` mapping column names to ``LabelEncoder``s.
+
+        Lifecycle:
+            experimental
+        """
         if self._encoders is not None:
             return self._encoders
 
@@ -373,10 +402,33 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         return self._encoders
 
     def stats(self) -> Stats:
+        """
+        Get data loading stats for this ``ExperimentDataPipe``.
+
+        Args: None.
+
+        Returns:
+            ``Stats`` object.
+
+        Lifecycle:
+            experimental
+        """
         return self._stats
 
     @property
     def shape(self) -> Tuple[int, int]:
+        """
+        Get the shape of the data that will be returned by this ExperimentDataPipe. This is the number of
+        obs (cell) and var (feature) counts in the returned data. If used in multiprocessing mode
+        (i.e. DataLoader instantiated with num_workers > 0), the obs (cell) count will reflect the size of the
+        partition of the data assigned to the active process.
+
+        Returns:
+            2-tuple of ``int``s, for obs and var counts, respectively.
+
+        Lifecycle:
+            experimental
+        """
         self._init()
         assert self._query is not None
 
@@ -384,7 +436,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
 
 # Note: must be a top-level function (and not a lambda), to play nice with multiprocessing pickling
-def collate_noop(x: Any) -> Any:
+def _collate_noop(x: Any) -> Any:
     return x
 
 
@@ -395,9 +447,15 @@ def experiment_dataloader(
     **dataloader_kwargs: Any,
 ) -> DataLoader:
     """
-    Factory method for PyTorch DataLoader. Provides a safer, more convenient interface for instantiating a DataLoader
-    that works with the ExperimentDataPipe, since not all of DataLoader's params can be used (batch_size, sampler,
-    batch_sampler, collate_fn).
+    Factory method for PyTorch ``DataLoader``. Provides a safer, more convenient interface for instantiating a
+    ``DataLoader`` that works with the ``ExperimentDataPipe``, since not all of ``DataLoader``'s params can be
+    used (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
+
+    Returns:
+        PyTorch ``DataLoader``.
+
+    Lifecycle:
+        experimental
     """
 
     unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
@@ -409,7 +467,7 @@ def experiment_dataloader(
         batch_size=None,  # batching is handled by our ExperimentDataPipe
         num_workers=num_workers,
         # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
-        collate_fn=collate_noop,
+        collate_fn=_collate_noop,
         **dataloader_kwargs,
     )
 

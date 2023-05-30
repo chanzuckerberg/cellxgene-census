@@ -3,7 +3,7 @@ import tiledbsoma as soma
 import torch
 
 import cellxgene_census
-from cellxgene_census.experimental.ml.pytorch import experiment_dataloader, ExperimentDataPipe
+import cellxgene_census.experimental.ml as census_ml
 
 # TODO: Convert this to a notebook
 
@@ -82,7 +82,7 @@ def run():
     obs_value_filter = "tissue_general == 'tongue' and is_primary_data == True"
     var_value_filter = ""
 
-    exp_dp = ExperimentDataPipe(
+    exp_dp = census_ml.ExperimentDataPipe(
         census["census_data"]["homo_sapiens"],
         measurement_name="RNA",
         X_name="raw",
@@ -95,7 +95,7 @@ def run():
     dp = exp_dp.shuffle(buffer_size=len(exp_dp))
     dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=RANDOM_SEED)
 
-    dl_train = experiment_dataloader(
+    dl_train = census_ml.experiment_dataloader(
         dp_train,
         # >= 1 uses multiprocessing to load data
         num_workers=0,
