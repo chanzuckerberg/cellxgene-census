@@ -38,7 +38,7 @@ class Stats:
     Statistics about the data retrieved by ExperimentDataPipe from TileDB-SOMA.
 
     Lifecycle:
-        Maturing.
+        Experimental.
     """
 
     n_obs: int = 0
@@ -232,7 +232,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
 
     Lifecycle:
-        Maturing.
+        Experimental.
     """
 
     _query: Optional[soma.ExperimentAxisQuery]
