@@ -19,6 +19,7 @@ def matrix(m: int, n: int) -> sparse.coo_matrix:
     return m
 
 
+@pytest.mark.experimental
 @pytest.mark.parametrize("stride", [101, 53])
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])

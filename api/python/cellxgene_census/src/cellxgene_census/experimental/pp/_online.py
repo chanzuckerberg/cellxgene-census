@@ -176,7 +176,6 @@ def _mbomv_sparse_correct_batches(
     input). Non-sparse and sparse combined using Chan's parallel adaptation of Welford's.
     The code assumes the sparse elements are all zero.
     """
-    # TODO explore prange
     for batch in range(n_batches):
         n_b = n_samples[batch] - n[batch]
         delta = -u[batch]  # assumes u_b == 0

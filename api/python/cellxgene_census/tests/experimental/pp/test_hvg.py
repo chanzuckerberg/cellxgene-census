@@ -9,17 +9,30 @@ import cellxgene_census
 from cellxgene_census.experimental.pp import highly_variable_genes
 
 
+@pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
     "experiment_name,obs_value_filter",
     [
-        ("mus_musculus", 'is_primary_data == True and tissue_general == "lung"'),
+        pytest.param(
+            "mus_musculus", 'is_primary_data == True and tissue_general == "lung"', marks=pytest.mark.expensive
+        ),
         ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
         ("mus_musculus", 'is_primary_data == True and assay == "Smart-seq"'),
     ],
 )
 @pytest.mark.parametrize("n_top_genes", (5, 500))
-@pytest.mark.parametrize("batch_key", (None, "dataset_id", "sex", "tissue_general", "assay"))
+@pytest.mark.parametrize(
+    "batch_key",
+    (
+        None,
+        "dataset_id",
+        pytest.param("sex", marks=pytest.mark.expensive),
+        pytest.param("tissue_general", marks=pytest.mark.expensive),
+        pytest.param("assay", marks=pytest.mark.expensive),
+        pytest.param("sex", marks=pytest.mark.expensive),
+    ),
+)
 @pytest.mark.parametrize("span", (None, 0.5))
 def test_hvg_vs_scanpy(
     n_top_genes: int, obs_value_filter: str, experiment_name: str, batch_key: Optional[str], span: float
@@ -70,6 +83,7 @@ def test_hvg_vs_scanpy(
     ) < 0.01
 
 
+@pytest.mark.experimental
 def test_hvg_error_cases() -> None:
     with cellxgene_census.open_soma(census_version="stable") as census:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
