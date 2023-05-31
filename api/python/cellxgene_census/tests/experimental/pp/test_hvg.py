@@ -18,7 +18,7 @@ from cellxgene_census.experimental.pp import highly_variable_genes
             "mus_musculus", 'is_primary_data == True and tissue_general == "lung"', marks=pytest.mark.expensive
         ),
         ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
-        ("mus_musculus", 'is_primary_data == True and assay == "Smart-seq"'),
+        pytest.param("mus_musculus", 'is_primary_data == True and assay == "Smart-seq"', marks=pytest.mark.expensive),
     ],
 )
 @pytest.mark.parametrize("n_top_genes", (5, 500))
