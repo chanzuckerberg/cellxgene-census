@@ -13,9 +13,9 @@ The following approach is used to manage releases of the Python cellxgene_census
 While not strictly required, this process assumes you have met the following prerequisites:
 
 - You have write access to the `chanzuckerberg/cellxgene-census` repo
-- You have an account on pypi.org and test.pypi.org, both with access to the cellxgene_census project
+- You have an account on pypi.org and test.pypi.org, both with access to the cellxgene_census project. You will need to have created an API token on each account so that you can authenticate to test.pypi.org and pypi.org accounts when using `twine`. Usually this means adding these tokens to your `~/.pypirc` file. See https://pypi.org/help/#apitoken for more information.
 - You have the Github CLI tool (`gh`) installed. See [documentation](https://cli.github.com/).
-- You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/). Note that you will need create an API token on both test.pypi.org and pypi.org accounts and use this to authenticate with `pipx`. See https://pypi.org/help/#apitoken for more information.
+- You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/). 
 
 ## Step 1: Building the package assets
 
@@ -81,7 +81,7 @@ To create a release, perform the following:
    ```
 4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
 5. Optional, _but recommended_: download the asset from the build workflow and validate it.
-6. Create and publish a GitHub Release [here](https://github.com/chanzuckerberg/cellxgene-census/releases/new). Set the release title to the `<SEMVER>`. Use the `Generate Release Notes` button to auto-populate the summary with a changelog. It is reasonable to remove any R-specific or builder-specific entries.
+6. Create and publish a GitHub Release [here](https://github.com/chanzuckerberg/cellxgene-census/releases/new). Set the release title to the `<SEMVER>`. Use the `Generate Release Notes` button to auto-populate the summary with a changelog. It is reasonable to remove any R-specific or builder-specific entries. Add a prelude to the summary, noting any major new features or API changes. 
 
 ## Step 4: Publish assets to PyPi
 
@@ -112,6 +112,6 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    pipx run twine upload ./artifact/*
 6. Test the installation from PyPi, as a final sanity check. Note that it may take a minute for the new release to be visible on pypi.org:
    ```shell
-   pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple cellxgene-census
+   pip install -i cellxgene-census
    python -c "import cellxgene_census; print(cellxgene_census.__version__)"
    ```
