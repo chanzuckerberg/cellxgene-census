@@ -308,6 +308,14 @@ def get_highly_variable_genes(
     Raises:
         ValueError: if the flavor paramater is not `seurat_v3`.
 
+    Examples:
+        >>> hvg = get_highly_variable_genes(
+                census,
+                organism="Mus musculus",
+                obs_value_filter="is_primary_data == True and tissue_general == 'lung'",
+                n_top_genes = 500
+            )
+
     Lifecycle:
         experimental
 
