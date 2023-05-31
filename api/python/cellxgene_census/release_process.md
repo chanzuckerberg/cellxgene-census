@@ -102,4 +102,16 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
 3. Use twine to upload to PyPi (this assumes the downloaded assets are in ./artifact/), e.g.,
    ```shell
    pipx run twine upload ./artifact/*
+<<<<<<< Updated upstream
+||||||| Stash base
+6. Test the installation from PyPi, as a final sanity check. Note that it may take a minute for the new release to be visible on pypi.org:
+   ```shell
+   pip install -i cellxgene-census
+   python -c "import cellxgene_census; print(cellxgene_census.__version__)"
+=======
+6. Test the installation from PyPi, as a final sanity check. Note that it may take a minute for the new release to be visible on pypi.org:
+   ```shell
+   pip install cellxgene-census
+   python -c "import cellxgene_census; print(cellxgene_census.__version__)"
+>>>>>>> Stashed changes
    ```
