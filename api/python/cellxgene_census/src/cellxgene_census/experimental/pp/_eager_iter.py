@@ -1,7 +1,7 @@
+import threading
 from collections import deque
 from concurrent import futures
-import threading
-from typing import Iterator, Optional, TypeVar
+from typing import Deque, Iterator, Optional, TypeVar
 
 _T = TypeVar("_T")
 
@@ -52,7 +52,7 @@ class EagerBufferedIterator(Iterator[_T]):
         self.max_pending = max_pending
         self._pool = pool or futures.ThreadPoolExecutor()
         self._own_pool = pool is None
-        self._pending_results = deque()
+        self._pending_results: Deque[futures.Future[_T]] = deque()
         self._lock = threading.Lock()
         self._begin_next()
 
@@ -66,8 +66,8 @@ class EagerBufferedIterator(Iterator[_T]):
             self._cleanup()
             raise
 
-    def _begin_next(self):
-        def _fut_done(fut):
+    def _begin_next(self) -> None:
+        def _fut_done(fut: futures.Future[_T]) -> None:
             if fut.exception() is None:
                 self._begin_next()
 
