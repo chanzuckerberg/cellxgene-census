@@ -15,7 +15,12 @@ from ._eager_iter import EagerIterator
 from ._online import CountsAccumulator, MeanVarianceAccumulator
 
 """
-Acknowledgements: ScanPy highly variable genes implementation, github.com/scverse/scanpy
+Acknowledgements: ScanPy highly variable genes implementation (scanpy.pp.highly_variable_genes), in turn
+based upon the original implementation in Seurat V3.
+
+Ref: 
+* https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html#scanpy.pp.highly_variable_genes
+* github.com/scverse/scanpy
 
 Notes:
 * Occasionally, skmis.loess will fail with a ValueError similar to
@@ -29,11 +34,12 @@ Notes:
     * https://discourse.scverse.org/t/error-in-highly-variable-gene-selection/276/9
 
   It seems possible to work around by retrying failures with addition of noise/jitter.
-
 """
 
 
 def _get_batch_index(query: soma.ExperimentAxisQuery, batch_key: str) -> pd.Series[Any]:
+    """Return categorical series representing the batch key, with codes that
+    index the key."""
     obs: pd.DataFrame = (
         query.obs(column_names=["soma_joinid", batch_key])
         .concat()
@@ -41,6 +47,7 @@ def _get_batch_index(query: soma.ExperimentAxisQuery, batch_key: str) -> pd.Seri
         .set_index("soma_joinid")[[batch_key]]
         .astype("category")
     )
+    assert obs[batch_key].index.is_categorical
     return obs[batch_key]
 
 
@@ -186,7 +193,7 @@ def highly_variable_genes(
     Identify and annotate highly variable genes contained in the query results.
     The API is modelled on ScanPy `scanpy.pp.highly_variable_genes` API, and
     results returned will mimic ScanPy results. The only `flavor` available
-    is the Seurat V3 method, which assumes count data.
+    is the Seurat V3 method, which assumes count data in the X layer.
 
     Args:
         query:
@@ -216,7 +223,8 @@ def highly_variable_genes(
     Raises:
         ValueError: if the flavor paramater is not `seurat_v3`.
 
-    Lifecycle: experimental
+    Lifecycle:
+        experimental
     """
     if flavor != "seurat_v3":
         raise ValueError('`flavor` must be "seurat_v3"')
@@ -244,6 +252,66 @@ def get_highly_variable_genes(
     span: float = 0.3,
     batch_key: Optional[str] = None,
 ) -> pd.DataFrame:
+    """
+    Convenience wrapper
+
+    Convience wrapper around ``soma.Experiment`` query and ``highly_variable_genes`` function, to build and
+     execute a query, and annotate the query result genes (``var`` dataframe) based upon variability.
+
+    See ``highly_variable_genes`` for more information on
+
+    Args:
+        census:
+            The census object, usually returned by :func:`cellxgene_census.open_soma()`.
+
+        organism:
+            The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+
+        measurement_name:
+            The measurement object to query. Defaults to `RNA`.
+
+        X_name:
+            The ``X`` layer to query. Defaults to `raw`.
+
+        obs_value_filter:
+            Value filter for the ``obs`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+
+        obs_coords:
+            Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+
+        var_value_filter:
+            Value filter for the ``var`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+
+        var_coords:
+            Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+
+        n_top_genes:
+            Number of genes to rank.
+
+        flavor:
+            Method used to annotate genes. Must be `seurat_v3`
+
+        span:
+            For `seurat_v3` flavor, the fraction of obs/cells used to
+            estimate the loess variance model fit.
+
+        batch_key:
+            If specified, gene selection will be done by batch and combined.
+
+    Returns:
+        Pandas DataFrame containing annotations for all `var` values specified by the query.
+
+    Raises:
+        ValueError: if the flavor paramater is not `seurat_v3`.
+
+    Lifecycle:
+        experimental
+
+    """
     exp = _get_experiment(census, organism)
     obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
     var_coords = (slice(None),) if var_coords is None else (var_coords,)
