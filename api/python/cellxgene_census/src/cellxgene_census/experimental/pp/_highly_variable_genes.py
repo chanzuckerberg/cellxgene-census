@@ -47,7 +47,7 @@ def _get_batch_index(query: soma.ExperimentAxisQuery, batch_key: str) -> pd.Seri
         .set_index("soma_joinid")[[batch_key]]
         .astype("category")
     )
-    assert obs[batch_key].index.is_categorical
+    assert obs[batch_key].index.is_categorical()
     return obs[batch_key]
 
 
