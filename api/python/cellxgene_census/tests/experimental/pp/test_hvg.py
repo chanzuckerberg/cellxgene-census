@@ -16,6 +16,7 @@ def small_mem_context() -> soma.SOMATileDBContext:
     cfg = {
         "tiledb_config": {
             "soma.init_buffer_bytes": 100 * 1024**2,
+            "vfs.s3.no_sign_request": True,
         },
     }
     return soma.SOMATileDBContext().replace(**cfg)
