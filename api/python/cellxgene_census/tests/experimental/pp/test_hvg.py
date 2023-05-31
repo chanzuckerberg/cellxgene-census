@@ -7,7 +7,7 @@ import scanpy as sc
 import tiledbsoma as soma
 
 import cellxgene_census
-from cellxgene_census.experimental.pp import highly_variable_genes, get_highly_variable_genes
+from cellxgene_census.experimental.pp import get_highly_variable_genes, highly_variable_genes
 
 
 @pytest.mark.experimental
