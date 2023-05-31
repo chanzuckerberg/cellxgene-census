@@ -176,7 +176,6 @@ def _highly_variable_genes_seurat_v3(
 
 def highly_variable_genes(
     query: soma.ExperimentAxisQuery,
-    /,
     n_top_genes: int = 1000,
     layer: str = "raw",
     flavor: Literal["seurat_v3"] = "seurat_v3",
