@@ -101,7 +101,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    Following the upload, confirm correct presentation on the project page and ability to download install from TestPyPi. 
 4. To test installation from TestPyPi:
    ```shell
-   pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple cellxgene-census
+   pip install --no-cache-dir -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple cellxgene-census
    python -c "import cellxgene_census; print(cellxgene_census.__version__)"
    ```
    Note that the `--extra-index-url` option ensures that any transitive package dependencies that are _not_ available on
@@ -112,6 +112,6 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    pipx run twine upload ./artifact/*
 6. Test the installation from PyPi, as a final sanity check. Note that it may take a minute for the new release to be visible on pypi.org:
    ```shell
-   pip install -i cellxgene-census
+   pip install --no-cache-dir cellxgene-census
    python -c "import cellxgene_census; print(cellxgene_census.__version__)"
    ```
