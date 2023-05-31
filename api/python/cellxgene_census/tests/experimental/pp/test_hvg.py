@@ -1,12 +1,13 @@
 from typing import Dict, Optional, Union
 
 import numpy as np
+import pandas as pd
 import pytest
 import scanpy as sc
 import tiledbsoma as soma
 
 import cellxgene_census
-from cellxgene_census.experimental.pp import highly_variable_genes
+from cellxgene_census.experimental.pp import highly_variable_genes, get_highly_variable_genes
 
 
 @pytest.mark.experimental
@@ -15,9 +16,11 @@ from cellxgene_census.experimental.pp import highly_variable_genes
     "experiment_name,obs_value_filter",
     [
         pytest.param(
-            "mus_musculus", 'is_primary_data == True and tissue_general == "lung"', marks=pytest.mark.expensive
+            "mus_musculus",
+            'is_primary_data == True and tissue_general in ["heart", "lung"]',
+            marks=pytest.mark.expensive,
         ),
-        ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
+        ("mus_musculus", 'is_primary_data == True and tissue_general == "skin of body"'),
         pytest.param("mus_musculus", 'is_primary_data == True and assay == "Smart-seq"', marks=pytest.mark.expensive),
     ],
 )
@@ -81,6 +84,24 @@ def test_hvg_vs_scanpy(
         ).sum()
         / n_top_genes
     ) < 0.01
+
+
+@pytest.mark.experimental
+@pytest.mark.live_corpus
+@pytest.mark.parametrize(
+    "experiment_name,organism,obs_value_filter",
+    [
+        ("mus_musculus", "Mus musculus", 'tissue_general == "liver"'),
+    ],
+)
+def test_get_highly_variable_genes(organism: str, experiment_name: str, obs_value_filter: str) -> None:
+    with cellxgene_census.open_soma(census_version="stable") as census:
+        hvg = get_highly_variable_genes(census, organism=organism, obs_value_filter=obs_value_filter, n_top_genes=1000)
+        n_vars = census["census_data"][experiment_name].ms["RNA"].var.count
+
+    assert isinstance(hvg, pd.DataFrame)
+    assert len(hvg) == n_vars
+    assert len(hvg[hvg.highly_variable]) == 1000
 
 
 @pytest.mark.experimental
