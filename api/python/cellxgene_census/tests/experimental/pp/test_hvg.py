@@ -15,7 +15,7 @@ def small_mem_context() -> soma.SOMATileDBContext:
     """used to keep memory usage smaller for GHA runners."""
     cfg = {
         "tiledb_config": {
-            "soma.init_buffer_bytes": 100 * 1024**2,
+            "soma.init_buffer_bytes": 64 * 1024**2,
             "vfs.s3.no_sign_request": True,
         },
     }
@@ -50,7 +50,12 @@ def small_mem_context() -> soma.SOMATileDBContext:
 )
 @pytest.mark.parametrize("span", (None, 0.5))
 def test_hvg_vs_scanpy(
-    n_top_genes: int, obs_value_filter: str, experiment_name: str, batch_key: Optional[str], span: float
+    n_top_genes: int,
+    obs_value_filter: str,
+    experiment_name: str,
+    batch_key: Optional[str],
+    span: float,
+    small_mem_context: soma.SOMATileDBContext,
 ) -> None:
     """Compare results with ScanPy on a couple of simple tests."""
 
@@ -62,7 +67,7 @@ def test_hvg_vs_scanpy(
     if span is not None:
         kwargs["span"] = span
 
-    with cellxgene_census.open_soma(census_version="stable") as census:
+    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
         # Get the highly variable genes
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
@@ -101,16 +106,23 @@ def test_hvg_vs_scanpy(
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
-    "experiment_name,organism,obs_value_filter",
+    "experiment_name,organism,obs_value_filter,batch_key",
     [
-        ("mus_musculus", "Mus musculus", 'tissue_general == "liver"'),
+        ("mus_musculus", "Mus musculus", 'tissue_general == "liver" and is_primary_data == True', None),
+        ("mus_musculus", "Mus musculus", 'is_primary_data == True and tissue_general == "heart"', "cell_type"),
     ],
 )
 def test_get_highly_variable_genes(
-    organism: str, experiment_name: str, obs_value_filter: str, small_mem_context: soma.SOMATileDBContext
+    organism: str,
+    experiment_name: str,
+    obs_value_filter: str,
+    batch_key: str,
+    small_mem_context: soma.SOMATileDBContext,
 ) -> None:
     with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
-        hvg = get_highly_variable_genes(census, organism=organism, obs_value_filter=obs_value_filter, n_top_genes=1000)
+        hvg = get_highly_variable_genes(
+            census, organism=organism, obs_value_filter=obs_value_filter, n_top_genes=1000, batch_key=batch_key
+        )
         n_vars = census["census_data"][experiment_name].ms["RNA"].var.count
 
     assert isinstance(hvg, pd.DataFrame)
@@ -125,3 +137,17 @@ def test_hvg_error_cases() -> None:
             # Only flavor="seurat_v3" is supported
             with pytest.raises(ValueError):
                 highly_variable_genes(query, flavor="oopsie")  # type: ignore[arg-type]
+
+
+@pytest.mark.experimental
+@pytest.mark.live_corpus
+def test_max_loess_jitter_error() -> None:
+    with cellxgene_census.open_soma(census_version="stable") as census:
+        with pytest.raises(ValueError):
+            get_highly_variable_genes(
+                census,
+                organism="mus_musculus",
+                obs_value_filter='is_primary_data == True and tissue_general == "heart"',
+                batch_key="cell_type",
+                max_loess_jitter=0.0,
+            )

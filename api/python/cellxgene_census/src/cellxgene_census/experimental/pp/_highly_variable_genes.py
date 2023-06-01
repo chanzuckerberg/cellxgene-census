@@ -57,6 +57,7 @@ def _highly_variable_genes_seurat_v3(
     n_top_genes: int = 1000,
     layer: str = "raw",
     span: float = 0.3,
+    max_loess_jitter: float = 1e-9,
 ) -> pd.DataFrame:
     try:
         import skmisc.loess
@@ -120,13 +121,29 @@ def _highly_variable_genes_seurat_v3(
         not_const = v > 0
         y = np.log10(v[not_const])
         x = np.log10(u[not_const])
-        model = skmisc.loess.loess(x, y, span=span, degree=2)
-        # Can we resolve low entropy loess errors by adding jitter and retrying?
-        # See: https://github.com/has2k1/scikit-misc/issues/9
-        model.fit()
-        estimated_variances[not_const] = model.outputs.fitted_values
-        reg_std[batch] = np.sqrt(10**estimated_variances)
 
+        jitter_magnitude: float = 0
+        while True:
+            try:
+                # Attempt to resolve low entropy loess errors by adding jitter and retrying
+                # See: https://github.com/has2k1/scikit-misc/issues/9
+                if jitter_magnitude != 0:
+                    _x = x + np.random.default_rng().uniform(-jitter_magnitude, jitter_magnitude, x.shape[0])
+                else:
+                    _x = x
+
+                model = skmisc.loess.loess(_x, y, span=span, degree=2)
+                model.fit()
+                estimated_variances[not_const] = model.outputs.fitted_values
+                break
+
+            except ValueError:
+                jitter_magnitude = 1e-18 if jitter_magnitude == 0 else jitter_magnitude * 10.0
+                if jitter_magnitude < max_loess_jitter:
+                    continue
+                raise
+
+        reg_std[batch] = np.sqrt(10**estimated_variances)
         vmax = np.sqrt(N)
         clip_val[batch] = reg_std[batch] * vmax + u
 
@@ -188,6 +205,7 @@ def highly_variable_genes(
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
     batch_key: Optional[str] = None,
+    max_loess_jitter: float = 1e-9,
 ) -> pd.DataFrame:
     """
     Identify and annotate highly variable genes contained in the query results.
@@ -219,6 +237,10 @@ def highly_variable_genes(
         batch_key:
             If specified, gene selection will be done by batch and combined.
 
+        max_lowess_jitter:
+            The maximum jitter to add to data in case of LOESS failure (can
+            occur when dataset has low entry counts.)
+
     Returns:
         Pandas DataFrame containing annotations for all `var` values specified by the
         `query` argument. Annotations are identical to those produced by
@@ -239,6 +261,7 @@ def highly_variable_genes(
         layer=layer,
         span=span,
         batch_key=batch_key,
+        max_loess_jitter=max_loess_jitter,
     )
 
 
@@ -255,6 +278,7 @@ def get_highly_variable_genes(
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
     batch_key: Optional[str] = None,
+    max_loess_jitter: float = 1e-9,
 ) -> pd.DataFrame:
     """
     Convenience wrapper
@@ -305,6 +329,10 @@ def get_highly_variable_genes(
 
         batch_key:
             If specified, gene selection will be done by batch and combined.
+
+        max_lowess_jitter:
+            The maximum jitter to add to data in case of LOESS failure (can
+            occur when dataset has low entry counts.)
 
     Returns:
         Pandas DataFrame containing annotations for all `var` values specified by the query.
@@ -363,4 +391,5 @@ def get_highly_variable_genes(
             flavor=flavor,
             span=span,
             batch_key=batch_key,
+            max_loess_jitter=max_loess_jitter,
         )
