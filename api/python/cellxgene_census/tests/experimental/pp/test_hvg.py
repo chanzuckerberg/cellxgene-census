@@ -27,12 +27,12 @@ def small_mem_context() -> soma.SOMATileDBContext:
 @pytest.mark.parametrize(
     "experiment_name,obs_value_filter",
     [
+        ("mus_musculus", 'is_primary_data == True and tissue_general == "skin of body"'),
         pytest.param(
             "mus_musculus",
             'is_primary_data == True and tissue_general in ["heart", "lung"]',
             marks=pytest.mark.expensive,
         ),
-        ("mus_musculus", 'is_primary_data == True and tissue_general == "skin of body"'),
         pytest.param("mus_musculus", 'is_primary_data == True and assay == "Smart-seq"', marks=pytest.mark.expensive),
     ],
 )

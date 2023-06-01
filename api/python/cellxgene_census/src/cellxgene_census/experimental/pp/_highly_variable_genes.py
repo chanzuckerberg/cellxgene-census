@@ -191,9 +191,13 @@ def highly_variable_genes(
 ) -> pd.DataFrame:
     """
     Identify and annotate highly variable genes contained in the query results.
-    The API is modelled on ScanPy `scanpy.pp.highly_variable_genes` API, and
-    results returned will mimic ScanPy results. The only `flavor` available
+    The API is modelled on ScanPy `scanpy.pp.highly_variable_genes` API.
+    Results returned will mimic ScanPy results. The only `flavor` available
     is the Seurat V3 method, which assumes count data in the X layer.
+
+    See
+    https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html#scanpy.pp.highly_variable_genes
+    for more information on this method.
 
     Args:
         query:
@@ -258,7 +262,7 @@ def get_highly_variable_genes(
     Convience wrapper around ``soma.Experiment`` query and ``highly_variable_genes`` function, to build and
      execute a query, and annotate the query result genes (``var`` dataframe) based upon variability.
 
-    See ``highly_variable_genes`` for more information on
+    See ``highly_variable_genes`` for more information on this function.
 
     Args:
         census:
@@ -309,12 +313,36 @@ def get_highly_variable_genes(
         ValueError: if the flavor paramater is not `seurat_v3`.
 
     Examples:
+
+        Fetch Pandas DataFrame containing var annotations for a subset of the
+        cells matching the obs value_filter:
+
         >>> hvg = get_highly_variable_genes(
                 census,
                 organism="Mus musculus",
                 obs_value_filter="is_primary_data == True and tissue_general == 'lung'",
                 n_top_genes = 500
             )
+
+        Fetch AnnData with top 500 genes:
+
+        >>> with cellxgene_census.open_soma(census_version="stable") as census:
+                organism = "mus_musculus"
+                obs_value_filter = "is_primary_data == True and tissue_general == 'lung'"
+
+                # Get the highly variable genes
+                hvg = cellxgene_census.experimental.pp.get_highly_variable_genes(
+                    census,
+                    organism=organism,
+                    obs_value_filter=obs_value_filter,
+                    n_top_genes = 500
+                )
+
+                # Fetch AnnData - all cells matching obs_value_filter, just the HVGs
+                hvg_soma_ids = hvg[hvg.highly_variable].index.values
+                adata = cellxgene_census.get_anndata(
+                    census, organism=organism, obs_value_filter=obs_value_filter, var_coords=hvg_soma_ids
+                )
 
     Lifecycle:
         experimental
