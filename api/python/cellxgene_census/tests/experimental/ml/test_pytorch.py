@@ -262,6 +262,24 @@ def test_encoders(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+def test__multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+    )
+    dl = experiment_dataloader(dp, num_workers=2)
+
+    full_result = list(iter(dl))
+
+    soma_joinids = [t[1][0].item() for t in full_result]
+    assert sorted(soma_joinids) == list(range(6))
+
+
+@pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
@@ -344,10 +362,8 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
-        num_workers=1,
-        sparse_X=True,
     )
-    dl = experiment_dataloader(dp)
+    dl = experiment_dataloader(dp, num_workers=2)
     dp.obs_encoders()  # trigger query building
     row = next(iter(dl))  # trigger multiprocessing
 

@@ -3,7 +3,7 @@ import os
 import sys
 from datetime import timedelta
 from time import time
-from typing import Any, Dict, Iterator, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ from torch.utils.data.dataset import Dataset
 import cellxgene_census
 from cellxgene_census._open import _build_soma_tiledb_context
 
-ObsDatum = Tuple[Tensor, torch.sparse_coo_tensor]
+ObsDatum = Tuple[Tensor, Tensor]
 
 Encoders = Dict[str, LabelEncoder]
 
@@ -96,7 +96,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
     def __init__(
         self,
-        obs_joinids: pa.Array,
+        obs_joinids: List[int],
         var_joinids: pa.Array,
         exp_uri: str,
         aws_region: Optional[str],
@@ -109,7 +109,6 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         sparse_X: bool,
         soma_buffer_bytes: Optional[int] = None,
     ) -> None:
-        self.obs_joinids = obs_joinids
         self.var_joinids = var_joinids
         self.batch_size = batch_size
         self.sparse_X = sparse_X
@@ -239,9 +238,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """In multi-processing mode (i.e. num_workers > 0), this ``ExperimentAxisQuery`` object will *not* be pickled; 
     each worker will instantiate a new query"""
 
-    _obs_joinids_partitioned: Optional[pa.Array]
-
-    _obs_and_x_iter: Optional[_ObsAndXIterator]
+    _obs_joinids_partitioned: Optional[List[int]] = None
 
     _encoders: Optional[Encoders]
 
@@ -259,7 +256,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
         sparse_X: bool = False,
-        num_workers: int = 0,
         soma_buffer_bytes: Optional[int] = None,
     ) -> None:
         """
@@ -329,15 +325,24 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             partition_size = len(obs_joinids) // num_partitions
             partition_start = partition_size * partition
             partition_end_excl = min(len(obs_joinids), partition_start + partition_size)
-            self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl]
+            self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl].tolist()
 
-            pytorch_logger.debug(
-                f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
-                f"range={partition_start}:{partition_end_excl}, "
-                f"{partition_size:}"
-            )
+            if pytorch_logger.isEnabledFor(logging.DEBUG):
+                if self._obs_joinids_partitioned and len(self._obs_joinids_partitioned) > 0:
+                    joinids_start = self._obs_joinids_partitioned[0]
+                    joinids_end = self._obs_joinids_partitioned[-1]
+                else:
+                    joinids_start = joinids_end = 0
+
+                pytorch_logger.debug(
+                    f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
+                    f"index range={partition_start}:{partition_end_excl}, "
+                    f"soma_joinid range={joinids_start}:{joinids_end}, "
+                    f"{partition_size:}"
+                )
 
     def __iter__(self) -> Iterator[ObsDatum]:
+        # TODO: avoid re-initializing query if in multi-processing mode, when _obs_joinids_partitioned is set. will need to cache var_joinids for serialization
         self._init()
         assert self._query is not None
 
