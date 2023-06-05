@@ -89,7 +89,7 @@ Let's find out if the the gene `"ENSG00000286096"` was measured in the dataset w
 ```{r}
 var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 dataset_joinid <- datasets_df$soma_joinid[datasets_df$dataset_id == "97a17473-e2b1-4f31-a544-44a60773e2dd"]
-is_present <- presence_matrix$take(dataset_joinid, var_joinid)$get_one_based_matrix()[,,drop=TRUE]
+is_present <- presence_matrix$take(dataset_joinid, var_joinid)$get_one_based_matrix()[, , drop = TRUE]
 cat(paste("Feature is", if (is_present) "present." else "not present."))
 ```
 
@@ -104,7 +104,7 @@ var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 # The presence matrix is indexed by the joinids of the dataset and var dataframes,
 # so slice out the feature of interest by its joinid.
 dataset_joinids <- datasets_df$soma_joinid[
-  presence_matrix$take(j=var_joinid)$get_one_based_matrix()[,,drop=TRUE] != 0
+  presence_matrix$take(j = var_joinid)$get_one_based_matrix()[, , drop = TRUE] != 0
 ]
 
 # From the datasets dataframe, slice out the datasets which have a joinid in the list
@@ -121,7 +121,7 @@ dataset_joinids <- datasets_df$soma_joinid[datasets_df$collection_id == "17481d1
 
 # Slice the presence matrix by the first dimension, i.e., by dataset
 var_joinids <- var_df$soma_joinid[
-  which(Matrix::colSums(presence_matrix$take(i=dataset_joinids)$get_one_based_matrix()[,,drop=TRUE]) > 0)
+  which(Matrix::colSums(presence_matrix$take(i = dataset_joinids)$get_one_based_matrix()[, , drop = TRUE]) > 0)
 ]
 
 print(var_df[var_joinids, ])
