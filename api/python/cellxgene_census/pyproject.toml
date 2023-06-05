@@ -31,7 +31,7 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma==1.2.4",
+    "tiledbsoma==1.2.5",
     "anndata",
     "numpy>=1.21,<1.24",  # numpy is constrained by numba and the old pip solver
     "requests",
@@ -40,6 +40,13 @@ dependencies= [
     "scipy",
     # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
     "certifi",
+]
+
+[project.optional-dependencies]
+experimental = [
+    "torch==2.0.1",
+    "torchdata==0.6.1",
+    "scikit-learn==1.2.2",
 ]
 
 [project.urls]
@@ -69,6 +76,7 @@ plugins = "numpy.typing.mypy_plugin"
 markers = [
     "live_corpus: runs on the live CELLxGENE Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
+    "experimental: tests for the `experimental` package",
 ]
 
 [tool.ruff]

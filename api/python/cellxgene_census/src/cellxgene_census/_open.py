@@ -33,7 +33,17 @@ api_logger.addHandler(logging.StreamHandler())
 
 def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
     """Private. Merge config defaults and return open census as a soma Collection/context."""
-    s3_region = locator.get("s3_region")
+    context = _build_soma_tiledb_context(locator.get("s3_region"), context)
+    return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
+
+
+def _build_soma_tiledb_context(
+    s3_region: Optional[str] = None, context: Optional[soma.options.SOMATileDBContext] = None
+) -> soma.options.SOMATileDBContext:
+    """
+    Private. Build a SOMATileDBContext with sensible defaults. If user-defined context is provided, only update the
+    `vfs.s3.region` only.
+    """
 
     if not context:
         # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
@@ -50,8 +60,7 @@ def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDB
             tiledb_config = context.tiledb_ctx.config()
             tiledb_config["vfs.s3.region"] = s3_region
             context = context.replace(tiledb_config=tiledb_config)
-
-    return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
+    return context
 
 
 def open_soma(
@@ -80,7 +89,7 @@ def open_soma(
             or a version are specified.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     Examples:
         Open the default Census version, using a context manager which will automatically
@@ -160,7 +169,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         KeyError: if either `dataset_id` or `census_version` do not exist.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     Examples:
         >>> cellxgene_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
@@ -197,7 +206,7 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
             an existing file), or is not a file.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     See Also:
         :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.

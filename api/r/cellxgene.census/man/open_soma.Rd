@@ -4,18 +4,23 @@
 \alias{open_soma}
 \title{Open the Cell Census}
 \usage{
-open_soma(census_version = "latest", uri = NULL, tiledbsoma_ctx = NULL)
+open_soma(census_version = "stable", uri = NULL, tiledbsoma_ctx = NULL)
 }
 \arguments{
-\item{census_version}{The version of the Census, e.g., "latest".}
+\item{census_version}{The version of the Census, e.g., "stable".}
 
 \item{uri}{The URI containing the Census SOMA objects. If specified, takes
 precedence over \code{census_version}.}
 
-\item{tiledbsoma_ctx}{A custom \code{tiledbsoma::SOMATileDBContext}}
+\item{tiledbsoma_ctx}{A \code{tiledbsoma::SOMATileDBContext} built using
+\code{new_SOMATileDBContext_for_census()}. Optional (created automatically)
+if using \code{census_version} and the context does not need to be reused.}
 }
 \value{
-Top-level \code{tiledbsoma::SOMACollection} object
+Top-level \code{tiledbsoma::SOMACollection} object. After use, the census
+should be closed to release memory and other resources, usually with
+\code{on.exit(census$close(), add = TRUE)}. Closing the top-level census
+will also close all SOMA objects accessed through it.
 }
 \description{
 Open the Cell Census

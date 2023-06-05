@@ -31,7 +31,7 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
         ValueError: if unable to find the specified organism.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     Examples:
 

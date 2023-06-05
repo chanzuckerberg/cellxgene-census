@@ -23,7 +23,7 @@ jobs:
           python -m pip install -U pip setuptools wheel
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -r ./docs/requirements.txt
-          pip install -e ./api/python/cellxgene_census/
+          pip install -e './api/python/cellxgene_census/[experimental]'
           mkdir -p docsite
           touch docsite/.nojekyll
 
