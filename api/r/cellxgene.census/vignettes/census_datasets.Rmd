@@ -34,7 +34,7 @@ Each Census contains a top-level data frame itemizing the datasets contained the
 
 ```{r}
 census <- cellxgene.census::open_soma()
-census_datasets <- census$get("census_info")$get("datasets")$read()
+census_datasets <- census$get("census_info")$get("datasets")$read()$concat()
 print(census_datasets)
 ```
 
@@ -59,7 +59,7 @@ print(all_experiments)
 
 ```{r}
 experiments_total_cells <- sum(sapply(all_experiments, function(it) {
-  nrow(it$obs$read(column_names = c("soma_joinid")))
+  nrow(it$obs$read(column_names = c("soma_joinid"))$concat())
 }))
 print(paste("Found", experiments_total_cells, "cells in all experiments."))
 print(paste(

@@ -100,7 +100,7 @@ All of these variables are defined in the CELLxGENE dataset schema except for th
 You can take a quick look at the high-level Census information by looking at `census$get("census_info")$get("summary")`:
 
 ```{r}
-as.data.frame(census$get("census_info")$get("summary")$read())
+as.data.frame(census$get("census_info")$get("summary")$read()$concat())
 ```
 
 Of special interest are the label-value combinations for:
@@ -116,7 +116,7 @@ By looking at `census$get("census_info)$get("summary_cell_counts")` you can get 
 The line below retrieves this table and casts it into an R data frame:
 
 ```{r}
-census_counts <- as.data.frame(census$get("census_info")$get("summary_cell_counts")$read())
+census_counts <- as.data.frame(census$get("census_info")$get("summary_cell_counts")$read()$concat())
 census_counts
 ```
 
@@ -168,7 +168,11 @@ All of these questions can be answered by directly querying the cell metadata as
 To exemplify the process of accessing and slicing cell metadata for summary stats, let's start with a trivial example and take a look at all human cell types available in the Census:
 
 ```{r}
-as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(column_names = c("cell_type", "is_primary_data")))
+as.data.frame(
+  census$get("census_data")$get("homo_sapiens")$obs$read(
+    column_names = c("cell_type", "is_primary_data")
+  )$concat()
+)
 ```
 
 The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data frame.
@@ -180,7 +184,7 @@ human_cell_types <- as.data.frame(
   census$get("census_data")$get("homo_sapiens")$obs$read(
     column_names = "cell_type",
     value_filter = "is_primary_data == TRUE"
-  )
+  )$concat()
 )$cell_type
 length(human_cell_types)
 ```
@@ -218,7 +222,7 @@ human_liver_cell_types <- as.data.frame(
   census$get("census_data")$get("homo_sapiens")$obs$read(
     column_names = "cell_type",
     value_filter = "is_primary_data == TRUE && tissue_general == 'liver'"
-  )
+  )$concat()
 )$cell_type
 sort(table(human_liver_cell_types), decreasing = TRUE)[1:10]
 ```
@@ -234,7 +238,7 @@ t_cells_diseased <- as.data.frame(
   census$get("census_data")$get("homo_sapiens")$obs$read(
     column_names = c("disease", "tissue_general"),
     value_filter = "is_primary_data == TRUE && disease != 'normal' && cell_type %in% c('CD8-positive, alpha-beta T cell', 'CD4-positive, alpha-beta T cell')"
-  )
+  )$concat()
 )
 print(table(t_cells_diseased))
 ```
