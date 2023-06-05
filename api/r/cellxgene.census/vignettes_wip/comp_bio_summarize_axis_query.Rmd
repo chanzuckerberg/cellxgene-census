@@ -50,7 +50,7 @@ Once the Census is open you can use its TileDB-SOMA methods as it is itself a `S
 
 Tips:
 
-* You can read an *entire* `SOMADataFrame` into R using `as.data.frame(soma_df$read())`.
+* You can read an *entire* `SOMADataFrame` into R using `as.data.frame(soma_df$read()$concat())`.
 * Queries will be much faster if you request only the DataFrame columns required for your analysis (e.g. `column_names = c("soma_joinid", "cell_type_ontology_term_id")`).
 * You can also further refine query results by using a `value_filter`, which will filter the census for matching records.
 
@@ -64,7 +64,7 @@ human <- census$get("census_data")$get("homo_sapiens")
 # Read obs into an R data frame (tibble).
 obs_df <- as.data.frame(human$obs$read(
   column_names = c("soma_joinid", "cell_type_ontology_term_id")
-))
+)$concat())
 
 # Find all unique values in the cell_type_ontology_term_id column.
 unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
@@ -88,7 +88,7 @@ LUNG_TISSUE <- "UBERON:0002048"
 obs_df <- as.data.frame(human$obs$read(
   column_names = c("cell_type_ontology_term_id"),
   value_filter = paste("tissue_ontology_term_id == '", LUNG_TISSUE, "'", sep = "")
-))
+)$concat())
 
 # Find all unique values in the cell_type_ontology_term_id column as an R data frame.
 unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
@@ -118,7 +118,7 @@ You can also define much more complex value filters. For example:
 obs_df <- as.data.frame(human$obs$read(
   column_names = c("cell_type_ontology_term_id"),
   value_filter = "tissue_ontology_term_id %in% c('UBERON:0002082', 'UBERON:OOO2084', 'UBERON:0002080')"
-))
+)$concat())
 
 # Summarize
 top_10 <- sort(table(obs_df$cell_type_ontology_term_id), decreasing = TRUE)[1:10]
@@ -140,7 +140,7 @@ total_cells <- 0
 for (organism in census$get("census_data")$names()) {
   print(organism)
   obs_df <- as.data.frame(
-    census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)
+    census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)$concat()
   )
   total_cells <- total_cells + nrow(obs_df)
   for (col in cols_to_query) {
