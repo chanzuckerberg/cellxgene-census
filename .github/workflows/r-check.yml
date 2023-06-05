@@ -20,11 +20,12 @@ jobs:
         with:
           working-directory: ./api/r/cellxgene.census
           extra-packages: any::rcmdcheck, any::styler, any::roxygen2
-          needs: check
-          # Disable dependency caching so long as we depend on bleeding-edge
-          # builds of tiledbsoma from r-universe. Its DESCRIPTION version
-          # number isn't routinely updated to invalidate our cache.
-          cache: false
+          cache: true
+      - name: install tiledbsoma & tiledb from tiledb-inc.r-universe.dev
+        # Install the latest tiledb[soma] package, overwriting any version cached by
+        # setup-r-dependencies. FIXME once we have a strategy for
+        # https://github.com/single-cell-data/TileDB-SOMA/issues/1427
+        run: Rscript -e 'install.packages(c("tiledb", "tiledbsoma"), repos = "https://tiledb-inc.r-universe.dev")'
       - name: styler
         run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
       - name: check session info
