@@ -6,6 +6,7 @@ from time import time
 from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import scipy
@@ -238,7 +239,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """In multi-processing mode (i.e. num_workers > 0), this ``ExperimentAxisQuery`` object will *not* be pickled; 
     each worker will instantiate a new query"""
 
-    _obs_joinids_partitioned: Optional[List[int]] = None
+    _obs_joinids_partitioned: Optional[npt.NDArray[np.int64]] = None
 
     _encoders: Optional[Encoders]
 
@@ -330,7 +331,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl].to_numpy()
 
             if pytorch_logger.isEnabledFor(logging.DEBUG):
-                if self._obs_joinids_partitioned and len(self._obs_joinids_partitioned) > 0:
+                if self._obs_joinids_partitioned is not None and len(self._obs_joinids_partitioned) > 0:
                     joinids_start = self._obs_joinids_partitioned[0]
                     joinids_end = self._obs_joinids_partitioned[-1]
                 else:
