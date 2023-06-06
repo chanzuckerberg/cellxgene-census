@@ -325,7 +325,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             partition_size = len(obs_joinids) // num_partitions
             partition_start = partition_size * partition
             partition_end_excl = min(len(obs_joinids), partition_start + partition_size)
-            self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl].tolist()
+            # The to_numpy() call is a workaround for a possible bug in TileDB-SOMA:
+            # https://github.com/single-cell-data/TileDB-SOMA/issues/1456
+            self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl].to_numpy()
 
             if pytorch_logger.isEnabledFor(logging.DEBUG):
                 if self._obs_joinids_partitioned and len(self._obs_joinids_partitioned) > 0:
@@ -346,8 +348,12 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self._init()
         assert self._query is not None
 
+        obs_joinids = (
+            self._obs_joinids_partitioned if self._obs_joinids_partitioned is not None else self._query.obs_joinids()
+        )
+
         return _ObsAndXIterator(
-            obs_joinids=self._obs_joinids_partitioned or self._query.obs_joinids(),
+            obs_joinids=obs_joinids,
             var_joinids=self._query.var_joinids(),
             exp_uri=self.exp_uri,
             aws_region=self.aws_region,
