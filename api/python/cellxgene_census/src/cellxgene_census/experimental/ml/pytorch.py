@@ -488,17 +488,21 @@ def experiment_dataloader(
 
 
 def _init_multiprocessing() -> None:
-    """Ensures use of multiprocessing use of "spawn" for starting child processes.
+    """Ensures use of "spawn" for starting child processes with multiprocessing.
     Forked processes are known to be problematic:
       https://pytorch.org/docs/stable/notes/multiprocessing.html#avoiding-and-fighting-deadlocks
     Also, CUDA does not support forked child processes:
       https://pytorch.org/docs/stable/notes/multiprocessing.html#cuda-in-multiprocessing
+
     """
-    if torch.multiprocessing.get_start_method() != "spawn":
-        pytorch_logger.warning(
-            "switching torch multiprocessing start method from "
-            f'"{torch.multiprocessing.get_start_method()}" to "spawn"'
-        )
+    torch.multiprocessing.set_start_method("fork", force=True)
+    orig_start_method = torch.multiprocessing.get_start_method()
+    if orig_start_method != "spawn":
+        if orig_start_method:
+            pytorch_logger.warning(
+                "switching torch multiprocessing start method from "
+                f'"{torch.multiprocessing.get_start_method()}" to "spawn"'
+            )
         torch.multiprocessing.set_start_method("spawn", force=True)
 
 
