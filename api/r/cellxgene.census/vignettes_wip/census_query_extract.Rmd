@@ -41,7 +41,7 @@ You can learn more about the `cellxgene.census` methods by accessing their corre
 
 ## Querying cell metadata (obs)
 
-The human gene metadata of the Census, for RNA assays, is located at `census$get("census_data")$get("homo_sapiens")$obs`. This is a `SOMADataFrame` and as such it can be materialized as an R data frame (tibble) using `as.data.frame(obs$read())`.
+The human gene metadata of the Census, for RNA assays, is located at `census$get("census_data")$get("homo_sapiens")$obs`. This is a `SOMADataFrame` and as such it can be materialized as an R data frame (tibble) using `as.data.frame(obs$read()$concat())`.
 
 The mouse cell metadata is at `census$get("census_data")$get("mus_musculus").obs`.
 
@@ -67,7 +67,7 @@ All of these can be used to fetch specific columns or specific rows matching a c
 For example let's see what are the possible values available for `sex`. To this we can load all cell metadata but fetching only for the column `sex`.
 
 ```{r}
-unique(as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(column_names = "sex")))
+unique(as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(column_names = "sex")$concat()))
 ```
 
 As you can see there are only three different values for sex, that is `"male"`, `"female"` and `"unknown"`.
@@ -75,7 +75,7 @@ As you can see there are only three different values for sex, that is `"male"`, 
 With this information we can fetch all cell metatadata for a specific sex value, for example `"unknown"`.
 
 ```{r}
-as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(value_filter = "sex == 'unknown'"))
+as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(value_filter = "sex == 'unknown'")$concat())
 ```
 
 You can use both `column_names` and `value_filter` to perform specific queries. For example let's fetch the `disease` column for the `cell_type` `"B cell"` in the `tissue_general` `"lung"`.
@@ -85,7 +85,7 @@ cell_metadata_b_cell <- as.data.frame(
   census$get("census_data")$get("homo_sapiens")$obs$read(
     value_filter = "cell_type == 'B cell' && tissue_general == 'lung'",
     column_names = "disease"
-  )
+  )$concat()
 )
 table(cell_metadata_b_cell)
 ```
@@ -111,7 +111,7 @@ as.data.frame(
   census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var$read(
     value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
     column_names = c("feature_name", "feature_length")
-  )
+  )$concat()
 )
 ```
 ## Querying expression data
