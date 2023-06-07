@@ -474,6 +474,9 @@ def experiment_dataloader(
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
+    if num_workers > 0:
+        _init_multiprocessing()
+
     return DataLoader(
         datapipe,
         batch_size=None,  # batching is handled by our ExperimentDataPipe
@@ -482,6 +485,21 @@ def experiment_dataloader(
         collate_fn=_collate_noop,
         **dataloader_kwargs,
     )
+
+
+def _init_multiprocessing() -> None:
+    """Ensures use of multiprocessing use of "spawn" for starting child processes.
+    Forked processes are known to be problematic:
+      https://pytorch.org/docs/stable/notes/multiprocessing.html#avoiding-and-fighting-deadlocks
+    Also, CUDA does not support forked child processes:
+      https://pytorch.org/docs/stable/notes/multiprocessing.html#cuda-in-multiprocessing
+    """
+    if torch.multiprocessing.get_start_method() != "spawn":
+        pytorch_logger.warning(
+            "switching torch multiprocessing start method from "
+            f'"{torch.multiprocessing.get_start_method()}" to "spawn"'
+        )
+        torch.multiprocessing.set_start_method("spawn", force=True)
 
 
 # For testing only
