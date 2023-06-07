@@ -76,7 +76,7 @@
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
                   </span>
                 </span>
             </span>
@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.0.0
+                    1.2.0
                 </div>
                 
             
@@ -204,7 +204,7 @@
 <section id="Learning-about-the-lung-data-in-the-Census">
 <h2>Learning about the lung data in the Census<a class="headerlink" href="#Learning-about-the-lung-data-in-the-Census" title="Permalink to this heading">¶</a></h2>
 <p>First we will open the Census. If you are not familiar with the basics of the Census API you should take a look at notebook <a class="reference external" href="https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -217,6 +217,14 @@
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <p>Let’s first take a look at the number of cells from human lung:</p>
 <div class="nbinput docutils container">
@@ -263,13 +271,13 @@
   </thead>
   <tbody>
     <tr>
-      <th>944</th>
-      <td>944</td>
+      <th>986</th>
+      <td>986</td>
       <td>Homo sapiens</td>
       <td>tissue_general</td>
       <td>UBERON:0002048</td>
-      <td>2295237</td>
-      <td>4573212</td>
+      <td>2907927</td>
+      <td>5975910</td>
       <td>lung</td>
     </tr>
   </tbody>
@@ -344,23 +352,23 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>145215</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
+      <td>1263240</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>native cell</td>
+      <td>CL:0000003</td>
+      <td>unknown</td>
+      <td>unknown</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -368,23 +376,23 @@
     </tr>
     <tr>
       <th>1</th>
-      <td>145216</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>alveolar macrophage</td>
-      <td>CL:0000583</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>1263243</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>Drop-seq</td>
+      <td>EFO:0008722</td>
+      <td>ciliated columnar cell of tracheobronchial tree</td>
+      <td>CL:0002145</td>
+      <td>57-year-old human stage</td>
+      <td>HsapDv:0000151</td>
+      <td>pulmonary fibrosis</td>
+      <td>MONDO:0002771</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>male</td>
+      <td>PATO:0000384</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -392,23 +400,23 @@
     </tr>
     <tr>
       <th>2</th>
-      <td>145217</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>1263245</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' transcription profiling</td>
+      <td>EFO:0030003</td>
+      <td>CD8-positive, alpha-beta T cell</td>
+      <td>CL:0000625</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>squamous cell lung carcinoma</td>
+      <td>MONDO:0005097</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -416,23 +424,23 @@
     </tr>
     <tr>
       <th>3</th>
-      <td>145218</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>1263249</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>CD4-positive, alpha-beta T cell</td>
+      <td>CL:0000624</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>lung adenocarcinoma</td>
+      <td>MONDO:0005061</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -440,23 +448,23 @@
     </tr>
     <tr>
       <th>4</th>
-      <td>145219</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>1263258</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>CD8-positive, alpha-beta T cell</td>
+      <td>CL:0000625</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>lung adenocarcinoma</td>
+      <td>MONDO:0005061</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -487,45 +495,21 @@
       <td>...</td>
     </tr>
     <tr>
-      <th>2295232</th>
-      <td>45561670</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>78-year-old human stage</td>
-      <td>HsapDv:0000172</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
-      <td>...</td>
-      <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>male</td>
-      <td>PATO:0000384</td>
-      <td>cell</td>
-      <td>lung</td>
-      <td>UBERON:0002048</td>
-      <td>lung</td>
-      <td>UBERON:0002048</td>
-    </tr>
-    <tr>
-      <th>2295233</th>
-      <td>45562154</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
+      <th>2907922</th>
+      <td>53794723</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
       <td>10x 3' v2</td>
       <td>EFO:0009899</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>67-year-old human stage</td>
-      <td>HsapDv:0000161</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
+      <td>unknown</td>
+      <td>unknown</td>
       <td>female</td>
       <td>PATO:0000383</td>
       <td>cell</td>
@@ -535,21 +519,21 @@
       <td>UBERON:0002048</td>
     </tr>
     <tr>
-      <th>2295234</th>
-      <td>45565290</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
+      <th>2907923</th>
+      <td>53794724</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
       <td>10x 3' v2</td>
       <td>EFO:0009899</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>65-year-old human stage</td>
-      <td>HsapDv:0000159</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
+      <td>unknown</td>
+      <td>unknown</td>
       <td>female</td>
       <td>PATO:0000383</td>
       <td>cell</td>
@@ -559,23 +543,23 @@
       <td>UBERON:0002048</td>
     </tr>
     <tr>
-      <th>2295235</th>
-      <td>45566613</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
+      <th>2907924</th>
+      <td>53794725</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
       <td>10x 3' v2</td>
       <td>EFO:0009899</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>80-year-old human stage</td>
-      <td>HsapDv:0000206</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>male</td>
-      <td>PATO:0000384</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
       <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
@@ -583,23 +567,47 @@
       <td>UBERON:0002048</td>
     </tr>
     <tr>
-      <th>2295236</th>
-      <td>45567413</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>68-year-old human stage</td>
-      <td>HsapDv:0000162</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <th>2907925</th>
+      <td>53794726</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>male</td>
-      <td>PATO:0000384</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>2907926</th>
+      <td>53794727</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
       <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
@@ -608,7 +616,7 @@
     </tr>
   </tbody>
 </table>
-<p>2295237 rows × 21 columns</p>
+<p>2907927 rows × 21 columns</p>
 </div></div>
 </div>
 <p>You can see that the number or rows represents the total number of unique lung cells in the Census. Now let’s take a deeper dive into the characteristics of these cells.</p>
@@ -666,33 +674,33 @@
   </thead>
   <tbody>
     <tr>
-      <th>f512b8b6-369d-4a85-a695-116e0806857f</th>
-      <td>Transcriptional Programming of Normal and Infl...</td>
-      <td>Skin</td>
+      <th>9d8e5dca-03a3-457d-b7fb-844c75735c83</th>
+      <td>Abdominal White Adipose Tissue</td>
+      <td>22 integrated samples</td>
       <td>0</td>
     </tr>
     <tr>
-      <th>36c867a7-be10-4e69-9b39-5de12b0af6da</th>
-      <td>Single-Cell Analysis of Crohn’s Disease Lesion...</td>
-      <td>Ileum</td>
+      <th>a6388a6f-6076-401b-9b30-7d4306a20035</th>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td>scRNA-seq data - myeloid cells</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
-      <td>Humoral immunity at the brain borders in homeo...</td>
-      <td>A scRNA-seq atlas of immune cells at the CNS b...</td>
+      <th>842c6f5d-4a94-4eef-8510-8c792d1124bc</th>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td>scRNA-seq data - all cells</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>456e8b9b-f872-488b-871d-94534090a865</th>
-      <td>Single-cell atlas of peripheral immune respons...</td>
-      <td>Single-cell atlas of peripheral immune respons...</td>
+      <th>74520626-b0ba-4ee9-86b5-714649554def</th>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td>scRNA-seq data - T cells</td>
       <td>3</td>
     </tr>
     <tr>
-      <th>d8da613f-e681-4c69-b463-e94f5e66847f</th>
-      <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>A molecular single-cell lung atlas of lethal C...</td>
+      <th>396a9124-fb20-4822-bf9c-e93fdf7c999a</th>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td>scRNA-seq data - B cells</td>
       <td>4</td>
     </tr>
     <tr>
@@ -702,38 +710,38 @@
       <td>...</td>
     </tr>
     <tr>
-      <th>30498543-4fdd-4f86-9e1b-05c1a1454a6a</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>B cells -- CV19 infection, vaccination and HC</td>
-      <td>524</td>
+      <th>f9ad5649-f372-43e1-a3a8-423383e5a8a2</th>
+      <td>Molecular characterization of selectively vuln...</td>
+      <td>Molecular characterization of selectively vuln...</td>
+      <td>557</td>
     </tr>
     <tr>
-      <th>b5191f01-f67d-44b8-bc8d-511a4ecd07bb</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>innate T cells -- CV19 infection, vaccination ...</td>
-      <td>525</td>
+      <th>456e8b9b-f872-488b-871d-94534090a865</th>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>558</td>
     </tr>
     <tr>
-      <th>e463dae9-3fc1-476d-870e-d98a04c56cd6</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>M cells -- CV19 infection, vaccination and HC</td>
-      <td>526</td>
+      <th>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</th>
+      <td>Construction of a human cell landscape at sing...</td>
+      <td>Construction of a human cell landscape at sing...</td>
+      <td>559</td>
     </tr>
     <tr>
-      <th>1b699e04-1127-42ea-998b-011ace4a5b81</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>T cells -- CV19 infection, vaccination and HC</td>
-      <td>527</td>
+      <th>e04daea4-4412-45b5-989e-76a9be070a89</th>
+      <td>A molecular cell atlas of the human lung from ...</td>
+      <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
+      <td>560</td>
     </tr>
     <tr>
-      <th>87ce26ed-e5d1-44b4-81cc-cc5b709a169f</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>Circulating Immune cells -- CV19 infection, va...</td>
-      <td>528</td>
+      <th>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</th>
+      <td>A molecular cell atlas of the human lung from ...</td>
+      <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
+      <td>561</td>
     </tr>
   </tbody>
 </table>
-<p>529 rows × 3 columns</p>
+<p>562 rows × 3 columns</p>
 </div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">obs</span></code> cell metadata <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> contains a column <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> that can be used for joining to the <code class="docutils literal notranslate"><span class="pre">census_dataset</span></code> <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> we just created.</p>
@@ -792,175 +800,182 @@
       <td>1028006</td>
       <td>High-resolution single-cell atlas reveals dive...</td>
       <td>The single-cell lung cancer atlas (LuCA) -- ex...</td>
-      <td>157</td>
+      <td>283</td>
     </tr>
     <tr>
-      <th>066943a2-fdac-4b29-b348-40cede398e4e</th>
-      <td>254931</td>
+      <th>9f222629-9e39-47d0-b83f-e08d610c7479</th>
+      <td>784630</td>
       <td>The integrated Human Lung Cell Atlas</td>
-      <td>The integrated Human Lung Cell Atlas</td>
-      <td>79</td>
+      <td>An integrated cell atlas of the human lung in ...</td>
+      <td>12</td>
     </tr>
     <tr>
       <th>f7c1c579-2dc0-47e2-ba19-8165c5a0e353</th>
       <td>217738</td>
       <td>A human cell atlas of fetal gene expression</td>
       <td>Survey of human embryonic development</td>
-      <td>94</td>
+      <td>452</td>
     </tr>
     <tr>
       <th>d8da613f-e681-4c69-b463-e94f5e66847f</th>
       <td>116313</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>4</td>
+      <td>41</td>
     </tr>
     <tr>
       <th>576f193c-75d0-4a11-bd25-8676587e6dc2</th>
       <td>90384</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Combined samples</td>
-      <td>519</td>
+      <td>346</td>
+    </tr>
+    <tr>
+      <th>d41f45c1-1b7b-4573-a998-ac5c5acb1647</th>
+      <td>82991</td>
+      <td>HTAN MSK - Transcriptional connectivity of reg...</td>
+      <td>Transcriptional connectivity of regulatory T c...</td>
+      <td>14</td>
     </tr>
     <tr>
       <th>3dc61ca1-ce40-46b6-8337-f27260fd9a03</th>
       <td>71752</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>All cells</td>
-      <td>75</td>
+      <td>294</td>
     </tr>
     <tr>
       <th>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</th>
       <td>60993</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
-      <td>177</td>
+      <td>561</td>
     </tr>
     <tr>
       <th>2672b679-8048-4f5e-9786-f1b196ccfd08</th>
       <td>57019</td>
       <td>scRNA-seq assessment of the human lung, spleen...</td>
       <td>Lung Parenchyma</td>
-      <td>317</td>
+      <td>385</td>
     </tr>
     <tr>
       <th>9dbab10c-118d-496b-966a-67f1763a6b7d</th>
       <td>49014</td>
       <td>COVID-19 immune features revealed by a large-s...</td>
       <td>Large-scale single-cell analysis reveals criti...</td>
-      <td>63</td>
+      <td>451</td>
     </tr>
     <tr>
       <th>9968be68-ab65-4a38-9e1a-c9b6abece194</th>
       <td>47909</td>
       <td>Charting human development using a multi-endod...</td>
       <td>Developing Human Atlas</td>
-      <td>508</td>
+      <td>34</td>
     </tr>
     <tr>
       <th>3de0ad6d-4378-4f62-b37b-ec0b75a50d94</th>
       <td>46500</td>
       <td>LungMAP — Human data from a broad age healthy ...</td>
       <td>Single-cell multiomic profiling of human lungs...</td>
-      <td>188</td>
+      <td>425</td>
     </tr>
     <tr>
       <th>2f132ec9-24b5-422f-9be0-ccef03b4fe28</th>
       <td>39778</td>
       <td>SARS-CoV-2 receptor ACE2 and TMPRSS2 are prima...</td>
       <td>Lung</td>
-      <td>104</td>
+      <td>281</td>
     </tr>
     <tr>
       <th>1e5bd3b8-6a0e-4959-8d69-cafed30fe814</th>
       <td>35699</td>
       <td>Emphysema Cell Atlas</td>
       <td>immune cells</td>
-      <td>51</td>
+      <td>91</td>
     </tr>
     <tr>
       <th>53d208b0-2cfd-4366-9866-c3c6114081bc</th>
       <td>35682</td>
       <td>Tabula Sapiens</td>
       <td>Tabula Sapiens - All Cells</td>
-      <td>339</td>
+      <td>444</td>
     </tr>
     <tr>
       <th>1b9d8702-5af8-4142-85ed-020eb06ec4f6</th>
       <td>35419</td>
       <td>Cross-tissue immune cell analysis reveals tiss...</td>
       <td>Global</td>
-      <td>314</td>
+      <td>380</td>
     </tr>
     <tr>
       <th>4ed927e9-c099-49af-b8ce-a2652d069333</th>
       <td>35284</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
-      <td>62</td>
+      <td>336</td>
     </tr>
     <tr>
       <th>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</th>
       <td>33698</td>
       <td>Construction of a human cell landscape at sing...</td>
       <td>Construction of a human cell landscape at sing...</td>
-      <td>244</td>
+      <td>559</td>
     </tr>
     <tr>
       <th>4b6af54a-4a21-46e0-bc8d-673c0561a836</th>
       <td>15495</td>
       <td>Emphysema Cell Atlas</td>
       <td>non-immune cells</td>
-      <td>53</td>
+      <td>89</td>
     </tr>
     <tr>
       <th>01209dce-3575-4bed-b1df-129f57fbc031</th>
       <td>11059</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
-      <td>186</td>
+      <td>500</td>
     </tr>
     <tr>
       <th>e04daea4-4412-45b5-989e-76a9be070a89</th>
       <td>8657</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
-      <td>176</td>
+      <td>560</td>
     </tr>
     <tr>
       <th>214bf9eb-93db-48c8-8e3c-9bb22fa3bc63</th>
       <td>3662</td>
       <td>Emphysema Cell Atlas</td>
       <td>AT2 cells</td>
-      <td>52</td>
+      <td>90</td>
     </tr>
     <tr>
       <th>f9846bb4-784d-4582-92c1-3f279e4c6f0c</th>
       <td>176</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Fibroblast and smooth muscle</td>
-      <td>71</td>
+      <td>286</td>
     </tr>
     <tr>
       <th>f64e1be1-de15-4d27-8da4-82225cd4c035</th>
       <td>55</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Immune cells</td>
-      <td>520</td>
+      <td>339</td>
     </tr>
     <tr>
       <th>810ac45f-8969-4698-b42c-652f802f75c2</th>
       <td>10</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Endothelium</td>
-      <td>77</td>
+      <td>289</td>
     </tr>
     <tr>
       <th>0ba16f4b-cb87-4fa3-9363-19fc51eec6e7</th>
       <td>4</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Myeloid</td>
-      <td>74</td>
+      <td>295</td>
     </tr>
   </tbody>
 </table>
@@ -993,19 +1008,20 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 assay
-10x 3&#39; v2                                   1087211
-10x 3&#39; v3                                    436291
-10x 5&#39; v1                                    218556
+10x 3&#39; v2                                   1236968
+10x 3&#39; v3                                    702845
+10x 5&#39; v1                                    262323
 sci-RNA-seq                                  217738
 BD Rhapsody Whole Transcriptome Analysis     122902
+10x 3&#39; transcription profiling                97432
+Drop-seq                                      65220
 single cell library construction              58981
-10x 5&#39; v2                                     45798
+10x 5&#39; v2                                     41852
 microwell-seq                                 33698
 Smart-seq2                                    25662
 inDrop                                        25652
-10x 3&#39; v1                                     11558
-Drop-seq                                       7333
-10x 3&#39; transcription profiling                 3857
+10x 3&#39; v1                                      8638
+Seq-Well                                       8016
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1028,14 +1044,21 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 disease
-normal                                   1111566
-lung adenocarcinoma                       626322
-squamous cell lung carcinoma              189044
-COVID-19                                  128650
+normal                                   1164582
+lung adenocarcinoma                       772120
+COVID-19                                  331019
+squamous cell lung carcinoma              209675
 non-small cell lung carcinoma             120796
 chronic obstructive pulmonary disease      55254
+pulmonary fibrosis                         51343
+interstitial lung disease                  45714
 pulmonary emphysema                        32065
+pneumonia                                  31923
 small cell lung carcinoma                  31540
+lung large cell carcinoma                  21167
+cystic fibrosis                            17590
+lymphangioleiomyomatosis                   12374
+pleomorphic carcinoma                      10765
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1058,9 +1081,9 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 sex
-male       1267756
-female     1019958
-unknown       7523
+male       1402940
+female     1123386
+unknown     381601
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1083,8 +1106,8 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 suspension_type
-cell               1879402
-nucleus             415835
+cell               2469358
+nucleus             438569
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1107,26 +1130,26 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 cell_type
-alveolar macrophage                           244502
-CD4-positive, alpha-beta T cell               185787
-macrophage                                    154415
-CD8-positive, alpha-beta T cell               152746
-type II pneumocyte                            143252
-epithelial cell of lower respiratory tract    101959
-classical monocyte                             90969
-natural killer cell                            90715
-stromal cell                                   87587
-malignant cell                                 75917
-B cell                                         61804
-T cell                                         53703
-fibroblast                                     41934
-plasma cell                                    41907
-fibroblast of lung                             41294
-epithelial cell of lung                        38426
-epithelial cell                                37498
-regulatory T cell                              36381
-mesenchymal cell                               33235
-monocyte                                       33154
+alveolar macrophage                                291507
+native cell                                        263362
+CD4-positive, alpha-beta T cell                    211456
+CD8-positive, alpha-beta T cell                    189471
+macrophage                                         154415
+type II pneumocyte                                 129234
+epithelial cell of lower respiratory tract         105090
+classical monocyte                                 102303
+natural killer cell                                 95953
+T cell                                              92846
+stromal cell                                        87714
+B cell                                              81125
+malignant cell                                      75917
+plasma cell                                         64551
+epithelial cell                                     59353
+fibroblast                                          45305
+capillary endothelial cell                          39416
+regulatory T cell                                   36381
+ciliated columnar cell of tracheobronchial tree     36049
+epithelial cell of lung                             35467
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1149,11 +1172,17 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tissue
-lung                       1882088
-lung parenchyma             311950
-alveolus of lung             54856
-lingula of left lung         35284
-lower lobe of left lung      11059
+lung                         2576327
+lung parenchyma               147410
+alveolus of lung               54856
+lingula of left lung           35284
+upper lobe of right lung       32099
+lower lobe of left lung        17854
+right lung                     12880
+upper lobe of left lung        10113
+left lung                       9276
+lower lobe of right lung        7981
+middle lobe of right lung       3847
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1204,37 +1233,37 @@ Name: count, dtype: int64
     <tr>
       <th>0</th>
       <td>0</td>
+      <td>ENSG00000243485</td>
+      <td>MIR1302-2HG</td>
+      <td>1021</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>ENSG00000237613</td>
+      <td>FAM138A</td>
+      <td>1219</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>ENSG00000186092</td>
+      <td>OR4F5</td>
+      <td>2618</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
       <td>ENSG00000238009</td>
       <td>RP11-34P13.7</td>
       <td>3726</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>ENSG00000279457</td>
-      <td>WASH9P</td>
-      <td>1397</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>2</td>
-      <td>ENSG00000228463</td>
-      <td>AP006222.1</td>
-      <td>8224</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>3</td>
-      <td>ENSG00000237094</td>
-      <td>RP4-669L17.4</td>
-      <td>6204</td>
-    </tr>
-    <tr>
       <th>4</th>
       <td>4</td>
-      <td>ENSG00000230021</td>
-      <td>RP11-206L10.17</td>
-      <td>5495</td>
+      <td>ENSG00000239945</td>
+      <td>RP11-34P13.8</td>
+      <td>1319</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1310,9 +1339,10 @@ Name: count, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
-       27243, 26323, 27181, 23203, 57030, 32610, 29620, 26454, 23705,
-       38676, 47307, 21641, 23740, 22552, 20594, 19952], dtype=uint64)
+array([17811, 50259, 44150, 34265, 22447, 23642, 26347, 20921, 24672,
+       27705, 27243, 26323, 27181, 23203, 57042, 32610, 29620, 26454,
+       23705, 38676, 47307, 21641, 23740, 22552, 20594, 19952],
+      dtype=uint64)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1369,23 +1399,23 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>1028006</td>
       <td>High-resolution single-cell atlas reveals dive...</td>
       <td>The single-cell lung cancer atlas (LuCA) -- ex...</td>
-      <td>157</td>
+      <td>283</td>
       <td>17811</td>
     </tr>
     <tr>
-      <th>066943a2-fdac-4b29-b348-40cede398e4e</th>
-      <td>254931</td>
+      <th>9f222629-9e39-47d0-b83f-e08d610c7479</th>
+      <td>784630</td>
       <td>The integrated Human Lung Cell Atlas</td>
-      <td>The integrated Human Lung Cell Atlas</td>
-      <td>79</td>
-      <td>28024</td>
+      <td>An integrated cell atlas of the human lung in ...</td>
+      <td>12</td>
+      <td>50259</td>
     </tr>
     <tr>
       <th>f7c1c579-2dc0-47e2-ba19-8165c5a0e353</th>
       <td>217738</td>
       <td>A human cell atlas of fetal gene expression</td>
       <td>Survey of human embryonic development</td>
-      <td>94</td>
+      <td>452</td>
       <td>44150</td>
     </tr>
     <tr>
@@ -1393,7 +1423,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>116313</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>4</td>
+      <td>41</td>
       <td>34265</td>
     </tr>
     <tr>
@@ -1401,15 +1431,23 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>90384</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Combined samples</td>
-      <td>519</td>
+      <td>346</td>
       <td>22447</td>
+    </tr>
+    <tr>
+      <th>d41f45c1-1b7b-4573-a998-ac5c5acb1647</th>
+      <td>82991</td>
+      <td>HTAN MSK - Transcriptional connectivity of reg...</td>
+      <td>Transcriptional connectivity of regulatory T c...</td>
+      <td>14</td>
+      <td>23642</td>
     </tr>
     <tr>
       <th>3dc61ca1-ce40-46b6-8337-f27260fd9a03</th>
       <td>71752</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>All cells</td>
-      <td>75</td>
+      <td>294</td>
       <td>26347</td>
     </tr>
     <tr>
@@ -1417,7 +1455,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>60993</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
-      <td>177</td>
+      <td>561</td>
       <td>20921</td>
     </tr>
     <tr>
@@ -1425,7 +1463,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>57019</td>
       <td>scRNA-seq assessment of the human lung, spleen...</td>
       <td>Lung Parenchyma</td>
-      <td>317</td>
+      <td>385</td>
       <td>24672</td>
     </tr>
     <tr>
@@ -1433,7 +1471,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>49014</td>
       <td>COVID-19 immune features revealed by a large-s...</td>
       <td>Large-scale single-cell analysis reveals criti...</td>
-      <td>63</td>
+      <td>451</td>
       <td>27705</td>
     </tr>
     <tr>
@@ -1441,7 +1479,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>47909</td>
       <td>Charting human development using a multi-endod...</td>
       <td>Developing Human Atlas</td>
-      <td>508</td>
+      <td>34</td>
       <td>27243</td>
     </tr>
     <tr>
@@ -1449,7 +1487,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>46500</td>
       <td>LungMAP — Human data from a broad age healthy ...</td>
       <td>Single-cell multiomic profiling of human lungs...</td>
-      <td>188</td>
+      <td>425</td>
       <td>26323</td>
     </tr>
     <tr>
@@ -1457,7 +1495,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>39778</td>
       <td>SARS-CoV-2 receptor ACE2 and TMPRSS2 are prima...</td>
       <td>Lung</td>
-      <td>104</td>
+      <td>281</td>
       <td>27181</td>
     </tr>
     <tr>
@@ -1465,7 +1503,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>35699</td>
       <td>Emphysema Cell Atlas</td>
       <td>immune cells</td>
-      <td>51</td>
+      <td>91</td>
       <td>23203</td>
     </tr>
     <tr>
@@ -1473,15 +1511,15 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>35682</td>
       <td>Tabula Sapiens</td>
       <td>Tabula Sapiens - All Cells</td>
-      <td>339</td>
-      <td>57030</td>
+      <td>444</td>
+      <td>57042</td>
     </tr>
     <tr>
       <th>1b9d8702-5af8-4142-85ed-020eb06ec4f6</th>
       <td>35419</td>
       <td>Cross-tissue immune cell analysis reveals tiss...</td>
       <td>Global</td>
-      <td>314</td>
+      <td>380</td>
       <td>32610</td>
     </tr>
     <tr>
@@ -1489,7 +1527,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>35284</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
-      <td>62</td>
+      <td>336</td>
       <td>29620</td>
     </tr>
     <tr>
@@ -1497,7 +1535,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>33698</td>
       <td>Construction of a human cell landscape at sing...</td>
       <td>Construction of a human cell landscape at sing...</td>
-      <td>244</td>
+      <td>559</td>
       <td>26454</td>
     </tr>
     <tr>
@@ -1505,7 +1543,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>15495</td>
       <td>Emphysema Cell Atlas</td>
       <td>non-immune cells</td>
-      <td>53</td>
+      <td>89</td>
       <td>23705</td>
     </tr>
     <tr>
@@ -1513,7 +1551,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>11059</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
-      <td>186</td>
+      <td>500</td>
       <td>38676</td>
     </tr>
     <tr>
@@ -1521,7 +1559,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>8657</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
-      <td>176</td>
+      <td>560</td>
       <td>47307</td>
     </tr>
     <tr>
@@ -1529,7 +1567,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>3662</td>
       <td>Emphysema Cell Atlas</td>
       <td>AT2 cells</td>
-      <td>52</td>
+      <td>90</td>
       <td>21641</td>
     </tr>
     <tr>
@@ -1537,7 +1575,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>176</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Fibroblast and smooth muscle</td>
-      <td>71</td>
+      <td>286</td>
       <td>23740</td>
     </tr>
     <tr>
@@ -1545,7 +1583,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>55</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Immune cells</td>
-      <td>520</td>
+      <td>339</td>
       <td>22552</td>
     </tr>
     <tr>
@@ -1553,7 +1591,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>10</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Endothelium</td>
-      <td>77</td>
+      <td>289</td>
       <td>20594</td>
     </tr>
     <tr>
@@ -1561,7 +1599,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>4</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Myeloid</td>
-      <td>74</td>
+      <td>295</td>
       <td>19952</td>
     </tr>
   </tbody>
@@ -1617,36 +1655,36 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
   </thead>
   <tbody>
     <tr>
-      <th>6</th>
-      <td>6</td>
+      <th>15</th>
+      <td>15</td>
       <td>ENSG00000177757</td>
       <td>FAM87B</td>
       <td>1947</td>
     </tr>
     <tr>
-      <th>8</th>
-      <td>8</td>
+      <th>18</th>
+      <td>18</td>
       <td>ENSG00000230368</td>
       <td>FAM41C</td>
       <td>1971</td>
     </tr>
     <tr>
-      <th>10</th>
-      <td>10</td>
+      <th>23</th>
+      <td>23</td>
       <td>ENSG00000187634</td>
       <td>SAMD11</td>
       <td>4172</td>
     </tr>
     <tr>
-      <th>11</th>
-      <td>11</td>
+      <th>24</th>
+      <td>24</td>
       <td>ENSG00000188976</td>
       <td>NOC2L</td>
       <td>5540</td>
     </tr>
     <tr>
-      <th>12</th>
-      <td>12</td>
+      <th>25</th>
+      <td>25</td>
       <td>ENSG00000187961</td>
       <td>KLHL17</td>
       <td>3402</td>
@@ -1659,43 +1697,43 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
       <td>...</td>
     </tr>
     <tr>
-      <th>27743</th>
-      <td>27743</td>
-      <td>ENSG00000160838</td>
-      <td>LRRC71</td>
-      <td>2649</td>
+      <th>35493</th>
+      <td>35493</td>
+      <td>ENSG00000230844</td>
+      <td>ZNF674-AS1</td>
+      <td>2566</td>
     </tr>
     <tr>
-      <th>30433</th>
-      <td>30433</td>
-      <td>ENSG00000136918</td>
-      <td>WDR38</td>
-      <td>1387</td>
+      <th>35879</th>
+      <td>35879</td>
+      <td>ENSG00000223546</td>
+      <td>LINC00630</td>
+      <td>11464</td>
     </tr>
     <tr>
-      <th>30816</th>
-      <td>30816</td>
-      <td>ENSG00000149021</td>
-      <td>SCGB1A1</td>
-      <td>584</td>
+      <th>36101</th>
+      <td>36101</td>
+      <td>ENSG00000223749</td>
+      <td>MIR503HG</td>
+      <td>3003</td>
     </tr>
     <tr>
-      <th>31272</th>
-      <td>31272</td>
-      <td>ENSG00000187848</td>
-      <td>P2RX2</td>
-      <td>1975</td>
+      <th>36357</th>
+      <td>36357</td>
+      <td>ENSG00000231535</td>
+      <td>LINC00278</td>
+      <td>4185</td>
     </tr>
     <tr>
-      <th>32538</th>
-      <td>32538</td>
-      <td>ENSG00000160472</td>
-      <td>TMEM190</td>
-      <td>605</td>
+      <th>36416</th>
+      <td>36416</td>
+      <td>ENSG00000176728</td>
+      <td>TTTY14</td>
+      <td>22334</td>
     </tr>
   </tbody>
 </table>
-<p>11516 rows × 4 columns</p>
+<p>11493 rows × 4 columns</p>
 </div></div>
 </div>
 <p>The number of rows represents the genes that were measured in all lung datasets.</p>
@@ -1761,7 +1799,7 @@ array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-AnnData object with n_obs × n_vars = 100000 × 11516
+AnnData object with n_obs × n_vars = 100000 × 11493
     obs: &#39;soma_joinid&#39;, &#39;dataset_id&#39;, &#39;assay&#39;, &#39;assay_ontology_term_id&#39;, &#39;cell_type&#39;, &#39;cell_type_ontology_term_id&#39;, &#39;development_stage&#39;, &#39;development_stage_ontology_term_id&#39;, &#39;disease&#39;, &#39;disease_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;is_primary_data&#39;, &#39;self_reported_ethnicity&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex&#39;, &#39;sex_ontology_term_id&#39;, &#39;suspension_type&#39;, &#39;tissue&#39;, &#39;tissue_ontology_term_id&#39;, &#39;tissue_general&#39;, &#39;tissue_general_ontology_term_id&#39;
     var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
 </pre></div></div>
@@ -1888,14 +1926,14 @@ AnnData object with n_obs × n_vars = 100000 × 11516
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/preprocessing/_highly_variable_genes.py:62: UserWarning: `flavor=&#39;seurat_v3&#39;` expects raw count data, but non-integers were found.
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/preprocessing/_highly_variable_genes.py:62: UserWarning: `flavor=&#39;seurat_v3&#39;` expects raw count data, but non-integers were found.
   warnings.warn(
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
   view_to_actual(adata)
 </pre></div></div>
 </div>
 <p>And reduce dimensionality by obtaining UMAP embeddings.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
@@ -1904,14 +1942,6 @@ AnnData object with n_obs × n_vars = 100000 × 11516
 <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
-</pre></div></div>
 </div>
 <p>And plot these embeddings.</p>
 <div class="nbinput nblast docutils container">
@@ -1942,7 +1972,7 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -1967,7 +1997,7 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -2002,7 +2032,7 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -2027,7 +2057,7 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>

@@ -21,15 +21,6 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_axis_query.html">Axis Query Example</a>
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Census datasets presence</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
-  </div>
-</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -61,7 +52,8 @@
 <span>  <span class="va">dataset_id</span>,</span>
 <span>  <span class="va">file</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  census_version <span class="op">=</span> <span class="st">"latest"</span></span>
+<span>  census_version <span class="op">=</span> <span class="st">"stable"</span>,</span>
+<span>  census <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -80,7 +72,13 @@
 
 
 <dt>census_version</dt>
-<dd><p>The census version.</p></dd>
+<dd><p>The desired Census version.</p></dd>
+
+
+<dt>census</dt>
+<dd><p>An open Census handle for <code>census_version</code>. If not provided, then
+it will be opened and closed automatically; but it's more efficient
+to reuse a handle if calling <code>download_source_h5ad()</code> multiple times.</p></dd>
 
 </dl></div>
 

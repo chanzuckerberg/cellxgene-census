@@ -76,7 +76,7 @@
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
                   </span>
                 </span>
             </span>
@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.0.0
+                    1.2.0
                 </div>
                 
             
@@ -223,18 +223,24 @@
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 Global seed set to 0
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-  from .autonotebook import tqdm as notebook_tqdm
 </pre></div></div>
 </div>
 <p>Now we can open the Census, if you are not familiar with the basics of the Census API you should take a look at the notebook <a class="reference external" href="https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CELLxGENE Census</a>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;latest&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <p>In this notebook we will use Tabula Muris Senis data from the liver as it contains cells from both 10X Genomics and Smart-Seq2 technologies.</p>
 <p>Let’s query the <code class="docutils literal notranslate"><span class="pre">datasets</span></code> table of the Census by filtering on <code class="docutils literal notranslate"><span class="pre">collection_name</span></code> for “Tabula Muris Senis” and <code class="docutils literal notranslate"><span class="pre">dataset_title</span></code> for “liver”.</p>
@@ -285,19 +291,8 @@ Global seed set to 0
   </thead>
   <tbody>
     <tr>
-      <th>6</th>
-      <td>336</td>
-      <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>
-      <td>Tabula Muris Senis</td>
-      <td>10.1038/s41586-020-2496-1</td>
-      <td>6202a243-b713-4e12-9ced-c387f8483dea</td>
-      <td>Liver - A single-cell transcriptomic atlas cha...</td>
-      <td>6202a243-b713-4e12-9ced-c387f8483dea.h5ad</td>
-      <td>7294</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>344</td>
+      <th>13</th>
+      <td>494</td>
       <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>
       <td>Tabula Muris Senis</td>
       <td>10.1038/s41586-020-2496-1</td>
@@ -305,6 +300,17 @@ Global seed set to 0
       <td>Liver - A single-cell transcriptomic atlas cha...</td>
       <td>4546e757-34d0-4d17-be06-538318925fcd.h5ad</td>
       <td>2859</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>516</td>
+      <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>
+      <td>Tabula Muris Senis</td>
+      <td>10.1038/s41586-020-2496-1</td>
+      <td>6202a243-b713-4e12-9ced-c387f8483dea</td>
+      <td>Liver - A single-cell transcriptomic atlas cha...</td>
+      <td>6202a243-b713-4e12-9ced-c387f8483dea.h5ad</td>
+      <td>7294</td>
     </tr>
   </tbody>
 </table>
@@ -461,7 +467,7 @@ Name: count, dtype: int64
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -485,7 +491,7 @@ Name: count, dtype: int64
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -550,7 +556,7 @@ HPU available: False, using: 0 HPUs
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.58it/s, loss=567, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.55it/s, loss=555, v_num=1]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -566,7 +572,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.53it/s, loss=567, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.52it/s, loss=555, v_num=1]
 </pre></div></div>
 </div>
 <p>And finally let’s get the latent representations as cell embeddings and use those for UMAP visualization.</p>
@@ -593,7 +599,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -617,7 +623,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -676,7 +682,7 @@ HPU available: False, using: 0 HPUs
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.56it/s, loss=552, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.54it/s, loss=549, v_num=1]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -692,7 +698,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.53it/s, loss=552, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.51it/s, loss=549, v_num=1]
 </pre></div></div>
 </div>
 <p>And we get the latent variables as embeddings.</p>
@@ -719,7 +725,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -743,7 +749,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/venv-notebooks/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>

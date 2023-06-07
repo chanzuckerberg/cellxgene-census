@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_source\_h5ad\_uri
+========================================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_source_h5ad_uri

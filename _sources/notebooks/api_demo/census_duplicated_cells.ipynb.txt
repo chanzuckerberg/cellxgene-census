@@ -48,13 +48,21 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-04-05T14:14:38.826982Z",
-     "iopub.status.busy": "2023-04-05T14:14:38.826753Z",
-     "iopub.status.idle": "2023-04-05T14:14:39.709643Z",
-     "shell.execute_reply": "2023-04-05T14:14:39.707969Z"
+     "iopub.execute_input": "2023-05-17T15:37:06.246546Z",
+     "iopub.status.busy": "2023-05-17T15:37:06.246069Z",
+     "iopub.status.idle": "2023-05-17T15:37:08.867857Z",
+     "shell.execute_reply": "2023-05-17T15:37:08.867253Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    }
+   ],
    "source": [
     "import cellxgene_census\n",
     "\n",
@@ -78,7 +86,14 @@
   {
    "cell_type": "code",
    "execution_count": 2,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:08.871706Z",
+     "iopub.status.busy": "2023-05-17T15:37:08.870353Z",
+     "iopub.status.idle": "2023-05-17T15:37:08.911114Z",
+     "shell.execute_reply": "2023-05-17T15:37:08.910586Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -124,8 +139,23 @@
   {
    "cell_type": "code",
    "execution_count": 3,
-   "metadata": {},
-   "outputs": [],
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:08.913202Z",
+     "iopub.status.busy": "2023-05-17T15:37:08.913060Z",
+     "iopub.status.idle": "2023-05-17T15:37:09.968086Z",
+     "shell.execute_reply": "2023-05-17T15:37:09.967626Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    }
+   ],
    "source": [
     "tabula_muris_liver_dataset_id = \"6202a243-b713-4e12-9ced-c387f8483dea\"\n",
     "\n",
@@ -147,7 +177,14 @@
   {
    "cell_type": "code",
    "execution_count": 4,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:09.970720Z",
+     "iopub.status.busy": "2023-05-17T15:37:09.970563Z",
+     "iopub.status.idle": "2023-05-17T15:37:09.976304Z",
+     "shell.execute_reply": "2023-05-17T15:37:09.975953Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -193,8 +230,23 @@
   {
    "cell_type": "code",
    "execution_count": 5,
-   "metadata": {},
-   "outputs": [],
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:09.978023Z",
+     "iopub.status.busy": "2023-05-17T15:37:09.977879Z",
+     "iopub.status.idle": "2023-05-17T15:37:16.049592Z",
+     "shell.execute_reply": "2023-05-17T15:37:16.048490Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    }
+   ],
    "source": [
     "with cellxgene_census.open_soma() as census:\n",
     "    nk_cells = census[\"census_data\"][\"homo_sapiens\"].obs.read(\n",
@@ -210,7 +262,14 @@
   {
    "cell_type": "code",
    "execution_count": 6,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:16.052588Z",
+     "iopub.status.busy": "2023-05-17T15:37:16.052364Z",
+     "iopub.status.idle": "2023-05-17T15:37:16.055971Z",
+     "shell.execute_reply": "2023-05-17T15:37:16.055607Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -237,8 +296,23 @@
   {
    "cell_type": "code",
    "execution_count": 7,
-   "metadata": {},
-   "outputs": [],
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:16.057773Z",
+     "iopub.status.busy": "2023-05-17T15:37:16.057628Z",
+     "iopub.status.idle": "2023-05-17T15:37:22.371662Z",
+     "shell.execute_reply": "2023-05-17T15:37:22.370999Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    }
+   ],
    "source": [
     "with cellxgene_census.open_soma() as census:\n",
     "    nk_cells_primary = census[\"census_data\"][\"homo_sapiens\"].obs.read(\n",
@@ -255,7 +329,14 @@
   {
    "cell_type": "code",
    "execution_count": 8,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:22.374378Z",
+     "iopub.status.busy": "2023-05-17T15:37:22.374168Z",
+     "iopub.status.idle": "2023-05-17T15:37:22.377211Z",
+     "shell.execute_reply": "2023-05-17T15:37:22.376841Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -288,8 +369,23 @@
   {
    "cell_type": "code",
    "execution_count": 9,
-   "metadata": {},
-   "outputs": [],
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:22.379352Z",
+     "iopub.status.busy": "2023-05-17T15:37:22.379138Z",
+     "iopub.status.idle": "2023-05-17T15:37:35.927633Z",
+     "shell.execute_reply": "2023-05-17T15:37:35.926700Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    }
+   ],
    "source": [
     "with cellxgene_census.open_soma() as census:\n",
     "    adata = cellxgene_census.get_anndata(\n",
@@ -306,7 +402,14 @@
   {
    "cell_type": "code",
    "execution_count": 10,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:35.930595Z",
+     "iopub.status.busy": "2023-05-17T15:37:35.930444Z",
+     "iopub.status.idle": "2023-05-17T15:37:35.934725Z",
+     "shell.execute_reply": "2023-05-17T15:37:35.933957Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -333,8 +436,23 @@
   {
    "cell_type": "code",
    "execution_count": 11,
-   "metadata": {},
-   "outputs": [],
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:35.936993Z",
+     "iopub.status.busy": "2023-05-17T15:37:35.936846Z",
+     "iopub.status.idle": "2023-05-17T15:37:46.880757Z",
+     "shell.execute_reply": "2023-05-17T15:37:46.879659Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    }
+   ],
    "source": [
     "with cellxgene_census.open_soma() as census:\n",
     "    adata_primary = cellxgene_census.get_anndata(\n",
@@ -352,7 +470,14 @@
   {
    "cell_type": "code",
    "execution_count": 12,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:46.883574Z",
+     "iopub.status.busy": "2023-05-17T15:37:46.883432Z",
+     "iopub.status.idle": "2023-05-17T15:37:46.888006Z",
+     "shell.execute_reply": "2023-05-17T15:37:46.887189Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -385,8 +510,22 @@
   {
    "cell_type": "code",
    "execution_count": 13,
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-05-17T15:37:46.890416Z",
+     "iopub.status.busy": "2023-05-17T15:37:46.890270Z",
+     "iopub.status.idle": "2023-05-17T15:38:11.311838Z",
+     "shell.execute_reply": "2023-05-17T15:38:11.310915Z"
+    }
+   },
    "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "The \"stable\" release is currently 2023-05-15. Specify 'census_version=\"2023-05-15\"' in future calls to open_soma() to ensure data consistency.\n"
+     ]
+    },
     {
      "name": "stdout",
      "output_type": "stream",
@@ -396,9 +535,9 @@
       "soma_dim_1: int64\n",
       "soma_data: float\n",
       "----\n",
-      "soma_dim_0: [[2141067,2141067,2141067,2141067,2141067,...,46504636,46504702,46504705,46504705,46504715]]\n",
-      "soma_dim_1: [[5,11,38,44,74,...,37047,37066,36918,36933,37047]]\n",
-      "soma_data: [[1,2,2,1,1,...,1,1,1,1,2]]\n"
+      "soma_dim_0: [[8448858,8448858,8448858,8448858,8448858,...,52812487,52812553,52812556,52812556,52812566]]\n",
+      "soma_dim_1: [[59,60,62,113,170,...,37033,37052,36904,36919,37033]]\n",
+      "soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]\n"
      ]
     }
    ],
@@ -448,7 +587,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.10.10"
+   "version": "3.10.11"
   },
   "vscode": {
    "interpreter": {

@@ -76,7 +76,7 @@
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
                   </span>
                 </span>
             </span>
@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.0.0
+                    1.2.0
                 </div>
                 
             
@@ -208,7 +208,7 @@
 <section id="Opening-the-Census">
 <h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -219,6 +219,14 @@
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 </section>
 <section id="Fetching-the-IDs-of-the-Census-datasets">
@@ -276,57 +284,57 @@
     <tr>
       <th>0</th>
       <td>0</td>
-      <td>43d4bb39-21af-4d05-b973-4c1fed7b916c</td>
-      <td>Transcriptional Programming of Normal and Infl...</td>
-      <td>10.1016/j.celrep.2018.09.006</td>
-      <td>f512b8b6-369d-4a85-a695-116e0806857f</td>
-      <td>Skin</td>
-      <td>f512b8b6-369d-4a85-a695-116e0806857f.h5ad</td>
-      <td>68036</td>
+      <td>6b701826-37bb-4356-9792-ff41fc4c3161</td>
+      <td>Abdominal White Adipose Tissue</td>
+      <td></td>
+      <td>9d8e5dca-03a3-457d-b7fb-844c75735c83</td>
+      <td>22 integrated samples</td>
+      <td>9d8e5dca-03a3-457d-b7fb-844c75735c83.h5ad</td>
+      <td>72335</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1</td>
-      <td>2b02dff7-e427-4cdc-96fb-c0f354c099aa</td>
-      <td>Single-Cell Analysis of Crohn’s Disease Lesion...</td>
-      <td>10.1016/j.cell.2019.08.008</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
-      <td>Ileum</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da.h5ad</td>
-      <td>32458</td>
+      <td>4195ab4c-20bd-4cd3-8b3d-65601277e731</td>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td></td>
+      <td>a6388a6f-6076-401b-9b30-7d4306a20035</td>
+      <td>scRNA-seq data - myeloid cells</td>
+      <td>a6388a6f-6076-401b-9b30-7d4306a20035.h5ad</td>
+      <td>30789</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2</td>
-      <td>e9eec7f5-8519-42f6-99b4-6dbd9cc5ef03</td>
-      <td>Humoral immunity at the brain borders in homeo...</td>
-      <td>10.1016/j.coi.2022.102188</td>
-      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</td>
-      <td>A scRNA-seq atlas of immune cells at the CNS b...</td>
-      <td>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff.h5ad</td>
-      <td>130908</td>
+      <td>4195ab4c-20bd-4cd3-8b3d-65601277e731</td>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td></td>
+      <td>842c6f5d-4a94-4eef-8510-8c792d1124bc</td>
+      <td>scRNA-seq data - all cells</td>
+      <td>842c6f5d-4a94-4eef-8510-8c792d1124bc.h5ad</td>
+      <td>714331</td>
     </tr>
     <tr>
       <th>3</th>
       <td>3</td>
-      <td>a72afd53-ab92-4511-88da-252fb0e26b9a</td>
-      <td>Single-cell atlas of peripheral immune respons...</td>
-      <td>10.1038/s41591-020-0944-y</td>
-      <td>456e8b9b-f872-488b-871d-94534090a865</td>
-      <td>Single-cell atlas of peripheral immune respons...</td>
-      <td>456e8b9b-f872-488b-871d-94534090a865.h5ad</td>
-      <td>44721</td>
+      <td>4195ab4c-20bd-4cd3-8b3d-65601277e731</td>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td></td>
+      <td>74520626-b0ba-4ee9-86b5-714649554def</td>
+      <td>scRNA-seq data - T cells</td>
+      <td>74520626-b0ba-4ee9-86b5-714649554def.h5ad</td>
+      <td>76567</td>
     </tr>
     <tr>
       <th>4</th>
       <td>4</td>
-      <td>e4c9ed14-e560-4900-a3bf-b0f8d2ce6a10</td>
-      <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>10.1038/s41586-021-03569-1</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f.h5ad</td>
-      <td>116313</td>
+      <td>4195ab4c-20bd-4cd3-8b3d-65601277e731</td>
+      <td>A spatially resolved single cell genomic atlas...</td>
+      <td></td>
+      <td>396a9124-fb20-4822-bf9c-e93fdf7c999a</td>
+      <td>scRNA-seq data - B cells</td>
+      <td>396a9124-fb20-4822-bf9c-e93fdf7c999a.h5ad</td>
+      <td>12510</td>
     </tr>
     <tr>
       <th>...</th>
@@ -340,63 +348,63 @@
       <td>...</td>
     </tr>
     <tr>
-      <th>524</th>
-      <td>524</td>
-      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td></td>
-      <td>30498543-4fdd-4f86-9e1b-05c1a1454a6a</td>
-      <td>B cells -- CV19 infection, vaccination and HC</td>
-      <td>30498543-4fdd-4f86-9e1b-05c1a1454a6a.h5ad</td>
-      <td>20727</td>
+      <th>557</th>
+      <td>557</td>
+      <td>180bff9c-c8a5-4539-b13b-ddbc00d643e6</td>
+      <td>Molecular characterization of selectively vuln...</td>
+      <td>10.1038/s41593-020-00764-7</td>
+      <td>f9ad5649-f372-43e1-a3a8-423383e5a8a2</td>
+      <td>Molecular characterization of selectively vuln...</td>
+      <td>f9ad5649-f372-43e1-a3a8-423383e5a8a2.h5ad</td>
+      <td>8168</td>
     </tr>
     <tr>
-      <th>525</th>
-      <td>525</td>
-      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td></td>
-      <td>b5191f01-f67d-44b8-bc8d-511a4ecd07bb</td>
-      <td>innate T cells -- CV19 infection, vaccination ...</td>
-      <td>b5191f01-f67d-44b8-bc8d-511a4ecd07bb.h5ad</td>
-      <td>33415</td>
+      <th>558</th>
+      <td>558</td>
+      <td>a72afd53-ab92-4511-88da-252fb0e26b9a</td>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>10.1038/s41591-020-0944-y</td>
+      <td>456e8b9b-f872-488b-871d-94534090a865</td>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>456e8b9b-f872-488b-871d-94534090a865.h5ad</td>
+      <td>44721</td>
     </tr>
     <tr>
-      <th>526</th>
-      <td>526</td>
-      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td></td>
-      <td>e463dae9-3fc1-476d-870e-d98a04c56cd6</td>
-      <td>M cells -- CV19 infection, vaccination and HC</td>
-      <td>e463dae9-3fc1-476d-870e-d98a04c56cd6.h5ad</td>
-      <td>41130</td>
+      <th>559</th>
+      <td>559</td>
+      <td>38833785-fac5-48fd-944a-0f62a4c23ed1</td>
+      <td>Construction of a human cell landscape at sing...</td>
+      <td>10.1038/s41586-020-2157-4</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+      <td>Construction of a human cell landscape at sing...</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf.h5ad</td>
+      <td>598266</td>
     </tr>
     <tr>
-      <th>527</th>
-      <td>527</td>
-      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td></td>
-      <td>1b699e04-1127-42ea-998b-011ace4a5b81</td>
-      <td>T cells -- CV19 infection, vaccination and HC</td>
-      <td>1b699e04-1127-42ea-998b-011ace4a5b81.h5ad</td>
-      <td>98068</td>
+      <th>560</th>
+      <td>560</td>
+      <td>5d445965-6f1a-4b68-ba3a-b8f765155d3a</td>
+      <td>A molecular cell atlas of the human lung from ...</td>
+      <td>10.1038/s41586-020-2922-4</td>
+      <td>e04daea4-4412-45b5-989e-76a9be070a89</td>
+      <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
+      <td>e04daea4-4412-45b5-989e-76a9be070a89.h5ad</td>
+      <td>9409</td>
     </tr>
     <tr>
-      <th>528</th>
-      <td>528</td>
-      <td>e3f391f6-5a75-4e96-8450-da47c3d2a939</td>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td></td>
-      <td>87ce26ed-e5d1-44b4-81cc-cc5b709a169f</td>
-      <td>Circulating Immune cells -- CV19 infection, va...</td>
-      <td>87ce26ed-e5d1-44b4-81cc-cc5b709a169f.h5ad</td>
-      <td>195632</td>
+      <th>561</th>
+      <td>561</td>
+      <td>5d445965-6f1a-4b68-ba3a-b8f765155d3a</td>
+      <td>A molecular cell atlas of the human lung from ...</td>
+      <td>10.1038/s41586-020-2922-4</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e.h5ad</td>
+      <td>65662</td>
     </tr>
   </tbody>
 </table>
-<p>529 rows × 8 columns</p>
+<p>562 rows × 8 columns</p>
 </div></div>
 </div>
 </section>
@@ -420,8 +428,8 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;529x60664 sparse matrix of type &#39;&lt;class &#39;numpy.uint8&#39;&gt;&#39;
-        with 14006372 stored elements in Compressed Sparse Row format&gt;
+&lt;562x60664 sparse matrix of type &#39;&lt;class &#39;numpy.uint8&#39;&gt;&#39;
+        with 14829450 stored elements in Compressed Sparse Row format&gt;
 </pre></div></div>
 </div>
 <p>We also need the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe, which is read into a Pandas DataFrame for convenient manipulation:</p>
@@ -468,37 +476,37 @@
     <tr>
       <th>0</th>
       <td>0</td>
+      <td>ENSG00000243485</td>
+      <td>MIR1302-2HG</td>
+      <td>1021</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>ENSG00000237613</td>
+      <td>FAM138A</td>
+      <td>1219</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>ENSG00000186092</td>
+      <td>OR4F5</td>
+      <td>2618</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
       <td>ENSG00000238009</td>
       <td>RP11-34P13.7</td>
       <td>3726</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>ENSG00000279457</td>
-      <td>WASH9P</td>
-      <td>1397</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>2</td>
-      <td>ENSG00000228463</td>
-      <td>AP006222.1</td>
-      <td>8224</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>3</td>
-      <td>ENSG00000237094</td>
-      <td>RP4-669L17.4</td>
-      <td>6204</td>
-    </tr>
-    <tr>
       <th>4</th>
       <td>4</td>
-      <td>ENSG00000230021</td>
-      <td>RP11-206L10.17</td>
-      <td>5495</td>
+      <td>ENSG00000239945</td>
+      <td>RP11-34P13.8</td>
+      <td>1319</td>
     </tr>
     <tr>
       <th>...</th>
@@ -627,129 +635,19 @@ Feature is present.
   </thead>
   <tbody>
     <tr>
-      <th>335</th>
-      <td>335</td>
-      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
-      <td>Tabula Sapiens</td>
-      <td>10.1126/science.abl4896</td>
-      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2</td>
-      <td>Tabula Sapiens - Stromal</td>
-      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2.h5ad</td>
-      <td>82478</td>
-    </tr>
-    <tr>
-      <th>336</th>
-      <td>336</td>
-      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
-      <td>Tabula Sapiens</td>
-      <td>10.1126/science.abl4896</td>
-      <td>97a17473-e2b1-4f31-a544-44a60773e2dd</td>
-      <td>Tabula Sapiens - Epithelial</td>
-      <td>97a17473-e2b1-4f31-a544-44a60773e2dd.h5ad</td>
-      <td>104148</td>
-    </tr>
-    <tr>
-      <th>337</th>
-      <td>337</td>
-      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
-      <td>Tabula Sapiens</td>
-      <td>10.1126/science.abl4896</td>
-      <td>c5d88abe-f23a-45fa-a534-788985e93dad</td>
-      <td>Tabula Sapiens - Immune</td>
-      <td>c5d88abe-f23a-45fa-a534-788985e93dad.h5ad</td>
-      <td>264824</td>
-    </tr>
-    <tr>
-      <th>338</th>
-      <td>338</td>
-      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
-      <td>Tabula Sapiens</td>
-      <td>10.1126/science.abl4896</td>
-      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf</td>
-      <td>Tabula Sapiens - Endothelial</td>
-      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf.h5ad</td>
-      <td>31691</td>
-    </tr>
-    <tr>
-      <th>339</th>
-      <td>339</td>
-      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
-      <td>Tabula Sapiens</td>
-      <td>10.1126/science.abl4896</td>
-      <td>53d208b0-2cfd-4366-9866-c3c6114081bc</td>
-      <td>Tabula Sapiens - All Cells</td>
-      <td>53d208b0-2cfd-4366-9866-c3c6114081bc.h5ad</td>
-      <td>483152</td>
-    </tr>
-    <tr>
-      <th>358</th>
-      <td>358</td>
+      <th>105</th>
+      <td>105</td>
       <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
       <td>Transcriptomic diversity of cell types across ...</td>
       <td>10.1101/2022.10.12.511898</td>
-      <td>07b1d7c8-5c2e-42f7-9246-26f746cd6013</td>
-      <td>Dissection: Myelencephalon (medulla oblongata)...</td>
-      <td>07b1d7c8-5c2e-42f7-9246-26f746cd6013.h5ad</td>
-      <td>27210</td>
+      <td>fe1a73ab-a203-45fd-84e9-0f7fd19efcbd</td>
+      <td>Dissection: Amygdaloid complex (AMY) - basolat...</td>
+      <td>fe1a73ab-a203-45fd-84e9-0f7fd19efcbd.h5ad</td>
+      <td>35285</td>
     </tr>
     <tr>
-      <th>371</th>
-      <td>371</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>7c1c3d47-3166-43e5-9a95-65ceb2d45f78</td>
-      <td>Dissection: Pons (Pn) - Pontine reticular form...</td>
-      <td>7c1c3d47-3166-43e5-9a95-65ceb2d45f78.h5ad</td>
-      <td>49512</td>
-    </tr>
-    <tr>
-      <th>372</th>
-      <td>372</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>9372df2d-13d6-4fac-980b-919a5b7eb483</td>
-      <td>Dissection: Midbrain (M) - Periaqueductal gray...</td>
-      <td>9372df2d-13d6-4fac-980b-919a5b7eb483.h5ad</td>
-      <td>33794</td>
-    </tr>
-    <tr>
-      <th>399</th>
-      <td>399</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>dd03ce70-3243-4c96-9561-330cc461e4d7</td>
-      <td>Dissection: Cerebral cortex (Cx) - Perirhinal ...</td>
-      <td>dd03ce70-3243-4c96-9561-330cc461e4d7.h5ad</td>
-      <td>23732</td>
-    </tr>
-    <tr>
-      <th>413</th>
-      <td>413</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>7a0a8891-9a22-4549-a55b-c2aca23c3a2a</td>
-      <td>Supercluster: Hippocampal CA1-3</td>
-      <td>7a0a8891-9a22-4549-a55b-c2aca23c3a2a.h5ad</td>
-      <td>74979</td>
-    </tr>
-    <tr>
-      <th>415</th>
-      <td>415</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>d2b5efc1-14c6-4b5f-bd98-40f9084872d7</td>
-      <td>Dissection: Tail of Hippocampus (HiT) - Caudal...</td>
-      <td>d2b5efc1-14c6-4b5f-bd98-40f9084872d7.h5ad</td>
-      <td>36886</td>
-    </tr>
-    <tr>
-      <th>419</th>
-      <td>419</td>
+      <th>109</th>
+      <td>109</td>
       <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
       <td>Transcriptomic diversity of cell types across ...</td>
       <td>10.1101/2022.10.12.511898</td>
@@ -759,118 +657,30 @@ Feature is present.
       <td>31899</td>
     </tr>
     <tr>
-      <th>422</th>
-      <td>422</td>
+      <th>126</th>
+      <td>126</td>
       <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
       <td>Transcriptomic diversity of cell types across ...</td>
       <td>10.1101/2022.10.12.511898</td>
-      <td>3a7f3ab4-a280-4b3b-b2c0-6dd05614a78c</td>
-      <td>Supercluster: Splatter</td>
-      <td>3a7f3ab4-a280-4b3b-b2c0-6dd05614a78c.h5ad</td>
-      <td>291833</td>
+      <td>dd03ce70-3243-4c96-9561-330cc461e4d7</td>
+      <td>Dissection: Cerebral cortex (Cx) - Perirhinal ...</td>
+      <td>dd03ce70-3243-4c96-9561-330cc461e4d7.h5ad</td>
+      <td>23732</td>
     </tr>
     <tr>
-      <th>424</th>
-      <td>424</td>
+      <th>131</th>
+      <td>131</td>
       <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
       <td>Transcriptomic diversity of cell types across ...</td>
       <td>10.1101/2022.10.12.511898</td>
-      <td>bdb26abd-f4ba-4ea3-8862-c2340e7a4f55</td>
-      <td>Supercluster: CGE interneuron</td>
-      <td>bdb26abd-f4ba-4ea3-8862-c2340e7a4f55.h5ad</td>
-      <td>227671</td>
+      <td>d2b5efc1-14c6-4b5f-bd98-40f9084872d7</td>
+      <td>Dissection: Tail of Hippocampus (HiT) - Caudal...</td>
+      <td>d2b5efc1-14c6-4b5f-bd98-40f9084872d7.h5ad</td>
+      <td>36886</td>
     </tr>
     <tr>
-      <th>426</th>
-      <td>426</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>5e5ab909-f73f-4b57-98a0-6d2c5662f6a4</td>
-      <td>Dissection: Midbrain (M) - Inferior colliculus...</td>
-      <td>5e5ab909-f73f-4b57-98a0-6d2c5662f6a4.h5ad</td>
-      <td>32306</td>
-    </tr>
-    <tr>
-      <th>434</th>
-      <td>434</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>35c8a04c-8639-4d15-8228-765d8d93fc96</td>
-      <td>Dissection: Hypothalamus (HTH) - supraoptic re...</td>
-      <td>35c8a04c-8639-4d15-8228-765d8d93fc96.h5ad</td>
-      <td>16753</td>
-    </tr>
-    <tr>
-      <th>436</th>
-      <td>436</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>3f56901c-dd4a-47d6-b60b-7b0c0111cfb2</td>
-      <td>Dissection: Head of hippocampus (HiH) - CA1-3</td>
-      <td>3f56901c-dd4a-47d6-b60b-7b0c0111cfb2.h5ad</td>
-      <td>37911</td>
-    </tr>
-    <tr>
-      <th>452</th>
-      <td>452</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>93131426-0124-4ab4-a013-9dfbcd99d467</td>
-      <td>Dissection: Epithalamus - ETH</td>
-      <td>93131426-0124-4ab4-a013-9dfbcd99d467.h5ad</td>
-      <td>24327</td>
-    </tr>
-    <tr>
-      <th>458</th>
-      <td>458</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>acae7679-d077-461c-b857-ee6ccfeb267f</td>
-      <td>Dissection: Head of hippocampus (HiH) - CA1</td>
-      <td>acae7679-d077-461c-b857-ee6ccfeb267f.h5ad</td>
-      <td>39147</td>
-    </tr>
-    <tr>
-      <th>460</th>
-      <td>460</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>c202b243-1aa1-4b16-bc9a-b36241f3b1e3</td>
-      <td>Supercluster: Amygdala excitatory</td>
-      <td>c202b243-1aa1-4b16-bc9a-b36241f3b1e3.h5ad</td>
-      <td>109452</td>
-    </tr>
-    <tr>
-      <th>462</th>
-      <td>462</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>0325478a-9b52-45b5-b40a-2e2ab0d72eb1</td>
-      <td>Supercluster: Upper-layer intratelencephalic</td>
-      <td>0325478a-9b52-45b5-b40a-2e2ab0d72eb1.h5ad</td>
-      <td>455006</td>
-    </tr>
-    <tr>
-      <th>464</th>
-      <td>464</td>
-      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
-      <td>Transcriptomic diversity of cell types across ...</td>
-      <td>10.1101/2022.10.12.511898</td>
-      <td>c2aad8fc-b63b-4f9b-9cfd-baf7bc9c1771</td>
-      <td>Dissection: Cerebral cortex (Cx) - Temporal po...</td>
-      <td>c2aad8fc-b63b-4f9b-9cfd-baf7bc9c1771.h5ad</td>
-      <td>37642</td>
-    </tr>
-    <tr>
-      <th>465</th>
-      <td>465</td>
+      <th>141</th>
+      <td>141</td>
       <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
       <td>Transcriptomic diversity of cell types across ...</td>
       <td>10.1101/2022.10.12.511898</td>
@@ -880,15 +690,213 @@ Feature is present.
       <td>152189</td>
     </tr>
     <tr>
-      <th>482</th>
-      <td>482</td>
+      <th>142</th>
+      <td>142</td>
       <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
       <td>Transcriptomic diversity of cell types across ...</td>
       <td>10.1101/2022.10.12.511898</td>
-      <td>fe1a73ab-a203-45fd-84e9-0f7fd19efcbd</td>
-      <td>Dissection: Amygdaloid complex (AMY) - basolat...</td>
-      <td>fe1a73ab-a203-45fd-84e9-0f7fd19efcbd.h5ad</td>
-      <td>35285</td>
+      <td>c2aad8fc-b63b-4f9b-9cfd-baf7bc9c1771</td>
+      <td>Dissection: Cerebral cortex (Cx) - Temporal po...</td>
+      <td>c2aad8fc-b63b-4f9b-9cfd-baf7bc9c1771.h5ad</td>
+      <td>37642</td>
+    </tr>
+    <tr>
+      <th>143</th>
+      <td>143</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>c202b243-1aa1-4b16-bc9a-b36241f3b1e3</td>
+      <td>Supercluster: Amygdala excitatory</td>
+      <td>c202b243-1aa1-4b16-bc9a-b36241f3b1e3.h5ad</td>
+      <td>109452</td>
+    </tr>
+    <tr>
+      <th>144</th>
+      <td>144</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>bdb26abd-f4ba-4ea3-8862-c2340e7a4f55</td>
+      <td>Supercluster: CGE interneuron</td>
+      <td>bdb26abd-f4ba-4ea3-8862-c2340e7a4f55.h5ad</td>
+      <td>227671</td>
+    </tr>
+    <tr>
+      <th>149</th>
+      <td>149</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>acae7679-d077-461c-b857-ee6ccfeb267f</td>
+      <td>Dissection: Head of hippocampus (HiH) - CA1</td>
+      <td>acae7679-d077-461c-b857-ee6ccfeb267f.h5ad</td>
+      <td>39147</td>
+    </tr>
+    <tr>
+      <th>162</th>
+      <td>162</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>9372df2d-13d6-4fac-980b-919a5b7eb483</td>
+      <td>Dissection: Midbrain (M) - Periaqueductal gray...</td>
+      <td>9372df2d-13d6-4fac-980b-919a5b7eb483.h5ad</td>
+      <td>33794</td>
+    </tr>
+    <tr>
+      <th>163</th>
+      <td>163</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>93131426-0124-4ab4-a013-9dfbcd99d467</td>
+      <td>Dissection: Epithalamus - ETH</td>
+      <td>93131426-0124-4ab4-a013-9dfbcd99d467.h5ad</td>
+      <td>24327</td>
+    </tr>
+    <tr>
+      <th>172</th>
+      <td>172</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>7c1c3d47-3166-43e5-9a95-65ceb2d45f78</td>
+      <td>Dissection: Pons (Pn) - Pontine reticular form...</td>
+      <td>7c1c3d47-3166-43e5-9a95-65ceb2d45f78.h5ad</td>
+      <td>49512</td>
+    </tr>
+    <tr>
+      <th>174</th>
+      <td>174</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>7a0a8891-9a22-4549-a55b-c2aca23c3a2a</td>
+      <td>Supercluster: Hippocampal CA1-3</td>
+      <td>7a0a8891-9a22-4549-a55b-c2aca23c3a2a.h5ad</td>
+      <td>74979</td>
+    </tr>
+    <tr>
+      <th>186</th>
+      <td>186</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>5e5ab909-f73f-4b57-98a0-6d2c5662f6a4</td>
+      <td>Dissection: Midbrain (M) - Inferior colliculus...</td>
+      <td>5e5ab909-f73f-4b57-98a0-6d2c5662f6a4.h5ad</td>
+      <td>32306</td>
+    </tr>
+    <tr>
+      <th>209</th>
+      <td>209</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>3f56901c-dd4a-47d6-b60b-7b0c0111cfb2</td>
+      <td>Dissection: Head of hippocampus (HiH) - CA1-3</td>
+      <td>3f56901c-dd4a-47d6-b60b-7b0c0111cfb2.h5ad</td>
+      <td>37911</td>
+    </tr>
+    <tr>
+      <th>211</th>
+      <td>211</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>3a7f3ab4-a280-4b3b-b2c0-6dd05614a78c</td>
+      <td>Supercluster: Splatter</td>
+      <td>3a7f3ab4-a280-4b3b-b2c0-6dd05614a78c.h5ad</td>
+      <td>291833</td>
+    </tr>
+    <tr>
+      <th>215</th>
+      <td>215</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>35c8a04c-8639-4d15-8228-765d8d93fc96</td>
+      <td>Dissection: Hypothalamus (HTH) - supraoptic re...</td>
+      <td>35c8a04c-8639-4d15-8228-765d8d93fc96.h5ad</td>
+      <td>16753</td>
+    </tr>
+    <tr>
+      <th>236</th>
+      <td>236</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>07b1d7c8-5c2e-42f7-9246-26f746cd6013</td>
+      <td>Dissection: Myelencephalon (medulla oblongata)...</td>
+      <td>07b1d7c8-5c2e-42f7-9246-26f746cd6013.h5ad</td>
+      <td>27210</td>
+    </tr>
+    <tr>
+      <th>239</th>
+      <td>239</td>
+      <td>283d65eb-dd53-496d-adb7-7570c7caa443</td>
+      <td>Transcriptomic diversity of cell types across ...</td>
+      <td>10.1101/2022.10.12.511898</td>
+      <td>0325478a-9b52-45b5-b40a-2e2ab0d72eb1</td>
+      <td>Supercluster: Upper-layer intratelencephalic</td>
+      <td>0325478a-9b52-45b5-b40a-2e2ab0d72eb1.h5ad</td>
+      <td>455006</td>
+    </tr>
+    <tr>
+      <th>444</th>
+      <td>444</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>53d208b0-2cfd-4366-9866-c3c6114081bc</td>
+      <td>Tabula Sapiens - All Cells</td>
+      <td>53d208b0-2cfd-4366-9866-c3c6114081bc.h5ad</td>
+      <td>483152</td>
+    </tr>
+    <tr>
+      <th>445</th>
+      <td>445</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2</td>
+      <td>Tabula Sapiens - Stromal</td>
+      <td>a68b64d8-aee3-4947-81b7-36b8fe5a44d2.h5ad</td>
+      <td>82478</td>
+    </tr>
+    <tr>
+      <th>446</th>
+      <td>446</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>c5d88abe-f23a-45fa-a534-788985e93dad</td>
+      <td>Tabula Sapiens - Immune</td>
+      <td>c5d88abe-f23a-45fa-a534-788985e93dad.h5ad</td>
+      <td>264824</td>
+    </tr>
+    <tr>
+      <th>447</th>
+      <td>447</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf</td>
+      <td>Tabula Sapiens - Endothelial</td>
+      <td>5a11f879-d1ef-458a-910c-9b0bdfca5ebf.h5ad</td>
+      <td>31691</td>
+    </tr>
+    <tr>
+      <th>448</th>
+      <td>448</td>
+      <td>e5f58829-1a66-40b5-a624-9046778e74f5</td>
+      <td>Tabula Sapiens</td>
+      <td>10.1126/science.abl4896</td>
+      <td>97a17473-e2b1-4f31-a544-44a60773e2dd</td>
+      <td>Tabula Sapiens - Epithelial</td>
+      <td>97a17473-e2b1-4f31-a544-44a60773e2dd.h5ad</td>
+      <td>104148</td>
     </tr>
   </tbody>
 </table>
@@ -944,39 +952,39 @@ Feature is present.
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>0</td>
+      <th>3</th>
+      <td>3</td>
       <td>ENSG00000238009</td>
       <td>RP11-34P13.7</td>
       <td>3726</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>ENSG00000279457</td>
-      <td>WASH9P</td>
-      <td>1397</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>2</td>
-      <td>ENSG00000228463</td>
-      <td>AP006222.1</td>
-      <td>8224</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>3</td>
-      <td>ENSG00000237094</td>
-      <td>RP4-669L17.4</td>
-      <td>6204</td>
-    </tr>
-    <tr>
       <th>4</th>
       <td>4</td>
-      <td>ENSG00000230021</td>
-      <td>RP11-206L10.17</td>
-      <td>5495</td>
+      <td>ENSG00000239945</td>
+      <td>RP11-34P13.8</td>
+      <td>1319</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>13</td>
+      <td>ENSG00000229905</td>
+      <td>RP11-206L10.4</td>
+      <td>456</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>14</td>
+      <td>ENSG00000237491</td>
+      <td>LINC01409</td>
+      <td>8413</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>15</td>
+      <td>ENSG00000177757</td>
+      <td>FAM87B</td>
+      <td>1947</td>
     </tr>
     <tr>
       <th>...</th>
@@ -986,39 +994,39 @@ Feature is present.
       <td>...</td>
     </tr>
     <tr>
-      <th>40210</th>
-      <td>40210</td>
-      <td>ENSG00000255669</td>
-      <td>RP11-885B4.2</td>
-      <td>1023</td>
+      <th>51459</th>
+      <td>51459</td>
+      <td>ENSG00000277778</td>
+      <td>PGM5P2</td>
+      <td>1980</td>
     </tr>
     <tr>
-      <th>40219</th>
-      <td>40219</td>
-      <td>ENSG00000255618</td>
-      <td>LINC02440</td>
-      <td>741</td>
+      <th>51983</th>
+      <td>51983</td>
+      <td>ENSG00000254893</td>
+      <td>RAP1BL</td>
+      <td>555</td>
     </tr>
     <tr>
-      <th>40352</th>
-      <td>40352</td>
-      <td>ENSG00000261627</td>
-      <td>RP11-91I8.1</td>
-      <td>508</td>
+      <th>58043</th>
+      <td>58043</td>
+      <td>ENSG00000261408</td>
+      <td>TEN1-CDK3</td>
+      <td>3898</td>
     </tr>
     <tr>
-      <th>40367</th>
-      <td>40367</td>
-      <td>ENSG00000233376</td>
-      <td>RP5-881L22.6</td>
-      <td>403</td>
+      <th>58688</th>
+      <td>58688</td>
+      <td>ENSG00000279457</td>
+      <td>WASH9P</td>
+      <td>1397</td>
     </tr>
     <tr>
-      <th>40376</th>
-      <td>40376</td>
-      <td>ENSG00000267465</td>
-      <td>AC011525.4</td>
-      <td>3363</td>
+      <th>58928</th>
+      <td>58928</td>
+      <td>ENSG00000279152</td>
+      <td>RP11-599B13.10</td>
+      <td>756</td>
     </tr>
   </tbody>
 </table>

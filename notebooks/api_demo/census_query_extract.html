@@ -76,7 +76,7 @@
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
                   </span>
                 </span>
             </span>
@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.0.0
+                    1.2.0
                 </div>
                 
             
@@ -202,7 +202,7 @@
 <section id="Opening-the-census">
 <h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -211,6 +211,14 @@
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
 </section>
@@ -312,14 +320,14 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>male</td>
-    </tr>
-    <tr>
-      <th>24982</th>
       <td>female</td>
     </tr>
     <tr>
-      <th>154744</th>
+      <th>10740</th>
+      <td>male</td>
+    </tr>
+    <tr>
+      <th>1263240</th>
       <td>unknown</td>
     </tr>
   </tbody>
@@ -389,16 +397,16 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>154744</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
-      <td>10x 3' v1</td>
-      <td>EFO:0009901</td>
-      <td>plasma cell</td>
-      <td>CL:0000786</td>
-      <td>human early adulthood stage</td>
-      <td>HsapDv:0000088</td>
-      <td>Crohn ileitis</td>
-      <td>MONDO:0000709</td>
+      <td>1263240</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>native cell</td>
+      <td>CL:0000003</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
       <td>unknown</td>
@@ -406,23 +414,23 @@
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>ileum</td>
-      <td>UBERON:0002116</td>
-      <td>small intestine</td>
-      <td>UBERON:0002108</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>154745</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
-      <td>10x 3' v1</td>
-      <td>EFO:0009901</td>
-      <td>native cell</td>
-      <td>CL:0000003</td>
-      <td>human early adulthood stage</td>
-      <td>HsapDv:0000088</td>
-      <td>Crohn ileitis</td>
-      <td>MONDO:0000709</td>
+      <td>1263245</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' transcription profiling</td>
+      <td>EFO:0030003</td>
+      <td>CD8-positive, alpha-beta T cell</td>
+      <td>CL:0000625</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>squamous cell lung carcinoma</td>
+      <td>MONDO:0005097</td>
       <td>...</td>
       <td>True</td>
       <td>unknown</td>
@@ -430,47 +438,47 @@
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>ileum</td>
-      <td>UBERON:0002116</td>
-      <td>small intestine</td>
-      <td>UBERON:0002108</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>154746</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
-      <td>10x 3' v1</td>
-      <td>EFO:0009901</td>
-      <td>alpha-beta T cell</td>
-      <td>CL:0000789</td>
-      <td>human early adulthood stage</td>
-      <td>HsapDv:0000088</td>
-      <td>Crohn ileitis</td>
-      <td>MONDO:0000709</td>
+      <td>1263247</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v3</td>
+      <td>EFO:0009922</td>
+      <td>native cell</td>
+      <td>CL:0000003</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>COVID-19</td>
+      <td>MONDO:0100096</td>
       <td>...</td>
-      <td>True</td>
+      <td>False</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>ileum</td>
-      <td>UBERON:0002116</td>
-      <td>small intestine</td>
-      <td>UBERON:0002108</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>154747</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
-      <td>10x 3' v1</td>
-      <td>EFO:0009901</td>
-      <td>native cell</td>
-      <td>CL:0000003</td>
-      <td>human early adulthood stage</td>
-      <td>HsapDv:0000088</td>
-      <td>Crohn ileitis</td>
-      <td>MONDO:0000709</td>
+      <td>1263249</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>CD4-positive, alpha-beta T cell</td>
+      <td>CL:0000624</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>lung adenocarcinoma</td>
+      <td>MONDO:0005061</td>
       <td>...</td>
       <td>True</td>
       <td>unknown</td>
@@ -478,34 +486,34 @@
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>ileum</td>
-      <td>UBERON:0002116</td>
-      <td>small intestine</td>
-      <td>UBERON:0002108</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>154748</td>
-      <td>36c867a7-be10-4e69-9b39-5de12b0af6da</td>
-      <td>10x 3' v1</td>
-      <td>EFO:0009901</td>
-      <td>plasma cell</td>
-      <td>CL:0000786</td>
-      <td>human early adulthood stage</td>
-      <td>HsapDv:0000088</td>
-      <td>Crohn ileitis</td>
-      <td>MONDO:0000709</td>
+      <td>1263251</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' transcription profiling</td>
+      <td>EFO:0030003</td>
+      <td>native cell</td>
+      <td>CL:0000003</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>COVID-19</td>
+      <td>MONDO:0100096</td>
       <td>...</td>
-      <td>True</td>
+      <td>False</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>ileum</td>
-      <td>UBERON:0002116</td>
-      <td>small intestine</td>
-      <td>UBERON:0002108</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
     </tr>
     <tr>
       <th>...</th>
@@ -532,128 +540,128 @@
       <td>...</td>
     </tr>
     <tr>
-      <th>2082502</th>
-      <td>45465783</td>
-      <td>e5233a94-9e43-418c-8209-6f1400c31530</td>
-      <td>10x 3' v2</td>
-      <td>EFO:0009899</td>
-      <td>activated CD8-positive, alpha-beta T cell</td>
-      <td>CL:0000906</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <th>3083766</th>
+      <td>53668428</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+      <td>microwell-seq</td>
+      <td>EFO:0030002</td>
+      <td>cord blood hematopoietic stem cell</td>
+      <td>CL:2000095</td>
+      <td>newborn human stage</td>
+      <td>HsapDv:0000082</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
-      <td>False</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <td>True</td>
+      <td>Han Chinese</td>
+      <td>HANCESTRO:0027</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>body of stomach</td>
-      <td>UBERON:0001161</td>
-      <td>stomach</td>
-      <td>UBERON:0000945</td>
+      <td>umbilical cord blood</td>
+      <td>UBERON:0012168</td>
+      <td>blood</td>
+      <td>UBERON:0000178</td>
     </tr>
     <tr>
-      <th>2082503</th>
-      <td>45465784</td>
-      <td>e5233a94-9e43-418c-8209-6f1400c31530</td>
-      <td>10x 3' v2</td>
-      <td>EFO:0009899</td>
-      <td>gamma-delta T cell</td>
-      <td>CL:0000798</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <th>3083767</th>
+      <td>53668429</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+      <td>microwell-seq</td>
+      <td>EFO:0030002</td>
+      <td>cord blood hematopoietic stem cell</td>
+      <td>CL:2000095</td>
+      <td>newborn human stage</td>
+      <td>HsapDv:0000082</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
-      <td>False</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <td>True</td>
+      <td>Han Chinese</td>
+      <td>HANCESTRO:0027</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>body of stomach</td>
-      <td>UBERON:0001161</td>
-      <td>stomach</td>
-      <td>UBERON:0000945</td>
+      <td>umbilical cord blood</td>
+      <td>UBERON:0012168</td>
+      <td>blood</td>
+      <td>UBERON:0000178</td>
     </tr>
     <tr>
-      <th>2082504</th>
-      <td>45465785</td>
-      <td>e5233a94-9e43-418c-8209-6f1400c31530</td>
-      <td>10x 3' v2</td>
-      <td>EFO:0009899</td>
-      <td>activated CD8-positive, alpha-beta T cell</td>
-      <td>CL:0000906</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <th>3083768</th>
+      <td>53668430</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+      <td>microwell-seq</td>
+      <td>EFO:0030002</td>
+      <td>cord blood hematopoietic stem cell</td>
+      <td>CL:2000095</td>
+      <td>newborn human stage</td>
+      <td>HsapDv:0000082</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
-      <td>False</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <td>True</td>
+      <td>Han Chinese</td>
+      <td>HANCESTRO:0027</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>body of stomach</td>
-      <td>UBERON:0001161</td>
-      <td>stomach</td>
-      <td>UBERON:0000945</td>
+      <td>umbilical cord blood</td>
+      <td>UBERON:0012168</td>
+      <td>blood</td>
+      <td>UBERON:0000178</td>
     </tr>
     <tr>
-      <th>2082505</th>
-      <td>45465786</td>
-      <td>e5233a94-9e43-418c-8209-6f1400c31530</td>
-      <td>10x 3' v2</td>
-      <td>EFO:0009899</td>
-      <td>natural T-regulatory cell</td>
-      <td>CL:0000903</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <th>3083769</th>
+      <td>53668431</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+      <td>microwell-seq</td>
+      <td>EFO:0030002</td>
+      <td>cord blood hematopoietic stem cell</td>
+      <td>CL:2000095</td>
+      <td>newborn human stage</td>
+      <td>HsapDv:0000082</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
-      <td>False</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <td>True</td>
+      <td>Han Chinese</td>
+      <td>HANCESTRO:0027</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>body of stomach</td>
-      <td>UBERON:0001161</td>
-      <td>stomach</td>
-      <td>UBERON:0000945</td>
+      <td>umbilical cord blood</td>
+      <td>UBERON:0012168</td>
+      <td>blood</td>
+      <td>UBERON:0000178</td>
     </tr>
     <tr>
-      <th>2082506</th>
-      <td>45465787</td>
-      <td>e5233a94-9e43-418c-8209-6f1400c31530</td>
-      <td>10x 3' v2</td>
-      <td>EFO:0009899</td>
-      <td>fibroblast</td>
-      <td>CL:0000057</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <th>3083770</th>
+      <td>53668432</td>
+      <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+      <td>microwell-seq</td>
+      <td>EFO:0030002</td>
+      <td>cord blood hematopoietic stem cell</td>
+      <td>CL:2000095</td>
+      <td>newborn human stage</td>
+      <td>HsapDv:0000082</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
-      <td>False</td>
-      <td>unknown</td>
-      <td>unknown</td>
+      <td>True</td>
+      <td>Han Chinese</td>
+      <td>HANCESTRO:0027</td>
       <td>unknown</td>
       <td>unknown</td>
       <td>cell</td>
-      <td>body of stomach</td>
-      <td>UBERON:0001161</td>
-      <td>stomach</td>
-      <td>UBERON:0000945</td>
+      <td>umbilical cord blood</td>
+      <td>UBERON:0012168</td>
+      <td>blood</td>
+      <td>UBERON:0000178</td>
     </tr>
   </tbody>
 </table>
-<p>2082507 rows × 21 columns</p>
+<p>3083771 rows × 21 columns</p>
 </div></div>
 </div>
 <p>You can use both <code class="docutils literal notranslate"><span class="pre">column_names</span></code> and <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> to perform specific queries. For example let’s fetch the <code class="docutils literal notranslate"><span class="pre">disease</span></code> columns for the <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cell&quot;</span></code> in the <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code>.</p>
@@ -682,19 +690,23 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 disease                                cell_type  tissue_general
-lung adenocarcinoma                    B cell     lung              50228
+lung adenocarcinoma                    B cell     lung              62351
+normal                                 B cell     lung              25374
 non-small cell lung carcinoma          B cell     lung              17484
-normal                                 B cell     lung              16801
-squamous cell lung carcinoma           B cell     lung              11584
-chronic obstructive pulmonary disease  B cell     lung               7147
-interstitial lung disease 2            B cell     lung               5141
-interstitial lung disease              B cell     lung               1655
+squamous cell lung carcinoma           B cell     lung              11920
+pulmonary fibrosis                     B cell     lung               6798
+chronic obstructive pulmonary disease  B cell     lung               6369
+COVID-19                               B cell     lung               2729
+lung large cell carcinoma              B cell     lung               1534
 pulmonary emphysema                    B cell     lung               1512
-COVID-19                               B cell     lung               1445
+pleomorphic carcinoma                  B cell     lung               1210
 small cell lung carcinoma              B cell     lung                583
-non-specific interstitial pneumonia    B cell     lung                284
-hypersensitivity pneumonitis           B cell     lung                 13
-sarcoidosis                            B cell     lung                  6
+interstitial lung disease              B cell     lung                376
+non-specific interstitial pneumonia    B cell     lung                231
+lymphangioleiomyomatosis               B cell     lung                133
+hypersensitivity pneumonitis           B cell     lung                 52
+pneumonia                              B cell     lung                 50
+pulmonary sarcoidosis                  B cell     lung                  6
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -834,7 +846,7 @@ Name: count, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-AnnData object with n_obs × n_vars = 1445 × 2
+AnnData object with n_obs × n_vars = 2729 × 2
     obs: &#39;sex&#39;, &#39;cell_type&#39;, &#39;tissue_general&#39;, &#39;disease&#39;
     var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
 </pre></div></div>
@@ -886,7 +898,7 @@ AnnData object with n_obs × n_vars = 1445 × 2
     </tr>
     <tr>
       <th>1</th>
-      <td>male</td>
+      <td>unknown</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
@@ -900,7 +912,7 @@ AnnData object with n_obs × n_vars = 1445 × 2
     </tr>
     <tr>
       <th>3</th>
-      <td>male</td>
+      <td>unknown</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
@@ -920,35 +932,35 @@ AnnData object with n_obs × n_vars = 1445 × 2
       <td>...</td>
     </tr>
     <tr>
-      <th>1440</th>
+      <th>2724</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
     </tr>
     <tr>
-      <th>1441</th>
+      <th>2725</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
     </tr>
     <tr>
-      <th>1442</th>
+      <th>2726</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
     </tr>
     <tr>
-      <th>1443</th>
+      <th>2727</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
     </tr>
     <tr>
-      <th>1444</th>
+      <th>2728</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
@@ -956,7 +968,7 @@ AnnData object with n_obs × n_vars = 1445 × 2
     </tr>
   </tbody>
 </table>
-<p>1445 rows × 4 columns</p>
+<p>2729 rows × 4 columns</p>
 </div></div>
 </div>
 <div class="nbinput docutils container">
@@ -999,14 +1011,14 @@ AnnData object with n_obs × n_vars = 1445 × 2
   <tbody>
     <tr>
       <th>0</th>
-      <td>9938</td>
+      <td>17442</td>
       <td>ENSG00000188229</td>
       <td>TUBB4B</td>
       <td>2037</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>12150</td>
+      <td>21624</td>
       <td>ENSG00000161798</td>
       <td>AQP5</td>
       <td>1884</td>

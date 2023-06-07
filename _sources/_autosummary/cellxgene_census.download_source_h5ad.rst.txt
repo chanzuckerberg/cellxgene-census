@@ -1,0 +1,6 @@
+﻿cellxgene\_census.download\_source\_h5ad
+========================================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: download_source_h5ad

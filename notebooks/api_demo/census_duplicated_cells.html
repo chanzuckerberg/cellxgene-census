@@ -76,7 +76,7 @@
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
                   </span>
                 </span>
             </span>
@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.0.0
+                    1.2.0
                 </div>
                 
             
@@ -220,7 +220,7 @@
 <p>Let’s take a look at an example from the Census using the Tabula Muris Senis data. Some of its datasets contain duplicated cells.</p>
 <p>We can obtain cell metadata for the <strong>main</strong> Tabula Muris Senis dataset: “All - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”, which contains the original (non-duplicated) cells.</p>
 <p>And remember we must include the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> column.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -236,6 +236,14 @@
     <span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">tabula_muris_obs</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <p>Now let’s take a look at counts for the unique combinations of values.</p>
 <div class="nbinput docutils container">
@@ -274,7 +282,7 @@ Name: count, dtype: int64
 </div>
 <p>You can see all cells across the tissues are labelled as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
 <p>But what if we select cells from the dataset that only contains cells from the liver: “Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
@@ -288,6 +296,14 @@ Name: count, dtype: int64
     <span class="n">tabula_muris_liver_obs</span> <span class="o">=</span> <span class="n">tabula_muris_liver_obs</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <p>And we take a look at counts for the unique combinations of values.</p>
 <div class="nbinput docutils container">
@@ -324,7 +340,7 @@ Name: count, dtype: int64
 <h3>Filtering out duplicate cells when reading the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame.<a class="headerlink" href="#Filtering-out-duplicate-cells-when-reading-the-obs-data-frame." title="Permalink to this heading">¶</a></h3>
 <p>Let’s say you are interested in looking at the cell metadata of <em>“all natural killer cells from blood of female cells with COVID-19”</em> but you want to exclude duplicate cells, then you can use <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> when reading the data frame to only include cells with <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> as <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 <p>Let’s first read the cell metadata including <strong>all</strong> cells:</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
@@ -339,6 +355,14 @@ Name: count, dtype: int64
     <span class="n">nk_cells</span> <span class="o">=</span> <span class="n">nk_cells</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -358,7 +382,7 @@ Name: count, dtype: int64
 </pre></div></div>
 </div>
 <p>And now we repeat the query only using cells marked as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
@@ -374,6 +398,14 @@ Name: count, dtype: int64
     <span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">nk_cells_primary</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -398,7 +430,7 @@ Name: count, dtype: int64
 <h3>Filtering out duplicate cells when creating an AnnData<a class="headerlink" href="#Filtering-out-duplicate-cells-when-creating-an-AnnData" title="Permalink to this heading">¶</a></h3>
 <p>You can also utilize <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> on the <code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> of <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code>.</p>
 <p>Let’s repeat the process above. First querying by including <strong>all</strong> cells. To reduce the bandwidth and memory usage, let’s just fetch data for one gene.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
@@ -414,6 +446,14 @@ Name: count, dtype: int64
     <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -433,7 +473,7 @@ Name: count, dtype: int64
 </pre></div></div>
 </div>
 <p>And now we repeat the query only using cells marked as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
@@ -450,6 +490,14 @@ Name: count, dtype: int64
     <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -506,6 +554,14 @@ Name: count, dtype: int64
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -516,9 +572,9 @@ soma_dim_0: int64
 soma_dim_1: int64
 soma_data: float
 ----
-soma_dim_0: [[2141067,2141067,2141067,2141067,2141067,...,46504636,46504702,46504705,46504705,46504715]]
-soma_dim_1: [[5,11,38,44,74,...,37047,37066,36918,36933,37047]]
-soma_data: [[1,2,2,1,1,...,1,1,1,1,2]]
+soma_dim_0: [[8448858,8448858,8448858,8448858,8448858,...,52812487,52812553,52812556,52812556,52812566]]
+soma_dim_1: [[59,60,62,113,170,...,37033,37052,36904,36919,37033]]
+soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]
 </pre></div></div>
 </div>
 </section>

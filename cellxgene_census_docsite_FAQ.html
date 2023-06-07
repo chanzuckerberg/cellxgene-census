@@ -46,7 +46,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Python API" href="python-api.html" /> 
+    <link rel="prev" title="cellxgene_census.get_census_version_directory" href="_autosummary/cellxgene_census.get_census_version_directory.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -72,7 +72,7 @@
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
                   </span>
                 </span>
             </span>
@@ -101,7 +101,7 @@
                 
                 
                 <div class="version">
-                    1.0.0
+                    1.2.0
                 </div>
                 
             
@@ -142,6 +142,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#how-can-i-ask-for-new-features">How can I ask for new features?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-can-i-contribute-my-data-to-the-census">How can I contribute my data to the Census?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census">Why do I get an <code class="docutils literal notranslate"><span class="pre">ArraySchema</span></code> error when opening the Census?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks">Why do I get an error when running <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">cellxgene_census</span></code> on Databricks?</a></li>
 </ul>
 </li>
 </ul>
@@ -183,22 +184,23 @@
                 
   <section id="faq">
 <h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading">¶</a></h1>
-<p>Last updated: Apr, 2023.</p>
+<p>Last updated: May, 2023.</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#why-should-i-use-the-census"><span class="xref myst">Why should I use the Census?</span></a></p></li>
-<li><p><a class="reference internal" href="#what-data-is-contained-in-the-census"><span class="xref myst">What data is contained in the Census?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-do-i-cite-the-use-of-the-census-for-a-publication"><span class="xref myst">How do I cite the use of the Census for a publication?</span></a></p></li>
-<li><p><a class="reference internal" href="#why-does-the-census-not-have-a-normalized-layer-or-embeddings"><span class="xref myst">Why does the Census not have a normalized layer or embeddings?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-does-the-census-differentiate-from-other-services"><span class="xref myst">How does the Census differentiate from other services?</span></a></p></li>
-<li><p><a class="reference internal" href="#can-i-query-human-and-mouse-data-in-a-single-query"><span class="xref myst">Can I query human and mouse data in a single query?</span></a></p></li>
-<li><p><a class="reference internal" href="#where-are-the-census-data-hosted"><span class="xref myst">Where are the Census data hosted?</span></a></p></li>
-<li><p><a class="reference internal" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built"><span class="xref myst">Can I retrieve the original H5AD datasets from which the Census was built?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-increase-the-performance-of-my-queries"><span class="xref myst">How can I increase the performance of my queries?</span></a></p></li>
-<li><p><a class="reference internal" href="#can-i-use-conda-to-install-the-census-python-api"><span class="xref myst">Can I use conda to install the Census Python API?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-ask-for-support"><span class="xref myst">How can I ask for support?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-ask-for-new-features"><span class="xref myst">How can I ask for new features?</span></a></p></li>
-<li><p><a class="reference internal" href="#how-can-i-contribute-my-data-to-the-census"><span class="xref myst">How can I contribute my data to the Census?</span></a></p></li>
-<li><p><a class="reference internal" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census"><span class="xref myst">Why do I get an <code class="docutils literal notranslate"><span class="pre">ArraySchema</span></code> error when opening the Census?</span></a></p></li>
+<li><p><a class="reference internal" href="#why-should-i-use-the-census"><span class="std std-ref">Why should I use the Census?</span></a></p></li>
+<li><p><a class="reference internal" href="#what-data-is-contained-in-the-census"><span class="std std-ref">What data is contained in the Census?</span></a></p></li>
+<li><p><a class="reference internal" href="#how-do-i-cite-the-use-of-the-census-for-a-publication"><span class="std std-ref">How do I cite the use of the Census for a publication?</span></a></p></li>
+<li><p><a class="reference internal" href="#why-does-the-census-not-have-a-normalized-layer-or-embeddings"><span class="std std-ref">Why does the Census not have a normalized layer or embeddings?</span></a></p></li>
+<li><p><a class="reference internal" href="#how-does-the-census-differentiate-from-other-tools"><span class="std std-ref">How does the Census differentiate from other tools?</span></a></p></li>
+<li><p><a class="reference internal" href="#can-i-query-human-and-mouse-data-in-a-single-query"><span class="std std-ref">Can I query human and mouse data in a single query?</span></a></p></li>
+<li><p><a class="reference internal" href="#where-are-the-census-data-hosted"><span class="std std-ref">Where are the Census data hosted?</span></a></p></li>
+<li><p><a class="reference internal" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built"><span class="std std-ref">Can I retrieve the original H5AD datasets from which the Census was built?</span></a></p></li>
+<li><p><a class="reference internal" href="#how-can-i-increase-the-performance-of-my-queries"><span class="std std-ref">How can I increase the performance of my queries?</span></a></p></li>
+<li><p><a class="reference internal" href="#can-i-use-conda-to-install-the-census-python-api"><span class="std std-ref">Can I use conda to install the Census Python API?</span></a></p></li>
+<li><p><a class="reference internal" href="#how-can-i-ask-for-support"><span class="std std-ref">How can I ask for support?</span></a></p></li>
+<li><p><a class="reference internal" href="#how-can-i-ask-for-new-features"><span class="std std-ref">How can I ask for new features?</span></a></p></li>
+<li><p><a class="reference internal" href="#how-can-i-contribute-my-data-to-the-census"><span class="std std-ref">How can I contribute my data to the Census?</span></a></p></li>
+<li><p><a class="reference internal" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census"><span class="std std-ref">Why do I get an ArraySchema error when opening the Census?</span></a></p></li>
+<li><p><a class="reference internal" href="#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks"><span class="std std-ref">Why do I get an error when running import cellxgene_census on Databricks?</span></a></p></li>
 </ul>
 <section id="why-should-i-use-the-census">
 <h2>Why should I use the Census?<a class="headerlink" href="#why-should-i-use-the-census" title="Permalink to this heading">¶</a></h2>
@@ -306,6 +308,25 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
 <p>You may get this error if you are trying to open a Census data build with an old version of the Census API. Please update your Python or R Census package.</p>
 <p>If the error persists please file a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a>.</p>
 </section>
+<section id="why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks">
+<h2>Why do I get an error when running <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">cellxgene_census</span></code> on Databricks?<a class="headerlink" href="#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks" title="Permalink to this heading">¶</a></h2>
+<p>This can occur if the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> Python package is installed in a Databricks notebook using <code class="docutils literal notranslate"><span class="pre">%sh</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cellxgene_census</span></code>. This command does <em>not</em> restart the Python process after installing <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> and any pip package dependencies that were pre-installed by the Databricks Runtime environment but upgraded for <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> will not be reloaded with their new version. You may see <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> related errors, for example.</p>
+<p>To fix, simply install using one of the following Databricks notebook “magic” commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">cellxgene</span><span class="o">-</span><span class="n">census</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">cellxgene</span><span class="o">-</span><span class="n">census</span>
+</pre></div>
+</div>
+<p>These commands restart the Python process after installing the <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code> package, similar to using <code class="docutils literal notranslate"><span class="pre">dbutils.library.restartPython()</span></code>. Additionally, these magic commands also ensure that the package is installed on all nodes of a multi-node cluster.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p>https://docs.databricks.com/libraries/notebooks-python-libraries.html#can-i-use-sh-pip-pip-or-pip-what-is-the-difference</p></li>
+<li><p>https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip</p></li>
+</ul>
+<p>Alternately, you can configure your cluster to install the <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code> package each time it is started by adding this package to the “Libraries” tab on the cluster configuration page per these <a class="reference external" href="https://docs.databricks.com/libraries/cluster-libraries.html">instructions</a>.</p>
+</section>
 </section>
 
 
@@ -313,7 +334,7 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
             
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="python-api.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="_autosummary/cellxgene_census.get_census_version_directory.html" class="btn btn-neutral float-left" title="cellxgene_census.get_census_version_directory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

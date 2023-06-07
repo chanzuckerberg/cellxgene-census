@@ -1,12 +1,12 @@
 # FAQ
 
-Last updated: Apr, 2023.
+Last updated: May, 2023.
 
 - [Why should I use the Census?](#why-should-i-use-the-census)
 - [What data is contained in the Census?](#what-data-is-contained-in-the-census)
 - [How do I cite the use of the Census for a publication?](#how-do-i-cite-the-use-of-the-census-for-a-publication)
 - [Why does the Census not have a normalized layer or embeddings?](#why-does-the-census-not-have-a-normalized-layer-or-embeddings)
-- [How does the Census differentiate from other services?](#how-does-the-census-differentiate-from-other-services)
+- [How does the Census differentiate from other tools?](#how-does-the-census-differentiate-from-other-tools)
 - [Can I query human and mouse data in a single query?](#can-i-query-human-and-mouse-data-in-a-single-query)
 - [Where are the Census data hosted?](#where-are-the-census-data-hosted)
 - [Can I retrieve the original H5AD datasets from which the Census was built?](#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built)
@@ -16,6 +16,7 @@ Last updated: Apr, 2023.
 - [How can I ask for new features?](#how-can-i-ask-for-new-features)
 - [How can I contribute my data to the Census?](#how-can-i-contribute-my-data-to-the-census)
 - [Why do I get an `ArraySchema` error when opening the Census?](#why-do-i-get-an-arrayschema-error-when-opening-the-census)
+- [Why do I get an error when running `import cellxgene_census` on Databricks?](#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks)
 
 ## Why should I use the Census?
 
@@ -132,3 +133,22 @@ You may get this error if you are trying to open a Census data build with an old
 
 If the error persists please file a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose).
 
+## Why do I get an error when running `import cellxgene_census` on Databricks?
+
+This can occur if the `cellxgene_census` Python package is installed in a Databricks notebook using `%sh pip install cellxgene_census`. This command does _not_ restart the Python process after installing `cellxgene_census` and any pip package dependencies that were pre-installed by the Databricks Runtime environment but upgraded for `cellxgene_census` will not be reloaded with their new version. You may see `numba` or `pyarrow` related errors, for example.
+
+To fix, simply install using one of the following Databricks notebook "magic" commands:
+```
+pip install -U cellxgene-census
+```
+or
+```
+%pip install -U cellxgene-census
+```
+These commands restart the Python process after installing the `cellxgene-census` package, similar to using `dbutils.library.restartPython()`. Additionally, these magic commands also ensure that the package is installed on all nodes of a multi-node cluster. 
+
+See also:
+* https://docs.databricks.com/libraries/notebooks-python-libraries.html#can-i-use-sh-pip-pip-or-pip-what-is-the-difference
+* https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip
+
+Alternately, you can configure your cluster to install the `cellxgene-census` package each time it is started by adding this package to the "Libraries" tab on the cluster configuration page per these [instructions](https://docs.databricks.com/libraries/cluster-libraries.html).

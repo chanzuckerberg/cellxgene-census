@@ -1,10 +1,6 @@
 pandoc: 2.9.2.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
-articles:
-  census_axis_query: census_axis_query.html
-  census_dataset_presence: census_dataset_presence.html
-  census_datasets: census_datasets.html
-  census_query_extract: census_query_extract.html
-last_built: 2023-05-10T19:25Z
+articles: {}
+last_built: 2023-06-07T03:58Z
 
