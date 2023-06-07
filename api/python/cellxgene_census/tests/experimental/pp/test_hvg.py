@@ -110,6 +110,12 @@ def test_hvg_vs_scanpy(
     [
         ("mus_musculus", "Mus musculus", 'tissue_general == "liver" and is_primary_data == True', None),
         ("mus_musculus", "Mus musculus", 'is_primary_data == True and tissue_general == "heart"', "cell_type"),
+        pytest.param(
+            "mus_musculus", "Mus musculus", "is_primary_data == True", "dataset_id", marks=pytest.mark.expensive
+        ),
+        pytest.param(
+            "homo_sapiens", "Homo sapiens", "is_primary_data == True", "dataset_id", marks=pytest.mark.expensive
+        ),
     ],
 )
 def test_get_highly_variable_genes(
