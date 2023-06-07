@@ -57,7 +57,7 @@ def _highly_variable_genes_seurat_v3(
     n_top_genes: int = 1000,
     layer: str = "raw",
     span: float = 0.3,
-    max_loess_jitter: float = 1e-9,
+    max_loess_jitter: float = 1e-6,
 ) -> pd.DataFrame:
     try:
         import skmisc.loess
@@ -205,7 +205,7 @@ def highly_variable_genes(
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
     batch_key: Optional[str] = None,
-    max_loess_jitter: float = 1e-9,
+    max_loess_jitter: float = 1e-6,
 ) -> pd.DataFrame:
     """
     Identify and annotate highly variable genes contained in the query results.
@@ -278,7 +278,7 @@ def get_highly_variable_genes(
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
     batch_key: Optional[str] = None,
-    max_loess_jitter: float = 1e-9,
+    max_loess_jitter: float = 1e-6,
 ) -> pd.DataFrame:
     """
     Convenience wrapper
