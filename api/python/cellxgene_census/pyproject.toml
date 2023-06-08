@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">= 3.7, < 3.11"  # Python 3.11 is pending numba support
+requires-python = ">= 3.7, < 3.12"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
@@ -33,7 +34,7 @@ dependencies= [
     # Make sure this version does not fall behind the builder's tiledbsoma version.
     "tiledbsoma==1.2.5",
     "anndata",
-    "numpy>=1.21,<1.24",  # numpy is constrained by numba and the old pip solver
+    "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
     "requests",
     "typing_extensions",
     "s3fs",
