@@ -63,7 +63,7 @@ root = "../.."
 
 [tool.black]
 line-length = 120
-target_version = ['py39']
+target_version = ['py10']
 
 [tool.mypy]
 show_error_codes = true

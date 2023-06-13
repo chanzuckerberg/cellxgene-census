@@ -125,7 +125,9 @@ def get_git_commit_sha() -> str:
 
     import git  # Scoped import - this requires the git executable to exist on the machine
 
-    repo = git.Repo(search_parent_directories=True)
+    # work around https://github.com/gitpython-developers/GitPython/issues/1349
+    # by explicitly referencing git.repo.base.Repo instead of git.Repo
+    repo = git.repo.base.Repo(search_parent_directories=True)
     hexsha: str = repo.head.object.hexsha
     return hexsha
 
@@ -136,6 +138,8 @@ def is_git_repo_dirty() -> bool:
     """
     import git  # Scoped import - this requires the git executable to exist on the machine
 
-    repo = git.Repo(search_parent_directories=True)
+    # work around https://github.com/gitpython-developers/GitPython/issues/1349
+    # by explicitly referencing git.repo.base.Repo instead of git.Repo
+    repo = git.repo.base.Repo(search_parent_directories=True)
     is_dirty: bool = repo.is_dirty()
     return is_dirty
