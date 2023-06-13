@@ -14,7 +14,7 @@ These assets are user-facing and are automatically rendered to the doc-sites, th
 ### Title
 
 * It must use the highest-level markdown header `#`.
-* Unless needed, it should not contain any direction mentions of "Census".
+* Unless needed, it should not contain any direct mentions of "Census".
 * It should be concise, self-explanatory, and if possible indicate an action.
 
 Examples:
