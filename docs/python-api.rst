@@ -42,7 +42,7 @@ Versioning of Cell Census builds
     cellxgene_census.get_census_version_description
     cellxgene_census.get_census_version_directory
 
-Experimental: PyTorch Loaders
+Experimental: Machine Learning
 --------------------------------
 .. autosummary::
     :toctree: _autosummary/
