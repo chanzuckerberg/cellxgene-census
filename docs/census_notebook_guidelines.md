@@ -5,7 +5,7 @@ API demonstration code that is part of the documentation should be deposited her
 - Python notebooks [`cellxgene-census/api/python/notebooks`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks)
 - R vignettes [`cellxgene-census/api/r/CellCensus/vignettes`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes)
 
-If the Python notebooks have to be included in the doc-site, then a symlink has to be created in the corresponding folder of [ `cellxgene-census/docs/notebooks/`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/docs/notebooks).
+To include Python notebooks in the doc site, create a symlink to the notebook in [cellxgene-census/docs/notebooks/](https://github.com/chanzuckerberg/cellxgene-census/tree/main/docs/notebooks) folder.
 
 These assets are user-facing and are automatically rendered to the doc-sites, they are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
 
