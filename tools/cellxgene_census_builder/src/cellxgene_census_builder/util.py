@@ -71,7 +71,7 @@ class ProcessResourceGetter:
 
         with open("/proc/self/status") as f:
             status = f.read()
-            thread_count = int(re.split(".*\nThreads:\t(\d+)\n.*", status)[1])
+            thread_count = int(re.split(r".*\nThreads:\t(\d+)\n.*", status)[1])
             self.max_thread_count = max(thread_count, self.max_thread_count)
         return thread_count
 
