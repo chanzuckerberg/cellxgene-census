@@ -7,7 +7,7 @@ API demonstration code that is part of the documentation should be deposited her
 
 To include Python notebooks in the doc site, create a symlink to the notebook in [cellxgene-census/docs/notebooks/](https://github.com/chanzuckerberg/cellxgene-census/tree/main/docs/notebooks) folder.
 
-These assets are user-facing and are automatically rendered to the doc-sites, they are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
+These assets are user-facing and are automatically rendered to the doc-sites and are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
 
 ## Guidelines
 
@@ -38,7 +38,7 @@ Examples:
 
 :white_check_mark:
 
-> This notebook provides a demonstration for integrating two Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Cell Census can inform data integration.
+> This notebook provides a demonstration for integrating two Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.
 
 :x: *it contains a long explanation of what the Census is, and the goal is not clear*
 
