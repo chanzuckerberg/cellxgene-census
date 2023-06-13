@@ -60,7 +60,7 @@ PresenceResults = Tuple[PresenceResult, ...]
 tissue_mapper: TissueMapper = TissueMapper()
 
 
-def _assert_open_for_write(obj: somacore.SOMAObject) -> None:
+def _assert_open_for_write(obj: Optional[somacore.SOMAObject]) -> None:
     assert obj is not None
     assert obj.exists(obj.uri)
     assert obj.mode == "w"
