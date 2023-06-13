@@ -1,8 +1,8 @@
 import argparse
 import logging
+import os
 import pathlib
 import sys
-from typing import Callable, List
 
 import s3fs
 
@@ -52,17 +52,23 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
     logging.info(f"Census build: start [version={__version__}]")
     logging.info(args)
 
-    build_steps: List[Callable[[CensusBuildArgs], bool]] = [
-        do_prebuild_set_defaults,
-        do_prebuild_checks,
-        do_build_soma,
-        do_validate_soma,
-        do_create_reports,
-        do_data_copy,
-        do_the_release,
-        do_report_copy,
-        do_old_release_cleanup,
-    ]
+    # Infer steps from environment variables, if provided
+    if os.getenv("CENSUS_BUILD_STEPS"):
+        logging.info("Census build: using build steps from environment variable CENSUS_BUILD_STEPS")
+        steps = os.getenv("CENSUS_BUILD_STEPS", "").split(",")
+        build_steps = [locals()[step] for step in steps]
+    else:
+        build_steps = [
+            do_prebuild_set_defaults,
+            do_prebuild_checks,
+            do_build_soma,
+            do_validate_soma,
+            do_create_reports,
+            do_data_copy,
+            do_the_release,
+            do_report_copy,
+            do_old_release_cleanup,
+        ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
             step_n_of = f"Build step {build_step.__name__} [{n} of {len(build_steps)}]"
