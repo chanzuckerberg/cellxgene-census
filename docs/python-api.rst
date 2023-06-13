@@ -52,7 +52,7 @@ Experimental: Machine Learning
     cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
     cellxgene_census.experimental.ml.pytorch.Stats
 
-Experimental: Highly Variable Genes
+Experimental: Processing
 --------------------------------
 .. autosummary::
     :toctree: _autosummary/
