@@ -41,3 +41,22 @@ Versioning of Cell Census builds
 
     cellxgene_census.get_census_version_description
     cellxgene_census.get_census_version_directory
+
+Experimental: PyTorch Loaders
+--------------------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.experimental.ml.pytorch.experiment_dataloader
+    cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
+    cellxgene_census.experimental.ml.pytorch.Stats
+
+Experimental: Highly Variable Genes
+--------------------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.experimental.pp.get_highly_variable_genes
+    cellxgene_census.experimental.pp.highly_variable_genes
