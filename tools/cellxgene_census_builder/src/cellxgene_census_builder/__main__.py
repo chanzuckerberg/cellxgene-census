@@ -227,6 +227,18 @@ def do_log_copy(args: CensusBuildArgs) -> bool:
     return True
 
 
+def do_sync_to_external_s3_bucket(args: CensusBuildArgs) -> bool:
+    """Copy data to external S3 bucket"""
+    from .data_copy import sync_to_S3_remote
+
+    sync_to_S3_remote(
+        urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
+        urlcat(args.config.cellxgene_census_S3_remote_path, args.build_tag),
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cellxgene_census_builder", description="Build the official Census.")
     parser.add_argument("working_dir", type=str, help="Working directory for the build")

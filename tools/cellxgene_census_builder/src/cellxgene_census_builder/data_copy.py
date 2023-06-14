@@ -42,6 +42,37 @@ def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: b
         _log_it(f"Completed copy, return code {returncode}, {from_path.as_posix()} -> {to_path}", dryrun)
 
 
+def sync_to_S3_remote(from_path: str, to_path: str, dryrun: bool = False) -> None:
+    """Copy (sync) between two S3 locations.
+
+    Equivalent of `aws s3 sync S3_path_source S3_path_dst`.
+
+    Raises upon error.
+    """
+    if not from_path.startswith("s3://") or not to_path.startswith("s3://"):
+        raise ValueError(f"S3_path argument does not appear to be an S3 path: {to_path}")
+
+    cmd = ["aws", "s3", "sync", from_path, to_path, "--no-progress"]
+    if dryrun:
+        cmd += ["--dryrun"]
+
+    returncode = -1
+    try:
+        _log_it(f"Starting copy {from_path} -> {to_path}", dryrun)
+        with subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True) as proc:
+            print(proc.returncode)
+            if proc.stdout is not None:
+                for line in proc.stdout:
+                    logging.info(line)
+
+        returncode = proc.returncode
+        if returncode:
+            raise subprocess.CalledProcessError(returncode, proc.args)
+
+    finally:
+        _log_it(f"Completed copy, return code {returncode}, {from_path} -> {to_path}", dryrun)
+
+
 def _log_it(msg: str, dryrun: bool) -> None:
     logging.info(f"{'(dryrun) ' if dryrun else ''}{msg}")
 
