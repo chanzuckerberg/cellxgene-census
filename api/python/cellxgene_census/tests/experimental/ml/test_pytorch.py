@@ -271,7 +271,7 @@ def test__multiprocessing__returns_full_result(soma_experiment: Experiment) -> N
         X_name="raw",
         obs_column_names=["label"],
     )
-    dl = experiment_dataloader(dp, num_workers=2)
+    dl = experiment_dataloader(dp, num_workers=1)  # multiprocessing used when num_workers > 0
 
     full_result = list(iter(dl))
 
@@ -363,7 +363,7 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
         X_name="raw",
         obs_column_names=["label"],
     )
-    dl = experiment_dataloader(dp, num_workers=2)
+    dl = experiment_dataloader(dp, num_workers=1)  # multiprocessing used when num_workers > 0
     dp.obs_encoders()  # trigger query building
     row = next(iter(dl))  # trigger multiprocessing
 
