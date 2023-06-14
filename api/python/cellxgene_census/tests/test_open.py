@@ -8,6 +8,7 @@ import anndata
 import numpy as np
 import pytest
 import requests_mock as rm
+import tiledb
 import tiledbsoma as soma
 
 import cellxgene_census
@@ -196,7 +197,7 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     # Passing an empty context
-    with pytest.raises(Exception):
+    with pytest.raises(tiledb.TileDBError, match=r"The AWS Access Key Id you provided does not exist in our records"):
         cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
 
 
