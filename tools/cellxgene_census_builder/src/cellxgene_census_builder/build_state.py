@@ -108,6 +108,9 @@ class CensusBuildConfig(Namespace):
 
     def __init__(self, **kwargs: Any):
         config = self.defaults.copy()
+        for k in config.keys():
+            if k.upper() in os.environ:
+                config[k] = os.environ[k.upper()]
         config.update(kwargs)
         super().__init__(**config)
 
