@@ -263,8 +263,9 @@ def test_encoders(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
-# skip pytest if python 3.9
-@pytest.mark.skipif(sys.version_info >= (3, 9), reason="fails intermittently with OOM error for 3.9")
+@pytest.mark.skipif(
+    (sys.version_info.major, sys.version_info.minor) == (3, 9), reason="fails intermittently with OOM error for 3.9"
+)
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
 def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
