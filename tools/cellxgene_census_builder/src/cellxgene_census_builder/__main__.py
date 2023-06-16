@@ -23,7 +23,7 @@ def main() -> int:
     if (working_dir / CENSUS_BUILD_CONFIG).is_file():
         build_config = CensusBuildConfig.load(working_dir / CENSUS_BUILD_CONFIG)
     else:
-        build_config = CensusBuildConfig()
+        build_config = CensusBuildConfig.load_from_env_vars()
 
     if not cli_args.test_resume:
         if (working_dir / CENSUS_BUILD_STATE).exists():
@@ -54,9 +54,9 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
 
     # Infer steps from environment variables, if provided
     if os.getenv("CENSUS_BUILD_STEPS"):
-        logging.info("Census build: using build steps from environment variable CENSUS_BUILD_STEPS")
         steps = os.getenv("CENSUS_BUILD_STEPS", "").split(",")
-        build_steps = [locals()[step] for step in steps]
+        build_steps = [globals()[step] for step in steps]
+        logging.info(f"Census build: using steps {steps}")
     else:
         build_steps = [
             do_prebuild_set_defaults,
@@ -68,6 +68,7 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
             do_the_release,
             do_report_copy,
             do_old_release_cleanup,
+            do_log_copy,
         ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
@@ -86,9 +87,6 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
             logging.info(f"{step_n_of}: complete")
 
         logging.info("Census build: completed")
-
-        # And last, last, last ... stash the logs
-        do_log_copy(args)
 
     except Exception:
         logging.critical("Caught exception, exiting", exc_info=True)

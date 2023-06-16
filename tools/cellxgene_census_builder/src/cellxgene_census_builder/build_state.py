@@ -9,9 +9,9 @@ import pathlib
 from datetime import datetime
 from typing import Any, Iterator, Mapping, Union
 
-import attrs
 import psutil
 import yaml
+from attrs import define, field, fields, validators
 from typing_extensions import Self
 
 """
@@ -20,38 +20,70 @@ Defaults for Census configuration.
 
 CENSUS_BUILD_CONFIG = "config.yaml"
 CENSUS_BUILD_STATE = "state.yaml"
-CENSUS_CONFIG_DEFAULTS = {
-    # General config
-    "verbose": 1,
-    "log_dir": "logs",
-    "log_file": "build.log",
-    "reports_dir": "reports",
-    "consolidate": True,
-    "disable_dirty_git_check": True,
-    "dryrun": False,  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
+
+
+@define
+class CensusBuildConfig:
+    verbose: int = field(converter=int, default=1)
+    log_dir: str = field(default="logs")
+    log_file: str = field(default="build.log")
+    reports_dir: str = field(default="reports")
+    consolidate = field(converter=bool, default=True)
+    disable_dirty_git_check = field(converter=bool, default=True)
+    dryrun: bool = field(
+        converter=bool, default=False
+    )  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
     #
     # Paths and census version name determined by spec.
-    "cellxgene_census_S3_path": "s3://cellxgene-data-public/cell-census",
-    "logs_S3_path": "s3://cellxgene-data-public-logs/builder",
-    "build_tag": datetime.now().astimezone().date().isoformat(),
+    cellxgene_census_S3_path: str = field(default="s3://cellxgene-data-public/cell-census")
+    cellxgene_census_S3_remote_path: str = field(default=None)
+    logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
+    build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
     #
     # Default multi-process. Memory scaling based on empirical tests.
-    "multi_process": True,
-    "max_workers": 2 + int(psutil.virtual_memory().total / (96 * 1024**3)),
+    multi_process: bool = field(converter=bool, default=True)
+    max_workers: int = field(default=2 + int(psutil.virtual_memory().total / (96 * 1024**3)))
     #
     # Host minimum resource validation
-    "host_validation_disable": False,  # if True, host validation checks will be skipped
-    "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
-    "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
-    "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
+    host_validation_disable: int = field(
+        converter=bool, default=False
+    )  # if True, host validation checks will be skipped
+    host_validation_min_physical_memory: int = field(converter=int, default=512 * 1024**3)  # 512Gi
+    host_validation_min_swap_memory: int = field(converter=int, default=2 * 1024**4)  # 2Ti
+    host_validation_min_free_disk_space: int = field(converter=int, default=1 * 1024**4)  # 1 Ti
     #
     # Release clean up
-    "release_cleanup_days": 32,  # Census builds older than this are deleted
+    release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are delete)
     #
     # For testing convenience only
-    "manifest": None,
-    "test_first_n": None,
-}
+    manifest: str = field(default=None)
+    test_first_n: int = field(converter=int, default=None)
+
+    @classmethod
+    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
+        if isinstance(file, (str, os.PathLike)):
+            with open(file) as f:
+                user_config = yaml.safe_load(f)
+        else:
+            user_config = yaml.safe_load(file)
+
+        # Empty YAML config file is legal
+        if user_config is None:
+            user_config = {}
+
+        # But we only understand a top-level dictionary (e.g., no lists, etc.)
+        if not isinstance(user_config, dict):
+            raise TypeError("YAML config file malformed - expected top-level dictionary")
+
+        return cls(**user_config)
+
+    @classmethod
+    def load_from_env_vars(cls) -> Self:
+        config = cls()
+        for fld in fields(CensusBuildConfig):
+            if fld.name.upper() in os.environ:
+                setattr(config, fld.name, os.environ[fld.name.upper()])
+        return config
 
 
 class Namespace(Mapping[str, Any]):
@@ -103,36 +135,6 @@ class MutableNamespace(Namespace):
     # semantics can't be supported until that is implemented.
 
 
-class CensusBuildConfig(Namespace):
-    defaults = CENSUS_CONFIG_DEFAULTS
-
-    def __init__(self, **kwargs: Any):
-        config = self.defaults.copy()
-        for k in config.keys():
-            if k.upper() in os.environ:
-                config[k] = os.environ[k.upper()]
-        config.update(kwargs)
-        super().__init__(**config)
-
-    @classmethod
-    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
-        if isinstance(file, (str, os.PathLike)):
-            with open(file) as f:
-                user_config = yaml.safe_load(f)
-        else:
-            user_config = yaml.safe_load(file)
-
-        # Empty YAML config file is legal
-        if user_config is None:
-            user_config = {}
-
-        # But we only understand a top-level dictionary (e.g., no lists, etc.)
-        if not isinstance(user_config, dict):
-            raise TypeError("YAML config file malformed - expected top-level dictionary")
-
-        return cls(**user_config)
-
-
 class CensusBuildState(MutableNamespace):
     def __init__(self, **kwargs: Any):
         self.__dirty_keys = set(kwargs)
@@ -166,12 +168,12 @@ class CensusBuildState(MutableNamespace):
                 state_log.write(record)
 
 
-@attrs.define(frozen=True)
+@define(frozen=True)
 class CensusBuildArgs:
-    working_dir: pathlib.PosixPath = attrs.field(validator=attrs.validators.instance_of(pathlib.PosixPath))
-    config: CensusBuildConfig = attrs.field(validator=attrs.validators.instance_of(CensusBuildConfig))
-    state: CensusBuildState = attrs.field(
-        factory=CensusBuildState, validator=attrs.validators.instance_of(CensusBuildState)  # default: empty state
+    working_dir: pathlib.PosixPath = field(validator=validators.instance_of(pathlib.PosixPath))
+    config: CensusBuildConfig = field(validator=validators.instance_of(CensusBuildConfig))
+    state: CensusBuildState = field(
+        factory=CensusBuildState, validator=validators.instance_of(CensusBuildState)  # default: empty state
     )
 
     @property
