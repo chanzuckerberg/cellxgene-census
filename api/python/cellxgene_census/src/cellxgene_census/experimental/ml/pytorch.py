@@ -211,7 +211,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     """
     An iterable-style PyTorch ``DataPipe`` that reads obs and X data from a SOMA Experiment, and returns an iterator of
-    tuples of PyTorch ``Tensor``s:
+    tuples of PyTorch ``Tensor`` objects.
 
     >>> (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
         tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
@@ -459,9 +459,9 @@ def experiment_dataloader(
     **dataloader_kwargs: Any,
 ) -> DataLoader:
     """
-    Factory method for PyTorch ``DataLoader``. Provides a safer, more convenient interface for instantiating a
-    ``DataLoader`` that works with the ``ExperimentDataPipe``, since not all of ``DataLoader``'s params can be
-    used (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
+    Factory method for PyTorch ``DataLoader``. This method can be used to safely instantiate a
+    ``DataLoader`` that works with the ``ExperimentDataPipe``, since not all of the ``DataLoader`` constructor params
+    can be used (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
 
     Returns:
         PyTorch ``DataLoader``.
