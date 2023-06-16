@@ -33,27 +33,6 @@ test_that("test_incremental_read", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   
-  # helper
-  table_iter_is_ok <- function(tbl_iter, stop_after = 3) {
-    
-    if (!is(tbl_iter, "TableReadIter")) return(FALSE)
-    
-    n <- 1
-    while (!tbl_iter$read_complete()) {
-      
-      if(!is.null(stop_after) & n > stop_after) break
-      
-      tbl <- tbl_iter$read_next()
-      if (!is(tbl, "Table")) return(FALSE)
-      if (!is(tbl, "ArrowTabular")) return(FALSE)
-      if (nrow(tbl) < 1) return(FALSE)
-      
-      n <- n + 1
-    }
-    
-    return(TRUE)
-  }
-  
   for (oganism in c("homo_sapiens", "mus_musculus")) {
       
       # use subset of columns for speed
@@ -70,4 +49,10 @@ test_that("test_incremental_read", {
   }
   
 })
+
+test_that("test_incremental_query", {
+  #TODO implement when query$obs() $var() and $X() return iterators, not yet in tiledbsoma
+  expect_true(TRUE)
+})
+
 
