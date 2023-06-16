@@ -48,12 +48,12 @@ class CensusBuildConfig:
     host_validation_disable: int = field(
         converter=bool, default=False
     )  # if True, host validation checks will be skipped
-    host_validation_min_physical_memory: int = field(converter=int, default=512 * 1024**3)  # 512Gi
-    host_validation_min_swap_memory: int = field(converter=int, default=2 * 1024**4)  # 2Ti
-    host_validation_min_free_disk_space: int = field(converter=int, default=1 * 1024**4)  # 1 Ti
+    host_validation_min_physical_memory: int = field(converter=int, default=512 * 1024**3)  # 512GiB
+    host_validation_min_swap_memory: int = field(converter=int, default=2 * 1024**4)  # 2TiB
+    host_validation_min_free_disk_space: int = field(converter=int, default=1 * 1024**4)  # 1 TiB
     #
     # Release clean up
-    release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are delete)
+    release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are deleted)
     #
     # For testing convenience only
     manifest: str = field(default=None)
