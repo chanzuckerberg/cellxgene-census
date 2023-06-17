@@ -1,0 +1,687 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Training a PyTorch Model &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Census data and schema" href="../../cellxgene_census_docsite_schema.html" />
+    <link rel="prev" title="Experimental Highly Variable Genes API" href="highly_variable_genes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                    </span>
+                    <hr class="navbar-divider">
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    1.2.1
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#experimental">Experimental</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="highly_variable_genes.html">Experimental Highly Variable Genes API</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Training a PyTorch Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Open-the-Census">Open the Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Create-a-DataLoader">Create a DataLoader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Splitting-the-dataset">Splitting the dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Shuffling-the-training-dataset">Shuffling the training dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Create-the-DataLoader">Create the DataLoader</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Define-the-model">Define the model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Train-the-model">Train the model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Make-predictions-with-the-model">Make predictions with the model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Training a PyTorch Model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/experimental/pytorch.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Training-a-PyTorch-Model">
+<h1>Training a PyTorch Model<a class="headerlink" href="#Training-a-PyTorch-Model" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial shows how to train a Logistic Regression model in PyTorch using the Census API’s <code class="docutils literal notranslate"><span class="pre">experimental.ml.ExperimentDataPipe</span></code> class. This is intended only to demonstrate the use of the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, and not as an example of how to train a biologically useful model.</p>
+<p>This tutorial assumes a basic familiarity with PyTorch and the Census API. See the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a> notebook tutorial for a quick primer on Census API usage.</p>
+<p><strong>Contents</strong> * <a class="reference internal" href="#Open-the-Census"><span class="std std-ref">Open the Census</span></a> * <a class="reference internal" href="#Create-a-DataLoader"><span class="std std-ref">Create a DataLoader</span></a> * <a class="reference internal" href="#Define-the-model"><span class="std std-ref">Define the model</span></a> * <a class="reference internal" href="#Train-the-model"><span class="std std-ref">Train the model</span></a> * <a class="reference internal" href="#Make-predictions-with-the-model"><span class="std std-ref">Make predictions with the model</span></a></p>
+</section>
+<section id="Open-the-Census">
+<h1>Open the Census<a class="headerlink" href="#Open-the-Census" title="Permalink to this heading">¶</a></h1>
+<p>First, obtain a handle to the Census data, in the usual manner:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+</section>
+<section id="Create-a-DataLoader">
+<h1>Create a DataLoader<a class="headerlink" href="#Create-a-DataLoader" title="Permalink to this heading">¶</a></h1>
+<p>To train a model in PyTorch using this <code class="docutils literal notranslate"><span class="pre">census</span></code> data object, first instantiate an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census.experimental.ml</span> <span class="k">as</span> <span class="nn">census_ml</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+
+<span class="n">experiment_datapipe</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">ExperimentDataPipe</span><span class="p">(</span>
+    <span class="n">experiment</span><span class="p">,</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+    <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;tongue&#39; and is_primary_data == True&quot;</span><span class="p">),</span>
+    <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This class provides an implementation of PyTorch’s <code class="docutils literal notranslate"><span class="pre">`DataPipe</span></code> interface &lt;<a class="reference external" href="https://pytorch.org/data/main/torchdata.datapipes.iter.html">https://pytorch.org/data/main/torchdata.datapipes.iter.html</a>&gt;`__, which defines a common mechanism for wrapping and accessing training data from any underlying source. The <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class encapsulates the details of querying and retrieving Census data from a single SOMA <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> and returning it to the caller as PyTorch Tensors. Most importantly, it retrieves the data lazily from the Census in batches,
+avoiding having to load the entire training dataset into memory at once.</p>
+<p>The constructor only requires a single parameter, <code class="docutils literal notranslate"><span class="pre">experiment</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> containing the data of the organism to be used for training.</p>
+<p>To retrieve a subset of the Experiment’s data, along either the <code class="docutils literal notranslate"><span class="pre">obs</span></code> or <code class="docutils literal notranslate"><span class="pre">var</span></code> axes, you may specify query filters via the <code class="docutils literal notranslate"><span class="pre">obs_query</span></code> and <code class="docutils literal notranslate"><span class="pre">var_query</span></code> parameters, which are both <code class="docutils literal notranslate"><span class="pre">soma.AxisQuery</span></code> objects.</p>
+<p>The values for the prediction label(s) that you intend to use for training are specified via the <code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> array.</p>
+<p>Finally, the <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> allows you to specify the number of obs rows (cells) to return in each training iteration step. You may exclude this parameter if you want single rows (<code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code>).</p>
+<p>(Note: PyTorch also provides <code class="docutils literal notranslate"><span class="pre">DataSet</span></code> as a legacy interface for wrapping and accessing training data sources, but a <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code> can be used interchangeably.)</p>
+<p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(15020, 60664)
+</pre></div></div>
+</div>
+<section id="Splitting-the-dataset">
+<h2>Splitting the dataset<a class="headerlink" href="#Splitting-the-dataset" title="Permalink to this heading">¶</a></h2>
+<p>You may split the overall dataset into the typical training, validation, and test sets by using the PyTorch <code class="docutils literal notranslate"><span class="pre">`RandomSplitter</span></code> &lt;<a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.RandomSplitter.html#torchdata.datapipes.iter.RandomSplitter">https://pytorch.org/data/main/generated/torchdata.datapipes.iter.RandomSplitter.html#torchdata.datapipes.iter.RandomSplitter</a>&gt;`__ <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Using PyTorch’s functional form for chaining <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>s, this is done as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_datapipe</span><span class="p">,</span> <span class="n">validation_datapipe</span><span class="p">,</span> <span class="n">test_datapipe</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span>
+    <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s2">&quot;validation&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">},</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Shuffling-the-training-dataset">
+<h2>Shuffling the training dataset<a class="headerlink" href="#Shuffling-the-training-dataset" title="Permalink to this heading">¶</a></h2>
+<p>Commonly, you will want to randomize the ordering of the training data for each training epoch. You can use PyTorch <code class="docutils literal notranslate"><span class="pre">`Shuffler</span></code> &lt;<a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.Shuffler.html">https://pytorch.org/data/main/generated/torchdata.datapipes.iter.Shuffler.html</a>&gt;`__ <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>, chaining it to the earlier <code class="docutils literal notranslate"><span class="pre">experiment_dataloader</span></code> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Again, using PyTorch’s functional form for chaining the <code class="docutils literal notranslate"><span class="pre">Datapipe</span></code>s, we have:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shuffled_train_datapipe</span> <span class="o">=</span> <span class="n">train_datapipe</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">shuffle()</span></code> operates on a fixed size of training rows, which is 10,000 by default, and can be specified via the <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code> param. Increasing this value may be useful for improving the heterogeneity of cells appearing within a given shuffling “window”, as low heterogeneity may result in overfitting in the model. Note, however, that larger <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code> values will require more memory.</p>
+<p>If the training data is known to fit fully within in available memory, you can shuffle the entire dataset using <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.shuffle(len(experiment_datapipe))</span></code>.</p>
+</section>
+<section id="Create-the-DataLoader">
+<h2>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading">¶</a></h2>
+<p>With the full set of DataPipe operations chained together, we can now instantiate a PyTorch <code class="docutils literal notranslate"><span class="pre">`DataLoader</span></code> &lt;<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader</a>&gt;`__ on the training data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">shuffled_train_datapipe</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Alternately, you can instantiate a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> object directly via its constructor. However, many of the parameters are not usable with iterable-style DataPipes, which is the case for <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>. In particular, the <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> parameters should not be specified. Using <code class="docutils literal notranslate"><span class="pre">experiment_dataloader</span></code> helps enforce correct usage.</p>
+</section>
+</section>
+<section id="Define-the-model">
+<h1>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading">¶</a></h1>
+<p>With the training data retrieval code now in place, we can move on to defining a simple logistic regression model, using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.nn.Linear</span></code> class:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+
+<span class="k">class</span> <span class="nc">LogisticRegression</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">outputs</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we define a function to train the model for a single epoch:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="n">train_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">train_correct</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">train_total</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">train_dataloader</span><span class="p">:</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">X_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="o">=</span> <span class="n">batch</span>
+
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># Perform prediction</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+
+        <span class="c1"># Determine the predicted label</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+
+        <span class="c1"># Compute the loss and perform back propagation</span>
+
+        <span class="c1"># Exclude the cell_type labels, which are in the second column</span>
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+
+        <span class="n">train_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">==</span> <span class="n">y_batch</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">train_total</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
+        <span class="n">train_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="n">train_loss</span> <span class="o">/=</span> <span class="n">train_total</span>
+    <span class="n">train_accuracy</span> <span class="o">=</span> <span class="n">train_correct</span> <span class="o">/</span> <span class="n">train_total</span>
+    <span class="k">return</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">train_accuracy</span>
+</pre></div>
+</div>
+</div>
+<p>Note the line, <code class="docutils literal notranslate"><span class="pre">X_batch,</span> <span class="pre">y_batch</span> <span class="pre">=</span> <span class="pre">batch</span></code>. Since the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> was configured with <code class="docutils literal notranslate"><span class="pre">batch_size=16</span></code>, these variables will hold tensors of rank 2. The <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> tensor will appear, for example, as:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[0., 0., 0.,  ..., 1., 0., 0.],
+        [0., 0., 2.,  ..., 0., 3., 0.],
+        [0., 0., 0.,  ..., 0., 0., 0.],
+        ...,
+        [0., 0., 0.,  ..., 0., 0., 0.],
+        [0., 1., 0.,  ..., 0., 0., 0.],
+        [0., 0., 0.,  ..., 0., 0., 8.]])
+</pre></div>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code>, the tensors will be of rank 1. The <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> tensor will appear, for example, as:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([0., 0., 0.,  ..., 1., 0., 0.])
+</pre></div>
+</div>
+<p>Secondly, note the line, <code class="docutils literal notranslate"><span class="pre">y_batch</span> <span class="pre">=</span> <span class="pre">y_batch[:,</span> <span class="pre">1]</span></code>. This line is extracting the user-specified <code class="docutils literal notranslate"><span class="pre">obs</span></code> <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> training labels from the second column of the <code class="docutils literal notranslate"><span class="pre">y_batch</span></code> rank 2 Tensor. For example, this would take a <code class="docutils literal notranslate"><span class="pre">y_batch</span></code> tensor that looks like:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[42496620,        1],
+        [42496621,        1],
+        [42496622,        3],
+        ...,
+        [42496633,        2],
+        [42496634,        1],
+        [42496635,        4]], dtype=torch.int32)
+</pre></div>
+</div>
+<p>and return:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([1, 1, 3, ..., 2, 1, 4])
+</pre></div>
+</div>
+<p>Note that cell type values are integer-encoded values, which can be decoded using <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders()</span></code> (more on this below).</p>
+</section>
+<section id="Train-the-model">
+<h1>Train the model<a class="headerlink" href="#Train-the-model" title="Permalink to this heading">¶</a></h1>
+<p>Finally, we are ready to train the model. Here we instantiate the model, a loss function, and an optimization method and then iterate through the desired number of training epochs. Note how the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> is passed into <code class="docutils literal notranslate"><span class="pre">train_epoch</span></code>, where for each epoch it will provide a new iterator through the training dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">RANDOM_SEED</span> <span class="o">=</span> <span class="mi">12345</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+<span class="c1"># The size of the input dimension is the number of genes</span>
+<span class="n">input_dim</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># The size of the output dimension is the number of distinct cell_type values</span>
+<span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">()[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
+<span class="n">output_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">train_loss</span><span class="p">,</span> <span class="n">train_accuracy</span> <span class="o">=</span> <span class="n">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">experiment_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">: Train Loss: </span><span class="si">{</span><span class="n">train_loss</span><span class="si">:</span><span class="s2">.7f</span><span class="si">}</span><span class="s2"> Accuracy </span><span class="si">{</span><span class="n">train_accuracy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch 1: Train Loss: 0.1156322 Accuracy 0.4494
+Epoch 2: Train Loss: 0.1095988 Accuracy 0.7357
+Epoch 3: Train Loss: 0.1089615 Accuracy 0.7300
+Epoch 4: Train Loss: 0.1080885 Accuracy 0.7275
+Epoch 5: Train Loss: 0.1101440 Accuracy 0.4220
+</pre></div></div>
+</div>
+</section>
+<section id="Make-predictions-with-the-model">
+<h1>Make predictions with the model<a class="headerlink" href="#Make-predictions-with-the-model" title="Permalink to this heading">¶</a></h1>
+<p>To make predictions with the model, we first create a new <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> using the <code class="docutils literal notranslate"><span class="pre">test_datapipe</span></code>, which provides the “test” split of the original dataset. For this example, we will only make predictions on a single batch of data from the test split.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">test_datapipe</span><span class="p">)</span>
+
+<span class="n">X_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">experiment_dataloader</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we invoke the model on the <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> input data and extract the predictions:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+
+<span class="n">predictions</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+</pre></div></div>
+</div>
+<p>The predictions are returned as the encoded values of <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> label. To recover the original cell type labels as strings, we decode using the <code class="docutils literal notranslate"><span class="pre">cell_type_encoder</span></code>. Here, we obtain the encoder from <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders()</span></code>.</p>
+<p>At inference time, if the model inputs are not obtained via an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, one could pickle the encoder at training time and save it along with the model. Then, at inference time it can be unpickled and used as shown below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">()[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
+
+<span class="n">predicted_cell_types</span> <span class="o">=</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+
+<span class="n">predicted_cell_types</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;],
+      dtype=object)
+</pre></div></div>
+</div>
+<p>Finally, we create a Pandas DataFrame to examine the predictions:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;actual cell type&quot;</span><span class="p">:</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y_batch</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()),</span>
+        <span class="s2">&quot;predicted cell type&quot;</span><span class="p">:</span> <span class="n">predicted_cell_types</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>actual cell type</th>
+      <th>predicted cell type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>epithelial cell</td>
+      <td>basal cell</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>As we can see, the predictions are poor. It is as left as an excercise to the reader to find a better performing model.</p>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="highly_variable_genes.html" class="btn btn-neutral float-left" title="Experimental Highly Variable Genes API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../cellxgene_census_docsite_schema.html" class="btn btn-neutral float-right" title="Census data and schema" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

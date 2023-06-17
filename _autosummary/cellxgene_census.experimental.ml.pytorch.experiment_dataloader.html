@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>cellxgene_census.get_presence_matrix &mdash; cellxgene-census  documentation</title>
+  <title>cellxgene_census.experimental.ml.pytorch.experiment_dataloader &mdash; cellxgene-census  documentation</title>
   
 
   
@@ -46,8 +46,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="cellxgene_census.get_census_version_description" href="cellxgene_census.get_census_version_description.html" />
-    <link rel="prev" title="cellxgene_census.get_anndata" href="cellxgene_census.get_anndata.html" /> 
+    <link rel="next" title="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe" href="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html" />
+    <link rel="prev" title="cellxgene_census.get_census_version_directory" href="cellxgene_census.get_census_version_directory.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -129,15 +129,17 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../python-api.html">Python API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#open-retrieve-cell-census-data">Open/retrieve Cell Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#get-slice-as-anndata">Get slice as AnnData</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../python-api.html#feature-presence-matrix">Feature presence matrix</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">cellxgene_census.get_presence_matrix</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cellxgene_census.get_presence_matrix"><code class="docutils literal notranslate"><span class="pre">get_presence_matrix()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#feature-presence-matrix">Feature presence matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#versioning-of-cell-census-builds">Versioning of Cell Census builds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-machine-learning">Experimental: Machine Learning</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../python-api.html#experimental-machine-learning">Experimental: Machine Learning</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cellxgene_census.experimental.ml.pytorch.experiment_dataloader"><code class="docutils literal notranslate"><span class="pre">experiment_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.pytorch.Stats.html">cellxgene_census.experimental.ml.pytorch.Stats</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-processing">Experimental: Processing</a></li>
 </ul>
 </li>
@@ -171,9 +173,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../python-api.html">Python API</a></li>
-      <li class="breadcrumb-item active">cellxgene_census.get_presence_matrix</li>
+      <li class="breadcrumb-item active">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/cellxgene_census.get_presence_matrix.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -181,38 +183,21 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <section id="cellxgene-census-get-presence-matrix">
-<h1>cellxgene_census.get_presence_matrix<a class="headerlink" href="#cellxgene-census-get-presence-matrix" title="Permalink to this heading">¶</a></h1>
+  <section id="cellxgene-census-experimental-ml-pytorch-experiment-dataloader">
+<h1>cellxgene_census.experimental.ml.pytorch.experiment_dataloader<a class="headerlink" href="#cellxgene-census-experimental-ml-pytorch-experiment-dataloader" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="cellxgene_census.get_presence_matrix">
-<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_presence_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">census</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organism</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'RNA'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix" title="(in SciPy v1.10.1)"><span class="pre">csr_matrix</span></a></span></span><a class="headerlink" href="#cellxgene_census.get_presence_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the feature dataset presence matrix and return as a SciPy sparse CSR array.
-The returned sparse matrix is indexed on the
-first dimension by the dataset <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values, and on the
-second dimension by the <code class="docutils literal notranslate"><span class="pre">var</span></code> DataFrame <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values.</p>
+<dt class="sig sig-object py" id="cellxgene_census.experimental.ml.pytorch.experiment_dataloader">
+<span class="sig-prename descclassname"><span class="pre">cellxgene_census.experimental.ml.pytorch.</span></span><span class="sig-name descname"><span class="pre">experiment_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapipe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IterDataPipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">dataloader_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataLoader</span></span></span><a class="headerlink" href="#cellxgene_census.experimental.ml.pytorch.experiment_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factory method for PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>. This method can be used to safely instantiate a
+<code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> that works with the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, since not all of the <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> constructor params
+can be used (<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code>).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>census</strong> – The census from which to read the presence matrix.</p></li>
-<li><p><strong>organism</strong> – The organism to query, usually one of <cite>Homo sapiens</cite> or <cite>Mus musculus</cite>.</p></li>
-<li><p><strong>measurement_name</strong> – The measurement object to query. Deafults to <cite>RNA</cite>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a> object containing the presence matrix.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if the organism cannot be found.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 </dd>
 </dl>
 <p class="rubric">Lifecycle</p>
-<p>maturing</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_presence_matrix</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
-<span class="go">&lt;321x60554 sparse array of type &#39;&lt;class &#39;numpy.uint8&#39;&gt;&#39;</span>
-<span class="go">with 6441269 stored elements in Compressed Sparse Row format&gt;</span>
-</pre></div>
-</div>
+<p>experimental</p>
 </dd></dl>
 
 </section>
@@ -222,8 +207,8 @@ second dimension by the <code class="docutils literal notranslate"><span class="
             
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cellxgene_census.get_anndata.html" class="btn btn-neutral float-left" title="cellxgene_census.get_anndata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cellxgene_census.get_census_version_description.html" class="btn btn-neutral float-right" title="cellxgene_census.get_census_version_description" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cellxgene_census.get_census_version_directory.html" class="btn btn-neutral float-left" title="cellxgene_census.get_census_version_directory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html" class="btn btn-neutral float-right" title="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

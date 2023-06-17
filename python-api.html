@@ -102,7 +102,7 @@
                 
                 
                 <div class="version">
-                    1.2.0
+                    1.2.1
                 </div>
                 
             
@@ -144,6 +144,17 @@
 <li class="toctree-l2"><a class="reference internal" href="#versioning-of-cell-census-builds">Versioning of Cell Census builds</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_description.html">cellxgene_census.get_census_version_description</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_directory.html">cellxgene_census.get_census_version_directory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-machine-learning">Experimental: Machine Learning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.Stats.html">cellxgene_census.experimental.ml.pytorch.Stats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-processing">Experimental: Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html">cellxgene_census.experimental.pp.get_highly_variable_genes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html">cellxgene_census.experimental.pp.highly_variable_genes</a></li>
 </ul>
 </li>
 </ul>
@@ -221,7 +232,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata" title="cellxgene_census.get_anndata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata</span></code></a></p></td>
-<td><p>Convience wrapper around <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.9.0rc2.dev27+ge067515)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
+<td><p>Convience wrapper around <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.9.0rc2.dev37+gff4a7f0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -245,6 +256,35 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_directory.html#cellxgene_census.get_census_version_directory" title="cellxgene_census.get_census_version_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_census_version_directory</span></code></a></p></td>
 <td><p>Get the directory of Census releases currently available.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="experimental-machine-learning">
+<h2>Experimental: Machine Learning<a class="headerlink" href="#experimental-machine-learning" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html#cellxgene_census.experimental.ml.pytorch.experiment_dataloader" title="cellxgene_census.experimental.ml.pytorch.experiment_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</span></code></a></p></td>
+<td><p>Factory method for PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html#cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe" title="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</span></code></a></p></td>
+<td><p>An iterable-style PyTorch <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code> that reads obs and X data from a SOMA Experiment, and returns an iterator of tuples of PyTorch <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.Stats.html#cellxgene_census.experimental.ml.pytorch.Stats" title="cellxgene_census.experimental.ml.pytorch.Stats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.Stats</span></code></a></p></td>
+<td><p>Statistics about the data retrieved by <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> via SOMA API.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="experimental-processing">
+<h2>Experimental: Processing<a class="headerlink" href="#experimental-processing" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html#cellxgene_census.experimental.pp.get_highly_variable_genes" title="cellxgene_census.experimental.pp.get_highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.get_highly_variable_genes</span></code></a></p></td>
+<td><p>Convenience wrapper</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html#cellxgene_census.experimental.pp.highly_variable_genes" title="cellxgene_census.experimental.pp.highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.highly_variable_genes</span></code></a></p></td>
+<td><p>Identify and annotate highly variable genes contained in the query results.</p></td>
 </tr>
 </tbody>
 </table>

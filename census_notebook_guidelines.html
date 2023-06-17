@@ -100,7 +100,7 @@
                 
                 
                 <div class="version">
-                    1.2.0
+                    1.2.1
                 </div>
                 
             
@@ -156,7 +156,7 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Cell Census API notebook/vignette editorial guidelines</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/cell_census_notebook_guidelines.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/census_notebook_guidelines.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -168,17 +168,18 @@
 <h1>Cell Census API notebook/vignette editorial guidelines<a class="headerlink" href="#cell-census-api-notebook-vignette-editorial-guidelines" title="Permalink to this heading">¶</a></h1>
 <p>API demonstration code that is part of the documentation should be deposited here:</p>
 <ul class="simple">
-<li><p>Python notebooks <a class="reference external" href="https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks"><code class="docutils literal notranslate"><span class="pre">cell-census/api/python/notebooks</span></code></a></p></li>
-<li><p>R vignettes <a class="reference external" href="https://github.com/chanzuckerberg/cell-census/tree/main/api/r/CellCensus/vignettes"><code class="docutils literal notranslate"><span class="pre">cell-census/api/r/CellCensus/vignettes</span></code></a></p></li>
+<li><p>Python notebooks <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks"><code class="docutils literal notranslate"><span class="pre">cellxgene-census/api/python/notebooks</span></code></a></p></li>
+<li><p>R vignettes <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes"><code class="docutils literal notranslate"><span class="pre">cellxgene-census/api/r/CellCensus/vignettes</span></code></a></p></li>
 </ul>
-<p>These assets are user-facing and are automatically rendered to the doc-sites, they are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.</p>
+<p>To include Python notebooks in the doc site, create a symlink to the notebook in <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/docs/notebooks">cellxgene-census/docs/notebooks/</a> folder.</p>
+<p>These assets are user-facing and are automatically rendered to the doc-sites and are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.</p>
 <section id="guidelines">
 <h2>Guidelines<a class="headerlink" href="#guidelines" title="Permalink to this heading">¶</a></h2>
 <section id="title">
 <h3>Title<a class="headerlink" href="#title" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>It must use the highest-level markdown header <code class="docutils literal notranslate"><span class="pre">#</span></code>.</p></li>
-<li><p>Unless needed, it should not contain “Cell Census”.</p></li>
+<li><p>Unless needed, it should not contain any direct mentions of “Census”.</p></li>
 <li><p>It should be concise, self-explanatory, and if possible indicate an action.</p></li>
 </ul>
 <p>Examples:</p>
@@ -192,17 +193,17 @@
 <p>Introductory text must be included right underneath the title.</p>
 <ul class="simple">
 <li><p>It must provide a one paragraph summary of the notebook’s goals.</p></li>
-<li><p>It must not contain an explanation of the Cell Census.</p></li>
+<li><p>It must not contain an explanation of the Census.</p></li>
 </ul>
 <p>Examples:</p>
 <p>:white_check_mark:</p>
 <blockquote>
-<div><p>This notebook provides a demonstration for integrating two Cell Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Cell Census can inform data integration.</p>
+<div><p>This notebook provides a demonstration for integrating two Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.</p>
 </div></blockquote>
-<p>:x: <em>it contains a long explanation of what the Cell Census is, and the goal is not clear</em></p>
+<p>:x: <em>it contains a long explanation of what the Census is, and the goal is not clear</em></p>
 <blockquote>
-<div><p>The Cell Census is a versioned container for the single-cell data hosted at CELLxGENE Discover. The Cell Census utilizes SOMA powered by TileDB for storing, accessing, and efficiently filtering data.</p>
-<p>This notebook shows you how to learn about the Cell Census contents and how to query it.</p>
+<div><p>The Census is a versioned container for the single-cell data hosted at CELLxGENE Discover. The Census utilizes SOMA powered by TileDB for storing, accessing, and efficiently filtering data.</p>
+<p>This notebook shows you how to learn about the Census contents and how to query it.</p>
 </div></blockquote>
 </section>
 <section id="table-of-contents">
@@ -219,7 +220,7 @@
 <div><p><strong>Contents</strong></p>
 <ol class="arabic simple">
 <li><p>Learning about the lung data.</p></li>
-<li><p>Fetching all human lung data from the Cell Census.</p></li>
+<li><p>Fetching all human lung data from the Census.</p></li>
 <li><p>Obtaining QC metrics for this data slice.</p></li>
 </ol>
 </div></blockquote>
@@ -240,9 +241,9 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Integrating data with SCVI.
 
 This notebook provides a demonstration for integrating two 
-Cell Census datasets using `scvi-tools`. The goal is not to 
+Census datasets using `scvi-tools`. The goal is not to 
 provide an exhaustive guide on proper integration, but to showcase 
-what information in the Cell Census can inform data integration.
+what information in the Census can inform data integration.
 
 **Contents**
 
@@ -259,24 +260,24 @@ what information in the Cell Census can inform data integration.
 Let&#39;s load all modules needed for this notebook.
 
 \code
-  import cell_census
+  import cellxgene_census
   import scanpy as sc
   import numpy as np
   import scvi
   from scipy.sparse import csr_matrix
 \code 
 
-Now we can open the Cell Census 
+Now we can open the Census 
 
 \code 
-  census = cell_census.open_soma(census_version=&quot;latest&quot;)
+  census = cellxgene_census.open_soma(census_version=&quot;latest&quot;)
 \code
 
 In this notebook we will use Tabula Muris Senis data 
 from the liver as it contains cells from both 10X 
 Genomics and Smart-Seq2 technologies.
 
-Let&#39;s query the datasets table of the Cell Census by 
+Let&#39;s query the datasets table of the Census by 
 filtering on collection_name for &quot;Tabula Muris Senis&quot; 
 and dataset_title for &quot;liver&quot;.
 

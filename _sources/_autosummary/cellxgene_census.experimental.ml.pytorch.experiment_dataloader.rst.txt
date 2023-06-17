@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.ml.pytorch.experiment\_dataloader
+================================================================
+
+.. currentmodule:: cellxgene_census.experimental.ml.pytorch
+
+.. autofunction:: experiment_dataloader

@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.pp.get\_highly\_variable\_genes
+==============================================================
+
+.. currentmodule:: cellxgene_census.experimental.pp
+
+.. autofunction:: get_highly_variable_genes
