@@ -35,7 +35,8 @@ ListReporterToFile <- R6::R6Class("ListReporterToFile",
                  text = paste(this_result$test, 
                               this_result$user, 
                               this_result$system, 
-                              this_result$real, 
+                              this_result$real,
+                              private$convert_test_output_to_string(this_result$results),
                               sep =","))
       close(file_handle)
       
@@ -45,6 +46,16 @@ ListReporterToFile <- R6::R6Class("ListReporterToFile",
   ),
                                   
   private = list(
-    to_file=NULL
+    to_file = NULL,
+    
+    convert_test_output_to_string = function(results) {
+      results_list <- lapply(results, function(x){
+        call_title <- x$srcref
+        call_result <- gsub("\n+", " ", as.character(x))
+        paste0(call_title, ": ", call_result)
+      })
+      return(paste0(as.vector(results_list), collapse="; "))
+    }
+    
   )
 )
