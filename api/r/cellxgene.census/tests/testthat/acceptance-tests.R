@@ -1,61 +1,135 @@
 # These are expensive tests and should be run as part of the automated 
 # testing framework. They are meant to be run manually via testthat::test_file()
 
-test_that("test_load_axes", {
+test_that("test_load_obs_human", {
               
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   
-  for (organism in c("homo_sapiens", "mus_musculus")) {
-      
-      # use subset of columns for speed
-      obs_df = census$get("census_data")$get(organism)$obs$read(coords = 1:4, column_names = c("soma_joinid", "cell_type", "tissue"))
-      obs_df = as.data.frame(obs_df$concat())
-      
-      expect_true(nrow(obs_df) > 0)
-      
-      var_df = census$get("census_data")$get(organism)$ms$get("RNA")$var$read(coords= 1:4)
-      var_df = as.data.frame(var_df$concat())
-      
-      expect_true(nrow(var_df) > 0)
-      
-      rm(obs_df)
-      rm(var_df)
-      gc()
-      break
-  }
+  organism <- "homo_sapiens"
+  
+  # use subset of columns for speed
+  obs_df = census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  obs_df = as.data.frame(obs_df$concat())
+  expect_true(nrow(obs_df) > 0)
+})
+
+test_that("test_load_var_human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  
+  var_df <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  var_df <- as.data.frame(var_df$concat())
+  expect_true(nrow(var_df) > 0)
   
 })
 
-test_that("test_incremental_read", {
-              
-  # Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks
+test_that("test_load_obs_mouse", {
               
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   
-  for (organism in c("homo_sapiens", "mus_musculus")) {
-      
-      # use subset of columns for speed
-      obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
-      expect_true(table_iter_is_ok(obs_iter))
-      
-      var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
-      expect_true(table_iter_is_ok(var_iter))
-      
-      # Warning that results cannot be concat because it 
-      # exceeds R's capability to allocate vectors beyond 32bit
-      expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
-      
-      expect_true(table_iter_is_ok(X_iter))
-      gc()
-      break
-  }
+  organism <- "mus_musculus"
+  
+  # use subset of columns for speed
+  obs_df <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  obs_df <- as.data.frame(obs_df$concat())
+  expect_true(nrow(obs_df) > 0)
+})
+
+test_that("test_load_var_mouse", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  
+  var_df <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  var_df <- as.data.frame(var_df$concat())
+  expect_true(nrow(var_df) > 0)
+  
+})
+
+test_that("test_incremental_read_obs_human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  
+  # use subset of columns for speed
+  obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  expect_true(table_iter_is_ok(obs_iter))
+})
+
+test_that("test_incremental_read_var_human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  
+  var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  expect_true(table_iter_is_ok(var_iter))
+})
+
+test_that("test_incremental_read_X_human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  
+  # Warning that results cannot be concat because it 
+  # exceeds R's capability to allocate vectors beyond 32bit
+  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  expect_true(table_iter_is_ok(X_iter))
+  
+})
+
+test_that("test_incremental_read_obs_mouse", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  
+  # use subset of columns for speed
+  obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  expect_true(table_iter_is_ok(obs_iter))
+})
+
+test_that("test_incremental_read_var_mouse", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  
+  var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  expect_true(table_iter_is_ok(var_iter))
+})
+
+test_that("test_incremental_read_X_mouse", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  
+  # Warning that results cannot be concat because it 
+  # exceeds R's capability to allocate vectors beyond 32bit
+  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  expect_true(table_iter_is_ok(X_iter))
   
 })
 
 test_that("test_incremental_query", {
-  #TODO implement when query$obs() $var() and $X() return iterators, not yet in tiledbsoma
+  # TODO implement when query$obs() $var() and $X() return iterators, not yet in tiledbsoma
+  # June, 2023
   expect_true(TRUE)
 })
 
@@ -179,5 +253,4 @@ test_that("test_seurat_whole-enchilada-large-buffer-size", {
   )
   
   test_seurat(test_args)
-                  
 })
