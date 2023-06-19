@@ -17,3 +17,10 @@ while (!tbl_iter$read_complete()) {
 
 return(TRUE)
 }
+
+# Tests that the object from get_seurat is a non-empty Seurat object
+test_seurat <- function(get_seurat_args) {
+  this_seurat <- do.call(get_seurat, get_seurat_args) 
+  expect_true(is(this_seurat, "SeuratObject"))
+  expect_true(ncol(this_seurat>0))
+}

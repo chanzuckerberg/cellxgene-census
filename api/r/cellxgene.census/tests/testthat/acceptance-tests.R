@@ -59,47 +59,125 @@ test_that("test_incremental_query", {
   expect_true(TRUE)
 })
 
-test_that("test_seurat_small_query_human", {
+test_that("test_seurat_small-query", {
               
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   
-  get_seurat_args(
-                  census = cenus,
-                  organism = "Homo sapiens",
-                  measurement_name = "RNA",
-                  X_name = "raw",
-                  obs_value_filter = "tissue_aorta"
-                  obs_coords = NULL,
-                  obs_column_names = NULL,
-                  var_value_filter = NULL,
-                  var_coords = NULL,
-                  var_column_names = NULL
-                  )
-                  
-  this_seurat <- do.call(get_seurat, get_seurat_args) 
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_value_filter = "tissue == 'aorta'"
+  )
+  
+  test_seurat(test_args)
+  
 })
 
-test_that("test_seurat_10K_cells_human", {
+test_that("test_seurat_10K-cells-human", {
               
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
   
-  get_seurat_args<- list(
-                  census = census,
-                  organism = "Homo sapiens",
-                  measurement_name = "RNA",
-                  X_name = "raw",
-                  obs_value_filter = NULL,
-                  obs_coords = 1:10000,
-                  obs_column_names = NULL,
-                  var_value_filter = NULL,
-                  var_coords = NULL,
-                  var_column_names = NULL
-                  )
-                  
-  this_seurat <- do.call(get_seurat, get_seurat_args) 
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_coords = 1:10000,
+  )
   
-  expect_true(is(this_seurat, "SeuratObject"))
-  expect_true(ncol(this_seurat>0))
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_100K-cells-human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_coords = 1:100000,
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_common-cell-type", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_value_filter = "cell_type == 'neuron'",
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_common-tissue", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_value_filter = "tissue == 'brain'",
+    obs_coords = NULL,
+    obs_column_names = NULL,
+    var_value_filter = NULL,
+    var_coords = NULL,
+    var_column_names = NULL
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_common-tissue-large-buffer-size", {
+              
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_value_filter = "tissue == 'brain'",
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_whole-enchilada-large-buffer-size", {
+              
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+  )
+  
+  test_seurat(test_args)
+                  
 })

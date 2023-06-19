@@ -1,0 +1,41 @@
+# Children class of testthat::ListReporter
+# writes test results to a file as it runs them
+
+ListReporterToFile <- R6::R6Class("ListReporterToFile",
+  inherit = ListReporter,
+  public = list(
+    
+    initialize = function(to_file="acceptance-tests-logs.csv") {
+      header <- c("test","user","system","real")
+      private$to_file <- to_file
+      
+      file_handle <- file(private$to_file)
+      base::writeLines("test,user,system,real", con=file_handle)
+      close(file_handle)
+      
+      super$initialize()
+    },
+    
+    end_test = function(context, test) {
+      super$end_test(context, test)
+      this_result <- super$get_results()
+      
+      # get last result
+      this_result <- this_result[[length(this_result)]]
+      
+      # write to file
+      file_handle <- file(private$to_file, "a")
+      base::writeLines(con = file_handle,
+                 text = paste(this_result$test, 
+                              this_result$user, 
+                              this_result$system, 
+                              this_result$real, 
+                              sep =","))
+      close(file_handle)
+    }
+  ),
+                                  
+  private = list(
+    to_file=NULL
+  )
+)
