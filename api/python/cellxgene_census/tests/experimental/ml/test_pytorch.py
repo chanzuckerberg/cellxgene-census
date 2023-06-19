@@ -1,6 +1,6 @@
 import pathlib
 import sys
-from typing import Callable, List, Optional, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Union
 
 import numpy as np
 import pyarrow as pa
@@ -22,8 +22,11 @@ except ImportError:
     pass
 
 
-def pytorch_x_value_gen(shape: Tuple[int, int]) -> spmatrix:
-    checkerboard_of_ones = coo_matrix(np.indices(shape).sum(axis=0) % 2)
+def pytorch_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
+    occupied_shape = (obs_range.stop - obs_range.start, var_range.stop - var_range.start)
+    checkerboard_of_ones = coo_matrix(np.indices(occupied_shape).sum(axis=0) % 2)
+    checkerboard_of_ones.row += obs_range.start
+    checkerboard_of_ones.col += var_range.start
     return checkerboard_of_ones
 
 
@@ -42,22 +45,23 @@ def varp_layer_names() -> Optional[List[str]]:
     return None
 
 
-@pytest.fixture
-def X_value_gen() -> Callable[[Tuple[int, int]], sparse.spmatrix]:
-    def _x_value_gen(shape: Tuple[int, int]) -> sparse.coo_matrix:
-        return sparse.random(
-            shape[0],
-            shape[1],
-            density=0.1,
-            format="coo",
-            dtype=np.float32,
-            random_state=np.random.default_rng(),
-        )
+# @pytest.fixture
+# def X_value_gen() -> Callable[int, range], Union[int, range]]], sparse.spmatrix]:
+#     def _x_value_gen(shape: Tuple[Union[int, range], Union[int, range]]) -> sparse.coo_matrix:
+#         return sparse.random(
+#             shape[0],
+#             shape[1],
+#             density=0.1,
+#             format="coo",
+#             dtype=np.float32,
+#             random_state=np.random.default_rng(),
+#         )
+#
+#     return _x_value_gen
+#
 
-    return _x_value_gen
 
-
-def add_dataframe(coll: CollectionBase, key: str, sz: int) -> None:
+def add_dataframe(coll: CollectionBase, key: str, value_range: range) -> None:
     df = coll.add_new_dataframe(
         key,
         schema=pa.schema(
@@ -71,55 +75,62 @@ def add_dataframe(coll: CollectionBase, key: str, sz: int) -> None:
     df.write(
         pa.Table.from_pydict(
             {
-                "soma_joinid": [i for i in range(sz)],
-                "label": [str(i) for i in range(sz)],
+                "soma_joinid": list(value_range),
+                "label": [str(i) for i in value_range],
             }
         )
     )
 
 
 def add_sparse_array(
-    coll: CollectionBase, key: str, shape: Tuple[int, int], value_gen: Callable[[Tuple[int, int]], sparse.spmatrix]
+    coll: CollectionBase,
+    key: str,
+    obs_range: range,
+    var_range: range,
+    value_gen: Callable[[range, range], spmatrix],
 ) -> None:
-    a = coll.add_new_sparse_ndarray(key, type=pa.float32(), shape=shape)
-    tensor = pa.SparseCOOTensor.from_scipy(value_gen(shape))
+    a = coll.add_new_sparse_ndarray(key, type=pa.float32(), shape=(obs_range.stop, var_range.stop))
+    tensor = pa.SparseCOOTensor.from_scipy(value_gen(obs_range, var_range))
     a.write(tensor)
 
 
 @pytest.fixture(scope="function")
 def soma_experiment(
     tmp_path: pathlib.Path,
-    n_obs: int,
-    n_vars: int,
-    X_layer_names: Sequence[str],
-    X_value_gen: Callable[[Tuple[int, int]], sparse.spmatrix],
+    obs_range: Union[int, range],
+    var_range: Union[int, range],
+    X_value_gen: Callable[[range, range], sparse.spmatrix],
     obsp_layer_names: Sequence[str],
     varp_layer_names: Sequence[str],
 ) -> soma.Experiment:
     with soma.Experiment.create((tmp_path / "exp").as_posix()) as exp:
-        add_dataframe(exp, "obs", n_obs)
+        if isinstance(obs_range, int):
+            obs_range = range(obs_range)
+        if isinstance(var_range, int):
+            var_range = range(var_range)
+
+        add_dataframe(exp, "obs", obs_range)
         ms = exp.add_new_collection("ms")
         rna = ms.add_new_collection("RNA", soma.Measurement)
-        add_dataframe(rna, "var", n_vars)
+        add_dataframe(rna, "var", var_range)
         rna_x = rna.add_new_collection("X", soma.Collection)
-        for X_layer_name in X_layer_names:
-            add_sparse_array(rna_x, X_layer_name, (n_obs, n_vars), X_value_gen)
+        add_sparse_array(rna_x, "raw", obs_range, var_range, X_value_gen)
 
         if obsp_layer_names:
             obsp = rna.add_new_collection("obsp")
             for obsp_layer_name in obsp_layer_names:
-                add_sparse_array(obsp, obsp_layer_name, (n_obs, n_obs), X_value_gen)
+                add_sparse_array(obsp, obsp_layer_name, obs_range, var_range, X_value_gen)
 
         if varp_layer_names:
             varp = rna.add_new_collection("varp")
             for varp_layer_name in varp_layer_names:
-                add_sparse_array(varp, varp_layer_name, (n_vars, n_vars), X_value_gen)
+                add_sparse_array(varp, varp_layer_name, obs_range, var_range, X_value_gen)
     return _factory.open((tmp_path / "exp").as_posix())
 
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_non_batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"]
@@ -133,7 +144,7 @@ def test_non_batched(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
@@ -153,8 +164,21 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(range(100_000_000, 100_000_003), 3, pytorch_x_value_gen)])
+def test_unique_soma_joinids(soma_experiment: Experiment) -> None:
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
+    )
+
+    soma_joinids = np.concatenate([batch[1][:, 0].numpy() for batch in exp_data_pipe])
+
+    assert len(np.unique(soma_joinids)) == len(soma_joinids)
+
+
+@pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(5, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(5, 3, pytorch_x_value_gen)])
 def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
@@ -171,7 +195,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
@@ -188,7 +212,7 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
@@ -206,7 +230,7 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
@@ -224,7 +248,7 @@ def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_sparse_output__batched(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
@@ -243,7 +267,7 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_encoders(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
@@ -267,7 +291,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
     (sys.version_info.major, sys.version_info.minor) == (3, 9), reason="fails intermittently with OOM error for 3.9"
 )
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(
         soma_experiment,
@@ -285,7 +309,7 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dl = experiment_dataloader(dp)
@@ -298,7 +322,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(6, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
@@ -325,7 +349,7 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
 def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
@@ -337,7 +361,7 @@ def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(10, 1, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
 def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dp = dp.shuffle()
@@ -353,7 +377,7 @@ def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("n_obs,n_vars,X_layer_names,X_value_gen", [(3, 3, ("raw",), pytorch_x_value_gen)])
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experiment) -> None:
     """
     If the DataPipe is accessed prior to multiprocessing (num_workers > 0), its internal _query will be
