@@ -148,10 +148,10 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
             obs_encoded[col] = enc.transform(obs[col])
 
         # `as_tensor()` avoids copying the numpy array data
-        obs_tensor = torch.as_tensor(obs_encoded.to_numpy(dtype=np.int32))
+        obs_tensor = torch.from_numpy(obs_encoded.to_numpy(dtype=np.int32))
 
         if not self.sparse_X:
-            X_tensor = torch.as_tensor(X.todense())
+            X_tensor = torch.from_numpy(X.todense())
         else:
             coo = X.tocoo()
 
