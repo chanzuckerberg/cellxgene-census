@@ -131,13 +131,8 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         while len(obs) < self.batch_size:
             try:
                 obs_partial, X_partial = self._read_partial_torch_batch(self.batch_size)
-                if X is None:
-                    obs = obs_partial
-                    X = X_partial
-                else:
-                    obs = pd.concat([obs, obs_partial], axis=0)
-                    X = sparse.vstack([X, X_partial])
-
+                obs = pd.concat([obs, obs_partial], axis=0)
+                X = sparse.vstack([X, X_partial])
             except StopIteration:
                 break
 
@@ -145,20 +140,22 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
             raise StopIteration
 
         obs_encoded = pd.DataFrame(
-            data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int32, index=obs.index
+            data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int64, index=obs.index
         )
         for col, enc in self.encoders.items():
             obs_encoded[col] = enc.transform(obs[col])
 
-        obs_tensor = torch.Tensor(obs_encoded.to_numpy()).int()
+        # `as_tensor()` avoids copying the numpy array data
+        obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
+
         if not self.sparse_X:
-            X_tensor = torch.Tensor(X.todense())
+            X_tensor = torch.from_numpy(X.todense())
         else:
             coo = X.tocoo()
 
             X_tensor = torch.sparse_coo_tensor(
                 # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
-                indices=torch.Tensor(np.array([coo.row, coo.col])),
+                indices=torch.from_numpy(np.array([coo.row, coo.col])),
                 values=coo.data,
                 size=coo.shape,
             )
@@ -172,9 +169,16 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
     def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, sparse.csr_matrix]:
         safe_batch_size = min(batch_size, len(self.obs_batch) - self.i)
         slice_ = slice(self.i, self.i + safe_batch_size)
+        assert slice_.stop <= self.obs_batch_.shape[0]
+
         obs_rows = self.obs_batch.iloc[slice_]
+        assert obs_rows["soma_joinid"].is_unique
         X_csr_scipy = self.X_batch[slice_]
+        assert safe_batch_size == obs_rows.shape[0]
+        assert obs_rows.shape[0] == X_csr_scipy.shape[0]
+
         self.i += safe_batch_size
+
         return obs_rows, X_csr_scipy
 
     @property
@@ -191,13 +195,14 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
         pytorch_logger.debug("Retrieving next TileDB-SOMA batch...")
         start_time = time()
-        # If no more batch to iterate through, raise StopIteration, as all iterators do when at end
+        # If no more batches to iterate through, raise StopIteration, as all iterators do when at end
         obs_table = next(self.obs_tables_iter)
         self.obs_batch_ = obs_table.to_pandas()
         # handle case of empty result (first batch has 0 rows)
         if len(self.obs_batch_) == 0:
             raise StopIteration
         self.X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
+        assert self.obs_batch_.shape[0] == self.X_batch.shape[0]
         self.i = 0
         self.stats.n_obs += self.X_batch.shape[0]
         self.stats.nnz += self.X_batch.nnz
@@ -214,7 +219,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     tuples of PyTorch ``Tensor`` objects.
 
     >>> (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
-        tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
+        tensor([2415,    0,    0], dtype=torch.int64)) # obs data, encoded
 
     Supports batching via `batch_size` param:
 
@@ -224,7 +229,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
                  [0., 0., 0., 0., 0., 0., 0., 0., 0.]]),
          tensor([[2415,    0,    0],                       # obs batch
                  [2416,    0,    4],
-                 [2417,    0,    3]], dtype=torch.int32))
+                 [2417,    0,    3]], dtype=torch.int64))
 
     Obs attribute values are encoded as categoricals. Values can be decoded by obtaining the encoder for a given
     attribute:
@@ -250,8 +255,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     def __init__(
         self,
         experiment: soma.Experiment,
-        measurement_name: str,
-        X_name: str,
+        measurement_name: str = "raw",
+        X_name: str = "X",
         obs_query: Optional[soma.AxisQuery] = None,
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
