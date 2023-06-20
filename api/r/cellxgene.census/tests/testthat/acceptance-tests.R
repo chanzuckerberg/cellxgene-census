@@ -184,6 +184,75 @@ test_that("test_seurat_100K-cells-human", {
                   
 })
 
+test_that("test_seurat_250K-cells-human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_coords = 1:250000
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_500K-cells-human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_coords = 1:500000
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_750K-cells-human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_coords = 1:750000
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_1M-cells-human", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_coords = 1:1e6
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+
 test_that("test_seurat_common-cell-type", {
               
   census <- open_soma_latest_for_test()
