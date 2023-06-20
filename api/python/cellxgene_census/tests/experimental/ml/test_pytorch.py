@@ -45,22 +45,6 @@ def varp_layer_names() -> Optional[List[str]]:
     return None
 
 
-# @pytest.fixture
-# def X_value_gen() -> Callable[int, range], Union[int, range]]], sparse.spmatrix]:
-#     def _x_value_gen(shape: Tuple[Union[int, range], Union[int, range]]) -> sparse.coo_matrix:
-#         return sparse.random(
-#             shape[0],
-#             shape[1],
-#             density=0.1,
-#             format="coo",
-#             dtype=np.float32,
-#             random_state=np.random.default_rng(),
-#         )
-#
-#     return _x_value_gen
-#
-
-
 def add_dataframe(coll: CollectionBase, key: str, value_range: range) -> None:
     df = coll.add_new_dataframe(
         key,
