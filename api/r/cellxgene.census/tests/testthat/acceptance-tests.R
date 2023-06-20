@@ -160,7 +160,7 @@ test_that("test_seurat_10K-cells-human", {
     organism = "Homo sapiens",
     measurement_name = "RNA",
     X_name = "raw",
-    obs_coords = 1:10000,
+    obs_coords = 1:10000
   )
   
   test_seurat(test_args)
@@ -177,7 +177,7 @@ test_that("test_seurat_100K-cells-human", {
     organism = "Homo sapiens",
     measurement_name = "RNA",
     X_name = "raw",
-    obs_coords = 1:100000,
+    obs_coords = 1:100000
   )
   
   test_seurat(test_args)
@@ -194,7 +194,7 @@ test_that("test_seurat_common-cell-type", {
     organism = "Homo sapiens",
     measurement_name = "RNA",
     X_name = "raw",
-    obs_value_filter = "cell_type == 'neuron'",
+    obs_value_filter = "cell_type == 'neuron'"
   )
   
   test_seurat(test_args)
@@ -211,12 +211,7 @@ test_that("test_seurat_common-tissue", {
     organism = "Homo sapiens",
     measurement_name = "RNA",
     X_name = "raw",
-    obs_value_filter = "tissue == 'brain'",
-    obs_coords = NULL,
-    obs_column_names = NULL,
-    var_value_filter = NULL,
-    var_coords = NULL,
-    var_column_names = NULL
+    obs_value_filter = "tissue == 'brain'"
   )
   
   test_seurat(test_args)
@@ -233,7 +228,7 @@ test_that("test_seurat_common-tissue-large-buffer-size", {
     organism = "Homo sapiens",
     measurement_name = "RNA",
     X_name = "raw",
-    obs_value_filter = "tissue == 'brain'",
+    obs_value_filter = "tissue == 'brain'"
   )
   
   test_seurat(test_args)
@@ -249,7 +244,7 @@ test_that("test_seurat_whole-enchilada-large-buffer-size", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
+    X_name = "raw"
   )
   
   test_seurat(test_args)
