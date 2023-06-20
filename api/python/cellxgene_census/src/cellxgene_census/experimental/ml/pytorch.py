@@ -142,13 +142,13 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         assert obs["soma_joinid"].is_unique
 
         obs_encoded = pd.DataFrame(
-            data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int32, index=obs.index
+            data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int64, index=obs.index
         )
         for col, enc in self.encoders.items():
             obs_encoded[col] = enc.transform(obs[col])
 
         # `as_tensor()` avoids copying the numpy array data
-        obs_tensor = torch.from_numpy(obs_encoded.to_numpy(dtype=np.int32))
+        obs_tensor = torch.from_numpy(obs_encoded.to_numpy(dtype=np.int64))
 
         if not self.sparse_X:
             X_tensor = torch.from_numpy(X.todense())
@@ -221,7 +221,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
     tuples of PyTorch ``Tensor`` objects.
 
     >>> (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
-        tensor([2415,    0,    0], dtype=torch.int32)) # obs data, encoded
+        tensor([2415,    0,    0], dtype=torch.int64)) # obs data, encoded
 
     Supports batching via `batch_size` param:
 
@@ -231,7 +231,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
                  [0., 0., 0., 0., 0., 0., 0., 0., 0.]]),
          tensor([[2415,    0,    0],                       # obs batch
                  [2416,    0,    4],
-                 [2417,    0,    3]], dtype=torch.int32))
+                 [2417,    0,    3]], dtype=torch.int64))
 
     Obs attribute values are encoded as categoricals. Values can be decoded by obtaining the encoder for a given
     attribute:
