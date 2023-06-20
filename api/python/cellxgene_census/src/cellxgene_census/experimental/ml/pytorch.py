@@ -539,9 +539,6 @@ if __name__ == "__main__":
         var_query=soma.AxisQuery(coords=(slice(1, 9),)),
         obs_column_names=column_names_arg.split(","),
         batch_size=int(torch_batch_size_arg),
-        # TODO: The amount of required memory is actually a multiple of this value. X data will be retrieved in SOMA batches
-        #  of this size, but multiple batches of X data will retrieved and held in memory for a given batch of obs cells.
-        #  This could be a cell row count instead, which would might make its memory impact clearer.
         soma_buffer_bytes=2**12,
         sparse_X=sparse_X_arg.lower() == "sparse",
     )
