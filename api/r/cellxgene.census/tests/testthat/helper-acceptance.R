@@ -29,5 +29,5 @@ table_iter_is_ok <- function(tbl_iter, stop_after = NULL) {
 test_seurat <- function(get_seurat_args) {
   this_seurat <- do.call(get_seurat, get_seurat_args) 
   expect_true(is(this_seurat, "Seurat"))
-  expect_true(ncol(this_seurat>0))
+  expect_true(ncol(this_seurat) > 0)
 }
