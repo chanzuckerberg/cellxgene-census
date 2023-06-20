@@ -139,8 +139,6 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         if len(obs) == 0:
             raise StopIteration
 
-        assert obs["soma_joinid"].is_unique
-
         obs_encoded = pd.DataFrame(
             data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int64, index=obs.index
         )
