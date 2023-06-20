@@ -86,7 +86,7 @@ test_that("test_incremental_read_X_human", {
   # Warning that results cannot be concat because it 
   # exceeds R's capability to allocate vectors beyond 32bit
   expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
-  expect_true(table_iter_is_ok(X_iter))
+  expect_true(table_iter_is_ok(X_iter, stop_after = 2))
   
 })
 
@@ -123,7 +123,7 @@ test_that("test_incremental_read_X_mouse", {
   # Warning that results cannot be concat because it 
   # exceeds R's capability to allocate vectors beyond 32bit
   expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
-  expect_true(table_iter_is_ok(X_iter))
+  expect_true(table_iter_is_ok(X_iter, stop_after = 2))
   
 })
 

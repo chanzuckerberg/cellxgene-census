@@ -28,6 +28,6 @@ table_iter_is_ok <- function(tbl_iter, stop_after = NULL) {
 # Tests that the object from get_seurat is a non-empty Seurat object
 test_seurat <- function(get_seurat_args) {
   this_seurat <- do.call(get_seurat, get_seurat_args) 
-  expect_true(is(this_seurat, "SeuratObject"))
+  expect_true(is(this_seurat, "Seurat"))
   expect_true(ncol(this_seurat>0))
 }
