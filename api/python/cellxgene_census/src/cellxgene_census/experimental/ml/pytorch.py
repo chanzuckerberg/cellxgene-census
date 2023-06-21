@@ -3,7 +3,7 @@ import os
 import sys
 from datetime import timedelta
 from time import time
-from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, Optional, Sequence, Tuple
 
 import numpy as np
 import numpy.typing as npt
@@ -97,8 +97,8 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
     def __init__(
         self,
-        obs_joinids: List[int],
-        var_joinids: pa.Array,
+        obs_joinids: npt.NDArray[np.int64],
+        var_joinids: npt.NDArray[np.int64],
         exp_uri: str,
         aws_region: Optional[str],
         measurement_name: str,
@@ -145,7 +145,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         for col, enc in self.encoders.items():
             obs_encoded[col] = enc.transform(obs[col])
 
-        # `as_tensor()` avoids copying the numpy array data
+        # `to_numpy()` avoids copying the numpy array data
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
         if not self.sparse_X:
@@ -240,11 +240,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         experimental
     """
 
-    _query: Optional[soma.ExperimentAxisQuery]
-    """In multi-processing mode (i.e. num_workers > 0), this ``ExperimentAxisQuery`` object will *not* be pickled; 
-    each worker will instantiate a new query"""
+    _initialized: bool
 
-    _obs_joinids_partitioned: Optional[npt.NDArray[np.int64]] = None
+    _obs_joinids: Optional[npt.NDArray[np.int64]]
+
+    _var_joinids: Optional[npt.NDArray[np.int64]]
 
     _encoders: Optional[Encoders]
 
@@ -286,83 +286,86 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         # TODO: This will control the SOMA batch sizes, and could be replaced with a row count once TileDB-SOMA
         #  supports `batch_size` param. It affects both the obs and X read operations.
         self.soma_buffer_bytes = soma_buffer_bytes
-        self._query = None
         self._stats = Stats()
         self._encoders = None
+        self._obs_joinids = None
+        self._var_joinids = None
+        self._initialized = False
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
 
     def _init(self) -> None:
-        if self._query is not None:
+        if self._initialized:
             return
+
+        pytorch_logger.debug("Initializing ExperimentDataPipe")
 
         # TODO: support multiple layers, per somacore.query.query.ExperimentAxisQuery.to_anndata()
         # TODO: handle closing of `_query` (and transitively, `exp`) when iterator is no longer in use; may need be used as a ContextManager,
         #  but not clear how we can do that when used by DataLoader
         exp = _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes)
 
-        self._query = exp.axis_query(
+        query = exp.axis_query(
             measurement_name=self.measurement_name,
             obs_query=self.obs_query,
             var_query=self.var_query,
         )
 
-        obs_joinids = self._query.obs_joinids()
+        # The to_numpy() call is a workaround for a possible bug in TileDB-SOMA:
+        # https://github.com/single-cell-data/TileDB-SOMA/issues/1456
+        self._obs_joinids = query.obs_joinids().to_numpy()
+        self._var_joinids = query.var_joinids().to_numpy()
 
-        self._encoders = self._build_obs_encoders()
+        self._encoders = self._build_obs_encoders(query)
 
+        self._initialized = True
+
+    @staticmethod
+    def _partition_obs_joinids(ids: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
+        # NOTE: Can alternately use a `worker_init_fn` to split among workers split workload
         worker_info = torch.utils.data.get_worker_info()
-        if worker_info:
-            # multi-processing mode
 
-            if worker_info.num_workers > 0 and self.sparse_X:
-                raise NotImplementedError(
-                    "torch does not work with sparse tensors in multi-processing mode "
-                    "(see https://github.com/pytorch/pytorch/issues/20248)"
-                )
+        if worker_info is None or worker_info.num_workers < 2:
+            return ids
 
-            partition, num_partitions = worker_info.id, worker_info.num_workers
+        partition, num_partitions = worker_info.id, worker_info.num_workers
 
-        else:
-            partition, num_partitions = 0, 1
+        partition_size = len(ids) // num_partitions
+        partition_start = partition_size * partition
+        partition_end_excl = min(len(ids), partition_start + partition_size)
+        ids = ids[partition_start:partition_end_excl]
 
-        if num_partitions is not None:
-            # partitioned data loading
-            # NOTE: Can alternately use a `worker_init_fn` to split among workers split workload
-            partition_size = len(obs_joinids) // num_partitions
-            partition_start = partition_size * partition
-            partition_end_excl = min(len(obs_joinids), partition_start + partition_size)
-            # The to_numpy() call is a workaround for a possible bug in TileDB-SOMA:
-            # https://github.com/single-cell-data/TileDB-SOMA/issues/1456
-            self._obs_joinids_partitioned = obs_joinids[partition_start:partition_end_excl].to_numpy()
+        if pytorch_logger.isEnabledFor(logging.DEBUG):
+            if len(ids) > 0:
+                joinids_start = ids[0]
+                joinids_end = ids[-1]
+            else:
+                joinids_start = joinids_end = 0
 
-            if pytorch_logger.isEnabledFor(logging.DEBUG):
-                if self._obs_joinids_partitioned is not None and len(self._obs_joinids_partitioned) > 0:
-                    joinids_start = self._obs_joinids_partitioned[0]
-                    joinids_end = self._obs_joinids_partitioned[-1]
-                else:
-                    joinids_start = joinids_end = 0
+            pytorch_logger.debug(
+                f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
+                f"index range={partition_start}:{partition_end_excl}, "
+                f"soma_joinid range={joinids_start}:{joinids_end}, "
+                f"{partition_size:}"
+            )
 
-                pytorch_logger.debug(
-                    f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
-                    f"index range={partition_start}:{partition_end_excl}, "
-                    f"soma_joinid range={joinids_start}:{joinids_end}, "
-                    f"{partition_size:}"
-                )
+        return ids
 
     def __iter__(self) -> Iterator[ObsDatum]:
-        # TODO: avoid re-initializing query if in multi-processing mode, when _obs_joinids_partitioned is set. will need to cache var_joinids for serialization
         self._init()
-        assert self._query is not None
+        assert self._obs_joinids is not None
+        assert self._var_joinids is not None
 
-        obs_joinids = (
-            self._obs_joinids_partitioned if self._obs_joinids_partitioned is not None else self._query.obs_joinids()
-        )
+        if self.sparse_X and torch.utils.data.get_worker_info() and torch.utils.data.get_worker_info().num_workers > 0:
+            raise NotImplementedError(
+                "torch does not work with sparse tensors in multi-processing mode "
+                "(see https://github.com/pytorch/pytorch/issues/20248)"
+            )
 
         return _ObsAndXIterator(
-            obs_joinids=obs_joinids,
-            var_joinids=self._query.var_joinids(),
+            obs_joinids=self._partition_obs_joinids(self._obs_joinids),
+            var_joinids=self._var_joinids,
             exp_uri=self.exp_uri,
             aws_region=self.aws_region,
             measurement_name=self.measurement_name,
@@ -377,24 +380,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
     def __len__(self) -> int:
         self._init()
-        assert self._query is not None
+        assert self._obs_joinids is not None
 
-        return int(self._query.n_obs)
+        return len(self._obs_joinids)
 
     def __getitem__(self, index: int) -> ObsDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
 
-    def __getstate__(self) -> Dict[str, Any]:
-        state = self.__dict__.copy()
-        # Don't pickle `_query`
-        del state["_query"]
-        return state
-
-    def __setstate__(self, state: Dict[str, Any]) -> None:
-        self.__dict__.update(state)
-        self._query = None
-
-    def _build_obs_encoders(self) -> Encoders:
+    def _build_obs_encoders(self, query: soma.ExperimentAxisQuery) -> Encoders:
         """
         Returns the encoders that were used to encode obs column values and that are needed to decode them.
 
@@ -404,22 +397,17 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         Lifecycle:
             experimental
         """
-        if self._encoders is not None:
-            return self._encoders
+        pytorch_logger.debug("Initializing encoders")
 
-        self._init()
-        assert self._query is not None
-
-        pytorch_logger.debug("initializing encoders")
-        obs = self._query.obs(column_names=self.obs_column_names).concat()
-        self._encoders = {}
+        obs = query.obs(column_names=self.obs_column_names).concat()
+        encoders = {}
         for col in self.obs_column_names:
             if obs[col].type in (pa.string(), pa.large_string()):
                 enc = LabelEncoder()
                 enc.fit(obs[col].combine_chunks().unique())
-                self._encoders[col] = enc
+                encoders[col] = enc
 
-        return self._encoders
+        return encoders
 
     def stats(self) -> Stats:
         """
@@ -450,9 +438,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             experimental
         """
         self._init()
-        assert self._query is not None
+        assert self._obs_joinids is not None
+        assert self._var_joinids is not None
 
-        return self._query.n_obs, self._query.n_vars
+        return len(self._obs_joinids), len(self._var_joinids)
 
     @property
     def obs_encoders(self) -> Encoders:
