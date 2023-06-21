@@ -3,6 +3,7 @@ import logging
 import os
 import pathlib
 import sys
+from typing import Callable, Sequence
 
 import s3fs
 
@@ -38,38 +39,96 @@ def main() -> int:
     # Process initialization/setup must be done early. NOTE: do NOT log before this line!
     process_init(build_args)
 
-    # Return process exit code (or raise, which exits with a code of `1`)
-    return do_build(build_args, skip_completed_steps=cli_args.test_resume)
+    command = os.getenv("CENSUS_BUILD_COMMAND")
+    if command == "build":
+        return do_build(build_args)
+    elif command == "replicate":
+        return do_replicate(build_args)
+    elif command == "release":
+        return do_release(build_args)
+    elif command == "sync-release":
+        return do_sync_release(build_args)
+    elif command == "pass":
+        return 0  # Used for testing
+    else:
+        return do_full_build(build_args, skip_completed_steps=cli_args.test_resume)
 
 
-def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
+def do_build(args: CensusBuildArgs) -> int:
+    """
+    Performs a build of the census and stores the artifact on the primary bucket.
+    No release or cleanup is performed.
+    """
+    logging.info(f"Census build: start [version={__version__}]")
+    logging.info(args)
+    build_steps = [
+        do_prebuild_set_defaults,
+        do_prebuild_checks,
+        do_build_soma,
+        do_validate_soma,
+        do_create_reports,
+        do_data_copy,
+        do_report_copy,
+        do_log_copy,
+    ]
+    rv = _do_build(build_steps, args)
+    logging.info("Census build: completed")
+    return rv
+
+
+def do_release(args: CensusBuildArgs) -> int:
+    """
+    Performs a release of the census.
+    """
+    return _do_build([do_the_release], args)
+
+
+def do_replicate(args: CensusBuildArgs) -> int:
+    """
+    Syncs the census from the primary bucket to the replica bucket.
+    """
+    return _do_build([do_sync_artifact_to_replica_s3_bucket], args)
+
+
+def do_sync_release(args: CensusBuildArgs) -> int:
+    """
+    Syncs the census from the primary bucket to the replica bucket.
+    """
+    return _do_build([do_sync_release_file_to_replica_s3_bucket], args)
+
+
+def do_full_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
+    """
+    Performs a full build of the census, including the release.
+    """
+    logging.info(f"Census full build: start [version={__version__}]")
+    logging.info(args)
+    build_steps = [
+        do_prebuild_set_defaults,
+        do_prebuild_checks,
+        do_build_soma,
+        do_validate_soma,
+        do_create_reports,
+        do_data_copy,
+        do_the_release,
+        do_report_copy,
+        do_old_release_cleanup,
+        do_log_copy,
+    ]
+    rv = _do_build(build_steps, args, skip_completed_steps)
+    logging.info("Census full build: completed")
+    return rv
+
+
+def _do_build(
+    build_steps: Sequence[Callable[[CensusBuildArgs], bool]], args: CensusBuildArgs, skip_completed_steps: bool = False
+) -> int:
     """
     Top-level build sequence.
 
     Built steps will be executed in order. Build will stop if a build step returns non-zero
     exit code or raises.
     """
-    logging.info(f"Census build: start [version={__version__}]")
-    logging.info(args)
-
-    # Infer steps from environment variables, if provided
-    if os.getenv("CENSUS_BUILD_STEPS"):
-        steps = os.getenv("CENSUS_BUILD_STEPS", "").split(",")
-        build_steps = [globals()[step] for step in steps]
-        logging.info(f"Census build: using steps {steps}")
-    else:
-        build_steps = [
-            do_prebuild_set_defaults,
-            do_prebuild_checks,
-            do_build_soma,
-            do_validate_soma,
-            do_create_reports,
-            do_data_copy,
-            do_the_release,
-            do_report_copy,
-            do_old_release_cleanup,
-            do_log_copy,
-        ]
     try:
         for n, build_step in enumerate(build_steps, start=1):
             step_n_of = f"Build step {build_step.__name__} [{n} of {len(build_steps)}]"
@@ -85,8 +144,6 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
             args.state[build_step.__name__] = True
             args.state.commit(args.working_dir / CENSUS_BUILD_STATE)
             logging.info(f"{step_n_of}: complete")
-
-        logging.info("Census build: completed")
 
     except Exception:
         logging.critical("Caught exception, exiting", exc_info=True)
@@ -225,8 +282,23 @@ def do_log_copy(args: CensusBuildArgs) -> bool:
     return True
 
 
-def do_sync_to_external_s3_bucket(args: CensusBuildArgs) -> bool:
-    """Copy data to external S3 bucket"""
+def do_sync_release_file_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
+    """Copy release.json to replica S3 bucket"""
+    from .data_copy import sync_to_S3_remote
+
+    source_key = urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "release.json")
+    dest_key = urlcat(args.config.cellxgene_census_S3_remote_path, args.build_tag, "release.json")
+
+    sync_to_S3_remote(
+        source_key,
+        dest_key,
+        dryrun=args.config.dryrun,
+    )
+    return True
+
+
+def do_sync_artifact_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
+    """Copy data to replica S3 bucket"""
     from .data_copy import sync_to_S3_remote
 
     sync_to_S3_remote(
