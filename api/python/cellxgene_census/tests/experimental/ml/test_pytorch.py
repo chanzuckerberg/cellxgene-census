@@ -266,7 +266,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
     assert isinstance(batch[1], Tensor)
 
     labels_encoded = batch[1][:, 1]
-    labels_decoded = exp_data_pipe.obs_encoders()["label"].inverse_transform(labels_encoded)
+    labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
     assert labels_decoded.tolist() == ["0", "1", "2"]
 
 
@@ -376,7 +376,7 @@ def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experimen
         obs_column_names=["label"],
     )
     dl = experiment_dataloader(dp, num_workers=1)  # multiprocessing used when num_workers > 0
-    dp.obs_encoders()  # trigger query building
+    dp.obs_encoders.keys()  # trigger query building
     row = next(iter(dl))  # trigger multiprocessing
 
     assert row is not None

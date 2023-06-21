@@ -310,6 +310,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         obs_joinids = self._query.obs_joinids()
 
+        self._encoders = self._build_obs_encoders()
+
         worker_info = torch.utils.data.get_worker_info()
         if worker_info:
             # multi-processing mode
@@ -366,7 +368,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
             measurement_name=self.measurement_name,
             X_layer_name=self.layer_name,
             batch_size=self.batch_size,
-            encoders=self.obs_encoders(),
+            encoders=self.obs_encoders,
             stats=self._stats,
             obs_column_names=self.obs_column_names,
             sparse_X=self.sparse_X,
@@ -392,7 +394,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self.__dict__.update(state)
         self._query = None
 
-    def obs_encoders(self) -> Encoders:
+    def _build_obs_encoders(self) -> Encoders:
         """
         Returns the encoders that were used to encode obs column values and that are needed to decode them.
 
@@ -408,6 +410,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         self._init()
         assert self._query is not None
 
+        pytorch_logger.debug("initializing encoders")
         obs = self._query.obs(column_names=self.obs_column_names).concat()
         self._encoders = {}
         for col in self.obs_column_names:
@@ -450,6 +453,13 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
         assert self._query is not None
 
         return self._query.n_obs, self._query.n_vars
+
+    @property
+    def obs_encoders(self) -> Encoders:
+        self._init()
+        assert self._encoders is not None
+
+        return self._encoders
 
 
 # Note: must be a top-level function (and not a lambda), to play nice with multiprocessing pickling
