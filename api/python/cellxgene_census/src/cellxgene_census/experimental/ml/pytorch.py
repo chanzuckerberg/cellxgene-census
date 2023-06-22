@@ -142,6 +142,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         obs_encoded = pd.DataFrame(
             data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int64, index=obs.index
         )
+        # TODO: Encode the entire SOMA batch at once in _read_partial_torch_batch()
         for col, enc in self.encoders.items():
             obs_encoded[col] = enc.transform(obs[col])
 
