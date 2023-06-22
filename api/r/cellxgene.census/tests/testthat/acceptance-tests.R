@@ -86,7 +86,7 @@ test_that("test_incremental_read_X_human", {
   # Warning that results cannot be concat because it 
   # exceeds R's capability to allocate vectors beyond 32bit
   expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
-  expect_true(table_iter_is_ok(X_iter, stop_after = 2))
+  expect_true(table_iter_is_ok(X_iter))
   
 })
 
@@ -123,7 +123,7 @@ test_that("test_incremental_read_X_mouse", {
   # Warning that results cannot be concat because it 
   # exceeds R's capability to allocate vectors beyond 32bit
   expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
-  expect_true(table_iter_is_ok(X_iter, stop_after = 2))
+  expect_true(table_iter_is_ok(X_iter))
   
 })
 
@@ -252,24 +252,6 @@ test_that("test_seurat_1M-cells-human", {
                   
 })
 
-
-test_that("test_seurat_common-cell-type", {
-              
-  census <- open_soma_latest_for_test()
-  on.exit(census$close(), add = TRUE)
-  
-  test_args <- list(
-    census = census,
-    organism = "Homo sapiens",
-    measurement_name = "RNA",
-    X_name = "raw",
-    obs_value_filter = "cell_type == 'neuron'"
-  )
-  
-  test_seurat(test_args)
-                  
-})
-
 test_that("test_seurat_common-tissue", {
               
   census <- open_soma_latest_for_test()
@@ -298,6 +280,40 @@ test_that("test_seurat_common-tissue-large-buffer-size", {
     measurement_name = "RNA",
     X_name = "raw",
     obs_value_filter = "tissue == 'brain'"
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_common-cell-type", {
+              
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_value_filter = "cell_type == 'neuron'"
+  )
+  
+  test_seurat(test_args)
+                  
+})
+
+test_that("test_seurat_common-cell-type-large-buffer-size", {
+              
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+  
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    X_name = "raw",
+    obs_value_filter = "cell_type == 'neuron'"
   )
   
   test_seurat(test_args)
