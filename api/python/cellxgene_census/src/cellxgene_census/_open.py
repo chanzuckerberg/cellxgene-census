@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 import certifi
 import s3fs
 import tiledbsoma as soma
+from fsspec.callbacks import TqdmCallback, _DEFAULT_CALLBACK
 
 from ._release_directory import CensusLocator, get_census_version_description
 from ._util import _uri_join
@@ -189,7 +190,9 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     return locator
 
 
-def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
+def download_source_h5ad(
+    dataset_id: str, to_path: str, *, census_version: str = "latest", progress: bool = False
+) -> None:
     """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
     file name.
 
@@ -200,6 +203,8 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
             The file name where the downloaded H5AD will be written.  Must not already exist.
         census_version:
             The census version name. Defaults to `latest`.
+        progress:
+            Display progress bar for downloading if set to True.
 
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite
@@ -227,4 +232,5 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
         anon=True,
         cache_regions=True,
     )
-    fs.get_file(locator["uri"], to_path)
+    callback = TqdmCallback() if progress else _DEFAULT_CALLBACK
+    fs.get_file(locator["uri"], to_path, callback=callback)
