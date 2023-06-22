@@ -37,14 +37,14 @@ def X_sparse_iter(
 
     Args:
         query:
-            A SOMA query defining the coordinates over which the iterator will
+            A SOMA ExperimentAxisQuery defining the coordinates over which the iterator will
             read.
         X_name:
             The name of the X layer.
         row_stride:
             The number of rows to return in each step.
         fmt:
-            The SciPy sparse array layout, either 'csr' or 'csc'
+            The SciPy sparse array layout. Only 'csr' is currently supported.
         be_eager:
             If true, will use multiple threads to parallelize reading
             and processing. This will improve speed, but at the cost
