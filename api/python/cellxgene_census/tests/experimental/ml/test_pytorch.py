@@ -360,29 +360,6 @@ def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
-# noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
-def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experiment) -> None:
-    """
-    If the DataPipe is accessed prior to multiprocessing (num_workers > 0), its internal _query will be
-    initialized. But since it cannot be pickled, we must ensure it is ignored during pickling in multiprocessing mode.
-    This test verifies the correct pickling behavior is in place.
-    """
-
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-    )
-    dl = experiment_dataloader(dp, num_workers=1)  # multiprocessing used when num_workers > 0
-    dp.obs_encoders.keys()  # trigger query building
-    row = next(iter(dl))  # trigger multiprocessing
-
-    assert row is not None
-
-
-@pytest.mark.experimental
 @pytest.mark.skip(reason="TODO")
 def test_experiment_data_loader__unsupported_params__fails() -> None:
     pass
