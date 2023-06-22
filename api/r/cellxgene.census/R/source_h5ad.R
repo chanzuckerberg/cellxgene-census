@@ -1,7 +1,10 @@
 #' Locate source h5ad file for a dataset.
 #'
 #' @param dataset_id The dataset_id of interest.
-#' @param census_version The census version.
+#' @param census_version The desired Census version.
+#' @param census An open Census handle for `census_version`. If not provided, then
+#'               it will be opened and closed automatically; but it's more efficient
+#'               to reuse a handle if calling `get_source_h5ad_uri()` multiple times.
 #'
 #' @return A list with `uri` and optional `s3_region`.
 #' @importFrom httr parse_url
@@ -9,20 +12,21 @@
 #' @export
 #'
 #' @examples
-get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
+get_source_h5ad_uri <- function(dataset_id, census_version = "stable", census = NULL) {
   description <- get_census_version_description(census_version)
-  census <- open_soma(
-    census_version,
-    uri = description$soma.uri,
-    tiledbsoma_ctx = tiledbsoma::SOMATileDBContext$new(
-      config = c("vfs.s3.region" = description$soma.s3_region)
+  if (is.null(census)) {
+    census <- open_soma(
+      census_version,
+      uri = description$soma.uri,
+      tiledbsoma_ctx = new_SOMATileDBContext_for_census(description)
     )
-  )
+    on.exit(census$close(), add = TRUE)
+  }
 
   dataset <- as.data.frame(
     census$get("census_info")$get("datasets")$read(
       value_filter = paste("dataset_id == '", dataset_id, "'", sep = "")
-    )
+    )$concat()
   )
   stopifnot("Unknown dataset_id" = nrow(dataset) == 1)
   dataset <- as.list(dataset[1, ])
@@ -46,7 +50,10 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
 #' @param dataset_id The dataset_id of interest.
 #' @param file Local file name to store H5AD file.
 #' @param overwrite TRUE to allow overwriting an existing file.
-#' @param census_version The census version.
+#' @param census_version The desired Census version.
+#' @param census An open Census handle for `census_version`. If not provided, then
+#'               it will be opened and closed automatically; but it's more efficient
+#'               to reuse a handle if calling `download_source_h5ad()` multiple times.
 #'
 #' @importFrom httr parse_url
 #' @importFrom aws.s3 save_object
@@ -54,9 +61,9 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "latest") {
 #'
 #' @examples
 download_source_h5ad <- function(dataset_id, file, overwrite = FALSE,
-                                 census_version = "latest") {
+                                 census_version = "stable", census = NULL) {
   stopifnot("specify local filename, not directory" = !dir.exists(file))
-  loc <- get_source_h5ad_uri(dataset_id, census_version = census_version)
+  loc <- get_source_h5ad_uri(dataset_id, census_version = census_version, census = census)
   url <- httr::parse_url(loc$uri)
   stopifnot("only S3 sources supported" = url$scheme == "s3")
 

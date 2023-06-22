@@ -1,4 +1,4 @@
-CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/cellxgene-census/release.json"
+CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json"
 
 
 #' Get release description for given census version
@@ -13,7 +13,10 @@ get_census_version_description <- function(census_version) {
   census_directory <- get_census_version_directory()
   description <- census_directory[census_version, ]
   if (nrow(description) == 0) {
-    stop(paste("unknown Cell Census version:", census_version))
+    stop(paste(
+      "The", census_version, "Census version is not valid.",
+      "Use get_census_version_directory() to retrieve available versions."
+    ))
   }
   ans <- as.list(description)
   ans$census_version <- census_version
@@ -37,6 +40,9 @@ get_census_version_directory <- function() {
     while (is.character(points_at)) {
       points_at <- raw[[points_at]]
     }
+    points_at[["alias"]] <- if (is.character(raw[[field]])) field else ""
+    # ^ that line actually does NOT modify `raw` because points_at is a copy;
+    # https://www.oreilly.com/library/view/r-in-a/9781449358204/ch05s05.html
     raw[[field]] <- points_at
   }
 

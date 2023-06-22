@@ -1,21 +1,62 @@
 Python API
 ==============================
 
+.. currentmodule:: cellxgene_census
+
+.. automodule:: cellxgene_census
+
 Open/retrieve Cell Census data
-----
-.. autofunction:: cellxgene_census.open_soma
-.. autofunction:: cellxgene_census.get_source_h5ad_uri
-.. autofunction:: cellxgene_census.download_source_h5ad
+------------------------------
+
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.open_soma
+    cellxgene_census.get_source_h5ad_uri
+    cellxgene_census.download_source_h5ad
+
 
 Get slice as AnnData
-----
-.. autofunction:: cellxgene_census.get_anndata
+--------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.get_anndata
 
 Feature presence matrix
-----
-.. autofunction:: cellxgene_census.get_presence_matrix
+-----------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.get_presence_matrix
 
 Versioning of Cell Census builds
-----
-.. autofunction:: cellxgene_census.get_census_version_description
-.. autofunction:: cellxgene_census.get_census_version_directory
+--------------------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.get_census_version_description
+    cellxgene_census.get_census_version_directory
+
+Experimental: Machine Learning
+--------------------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.experimental.ml.pytorch.experiment_dataloader
+    cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
+    cellxgene_census.experimental.ml.pytorch.Stats
+
+Experimental: Processing
+--------------------------------
+.. autosummary::
+    :toctree: _autosummary/
+    :nosignatures:
+
+    cellxgene_census.experimental.pp.get_highly_variable_genes
+    cellxgene_census.experimental.pp.highly_variable_genes

@@ -2,18 +2,19 @@
 
 API demonstration code that is part of the documentation should be deposited here: 
 
-- Python notebooks [`cell-census/api/python/notebooks`](https://github.com/chanzuckerberg/cell-census/tree/main/api/python/notebooks)
-- R vignettes [`cell-census/api/r/CellCensus/vignettes`](https://github.com/chanzuckerberg/cell-census/tree/main/api/r/CellCensus/vignettes)
+- Python notebooks [`cellxgene-census/api/python/notebooks`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks)
+- R vignettes [`cellxgene-census/api/r/CellCensus/vignettes`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes)
 
+To include Python notebooks in the doc site, create a symlink to the notebook in [cellxgene-census/docs/notebooks/](https://github.com/chanzuckerberg/cellxgene-census/tree/main/docs/notebooks) folder.
 
-These assets are user-facing and are automatically rendered to the doc-sites, they are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
+These assets are user-facing and are automatically rendered to the doc-sites and are one of the primary means by which users get onboarded to the product. Thus the following guidelines need to be followed to ensure readability and a consistent experience.
 
 ## Guidelines
 
 ### Title
 
 * It must use the highest-level markdown header `#`.
-* Unless needed, it should not contain "Cell Census".
+* Unless needed, it should not contain any direct mentions of "Census".
 * It should be concise, self-explanatory, and if possible indicate an action.
 
 Examples:
@@ -31,19 +32,19 @@ Examples:
 Introductory text must be included right underneath the title.
 
 * It must provide a one paragraph summary of the notebook's goals.
-* It must not contain an explanation of the Cell Census.
+* It must not contain an explanation of the Census.
 
 Examples: 
 
 :white_check_mark:
 
-> This notebook provides a demonstration for integrating two Cell Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Cell Census can inform data integration.
+> This notebook provides a demonstration for integrating two Census datasets using scvi-tools. The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.
 
-:x: *it contains a long explanation of what the Cell Census is, and the goal is not clear*
+:x: *it contains a long explanation of what the Census is, and the goal is not clear*
 
-> The Cell Census is a versioned container for the single-cell data hosted at CELLxGENE Discover. The Cell Census utilizes SOMA powered by TileDB for storing, accessing, and efficiently filtering data.
+> The Census is a versioned container for the single-cell data hosted at CELLxGENE Discover. The Census utilizes SOMA powered by TileDB for storing, accessing, and efficiently filtering data.
 >
->This notebook shows you how to learn about the Cell Census contents and how to query it.
+>This notebook shows you how to learn about the Census contents and how to query it.
 
 ### Table of Contents 
 
@@ -60,7 +61,7 @@ Example:
 > **Contents**
 > 
 > 1. Learning about the lung data.
-> 2. Fetching all human lung data from the Cell Census.
+> 2. Fetching all human lung data from the Census.
 > 3. Obtaining QC metrics for this data slice.
 
 ### Sections
@@ -79,9 +80,9 @@ The rest of the notebook/vignette content must be organized within sections:
 # Integrating data with SCVI.
 
 This notebook provides a demonstration for integrating two 
-Cell Census datasets using `scvi-tools`. The goal is not to 
+Census datasets using `scvi-tools`. The goal is not to 
 provide an exhaustive guide on proper integration, but to showcase 
-what information in the Cell Census can inform data integration.
+what information in the Census can inform data integration.
 
 **Contents**
 
@@ -98,24 +99,24 @@ what information in the Cell Census can inform data integration.
 Let's load all modules needed for this notebook.
 
 \code
-  import cell_census
+  import cellxgene_census
   import scanpy as sc
   import numpy as np
   import scvi
   from scipy.sparse import csr_matrix
 \code 
 
-Now we can open the Cell Census 
+Now we can open the Census 
 
 \code 
-  census = cell_census.open_soma(census_version="latest")
+  census = cellxgene_census.open_soma(census_version="latest")
 \code
 
 In this notebook we will use Tabula Muris Senis data 
 from the liver as it contains cells from both 10X 
 Genomics and Smart-Seq2 technologies.
 
-Let's query the datasets table of the Cell Census by 
+Let's query the datasets table of the Census by 
 filtering on collection_name for "Tabula Muris Senis" 
 and dataset_title for "liver".
 

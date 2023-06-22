@@ -25,6 +25,8 @@ Install the `cellxgene-census` package via pip:
 pip install -U cellxgene-census
 ```
 
+If installing in a Databricks notebook environment, use `%pip install`. Do not use `%sh pip install`. See the [FAQ](cellxgene_census_docsite_FAQ.md#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks).
+
 ## R
 
 The R package will be soon deposited into R-Universe. In the meantime you can directly install from github using the [devtools](https://devtools.r-lib.org/) R package.

@@ -1,8 +1,5 @@
 [![codecov](https://codecov.io/gh/chanzuckerberg/cellxgene-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cellxgene-census)
 
-:exclamation: **Status:** pre-release, under rapid development.
-
-
 # CZ CELLxGENE Discover Census
 
 

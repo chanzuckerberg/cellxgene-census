@@ -4,12 +4,16 @@
 \alias{get_source_h5ad_uri}
 \title{Locate source h5ad file for a dataset.}
 \usage{
-get_source_h5ad_uri(dataset_id, census_version = "latest")
+get_source_h5ad_uri(dataset_id, census_version = "stable", census = NULL)
 }
 \arguments{
 \item{dataset_id}{The dataset_id of interest.}
 
-\item{census_version}{The census version.}
+\item{census_version}{The desired Census version.}
+
+\item{census}{An open Census handle for \code{census_version}. If not provided, then
+it will be opened and closed automatically; but it's more efficient
+to reuse a handle if calling \code{get_source_h5ad_uri()} multiple times.}
 }
 \value{
 A list with \code{uri} and optional \code{s3_region}.

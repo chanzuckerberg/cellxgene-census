@@ -1,6 +1,6 @@
 # A known-good Cell Census version. This may need updating if the version used
 # is withdrawn for any reason.
-KNOWN_CENSUS_VERSION <- "2023-04-04"
+KNOWN_CENSUS_VERSION <- "2023-05-15" # an LTS version
 KNOWN_CENSUS_URI <- paste(
   "s3://cellxgene-data-public/cell-census/",
   KNOWN_CENSUS_VERSION,
@@ -14,7 +14,7 @@ test_that("get_census_version_description", {
   expect_equal(desc$soma.uri, KNOWN_CENSUS_URI)
 
   # alias resolution
-  desc <- get_census_version_description("latest")
+  desc <- get_census_version_description("stable")
   expect_true(is.list(desc))
   expect_true(is.character(desc$release_build))
   expect_true(is.character(desc$soma.uri))

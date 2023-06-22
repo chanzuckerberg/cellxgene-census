@@ -37,7 +37,7 @@ CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersion
 
 
 # URL for the default top-level directory of all public data
-CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://census.cellxgene.cziscience.com/cellxgene-census/release.json"
+CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json"
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
@@ -54,7 +54,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         KeyError: if unknown census_version value.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     See Also:
         :func:`get_census_version_directory`: returns the entire directory as a dict.
@@ -83,7 +83,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
         A dictionary that contains release names and their corresponding release description.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     See Also:
         :func:`get_census_version_description`: get description by census_version.

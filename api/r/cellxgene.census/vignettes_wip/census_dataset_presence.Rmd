@@ -1,0 +1,138 @@
+---
+title: "Genes measured in each cell (dataset presence matrix)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Genes measured in each cell (dataset presence matrix)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 80)
+```
+
+<!--
+THIS VIGNETTE IS BASED ON:
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_dataset_presence.ipynb
+-->
+
+The Census is a compilation of cells from multiple datasets that may differ by the sets of genes they measure. This notebook describes the way to identify the genes measured per dataset.
+
+The presence matrix is a sparse boolean array, indicating which features (var) were present in each dataset. The array has dimensions [n_datasets, n_var], and is stored in the SOMA Measurement `varp` collection. The first dimension is indexed by the `soma_joinid` in the `census_datasets` dataframe. The second is indexed by the `soma_joinid` in the `var` dataframe of the measurement.
+
+As a reminder the `obs` data frame has a column `dataset_id` that can be used to link any cell in the Census to the presence matrix.
+
+Contents
+
+1. Opening the Census.
+2. Fetching the IDs of the Census datasets.
+3. Fetching the dataset presence matrix.
+4. Identifying genes measured in a specific dataset.
+5. Identifying datasets that measured specific genes.
+6. Identifying all genes measured in a dataset.
+
+## Opening the Census
+
+The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
+
+```{r}
+census <- cellxgene.census::open_soma()
+```
+
+## Fetching the IDs of the Census datasets
+
+Let's grab a table of all the datasets included in the Census and use this table in combination with the presence matrix below.
+
+```{r}
+# Grab the experiment containing human data, and the measurement therein with RNA
+human <- census$get("census_data")$get("homo_sapiens")
+human_rna <- human$ms$get("RNA")
+
+# The census-wide datasets
+datasets_df <- as.data.frame(census$get("census_info")$get("datasets")$read()$concat())
+print(datasets_df)
+```
+
+## Fetching the dataset presence matrix
+
+Now let's fetch the dataset presence matrix.
+
+For convenience, read the entire presence matrix (for Homo sapiens) into a sparse matrix. There is a convenience API providing this capability:
+
+```{r}
+presence_matrix <- cellxgene.census::get_presence_matrix(census, "Homo sapiens", "RNA")
+print(dim(presence_matrix))
+```
+
+We also need the `var` dataframe, which is read into an R data frame for convenient manipulation:
+
+```{r}
+var_df <- as.data.frame(human_rna$var$read()$concat())
+print(var_df)
+```
+
+## Identifying genes measured in a specific dataset
+
+Now that we have the dataset table, the genes metadata table, and the dataset presence matrix, we can check if a gene or set of genes were measured in a specific dataset.
+
+**Important:** the presence matrix is indexed by `soma_joinid`, and is *NOT* positionally indexed. In other words:
+
+- the first dimension of the presence matrix is the dataset's `soma_joinid`, as stored in the `census_datasets` dataframe.
+- the second dimension of the presence matrix is the feature's `soma_joinid`, as stored in the `var` dataframe.
+
+Let's find out if the the gene `"ENSG00000286096"` was measured in the dataset with id `"97a17473-e2b1-4f31-a544-44a60773e2dd"`.
+
+```{r}
+var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
+dataset_joinid <- datasets_df$soma_joinid[datasets_df$dataset_id == "97a17473-e2b1-4f31-a544-44a60773e2dd"]
+is_present <- presence_matrix$take(dataset_joinid, var_joinid)$get_one_based_matrix()[, , drop = TRUE]
+cat(paste("Feature is", if (is_present) "present." else "not present."))
+```
+
+## Identifying datasets that measured specific genes
+
+Similarly, we can determine the datasets that measured a specific gene or set of genes.
+
+```{r}
+# Grab the feature's soma_joinid from the var dataframe
+var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
+
+# The presence matrix is indexed by the joinids of the dataset and var dataframes,
+# so slice out the feature of interest by its joinid.
+dataset_joinids <- datasets_df$soma_joinid[
+  presence_matrix$take(j = var_joinid)$get_one_based_matrix()[, , drop = TRUE] != 0
+]
+
+# From the datasets dataframe, slice out the datasets which have a joinid in the list
+print(datasets_df[dataset_joinids, ])
+```
+
+## Identifying all genes measured in a dataset
+
+Finally, we can find the set of genes that were measured in the cells of a given dataset.
+
+```{r}
+# Slice the dataset(s) of interest, and get the joinid(s)
+dataset_joinids <- datasets_df$soma_joinid[datasets_df$collection_id == "17481d16-ee44-49e5-bcf0-28c0780d8c4a"]
+
+# Slice the presence matrix by the first dimension, i.e., by dataset
+var_joinids <- var_df$soma_joinid[
+  which(Matrix::colSums(presence_matrix$take(i = dataset_joinids)$get_one_based_matrix()[, , drop = TRUE]) > 0)
+]
+
+print(var_df[var_joinids, ])
+```
+
+### Close the census
+
+After use, the census object should be closed to release memory and other resources.
+
+```{r}
+census$close()
+```
+
+This also closes all SOMA objects accessed via the top-level `census`. Closing can be automated using `on.exit(census$close(), add = TRUE)` immediately after `census <- open_soma()`.
