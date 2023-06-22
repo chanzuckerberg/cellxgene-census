@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from contextlib import contextmanager
 from datetime import timedelta
 from time import time
 from typing import Any, Dict, Iterator, Optional, Sequence, Tuple
@@ -25,7 +26,7 @@ from torch.utils.data.dataset import Dataset
 import cellxgene_census
 from cellxgene_census._open import _build_soma_tiledb_context
 
-ObsDatum = Tuple[Tensor, Tensor]
+ObsAndXDatum = Tuple[Tensor, Tensor]
 
 Encoders = Dict[str, LabelEncoder]
 
@@ -61,6 +62,7 @@ class Stats:
         )
 
 
+@contextmanager
 def _open_experiment(
     uri: str, aws_region: Optional[str] = None, soma_buffer_bytes: Optional[int] = None
 ) -> soma.Experiment:
@@ -74,10 +76,11 @@ def _open_experiment(
             }
         )
 
-    return soma.Experiment.open(uri, context=context)
+    with soma.Experiment.open(uri, context=context) as exp:
+        yield exp
 
 
-class _ObsAndXIterator(Iterator[ObsDatum]):
+class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     """
     Iterates through a set of obs and related X rows, specified as ``soma_joinid``s. Encapsulates the batch-based data
     fetching from SOMA objects, providing row-based iteration.
@@ -97,34 +100,25 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
     def __init__(
         self,
-        obs_joinids: npt.NDArray[np.int64],
+        X: soma.SparseNDArray,
+        obs_tables_iter: somacore.ReadIter[pa.Table],
         var_joinids: npt.NDArray[np.int64],
-        exp_uri: str,
-        aws_region: Optional[str],
-        measurement_name: str,
-        X_layer_name: str,
         batch_size: int,
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
-        obs_column_names: Sequence[str],
         sparse_X: bool,
-        soma_buffer_bytes: Optional[int] = None,
     ) -> None:
+        self.X = X
+        self.obs_tables_iter = obs_tables_iter
         self.var_joinids = var_joinids
         self.batch_size = batch_size
         self.sparse_X = sparse_X
-
-        # holding reference to SOMA object prevents it from being closed
-        self.exp = _open_experiment(exp_uri, aws_region, soma_buffer_bytes=soma_buffer_bytes)
-        self.X: soma.SparseNDArray = self.exp.ms[measurement_name].X[X_layer_name]
-        self.obs_tables_iter = self.exp.obs.read(
-            coords=(obs_joinids,), batch_size=somacore.BatchSize(), column_names=obs_column_names
-        )
         self.encoders = encoders
         self.stats = stats
 
-    def __next__(self) -> ObsDatum:
-        # read the next torch batch, possibly across multiple soma batches
+    def __next__(self) -> ObsAndXDatum:
+        """Read the next torch batch, possibly across multiple soma batches"""
+
         obs: pd.DataFrame = pd.DataFrame()
         X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)))
 
@@ -212,7 +206,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         return obs_batch, X_batch
 
 
-class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
+class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
     """
     An iterable-style PyTorch ``DataPipe`` that reads obs and X data from a SOMA Experiment, and returns an iterator of
     tuples of PyTorch ``Tensor`` objects.
@@ -300,23 +294,19 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         pytorch_logger.debug("Initializing ExperimentDataPipe")
 
-        # TODO: support multiple layers, per somacore.query.query.ExperimentAxisQuery.to_anndata()
-        # TODO: handle closing of `_query` (and transitively, `exp`) when iterator is no longer in use; may need be used as a ContextManager,
-        #  but not clear how we can do that when used by DataLoader
-        exp = _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes)
+        with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
+            query = exp.axis_query(
+                measurement_name=self.measurement_name,
+                obs_query=self.obs_query,
+                var_query=self.var_query,
+            )
 
-        query = exp.axis_query(
-            measurement_name=self.measurement_name,
-            obs_query=self.obs_query,
-            var_query=self.var_query,
-        )
+            # The to_numpy() call is a workaround for a possible bug in TileDB-SOMA:
+            # https://github.com/single-cell-data/TileDB-SOMA/issues/1456
+            self._obs_joinids = query.obs_joinids().to_numpy()
+            self._var_joinids = query.var_joinids().to_numpy()
 
-        # The to_numpy() call is a workaround for a possible bug in TileDB-SOMA:
-        # https://github.com/single-cell-data/TileDB-SOMA/issues/1456
-        self._obs_joinids = query.obs_joinids().to_numpy()
-        self._var_joinids = query.var_joinids().to_numpy()
-
-        self._encoders = self._build_obs_encoders(query)
+            self._encoders = self._build_obs_encoders(query)
 
         self._initialized = True
 
@@ -349,7 +339,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         return ids
 
-    def __iter__(self) -> Iterator[ObsDatum]:
+    def __iter__(self) -> Iterator[ObsAndXDatum]:
         self._init()
         assert self._obs_joinids is not None
         assert self._var_joinids is not None
@@ -360,20 +350,24 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
             )
 
-        return _ObsAndXIterator(
-            obs_joinids=self._partition_obs_joinids(self._obs_joinids),
-            var_joinids=self._var_joinids,
-            exp_uri=self.exp_uri,
-            aws_region=self.aws_region,
-            measurement_name=self.measurement_name,
-            X_layer_name=self.layer_name,
-            batch_size=self.batch_size,
-            encoders=self.obs_encoders,
-            stats=self._stats,
-            obs_column_names=self.obs_column_names,
-            sparse_X=self.sparse_X,
-            soma_buffer_bytes=self.soma_buffer_bytes,
-        )
+        with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
+            X: soma.SparseNDArray = exp.ms[self.measurement_name].X[self.layer_name]
+            obs_tables_iter = exp.obs.read(
+                coords=(self._partition_obs_joinids(self._obs_joinids),),
+                batch_size=somacore.BatchSize(),
+                column_names=self.obs_column_names,
+            )
+
+            for datum_ in _ObsAndXIterator(
+                X,
+                obs_tables_iter,
+                var_joinids=self._var_joinids,
+                batch_size=self.batch_size,
+                encoders=self.obs_encoders,
+                stats=self._stats,
+                sparse_X=self.sparse_X,
+            ):
+                yield datum_
 
     def __len__(self) -> int:
         self._init()
@@ -381,7 +375,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         return len(self._obs_joinids)
 
-    def __getitem__(self, index: int) -> ObsDatum:
+    def __getitem__(self, index: int) -> ObsAndXDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
 
     def _build_obs_encoders(self, query: soma.ExperimentAxisQuery) -> Encoders:
