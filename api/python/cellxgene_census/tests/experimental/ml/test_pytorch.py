@@ -1,8 +1,10 @@
 import pathlib
 import sys
 from typing import Callable, List, Optional, Sequence, Union
+from unittest.mock import patch
 
 import numpy as np
+import pandas as pd
 import pyarrow as pa
 import pytest
 import tiledbsoma as soma
@@ -247,6 +249,31 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
     batch = next(batch_iter)
     assert isinstance(batch[1], Tensor)
     assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
+def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment) -> None:
+    with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXIterator.next_soma_batch") as mock_next_soma_batch:
+        # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
+        mock_next_soma_batch.side_effect = [
+            (pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4)),
+            (pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4)),
+            (pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2)),
+        ]
+
+        exp_data_pipe = ExperimentDataPipe(
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            obs_column_names=[],
+            batch_size=3,
+        )
+
+        full_result = list(exp_data_pipe)
+
+        assert [len(batch[1]) for batch in full_result] == [3, 3, 3, 1]
 
 
 @pytest.mark.experimental
