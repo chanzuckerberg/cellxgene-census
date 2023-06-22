@@ -330,23 +330,21 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
 
         partition, num_partitions = worker_info.id, worker_info.num_workers
 
-        partition_size = len(ids) // num_partitions
-        partition_start = partition_size * partition
-        partition_end_excl = min(len(ids), partition_start + partition_size)
-        ids = ids[partition_start:partition_end_excl]
+        partitions = np.array_split(ids, num_partitions)
+        ids = partitions[partition]
 
-        if pytorch_logger.isEnabledFor(logging.DEBUG):
-            if len(ids) > 0:
-                joinids_start = ids[0]
-                joinids_end = ids[-1]
-            else:
-                joinids_start = joinids_end = 0
+        if pytorch_logger.isEnabledFor(logging.DEBUG) and len(ids) > 0:
+            joinids_start = ids[0]
+            joinids_end = ids[-1]
+            lens = [len(p) for p in partitions]
+            partition_start = sum(lens[:partition])
+            partition_end_excl = partition_start + lens[partition]
 
             pytorch_logger.debug(
                 f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
-                f"index range={partition_start}:{partition_end_excl}, "
-                f"soma_joinid range={joinids_start}:{joinids_end}, "
-                f"{partition_size:}"
+                f"index range=[{partition_start}:{partition_end_excl}), "
+                f"soma_joinid range=[{joinids_start}:{joinids_end}], "
+                f"partition_size={len(ids)}"
             )
 
         return ids
