@@ -37,7 +37,7 @@ dependencies= [
     "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
     "requests",
     "typing_extensions",
-    "s3fs",
+    "s3fs>=2021.06.1",
     "scipy",
     # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
     "certifi",
