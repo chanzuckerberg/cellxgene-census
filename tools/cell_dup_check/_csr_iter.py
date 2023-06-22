@@ -63,9 +63,7 @@ def X_sparse_iter(
 
     # Lazy partition array by chunk_size on first dimension
     obs_coords = query.obs_joinids().to_numpy()
-    obs_coord_chunker = (
-        obs_coords[i : i + row_stride] for i in range(0, len(obs_coords), row_stride)
-    )
+    obs_coord_chunker = (obs_coords[i : i + row_stride] for i in range(0, len(obs_coords), row_stride))
 
     # Lazy read into Arrow Table. Yields (coords, Arrow.Table)
     X = query._ms.X[X_name]
