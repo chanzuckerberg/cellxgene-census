@@ -86,7 +86,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
     obs_tables_iter: somacore.ReadIter[pa.Table]
     """Iterates the SOMA batches (tables) of obs data"""
 
-    obs_batch_: pd.DataFrame = pd.DataFrame()
+    obs_batch: pd.DataFrame = pd.DataFrame()
     """The current SOMA batch of obs data"""
 
     X_batch: scipy.matrix = None
@@ -130,7 +130,7 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
         while len(obs) < self.batch_size:
             try:
-                obs_partial, X_partial = self._read_partial_torch_batch(self.batch_size)
+                obs_partial, X_partial = self._read_partial_torch_batch(self.batch_size - len(obs))
                 obs = pd.concat([obs, obs_partial], axis=0)
                 X = sparse.vstack([X, X_partial])
             except StopIteration:
@@ -168,13 +168,20 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
         return X_tensor, obs_tensor
 
     def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, sparse.csr_matrix]:
-        safe_batch_size = min(batch_size, len(self.obs_batch) - self.i)
-        slice_ = slice(self.i, self.i + safe_batch_size)
-        assert slice_.stop <= self.obs_batch_.shape[0]
+        if not (0 <= self.i < len(self.obs_batch)):
+            self.obs_batch, self.X_batch = self.next_soma_batch()
+            self.i = 0
 
-        obs_rows = self.obs_batch.iloc[slice_]
+        obs_batch = self.obs_batch
+        X_batch = self.X_batch
+
+        safe_batch_size = min(batch_size, len(obs_batch) - self.i)
+        slice_ = slice(self.i, self.i + safe_batch_size)
+        assert slice_.stop <= obs_batch.shape[0]
+
+        obs_rows = obs_batch.iloc[slice_]
         assert obs_rows["soma_joinid"].is_unique
-        X_csr_scipy = self.X_batch[slice_]
+        X_csr_scipy = X_batch[slice_]
         assert safe_batch_size == obs_rows.shape[0]
         assert obs_rows.shape[0] == X_csr_scipy.shape[0]
 
@@ -182,36 +189,27 @@ class _ObsAndXIterator(Iterator[ObsDatum]):
 
         return obs_rows, X_csr_scipy
 
-    @property
     # TODO: Retrieve next batch asynchronously, so it's available before the current batch's iteration ends
-    def obs_batch(self) -> pd.DataFrame:
-        """
-        Returns the current SOMA batch of obs rows.
-        If the current SOMA batch has been fully iterated, loads the next SOMA batch of both obs and X data and returns
-        the new obs batch (only).
-        Raises ``StopIteration`` if there are no more SOMA batches to retrieve.
-        """
-        if 0 <= self.i < len(self.obs_batch_):
-            return self.obs_batch_
-
-        pytorch_logger.debug("Retrieving next TileDB-SOMA batch...")
+    def next_soma_batch(self) -> Tuple[pd.DataFrame, scipy.matrix]:
+        pytorch_logger.debug("Retrieving next SOMA batch...")
         start_time = time()
         # If no more batches to iterate through, raise StopIteration, as all iterators do when at end
         obs_table = next(self.obs_tables_iter)
-        self.obs_batch_ = obs_table.to_pandas()
+        obs_batch = obs_table.to_pandas()
+
         # handle case of empty result (first batch has 0 rows)
-        if len(self.obs_batch_) == 0:
+        if len(obs_batch) == 0:
             raise StopIteration
-        self.X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
-        assert self.obs_batch_.shape[0] == self.X_batch.shape[0]
-        self.i = 0
-        self.stats.n_obs += self.X_batch.shape[0]
-        self.stats.nnz += self.X_batch.nnz
+
+        X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
+        assert obs_batch.shape[0] == X_batch.shape[0]
+        self.stats.n_obs += X_batch.shape[0]
+        self.stats.nnz += X_batch.nnz
         self.stats.elapsed += int(time() - start_time)
         self.stats.n_soma_batches += 1
         # TODO: also show per-batch stats (non-cumulative)
-        pytorch_logger.debug(f"Retrieved batch: shape={self.X_batch.shape}, cum_stats: {self.stats}")
-        return self.obs_batch_
+        pytorch_logger.debug(f"Retrieved batch: shape={X_batch.shape}, cum_stats: {self.stats}")
+        return obs_batch, X_batch
 
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsDatum]]):  # type: ignore
