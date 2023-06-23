@@ -219,7 +219,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
         return X_tensor, obs_tensor
 
-    def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, sparse.csr_matrix]:
+    def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
             self.soma_batch: ObsAndXSOMABatch = next(self.soma_batch_iter)
             self.stats += self.soma_batch.stats
