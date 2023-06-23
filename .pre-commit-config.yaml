@@ -18,7 +18,7 @@ repos:
         args: ["--config", "./tools/pyproject.toml"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.272
+    rev: v0.0.275
     hooks:
       - id: ruff
         name: ruff-cellxgene-census
@@ -30,7 +30,7 @@ repos:
         args: [ "--config=./tools/pyproject.toml", "--fix" ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
+    rev: v1.4.0
     hooks:
       - id: mypy
         name: mypy-cellxgene-census
