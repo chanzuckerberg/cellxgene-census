@@ -1,5 +1,5 @@
 from concurrent import futures
-from typing import Generator, Iterator, Tuple, TypeVar
+from typing import Generator, Iterator, Literal, Tuple, TypeVar
 
 import numpy as np
 import numpy.typing as npt
@@ -22,7 +22,7 @@ def X_sparse_iter(
     query: soma.ExperimentAxisQuery,
     X_name: str = "raw",
     row_stride: int = 2**16,  # row stride
-    fmt: str = "csr",  # the only choice, as of now
+    fmt: Literal["csr", "csc"] = "csr",  # the resulting sparse format
     be_eager: bool = True,
 ) -> Iterator[_RT]:
     """
@@ -44,7 +44,7 @@ def X_sparse_iter(
         row_stride:
             The number of rows to return in each step.
         fmt:
-            The SciPy sparse array layout. Only 'csr' is currently supported.
+            The SciPy sparse array layout. Supported: 'csc' and 'csr' (default).
         be_eager:
             If true, will use multiple threads to parallelize reading
             and processing. This will improve speed, but at the cost
@@ -59,7 +59,12 @@ def X_sparse_iter(
     Lifecycle:
         experimental
     """
-    assert fmt == "csr"  # TODO - add 'csc' support later
+    if fmt == "csr":
+        fmt_ctor = sparse.csr_matrix
+    elif fmt == "csc":
+        fmt_ctor = sparse.csc_matrix
+    else:
+        raise ValueError("fmt must be 'csr' or 'csc'")
 
     # Lazy partition array by chunk_size on first dimension
     obs_coords = query.obs_joinids().to_numpy()
@@ -97,10 +102,12 @@ def X_sparse_iter(
     csr_reader: Generator[_RT, None, None] = (
         (
             (obs_coords_chunk, var_coords),
-            sparse.coo_matrix(
-                (data, (i, j)),
-                shape=(len(obs_coords_chunk), query.n_vars),
-            ).tocsr(),
+            fmt_ctor(
+                sparse.coo_matrix(
+                    (data, (i, j)),
+                    shape=(len(obs_coords_chunk), query.n_vars),
+                )
+            ),
         )
         for (obs_coords_chunk, var_coords), (data, i, j) in coo_reindexer
     )
