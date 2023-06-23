@@ -13,6 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.7.17", "3.8", "3.9", "3.10", "3.11"]
+        check-latest: true
 
     runs-on: ${{matrix.os}}
 
@@ -23,13 +24,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies (excluding experimental)
-        if: startsWith(matrix.python-version, '3.7')
+        if: ${{ startsWith(matrix.python-version, '3.7') }}
         run: |
           python -m pip install -U pip setuptools wheel
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -e './api/python/cellxgene_census/'
       - name: Install dependencies (including experimental)
-        if: !startsWith(matrix.python-version, '3.7')
+        if: ${{ !startsWith(matrix.python-version, '3.7') }}
         run: |
           python -m pip install -U pip setuptools wheel
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
@@ -38,7 +39,7 @@ jobs:
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
       - name: Test with pytest (API, experimental)
-        if: !startsWith(matrix.python-version, '3.7')
+        if: ${{ !startsWith(matrix.python-version, '3.7') }}
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 --experimental ./api/python/cellxgene_census/tests/experimental
       - uses: actions/upload-artifact@v3
