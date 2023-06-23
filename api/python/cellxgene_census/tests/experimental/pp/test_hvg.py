@@ -15,7 +15,7 @@ def small_mem_context() -> soma.SOMATileDBContext:
     """used to keep memory usage smaller for GHA runners."""
     cfg = {
         "tiledb_config": {
-            "soma.init_buffer_bytes": 64 * 1024**2,
+            "soma.init_buffer_bytes": 32 * 1024**2,
             "vfs.s3.no_sign_request": True,
         },
     }

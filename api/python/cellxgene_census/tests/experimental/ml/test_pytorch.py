@@ -1,8 +1,10 @@
 import pathlib
 import sys
 from typing import Callable, List, Optional, Sequence, Union
+from unittest.mock import patch
 
 import numpy as np
+import pandas as pd
 import pyarrow as pa
 import pytest
 import tiledbsoma as soma
@@ -250,6 +252,31 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
+def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment) -> None:
+    with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXIterator.next_soma_batch") as mock_next_soma_batch:
+        # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
+        mock_next_soma_batch.side_effect = [
+            (pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4)),
+            (pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4)),
+            (pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2)),
+        ]
+
+        exp_data_pipe = ExperimentDataPipe(
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            obs_column_names=[],
+            batch_size=3,
+        )
+
+        full_result = list(exp_data_pipe)
+
+        assert [len(batch[1]) for batch in full_result] == [3, 3, 3, 1]
+
+
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_encoders(soma_experiment: Experiment) -> None:
@@ -266,7 +293,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
     assert isinstance(batch[1], Tensor)
 
     labels_encoded = batch[1][:, 1]
-    labels_decoded = exp_data_pipe.obs_encoders()["label"].inverse_transform(labels_encoded)
+    labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
     assert labels_decoded.tolist() == ["0", "1", "2"]
 
 
@@ -357,29 +384,6 @@ def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
     data1_soma_joinids = [row[1][0].item() for row in data1]
     data2_soma_joinids = [row[1][0].item() for row in data2]
     assert data1_soma_joinids != data2_soma_joinids
-
-
-@pytest.mark.experimental
-# noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
-def test_experiment_dataloader__multiprocess_pickling(soma_experiment: Experiment) -> None:
-    """
-    If the DataPipe is accessed prior to multiprocessing (num_workers > 0), its internal _query will be
-    initialized. But since it cannot be pickled, we must ensure it is ignored during pickling in multiprocessing mode.
-    This test verifies the correct pickling behavior is in place.
-    """
-
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-    )
-    dl = experiment_dataloader(dp, num_workers=1)  # multiprocessing used when num_workers > 0
-    dp.obs_encoders()  # trigger query building
-    row = next(iter(dl))  # trigger multiprocessing
-
-    assert row is not None
 
 
 @pytest.mark.experimental
