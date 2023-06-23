@@ -93,7 +93,6 @@ def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_conf
         
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
-@pytest.mark.parametrize("stop_after", [2, pytest.param(None, marks=pytest.mark.expensive)])
 @pytest.mark.parametrize(
     ("stop_after", "ctx_config"),
     [
