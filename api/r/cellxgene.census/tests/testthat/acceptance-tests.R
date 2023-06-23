@@ -90,6 +90,20 @@ test_that("test_incremental_read_X_human", {
   
 })
 
+test_that("test_incremental_read_X_human-large-buffer-size", {
+              
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  
+  # Warning that results cannot be concat because it 
+  # exceeds R's capability to allocate vectors beyond 32bit
+  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  expect_true(table_iter_is_ok(X_iter))
+  
+})
+
 test_that("test_incremental_read_obs_mouse", {
               
   census <- open_soma_latest_for_test()
@@ -116,6 +130,20 @@ test_that("test_incremental_read_var_mouse", {
 test_that("test_incremental_read_X_mouse", {
               
   census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  
+  # Warning that results cannot be concat because it 
+  # exceeds R's capability to allocate vectors beyond 32bit
+  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  expect_true(table_iter_is_ok(X_iter))
+  
+})
+
+test_that("test_incremental_read_X_mouse-large-buffer-size", {
+              
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
   on.exit(census$close(), add = TRUE)
   
   organism <- "mus_musculus"
