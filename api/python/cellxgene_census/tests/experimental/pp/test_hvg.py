@@ -15,7 +15,7 @@ def small_mem_context() -> soma.SOMATileDBContext:
     """used to keep memory usage smaller for GHA runners."""
     cfg = {
         "tiledb_config": {
-            "soma.init_buffer_bytes": 64 * 1024**2,
+            "soma.init_buffer_bytes": 32 * 1024**2,
             "vfs.s3.no_sign_request": True,
         },
     }
@@ -72,7 +72,7 @@ def test_hvg_vs_scanpy(
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
         ) as query:
-            hvg = highly_variable_genes(query, **kwargs)  # type: ignore[arg-type]
+            hvg = highly_variable_genes(query, **kwargs)
             adata = query.to_anndata(X_name="raw")
 
     scanpy_hvg = sc.pp.highly_variable_genes(adata, inplace=False, **kwargs)
@@ -142,7 +142,7 @@ def test_hvg_error_cases() -> None:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
             # Only flavor="seurat_v3" is supported
             with pytest.raises(ValueError):
-                highly_variable_genes(query, flavor="oopsie")  # type: ignore[arg-type]
+                highly_variable_genes(query, flavor="oopsie")
 
 
 @pytest.mark.experimental
