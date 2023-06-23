@@ -57,8 +57,18 @@ repos:
           - typing_extensions
           - types-setuptools
           - types-PyYAML
+      - id: mypy
+        name: mypy-tools-not-builder
+        files: ^tools/
+        exclude: ^tools/cellxgene_census_builder
+        args: ["--config", "./tools/pyproject.toml"]
+        additional_dependencies:
+          - numpy
+          - pandas-stubs
+          - typing_extensions
 
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.7.0
     hooks:
       - id: nbqa-black
+        files: ^api/python/notebooks
