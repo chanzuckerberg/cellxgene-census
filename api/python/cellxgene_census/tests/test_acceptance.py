@@ -70,6 +70,11 @@ def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
+@pytest.mark.parametrize("stop_after", [2, pytest.param(None, marks=pytest.mark.expensive)])
+@pytest.mark.parametrize(
+    "ctx_config", 
+    [DEFAULT_TILEDB_CONFIGURATION, pytest.param({"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive)]
+)
 def test_incremental_read(organism: str) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
 
@@ -77,11 +82,18 @@ def test_incremental_read(organism: str) -> None:
     # memory use, and makes it feasible to run in a GHA.
     context = make_context("latest")
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
-        assert table_iter_is_ok(census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]))
         assert table_iter_is_ok(
-            census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"])
+            census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]),
+            stop_after=stop_after
         )
-        assert table_iter_is_ok(census["census_data"][organism].ms["RNA"].X["raw"].read().tables())
+        assert table_iter_is_ok(
+            census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]),
+            stop_after=stop_after
+        )
+        assert table_iter_is_ok(
+            census["census_data"][organism].ms["RNA"].X["raw"].read().tables(), 
+            stop_after=stop_after
+        )
 
 
 @pytest.mark.live_corpus
@@ -115,14 +127,26 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
         pytest.param(
             None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 100K cells"
         ),
+        # 250K cells, standard buffer size
+        pytest.param(
+            None, slice(0, 250_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 250K cells"
+        ),
+        # 500K cells, standard buffer size
+        pytest.param(
+            None, slice(0, 500_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 500K cells"
+        ),
+        # 750K cells, standard buffer size
+        pytest.param(
+            None, slice(0, 750_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 750K cells"
+        ),
         # 1M cells, standard buffer size
         pytest.param(
             None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 1M cells"
         ),
-        # very common cell type, with standard buffer size
-        pytest.param("cell_type=='neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
         # very common tissue, with standard buffer size
         pytest.param("tissue=='brain'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
+        # very common cell type, with standard buffer size
+        pytest.param("cell_type=='neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
         # all primary cells, with big buffer size
         pytest.param(
             "is_primary_data==True", None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive
