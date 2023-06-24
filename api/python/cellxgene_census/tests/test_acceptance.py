@@ -75,7 +75,7 @@ def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2
     [
         pytest.param(2, None),
         pytest.param(None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-    ]
+    ],
 )
 def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_config: Optional[Dict[str, Any]]) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
@@ -86,11 +86,10 @@ def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_conf
     context = make_context("latest", ctx_config)
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(
-            census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]),
-            stop_after=stop_after
+            census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]), stop_after=stop_after
         )
-        
-        
+
+
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
@@ -98,7 +97,7 @@ def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_conf
     [
         pytest.param(2, None),
         pytest.param(None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-    ]
+    ],
 )
 def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_config: Optional[Dict[str, Any]]) -> None:
     """Verify that var can be read incrementally, i.e., in chunks"""
@@ -110,7 +109,7 @@ def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_conf
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(
             census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]),
-            stop_after=stop_after
+            stop_after=stop_after,
         )
 
 
@@ -121,8 +120,8 @@ def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_conf
     [
         pytest.param(2, None),
         pytest.param(None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-        pytest.param(None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive)
-    ]
+        pytest.param(None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
+    ],
 )
 def test_incremental_read_X(organism: str, stop_after: Optional[int], ctx_config: Optional[Dict[str, Any]]) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
@@ -131,8 +130,7 @@ def test_incremental_read_X(organism: str, stop_after: Optional[int], ctx_config
     context = make_context("latest", ctx_config)
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(
-            census["census_data"][organism].ms["RNA"].X["raw"].read().tables(), 
-            stop_after=stop_after
+            census["census_data"][organism].ms["RNA"].X["raw"].read().tables(), stop_after=stop_after
         )
 
 
