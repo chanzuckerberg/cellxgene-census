@@ -6,11 +6,10 @@ ListReporterToFile <- R6::R6Class("ListReporterToFile",
   public = list(
     
     initialize = function(to_file="acceptance-tests-logs.csv") {
-      header <- c("test","user","system","real", "test_result_message")
       private$to_file <- to_file
       
       file_handle <- file(private$to_file)
-      base::writeLines("test,user,system,real", con=file_handle)
+      base::writeLines("test,user,system,real,test_result", con=file_handle)
       close(file_handle)
       
       super$initialize()
