@@ -2,7 +2,7 @@
 
 This directory contains tests of the `cellxgene.census` R package API, _and_ the use of the API on the live "corpus", i.e., data in the public Census S3 bucket. The tests use the R package `tessthat`.
 
-In addition, a set of acceptance (expensive) tests are available and `testthat` does not run them by default (see [section below](#Acceptance-(expensive)-tests)).
+In addition, a set of acceptance (expensive) tests are available and `testthat` does not run them by default (see [section below](#Acceptance-expensive-tests)).
 
 Tests can be run in the usual manner. First, ensure you have `cellxgene-census` and `testthat` installed, e.g., from the top-level repo directory:
 
