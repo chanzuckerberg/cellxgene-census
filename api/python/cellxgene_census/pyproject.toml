@@ -38,7 +38,7 @@ dependencies= [
     "requests",
     "typing_extensions",
     "s3fs",
-    "scipy",
+    "scipy<=1.10.1",  # for compat with pyarrow
     # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
     "certifi",
 ]
