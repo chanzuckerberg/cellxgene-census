@@ -1,10 +1,11 @@
-from typing import Generator, Iterator, Literal, Tuple, TypeVar
+from typing import Generator, Iterator, Tuple, TypeVar
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
 import tiledbsoma as soma
+from typing_extensions import Literal
 
 from ._eager_iter import EagerIterator
 
