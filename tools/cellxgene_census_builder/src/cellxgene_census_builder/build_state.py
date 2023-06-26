@@ -36,7 +36,7 @@ class CensusBuildConfig:
     #
     # Paths and census version name determined by spec.
     cellxgene_census_S3_path: str = field(default="s3://cellxgene-data-public/cell-census")
-    cellxgene_census_S3_remote_path: str = field(default=None)
+    cellxgene_census_S3_replica_path: str = field(default=None)
     logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
     build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
     #
@@ -57,7 +57,7 @@ class CensusBuildConfig:
     #
     # For testing convenience only
     manifest: str = field(default=None)
-    test_first_n: int = field(converter=int, default=None)
+    test_first_n: int = field(converter=int, default=0)
 
     @classmethod
     def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:

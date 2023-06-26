@@ -209,6 +209,10 @@ def do_the_release(args: CensusBuildArgs) -> bool:
     return True
 
 
+def do_replica_release(args: CensusBuildArgs) -> bool:
+    return True
+
+
 def do_report_copy(args: CensusBuildArgs) -> bool:
     """Copy build summary reports to S3 for posterity."""
     from .data_copy import sync_to_S3
@@ -250,7 +254,7 @@ def do_sync_release_file_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
     from .data_copy import sync_to_S3_remote
 
     source_key = urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "release.json")
-    dest_key = urlcat(args.config.cellxgene_census_S3_remote_path, args.build_tag, "release.json")
+    dest_key = urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag, "release.json")
 
     sync_to_S3_remote(
         source_key,
@@ -266,7 +270,7 @@ def do_sync_artifact_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
 
     sync_to_S3_remote(
         urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
-        urlcat(args.config.cellxgene_census_S3_remote_path, args.build_tag),
+        urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag),
         dryrun=args.config.dryrun,
     )
     return True
