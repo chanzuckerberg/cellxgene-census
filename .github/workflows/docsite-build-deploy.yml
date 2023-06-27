@@ -53,8 +53,12 @@ jobs:
           cd api/r/cellxgene.census
           Rscript -e 'pkgdown::build_site()'
           cd ../../../
-          mkdir -p docsite/r
+          mkdir -p docsite/r/vignettes
           cp -r api/r/cellxgene.census/docs/* docsite/r/.
+
+          # copy vignettes from static HTMLs checked into git;
+          # see api/r/cellxgene.census/vignettes_/README.md
+          cp api/r/cellxgene.census/vignettes_/*.html docsite/r/vignettes
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4

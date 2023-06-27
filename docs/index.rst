@@ -11,5 +11,6 @@
    cellxgene_census_docsite_schema.md
    cellxgene_census_docsite_data_release_info.md
    python-api
-   R API <https://chanzuckerberg.github.io/cellxgene-census/r/index.html>
+   cellxgene_census_docsite_r_tutorials.md
+   R API <https://chanzuckerberg.github.io/cellxgene-census/r/reference/index.html>
    cellxgene_census_docsite_FAQ.md
