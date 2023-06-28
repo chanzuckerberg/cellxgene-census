@@ -76,7 +76,7 @@ test_that("test_incremental_read_X_human", {
 
   # Warning that results cannot be concat because it
   # exceeds R's capability to allocate vectors beyond 32bit
-  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
 })
 
@@ -88,7 +88,7 @@ test_that("test_incremental_read_X_human-large-buffer-size", {
 
   # Warning that results cannot be concat because it
   # exceeds R's capability to allocate vectors beyond 32bit
-  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
 })
 
@@ -121,7 +121,7 @@ test_that("test_incremental_read_X_mouse", {
 
   # Warning that results cannot be concat because it
   # exceeds R's capability to allocate vectors beyond 32bit
-  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
 })
 
@@ -133,14 +133,84 @@ test_that("test_incremental_read_X_mouse-large-buffer-size", {
 
   # Warning that results cannot be concat because it
   # exceeds R's capability to allocate vectors beyond 32bit
-  expect_warning(X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables())
+  X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
 })
 
-test_that("test_incremental_query", {
-  # TODO implement when query$obs() $var() and $X() return iterators, not yet in tiledbsoma
-  # June, 2023
-  expect_true(TRUE)
+test_that("test_incremental_query_human_brain", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  obs_value_filter <- "tissue == 'brain'"
+  
+  query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    experiment = census$get("census_data")$get(organism),
+    measurement_name = "RNA", 
+    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+  )
+  
+  expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$var(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  
+})
+
+test_that("test_incremental_query_human_aorta", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "homo_sapiens"
+  obs_value_filter <- "tissue == 'aorta'"
+  
+  query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    experiment = census$get("census_data")$get(organism),
+    measurement_name = "RNA", 
+    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+  )
+  
+  expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$var(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  
+})
+
+test_that("test_incremental_query_mouse_brain", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  obs_value_filter <- "tissue == 'brain'"
+  
+  query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    experiment = census$get("census_data")$get(organism),
+    measurement_name = "RNA", 
+    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+  )
+  
+  expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$var(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  
+})
+
+test_that("test_incremental_query_mouse_aorta", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  
+  organism <- "mus_musculus"
+  obs_value_filter <- "tissue == 'aorta'"
+  
+  query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    experiment = census$get("census_data")$get(organism),
+    measurement_name = "RNA", 
+    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+  )
+  
+  expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$var(), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  
 })
 
 test_that("test_seurat_small-query", {
