@@ -147,7 +147,7 @@ test_that("test_incremental_query_human_brain", {
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
     measurement_name = "RNA", 
-    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
   expect_true(table_iter_is_ok(query$obs()))
@@ -166,7 +166,7 @@ test_that("test_incremental_query_human_aorta", {
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
     measurement_name = "RNA", 
-    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
   expect_true(table_iter_is_ok(query$obs()))
@@ -185,7 +185,7 @@ test_that("test_incremental_query_mouse_brain", {
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
     measurement_name = "RNA", 
-    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
   expect_true(table_iter_is_ok(query$obs()))
@@ -204,7 +204,7 @@ test_that("test_incremental_query_mouse_aorta", {
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
     measurement_name = "RNA", 
-    obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
   expect_true(table_iter_is_ok(query$obs()))
