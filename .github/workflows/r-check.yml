@@ -19,7 +19,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ./api/r/cellxgene.census
-          extra-packages: any::rcmdcheck, any::styler, any::roxygen2
+          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::remotes
           cache: true
       - name: install tiledbsoma
         # Install the latest tiledbsoma package, overwriting any version cached by
