@@ -150,9 +150,9 @@ test_that("test_incremental_query_human_brain", {
     obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
-  expect_true(table_iter_is_ok(query$obs())
-  expect_true(table_iter_is_ok(query$var())
-  expect_true(table_iter_is_ok(query$X("raw")$tables())
+  expect_true(table_iter_is_ok(query$obs()))
+  expect_true(table_iter_is_ok(query$var()))
+  expect_true(table_iter_is_ok(query$X("raw")$tables()))
   
 })
 
@@ -169,9 +169,9 @@ test_that("test_incremental_query_human_aorta", {
     obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
-  expect_true(table_iter_is_ok(query$obs())
-  expect_true(table_iter_is_ok(query$var())
-  expect_true(table_iter_is_ok(query$X("raw")$tables())
+  expect_true(table_iter_is_ok(query$obs()))
+  expect_true(table_iter_is_ok(query$var()))
+  expect_true(table_iter_is_ok(query$X("raw")$tables()))
   
 })
 
@@ -188,9 +188,9 @@ test_that("test_incremental_query_mouse_brain", {
     obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
-  expect_true(table_iter_is_ok(query$obs())
-  expect_true(table_iter_is_ok(query$var())
-  expect_true(table_iter_is_ok(query$X("raw")$tables())
+  expect_true(table_iter_is_ok(query$obs()))
+  expect_true(table_iter_is_ok(query$var()))
+  expect_true(table_iter_is_ok(query$X("raw")$tables()))
   
 })
 
@@ -207,9 +207,9 @@ test_that("test_incremental_query_mouse_aorta", {
     obs_query = SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
   
-  expect_true(table_iter_is_ok(query$obs())
-  expect_true(table_iter_is_ok(query$var())
-  expect_true(table_iter_is_ok(query$X("raw")$tables())
+  expect_true(table_iter_is_ok(query$obs()))
+  expect_true(table_iter_is_ok(query$var()))
+  expect_true(table_iter_is_ok(query$X("raw")$tables()))
   
 })
 
