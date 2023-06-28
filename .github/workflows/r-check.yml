@@ -25,7 +25,7 @@ jobs:
         # Install the latest tiledbsoma package, overwriting any version cached by
         # setup-r-dependencies. TODO: once there are release versions, set up a build matrix with
         # both the released and latest versions.
-        run: Rscript -e 'remotes::install_github("https://github.com/single-cell-data/TileDB-SOMA", subdir="apis/r")'
+        run: Rscript -e 'remotes::install_git("https://github.com/single-cell-data/TileDB-SOMA.git", subdir="apis/r")'
       - name: styler
         run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
       - name: check session info
