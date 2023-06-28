@@ -152,7 +152,7 @@ test_that("test_incremental_query_human_brain", {
   
   expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
   expect_true(table_iter_is_ok(query$var(), stop_after = 2))
-  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw")$tables(), stop_after = 2))
   
 })
 
@@ -171,7 +171,7 @@ test_that("test_incremental_query_human_aorta", {
   
   expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
   expect_true(table_iter_is_ok(query$var(), stop_after = 2))
-  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw")$tables(), stop_after = 2))
   
 })
 
@@ -190,7 +190,7 @@ test_that("test_incremental_query_mouse_brain", {
   
   expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
   expect_true(table_iter_is_ok(query$var(), stop_after = 2))
-  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw")$tables(), stop_after = 2))
   
 })
 
@@ -209,7 +209,7 @@ test_that("test_incremental_query_mouse_aorta", {
   
   expect_true(table_iter_is_ok(query$obs(), stop_after = 2))
   expect_true(table_iter_is_ok(query$var(), stop_after = 2))
-  expect_true(table_iter_is_ok(query$X("raw"), stop_after = 2))
+  expect_true(table_iter_is_ok(query$X("raw")$tables(), stop_after = 2))
   
 })
 
