@@ -137,8 +137,8 @@ def test_get_highly_variable_genes(
 
 
 @pytest.mark.experimental
-def test_hvg_error_cases() -> None:
-    with cellxgene_census.open_soma(census_version="stable") as census:
+def test_hvg_error_cases(small_mem_context: soma.SOMATileDBContext) -> None:
+    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
             # Only flavor="seurat_v3" is supported
             with pytest.raises(ValueError):
@@ -147,8 +147,8 @@ def test_hvg_error_cases() -> None:
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-def test_max_loess_jitter_error() -> None:
-    with cellxgene_census.open_soma(census_version="stable") as census:
+def test_max_loess_jitter_error(small_mem_context: soma.SOMATileDBContext) -> None:
+    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
         with pytest.raises(ValueError):
             get_highly_variable_genes(
                 census,
