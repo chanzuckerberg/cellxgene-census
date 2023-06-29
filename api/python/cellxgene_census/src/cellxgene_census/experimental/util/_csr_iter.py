@@ -1,19 +1,13 @@
-from concurrent import futures
-from typing import Generator, Iterator, Literal, Tuple, TypeVar
+from typing import Generator, Iterator, Tuple
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
 import tiledbsoma as soma
+from typing_extensions import Literal
 
-"""
-This might make a good addition to soma.ExperimentAxisQuery.
-
-TODO: this implementation does not leverage the ExperimentAxisQuery internals
-for fast CSR creation, and instead uses the (slower) scipy.sparse implementation.
-If integrated, it should be migrated to the much faster implementation.
-"""
+from ._eager_iter import EagerIterator
 
 _RT = Tuple[Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]], sparse.spmatrix]
 
@@ -56,6 +50,18 @@ def X_sparse_iter(
             var_coords
             SciPy sparse matrix
 
+    Examples:
+        >>> with cellxgene_census.open_soma() as census:
+        ...     exp = census["census_data"][experiment]
+        ...    with exp.axis_query(measurement_name="RNA") as query:
+        ...        for (obs_soma_joinids, var_soma_joinids), X_chunk in X_sparse_iter(
+        ...            query, X_name="raw", row_stride=1000
+        ...        ):
+        ...            # X_chunk is a scipy.csr_matrix of csc_matrix
+        ...            # For each X_chunk[i, j], the associated soma_joinid is
+        ...            # obs_soma_joinids[i] and var_soma_joinids[j]
+        ...            ...
+
     Lifecycle:
         experimental
     """
@@ -81,7 +87,7 @@ def X_sparse_iter(
         for obs_coords_chunk in obs_coord_chunker
     )
     if be_eager:
-        table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
+        table_reader = (t for t in EagerIterator(table_reader, query._threadpool))
 
     # lazy reindex of obs coordinates. Yields coords and (data, i, j) as numpy ndarrays
     coo_reindexer = (
@@ -96,7 +102,7 @@ def X_sparse_iter(
         for (obs_coords_chunk, var_coords), tbl in table_reader
     )
     if be_eager:
-        coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
+        coo_reindexer = (t for t in EagerIterator(coo_reindexer, query._threadpool))
 
     # lazy convert Arrow table to Scipy sparse.csr_matrix
     csr_reader: Generator[_RT, None, None] = (
@@ -112,22 +118,6 @@ def X_sparse_iter(
         for (obs_coords_chunk, var_coords), (data, i, j) in coo_reindexer
     )
     if be_eager:
-        csr_reader = (t for t in _EagerIterator(csr_reader, query._threadpool))
+        csr_reader = (t for t in EagerIterator(csr_reader, query._threadpool))
 
     yield from csr_reader
-
-
-_T = TypeVar("_T")
-
-
-class _EagerIterator(Iterator[_T]):
-    def __init__(self, iterator: Iterator[_T], pool: futures.Executor):
-        super().__init__()
-        self.iterator = iterator
-        self._pool = pool
-        self._future = self._pool.submit(self.iterator.__next__)
-
-    def __next__(self) -> _T:
-        res = self._future.result()
-        self._future = self._pool.submit(self.iterator.__next__)
-        return res
