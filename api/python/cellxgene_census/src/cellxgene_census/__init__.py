@@ -20,11 +20,7 @@ For more information on the API, visit the `cellxgene_census repo`_. For more in
     https://github.com/single-cell-data/TileDB-SOMA
 """
 
-try:
-    from importlib import metadata
-except ImportError:
-    # for python <=3.7
-    import importlib_metadata as metadata  # type: ignore[no-redef]
+from importlib import metadata
 
 from ._get_anndata import get_anndata
 from ._open import download_source_h5ad, get_source_h5ad_uri, open_soma

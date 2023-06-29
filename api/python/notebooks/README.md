@@ -8,7 +8,7 @@ Demonstration notebooks for the CZ CELLxGENE Discover Census. There are two kind
 ## Dependencies
 
 You must be on a Linux or MacOS system, with the following installed:
-* Python 3.7 to 3.11
+* Python 3.8 to 3.11
 * Jupyter or some other means of running notebooks (e.g., vscode)
 
 For now, it is recommended that you do all this on a host with sufficient memory,
