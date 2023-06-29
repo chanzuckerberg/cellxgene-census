@@ -162,10 +162,10 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
         sparse_X: bool,
-        is_eager_fetch: bool,
+        use_eager_fetch: bool,
     ) -> None:
         self.soma_batch_iter = _ObsAndXSOMAIterator(X, obs_tables_iter, pa.array(var_joinids))
-        if is_eager_fetch:
+        if use_eager_fetch:
             self.soma_batch_iter = EagerIterator(self.soma_batch_iter)
         self.soma_batch = None
         self.var_joinids = var_joinids
@@ -295,7 +295,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         batch_size: int = 1,
         sparse_X: bool = False,
         soma_buffer_bytes: Optional[int] = None,
-        is_eager_fetch: bool = True,
+        use_eager_fetch: bool = True,
     ) -> None:
         """
         Construct a new ``ExperimentDataPipe``.
@@ -319,7 +319,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         # TODO: This will control the SOMA batch sizes, and could be replaced with a row count once TileDB-SOMA
         #  supports `batch_size` param. It affects both the obs and X read operations.
         self.soma_buffer_bytes = soma_buffer_bytes
-        self.is_eager_fetch = is_eager_fetch
+        self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
         self._encoders = None
         self._obs_joinids = None
@@ -408,7 +408,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 encoders=self.obs_encoders,
                 stats=self._stats,
                 sparse_X=self.sparse_X,
-                is_eager_fetch=self.is_eager_fetch,
+                use_eager_fetch=self.use_eager_fetch,
             )
 
             for datum_ in obs_and_x_iter:
