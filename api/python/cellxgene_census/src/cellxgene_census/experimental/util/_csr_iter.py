@@ -15,13 +15,13 @@ _RT = Tuple[Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]], sparse.spmatrix
 def X_sparse_iter(
     query: soma.ExperimentAxisQuery,
     X_name: str = "raw",
-    row_stride: int = 2**16,  # row stride
+    axis: int = 0,
+    stride: int = 2**16,  # row stride
     fmt: Literal["csr", "csc"] = "csr",  # the resulting sparse format
     be_eager: bool = True,
 ) -> Iterator[_RT]:
     """
-    Return a row-wise iterator over the user-specified X SparseNdMatrix, returning for each
-    iteration step:
+    Return an iterator over an X SparseNdMatrix, returning for each iteration step:
         * obs coords (coordinates)
         * var_coords (coordinates)
         * X contents as a SciPy csr_matrix or csc_matrix
@@ -35,8 +35,11 @@ def X_sparse_iter(
             read.
         X_name:
             The name of the X layer.
-        row_stride:
-            The number of rows to return in each step.
+        axis:
+            The axis to iterate over, where zero (0) is obs axis and one (1)
+            is the var axis. Currently only axis 0 (obs axis) is supported.
+        stride:
+            The chunk size to return in each step.
         fmt:
             The SciPy sparse array layout. Supported: 'csc' and 'csr' (default).
         be_eager:
@@ -46,8 +49,7 @@ def X_sparse_iter(
 
     Returns:
         An iterator which iterates over a tuple of:
-            obs_coords
-            var_coords
+            (obs_coords, var_coords)
             SciPy sparse matrix
 
     Examples:
@@ -55,7 +57,7 @@ def X_sparse_iter(
         ...     exp = census["census_data"][experiment]
         ...    with exp.axis_query(measurement_name="RNA") as query:
         ...        for (obs_soma_joinids, var_soma_joinids), X_chunk in X_sparse_iter(
-        ...            query, X_name="raw", row_stride=1000
+        ...            query, X_name="raw", stride=1000
         ...        ):
         ...            # X_chunk is a scipy.csr_matrix of csc_matrix
         ...            # For each X_chunk[i, j], the associated soma_joinid is
@@ -72,9 +74,12 @@ def X_sparse_iter(
     else:
         raise ValueError("fmt must be 'csr' or 'csc'")
 
+    if axis != 0:
+        raise ValueError("axis must be zero (obs)")
+
     # Lazy partition array by chunk_size on first dimension
     obs_coords = query.obs_joinids().to_numpy()
-    obs_coord_chunker = (obs_coords[i : i + row_stride] for i in range(0, len(obs_coords), row_stride))
+    obs_coord_chunker = (obs_coords[i : i + stride] for i in range(0, len(obs_coords), stride))
 
     # Lazy read into Arrow Table. Yields (coords, Arrow.Table)
     X = query._ms.X[X_name]
