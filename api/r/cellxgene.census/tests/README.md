@@ -42,6 +42,179 @@ When run, please record the results in this file (below) and commit the change t
   - `stdout.txt`
   - `acceptance-tests-logs-[YYY]-[MM]-[DD].csv`
 
+
+## 2023-06-29
+
+- Host: EC2 instance type: `r6id.x32xlarge`, all nvme mounted as swap.
+- Uname: Linux ip-172-31-62-52 5.19.0-1027-aws #28~22.04.1-Ubuntu SMP Wed May 31 18:30:36 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+- Census version
+
+```
+> cellxgene.census::get_census_version_description('latest')
+$release_date
+[1] ""
+
+$release_build
+[1] "2023-06-28"
+
+$soma.uri
+[1] "s3://cellxgene-data-public/cell-census/2023-06-28/soma/"
+
+$soma.s3_region
+[1] "us-west-2"
+
+$h5ads.uri
+[1] "s3://cellxgene-data-public/cell-census/2023-06-28/h5ads/"
+
+$h5ads.s3_region
+[1] "us-west-2"
+
+$alias
+[1] "latest"
+
+$census_version
+[1] "latest"
+```
+
+- R session info 
+
+```
+> library("cellxgene.census"); sessionInfo()
+R version 4.3.0 (2023-04-21)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.2 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: America/Los_Angeles
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] cellxgene.census_0.0.0.9000
+
+loaded via a namespace (and not attached):
+ [1] vctrs_0.6.3           httr_1.4.6            cli_3.6.1            
+ [4] tiledbsoma_0.0.0.9030 rlang_1.1.1           purrr_1.0.1          
+ [7] assertthat_0.2.1      data.table_1.14.8     jsonlite_1.8.5       
+[10] glue_1.6.2            bit_4.0.5             triebeard_0.4.1      
+[13] grid_4.3.0            RcppSpdlog_0.0.13     base64enc_0.1-3      
+[16] lifecycle_1.0.3       compiler_4.3.0        fs_1.6.2             
+[19] Rcpp_1.0.10           aws.s3_0.3.21         lattice_0.21-8       
+[22] digest_0.6.31         R6_2.5.1              tidyselect_1.2.0     
+[25] curl_5.0.1            magrittr_2.0.3        urltools_1.7.3       
+[28] Matrix_1.5-4.1        tools_4.3.0           bit64_4.0.5          
+[31] aws.signature_0.6.0   spdl_0.0.5            arrow_12.0.1         
+[34] xml2_1.3.4   
+
+```
+
+- `stdout.txt`
+
+```
+START TEST ( 2023-06-28 13:07:31.895118 ):  test_load_obs_human 
+END TEST ( 2023-06-28 13:07:39.308527 ):  test_load_obs_human 
+START TEST ( 2023-06-28 13:07:39.310306 ):  test_load_var_human 
+END TEST ( 2023-06-28 13:07:40.99671 ):  test_load_var_human 
+START TEST ( 2023-06-28 13:07:40.998601 ):  test_load_obs_mouse 
+END TEST ( 2023-06-28 13:07:43.292537 ):  test_load_obs_mouse 
+START TEST ( 2023-06-28 13:07:43.294842 ):  test_load_var_mouse 
+END TEST ( 2023-06-28 13:07:45.002476 ):  test_load_var_mouse 
+START TEST ( 2023-06-28 13:07:45.004729 ):  test_incremental_read_obs_human 
+END TEST ( 2023-06-28 13:07:50.491426 ):  test_incremental_read_obs_human 
+START TEST ( 2023-06-28 13:07:50.493703 ):  test_incremental_read_var_human 
+END TEST ( 2023-06-28 13:07:52.038702 ):  test_incremental_read_var_human 
+START TEST ( 2023-06-28 13:07:52.041194 ):  test_incremental_read_X_human 
+END TEST ( 2023-06-28 13:29:33.990447 ):  test_incremental_read_X_human 
+START TEST ( 2023-06-28 13:29:33.993099 ):  test_incremental_read_X_human-large-buffer-size 
+END TEST ( 2023-06-28 13:56:46.292904 ):  test_incremental_read_X_human-large-buffer-size 
+START TEST ( 2023-06-28 13:56:46.410884 ):  test_incremental_read_obs_mouse 
+END TEST ( 2023-06-28 13:56:54.468978 ):  test_incremental_read_obs_mouse 
+START TEST ( 2023-06-28 13:56:54.496171 ):  test_incremental_read_var_mouse 
+END TEST ( 2023-06-28 13:56:57.260737 ):  test_incremental_read_var_mouse 
+START TEST ( 2023-06-28 13:56:57.299614 ):  test_incremental_read_X_mouse 
+END TEST ( 2023-06-28 14:00:33.340603 ):  test_incremental_read_X_mouse 
+START TEST ( 2023-06-28 14:00:33.342839 ):  test_incremental_read_X_mouse-large-buffer-size 
+END TEST ( 2023-06-28 14:02:03.251537 ):  test_incremental_read_X_mouse-large-buffer-size 
+START TEST ( 2023-06-28 14:02:03.253954 ):  test_incremental_query_human_brain 
+END TEST ( 2023-06-28 14:03:10.796619 ):  test_incremental_query_human_brain 
+START TEST ( 2023-06-28 14:03:10.79851 ):  test_incremental_query_human_aorta 
+END TEST ( 2023-06-28 14:03:23.883367 ):  test_incremental_query_human_aorta 
+START TEST ( 2023-06-28 14:03:23.885332 ):  test_incremental_query_mouse_brain 
+END TEST ( 2023-06-28 14:03:35.250481 ):  test_incremental_query_mouse_brain 
+START TEST ( 2023-06-28 14:03:35.252468 ):  test_incremental_query_mouse_aorta 
+END TEST ( 2023-06-28 14:03:42.035149 ):  test_incremental_query_mouse_aorta 
+START TEST ( 2023-06-28 14:03:42.037484 ):  test_seurat_small-query 
+END TEST ( 2023-06-28 14:04:04.055966 ):  test_seurat_small-query 
+START TEST ( 2023-06-28 14:04:04.057835 ):  test_seurat_10K-cells-human 
+END TEST ( 2023-06-28 14:04:17.078379 ):  test_seurat_10K-cells-human 
+START TEST ( 2023-06-28 14:04:17.080181 ):  test_seurat_100K-cells-human 
+END TEST ( 2023-06-28 14:05:08.98193 ):  test_seurat_100K-cells-human 
+START TEST ( 2023-06-28 14:05:08.983845 ):  test_seurat_250K-cells-human 
+END TEST ( 2023-06-28 14:06:58.356763 ):  test_seurat_250K-cells-human 
+START TEST ( 2023-06-28 14:06:58.358616 ):  test_seurat_500K-cells-human 
+END TEST ( 2023-06-28 14:10:39.413578 ):  test_seurat_500K-cells-human 
+START TEST ( 2023-06-28 14:10:39.415487 ):  test_seurat_750K-cells-human 
+END TEST ( 2023-06-28 14:15:51.340092 ):  test_seurat_750K-cells-human 
+START TEST ( 2023-06-28 14:15:51.341954 ):  test_seurat_1M-cells-human 
+END TEST ( 2023-06-28 14:16:42.491952 ):  test_seurat_1M-cells-human 
+START TEST ( 2023-06-28 14:16:42.494254 ):  test_seurat_common-tissue 
+END TEST ( 2023-06-28 14:20:43.831188 ):  test_seurat_common-tissue 
+START TEST ( 2023-06-28 14:20:43.833142 ):  test_seurat_common-tissue-large-buffer-size 
+END TEST ( 2023-06-28 14:24:50.548616 ):  test_seurat_common-tissue-large-buffer-size 
+START TEST ( 2023-06-28 14:24:50.550572 ):  test_seurat_common-cell-type 
+END TEST ( 2023-06-28 14:41:30.949797 ):  test_seurat_common-cell-type 
+START TEST ( 2023-06-28 14:41:30.952931 ):  test_seurat_common-cell-type-large-buffer-size 
+END TEST ( 2023-06-28 16:01:33.389666 ):  test_seurat_common-cell-type-large-buffer-size 
+START TEST ( 2023-06-28 16:01:33.393631 ):  test_seurat_whole-enchilada-large-buffer-size 
+END TEST ( 2023-06-28 16:01:33.398993 ):  test_seurat_whole-enchilada-large-buffer-size
+```
+
+- `acceptance-tests-logs-2023-06-23.csv `
+
+```
+test,user,system,real,test_result
+test_load_obs_human,15.883,90.46,7.412,expect_true(nrow(obs_df) > 0): expectation_success: nrow(obs_df) > 0 is not TRUE 
+test_load_var_human,0.446000000000002,0.525999999999996,1.681,expect_true(nrow(var_df) > 0): expectation_success: nrow(var_df) > 0 is not TRUE 
+test_load_obs_mouse,2.334,10.173,2.293,expect_true(nrow(obs_df) > 0): expectation_success: nrow(obs_df) > 0 is not TRUE 
+test_load_var_mouse,0.402000000000001,0.498999999999995,1.706,expect_true(nrow(var_df) > 0): expectation_success: nrow(var_df) > 0 is not TRUE 
+test_incremental_read_obs_human,12.644,89.335,5.486,expect_true(table_iter_is_ok(obs_iter)): expectation_success: table_iter_is_ok(obs_iter) is not TRUE 
+test_incremental_read_var_human,0.431000000000004,0.623999999999995,1.544,expect_true(table_iter_is_ok(var_iter)): expectation_success: table_iter_is_ok(var_iter) is not TRUE 
+test_incremental_read_X_human,8541.548,14085.129,1301.948,expect_true(table_iter_is_ok(X_iter)): expectation_success: table_iter_is_ok(X_iter) is not TRUE 
+test_incremental_read_X_human-large-buffer-size,8298.131,55528.271,1632.207,expect_true(table_iter_is_ok(X_iter)): expectation_success: table_iter_is_ok(X_iter) is not TRUE 
+test_incremental_read_obs_mouse,2.98799999999756,11.2309999999998,8.02999999999975,expect_true(table_iter_is_ok(obs_iter)): expectation_success: table_iter_is_ok(obs_iter) is not TRUE 
+test_incremental_read_var_mouse,0.781999999999243,0.567000000010012,2.75600000000031,expect_true(table_iter_is_ok(var_iter)): expectation_success: table_iter_is_ok(var_iter) is not TRUE 
+test_incremental_read_X_mouse,956.803999999996,1747.19899999999,216.037,expect_true(table_iter_is_ok(X_iter)): expectation_success: table_iter_is_ok(X_iter) is not TRUE 
+test_incremental_read_X_mouse-large-buffer-size,944.569000000003,1788.836,89.9070000000002,expect_true(table_iter_is_ok(X_iter)): expectation_success: table_iter_is_ok(X_iter) is not TRUE 
+test_incremental_query_human_brain,229.760000000002,235.297999999995,67.5410000000002,expect_true(table_iter_is_ok(query$obs())): expectation_success: table_iter_is_ok(query$obs()) is not TRUE ; expect_true(table_iter_is_ok(query$var())): expectation_success: table_iter_is_ok(query$var()) is not TRUE ; expect_true(table_iter_is_ok(query$X("raw")$tables())): expectation_success: table_iter_is_ok(query$X("raw")$tables()) is not TRUE 
+test_incremental_query_human_aorta,14.7129999999997,69.6689999999944,13.0839999999998,expect_true(table_iter_is_ok(query$obs())): expectation_success: table_iter_is_ok(query$obs()) is not TRUE ; expect_true(table_iter_is_ok(query$var())): expectation_success: table_iter_is_ok(query$var()) is not TRUE ; expect_true(table_iter_is_ok(query$X("raw")$tables())): expectation_success: table_iter_is_ok(query$X("raw")$tables()) is not TRUE 
+test_incremental_query_mouse_brain,46.494999999999,56.6560000000027,11.3639999999996,expect_true(table_iter_is_ok(query$obs())): expectation_success: table_iter_is_ok(query$obs()) is not TRUE ; expect_true(table_iter_is_ok(query$var())): expectation_success: table_iter_is_ok(query$var()) is not TRUE ; expect_true(table_iter_is_ok(query$X("raw")$tables())): expectation_success: table_iter_is_ok(query$X("raw")$tables()) is not TRUE 
+test_incremental_query_mouse_aorta,14.8260000000009,13.6779999999999,6.78200000000015,expect_true(table_iter_is_ok(query$obs())): expectation_success: table_iter_is_ok(query$obs()) is not TRUE ; expect_true(table_iter_is_ok(query$var())): expectation_success: table_iter_is_ok(query$var()) is not TRUE ; expect_true(table_iter_is_ok(query$X("raw")$tables())): expectation_success: table_iter_is_ok(query$X("raw")$tables()) is not TRUE 
+test_seurat_small-query,24.0690000000031,70.6049999999959,22.018,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_10K-cells-human,9.0669999999991,9.08899999999267,13.02,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_100K-cells-human,55.2659999999996,52.5160000000033,51.9010000000003,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_250K-cells-human,122.486999999997,107.065000000002,109.373,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_500K-cells-human,246.814000000002,192.854000000007,221.055,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_750K-cells-human,339.014999999999,291.834999999992,311.924,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_1M-cells-human,160.785,229.281999999992,51.1480000000001,test_seurat(test_args): Error: Error in `vec_to_Array(x, type)`: long vectors not supported yet: memory.c:3888 
+test_seurat_common-tissue,388.418999999998,256.304000000004,241.336,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_common-tissue-large-buffer-size,383.98,271.957999999999,246.715,test_seurat(test_args): expectation_success: is(this_seurat, "Seurat") is not TRUE ; test_seurat(test_args): expectation_success: ncol(this_seurat) > 0 is not TRUE 
+test_seurat_common-cell-type,3408.023,9100.003,1000.399,test_seurat(test_args): Error: Error in `vec_to_Array(x, type)`: long vectors not supported yet: memory.c:3888 
+test_seurat_common-cell-type-large-buffer-size,3552.187,30429.321,4802.434,test_seurat(test_args): Error: Error in `vec_to_Array(x, type)`: long vectors not supported yet: memory.c:3888 
+test_seurat_whole-enchilada-large-buffer-size,0.00400000000081491,0,0.00500000000101863,expect_true(TRUE): expectation_success: TRUE is not TRUE
+```
+
+
 ## 2023-06-23
 
 - Host: EC2 instance type: `r6id.x32xlarge`, all nvme mounted as swap.
