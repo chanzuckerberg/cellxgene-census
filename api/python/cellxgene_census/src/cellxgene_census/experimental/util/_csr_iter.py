@@ -55,14 +55,14 @@ def X_sparse_iter(
     Examples:
         >>> with cellxgene_census.open_soma() as census:
         ...     exp = census["census_data"][experiment]
-        ...    with exp.axis_query(measurement_name="RNA") as query:
-        ...        for (obs_soma_joinids, var_soma_joinids), X_chunk in X_sparse_iter(
-        ...            query, X_name="raw", stride=1000
-        ...        ):
-        ...            # X_chunk is a scipy.csr_matrix of csc_matrix
-        ...            # For each X_chunk[i, j], the associated soma_joinid is
-        ...            # obs_soma_joinids[i] and var_soma_joinids[j]
-        ...            ...
+        ...     with exp.axis_query(measurement_name="RNA") as query:
+        ...         for (obs_soma_joinids, var_soma_joinids), X_chunk in X_sparse_iter(
+        ...             query, X_name="raw", stride=1000
+        ...         ):
+        ...             # X_chunk is a scipy.csr_matrix of csc_matrix
+        ...             # For each X_chunk[i, j], the associated soma_joinid is
+        ...             # obs_soma_joinids[i] and var_soma_joinids[j]
+        ...             ...
 
     Lifecycle:
         experimental
