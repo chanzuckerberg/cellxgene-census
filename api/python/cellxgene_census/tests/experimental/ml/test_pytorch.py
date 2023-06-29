@@ -18,7 +18,12 @@ from tiledbsoma._collection import CollectionBase
 try:
     from torch import Tensor
 
-    from cellxgene_census.experimental.ml.pytorch import ExperimentDataPipe, experiment_dataloader
+    from cellxgene_census.experimental.ml.pytorch import (
+        ExperimentDataPipe,
+        ObsAndXSOMABatch,
+        Stats,
+        experiment_dataloader,
+    )
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
     pass
@@ -255,12 +260,12 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
 def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment) -> None:
-    with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXIterator.next_soma_batch") as mock_next_soma_batch:
+    with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXSOMAIterator.__next__") as mock_soma_iterator_next:
         # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
-        mock_next_soma_batch.side_effect = [
-            (pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4)),
-            (pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4)),
-            (pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2)),
+        mock_soma_iterator_next.side_effect = [
+            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
+            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
+            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
         ]
 
         exp_data_pipe = ExperimentDataPipe(

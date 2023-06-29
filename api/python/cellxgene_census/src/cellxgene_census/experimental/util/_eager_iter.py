@@ -1,7 +1,11 @@
+import logging
 import threading
 from collections import deque
 from concurrent import futures
+from concurrent.futures import Future
 from typing import Deque, Iterator, Optional, TypeVar
+
+util_logger = logging.getLogger("cellxgene_census.experimental.util")
 
 _T = TypeVar("_T")
 
@@ -16,18 +20,25 @@ class EagerIterator(Iterator[_T]):
         self.iterator = iterator
         self._pool = pool or futures.ThreadPoolExecutor()
         self._own_pool = pool is None
+        self._future: Optional[Future[_T]] = None
+        self.fetch_next()
+
+    def fetch_next(self) -> None:
         self._future = self._pool.submit(self.iterator.__next__)
+        util_logger.debug("Fetching next iterator element, eagerly")
 
     def __next__(self) -> _T:
         try:
+            assert self._future
             res = self._future.result()
-            self._future = self._pool.submit(self.iterator.__next__)
+            self.fetch_next()
             return res
         except StopIteration:
             self._cleanup()
             raise
 
     def _cleanup(self) -> None:
+        util_logger.debug("Cleaning up eager iterator")
         if self._own_pool:
             self._pool.shutdown()
 
@@ -68,6 +79,7 @@ class EagerBufferedIterator(Iterator[_T]):
 
     def _begin_next(self) -> None:
         def _fut_done(fut: futures.Future[_T]) -> None:
+            util_logger.debug("Finished fetching next iterator element, eagerly")
             if fut.exception() is None:
                 self._begin_next()
 
@@ -75,11 +87,13 @@ class EagerBufferedIterator(Iterator[_T]):
             not_running = len(self._pending_results) == 0 or self._pending_results[-1].done()
             if len(self._pending_results) < self.max_pending and not_running:
                 _future = self._pool.submit(self.iterator.__next__)
+                util_logger.debug("Fetching next iterator element, eagerly")
                 _future.add_done_callback(_fut_done)
                 self._pending_results.append(_future)
             assert len(self._pending_results) <= self.max_pending
 
     def _cleanup(self) -> None:
+        util_logger.debug("Cleaning up eager iterator")
         if self._own_pool:
             self._pool.shutdown()
 
