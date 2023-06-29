@@ -16,9 +16,9 @@ def X_sparse_iter(
     query: soma.ExperimentAxisQuery,
     X_name: str = "raw",
     axis: int = 0,
-    stride: int = 2**16,  # row stride
-    fmt: Literal["csr", "csc"] = "csr",  # the resulting sparse format
-    be_eager: bool = True,
+    stride: int = 2**16,
+    fmt: Literal["csr", "csc"] = "csr",
+    use_eager_fetch: bool = True,
 ) -> Iterator[_RT]:
     """
     Return an iterator over an X SparseNdMatrix, returning for each iteration step:
@@ -42,7 +42,7 @@ def X_sparse_iter(
             The chunk size to return in each step.
         fmt:
             The SciPy sparse array layout. Supported: 'csc' and 'csr' (default).
-        be_eager:
+        use_eager_fetch:
             If true, will use multiple threads to parallelize reading
             and processing. This will improve speed, but at the cost
             of some additional memory use.
@@ -91,7 +91,7 @@ def X_sparse_iter(
         )
         for obs_coords_chunk in obs_coord_chunker
     )
-    if be_eager:
+    if use_eager_fetch:
         table_reader = (t for t in EagerIterator(table_reader, query._threadpool))
 
     # lazy reindex of obs coordinates. Yields coords and (data, i, j) as numpy ndarrays
@@ -106,7 +106,7 @@ def X_sparse_iter(
         )
         for (obs_coords_chunk, var_coords), tbl in table_reader
     )
-    if be_eager:
+    if use_eager_fetch:
         coo_reindexer = (t for t in EagerIterator(coo_reindexer, query._threadpool))
 
     # lazy convert Arrow table to Scipy sparse.csr_matrix
@@ -122,7 +122,7 @@ def X_sparse_iter(
         )
         for (obs_coords_chunk, var_coords), (data, i, j) in coo_reindexer
     )
-    if be_eager:
+    if use_eager_fetch:
         csr_reader = (t for t in EagerIterator(csr_reader, query._threadpool))
 
     yield from csr_reader
