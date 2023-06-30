@@ -27,26 +27,26 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies= [
-    "typing_extensions",
-    "pyarrow",
-    "pandas",
-    "anndata>=0.8",
-    "numpy",
+    "typing_extensions==4.6.3",
+    "pyarrow==12.0.1",
+    "pandas==2.0.2",
+    "anndata==0.8",
+    "numpy==1.23.5",
     # IMPORTANT: consider TileDB format compat before advancing this version.
     # IMPORTANT: do not update to cellxgene_census package until you want a new tiledbsoma/tiledb
-    "cell_census==0.10.0", 
-    "scipy==1.10.1",
-    "fsspec",
-    "s3fs",
-    "requests",
-    "aiohttp",
+    "cellxgene_census==1.0.0", 
+    "scipy==1.10.1",  # 1.11 has compat issues with pyarrow
+    "fsspec==2023.6.0",
+    "s3fs==2023.6.0",
+    "requests==2.31.0",
+    "aiohttp==3.8.4",
     "Cython", # required by owlready2
     "wheel",  # required by owlready2
-    "owlready2",
-    "gitpython",
-    "attrs>=22.2.0",
-    "psutil",
-    "pyyaml",
+    "owlready2==0.38",
+    "gitpython==3.1.31",
+    "attrs==23.1.0",
+    "psutil==5.9.5",
+    "pyyaml==6.0",
 ]
 
 [project.urls]
