@@ -140,77 +140,73 @@ test_that("test_incremental_read_X_mouse-large-buffer-size", {
 test_that("test_incremental_query_human_brain", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
-  
+
   organism <- "homo_sapiens"
   obs_value_filter <- "tissue == 'brain'"
-  
+
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
-    measurement_name = "RNA", 
+    measurement_name = "RNA",
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
-  
+
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  
 })
 
 test_that("test_incremental_query_human_aorta", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
-  
+
   organism <- "homo_sapiens"
   obs_value_filter <- "tissue == 'aorta'"
-  
+
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
-    measurement_name = "RNA", 
+    measurement_name = "RNA",
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
-  
+
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  
 })
 
 test_that("test_incremental_query_mouse_brain", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
-  
+
   organism <- "mus_musculus"
   obs_value_filter <- "tissue == 'brain'"
-  
+
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
-    measurement_name = "RNA", 
+    measurement_name = "RNA",
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
-  
+
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  
 })
 
 test_that("test_incremental_query_mouse_aorta", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
-  
+
   organism <- "mus_musculus"
   obs_value_filter <- "tissue == 'aorta'"
-  
+
   query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     experiment = census$get("census_data")$get(organism),
-    measurement_name = "RNA", 
+    measurement_name = "RNA",
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter)
   )
-  
+
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  
 })
 
 test_that("test_seurat_small-query", {
