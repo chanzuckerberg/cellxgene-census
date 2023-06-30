@@ -11,7 +11,7 @@ from somacore.options import SparseDFCoord
 from typing_extensions import Literal
 
 from ..._experiment import _get_experiment
-from .._eager_iter import EagerIterator
+from ..util import EagerIterator
 from ._online import CountsAccumulator, MeanVarianceAccumulator
 
 """

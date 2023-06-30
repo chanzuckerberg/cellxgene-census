@@ -15,7 +15,7 @@ import somacore
 import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
-from attr import attrs
+from attr import define
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore.query import _fast_csr
@@ -24,17 +24,29 @@ from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 
 import cellxgene_census
-from cellxgene_census._open import _build_soma_tiledb_context
+
+from ..._open import _build_soma_tiledb_context
+from ..util import EagerIterator
 
 ObsAndXDatum = Tuple[Tensor, Tensor]
+
+
+@define
+class ObsAndXSOMABatch:
+    obs: pd.DataFrame
+    X: scipy.matrix
+    stats: "Stats"
+
+    def __len__(self) -> int:
+        return len(self.obs)
+
 
 Encoders = Dict[str, LabelEncoder]
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
-pytorch_logger.setLevel(logging.INFO)
 
 
-@attrs
+@define
 class Stats:
     """
     Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API.
@@ -61,6 +73,13 @@ class Stats:
             f"elapsed={timedelta(seconds=self.elapsed)}"
         )
 
+    def __add__(self, other: "Stats") -> "Stats":
+        self.n_obs += other.n_obs
+        self.nnz += other.nnz
+        self.elapsed += other.elapsed
+        self.n_soma_batches += other.n_soma_batches
+        return self
+
 
 @contextmanager
 def _open_experiment(
@@ -80,20 +99,56 @@ def _open_experiment(
         yield exp
 
 
+class _ObsAndXSOMAIterator(Iterator[ObsAndXSOMABatch]):
+    obs_tables_iter: somacore.ReadIter[pa.Table]
+    """Iterates the SOMA batches (tables) of obs data"""
+
+    X: soma.SparseNDArray
+    """All X data"""
+
+    var_joinids: pa.Array
+
+    def __init__(self, X: soma.SparseNDArray, obs_tables_iter: somacore.ReadIter[pa.Table], var_joinids: pa.Array):
+        self.obs_tables_iter = obs_tables_iter
+        self.X = X
+        self.var_joinids = var_joinids
+
+    def __next__(self) -> ObsAndXSOMABatch:
+        pytorch_logger.debug("Retrieving next SOMA batch...")
+        start_time = time()
+
+        # If no more batches to iterate through, raise StopIteration, as all iterators do when at end
+        obs_table = next(self.obs_tables_iter)
+        obs_batch = obs_table.to_pandas()
+
+        # handle case of empty result (first batch has 0 rows)
+        if len(obs_batch) == 0:
+            raise StopIteration
+
+        X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
+        assert obs_batch.shape[0] == X_batch.shape[0]
+
+        stats = Stats()
+        stats.n_obs += X_batch.shape[0]
+        stats.nnz += X_batch.nnz
+        stats.elapsed += int(time() - start_time)
+        stats.n_soma_batches += 1
+
+        pytorch_logger.debug(f"Retrieved SOMA batch: {stats}")
+        return ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
+
+
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     """
     Iterates through a set of obs and related X rows, specified as ``soma_joinid``s. Encapsulates the batch-based data
     fetching from SOMA objects, providing row-based iteration.
     """
 
-    obs_tables_iter: somacore.ReadIter[pa.Table]
-    """Iterates the SOMA batches (tables) of obs data"""
+    soma_batch_iter: Iterator[ObsAndXSOMABatch]
+    """The iterator for SOMA batches of paired obs and X data"""
 
-    obs_batch: pd.DataFrame = pd.DataFrame()
-    """The current SOMA batch of obs data"""
-
-    X_batch: scipy.matrix = None
-    """All X data for the ``soma_joinid``s of the current obs - batch"""
+    soma_batch: Optional[ObsAndXSOMABatch]
+    """The current SOMA batch of obs and X data"""
 
     i: int = -1
     """Index into current obs ``SOMA`` batch"""
@@ -107,9 +162,12 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
         sparse_X: bool,
+        use_eager_fetch: bool,
     ) -> None:
-        self.X = X
-        self.obs_tables_iter = obs_tables_iter
+        self.soma_batch_iter = _ObsAndXSOMAIterator(X, obs_tables_iter, pa.array(var_joinids))
+        if use_eager_fetch:
+            self.soma_batch_iter = EagerIterator(self.soma_batch_iter)
+        self.soma_batch = None
         self.var_joinids = var_joinids
         self.batch_size = batch_size
         self.sparse_X = sparse_X
@@ -161,13 +219,16 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
         return X_tensor, obs_tensor
 
-    def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, sparse.csr_matrix]:
-        if not (0 <= self.i < len(self.obs_batch)):
-            self.obs_batch, self.X_batch = self.next_soma_batch()
+    def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
+        if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
+            self.soma_batch: ObsAndXSOMABatch = next(self.soma_batch_iter)
+            self.stats += self.soma_batch.stats
             self.i = 0
 
-        obs_batch = self.obs_batch
-        X_batch = self.X_batch
+            pytorch_logger.debug(f"Retrieved SOMA batch totals: {self.stats}")
+
+        obs_batch = self.soma_batch.obs
+        X_batch = self.soma_batch.X
 
         safe_batch_size = min(batch_size, len(obs_batch) - self.i)
         slice_ = slice(self.i, self.i + safe_batch_size)
@@ -182,28 +243,6 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.i += safe_batch_size
 
         return obs_rows, X_csr_scipy
-
-    # TODO: Retrieve next batch asynchronously, so it's available before the current batch's iteration ends
-    def next_soma_batch(self) -> Tuple[pd.DataFrame, scipy.matrix]:
-        pytorch_logger.debug("Retrieving next SOMA batch...")
-        start_time = time()
-        # If no more batches to iterate through, raise StopIteration, as all iterators do when at end
-        obs_table = next(self.obs_tables_iter)
-        obs_batch = obs_table.to_pandas()
-
-        # handle case of empty result (first batch has 0 rows)
-        if len(obs_batch) == 0:
-            raise StopIteration
-
-        X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
-        assert obs_batch.shape[0] == X_batch.shape[0]
-        self.stats.n_obs += X_batch.shape[0]
-        self.stats.nnz += X_batch.nnz
-        self.stats.elapsed += int(time() - start_time)
-        self.stats.n_soma_batches += 1
-        # TODO: also show per-batch stats (non-cumulative)
-        pytorch_logger.debug(f"Retrieved batch: shape={X_batch.shape}, cum_stats: {self.stats}")
-        return obs_batch, X_batch
 
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
@@ -256,6 +295,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         batch_size: int = 1,
         sparse_X: bool = False,
         soma_buffer_bytes: Optional[int] = None,
+        use_eager_fetch: bool = True,
     ) -> None:
         """
         Construct a new ``ExperimentDataPipe``.
@@ -279,6 +319,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         # TODO: This will control the SOMA batch sizes, and could be replaced with a row count once TileDB-SOMA
         #  supports `batch_size` param. It affects both the obs and X read operations.
         self.soma_buffer_bytes = soma_buffer_bytes
+        self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
         self._encoders = None
         self._obs_joinids = None
@@ -352,13 +393,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
             X: soma.SparseNDArray = exp.ms[self.measurement_name].X[self.layer_name]
+
             obs_tables_iter = exp.obs.read(
                 coords=(self._partition_obs_joinids(self._obs_joinids),),
                 batch_size=somacore.BatchSize(),
                 column_names=self.obs_column_names,
             )
 
-            for datum_ in _ObsAndXIterator(
+            obs_and_x_iter = _ObsAndXIterator(
                 X,
                 obs_tables_iter,
                 var_joinids=self._var_joinids,
@@ -366,7 +408,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 encoders=self.obs_encoders,
                 stats=self._stats,
                 sparse_X=self.sparse_X,
-            ):
+                use_eager_fetch=self.use_eager_fetch,
+            )
+
+            for datum_ in obs_and_x_iter:
                 yield datum_
 
     def __len__(self) -> int:
@@ -400,6 +445,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         return encoders
 
+    # TODO: This does not work in multiprocessing mode, as child process's stats are not collected
     def stats(self) -> Stats:
         """
         Get data loading stats for this ``ExperimentDataPipe``.

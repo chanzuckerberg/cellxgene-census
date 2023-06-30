@@ -35,7 +35,7 @@ dependencies= [
     # IMPORTANT: consider TileDB format compat before advancing this version.
     # IMPORTANT: do not update to cellxgene_census package until you want a new tiledbsoma/tiledb
     "cell_census==0.10.0", 
-    "scipy<=1.10.1",  # for pyarrow compatibility
+    "scipy==1.10.1",
     "fsspec",
     "s3fs",
     "requests",
@@ -63,7 +63,7 @@ root = "../.."
 
 [tool.black]
 line-length = 120
-target_version = ['py10']
+target_version = ['py310']
 
 [tool.mypy]
 show_error_codes = true
