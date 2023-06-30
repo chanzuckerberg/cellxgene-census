@@ -23,9 +23,9 @@
 
    .. autosummary::
    
-      ~Stats.elapsed
       ~Stats.n_obs
-      ~Stats.n_soma_batches
       ~Stats.nnz
+      ~Stats.elapsed
+      ~Stats.n_soma_batches
    
    

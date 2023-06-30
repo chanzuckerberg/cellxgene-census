@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.2.1
+                    1.3.0
                 </div>
                 
             
@@ -190,7 +190,7 @@
   <section id="Integrating-multi-dataset-slices-of-data">
 <h1>Integrating multi-dataset slices of data<a class="headerlink" href="#Integrating-multi-dataset-slices-of-data" title="Permalink to this heading">¶</a></h1>
 <p>The Census contains data from multiple studies providing an opportunity to perform inter-dataset analysis. To this end integration of data has to be performed first to account for batch effects.</p>
-<p>This notebook provides a demonstration for integrating two Census datasets using <code class="docutils literal notranslate"><span class="pre">`scvi-tools</span></code> &lt;<a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">https://docs.scvi-tools.org/en/stable/index.html</a>&gt;`__. <strong>The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.</strong></p>
+<p>This notebook provides a demonstration for integrating two Census datasets using <a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">scvi-tools</a>. <strong>The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.</strong></p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
 <li><p>Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2).</p></li>
@@ -410,7 +410,7 @@ Name: count, dtype: int64
 <h2>Integration with scvi-tools<a class="headerlink" href="#Integration-with-scvi-tools" title="Permalink to this heading">¶</a></h2>
 <p>From its documentation <code class="docutils literal notranslate"><span class="pre">scvi-tools</span></code> is described as a package for end-to-end analysis of single-cell omics data primarily developed and maintained by the Yosef Lab at UC Berkeley.</p>
 <p>Here we will use the “single-cell Variational Inference” model or scVI which uses a deep generative model for the integration of spatial transcriptomic data and scRNA-seq data.</p>
-<p><strong>For comprehensive usage and best practices of scVI please refer to the</strong><a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">doc site</a><strong>of ``scvi-tools``.</strong></p>
+<p><strong>For comprehensive usage and best practices of scVI please refer to the</strong><a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">doc site</a><strong>of scvi-tools.</strong></p>
 <section id="Inspecting-data-prior-to-integration">
 <h3>Inspecting data prior to integration<a class="headerlink" href="#Inspecting-data-prior-to-integration" title="Permalink to this heading">¶</a></h3>
 <p>Let’s take a look at the strength of batch effects in our data. For that we will perform bread-and-butter normalization, neighbor graph calculation, and embedding visualization via UMAP.</p>
@@ -509,7 +509,7 @@ Name: count, dtype: int64
 <section id="Data-integration-with-scVI">
 <h3>Data integration with scVI<a class="headerlink" href="#Data-integration-with-scVI" title="Permalink to this heading">¶</a></h3>
 <p>Whenever you query and fetch Census data from multiple datasets then integration needs to be performed as evidenced by the batch effects we observed.</p>
-<p><strong>The paramaters for SCVI used in this notebook were selected to the model run quickly.</strong> For best practices on integration of single-cell data using <code class="docutils literal notranslate"><span class="pre">`scvi-tools</span></code> &lt;<a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">https://docs.scvi-tools.org/en/stable/index.html</a>&gt;`__ please refer to their documentation page.</p>
+<p><strong>The paramaters for SCVI used in this notebook were selected to the model run quickly.</strong> For best practices on integration of single-cell data using <a class="reference external" href="https://docs.scvi-tools.org/en/stable/index.html">scvi-tools</a> please refer to their documentation page.</p>
 <p>Additionally we recommend reading the article <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2022.03.10.483747v1">An integrated cell atlas of the human lung in health and disease</a> by Sikkema et al. whom perfomed integration of 43 datasets from Lung.</p>
 <p>Here we focus on the metadata from the Census that can be as batch information for integration.</p>
 <section id="Integration-with-batch-defined-as-dataset_id">

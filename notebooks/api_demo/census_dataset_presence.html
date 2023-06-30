@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.2.1
+                    1.3.0
                 </div>
                 
             
@@ -560,7 +560,11 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <section id="Identifying-genes-measured-in-a-specific-dataset.">
 <h2>Identifying genes measured in a specific dataset.<a class="headerlink" href="#Identifying-genes-measured-in-a-specific-dataset." title="Permalink to this heading">¶</a></h2>
 <p>Now that we have the dataset table, the genes metadata table, and the dataset presence matrix, we can check if a gene or set of genes were measured in a specific dataset.</p>
-<p><strong>Important:</strong> the presence matrix is indexed by soma_joinid, and is <em>NOT</em> positionally indexed. In other words: * the first dimension of the presence matrix is the dataset’s <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>, as stored in the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe. * the second dimension of the presence matrix is the feature’s <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>, as stored in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
+<p><strong>Important:</strong> the presence matrix is indexed by soma_joinid, and is <em>NOT</em> positionally indexed. In other words:</p>
+<ul class="simple">
+<li><p>the first dimension of the presence matrix is the dataset’s <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>, as stored in the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe.</p></li>
+<li><p>the second dimension of the presence matrix is the feature’s <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>, as stored in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p></li>
+</ul>
 <p>Let’s find out if the the gene <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000286096&quot;</span></code> was measured in the dataset with id <code class="docutils literal notranslate"><span class="pre">&quot;97a17473-e2b1-4f31-a544-44a60773e2dd&quot;</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:

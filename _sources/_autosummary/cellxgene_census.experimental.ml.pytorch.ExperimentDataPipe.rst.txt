@@ -14,7 +14,6 @@
    .. autosummary::
    
       ~ExperimentDataPipe.__init__
-      ~ExperimentDataPipe.obs_encoders
       ~ExperimentDataPipe.register_datapipe_as_function
       ~ExperimentDataPipe.register_function
       ~ExperimentDataPipe.reset
@@ -32,6 +31,7 @@
    
       ~ExperimentDataPipe.functions
       ~ExperimentDataPipe.getstate_hook
+      ~ExperimentDataPipe.obs_encoders
       ~ExperimentDataPipe.reduce_ex_hook
       ~ExperimentDataPipe.repr_hook
       ~ExperimentDataPipe.shape

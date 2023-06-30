@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.2.1
+                    1.3.0
                 </div>
                 
             
@@ -230,7 +230,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <p>For slicing the cell metadata there are two relevant arguments that can be passed through <code class="docutils literal notranslate"><span class="pre">read()</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">column_names</span></code> — list of strings indicating what metadata columns to fetch.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">value_filter</span></code> — Python expression with selection conditions to fetch rows, it is similar to <code class="docutils literal notranslate"><span class="pre">`pandas.DataFrame.query()</span></code> &lt;<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html">https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html</a>&gt;`__, for full details see <code class="docutils literal notranslate"><span class="pre">`tiledb.QueryCondition</span></code> &lt;<a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition</a>&gt;`__ shortly:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">value_filter</span></code> — Python expression with selection conditions to fetch rows, it is similar to <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html">pandas.DataFrame.query()</a>, for full details see <a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">tiledb.QueryCondition</a> shortly:</p>
 <ul>
 <li><p>Expressions are one or more comparisons</p></li>
 <li><p>Comparisons are one of <code class="docutils literal notranslate"><span class="pre">&lt;column&gt;</span> <span class="pre">&lt;op&gt;</span> <span class="pre">&lt;value&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;column&gt;</span> <span class="pre">&lt;op&gt;</span> <span class="pre">&lt;column&gt;</span></code></p></li>
@@ -809,8 +809,8 @@ Name: count, dtype: int64
 <p>The method will return an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">column_names</span></code> — a dictionary with two keys <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code> whose values are lists of strings indicating the columns to select for cell and gene metadata respectively.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> — python expression with selection conditions to fetch <strong>cells</strong> meeting a criteria. For full details see <code class="docutils literal notranslate"><span class="pre">`tiledb.QueryCondition</span></code> &lt;<a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition</a>&gt;`__.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">var_value_filter</span></code> — python expression with selection conditions to fetch <strong>genes</strong> meeting a criteria. Details as above. For full details see <code class="docutils literal notranslate"><span class="pre">`tiledb.QueryCondition</span></code> &lt;<a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition</a>&gt;`__.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> — python expression with selection conditions to fetch <strong>cells</strong> meeting a criteria. For full details see <a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">tiledb.QueryCondition</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_value_filter</span></code> — python expression with selection conditions to fetch <strong>genes</strong> meeting a criteria. Details as above. For full details see <a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">tiledb.QueryCondition</a>.</p></li>
 </ul>
 <p>For example if we want to fetch the expression data for:</p>
 <ul class="simple">

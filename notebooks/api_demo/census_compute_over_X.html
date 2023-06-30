@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.2.1
+                    1.3.0
                 </div>
                 
             
@@ -215,10 +215,19 @@
 <section id="Incremental-count-and-mean-calculation.">
 <h2>Incremental count and mean calculation.<a class="headerlink" href="#Incremental-count-and-mean-calculation." title="Permalink to this heading">¶</a></h2>
 <p>Many statistics, such as <code class="docutils literal notranslate"><span class="pre">mean</span></code>, are easy to calculate incrementally. This cell demonstrates a query on the <code class="docutils literal notranslate"><span class="pre">X['raw']</span></code> sparse nD array, which will return results in batches. Accumulate the sum and count incrementally, into <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_n</span></code>, and then compute mean.</p>
-<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names: * <code class="docutils literal notranslate"><span class="pre">soma_data</span></code> - the X value (float32) * <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> - the obs coordinate (int64) * <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> - the var coordinate (int64)</p>
+<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">soma_data</span></code> - the X value (float32)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> - the obs coordinate (int64)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> - the var coordinate (int64)</p></li>
+</ul>
 <p><strong>Important</strong>: the X matrices are joined to var/obs axis DataFrames by an integer join “id” (aka <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>). They are <em>NOT</em> positionally indexed, and any given cell or gene may have a <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> of any value (e.g., a large integer). In other words, for any given <code class="docutils literal notranslate"><span class="pre">X</span></code> value, the <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe, and the <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> coordinate corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
 <p>For convenience, the query package contains a utility function to simplify operations on query slices. <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> returns an indexer that can be used to wrap the output of <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>, converting from <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> to positional indexing. Positions are <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">N)</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code> are the number of results on the query for any given axis (equivalent to the Pandas <code class="docutils literal notranslate"><span class="pre">.iloc</span></code> of the axis dataframe).</p>
-<p>Key points: * it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations. * by default, data in the census is indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> and not positionally. Use <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> if you want positions.</p>
+<p>Key points:</p>
+<ul class="simple">
+<li><p>it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations.</p></li>
+<li><p>by default, data in the census is indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> and not positionally. Use <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> if you want positions.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>

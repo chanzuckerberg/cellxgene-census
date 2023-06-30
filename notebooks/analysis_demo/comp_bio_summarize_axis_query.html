@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.2.1
+                    1.3.0
                 </div>
                 
             
@@ -189,7 +189,7 @@
                 
   <section id="Summarizing-cell-and-gene-metadata">
 <h1>Summarizing cell and gene metadata<a class="headerlink" href="#Summarizing-cell-and-gene-metadata" title="Permalink to this heading">¶</a></h1>
-<p>This notebook provides examples for basic axis metadata handling using Pandas. The Census stores <code class="docutils literal notranslate"><span class="pre">obs</span></code> (cell) and <code class="docutils literal notranslate"><span class="pre">var</span></code> (gene) metadata in <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> objects via the <code class="docutils literal notranslate"><span class="pre">`TileDB-SOMA</span></code> API &lt;<a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">https://github.com/single-cell-data/TileDB-SOMA</a>&gt;`__ (<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">documentation</a>), which can be queried and read as a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> using <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code>.</p>
+<p>This notebook provides examples for basic axis metadata handling using Pandas. The Census stores <code class="docutils literal notranslate"><span class="pre">obs</span></code> (cell) and <code class="docutils literal notranslate"><span class="pre">var</span></code> (gene) metadata in <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> objects via the <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA API</a> (<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">documentation</a>), which can be queried and read as a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> using <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code>.</p>
 <p>Note that Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> is an in-memory object, therefore queries should be small enough for results to fit in memory.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -350,7 +350,11 @@ CL:0002632    132243
 Name: count, dtype: int64
 </pre></div></div>
 </div>
-<p>You can also define much more complex value filters. For example: * combine terms with <code class="docutils literal notranslate"><span class="pre">and</span></code> and <code class="docutils literal notranslate"><span class="pre">or</span></code> * use the <code class="docutils literal notranslate"><span class="pre">in</span></code> operator to query on multiple values</p>
+<p>You can also define much more complex value filters. For example:</p>
+<ul class="simple">
+<li><p>combine terms with <code class="docutils literal notranslate"><span class="pre">and</span></code> and <code class="docutils literal notranslate"><span class="pre">or</span></code></p></li>
+<li><p>use the <code class="docutils literal notranslate"><span class="pre">in</span></code> operator to query on multiple values</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
