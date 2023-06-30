@@ -10,7 +10,7 @@ util_logger = logging.getLogger("cellxgene_census.experimental.util")
 _T = TypeVar("_T")
 
 
-class EagerIterator(Iterator[_T]):
+class _EagerIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],
@@ -51,7 +51,7 @@ class EagerIterator(Iterator[_T]):
         super_del()
 
 
-class EagerBufferedIterator(Iterator[_T]):
+class _EagerBufferedIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],
