@@ -2,7 +2,7 @@ import argparse
 import sys
 from typing import Optional, TextIO
 
-import cell_census as cellxgene_census  # the eventual name
+import cellxgene_census
 import pandas as pd
 
 from .build_soma.globals import CENSUS_DATA_NAME, CENSUS_INFO_NAME
