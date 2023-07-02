@@ -68,6 +68,27 @@ test_that("test_incremental_read_var_human", {
   expect_true(table_iter_is_ok(var_iter))
 })
 
+test_that("test_incremental_read_obs_mouse", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "mus_musculus"
+
+  # use subset of columns for speed
+  obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  expect_true(table_iter_is_ok(obs_iter))
+})
+
+test_that("test_incremental_read_var_mouse", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "mus_musculus"
+
+  var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  expect_true(table_iter_is_ok(var_iter))
+})
+
 test_that("test_incremental_read_X_human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
@@ -90,27 +111,6 @@ test_that("test_incremental_read_X_human-large-buffer-size", {
   # exceeds R's capability to allocate vectors beyond 32bit
   X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
-})
-
-test_that("test_incremental_read_obs_mouse", {
-  census <- open_soma_latest_for_test()
-  on.exit(census$close(), add = TRUE)
-
-  organism <- "mus_musculus"
-
-  # use subset of columns for speed
-  obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
-  expect_true(table_iter_is_ok(obs_iter))
-})
-
-test_that("test_incremental_read_var_mouse", {
-  census <- open_soma_latest_for_test()
-  on.exit(census$close(), add = TRUE)
-
-  organism <- "mus_musculus"
-
-  var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
-  expect_true(table_iter_is_ok(var_iter))
 })
 
 test_that("test_incremental_read_X_mouse", {
