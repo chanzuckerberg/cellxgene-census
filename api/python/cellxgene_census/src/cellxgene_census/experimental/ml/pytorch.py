@@ -26,7 +26,7 @@ from torch.utils.data.dataset import Dataset
 import cellxgene_census
 
 from ..._open import _build_soma_tiledb_context
-from ..util import EagerIterator
+from ..util._eager_iter import _EagerIterator
 
 ObsAndXDatum = Tuple[Tensor, Tensor]
 
@@ -166,7 +166,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     ) -> None:
         self.soma_batch_iter = _ObsAndXSOMAIterator(X, obs_tables_iter, pa.array(var_joinids))
         if use_eager_fetch:
-            self.soma_batch_iter = EagerIterator(self.soma_batch_iter)
+            self.soma_batch_iter = _EagerIterator(self.soma_batch_iter)
         self.soma_batch = None
         self.var_joinids = var_joinids
         self.batch_size = batch_size
