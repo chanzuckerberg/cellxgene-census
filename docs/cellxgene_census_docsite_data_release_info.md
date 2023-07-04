@@ -61,7 +61,7 @@ census <- open_soma(census_version = "latest")
 
 ### LTS 2023-05-15
 
-Open this data release by specifying `census_version = "2023-06-28"` in future calls to `open_soma()`
+Open this data release by specifying `census_version = "2023-06-28"` in future calls to `open_soma()`.
 
 #### 🔴 Erratum 🔴  
 
