@@ -1,2 +1,2 @@
-cellxgene-census
+cellxgene-census[experimental]
 xxhash
