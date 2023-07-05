@@ -1,19 +1,10 @@
 import concurrent.futures
 import logging
 import multiprocessing
-import os
-from typing import Iterator, Optional, TypeVar, cast
+from typing import Iterator, Optional, TypeVar
 
 from ..build_state import CensusBuildArgs
 from ..util import process_init
-
-
-def cpu_count() -> int:
-    """Sign, os.cpu_count() returns None if "undetermined" number of CPUs"""
-    cpu_count = os.cpu_count()
-    if os.cpu_count() is None:
-        return 1
-    return cast(int, cpu_count)
 
 
 def _mp_config_checks() -> bool:

@@ -1,8 +1,10 @@
 import logging
 import multiprocessing
+import os
 import platform
 import re
 import urllib.parse
+from typing import cast
 
 from .build_state import CensusBuildArgs
 from .logging import logging_init
@@ -39,6 +41,14 @@ def urlcat(base: str, *paths: str) -> str:
     return url
 
 
+def env_var_init(args: CensusBuildArgs) -> None:
+    """
+    Set environment variables as needed by dependencies, etc.
+    """
+    if "NUMEXPR_MAX_THREADS" not in os.environ:
+        os.environ["NUMEXPR_MAX_THREADS"] = str(min(1, cpu_count() // 2))
+
+
 def process_init(args: CensusBuildArgs) -> None:
     """
     Called on every process start to configure global package/module behavior.
@@ -46,6 +56,7 @@ def process_init(args: CensusBuildArgs) -> None:
     if multiprocessing.get_start_method(True) != "spawn":
         multiprocessing.set_start_method("spawn", True)
 
+    env_var_init(args)
     logging_init(args)
 
 
@@ -100,3 +111,11 @@ def log_process_resource_status(preface: str = "Resource use:") -> None:
             f"maps: {_resouce_getter.map_count} "
             f"[max: {_resouce_getter.max_map_count}]"
         )
+
+
+def cpu_count() -> int:
+    """Sign, os.cpu_count() returns None if "undetermined" number of CPUs"""
+    cpu_count = os.cpu_count()
+    if os.cpu_count() is None:
+        return 1
+    return cast(int, cpu_count)
