@@ -513,7 +513,6 @@ def _validate_Xnorm_layer(args_: Tuple[ExperimentSpecification, str, CensusBuild
                 yield (row_idx, raw, norm)
 
         def check_raw_and_norm(row_idx: int, raw: pa.Table, norm: pa.Table) -> bool:
-            logging.info(f"tick: {experiment_specification.name} {row_idx}")
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
 
@@ -545,7 +544,6 @@ def _validate_Xnorm_layer(args_: Tuple[ExperimentSpecification, str, CensusBuild
                 norm_spm.data, raw_spm.multiply(1.0 / raw_spm.sum(axis=1).A).data
             ), f"{experiment_specification.name}"
 
-            logging.info(f"tock: {experiment_specification.name} {row_idx}")
             return True
 
         if args.config.multi_process:
@@ -736,42 +734,46 @@ def validate_internal_consistency(
                 .to_pandas()
                 .set_index("soma_joinid")
             )
-            presence_tbl = exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME].read().tables().concat()
-            presence = sparse.coo_matrix(
-                (
-                    presence_tbl["soma_data"],
+
+            if MEASUREMENT_RNA_NAME in exp.ms and "raw" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                presence_tbl = (
+                    exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME].read().tables().concat()
+                )
+                presence = sparse.coo_matrix(
                     (
-                        datasets_df.index.get_indexer(presence_tbl["soma_dim_0"]),  # type: ignore[no-untyped-call]
-                        var.index.get_indexer(presence_tbl["soma_dim_1"]),
+                        presence_tbl["soma_data"],
+                        (
+                            datasets_df.index.get_indexer(presence_tbl["soma_dim_0"]),  # type: ignore[no-untyped-call]
+                            var.index.get_indexer(presence_tbl["soma_dim_1"]),
+                        ),
                     ),
-                ),
-                shape=(len(datasets_df), len(var)),
-            ).tocsr()
+                    shape=(len(datasets_df), len(var)),
+                ).tocsr()
 
-            # Assertion 1 - obs and var nnz counts are mutually consistent
-            assert obs.nnz.sum() == var.nnz.sum(), f"{eb.name}: axis NNZ mismatch."
-            assert obs.nnz.sum() == exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz, f"{eb.name}: axis / X NNZ mismatch."
+                # Assertion 1 - obs and var nnz counts are mutually consistent
+                assert obs.nnz.sum() == var.nnz.sum(), f"{eb.name}: axis NNZ mismatch."
+                assert obs.nnz.sum() == exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz, f"{eb.name}: axis / X NNZ mismatch."
 
-            # Assertion 2 - obs.n_measured_vars is consistent with presence matrix
-            """
-            approach: sum across presence by dataset. Merge with datasets df on dataset soma_joinid, then
-            merge with obs on dataset_id.  Assert that the new column == the n_measured_vars
-            """
-            datasets_df["presence_sum_var_axis"] = presence.sum(axis=1).A1
-            tmp = obs.merge(datasets_df, left_on="dataset_id", right_on="dataset_id")
-            assert (
-                tmp.n_measured_vars == tmp.presence_sum_var_axis
-            ).all(), f"{eb.name}: obs.n_measured_vars does not match presence matrix."
-            del tmp
+                # Assertion 2 - obs.n_measured_vars is consistent with presence matrix
+                """
+                approach: sum across presence by dataset. Merge with datasets df on dataset soma_joinid, then
+                merge with obs on dataset_id.  Assert that the new column == the n_measured_vars
+                """
+                datasets_df["presence_sum_var_axis"] = presence.sum(axis=1).A1
+                tmp = obs.merge(datasets_df, left_on="dataset_id", right_on="dataset_id")
+                assert (
+                    tmp.n_measured_vars == tmp.presence_sum_var_axis
+                ).all(), f"{eb.name}: obs.n_measured_vars does not match presence matrix."
+                del tmp
 
-            # Assertion 3 - var.n_measured_obs is consistent with presence matrix
-            tmp = datasets_df.set_index("dataset_id")
-            tmp["obs_counts_by_dataset"] = 0
-            tmp.update(obs.value_counts(subset="dataset_id").rename("obs_counts_by_dataset"))
-            assert (
-                var.n_measured_obs == (tmp.obs_counts_by_dataset.to_numpy() * presence)
-            ).all(), f"{eb.name}: var.n_measured_obs does not match presence matrix."
-            del tmp
+                # Assertion 3 - var.n_measured_obs is consistent with presence matrix
+                tmp = datasets_df.set_index("dataset_id")
+                tmp["obs_counts_by_dataset"] = 0
+                tmp.update(obs.value_counts(subset="dataset_id").rename("obs_counts_by_dataset"))
+                assert (
+                    var.n_measured_obs == (tmp.obs_counts_by_dataset.to_numpy() * presence)
+                ).all(), f"{eb.name}: var.n_measured_obs does not match presence matrix."
+                del tmp
 
     return True
 
