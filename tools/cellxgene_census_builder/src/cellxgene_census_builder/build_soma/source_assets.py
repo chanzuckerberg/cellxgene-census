@@ -7,8 +7,9 @@ import aiohttp
 import fsspec
 
 from ..build_state import CensusBuildArgs
+from ..util import cpu_count
 from .datasets import Dataset
-from .mp import cpu_count, create_process_pool_executor
+from .mp import create_process_pool_executor
 
 
 def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
