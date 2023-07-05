@@ -7,4 +7,5 @@ from ._highly_variable_genes import get_highly_variable_genes, highly_variable_g
 __all__ = [
     "get_highly_variable_genes",
     "highly_variable_genes",
+    "mean",
 ]
