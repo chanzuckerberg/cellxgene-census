@@ -7,7 +7,7 @@ import scipy.sparse as sparse
 import tiledbsoma as soma
 from typing_extensions import Literal
 
-from ._eager_iter import EagerIterator
+from ._eager_iter import _EagerIterator
 
 _RT = Tuple[Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]], sparse.spmatrix]
 
@@ -92,7 +92,7 @@ def X_sparse_iter(
         for obs_coords_chunk in obs_coord_chunker
     )
     if use_eager_fetch:
-        table_reader = (t for t in EagerIterator(table_reader, query._threadpool))
+        table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
 
     # lazy reindex of obs coordinates. Yields coords and (data, i, j) as numpy ndarrays
     coo_reindexer = (
@@ -107,7 +107,7 @@ def X_sparse_iter(
         for (obs_coords_chunk, var_coords), tbl in table_reader
     )
     if use_eager_fetch:
-        coo_reindexer = (t for t in EagerIterator(coo_reindexer, query._threadpool))
+        coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
 
     # lazy convert Arrow table to Scipy sparse.csr_matrix
     csr_reader: Generator[_RT, None, None] = (
@@ -123,6 +123,6 @@ def X_sparse_iter(
         for (obs_coords_chunk, var_coords), (data, i, j) in coo_reindexer
     )
     if use_eager_fetch:
-        csr_reader = (t for t in EagerIterator(csr_reader, query._threadpool))
+        csr_reader = (t for t in _EagerIterator(csr_reader, query._threadpool))
 
     yield from csr_reader
