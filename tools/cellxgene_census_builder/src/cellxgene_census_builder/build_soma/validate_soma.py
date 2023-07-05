@@ -6,7 +6,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, TypeVar, Union
+from typing import Any, Dict, Generator, List, Tuple, TypeVar, Union
 
 import anndata
 import numpy as np
@@ -44,7 +44,7 @@ from .globals import (
     MEASUREMENT_RNA_NAME,
     SOMA_TileDB_Context,
 )
-from .mp import create_process_pool_executor, log_on_broken_process_pool
+from .mp import EagerIterator, create_process_pool_executor, create_thread_pool_executor, log_on_broken_process_pool
 
 
 @dataclass  # TODO: use attrs
@@ -479,9 +479,9 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
     return True
 
 
-def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str]) -> bool:
+def _validate_Xnorm_layer(args_: Tuple[ExperimentSpecification, str, CensusBuildArgs]) -> bool:
     """Validate that X['normalized'] is correct relative to X['raw']"""
-    experiment_specification, soma_path = args
+    experiment_specification, soma_path, args = args_
 
     with open_experiment(soma_path, experiment_specification) as exp:
         logging.info(f"validate_Xnorm_layer - start, {experiment_specification.name}")
@@ -502,10 +502,18 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str]) -> bool:
             .set_index("soma_joinid")
         )
 
-        ROW_STRIDE = 100_000
-        for row_idx in range(0, n_rows, ROW_STRIDE):  # assumes contig joinids, [0, n_rows)
-            raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_STRIDE - 1),)).tables().concat()
-            norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_STRIDE - 1),)).tables().concat()
+        ROW_STRIDE = 250_000
+
+        def lazy_X_reader(
+            X_raw: soma.SparseNDArray, X_norm: soma.SparseNDArray
+        ) -> Generator[Tuple[int, pa.Table, pa.Table], None, None]:
+            for row_idx in range(0, n_rows, ROW_STRIDE):  # assumes contig joinids, [0, n_rows)
+                raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_STRIDE - 1),)).tables().concat()
+                norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_STRIDE - 1),)).tables().concat()
+                yield (row_idx, raw, norm)
+
+        def check_raw_and_norm(row_idx: int, raw: pa.Table, norm: pa.Table) -> bool:
+            logging.info(f"tick: {experiment_specification.name} {row_idx}")
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
 
@@ -536,6 +544,18 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str]) -> bool:
             assert np.allclose(
                 norm_spm.data, raw_spm.multiply(1.0 / raw_spm.sum(axis=1).A).data
             ), f"{experiment_specification.name}"
+
+            logging.info(f"tock: {experiment_specification.name} {row_idx}")
+            return True
+
+        if args.config.multi_process:
+            with create_thread_pool_executor(args) as pool:
+                for row_idx, raw, norm in EagerIterator(lazy_X_reader(X_raw, X_norm), pool=pool):
+                    assert check_raw_and_norm(row_idx, raw, norm)
+
+        else:
+            for row_idx, raw, norm in lazy_X_reader(X_raw, X_norm):
+                assert check_raw_and_norm(row_idx, raw, norm)
 
         logging.info(f"validate_Xnorm_layer - completed, {experiment_specification.name}")
 
@@ -584,7 +604,7 @@ def validate_X_layers(
         with create_process_pool_executor(args) as ppe:
             ROWS_PER_PROCESS = 1_000_000
             futures = []
-            futures += [ppe.submit(_validate_Xnorm_layer, (eb, soma_path)) for eb in experiment_specifications]
+            futures += [ppe.submit(_validate_Xnorm_layer, (eb, soma_path, args)) for eb in experiment_specifications]
             futures += [
                 ppe.submit(
                     _validate_X_layer_has_unique_coords,
@@ -620,7 +640,7 @@ def validate_X_layers(
             logging.info(f"validate_X {n} of {len(datasets)} complete.")
             assert vld
         for eb in experiment_specifications:
-            assert _validate_Xnorm_layer((eb, soma_path))
+            assert _validate_Xnorm_layer((eb, soma_path, args))
 
     return True
 
