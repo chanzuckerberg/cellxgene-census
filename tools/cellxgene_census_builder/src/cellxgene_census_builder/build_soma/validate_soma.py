@@ -584,6 +584,7 @@ def validate_X_layers(
         with create_process_pool_executor(args) as ppe:
             ROWS_PER_PROCESS = 1_000_000
             futures = []
+            futures += [ppe.submit(_validate_Xnorm_layer, (eb, soma_path)) for eb in experiment_specifications]
             futures += [
                 ppe.submit(
                     _validate_X_layer_has_unique_coords,
@@ -599,7 +600,6 @@ def validate_X_layers(
                 )
                 for dataset in datasets
             ]
-            futures += [ppe.submit(_validate_Xnorm_layer, (eb, soma_path)) for eb in experiment_specifications]
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
                 log_on_broken_process_pool(ppe)
                 assert future.result()

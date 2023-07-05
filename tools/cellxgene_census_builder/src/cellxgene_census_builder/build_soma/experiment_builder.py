@@ -412,25 +412,40 @@ class ExperimentBuilder:
         with soma.open(
             urlcat(self.experiment.uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
         ) as X_raw:
-
-            def X_norm_write(exp: soma.Experiment, X_tbl: pa.Table) -> None:
-                soma_dim_0 = X_tbl["soma_dim_0"]
-                soma_dim_1 = X_tbl["soma_dim_1"]
-                soma_data = X_tbl["soma_data"].to_numpy() / raw_sum[soma_dim_0]
-                exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].write(
-                    pa.Table.from_arrays(
-                        [soma_dim_0, soma_dim_1, soma_data],
-                        names=["soma_dim_0", "soma_dim_1", "soma_data"],
-                    )
-                )
-
+            X_normalized = self.experiment.ms[MEASUREMENT_RNA_NAME].X["normalized"]
             if args.config.multi_process:
                 with create_thread_pool_executor(args) as pool:
-                    for X_tbl in EagerIterator(X_raw.read().tables(), pool=pool):
-                        X_norm_write(self.experiment, X_tbl)
+                    lazy_reader = EagerIterator(X_raw.read().tables(), pool=pool)
+                    lazy_divider = EagerIterator(
+                        (
+                            (
+                                X_tbl["soma_dim_0"],
+                                X_tbl["soma_dim_1"],
+                                X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]],
+                            )
+                            for X_tbl in lazy_reader
+                        ),
+                        pool=pool,
+                    )
+                    for soma_dim_0, soma_dim_1, soma_data in lazy_divider:
+                        X_normalized.write(
+                            pa.Table.from_arrays(
+                                [soma_dim_0, soma_dim_1, soma_data],
+                                names=["soma_dim_0", "soma_dim_1", "soma_data"],
+                            )
+                        )
+
             else:
                 for X_tbl in X_raw.read().tables():
-                    X_norm_write(self.experiment, X_tbl)
+                    soma_dim_0 = X_tbl["soma_dim_0"]
+                    soma_dim_1 = X_tbl["soma_dim_1"]
+                    soma_data = X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]]
+                    X_normalized.write(
+                        pa.Table.from_arrays(
+                            [soma_dim_0, soma_dim_1, soma_data],
+                            names=["soma_dim_0", "soma_dim_1", "soma_data"],
+                        )
+                    )
 
         logging.info(f"Write X normalized: {self.name} - finished")
 

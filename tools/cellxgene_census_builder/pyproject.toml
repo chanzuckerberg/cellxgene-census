@@ -29,7 +29,7 @@ classifiers = [
 dependencies= [
     "typing_extensions==4.6.3",
     "pyarrow==12.0.1",
-    "pandas==2.0.2",
+    "pandas[performance]==2.0.3",
     "anndata==0.8",
     "numpy==1.23.5",
     # IMPORTANT: consider TileDB format compat before advancing this version.
