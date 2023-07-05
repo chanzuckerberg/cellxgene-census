@@ -70,6 +70,14 @@ def open_anndata(
                 ad.X.resize(ad.n_obs, len(new_var))
                 ad = anndata.AnnData(X=ad.X, obs=ad.obs, var=new_var, raw=ad.raw, dtype=np.float32)
 
+        # Drop all of the fields we do not use (obsm, varm, uns, etc). Speeds up subsequent slicing
+        # and reduces memory footprint.
+        del ad.uns
+        del ad.obsm
+        del ad.obsp
+        del ad.varm
+        del ad.varp
+
         # sanity checks & expectations for any AnnData we can handle
         if ad.raw is not None:
             assert ad.X.shape == ad.raw.X.shape
