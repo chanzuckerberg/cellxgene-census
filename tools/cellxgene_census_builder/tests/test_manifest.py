@@ -1,6 +1,8 @@
 import pathlib
 from unittest.mock import patch
 
+import pytest
+
 from cellxgene_census_builder.build_soma.manifest import load_manifest
 
 
@@ -109,7 +111,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
 
 def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
     """
-    `load_manifest` should exclude datasets that do not have assets
+    `load_manifest` should raise error if it finds datasets without assets
     """
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
         m.return_value = [
@@ -133,7 +135,5 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
             },
         ]
 
-        manifest = load_manifest(None)
-        assert len(manifest) == 1
-        assert manifest[0].dataset_id == "dataset_id_1"
-        assert manifest[0].dataset_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
+        with pytest.raises(RuntimeError):
+            load_manifest(None)
