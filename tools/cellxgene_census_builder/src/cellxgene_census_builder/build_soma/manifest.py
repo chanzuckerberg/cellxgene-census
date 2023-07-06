@@ -68,11 +68,13 @@ def load_manifest_from_CxG() -> List[Dataset]:
         assets = dataset.get("assets", [])
         assets_h5ad = [a for a in assets if a["filetype"] == "H5AD"]
         if not assets_h5ad:
-            logging.error(f"Unable to find H5AD asset for dataset id {dataset_id} - ignoring this dataset")
-            continue
+            msg = f"Manifest fetch: unable to find H5AD asset for dataset id {dataset_id} - this should never happen and is likely an upstream bug"
+            logging.error(msg)
+            raise RuntimeError(msg)
         if len(assets_h5ad) > 1:
-            logging.error(f"Dataset id {dataset_id} has more than one H5AD asset - ignoring this dataset")
-            continue
+            msg = f"Manifest fetch: dataset id {dataset_id} has more than one H5AD asset - this should never happen and is likely an upstream bug"
+            logging.error(msg)
+            raise RuntimeError(msg)
         asset_h5ad_uri = assets_h5ad[0]["url"]
         asset_h5ad_filesize = assets_h5ad[0]["filesize"]
 
