@@ -1,6 +1,6 @@
 # Census data releases 
 
-**Last edited**: July, 2023.
+**Last edited**: July 6th, 2023.
 
 **Contents**
 
@@ -19,20 +19,20 @@ To enable data stability and scientific reproducibility, [CZ CELLxGENE Discover]
 * Published online every six months for public access, starting on May 15, 2023.
 * Available for public access for at least 5 years upon publication.
  
-The latest LTS Census data release is the default opened by the APIs and recognized as the `census_version = "stable"`.
+The latest LTS Census data release is the default opened by the APIs and recognized as `census_version = "stable"`. To open previous LTS Census data releases, you can directly specify the version via its build date `census_version = "[YYYY]-[MM]-[DD]"`.
 
 Python
 
 ```python
 import cellxgene_census
-census = cellxgene_census.open_soma()
+census = cellxgene_census.open_soma(census_version = "stable")
 ```
 
 R
 
 ```r
 library("cellxgene.census")
-census <- open_soma()
+census <- open_soma(census_version = "stable")
 ```
 
 ### Weekly Census release (latest)
@@ -61,13 +61,13 @@ census <- open_soma(census_version = "latest")
 
 ### LTS 2023-05-15
 
-Open this data release by specifying `census_version = "2023-06-28"` in future calls to `open_soma()`.
+Open this data release by specifying `census_version = "2023-05-15"` in future calls to `open_soma()`.
 
-#### 🔴 Erratum 🔴  
+#### 🔴 Errata 🔴  
 
-There are 243,569 number of cells labelled as `is_primary_data = True` for which a fraction of them the label is incorrect. 
+**Duplicate observations with  `is_primary_data = True`**
 
-Such label indicates that a cell is the primary representation of an observation, otherwise a cell is deemed to be a duplicate representation. Based on their count vectors, these 243,569 number of cells are represented at least twice with `is_primary_data = True`.
+In order to prevent duplicate data in analyses, each observation (cell) should be marked `is_primary data = True` exactly once in the Census. Since this LTS release, 243,569 observations have been identified that are represented at least twice with `is_primary_data = True`.
 
 This issue will be corrected in the following LTS data release, by identifying and marking only one cell out of the duplicates as  `is_primary_data = True`.
 
