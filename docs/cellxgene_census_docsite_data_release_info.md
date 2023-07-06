@@ -65,7 +65,7 @@ Open this data release by specifying `census_version = "2023-05-15"` in future c
 
 #### 🔴 Errata 🔴  
 
-**Duplicate observations with  `is_primary_data = True`**
+##### Duplicate observations with  `is_primary_data = True`
 
 In order to prevent duplicate data in analyses, each observation (cell) should be marked `is_primary data = True` exactly once in the Census. Since this LTS release, 243,569 observations have been identified that are represented at least twice with `is_primary_data = True`.
 
