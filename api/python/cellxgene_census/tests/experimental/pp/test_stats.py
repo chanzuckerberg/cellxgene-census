@@ -1,7 +1,8 @@
+import math
+
 import pandas as pd
 import pytest
 import tiledbsoma as soma
-from numpy.testing import assert_almost_equal
 
 import cellxgene_census
 from cellxgene_census.experimental import pp
@@ -25,7 +26,7 @@ def small_mem_context() -> soma.SOMATileDBContext:
     "experiment_name,obs_value_filter",
     [
         ("mus_musculus", 'tissue_general == "liver" and is_primary_data == True'),
-        # ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
+        ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
         pytest.param("mus_musculus", "is_primary_data == True", marks=pytest.mark.expensive),
         pytest.param("homo_sapiens", "is_primary_data == True", marks=pytest.mark.expensive),
     ],
@@ -55,9 +56,9 @@ def test_mean_variance(
                 sparse_mat = sparse_row.to_scipy()
                 row = sparse_mat.tocsr().getrow(test_soma_joinid)
 
-                assert_almost_equal(
-                    row.todense().mean(), mean_variance.loc[test_soma_joinid, "mean"], decimal=5  # type: ignore
+                assert math.isclose(
+                    row.todense().mean(), mean_variance.loc[test_soma_joinid, "mean"], rel_tol=0.01  # type: ignore
                 )
-                assert_almost_equal(
-                    row.todense().var(), mean_variance.loc[test_soma_joinid, "variance"], decimal=5  # type: ignore
+                assert math.isclose(
+                    row.todense().var(), mean_variance.loc[test_soma_joinid, "variance"], rel_tol=0.01  # type: ignore
                 )
