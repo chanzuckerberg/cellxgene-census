@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import os
+from concurrent import futures
+
 import numpy as np
 import pandas as pd
 import tiledbsoma as soma
 
+from ..util._eager_iter import _EagerIterator
 from ._online import MeanVarianceAccumulator
 
 
@@ -45,14 +49,18 @@ def mean_variance(
     n_samples = np.array([query.n_vars], dtype=np.int64)
     mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_obs)
 
-    # TODO: EagerIterator
-    for arrow_tbl in query.X(layer).tables():
-        obs_indexer = query.indexer
-        obs_dim = obs_indexer.by_obs(arrow_tbl["soma_dim_0"])
-        data = arrow_tbl["soma_data"].to_numpy()
-        mvn.update_single_batch(obs_dim, data)
+    max_workers = (os.cpu_count() or 4) + 2
+    with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
+            # for arrow_tbl in query.X(layer).tables():
+            obs_indexer = query.indexer
+            obs_dim = obs_indexer.by_obs(arrow_tbl["soma_dim_0"])
+            data = arrow_tbl["soma_data"].to_numpy()
+            mvn.update_single_batch(obs_dim, data)
 
     _, _, all_u, all_var = mvn.finalize()
+
+    del mvn
 
     return pd.DataFrame(
         index=pd.Index(data=query.obs_joinids(), name="soma_joinid"),
