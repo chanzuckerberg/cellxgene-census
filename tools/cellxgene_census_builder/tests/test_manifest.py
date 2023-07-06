@@ -2,7 +2,6 @@ import pathlib
 from unittest.mock import patch
 
 import pytest
-
 from cellxgene_census_builder.build_soma.manifest import load_manifest
 
 
