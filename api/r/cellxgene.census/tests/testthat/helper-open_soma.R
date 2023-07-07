@@ -4,14 +4,15 @@
 
 tiledbsoma_ctx_latest_for_test <- NULL
 
-open_soma_latest_for_test <- function() {
+open_soma_latest_for_test <- function(...) {
   if (is.null(tiledbsoma_ctx_latest_for_test)) {
     # it's important to initialize tiledbsoma_ctx_latest_for_test "lazily" here
     # rather than at top level since top-level code is evaluated at install time
     # and saved, which leads to confusion with TileDB-R's internal caching of
     # the last-used context.
     tiledbsoma_ctx_latest_for_test <- new_SOMATileDBContext_for_census(
-      get_census_version_description("latest")
+      get_census_version_description("latest"),
+      ...
     )
   }
   open_soma("latest", tiledbsoma_ctx = tiledbsoma_ctx_latest_for_test)
