@@ -77,7 +77,7 @@ class MeanAccumulator:
         # compute u for each batch
         batches_u = self.u
 
-        # accum all batches using Chan's
+        # accum all batches
         all_u = _mbom_combine_batches(self.n_batches, self.n_samples, self.u)
 
         return batches_u, all_u
