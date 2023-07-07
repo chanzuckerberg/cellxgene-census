@@ -68,7 +68,8 @@ def mean_variance(
         for obs_dim, data in iterate():
             mvn.update_single_batch(obs_dim, data)
             _, _, all_u, all_var = mvn.finalize()
-            result["mean"] = all_u
+            if calculate_mean:
+                result["mean"] = all_u
             result["variance"] = all_var
         del mvn
     else:
