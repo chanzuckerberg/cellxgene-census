@@ -1,5 +1,5 @@
 """
-An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at [CELLxGENE Discover](https://cellxgene.cziscience.com/).
+An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at `CELLxGENE Discover`_.
 
 The API is built on the `tiledbsoma` SOMA API, and provides a number of helper functions including:
 
@@ -8,14 +8,19 @@ The API is built on the `tiledbsoma` SOMA API, and provides a number of helper f
     * Get a slice of the Census as an AnnData, for use with ScanPy
     * Get the URI for, or directly download, underlying data in H5AD format
 
-For more information on the API, visit the [cellxgene_census repo](https://github.com/chanzuckerberg/cellxgene-census/). For more information on SOMA, see the [tiledbsoma repo](https://github.com/single-cell-data/TileDB-SOMA).
+For more information on the API, visit the `cellxgene_census repo`_. For more information on SOMA, see the `tiledbsoma repo`_.
+
+.. _CELLxGENE Discover:
+    https://cellxgene.cziscience.com/
+
+.. _cellxgene_census repo:
+    https://github.com/chanzuckerberg/cellxgene-census/
+
+.. _tiledbsoma repo:
+    https://github.com/single-cell-data/TileDB-SOMA
 """
 
-try:
-    from importlib import metadata
-except ImportError:
-    # for python <=3.7
-    import importlib_metadata as metadata  # type: ignore[no-redef]
+from importlib import metadata
 
 from ._get_anndata import get_anndata
 from ._open import download_source_h5ad, get_source_h5ad_uri, open_soma

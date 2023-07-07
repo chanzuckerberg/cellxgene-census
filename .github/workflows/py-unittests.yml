@@ -9,12 +9,12 @@ on:
 
 jobs:
   unit_tests_python_api:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    runs-on: ${{matrix.os}}
 
     steps:
       - uses: actions/checkout@v3
@@ -22,27 +22,31 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install dependencies (including experimental)
         run: |
           python -m pip install -U pip setuptools wheel
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
-          pip install -e ./api/python/cellxgene_census/
-      - name: Test with pytest (API)
+          pip install -e './api/python/cellxgene_census/[experimental]'
+      - name: Test with pytest (API, main tests)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
+      - name: Test with pytest (API, experimental)
+        run: |
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 --experimental ./api/python/cellxgene_census/tests/experimental
       - uses: actions/upload-artifact@v3
+        if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage
           path: ./.coverage*
           retention-days: 3
 
   unit_tests_builder:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.10"]
+
+    runs-on: ${{matrix.os}}
 
     steps:
       - uses: actions/checkout@v3

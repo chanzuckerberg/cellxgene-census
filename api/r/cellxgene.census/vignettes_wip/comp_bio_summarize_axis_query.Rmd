@@ -1,8 +1,8 @@
 ---
-title: "Axis Query Example"
+title: "Summarizing cell and gene metadata"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Axis Query Example}
+  %\VignetteIndexEntry{Summarizing cell and gene metadata}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,38 +15,46 @@ knitr::opts_chunk$set(
 options(width = 80)
 ```
 
-<!--
+<!--`
 THIS VIGNETTE IS BASED ON:
-https://github.com/chanzuckerberg/cell-census/blob/main/api/python/notebooks/api_demo/census_axis_query.ipynb
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_summarize_axis_query.ipynb
 -->
 
-# Axis Query Example
-
-*Goal:* demonstrate basic axis metadata handling.
-
-The CZ CELLxGENE Census stores obs (cell) metadata in a SOMA DataFrame, which can be queried and read as an R data frame. The Census also has a convenience package which simplifies opening the census.
+This vignette provides examples for basic axis metadata handling. The CZ CELLxGENE Census stores `obs` (cell) and `var` (gene) metadata in a SOMA DataFrame objects via the [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) API ([documentation](https://tiledbsoma.readthedocs.io/en/latest/)), which can be queried and read as an R data frame. The Census also has a convenience package which simplifies opening the census.
 
 R data frames are in-memory objects. Take care that queries are small enough for results to fit in memory.
 
-## Opening the census
+**Contents**
 
-The `cellxgene.census` R package contains a convenient API to open the latest version of the Census.
+1. Opening the Census
+2. Summarizing cell metadata
+    - Example: Summarize all cell types
+    - Example: Summarize a subset of cell types, selected with a `value_filter`
+3. Full Census metadata stats
+
+## Opening the Census
+
+The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
 
 ```{r}
 census <- cellxgene.census::open_soma()
 ```
 
+If you open the Census, you should close it with `census$close()`. This can be automated using `on.exit(census$close(), add = TRUE)` immediately after `census <- open_soma()`.
+
 You can learn more about the cellxgene.census methods by accessing their corresponding documentation. For example `?cellxgene.census::open_soma`.
 
-## Summarize Census cell metadata
+## Summarizing cell metadata
+
+Once the Census is open you can use its TileDB-SOMA methods as it is itself a `SOMACollection`. You can thus access the metadata `SOMADataFram`e objects encoding cell and gene metadata.
 
 Tips:
 
-* You can read an *entire* SOMA dataframe into R using `as.data.frame(soma_df$read())`.
+* You can read an *entire* `SOMADataFrame` into R using `as.data.frame(soma_df$read()$concat())`.
 * Queries will be much faster if you request only the DataFrame columns required for your analysis (e.g. `column_names = c("soma_joinid", "cell_type_ontology_term_id")`).
 * You can also further refine query results by using a `value_filter`, which will filter the census for matching records.
 
-### Summarize all cell types
+### Example: Summarize all cell types
 
 This example reads the cell metadata (obs) into an R data frame to summarize in a variety of ways.
 
@@ -56,7 +64,7 @@ human <- census$get("census_data")$get("homo_sapiens")
 # Read obs into an R data frame (tibble).
 obs_df <- as.data.frame(human$obs$read(
   column_names = c("soma_joinid", "cell_type_ontology_term_id")
-))
+)$concat())
 
 # Find all unique values in the cell_type_ontology_term_id column.
 unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
@@ -69,7 +77,7 @@ cat(paste(
 head(unique_cell_type_ontology_term_id)
 ```
 
-### Summarize a subset of cell types, selected with a `value_filter`
+### Example: Summarize a subset of cell types, selected with a `value_filter`
 
 This example utilizes a SOMA "value filter" to read the subset of cells with `tissue_ontology_term_id` equal to `UBERON:0002048` (lung tissue), and summarizes the query result.
 
@@ -80,7 +88,7 @@ LUNG_TISSUE <- "UBERON:0002048"
 obs_df <- as.data.frame(human$obs$read(
   column_names = c("cell_type_ontology_term_id"),
   value_filter = paste("tissue_ontology_term_id == '", LUNG_TISSUE, "'", sep = "")
-))
+)$concat())
 
 # Find all unique values in the cell_type_ontology_term_id column as an R data frame.
 unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
@@ -110,14 +118,14 @@ You can also define much more complex value filters. For example:
 obs_df <- as.data.frame(human$obs$read(
   column_names = c("cell_type_ontology_term_id"),
   value_filter = "tissue_ontology_term_id %in% c('UBERON:0002082', 'UBERON:OOO2084', 'UBERON:0002080')"
-))
+)$concat())
 
 # Summarize
 top_10 <- sort(table(obs_df$cell_type_ontology_term_id), decreasing = TRUE)[1:10]
 print(top_10)
 ```
 
-### Full census stats
+## Full Census metadata stats
 
 This example queries all organisms in the Census, and summarizes the diversity of various metadata labels.
 
@@ -132,7 +140,7 @@ total_cells <- 0
 for (organism in census$get("census_data")$names()) {
   print(organism)
   obs_df <- as.data.frame(
-    census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)
+    census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)$concat()
   )
   total_cells <- total_cells + nrow(obs_df)
   for (col in cols_to_query) {
@@ -141,3 +149,13 @@ for (organism in census$get("census_data")$names()) {
 }
 cat(paste("Complete Census contains", total_cells, "cells."))
 ```
+
+### Close the census
+
+After use, the census object should be closed to release memory and other resources.
+
+```{r}
+census$close()
+```
+
+This also closes all SOMA objects accessed via the top-level `census`. Closing can be automated using `on.exit(census$close(), add = TRUE)` immediately after `census <- open_soma()`.

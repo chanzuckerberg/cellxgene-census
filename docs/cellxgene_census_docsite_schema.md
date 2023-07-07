@@ -5,7 +5,7 @@ This page provides a user-friendly overview of the Census contents and its schem
 **Contents**
 
 1. [Schema](#schema)
-2. [Data included in the Census](data-included-in-the-census)
+2. [Data included in the Census](#data-included-in-the-census)
 1. [SOMA objects](#soma-objects)
 
 ## Schema
@@ -14,14 +14,14 @@ The Census is a collection of a variety of **[SOMA objects](#soma-objects)** org
 
 ![image](cellxgene_census_docsite_model.svg)
 
-As you can see the Census data is a SOMACollection with two high-level items:
+As you can see the Census data is a `SOMACollection` with two high-level items:
 
 1. `"census_info"` for the census summary info.
 2. `"census_data"` for the single-cell data and metadata. 
 
 ### Census summary info `"census_info"`
 
-A SOMAcollection with tables providing information of the census as a whole, it has the following items:
+A `SOMAcollection` with tables providing information of the census as a whole, it has the following items:
 
 - `"summary"`: high-level information of this Census, e.g. build date, total cell count, etc.
 - `"datasets"`: A table with all datasets from CELLxGENE Discover used to create the Census.
@@ -46,6 +46,12 @@ All data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) that ad
 - Non-spatial RNA data, see full list of sequencing technologies included [here](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#assays).
 - Raw counts.
 - Only standardized cell and gene metadata as described in the CELLxGENE Discover dataset [schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md).
+
+⚠️ Note that the data includes: 
+
+* **Full-gene sequencing read counts** (e.g. Smart-Seq2) and **molecule counts** (e.g. 10X).
+* **Duplicate cells** present across multiple datasets, these can be filtered in or out using the cell metadata variable `is_primary_data`.
+
 
 ## SOMA objects 
 

@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">= 3.7, < 3.11"  # Python 3.11 is pending numba support
+requires-python = ">= 3.8, < 3.12"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -22,22 +22,32 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma==1.2.1",
+    "tiledbsoma==1.2.7",
     "anndata",
-    "numpy>=1.21,<1.24",  # numpy is constrained by numba and the old pip solver
+    "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
     "requests",
     "typing_extensions",
-    "s3fs",
-    "scipy",
+    "s3fs>=2021.06.1",
+    "scipy<1.11",  # work around incompatibility between scipy and pyarrow
+    # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
+    "certifi",
+]
+
+[project.optional-dependencies]
+experimental = [
+    "torch==2.0.1",
+    "torchdata==0.6.1",
+    "scikit-learn==1.2.2",
+    "scikit-misc==0.2.0",
 ]
 
 [project.urls]
@@ -67,6 +77,7 @@ plugins = "numpy.typing.mypy_plugin"
 markers = [
     "live_corpus: runs on the live CELLxGENE Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
+    "experimental: tests for the `experimental` package",
 ]
 
 [tool.ruff]

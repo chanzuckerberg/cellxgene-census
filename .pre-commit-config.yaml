@@ -2,7 +2,7 @@ exclude: (^doc/)|(.*/venv/)
 default_stages: [commit]
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black-jupyter
         name: black-notebooks
@@ -18,7 +18,7 @@ repos:
         args: ["--config", "./tools/pyproject.toml"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.249
+    rev: v0.0.275
     hooks:
       - id: ruff
         name: ruff-cellxgene-census
@@ -30,13 +30,14 @@ repos:
         args: [ "--config=./tools/pyproject.toml", "--fix" ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.0.1
+    rev: v1.4.0
     hooks:
       - id: mypy
         name: mypy-cellxgene-census
         files: ^api/python/cellxgene_census
         args: ["--config-file=./api/python/cellxgene_census/pyproject.toml"]
         additional_dependencies:
+          - attrs
           - types-requests
           - pytest
           - pandas-stubs
@@ -44,10 +45,11 @@ repos:
           - typing_extensions
           - types-setuptools
       - id: mypy
-        name: mypy-tools
-        files: ^tools
-        args: ["--config-file=./tools/pyproject.toml"]
+        name: mypy-tools-cellxgene_census_builder
+        files: ^tools/cellxgene_census_builder
+        args: ["--config-file=./tools/cellxgene_census_builder/pyproject.toml"]
         additional_dependencies:
+          - attrs
           - types-requests
           - pytest
           - pandas-stubs
@@ -55,8 +57,18 @@ repos:
           - typing_extensions
           - types-setuptools
           - types-PyYAML
+      - id: mypy
+        name: mypy-tools-not-builder
+        files: ^tools/
+        exclude: ^tools/cellxgene_census_builder
+        args: ["--config", "./tools/pyproject.toml"]
+        additional_dependencies:
+          - numpy
+          - pandas-stubs
+          - typing_extensions
 
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.6.4
+    rev: 1.7.0
     hooks:
       - id: nbqa-black
+        files: ^api/python/notebooks

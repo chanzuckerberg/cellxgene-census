@@ -6,7 +6,6 @@
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
-
 from typing import Dict, Optional, Union, cast
 
 import requests
@@ -31,13 +30,14 @@ CensusVersionDescription = TypedDict(
         "release_build": str,  # date of build
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
+        "alias": Optional[str],  # the alias of this entry
     },
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 
-# URL for the default top-level directory of all public data, formatted as a CensusDirectory
-CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://s3.us-west-2.amazonaws.com/cellxgene-data-public/cell-census/release.json"
+# URL for the default top-level directory of all public data
+CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json"
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
@@ -54,7 +54,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         KeyError: if unknown census_version value.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     See Also:
         :func:`get_census_version_directory`: returns the entire directory as a dict.
@@ -83,7 +83,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
         A dictionary that contains release names and their corresponding release description.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     See Also:
         :func:`get_census_version_description`: get description by census_version.
@@ -117,6 +117,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
     for census_version in list(directory.keys()):
         # Strings are aliases for other census_version
         points_at = directory[census_version]
+        alias = census_version if isinstance(points_at, str) else None
         while isinstance(points_at, str):
             # resolve aliases
             if points_at not in directory:
@@ -127,7 +128,8 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
             points_at = directory[points_at]
 
         if isinstance(points_at, dict):
-            directory[census_version] = points_at
+            directory[census_version] = points_at.copy()
+            cast(CensusVersionDescription, directory[census_version])["alias"] = alias
 
     # Cast is safe, as we have removed all aliases
     return cast(Dict[CensusVersionName, CensusVersionDescription], directory)
