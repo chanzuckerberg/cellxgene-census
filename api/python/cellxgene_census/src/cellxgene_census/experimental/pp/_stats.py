@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import os
 from concurrent import futures
+from typing import Any, Generator, Tuple
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import tiledbsoma as soma
 
@@ -48,43 +50,33 @@ def mean_variance(
     n_batches = 1
     n_samples = np.array([query.n_vars], dtype=np.int64)
 
-    if calculate_variance:
-        mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_obs)
-    else:
-        mvn = MeanAccumulator(n_batches, n_samples, query.n_obs)
-
-    max_workers = (os.cpu_count() or 4) + 2
-    with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
-        for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
-            # for arrow_tbl in query.X(layer).tables():
-            obs_indexer = query.indexer
-            obs_dim = obs_indexer.by_obs(arrow_tbl["soma_dim_0"])
-            data = arrow_tbl["soma_data"].to_numpy()
-            mvn.update_single_batch(obs_dim, data)
-
-    if calculate_variance:
-        batches_u, batches_var, all_u, all_var = mvn.finalize()
-    else:
-        batches_u, all_u = mvn.finalize()
-
-    del mvn
+    def iterate() -> Generator[Tuple[npt.NDArray[np.int64], Any], None, None]:
+        max_workers = (os.cpu_count() or 4) + 2
+        with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+            for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
+                obs_indexer = query.indexer
+                obs_dim = obs_indexer.by_obs(arrow_tbl["soma_dim_0"])
+                data = arrow_tbl["soma_data"].to_numpy()
+                yield obs_dim, data
 
     result = pd.DataFrame(
         index=pd.Index(data=query.obs_joinids(), name="soma_joinid"),
     )
 
-    if calculate_mean:
-        result["mean"] = all_u
-
     if calculate_variance:
-        result["variance"] = all_var
+        mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_obs)
+        for obs_dim, data in iterate():
+            mvn.update_single_batch(obs_dim, data)
+            _, _, all_u, all_var = mvn.finalize()
+            result["mean"] = all_u
+            result["variance"] = all_var
+        del mvn
+    else:
+        mn = MeanAccumulator(n_batches, n_samples, query.n_obs)
+        for obs_dim, data in iterate():
+            mn.update_single_batch(obs_dim, data)
+            _, all_u = mn.finalize()
+            result["mean"] = all_u
+        del mn
 
     return result
-
-    # return pd.DataFrame(
-    #     index=pd.Index(data=query.obs_joinids(), name="soma_joinid"),
-    #     data={
-    #         "mean": all_u,
-    #         "variance": all_var,
-    #     },
-    # )

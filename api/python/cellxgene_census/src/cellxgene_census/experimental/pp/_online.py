@@ -70,7 +70,7 @@ class MeanAccumulator:
         assert self.n_batches == 1
         _mbom_update_single_batch(var_vec, val_vec, self.n, self.u)
 
-    def finalize(self):
+    def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         # correct each batch to account for sparsity
         _mbom_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u)
 
@@ -81,6 +81,7 @@ class MeanAccumulator:
         all_u = _mbom_combine_batches(self.n_batches, self.n_samples, self.u)
 
         return batches_u, all_u
+
 
 class CountsAccumulator:
     def __init__(self, n_batches: int, n_variables: int, clip_val: npt.NDArray[np.float64]):
@@ -309,26 +310,25 @@ def _accum_clipped_counts_by_batch(
         squared_counts_sum[bid, col] += val**2
 
 
-
-
 @numba.jit(
     numba.void(numba.int64, numba.int64[:], numba.int32[:, :], numba.float64[:, :]),
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _mbom_sparse_correct_batches(
-        n_batches: int,
-        n_samples: npt.NDArray[np.int64],
-        n: npt.NDArray[np.int32],
-        u: npt.NDArray[np.float64],
-    ) -> None:
-        """
-        Analogous to _mbomv_sparse_correct_batches, but only computes the mean
-        """
-        for batch in range(n_batches):
-            _u = (n[batch] * u[batch]) / n_samples[batch]
-            u[batch] = _u
-            n[batch] = n_samples[batch]
+    n_batches: int,
+    n_samples: npt.NDArray[np.int64],
+    n: npt.NDArray[np.int32],
+    u: npt.NDArray[np.float64],
+) -> None:
+    """
+    Analogous to _mbomv_sparse_correct_batches, but only computes the mean
+    """
+    for batch in range(n_batches):
+        _u = (n[batch] * u[batch]) / n_samples[batch]
+        u[batch] = _u
+        n[batch] = n_samples[batch]
+
 
 @numba.jit(
     numba.void(
@@ -356,9 +356,7 @@ def _mbom_update_single_batch(
 
 
 @numba.jit(
-    numba.types.Tuple((numba.float64[:], numba.float64[:]))(
-        numba.int64, numba.int64[:], numba.float64[:, :]
-    ),
+    numba.float64[:](numba.int64, numba.int64[:], numba.float64[:, :]),
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
@@ -370,7 +368,7 @@ def _mbom_combine_batches(
     for first_batch in range(0, n_batches):
         if n_samples[first_batch] > 0:
             acc_n = n_samples[first_batch]
-            acc_u = u[first_batch].copy()
+            acc_u: npt.NDArray[np.float64] = u[first_batch].copy()
             break
 
     for batch in range(first_batch + 1, n_batches):
