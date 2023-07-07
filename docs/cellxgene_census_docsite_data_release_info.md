@@ -1,6 +1,6 @@
 # Census data releases 
 
-**Last edited**: July 6th, 2023.
+**Last edited**: July 7th, 2023.
 
 **Contents**
 
@@ -12,7 +12,7 @@
 It is a Census build that is publicly hosted online. A Census build is 
 a [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) collection with the Census data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) as specified in the [Census schema](cellxgene_census_docsite_schema.md). 
 
-Any given Census build is named with a unique tag, normally the date of build, e.g., `"2023-05-15"`
+Any given Census build is named with a unique tag, normally the date of build, e.g., `"2023-05-15"`.
 
 
 ### Long-term supported (LTS) Census releases
@@ -40,7 +40,7 @@ census <- open_soma(census_version = "stable")
 
 ### Weekly Census releases (latest)
 
-[CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) plans to perform weekly Census data releases:
+[CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, CZ CELLxGENE Discover plans to perform weekly Census data releases:
 
 * Available for public access for 1 month.
 
