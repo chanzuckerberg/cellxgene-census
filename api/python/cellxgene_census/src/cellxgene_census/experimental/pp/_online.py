@@ -68,69 +68,19 @@ class MeanAccumulator:
 
     def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
         assert self.n_batches == 1
-        self._mbomv_update_single_batch(var_vec, val_vec, self.n, self.u)
+        _mbom_update_single_batch(var_vec, val_vec, self.n, self.u)
 
     def finalize(self):
         # correct each batch to account for sparsity
-        self._mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u)
+        _mbom_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u)
 
         # compute u for each batch
         batches_u = self.u
 
         # accum all batches using Chan's
-        all_u = self._mbomv_combine_batches(self.n_batches, self.n_samples, self.u)
+        all_u = _mbom_combine_batches(self.n_batches, self.n_samples, self.u)
 
         return batches_u, all_u
-
-    def _mbomv_sparse_correct_batches(
-        self,
-        n_batches: int,
-        n_samples: npt.NDArray[np.int64],
-        n: npt.NDArray[np.int32],
-        u: npt.NDArray[np.float64],
-    ) -> None:
-        for batch in range(n_batches):
-            _u = (n[batch] * u[batch]) / n_samples[batch]
-            u[batch] = _u
-            n[batch] = n_samples[batch]
-
-    def _mbomv_update_single_batch(
-        self,
-        var_vec: npt.NDArray[np.int64],
-        val_vec: npt.NDArray[np.float32],
-        n: npt.NDArray[np.int32],
-        u: npt.NDArray[np.float64],
-    ) -> None:
-        for col, val in zip(var_vec, val_vec):
-            u_prev = u[0, col]
-            n[0, col] += 1
-            u[0, col] = u_prev + (val - u_prev) / n[0, col]
-
-    def _mbomv_combine_batches(
-        self,
-        n_batches: int,
-        n_samples: npt.NDArray[np.int64],
-        u: npt.NDArray[np.float64],
-    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        for first_batch in range(0, n_batches):
-            if n_samples[first_batch] > 0:
-                acc_n = n_samples[first_batch]
-                acc_u = u[first_batch].copy()
-                break
-
-        for batch in range(first_batch + 1, n_batches):
-            # ignore batches with no data
-            if n_samples[batch] == 0:
-                continue
-
-            n = acc_n + n_samples[batch]
-            _u = (acc_n * acc_u + n_samples[batch] * u[batch]) / n
-            # TODO: reduce memory allocs?
-            acc_n = n
-            acc_u = _u
-
-        return acc_u
-
 
 class CountsAccumulator:
     def __init__(self, n_batches: int, n_variables: int, clip_val: npt.NDArray[np.float64]):
@@ -357,3 +307,81 @@ def _accum_clipped_counts_by_batch(
             val = clip_val[bid, col]
         counts_sum[bid, col] += val
         squared_counts_sum[bid, col] += val**2
+
+
+
+
+@numba.jit(
+    numba.void(numba.int64, numba.int64[:], numba.int32[:, :], numba.float64[:, :]),
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _mbom_sparse_correct_batches(
+        n_batches: int,
+        n_samples: npt.NDArray[np.int64],
+        n: npt.NDArray[np.int32],
+        u: npt.NDArray[np.float64],
+    ) -> None:
+        """
+        Analogous to _mbomv_sparse_correct_batches, but only computes the mean
+        """
+        for batch in range(n_batches):
+            _u = (n[batch] * u[batch]) / n_samples[batch]
+            u[batch] = _u
+            n[batch] = n_samples[batch]
+
+@numba.jit(
+    numba.void(
+        numba.types.Array(numba.int64, 1, "C", readonly=True),
+        numba.types.Array(numba.float32, 1, "C", readonly=True),
+        numba.int32[:, :],
+        numba.float64[:, :],
+    ),
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _mbom_update_single_batch(
+    var_vec: npt.NDArray[np.int64],
+    val_vec: npt.NDArray[np.float32],
+    n: npt.NDArray[np.int32],
+    u: npt.NDArray[np.float64],
+) -> None:
+    """
+    Analogous to _mbomv_update_single_batch, but only computes the mean
+    """
+    for col, val in zip(var_vec, val_vec):
+        u_prev = u[0, col]
+        n[0, col] += 1
+        u[0, col] = u_prev + (val - u_prev) / n[0, col]
+
+
+@numba.jit(
+    numba.types.Tuple((numba.float64[:], numba.float64[:]))(
+        numba.int64, numba.int64[:], numba.float64[:, :]
+    ),
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _mbom_combine_batches(
+    n_batches: int,
+    n_samples: npt.NDArray[np.int64],
+    u: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    for first_batch in range(0, n_batches):
+        if n_samples[first_batch] > 0:
+            acc_n = n_samples[first_batch]
+            acc_u = u[first_batch].copy()
+            break
+
+    for batch in range(first_batch + 1, n_batches):
+        # ignore batches with no data
+        if n_samples[batch] == 0:
+            continue
+
+        n = acc_n + n_samples[batch]
+        _u = (acc_n * acc_u + n_samples[batch] * u[batch]) / n
+        # TODO: reduce memory allocs?
+        acc_n = n
+        acc_u = _u
+
+    return acc_u
