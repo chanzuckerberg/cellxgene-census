@@ -56,6 +56,82 @@ class MeanVarianceAccumulator:
         return batches_u, batches_var, all_u, all_var
 
 
+class MeanAccumulator:
+    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int):
+        if n_samples.sum() <= 0:
+            raise ValueError("No samples provided - can't calculate mean or variance.")
+
+        self.n_batches = n_batches
+        self.n_samples = n_samples
+        self.n = np.zeros((n_batches, n_variables), dtype=np.int32)
+        self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
+
+    def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
+        assert self.n_batches == 1
+        self._mbomv_update_single_batch(var_vec, val_vec, self.n, self.u)
+
+    def finalize(self):
+        # correct each batch to account for sparsity
+        self._mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u)
+
+        # compute u for each batch
+        batches_u = self.u
+
+        # accum all batches using Chan's
+        all_u = self._mbomv_combine_batches(self.n_batches, self.n_samples, self.u)
+
+        return batches_u, all_u
+
+    def _mbomv_sparse_correct_batches(
+        self,
+        n_batches: int,
+        n_samples: npt.NDArray[np.int64],
+        n: npt.NDArray[np.int32],
+        u: npt.NDArray[np.float64],
+    ) -> None:
+        for batch in range(n_batches):
+            _u = (n[batch] * u[batch]) / n_samples[batch]
+            u[batch] = _u
+            n[batch] = n_samples[batch]
+
+    def _mbomv_update_single_batch(
+        self,
+        var_vec: npt.NDArray[np.int64],
+        val_vec: npt.NDArray[np.float32],
+        n: npt.NDArray[np.int32],
+        u: npt.NDArray[np.float64],
+    ) -> None:
+        for col, val in zip(var_vec, val_vec):
+            u_prev = u[0, col]
+            n[0, col] += 1
+            u[0, col] = u_prev + (val - u_prev) / n[0, col]
+
+    def _mbomv_combine_batches(
+        self,
+        n_batches: int,
+        n_samples: npt.NDArray[np.int64],
+        u: npt.NDArray[np.float64],
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        for first_batch in range(0, n_batches):
+            if n_samples[first_batch] > 0:
+                acc_n = n_samples[first_batch]
+                acc_u = u[first_batch].copy()
+                break
+
+        for batch in range(first_batch + 1, n_batches):
+            # ignore batches with no data
+            if n_samples[batch] == 0:
+                continue
+
+            n = acc_n + n_samples[batch]
+            _u = (acc_n * acc_u + n_samples[batch] * u[batch]) / n
+            # TODO: reduce memory allocs?
+            acc_n = n
+            acc_u = _u
+
+        return acc_u
+
+
 class CountsAccumulator:
     def __init__(self, n_batches: int, n_variables: int, clip_val: npt.NDArray[np.float64]):
         self.n_batches = n_batches

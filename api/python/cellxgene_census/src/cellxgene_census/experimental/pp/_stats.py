@@ -8,7 +8,7 @@ import pandas as pd
 import tiledbsoma as soma
 
 from ..util._eager_iter import _EagerIterator
-from ._online import MeanVarianceAccumulator
+from ._online import MeanAccumulator, MeanVarianceAccumulator
 
 
 def mean_variance(
@@ -47,7 +47,11 @@ def mean_variance(
 
     n_batches = 1
     n_samples = np.array([query.n_vars], dtype=np.int64)
-    mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_obs)
+
+    if calculate_variance:
+        mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_obs)
+    else:
+        mvn = MeanAccumulator(n_batches, n_samples, query.n_obs)
 
     max_workers = (os.cpu_count() or 4) + 2
     with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
@@ -58,14 +62,29 @@ def mean_variance(
             data = arrow_tbl["soma_data"].to_numpy()
             mvn.update_single_batch(obs_dim, data)
 
-    _, _, all_u, all_var = mvn.finalize()
+    if calculate_variance:
+        batches_u, batches_var, all_u, all_var = mvn.finalize()
+    else:
+        batches_u, all_u = mvn.finalize()
 
     del mvn
 
-    return pd.DataFrame(
+    result = pd.DataFrame(
         index=pd.Index(data=query.obs_joinids(), name="soma_joinid"),
-        data={
-            "mean": all_u,
-            "variance": all_var,
-        },
     )
+
+    if calculate_mean:
+        result["mean"] = all_u
+
+    if calculate_variance:
+        result["variance"] = all_var
+
+    return result
+
+    # return pd.DataFrame(
+    #     index=pd.Index(data=query.obs_joinids(), name="soma_joinid"),
+    #     data={
+    #         "mean": all_u,
+    #         "variance": all_var,
+    #     },
+    # )
