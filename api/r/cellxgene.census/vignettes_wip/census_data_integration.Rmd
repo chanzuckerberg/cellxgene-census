@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   fig.height = 5,
   fig.align = "center"
 )
-options(width = 80)
+options(width = 80, max.print=100)
 ```
 
 <!--
@@ -51,12 +51,7 @@ library(patchwork)
 Now we can open the Census.
 
 ```{r}
-ctx <- new_SOMATileDBContext_for_census(
-   get_census_version_description("latest"),
-   soma.init_buffer_bytes = "1073741824"
-)
-
-census <- cellxgene.census::open_soma(tiledbsoma_ctx = ctx)
+census <- cellxgene.census::open_soma()
 ```
 
 In this notebook we will use Tabula Muris Senis data from the liver as it contains cells from both 10X Genomics and Smart-Seq2 technologies.
@@ -93,7 +88,7 @@ table(seurat_obj$assay)
 
 ## Gene-length normalization of Smart-Seq2 data.
 
-Smart-seq2 read counts have to be normalized by gene length. For full details on gene-length normalization take a look at the notebook [Normalizing full-length gene sequencing data from the Census](https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html).
+Smart-seq2 read counts have to be normalized by gene length.
 
 Lets first get the gene lengths from `var.feature_length`.
 
@@ -177,7 +172,7 @@ seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
 # normalize each dataset independently
 seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x)
+  x <- SCTransform(x)
 })
 
 # select features for integration
@@ -235,7 +230,7 @@ seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
 # normalize each dataset independently controlling for batch
 seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x, vars.to.regress = "donor_id")
+  x <- SCTransform(x, vars.to.regress = "donor_id")
 })
 
 # select features for integration
@@ -295,7 +290,7 @@ seurat_obj.list <- SplitObject(seurat_obj, split.by = "dataset_id")
 
 # normalize each dataset independently controlling for batch
 seurat_obj.list <- lapply(X = seurat_obj.list, FUN = function(x) {
-    x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
+  x <- SCTransform(x, vars.to.regress = c("donor_id", "assay_ontology_term_id", "suspension_type"))
 })
 
 # select features for integration
