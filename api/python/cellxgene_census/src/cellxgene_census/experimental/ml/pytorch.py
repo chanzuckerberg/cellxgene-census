@@ -28,11 +28,25 @@ import cellxgene_census
 from ..._open import _build_soma_tiledb_context
 from ..util._eager_iter import _EagerIterator
 
+pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
+
+
+# TODO: Rename to reflect the correct order of the Tensors within the tuple: (X, obs)
 ObsAndXDatum = Tuple[Tensor, Tensor]
+"""Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s). 
+The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
 
 
 @define
-class ObsAndXSOMABatch:
+class _ObsAndXSOMABatch:
+    """
+    Return type of ``_ObsAndXSOMAIterator`` that pairs a chunk of ``obs`` rows with the respective rows from the ``X``
+    matrix.
+
+    Lifecycle:
+        experimental
+    """
+
     obs: pd.DataFrame
     X: scipy.matrix
     stats: "Stats"
@@ -42,14 +56,14 @@ class ObsAndXSOMABatch:
 
 
 Encoders = Dict[str, LabelEncoder]
-
-pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
+"""A dictionary of ``LabelEncoder``s keyed by the ``obs`` column name."""
 
 
 @define
 class Stats:
     """
-    Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API.
+    Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API. This is useful for assessing the read
+    throughput of SOMA data.
 
     Lifecycle:
         experimental
@@ -85,6 +99,8 @@ class Stats:
 def _open_experiment(
     uri: str, aws_region: Optional[str] = None, soma_buffer_bytes: Optional[int] = None
 ) -> soma.Experiment:
+    """Internal method for opening a SOMA experiment as a context manager."""
+
     context = _build_soma_tiledb_context(aws_region)
 
     if soma_buffer_bytes is not None:
@@ -99,21 +115,23 @@ def _open_experiment(
         yield exp
 
 
-class _ObsAndXSOMAIterator(Iterator[ObsAndXSOMABatch]):
+class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
     obs_tables_iter: somacore.ReadIter[pa.Table]
-    """Iterates the SOMA batches (tables) of obs data"""
+    """Iterates the SOMA batches (tables) of corresponding ``obs`` and ``X`` data. This is an internal class, 
+    not intended for public use."""
 
     X: soma.SparseNDArray
-    """All X data"""
+    """A handle to the full X data of the SOMA ``Experiment``"""
 
     var_joinids: pa.Array
+    """The ``var`` joinids to be retrieved from the SOMA ``Experiment``"""
 
     def __init__(self, X: soma.SparseNDArray, obs_tables_iter: somacore.ReadIter[pa.Table], var_joinids: pa.Array):
         self.obs_tables_iter = obs_tables_iter
         self.X = X
         self.var_joinids = var_joinids
 
-    def __next__(self) -> ObsAndXSOMABatch:
+    def __next__(self) -> _ObsAndXSOMABatch:
         pytorch_logger.debug("Retrieving next SOMA batch...")
         start_time = time()
 
@@ -135,19 +153,24 @@ class _ObsAndXSOMAIterator(Iterator[ObsAndXSOMABatch]):
         stats.n_soma_batches += 1
 
         pytorch_logger.debug(f"Retrieved SOMA batch: {stats}")
-        return ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
+        return _ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
 
 
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     """
-    Iterates through a set of obs and related X rows, specified as ``soma_joinid``s. Encapsulates the batch-based data
-    fetching from SOMA objects, providing row-based iteration.
+    Iterates through a set of ``obs`` and corresponding ``X`` rows, where the rows to be returned are specified by
+    the ``obs_tables_iter`` argument. For the specified ``obs` rows, the corresponding ``X`` data is loaded and
+    joined together. It is returned from this iterator as 2-tuples of ``X`` and obs Tensors.
+
+    Internally manages the retrieval of data in SOMA-sized batches, fetching the next batch of SOMA data as needed.
+    Supports fetching the data in an eager manner, where the next SOMA batch is fetched while the current batch is
+    being read. This is an internal class, not intended for public use.
     """
 
-    soma_batch_iter: Iterator[ObsAndXSOMABatch]
+    soma_batch_iter: Iterator[_ObsAndXSOMABatch]
     """The iterator for SOMA batches of paired obs and X data"""
 
-    soma_batch: Optional[ObsAndXSOMABatch]
+    soma_batch: Optional[_ObsAndXSOMABatch]
     """The current SOMA batch of obs and X data"""
 
     i: int = -1
@@ -220,8 +243,12 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         return X_tensor, obs_tensor
 
     def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
+        """Reads a torch-size batch of data from the current SOMA batch, returning a torch-size batch whose size may
+        contain fewer rows than the requested ``batch_size``. This can happen when the remaining rows in the current
+        SOMA batch are fewer than the requested ``batch_size``."""
+
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
-            self.soma_batch: ObsAndXSOMABatch = next(self.soma_batch_iter)
+            self.soma_batch: _ObsAndXSOMABatch = next(self.soma_batch_iter)
             self.stats += self.soma_batch.stats
             self.i = 0
 
@@ -247,13 +274,20 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
     """
-    An iterable-style PyTorch ``DataPipe`` that reads obs and X data from a SOMA Experiment, and returns an iterator of
-    tuples of PyTorch ``Tensor`` objects.
+    An iterable-style PyTorch ``DataPipe`` that reads ``obs`` and ``X`` data from a SOMA Experiment, based upon the
+    specified queries along the ``obs`` and ``var`` axes. Provides an iterator over these data when the object is
+    passed to Python's built-in ``iter`` function:
+
+    >>> for batch in iter(ExperimentDataPipe(...)):
+            X_batch, y_batch = batch
+
+    The ``batch_size`` parameter controls the number of rows of ``obs`` and ``X`` data that are returned in each
+    iteration. If the ``batch_size`` is 1, then each Tensor will have rank 1:
 
     >>> (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
         tensor([2415,    0,    0], dtype=torch.int64)) # obs data, encoded
 
-    Supports batching via `batch_size` param:
+    For larger ``batch_size`` values, the returned Tensors will have rank 2:
 
     >>> DataLoader(..., batch_size=3, ...):
         (tensor([[0., 0., 0., 0., 0., 1., 0., 0., 0.],     # X batch
@@ -263,8 +297,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                  [2416,    0,    4],
                  [2417,    0,    3]], dtype=torch.int64))
 
-    Obs attribute values are encoded as categoricals. Values can be decoded by obtaining the encoder for a given
-    attribute:
+    The ``sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse Tensor.  If the model
+    supports use of sparse Tensors, this will reduce memory usage.
+
+    The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
+    element is always the soma_joinid of the ``obs`` DataFrame (or, equiavalently, the ``soma_dim_0`` of the ``X``
+    matrix. The remaining elements are the ``obs`` columns specified by ``obs_column_names``, and string-typed
+    columns are encoded as integer values. If needed, these values can be decoded, by obtaining the encoder for a
+    given ``obs`` column name and calling its ``inverse_transform`` method:
 
     >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
 
@@ -299,6 +339,38 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     ) -> None:
         """
         Construct a new ``ExperimentDataPipe``.
+
+        Args:
+            experiment: soma.Experiment
+                The SOMA Experiment from which to read data.
+            measurement_name: str
+                The name of the SOMA measurement to read. Defaults to "raw".
+            X_name: str
+                The name of the X layer to read. Defaults to "X".
+            obs_query: Optional[soma.AxisQuery]
+                The query used to filter along the ``obs`` axis. If not specified, all ``obs`` and ``X`` data will
+                be returned, which can be very large.
+            var_query: Optional[soma.AxisQuery]
+                The query used to filter along the ``var`` axis. If not specified, all ``var`` columns (genes/features)
+                will be returned.
+            obs_column_names: Sequence[str]
+                The names of the ``obs`` columns to return. The ``soma_joinid`` index "column" does not need to be
+                specified and will always be returned. If not specified, only the ``soma_joinid`` will be returned.
+            batch_size: int
+                The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to 1. A value of 1
+                will result in Tensors of rank 1 being returns (a single row); larger values will result in Tensors of
+                rank 2 (multiple rows).
+            sparse_X: bool
+                Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
+                setting this to ``True` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
+                to ``False``, since sparse Tensors are still experimental in PyTorch.
+            soma_buffer_bytes: Optional[int]
+                The number of bytes to use for reading data from SOMA. If not specified, will use the default SOMA
+                value. Maximum memory utilization is controlled by this parameter, with larger values providing better
+                read performance.
+            use_eager_fetch: bool
+                Controls whether the returned iterator will eagerly fetch data from SOMA while client code is iterating
+                through data. Defaults to ``True``.
 
         Returns:
             ``ExperimentDataPipe``.

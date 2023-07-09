@@ -20,8 +20,8 @@ try:
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
-        ObsAndXSOMABatch,
         Stats,
+        _ObsAndXSOMABatch,
         experiment_dataloader,
     )
 except ImportError:
@@ -317,9 +317,9 @@ def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experi
     with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXSOMAIterator.__next__") as mock_soma_iterator_next:
         # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
         mock_soma_iterator_next.side_effect = [
-            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
+            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
+            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
+            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
         ]
 
         exp_data_pipe = ExperimentDataPipe(
