@@ -498,6 +498,9 @@ def _accumulate_all_X_layers(
         if not is_nonnegative_integral(raw_X):
             logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
 
+        if isinstance(raw_X, np.ndarray):
+            raw_X = sparse.csr_matrix(raw_X)
+
         raw_X.eliminate_zeros()
 
         # save X['raw']
@@ -734,7 +737,7 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> 
     Read indicated rows from X['raw'], write to X['normalized']
     """
     experiment_uri, obs_joinid_start, n, raw_sum = args
-    logging.debug(f"Write X normalized - starting block {obs_joinid_start}")
+    logging.info(f"Write X normalized - starting block {obs_joinid_start}")
     with soma.open(
         urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
     ) as X_raw:
@@ -767,4 +770,4 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> 
                         )
                     )
 
-    logging.debug(f"Write X normalized - finished block {obs_joinid_start}")
+    logging.info(f"Write X normalized - finished block {obs_joinid_start}")

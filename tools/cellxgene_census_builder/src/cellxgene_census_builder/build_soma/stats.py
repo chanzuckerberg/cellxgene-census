@@ -10,24 +10,18 @@ from .globals import CENSUS_OBS_STATS_COLUMNS, CENSUS_VAR_STATS_COLUMNS
 
 
 def get_obs_stats(
-    raw_X: Union[sparse.csr_matrix, sparse.csc_matrix, npt.NDArray[np.float32]],
+    raw_X: Union[sparse.csr_matrix, sparse.csc_matrix],
 ) -> pd.DataFrame:
     """Compute summary stats for obs axis, and return as a dataframe."""
 
-    if isinstance(raw_X, sparse.csr_matrix) or isinstance(raw_X, sparse.csc_matrix):
-        raw_sum = raw_X.sum(axis=1).A1
-        nnz = raw_X.getnnz(axis=1)
-        raw_mean, raw_variance = sparse_mean_var(raw_X, axis=1, ddof=1)
-
-    elif isinstance(raw_X, np.ndarray):
-        raw_sum = raw_X.sum(axis=1)
-        nnz = np.count_nonzero(raw_X, axis=1)
-        raw_mean = np.mean(raw_X, axis=1)
-        raw_variance = np.var(raw_X, axis=1, ddof=1)
-
-    else:
+    if not isinstance(raw_X, sparse.csr_matrix) and not isinstance(raw_X, sparse.csc_matrix):
         raise NotImplementedError(f"get_obs_stats: unsupported type {type(raw_X)}")
 
+    raw_sum = raw_X.sum(axis=1).A1
+    nnz = raw_X.getnnz(axis=1)
+    raw_mean = raw_sum / nnz
+    # _, raw_variance = sparse_mean_var(raw_X, axis=1, ddof=1)
+    raw_variance = _var(raw_X, axis=1, ddof=1)
     n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0) > 0).sum(), dtype=np.int64)
 
     return pd.DataFrame(
@@ -63,69 +57,69 @@ def get_var_stats(
     )
 
 
-def sparse_mean_var(
+@numba.jit(
+    numba.float64(numba.types.Array(numba.float32, 1, "C", readonly=True), numba.int64),
+    nogil=True,
+    nopython=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _var_ndarray(data: npt.NDArray[np.float32], ddof: int) -> float:
+    """Return variance of an ndarray."""
+    n = len(data)
+    if n < 2:
+        return 0.0
+    K = data[0]
+    Ex = Ex2 = 0.0
+    n = len(data)
+    for i in range(n):
+        x = data[i]
+        Ex += x - K
+        Ex2 += (x - K) ** 2
+
+    variance = (Ex2 - Ex**2 / n) / (n - ddof)
+    return variance
+
+
+@numba.jit(
+    [
+        numba.void(
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.int64,
+            numba.float32[:],
+        ),
+        numba.void(
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.int64,
+            numba.float32[:],
+        ),
+    ],
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _var_matrix(
+    data: npt.NDArray[np.float32],
+    indptr: npt.NDArray[np.int32],
+    ddof: int,
+    out: npt.NDArray[np.float32],
+) -> None:
+    n_elem = len(indptr) - 1
+    for i in range(n_elem):
+        out[i] = _var_ndarray(data[indptr[i] : indptr[i + 1]], ddof)
+
+
+def _var(
     matrix: Union[sparse.csr_matrix, sparse.csc_matrix],
     axis: int = 0,
     ddof: int = 1,
-) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+) -> npt.NDArray[np.float32]:
     if axis == 0:
         n_elem, axis_len = matrix.shape
+        matrix = matrix.tocsc()
     else:
         axis_len, n_elem = matrix.shape
+        matrix = matrix.tocsr()
 
-    n_a = np.zeros((axis_len,), dtype=np.int32)
-    u_a = np.zeros((axis_len,), dtype=np.float64)
-    M2_a = np.zeros((axis_len,), dtype=np.float64)
-
-    # chunk to lower memory consumption. Slow if not on primary axis, but
-    # should still work.
-    n_elem_stride = 2**17
-    for idx in range(0, n_elem, n_elem_stride):
-        slc = matrix[idx : idx + n_elem_stride].tocoo()
-        coords = slc.col if axis == 0 else slc.row
-        _sparse_mean_var_accumulate(slc.data, coords, n_a, u_a, M2_a)
-
-    u, M2 = _sparse_mean_var_finalize(n_elem, n_a, u_a, M2_a)
-
-    var: npt.NDArray[np.float64] = M2 / max(1, (n_elem - ddof))
-
-    return u, var
-
-
-@numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
-def _sparse_mean_var_accumulate(
-    data_arr: npt.NDArray[np.float32],
-    col_arr: npt.NDArray[np.int64],
-    n: npt.NDArray[np.int32],
-    u: npt.NDArray[np.float64],
-    M2: npt.NDArray[np.float64],
-) -> None:
-    """
-    Incrementally accumulate mean and sum of square of distance from mean using
-    Welford's online method.
-    """
-    for col, data in zip(col_arr, data_arr):
-        u_prev = u[col]
-        M2_prev = M2[col]
-        n[col] += 1
-        u[col] = u_prev + (data - u_prev) / n[col]
-        M2[col] = M2_prev + (data - u_prev) * (data - u[col])
-
-
-@numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
-def _sparse_mean_var_finalize(
-    n_rows: int,
-    n_a: npt.NDArray[np.int32],
-    u_a: npt.NDArray[np.float64],
-    M2_a: npt.NDArray[np.float64],
-) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """
-    Finalize incremental values, acconting for missing elements (due to sparse input).
-    Non-sparse and sparse combined using Chan's parallel adaptation of Welford's.
-    The code assumes the sparse elements are all zero and ignores those terms.
-    """
-    n_b = n_rows - n_a
-    delta = -u_a  # assumes u_b == 0
-    u = (n_a * u_a) / n_rows
-    M2 = M2_a + delta**2 * n_a * n_b / n_rows  # assumes M2_b == 0
-    return u, M2
+    out = np.empty((axis_len,), dtype=np.float32)
+    _var_matrix(matrix.data, matrix.indptr, ddof, out)
+    return out

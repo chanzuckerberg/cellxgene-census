@@ -292,11 +292,10 @@ def _validate_X_obs_axis_stats(
 
     Checks that the computed X stats, as stored in obs and var, are correct.
     """
-    T = TypeVar("T", bound=npt.NBitBase)
+    TypeVar("T", bound=npt.NBitBase)
 
-    def var(
-        X: Union[npt.NDArray[np.floating[T]], sparse.spmatrix], axis: int = 0, ddof: int = 1
-    ) -> Any:  # cough, cough
+    def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int = 1) -> Any:  # cough, cough
+        """Helper: variance over sparse matrices"""
         if isinstance(X, np.ndarray):
             return np.var(X, axis=axis, ddof=ddof)
 
@@ -305,31 +304,31 @@ def _validate_X_obs_axis_stats(
         # with Bessel's correction applied for unbiased estimate
         X_squared = X.copy()
         X_squared.data **= 2
-        n: int = X.shape[axis]
-        return ((X_squared.mean(axis) - np.square(X.mean(axis))).A1) * (n / (n - ddof))
+        n = X.getnnz(axis=axis)
+        return ((X_squared.sum(axis=axis).A1 / n) - np.square(X.sum(axis=axis).A1 / n)) * (n / (n - ddof))
 
     expected_X = ad.X if ad.raw is None else ad.raw.X
     # various datasets have explicit zeros, which are not stored in the Census
     expected_X.eliminate_zeros()
 
     # obs.raw_sum
+    raw_sum = expected_X.sum(axis=1).A1
     assert np.array_equal(
-        census_obs.raw_sum.to_numpy(), expected_X.sum(axis=1).A1
+        census_obs.raw_sum.to_numpy(), raw_sum
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_sum incorrect."
 
     # obs.nnz
-    assert np.array_equal(
-        census_obs.nnz.to_numpy(), expected_X.getnnz(axis=1)
-    ), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
+    nnz = expected_X.getnnz(axis=1)
+    assert np.array_equal(census_obs.nnz.to_numpy(), nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
-    # obs.raw_mean
+    # obs.raw_mean - mean of the explicitly stored values (zeros are _ignored_)
     assert np.allclose(
-        census_obs.raw_mean.to_numpy(), expected_X.mean(axis=1).A1, rtol=1e-03, atol=1e-06
+        census_obs.raw_mean.to_numpy(), raw_sum / nnz
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_mean incorrect."
 
     # obs.raw_variance
     assert np.allclose(
-        census_obs.raw_variance.to_numpy(), var(expected_X, axis=1, ddof=1), rtol=1e-02, atol=1e-05
+        census_obs.raw_variance.to_numpy(), var(expected_X, axis=1, ddof=1)  #, rtol=1e-02, atol=1e-05
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_variance incorrect."
 
     # obs.n_measured_vars
@@ -363,6 +362,8 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                 expected_ad_x, expected_ad_var = ad.X, ad.var
             else:
                 expected_ad_x, expected_ad_var = ad.raw.X, ad.raw.var
+
+            assert sparse.isspmatrix(expected_ad_x)
 
             # get the joinids for the obs axis
             obs_joinids = (
