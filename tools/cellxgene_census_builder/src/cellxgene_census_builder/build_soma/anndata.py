@@ -113,7 +113,9 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     organism_ontology_term_id = filter_spec.get("organism_ontology_term_id", None)
     assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids", None)
 
-    def _filter(ad: anndata.AnnData, retain_X: Optional[bool] = True) -> anndata.AnnData:
+    def _filter(
+        ad: anndata.AnnData, retain_X: Optional[bool] = True, retain_both_X_copies: Optional[bool] = False
+    ) -> anndata.AnnData:
         obs_mask = ~(  # noqa: E712
             ad.obs.tissue_ontology_term_id.str.endswith(" (organoid)")
             | ad.obs.tissue_ontology_term_id.str.endswith(" (cell culture)")
@@ -150,6 +152,10 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
             assert ad.var.index.difference(raw.var.index).empty
             assert raw.var.index.difference(ad.var.index).empty
             assert ad.X.shape == raw.X.shape
+
+        if retain_X and not retain_both_X_copies and raw:
+            # we normally only use one, following CXG 3 conventions. Raw if present, else X.
+            X = None
 
         # this dumps all other ancillary state, eg, obsm/varm/....
         ad = anndata.AnnData(X=X, obs=obs, var=var, raw=raw, dtype=np.float32)
