@@ -6,7 +6,7 @@ import threading
 from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
 from functools import partial
 from types import TracebackType
-from typing import     Any,    Callable,    Generic,    Iterable,    Iterator,    Mapping,    Optional,    ParamSpec,    TypeVar,
+from typing import Any, Callable, Generic, Iterable, Iterator, Mapping, Optional, ParamSpec, TypeVar
 
 import attrs
 
