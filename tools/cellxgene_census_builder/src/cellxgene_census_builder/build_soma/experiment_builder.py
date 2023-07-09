@@ -414,7 +414,7 @@ class ExperimentBuilder:
         raw_sum = self.obs_df.raw_sum.to_numpy()
 
         if args.config.multi_process:
-            STRIDE = 2_000_000  # controls fragment size, which impacts consolidation time
+            STRIDE = 2_000_000  # controls TileDB fragment size, which impacts consolidation time
             # memory budget: 3 attributes
             mem_budget = 3 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
             n_workers = n_workers_from_memory_budget(args, mem_budget)
