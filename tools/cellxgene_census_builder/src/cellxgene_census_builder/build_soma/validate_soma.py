@@ -328,7 +328,7 @@ def _validate_X_obs_axis_stats(
 
     # obs.raw_variance
     assert np.allclose(
-        census_obs.raw_variance.to_numpy(), var(expected_X, axis=1, ddof=1)  #, rtol=1e-02, atol=1e-05
+        census_obs.raw_variance.to_numpy(), var(expected_X, axis=1, ddof=1)
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_variance incorrect."
 
     # obs.n_measured_vars
