@@ -363,6 +363,8 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
             else:
                 expected_ad_x, expected_ad_var = ad.raw.X, ad.raw.var
 
+            if isinstance(expected_ad_x, np.ndarray):
+                expected_ad_x = sparse.csr_matrix(expected_ad_x)
             assert sparse.isspmatrix(expected_ad_x)
 
             # get the joinids for the obs axis
@@ -577,8 +579,8 @@ def validate_X_layers(
                 avg_row_nnz = max(avg_row_nnz, int(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
 
     if args.config.multi_process:
-        ROWS_PER_PROCESS = 2_000_000
-        n_workers = n_workers_from_memory_budget(args, 3 * 8 * ROWS_PER_PROCESS * avg_row_nnz)
+        ROWS_PER_PROCESS = 1_000_000
+        n_workers = n_workers_from_memory_budget(args, 3 * 8 * 200_000 * avg_row_nnz)
         with create_process_pool_executor(args, max_workers=n_workers) as ppe:
             futures = [
                 ppe.submit(_validate_Xnorm_layer, (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS))
@@ -593,6 +595,7 @@ def validate_X_layers(
                 for layer_name in CENSUS_X_LAYERS
                 for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
             ]
+            # XXX TODO: these don't have a fixed memory budget, and need to move to a dynamic scheduler
             futures += [
                 ppe.submit(
                     _validate_Xraw_contents_by_dataset, (assets_path, soma_path, dataset, experiment_specifications)

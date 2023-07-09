@@ -410,11 +410,12 @@ class ExperimentBuilder:
         logging.info(f"Write X normalized: {self.name} - starting")
         # grab the previously calculated sum of the X['raw'] layer
         raw_sum = self.obs_df.raw_sum.to_numpy()
-        avg_row_nnz = int(self.obs_df.nnz.to_numpy().sum() / len(self.obs_df))
 
         if args.config.multi_process:
             STRIDE = 2_000_000  # controls fragment size, which impacts consolidation time
-            n_workers = n_workers_from_memory_budget(args, 3 * 8 * STRIDE * avg_row_nnz)
+            # memory budget: 3 attributes
+            mem_budget = 3 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
+            n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
                     pe.submit(_write_X_normalized, (self.experiment.uri, start_id, STRIDE, raw_sum))
