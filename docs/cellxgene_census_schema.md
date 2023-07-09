@@ -723,7 +723,7 @@ The following columns MUST be included:
   <tr>
     <td>n_measured_obs</td>
     <td>int64</td>
-    <td>The number of observations taken for this feature (sum of feature presence matrix).</td>
+    <td>For this feature, the number of observations present in the source H5AD (sum of feature presence matrix).</td>
   </tr>
 </tbody>
 </table>
@@ -852,27 +852,27 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   <tr>
     <td>nnz</td>
     <td>int64</td>
-    <td>Number of non-zero measurements in the counts (raw) matrix `X['raw']`</td>
+    <td>For this observation, the number of non-zero measurements in the `X['raw']` counts (raw) matrix.</td>
   </tr>
   <tr>
     <td>n_measured_vars</td>
     <td>int64</td>
-    <td>The number of features measured for this cell (observation).</td>
+    <td>For this observation, the number of features present in the source H5AD (sum of feature presence matrix).</td>
   </tr>
   <tr>
     <td>raw_sum</td>
     <td>float32</td>
-    <td>Sum of the count (raw) matrix values for this observation.</td>
+    <td>For this observation, the sum of the count (raw) matrix values.</td>
   </tr>
   <tr>
     <td>raw_mean</td>
     <td>float32</td>
-    <td>Mean of the count (raw) matrix values for this observation./td>
+    <td>For this observation, the mean of the count (raw) matrix values.</td>
   </tr>
   <tr>
     <td>raw_variance</td>
     <td>float32</td>
-    <td>Variance of the counts (raw) matrix values for this observation.</td>
+    <td>For this observation, the variance of the counts (raw) matrix values.</td>
   </tr>
 </tbody>
 </table>
