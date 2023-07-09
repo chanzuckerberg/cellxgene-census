@@ -46,7 +46,9 @@ from .globals import (
 )
 from .mp import (
     EagerIterator,
+    ResourcePoolProcessExecutor,
     create_process_pool_executor,
+    create_resource_pool_executor,
     create_thread_pool_executor,
     log_on_broken_process_pool,
     n_workers_from_memory_budget,
@@ -574,7 +576,7 @@ def _accumulate_X(
     dataset: Dataset,
     experiment_builders: List["ExperimentBuilder"],
     progress: Tuple[int, int],
-    executor: Optional[concurrent.futures.Executor],
+    executor: Optional[ResourcePoolProcessExecutor],
 ) -> concurrent.futures.Future[AccumulateXResults]:
     ...
 
@@ -584,7 +586,7 @@ def _accumulate_X(
     dataset: Dataset,
     experiment_builders: List["ExperimentBuilder"],
     progress: Tuple[int, int],
-    executor: Optional[concurrent.futures.Executor] = None,
+    executor: Optional[ResourcePoolProcessExecutor] = None,
 ) -> Union[concurrent.futures.Future[AccumulateXResults], AccumulateXResults]:
     """
     Save X layer data for a single AnnData, for all Experiments. Return a future if
@@ -602,6 +604,8 @@ def _accumulate_X(
 
     if executor is not None:
         return executor.submit(
+            # Heuristic: AnnData uses gzip, which normally achieves ~4X compression. 100% pad.
+            8 * dataset.asset_h5ad_filesize,
             _accumulate_all_X_layers,
             assets_path,
             dataset,
@@ -633,7 +637,8 @@ def populate_X_layers(
     # populate X layers
     results: List[AccumulateXResult] = []
     if args.config.multi_process:
-        with create_process_pool_executor(args, max_workers=args.config.max_workers) as pe:
+        # with create_process_pool_executor(args, max_workers=args.config.max_workers) as pe:
+        with create_resource_pool_executor(args) as pe:
             futures = {
                 _accumulate_X(
                     assets_path,

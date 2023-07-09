@@ -44,7 +44,11 @@ from .globals import (
     MEASUREMENT_RNA_NAME,
     SOMA_TileDB_Context,
 )
-from .mp import create_process_pool_executor, log_on_broken_process_pool, n_workers_from_memory_budget
+from .mp import (
+    create_process_pool_executor,
+    create_resource_pool_executor,
+    log_on_broken_process_pool,
+)
 
 
 @dataclass  # TODO: use attrs
@@ -476,6 +480,7 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
             offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
             unique_offsets = np.unique(offsets)
             assert len(offsets) == len(unique_offsets)
+            gc.collect()
 
         logging.info(
             f"validate_no_dups_X finished, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
@@ -489,11 +494,11 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
 def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -> bool:
     """Validate that X['normalized'] is correct relative to X['raw']"""
     experiment_specification, soma_path, row_range_start, row_range_stop = args
+    logging.info(
+        f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+    )
 
     with open_experiment(soma_path, experiment_specification) as exp:
-        logging.info(
-            f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
-        )
         if "normalized" not in exp.ms[MEASUREMENT_RNA_NAME].X:
             return True
 
@@ -534,8 +539,14 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             assert np.allclose(
                 norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data
             ), f"{experiment_specification.name}"
+            gc.collect()
 
-        return True
+    gc.collect()
+    log_process_resource_status()
+    logging.info(
+        f"validate_Xnorm_layer - finish, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+    )
+    return True
 
 
 def validate_X_layers(
@@ -580,28 +591,38 @@ def validate_X_layers(
 
     if args.config.multi_process:
         ROWS_PER_PROCESS = 1_000_000
-        n_workers = n_workers_from_memory_budget(args, 3 * 8 * 200_000 * avg_row_nnz)
-        with create_process_pool_executor(args, max_workers=n_workers) as ppe:
-            futures = [
-                ppe.submit(_validate_Xnorm_layer, (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS))
-                for eb in experiment_specifications
-                for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
-            ] + [
-                ppe.submit(
-                    _validate_X_layer_has_unique_coords,
-                    (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
-                )
-                for eb in experiment_specifications
-                for layer_name in CENSUS_X_LAYERS
-                for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
-            ]
-            # XXX TODO: these don't have a fixed memory budget, and need to move to a dynamic scheduler
-            futures += [
-                ppe.submit(
-                    _validate_Xraw_contents_by_dataset, (assets_path, soma_path, dataset, experiment_specifications)
-                )
-                for dataset in datasets
-            ]
+        mem_budget_factor = int(10 * avg_row_nnz * 2)  # Heuristic:  3 columns, (int64, int64, float32), 100% pad.
+        with create_resource_pool_executor(args) as ppe:
+            futures = (
+                [
+                    ppe.submit(
+                        500_000 * mem_budget_factor,
+                        _validate_Xnorm_layer,
+                        (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
+                    )
+                    for eb in experiment_specifications
+                    for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
+                ]
+                + [
+                    ppe.submit(
+                        250_000 * mem_budget_factor,
+                        _validate_X_layer_has_unique_coords,
+                        (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
+                    )
+                    for eb in experiment_specifications
+                    for layer_name in CENSUS_X_LAYERS
+                    for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
+                ]
+                + [
+                    ppe.submit(
+                        # Heuristic: AnnData uses gzip, which normally achieves ~4X compression. 100% pad.
+                        8 * dataset.asset_h5ad_filesize,
+                        _validate_Xraw_contents_by_dataset,
+                        (assets_path, soma_path, dataset, experiment_specifications),
+                    )
+                    for dataset in datasets
+                ]
+            )
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
                 log_on_broken_process_pool(ppe)
                 assert future.result()
@@ -633,6 +654,7 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         df = census[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
         df["dataset_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: urlcat(assets_path, p))
+        df["asset_h5ad_filesize"] = df.dataset_asset_h5ad_uri.map(lambda p: os.path.getsize(p))
         datasets = Dataset.from_dataframe(df)
         return datasets
 

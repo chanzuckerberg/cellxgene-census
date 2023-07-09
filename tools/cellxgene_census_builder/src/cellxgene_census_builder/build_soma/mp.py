@@ -6,7 +6,7 @@ import threading
 from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
 from functools import partial
 from types import TracebackType
-from typing import Any, Callable, Generic, Iterable, Iterator, Mapping, Optional, ParamSpec, TypeVar
+from typing import Any, Callable, Generic, Iterable, Iterator, Mapping, Optional, ParamSpec, TypeVar, Union
 
 import attrs
 
@@ -30,17 +30,17 @@ def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) 
 
 def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
     assert _mp_config_checks()
-    logging.debug(f"create_process_pool_executor - max_workers={max_workers}")
+    logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
     return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
 
 
 def create_thread_pool_executor(max_workers: Optional[int] = None) -> ThreadPoolExecutor:
     assert _mp_config_checks()
-    logging.debug(f"create_thread_pool_executor - max_workers={max_workers}")
+    logging.debug(f"create_thread_pool_executor [max_workers={max_workers}]")
     return ThreadPoolExecutor(max_workers=max_workers)
 
 
-def log_on_broken_process_pool(ppe: ProcessPoolExecutor) -> None:
+def log_on_broken_process_pool(ppe: Union[ProcessPoolExecutor, "ResourcePoolProcessExecutor"]) -> None:
     """
     There are a number of conditions where the Process Pool can be broken,
     such that it will hang in a shutdown. This will cause the context __exit__
@@ -86,7 +86,7 @@ class EagerIterator(Iterator[_T]):
 
     def _fetch_next(self) -> None:
         self._future = self._pool.submit(self.iterator.__next__)
-        logging.debug("Fetching next iterator element, eagerly")
+        logging.debug("EagerIterator: fetching next iterator element, eagerly")
 
     def __next__(self) -> _T:
         try:
@@ -99,7 +99,7 @@ class EagerIterator(Iterator[_T]):
             raise
 
     def _cleanup(self) -> None:
-        logging.debug("Cleaning up eager iterator")
+        logging.debug("EagerIterator: cleaning up eager iterator")
         if self._own_pool:
             self._pool.shutdown()
 
@@ -137,8 +137,8 @@ def _work_item_done(scheduler: "_SchedulerThread", wi: _WorkItem[_T], future: Fu
 
 
 class _SchedulerThread(threading.Thread):
-    def __init__(self, executor: "ResourceProcessExecutor", max_resources: int):
-        super().__init__(name="ResourceProcessExecutor_scheduler")
+    def __init__(self, executor: "ResourcePoolProcessExecutor", max_resources: int):
+        super().__init__(name="ResourcePoolProcessExecutor_scheduler")
         self.executor = executor
         self.max_resources: int = max_resources
 
@@ -161,10 +161,14 @@ class _SchedulerThread(threading.Thread):
                     self.wakeup.wait()
 
                 if self.shutdown_requested:
+                    logging.debug("ResourcePoolProcessExecutor: shutdown request received by scheduler")
                     return
 
-                # there is work, so peek to see how much. We may need
-                # to wait for resources to be available.
+                # there is work, so peek to see how much. We may need to wait for resources to be available.
+                #
+                # TODO: this always schedules in LIFO order. There are opportunties for better
+                # packing algos, which would lead to higher resource utilization.
+                #
                 wi: _WorkItem[Any] = self.executor.pending_work.queue[0]
                 while (
                     not self.shutdown_requested
@@ -174,8 +178,14 @@ class _SchedulerThread(threading.Thread):
                     self.wakeup.wait()
 
                 if self.shutdown_requested:
-                    return  # type: ignore[unreachable]
+                    logging.debug("ResourcePoolProcessExecutor: shutdown request received by scheduler")  # type: ignore[unreachable]
+                    return
 
+                logging.debug(
+                    "ResourcePoolProcessExecutor: adding work item to process pool "
+                    f"[free={self.max_resources-self.resources_in_use}, "
+                    f"utilization={self.resources_in_use/self.max_resources:0.3f}]"
+                )
                 wi = self.executor.pending_work.get(block=False)
                 self.resources_in_use += wi.resources
                 ftr: Future[Any] = self.executor.process_pool.submit(wi.fn, *wi.args, **wi.kwargs)
@@ -187,13 +197,17 @@ class _SchedulerThread(threading.Thread):
             self.wakeup.notify()
 
 
-class ResourceProcessExecutor(contextlib.AbstractContextManager["ResourceProcessExecutor"]):
+class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoolProcessExecutor"]):
     def __init__(self, max_resources: int, *args: Any, **kwargs: Any):
         super().__init__()
         self.pending_work: queue.Queue[_WorkItem[Any]] = queue.Queue()
         self.process_pool: ProcessPoolExecutor = ProcessPoolExecutor(*args, **kwargs)
         self.scheduler = _SchedulerThread(self, max_resources)
         self.scheduler.start()
+
+    @property
+    def _broken(self) -> bool:
+        return self.process_pool._broken
 
     def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
         f = Future[_T]()
@@ -214,3 +228,17 @@ class ResourceProcessExecutor(contextlib.AbstractContextManager["ResourceProcess
     ) -> None:
         self.shutdown(wait=True)
         return None
+
+
+def create_resource_pool_executor(
+    args: CensusBuildArgs, max_resources: Optional[int] = None, max_workers: Optional[int] = None
+) -> ResourcePoolProcessExecutor:
+    assert _mp_config_checks()
+    if max_resources is None:
+        max_resources = args.config.memory_budget
+    if max_workers is None:
+        max_workers = cpu_count() + 2
+    logging.debug(f"create_resource_pool_executor [max_workers={max_workers}, max_resources={max_resources}]")
+    return ResourcePoolProcessExecutor(
+        max_resources=max_resources, max_workers=max_workers, initializer=process_init, initargs=(args,)
+    )
