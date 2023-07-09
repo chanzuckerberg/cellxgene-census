@@ -17,8 +17,8 @@ def main() -> int:
 
     config = CensusBuildConfig(**cli_args.__dict__)
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=config)
-    logging.info(args)
     process_init(args)
+    logging.info(args)
 
     cc = 0
     if cli_args.subcommand == "build":
