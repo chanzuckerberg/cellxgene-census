@@ -1,4 +1,5 @@
 import argparse
+import logging
 import pathlib
 import sys
 from datetime import datetime
@@ -16,6 +17,7 @@ def main() -> int:
 
     config = CensusBuildConfig(**cli_args.__dict__)
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=config)
+    logging.info(args)
     process_init(args)
 
     cc = 0
