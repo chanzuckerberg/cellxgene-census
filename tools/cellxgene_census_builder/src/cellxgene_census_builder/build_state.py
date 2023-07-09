@@ -37,7 +37,8 @@ CENSUS_CONFIG_DEFAULTS = {
     #
     # Default multi-process. Memory scaling based on empirical tests.
     "multi_process": True,
-    "max_workers": 2 + int(psutil.virtual_memory().total / (96 * 1024**3)),
+    "max_workers": 2 + int(psutil.virtual_memory().total / (128 * 1024**3)),
+    "memory_budget": int(psutil.virtual_memory().total),
     #
     # Host minimum resource validation
     "host_validation_disable": False,  # if True, host validation checks will be skipped

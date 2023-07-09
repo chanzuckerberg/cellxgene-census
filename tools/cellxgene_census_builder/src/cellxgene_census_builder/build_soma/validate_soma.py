@@ -6,7 +6,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Generator, List, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Tuple, TypeVar, Union
 
 import anndata
 import numpy as np
@@ -44,7 +44,7 @@ from .globals import (
     MEASUREMENT_RNA_NAME,
     SOMA_TileDB_Context,
 )
-from .mp import EagerIterator, create_process_pool_executor, create_thread_pool_executor, log_on_broken_process_pool
+from .mp import create_process_pool_executor, log_on_broken_process_pool, n_workers_from_memory_budget
 
 
 @dataclass  # TODO: use attrs
@@ -232,7 +232,7 @@ def validate_axis_dataframes(
     # check shapes & perform weak test of contents
     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
     if args.config.multi_process:
-        with create_process_pool_executor(args) as ppe:
+        with create_process_pool_executor(args, max_workers=args.config.max_workers) as ppe:
             futures = [
                 ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
                 for dataset in datasets
@@ -313,12 +313,14 @@ def _validate_X_obs_axis_stats(
     expected_X.eliminate_zeros()
 
     # obs.raw_sum
-    assert (
-        census_obs.raw_sum == expected_X.sum(axis=1).A1
-    ).all(), f"{eb.name}:{dataset.dataset_id} obs.raw_sum incorrect."
+    assert np.array_equal(
+        census_obs.raw_sum.to_numpy(), expected_X.sum(axis=1).A1
+    ), f"{eb.name}:{dataset.dataset_id} obs.raw_sum incorrect."
 
     # obs.nnz
-    assert (census_obs.nnz == expected_X.getnnz(axis=1)).all(), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
+    assert np.array_equal(
+        census_obs.nnz.to_numpy(), expected_X.getnnz(axis=1)
+    ), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
     # obs.raw_mean
     assert np.allclose(
@@ -332,7 +334,7 @@ def _validate_X_obs_axis_stats(
 
     # obs.n_measured_vars
     assert (
-        census_obs.n_measured_vars == (expected_X.sum(axis=0) > 0).sum()
+        census_obs.n_measured_vars.to_numpy() == (expected_X.sum(axis=0) > 0).sum()
     ).all(), f"{eb.name}:{dataset.dataset_id} obs.n_measured_vars incorrect."
 
     return True
@@ -350,6 +352,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
       (where presence is defined as having a non-zero value)
     """
     assets_path, soma_path, dataset, experiment_specifications = args
+    logging.info(f"validate X[raw] by contents - starting {dataset.dataset_id}")
     _, unfiltered_ad = next(open_anndata(assets_path, [dataset]))
 
     for eb in experiment_specifications:
@@ -445,6 +448,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
 
     gc.collect()
     log_process_resource_status()
+    logging.info(f"validate X[raw] by contents - finished {dataset.dataset_id}")
     return True
 
 
@@ -463,36 +467,36 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
         ROW_SLICE_SIZE = 100_000
 
         for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
-            # work around TileDB-SOMA bug #900 which errors if we slice beyond end of shape.
-            # TODO: remove when issue is resolved.
-            end_row = min(row + ROW_SLICE_SIZE, X_layer.shape[0] - 1)
-
-            slice_of_X = X_layer.read(coords=(slice(row, end_row),)).tables().concat()
+            slice_of_X = X_layer.read(coords=(slice(row, row + ROW_SLICE_SIZE - 1),)).tables().concat()
 
             # Use C layout offset for unique test
             offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
             unique_offsets = np.unique(offsets)
             assert len(offsets) == len(unique_offsets)
 
+        logging.info(
+            f"validate_no_dups_X finished, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+        )
+
     gc.collect()
     log_process_resource_status()
     return True
 
 
-def _validate_Xnorm_layer(args_: Tuple[ExperimentSpecification, str, CensusBuildArgs]) -> bool:
+def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -> bool:
     """Validate that X['normalized'] is correct relative to X['raw']"""
-    experiment_specification, soma_path, args = args_
+    experiment_specification, soma_path, row_range_start, row_range_stop = args
 
     with open_experiment(soma_path, experiment_specification) as exp:
-        logging.info(f"validate_Xnorm_layer - start, {experiment_specification.name}")
+        logging.info(
+            f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+        )
         if "normalized" not in exp.ms[MEASUREMENT_RNA_NAME].X:
             return True
 
         X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
         X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
         assert X_raw.shape == X_norm.shape
-        assert X_raw.nnz == X_norm.nnz
-        n_rows = X_norm.shape[0]
 
         var_df = (
             exp.ms[MEASUREMENT_RNA_NAME]
@@ -501,63 +505,34 @@ def _validate_Xnorm_layer(args_: Tuple[ExperimentSpecification, str, CensusBuild
             .to_pandas()
             .set_index("soma_joinid")
         )
+        n_cols = len(var_df)
+        assert X_raw.shape[1] == n_cols
 
-        ROW_STRIDE = 250_000
+        ROW_SLICE_SIZE = 100_000
+        for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
+            raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
+            norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
 
-        def lazy_X_reader(
-            X_raw: soma.SparseNDArray, X_norm: soma.SparseNDArray
-        ) -> Generator[Tuple[int, pa.Table, pa.Table], None, None]:
-            for row_idx in range(0, n_rows, ROW_STRIDE):  # assumes contig joinids, [0, n_rows)
-                raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_STRIDE - 1),)).tables().concat()
-                norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_STRIDE - 1),)).tables().concat()
-                yield (row_idx, raw, norm)
-
-        def check_raw_and_norm(row_idx: int, raw: pa.Table, norm: pa.Table) -> bool:
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
 
             dim0 = norm["soma_dim_0"].to_numpy()
             dim1 = norm["soma_dim_1"].to_numpy()
-            row: npt.NDArray[np.int32] = pd.RangeIndex(row_idx, row_idx + ROW_STRIDE).get_indexer(dim0)  # type: ignore[no-untyped-call]
+            row: npt.NDArray[np.int64] = pd.RangeIndex(row_idx, row_idx + ROW_SLICE_SIZE).get_indexer(dim0)  # type: ignore[no-untyped-call]
             col = var_df.index.get_indexer(dim1)
-            n_rows = row.max() + 1
+            n_rows: int = row.max() + 1
 
-            norm_spm = sparse.coo_matrix(
-                (
-                    norm["soma_data"].to_numpy(),
-                    (row, col),
-                ),
-                shape=(n_rows, len(var_df)),
-            ).tocsr()
+            norm_csr = sparse.coo_matrix((norm["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
+            raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
+
             assert np.allclose(
-                norm_spm.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-4, atol=1e-6
+                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-4, atol=1e-6
             ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
-
-            raw_spm = sparse.coo_matrix(
-                (
-                    raw["soma_data"].to_numpy(),
-                    (row, col),
-                ),
-                shape=(n_rows, len(var_df)),
-            ).tocsr()
             assert np.allclose(
-                norm_spm.data, raw_spm.multiply(1.0 / raw_spm.sum(axis=1).A).data
+                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data
             ), f"{experiment_specification.name}"
 
-            return True
-
-        if args.config.multi_process:
-            with create_thread_pool_executor(args) as pool:
-                for row_idx, raw, norm in EagerIterator(lazy_X_reader(X_raw, X_norm), pool=pool):
-                    assert check_raw_and_norm(row_idx, raw, norm)
-
-        else:
-            for row_idx, raw, norm in lazy_X_reader(X_raw, X_norm):
-                assert check_raw_and_norm(row_idx, raw, norm)
-
-        logging.info(f"validate_Xnorm_layer - completed, {experiment_specification.name}")
-
-    return True
+        return True
 
 
 def validate_X_layers(
@@ -574,6 +549,7 @@ def validate_X_layers(
     Raises on error.  Returns True on success.
     """
     logging.debug("validate_X_layers")
+    avg_row_nnz = 0
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
             assert soma.Collection.exists(exp.ms[MEASUREMENT_RNA_NAME].X.uri)
@@ -597,20 +573,24 @@ def validate_X_layers(
                     assert X.schema.field("soma_dim_1").type == pa.int64()
                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                     assert X.shape == (n_obs, n_vars)
+                avg_row_nnz = max(avg_row_nnz, int(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
 
     if args.config.multi_process:
-        with create_process_pool_executor(args) as ppe:
-            ROWS_PER_PROCESS = 1_000_000
-            futures = []
-            futures += [ppe.submit(_validate_Xnorm_layer, (eb, soma_path, args)) for eb in experiment_specifications]
-            futures += [
+        ROWS_PER_PROCESS = 2_000_000
+        n_workers = n_workers_from_memory_budget(args, 3 * 8 * ROWS_PER_PROCESS * avg_row_nnz)
+        with create_process_pool_executor(args, max_workers=n_workers) as ppe:
+            futures = [
+                ppe.submit(_validate_Xnorm_layer, (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS))
+                for eb in experiment_specifications
+                for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
+            ] + [
                 ppe.submit(
                     _validate_X_layer_has_unique_coords,
                     (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
                 )
                 for eb in experiment_specifications
                 for layer_name in CENSUS_X_LAYERS
-                for row_start in range(0, n_obs, ROWS_PER_PROCESS)
+                for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
             ]
             futures += [
                 ppe.submit(
@@ -638,7 +618,7 @@ def validate_X_layers(
             logging.info(f"validate_X {n} of {len(datasets)} complete.")
             assert vld
         for eb in experiment_specifications:
-            assert _validate_Xnorm_layer((eb, soma_path, args))
+            assert _validate_Xnorm_layer((eb, soma_path, 0, eb_info[eb.name].n_obs))
 
     return True
 
@@ -750,9 +730,16 @@ def validate_internal_consistency(
                     shape=(len(datasets_df), len(var)),
                 ).tocsr()
 
-                # Assertion 1 - obs and var nnz counts are mutually consistent
+                # Assertion 1 - counts are mutually consistent
                 assert obs.nnz.sum() == var.nnz.sum(), f"{eb.name}: axis NNZ mismatch."
                 assert obs.nnz.sum() == exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz, f"{eb.name}: axis / X NNZ mismatch."
+                assert (
+                    exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].nnz
+                ), "X['raw'] and X['normalized'] nnz differ."
+                assert (
+                    exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape == exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape
+                ), "X['raw'] and X['normalized'] shape differ."
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz == var.nnz.sum(), "X['raw'] and axis nnz sum differ."
 
                 # Assertion 2 - obs.n_measured_vars is consistent with presence matrix
                 """

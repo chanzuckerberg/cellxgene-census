@@ -1,10 +1,17 @@
-import concurrent.futures
+import contextlib
 import logging
 import multiprocessing
-from typing import Iterator, Optional, TypeVar
+import queue
+import threading
+from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
+from functools import partial
+from types import TracebackType
+from typing import     Any,    Callable,    Generic,    Iterable,    Iterator,    Mapping,    Optional,    ParamSpec,    TypeVar,
+
+import attrs
 
 from ..build_state import CensusBuildArgs
-from ..util import process_init
+from ..util import cpu_count, process_init
 
 
 def _mp_config_checks() -> bool:
@@ -16,27 +23,24 @@ def _mp_config_checks() -> bool:
     return True
 
 
-def create_process_pool_executor(
-    args: CensusBuildArgs, max_workers: Optional[int] = None
-) -> concurrent.futures.ProcessPoolExecutor:
+def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
+    n_workers: int = int(args.config.memory_budget // per_worker_budget)
+    return min(max(1, n_workers), cpu_count() + 2)
+
+
+def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
     assert _mp_config_checks()
-    return concurrent.futures.ProcessPoolExecutor(
-        max_workers=args.config.max_workers if max_workers is None else max_workers,
-        initializer=process_init,
-        initargs=(args,),
-    )
+    logging.debug(f"create_process_pool_executor - max_workers={max_workers}")
+    return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
 
 
-def create_thread_pool_executor(
-    args: CensusBuildArgs, max_workers: Optional[int] = None
-) -> concurrent.futures.ThreadPoolExecutor:
+def create_thread_pool_executor(max_workers: Optional[int] = None) -> ThreadPoolExecutor:
     assert _mp_config_checks()
-    return concurrent.futures.ThreadPoolExecutor(
-        max_workers=args.config.max_workers if max_workers is None else max_workers,
-    )
+    logging.debug(f"create_thread_pool_executor - max_workers={max_workers}")
+    return ThreadPoolExecutor(max_workers=max_workers)
 
 
-def log_on_broken_process_pool(ppe: concurrent.futures.ProcessPoolExecutor) -> None:
+def log_on_broken_process_pool(ppe: ProcessPoolExecutor) -> None:
     """
     There are a number of conditions where the Process Pool can be broken,
     such that it will hang in a shutdown. This will cause the context __exit__
@@ -64,22 +68,23 @@ def log_on_broken_process_pool(ppe: concurrent.futures.ProcessPoolExecutor) -> N
 # it DRY.
 
 _T = TypeVar("_T")
+_P = ParamSpec("_P")
 
 
 class EagerIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],
-        pool: Optional[concurrent.futures.Executor] = None,
+        pool: Optional[Executor] = None,
     ):
         super().__init__()
         self.iterator = iterator
-        self._pool = pool or concurrent.futures.ThreadPoolExecutor()
+        self._pool = pool or ThreadPoolExecutor()
         self._own_pool = pool is None
-        self._future: Optional[concurrent.futures.Future[_T]] = None
-        self.fetch_next()
+        self._future: Optional[Future[_T]] = None
+        self._fetch_next()
 
-    def fetch_next(self) -> None:
+    def _fetch_next(self) -> None:
         self._future = self._pool.submit(self.iterator.__next__)
         logging.debug("Fetching next iterator element, eagerly")
 
@@ -87,7 +92,7 @@ class EagerIterator(Iterator[_T]):
         try:
             assert self._future
             res = self._future.result()
-            self.fetch_next()
+            self._fetch_next()
             return res
         except StopIteration:
             self._cleanup()
@@ -105,3 +110,107 @@ class EagerIterator(Iterator[_T]):
         self._cleanup()
         super_del = getattr(super(), "__del__", lambda: None)
         super_del()
+
+
+@attrs.define
+class _WorkItem(Generic[_T]):
+    resources: int
+    future: Future[_T]
+    fn: Callable[..., _T]
+    args: Iterable[Any]
+    kwargs: Mapping[str, Any]
+
+
+def _work_item_done(scheduler: "_SchedulerThread", wi: _WorkItem[_T], future: Future[_T]) -> None:
+    """Callback when Future is cancelled or completes."""
+    assert not future.running() and future.done()
+    if future.cancelled():
+        wi.future.cancel()
+    else:
+        exc = future.exception()
+        if exc is None:
+            wi.future.set_result(future.result())
+        else:
+            wi.future.set_exception(exc)
+
+    scheduler._release_resouces(wi)
+
+
+class _SchedulerThread(threading.Thread):
+    def __init__(self, executor: "ResourceProcessExecutor", max_resources: int):
+        super().__init__(name="ResourceProcessExecutor_scheduler")
+        self.executor = executor
+        self.max_resources: int = max_resources
+
+        self.resources_in_use: int = 0
+
+        self.shutdown_requested: bool = False
+
+        self.mutex_lock: threading.Lock = threading.Lock()
+        self.wakeup: threading.Condition = threading.Condition(self.mutex_lock)
+
+    def shutdown(self) -> None:
+        self.shutdown_requested = True
+        with self.wakeup:
+            self.wakeup.notify()
+
+    def run(self) -> None:
+        while True:
+            with self.wakeup:
+                while not self.shutdown_requested and self.executor.pending_work.qsize() == 0:
+                    self.wakeup.wait()
+
+                if self.shutdown_requested:
+                    return
+
+                # there is work, so peek to see how much. We may need
+                # to wait for resources to be available.
+                wi: _WorkItem[Any] = self.executor.pending_work.queue[0]
+                while (
+                    not self.shutdown_requested
+                    and (self.resources_in_use > 0)
+                    and (wi.resources + self.resources_in_use > self.max_resources)
+                ):
+                    self.wakeup.wait()
+
+                if self.shutdown_requested:
+                    return  # type: ignore[unreachable]
+
+                wi = self.executor.pending_work.get(block=False)
+                self.resources_in_use += wi.resources
+                ftr: Future[Any] = self.executor.process_pool.submit(wi.fn, *wi.args, **wi.kwargs)
+                ftr.add_done_callback(partial(_work_item_done, self, wi))
+
+    def _release_resouces(self, wi: _WorkItem[Any]) -> None:
+        with self.wakeup:
+            self.resources_in_use -= wi.resources
+            self.wakeup.notify()
+
+
+class ResourceProcessExecutor(contextlib.AbstractContextManager["ResourceProcessExecutor"]):
+    def __init__(self, max_resources: int, *args: Any, **kwargs: Any):
+        super().__init__()
+        self.pending_work: queue.Queue[_WorkItem[Any]] = queue.Queue()
+        self.process_pool: ProcessPoolExecutor = ProcessPoolExecutor(*args, **kwargs)
+        self.scheduler = _SchedulerThread(self, max_resources)
+        self.scheduler.start()
+
+    def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
+        f = Future[_T]()
+        w = _WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs)
+        self.pending_work.put(w)
+        with self.scheduler.wakeup:
+            self.scheduler.wakeup.notify()
+        return f
+
+    def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
+        self.scheduler.shutdown()
+        while not self.pending_work.empty():
+            self.pending_work.get(block=False).future.cancel()
+        self.process_pool.shutdown(wait, cancel_futures=cancel_futures)
+
+    def __exit__(
+        self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]
+    ) -> None:
+        self.shutdown(wait=True)
+        return None

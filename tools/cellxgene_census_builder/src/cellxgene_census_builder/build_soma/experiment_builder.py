@@ -49,6 +49,7 @@ from .mp import (
     create_process_pool_executor,
     create_thread_pool_executor,
     log_on_broken_process_pool,
+    n_workers_from_memory_budget,
 )
 from .source_assets import cat_file
 from .stats import get_obs_stats, get_var_stats
@@ -56,7 +57,6 @@ from .summary_cell_counts import (
     accumulate_summary_counts,
     init_summary_counts_accumulator,
 )
-from .tissue_mapper import TissueMapper  # type: ignore
 from .util import (
     anndata_ordered_bool_issue_853_workaround,
     array_chunker,
@@ -83,9 +83,6 @@ class AxisStats:
 
 AccumulateXResult = Tuple[PresenceResult, AxisStats]
 AccumulateXResults = Sequence[AccumulateXResult]
-
-# UBERON tissue term mapper
-tissue_mapper: TissueMapper = TissueMapper()
 
 
 def _assert_open_for_write(obj: Optional[somacore.SOMAObject]) -> None:
@@ -162,6 +159,7 @@ class ExperimentBuilder:
         self.n_var: int = 0
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
+        self.obs_df_accumulation: List[pd.DataFrame] = []
         self.obs_df: pd.DataFrame = pd.DataFrame(
             data={
                 k: pd.Series(
@@ -238,10 +236,11 @@ class ExperimentBuilder:
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
         """
-        Write obs, accumulate var.
+        Build (accumulate) in-memory obs and var.
 
         Returns: number of cells that make it past the experiment filter.
         """
+
         assert len(ad.obs) > 0
 
         # Narrow columns just to minimize memory footprint. Summary cell counting
@@ -270,11 +269,8 @@ class ExperimentBuilder:
         obs_df = obs_df[list(CENSUS_OBS_TERM_COLUMNS)]
         obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
 
-        # accumulate obs into the experiment builder
-        if self.obs_df.empty:
-            self.obs_df = obs_df
-        else:
-            self.obs_df = pd.concat([self.obs_df, obs_df], ignore_index=True, copy=False)
+        # accumulate obs
+        self.obs_df_accumulation.append(obs_df)
 
         self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs
 
@@ -288,7 +284,6 @@ class ExperimentBuilder:
         self.var_df = pd.concat([self.var_df, tv], ignore_index=True).drop_duplicates()
 
         self.n_obs += len(obs_df)
-        assert self.n_obs == len(self.obs_df)
         self.n_unique_obs += (obs_df.is_primary_data == True).sum()  # noqa: E712
 
         donors = obs_df.donor_id.unique()
@@ -296,6 +291,15 @@ class ExperimentBuilder:
 
         self.n_datasets += 1
         return len(obs_df)
+
+    def finalize_obs_axes(self) -> None:
+        if not self.obs_df_accumulation:
+            return
+        self.obs_df = pd.concat(self.obs_df_accumulation, ignore_index=True)
+        self.obs_df_accumulation.clear()
+        assert self.n_obs == len(self.obs_df)
+        gc.collect()
+        return
 
     def write_obs_dataframe(self) -> None:
         logging.info(f"{self.name}: writing obs dataframe")
@@ -399,53 +403,31 @@ class ExperimentBuilder:
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
     def write_X_normalized(self, args: CensusBuildArgs) -> None:
-        _assert_open_for_write(self.experiment)
         assert self.experiment is not None
-
         if self.n_obs == 0:
             return
 
         logging.info(f"Write X normalized: {self.name} - starting")
         # grab the previously calculated sum of the X['raw'] layer
         raw_sum = self.obs_df.raw_sum.to_numpy()
+        avg_row_nnz = int(self.obs_df.nnz.to_numpy().sum() / len(self.obs_df))
 
-        with soma.open(
-            urlcat(self.experiment.uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
-        ) as X_raw:
-            X_normalized = self.experiment.ms[MEASUREMENT_RNA_NAME].X["normalized"]
-            if args.config.multi_process:
-                with create_thread_pool_executor(args) as pool:
-                    lazy_reader = EagerIterator(X_raw.read().tables(), pool=pool)
-                    lazy_divider = EagerIterator(
-                        (
-                            (
-                                X_tbl["soma_dim_0"],
-                                X_tbl["soma_dim_1"],
-                                X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]],
-                            )
-                            for X_tbl in lazy_reader
-                        ),
-                        pool=pool,
-                    )
-                    for soma_dim_0, soma_dim_1, soma_data in lazy_divider:
-                        X_normalized.write(
-                            pa.Table.from_arrays(
-                                [soma_dim_0, soma_dim_1, soma_data],
-                                names=["soma_dim_0", "soma_dim_1", "soma_data"],
-                            )
-                        )
+        if args.config.multi_process:
+            STRIDE = 2_000_000  # controls fragment size, which impacts consolidation time
+            n_workers = n_workers_from_memory_budget(args, 3 * 8 * STRIDE * avg_row_nnz)
+            with create_process_pool_executor(args, max_workers=n_workers) as pe:
+                futures = [
+                    pe.submit(_write_X_normalized, (self.experiment.uri, start_id, STRIDE, raw_sum))
+                    for start_id in range(0, self.n_obs, STRIDE)
+                ]
+                for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
+                    log_on_broken_process_pool(pe)
+                    # prop exceptions by calling result
+                    f.result()
+                    logging.info(f"Write X normalized: {n} of {len(futures)} complete.")
 
-            else:
-                for X_tbl in X_raw.read().tables():
-                    soma_dim_0 = X_tbl["soma_dim_0"]
-                    soma_dim_1 = X_tbl["soma_dim_1"]
-                    soma_data = X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]]
-                    X_normalized.write(
-                        pa.Table.from_arrays(
-                            [soma_dim_0, soma_dim_1, soma_data],
-                            names=["soma_dim_0", "soma_dim_1", "soma_data"],
-                        )
-                    )
+        else:
+            _write_X_normalized((self.experiment.uri, 0, self.n_obs, raw_sum))
 
         logging.info(f"Write X normalized: {self.name} - finished")
 
@@ -491,7 +473,7 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     gc.collect()
-    logging.debug(f"Loading AnnData for dataset {dataset.dataset_id} ({progress[0]} of {progress[1]})")
+    logging.info(f"Loading AnnData for dataset {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     unfiltered_ad = next(open_anndata(assets_path, [dataset]))[1]
     assert unfiltered_ad.isbacked is False
 
@@ -535,7 +517,7 @@ def _accumulate_all_X_layers(
             col = local_var_joinids[X.col]
             assert (col >= 0).all()
             X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
-            with soma.Experiment.open(eb.experiment_uri, "w") as experiment:
+            with soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
                 experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
             gc.collect()
 
@@ -647,7 +629,7 @@ def populate_X_layers(
     # populate X layers
     results: List[AccumulateXResult] = []
     if args.config.multi_process:
-        with create_process_pool_executor(args) as pe:
+        with create_process_pool_executor(args, max_workers=args.config.max_workers) as pe:
             futures = {
                 _accumulate_X(
                     assets_path,
@@ -707,6 +689,11 @@ def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> Summa
 def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
     """Inplace addition of tissue_general-related columns"""
 
+    # UBERON tissue term mapper
+    from .tissue_mapper import TissueMapper  # type: ignore
+
+    tissue_mapper: TissueMapper = TissueMapper()
+
     tissue_ids = obs_df.tissue_ontology_term_id.unique()
 
     # Map specific ID -> general ID
@@ -738,3 +725,46 @@ def reopen_experiment_builders(
 
         for eb in experiment_builders:
             yield eb
+
+
+def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> None:
+    """
+    Helper for ExperimentBuilder.write_X_normalized.
+
+    Read indicated rows from X['raw'], write to X['normalized']
+    """
+    experiment_uri, obs_joinid_start, n, raw_sum = args
+    logging.debug(f"Write X normalized - starting block {obs_joinid_start}")
+    with soma.open(
+        urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
+    ) as X_raw:
+        with soma.open(
+            urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "normalized"),
+            mode="w",
+            context=SOMA_TileDB_Context(),
+        ) as X_normalized:
+            with create_thread_pool_executor(max_workers=2) as pool:
+                lazy_reader = EagerIterator(
+                    X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),)).tables(),
+                    pool=pool,
+                )
+                lazy_divider = EagerIterator(
+                    (
+                        (
+                            X_tbl["soma_dim_0"],
+                            X_tbl["soma_dim_1"],
+                            X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]],
+                        )
+                        for X_tbl in lazy_reader
+                    ),
+                    pool=pool,
+                )
+                for soma_dim_0, soma_dim_1, soma_data in lazy_divider:
+                    X_normalized.write(
+                        pa.Table.from_arrays(
+                            [soma_dim_0, soma_dim_1, soma_data],
+                            names=["soma_dim_0", "soma_dim_1", "soma_data"],
+                        )
+                    )
+
+    logging.debug(f"Write X normalized - finished block {obs_joinid_start}")

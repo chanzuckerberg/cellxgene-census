@@ -145,15 +145,14 @@ def accumulate_axes(
     N = len(datasets) * len(experiment_builders)
     n = 0
 
-    with create_thread_pool_executor(args) as pool:
+    with create_thread_pool_executor(max_workers=2) as pool:
         adata_iter = open_anndata(assets_path, datasets, backed="r")
         if args.config.multi_process:
             adata_iter = EagerIterator(adata_iter, pool)
 
         for dataset, ad in adata_iter:
             dataset_total_cell_count = 0
-
-            for eb in reopen_experiment_builders(experiment_builders):
+            for eb in experiment_builders:
                 n += 1
                 logging.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
                 ad_filtered = eb.filter_anndata_cells(ad)
@@ -162,7 +161,7 @@ def accumulate_axes(
                     logging.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
                     continue
 
-                # append to `obs`; accumulate `var` data
+                # accumulate `obs` and `var` data
                 dataset_total_cell_count += eb.accumulate_axes(dataset, ad_filtered)
 
             # dataset passes filter if either experiment includes cells from the dataset
@@ -171,6 +170,7 @@ def accumulate_axes(
                 dataset.dataset_total_cell_count = dataset_total_cell_count
 
     for eb in experiment_builders:
+        eb.finalize_obs_axes()
         logging.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
 
     return filtered_datasets
