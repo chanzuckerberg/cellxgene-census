@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 from contextlib import contextmanager
 from datetime import timedelta
 from time import time
@@ -22,8 +21,6 @@ from somacore.query import _fast_csr
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
-
-import cellxgene_census
 
 from ..._open import _build_soma_tiledb_context
 from ..util._eager_iter import _EagerIterator
@@ -285,7 +282,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     iteration. If the ``batch_size`` is 1, then each Tensor will have rank 1:
 
     >>> (tensor([0., 0., 0., 0., 0., 1., 0., 0., 0.]),  # X data
-        tensor([2415,    0,    0], dtype=torch.int64)) # obs data, encoded
+         tensor([2415,    0,    0], dtype=torch.int64)) # obs data, encoded
 
     For larger ``batch_size`` values, the returned Tensors will have rank 2:
 
@@ -301,9 +298,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     supports use of sparse Tensors, this will reduce memory usage.
 
     The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
-    element is always the soma_joinid of the ``obs`` DataFrame (or, equiavalently, the ``soma_dim_0`` of the ``X``
-    matrix. The remaining elements are the ``obs`` columns specified by ``obs_column_names``, and string-typed
-    columns are encoded as integer values. If needed, these values can be decoded, by obtaining the encoder for a
+    element is always the ``soma_joinid`` of the ``obs`` DataFrame (or, equiavalently, the ``soma_dim_0`` of the ``X``
+    matrix). The remaining elements are the ``obs`` columns specified by ``obs_column_names``, and string-typed
+    columns are encoded as integer values. If needed, these values can be decoded by obtaining the encoder for a
     given ``obs`` column name and calling its ``inverse_transform`` method:
 
     >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
@@ -341,39 +338,39 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         Construct a new ``ExperimentDataPipe``.
 
         Args:
-            experiment: soma.Experiment
+            experiment:
                 The SOMA Experiment from which to read data.
-            measurement_name: str
+            measurement_name:
                 The name of the SOMA measurement to read. Defaults to "raw".
-            X_name: str
+            X_name:
                 The name of the X layer to read. Defaults to "X".
-            obs_query: Optional[soma.AxisQuery]
+            obs_query:
                 The query used to filter along the ``obs`` axis. If not specified, all ``obs`` and ``X`` data will
                 be returned, which can be very large.
-            var_query: Optional[soma.AxisQuery]
+            var_query:
                 The query used to filter along the ``var`` axis. If not specified, all ``var`` columns (genes/features)
                 will be returned.
-            obs_column_names: Sequence[str]
+            obs_column_names:
                 The names of the ``obs`` columns to return. The ``soma_joinid`` index "column" does not need to be
                 specified and will always be returned. If not specified, only the ``soma_joinid`` will be returned.
-            batch_size: int
+            batch_size:
                 The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to 1. A value of 1
                 will result in Tensors of rank 1 being returns (a single row); larger values will result in Tensors of
                 rank 2 (multiple rows).
-            sparse_X: bool
+            sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
                 setting this to ``True` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
                 to ``False``, since sparse Tensors are still experimental in PyTorch.
-            soma_buffer_bytes: Optional[int]
+            soma_buffer_bytes:
                 The number of bytes to use for reading data from SOMA. If not specified, will use the default SOMA
                 value. Maximum memory utilization is controlled by this parameter, with larger values providing better
                 read performance.
-            use_eager_fetch: bool
+            use_eager_fetch:
                 Controls whether the returned iterator will eagerly fetch data from SOMA while client code is iterating
                 through data. Defaults to ``True``.
 
         Returns:
-            ``ExperimentDataPipe``.
+            ``ExperimentDataPipe``
 
         Lifecycle:
             experimental
@@ -496,15 +493,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         raise NotImplementedError("IterDataPipe can only be iterated")
 
     def _build_obs_encoders(self, query: soma.ExperimentAxisQuery) -> Encoders:
-        """
-        Returns the encoders that were used to encode obs column values and that are needed to decode them.
-
-        Returns:
-            ``Dict[str, LabelEncoder]`` mapping column names to ``LabelEncoder``s.
-
-        Lifecycle:
-            experimental
-        """
         pytorch_logger.debug("Initializing encoders")
 
         obs = query.obs(column_names=self.obs_column_names).concat()
@@ -540,6 +528,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         (i.e. DataLoader instantiated with num_workers > 0), the obs (cell) count will reflect the size of the
         partition of the data assigned to the active process.
 
+        Args: None.
+
         Returns:
             2-tuple of ``int``s, for obs and var counts, respectively.
 
@@ -554,6 +544,18 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @property
     def obs_encoders(self) -> Encoders:
+        """
+        Returns a dictionary of ``sklearn.preprocessing.LabelEncoder`` objects, keyed on ``obs`` column names,
+        which were used to encode the ``obs`` column values. These encoders can be used to decode the encoded values as
+        follows:
+
+        >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
+
+        See https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html.
+
+        Returns:
+            ``Dict[str, LabelEncoder]`` mapping column names to ``LabelEncoder``s.
+        """
         self._init()
         assert self._encoders is not None
 
@@ -576,8 +578,19 @@ def experiment_dataloader(
     ``DataLoader`` that works with the ``ExperimentDataPipe``, since not all of the ``DataLoader`` constructor params
     can be used (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
 
+    Args:
+        datapipe:
+            A PyTorch ``IterDataPipe``, which can be an ``ExperimentDataPipe`` or any other ``IterDataPipe`` that has
+            been chained to the ``ExperimentDataPipe``.
+        num_workers:
+            Number of worker processes to use for data loading. If 0, data will be loaded in the main process.
+        **dataloader_kwargs:
+            Additional keyword arguments to pass to the ``torch.utils.data.DataLoader`` constructor,
+            except for ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not supported when using ``ExperimentDataPipe``.
+            See https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader.
+
     Returns:
-        PyTorch ``DataLoader``.
+        A ``torch.utils.data.DataLoader``.
 
     Lifecycle:
         experimental
@@ -617,46 +630,3 @@ def _init_multiprocessing() -> None:
                 f'"{torch.multiprocessing.get_start_method()}" to "spawn"'
             )
         torch.multiprocessing.set_start_method("spawn", force=True)
-
-
-# For testing only
-if __name__ == "__main__":
-    import tiledbsoma as soma
-
-    (
-        census_uri_arg,
-        organism_arg,
-        measurement_name_arg,
-        layer_name_arg,
-        obs_value_filter_arg,
-        column_names_arg,
-        sparse_X_arg,
-        torch_batch_size_arg,
-        num_workers_arg,
-    ) = sys.argv[1:]
-
-    census = cellxgene_census.open_soma(uri=census_uri_arg)
-
-    exp_datapipe = ExperimentDataPipe(
-        experiment=census["census_data"]["homo_sapiens"],
-        measurement_name=measurement_name_arg,
-        X_name=layer_name_arg,
-        obs_query=soma.AxisQuery(value_filter=(obs_value_filter_arg or None)),
-        var_query=soma.AxisQuery(coords=(slice(1, 9),)),
-        obs_column_names=column_names_arg.split(","),
-        batch_size=int(torch_batch_size_arg),
-        soma_buffer_bytes=2**12,
-        sparse_X=sparse_X_arg.lower() == "sparse",
-    )
-
-    dp_shuffle = exp_datapipe.shuffle(buffer_size=len(exp_datapipe))
-    dp_train, dp_test = dp_shuffle.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
-
-    dl = experiment_dataloader(dp_train, num_workers=int(num_workers_arg))
-
-    i = 0
-    datum = None
-    for i, datum in enumerate(dl):
-        if (i + 1) % 1000 == 0:
-            print(f"Received {i} torch batches, {exp_datapipe.stats()}:\n{datum}")
-    print(f"Received {i} torch batches, {exp_datapipe.stats()}:\n{datum}")
