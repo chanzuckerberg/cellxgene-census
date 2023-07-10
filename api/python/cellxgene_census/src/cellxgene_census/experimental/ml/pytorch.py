@@ -96,7 +96,7 @@ class Stats:
 def _open_experiment(
     uri: str, aws_region: Optional[str] = None, soma_buffer_bytes: Optional[int] = None
 ) -> soma.Experiment:
-    """Internal method for opening a SOMA experiment as a context manager."""
+    """Internal method for opening a SOMA ``Experiment`` as a context manager."""
 
     context = _build_soma_tiledb_context(aws_region)
 
@@ -271,7 +271,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
     """
-    An iterable-style PyTorch ``DataPipe`` that reads ``obs`` and ``X`` data from a SOMA Experiment, based upon the
+    An iterable-style PyTorch ``DataPipe`` that reads ``obs`` and ``X`` data from a SOMA ``Experiment``, based upon the
     specified queries along the ``obs`` and ``var`` axes. Provides an iterator over these data when the object is
     passed to Python's built-in ``iter`` function:
 
@@ -303,7 +303,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     columns are encoded as integer values. If needed, these values can be decoded by obtaining the encoder for a
     given ``obs`` column name and calling its ``inverse_transform`` method:
 
-    >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
+    >>> exp_data_pipe.obs_encoders["<obs_attr_name>"].inverse_transform(encoded_values)
 
     Lifecycle:
         experimental
@@ -339,9 +339,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         Args:
             experiment:
-                The SOMA Experiment from which to read data.
+                The SOMA ``Experiment`` from which to read data.
             measurement_name:
-                The name of the SOMA measurement to read. Defaults to "raw".
+                The name of the SOMA ``Measurement`` to read. Defaults to "raw".
             X_name:
                 The name of the X layer to read. Defaults to "X".
             obs_query:
@@ -523,7 +523,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     @property
     def shape(self) -> Tuple[int, int]:
         """
-        Get the shape of the data that will be returned by this ExperimentDataPipe. This is the number of
+        Get the shape of the data that will be returned by this ``ExperimentDataPipe``. This is the number of
         obs (cell) and var (feature) counts in the returned data. If used in multiprocessing mode
         (i.e. DataLoader instantiated with num_workers > 0), the obs (cell) count will reflect the size of the
         partition of the data assigned to the active process.
@@ -549,7 +549,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         which were used to encode the ``obs`` column values. These encoders can be used to decode the encoded values as
         follows:
 
-        >>> exp_data_pipe.obs_encoders()["<obs_attr_name>"].inverse_transform(encoded_values)
+        >>> exp_data_pipe.obs_encoders["<obs_attr_name>"].inverse_transform(encoded_values)
 
         See https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html.
 
@@ -591,6 +591,11 @@ def experiment_dataloader(
 
     Returns:
         A ``torch.utils.data.DataLoader``.
+
+    Raises:
+        ValueError: if any of the ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params are passed
+        as keyword arguments.
+
 
     Lifecycle:
         experimental
