@@ -236,7 +236,7 @@ def validate_axis_dataframes(
     # check shapes & perform weak test of contents
     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
     if args.config.multi_process:
-        with create_process_pool_executor(args, max_workers=args.config.max_workers) as ppe:
+        with create_process_pool_executor(args) as ppe:
             futures = [
                 ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
                 for dataset in datasets
@@ -534,11 +534,11 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
 
             assert np.allclose(
-                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-4, atol=1e-6
+                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-2, atol=1e-2
             ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
             assert np.allclose(
-                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data
-            ), f"{experiment_specification.name}"
+                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data, rtol=1e-2, atol=1e-2
+            ), f"{experiment_specification.name}: normalized layer does not match raw contents"
             gc.collect()
 
     gc.collect()
@@ -596,7 +596,7 @@ def validate_X_layers(
             futures = (
                 [
                     ppe.submit(
-                        500_000 * mem_budget_factor,
+                        750_000 * mem_budget_factor,
                         _validate_Xnorm_layer,
                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
                     )

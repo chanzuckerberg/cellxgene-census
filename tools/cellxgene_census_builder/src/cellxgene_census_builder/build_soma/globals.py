@@ -262,7 +262,32 @@ CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG = {
         },
     }
 }
-CENSUS_X_LAYERS_PLATFORM_CONFIG = {layer: CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG for layer in CENSUS_X_LAYERS.keys()}
+CENSUS_X_LAYERS_PLATFORM_CONFIG = {
+    "raw": {
+        **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG,
+    },
+    "normalized": {
+        "tiledb": {
+            "create": {
+                **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
+                "attrs": {
+                    "soma_data": {
+                        "filters": [
+                            {
+                                "_type": "FloatScaleFilter",
+                                "factor": 1.0 / 2**18,
+                                "offset": 0.5,
+                                "bytewidth": 4,
+                            },
+                            "ByteShuffleFilter",
+                            {"_type": "ZstdFilter", "level": 5},
+                        ]
+                    }
+                },
+            }
+        }
+    },
+}
 
 # list of EFO terms that correspond to RNA seq modality/measurement
 RNA_SEQ = [
