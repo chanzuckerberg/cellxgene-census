@@ -41,7 +41,6 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=False,
         help="Use multiple processes",
     )
-    parser.add_argument("--max-workers", type=int, help="Concurrency")
     parser.add_argument(
         "--build-tag",
         type=str,

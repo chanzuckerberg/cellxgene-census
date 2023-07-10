@@ -32,7 +32,7 @@ def _gather(uri: str) -> List[str]:
 
 def _run(args: CensusBuildArgs, uris_to_consolidate: List[str]) -> None:
     # Queue consolidator for each array
-    with create_process_pool_executor(args, max_workers=args.config.max_workers) as ppe:
+    with create_process_pool_executor(args) as ppe:
         futures = [ppe.submit(consolidate_tiledb_object, uri) for uri in uris_to_consolidate]
         logging.info(f"Consolidate: {len(futures)} consolidation jobs queued")
 

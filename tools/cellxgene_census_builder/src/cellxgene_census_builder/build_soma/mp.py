@@ -30,6 +30,8 @@ def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) 
 
 def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
     assert _mp_config_checks()
+    if max_workers is None:
+        max_workers = cpu_count() + 2
     logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
     return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
 
