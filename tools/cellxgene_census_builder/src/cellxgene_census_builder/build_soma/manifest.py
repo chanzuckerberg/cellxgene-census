@@ -85,8 +85,6 @@ def load_manifest_from_CxG() -> List[Dataset]:
             collection_doi=null_to_empty_str(dataset["collection_doi"]),
             asset_h5ad_filesize=asset_h5ad_filesize,
             schema_version=schema_version,
-            cell_count=dataset.get("cell_count", -1),
-            mean_genes_per_cell=dataset.get("mean_genes_per_cell", -1),
         )
         response.append(d)
 
