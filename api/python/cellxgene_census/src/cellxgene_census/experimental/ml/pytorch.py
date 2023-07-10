@@ -359,7 +359,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 rank 2 (multiple rows).
             sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
-                setting this to ``True` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
+                setting this to ``True`` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
                 to ``False``, since sparse Tensors are still experimental in PyTorch.
             soma_buffer_bytes:
                 The number of bytes to use for reading data from SOMA. If not specified, will use the default SOMA
