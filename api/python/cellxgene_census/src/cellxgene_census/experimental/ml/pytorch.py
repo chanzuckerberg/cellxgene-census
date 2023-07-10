@@ -593,8 +593,7 @@ def experiment_dataloader(
         A ``torch.utils.data.DataLoader``.
 
     Raises:
-        ValueError: if any of the ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params are passed
-        as keyword arguments.
+        ValueError: if any of the ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params are passed as keyword arguments.
 
 
     Lifecycle:
