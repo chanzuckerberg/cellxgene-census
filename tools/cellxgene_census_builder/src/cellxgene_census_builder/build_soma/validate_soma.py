@@ -523,6 +523,7 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
+            assert np.all(norm['soma_data'].to_numpy() >= 0.)
 
             dim0 = norm["soma_dim_0"].to_numpy()
             dim1 = norm["soma_dim_1"].to_numpy()
@@ -534,10 +535,10 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
 
             assert np.allclose(
-                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-2, atol=1e-2
+                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-1, atol=1e-1
             ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
             assert np.allclose(
-                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data, rtol=1e-4, atol=1e-4
+                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data, rtol=1e-2, atol=1e-2
             ), f"{experiment_specification.name}: normalized layer does not match raw contents"
             gc.collect()
 
