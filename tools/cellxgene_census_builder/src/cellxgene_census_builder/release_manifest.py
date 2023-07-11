@@ -18,6 +18,7 @@ CensusLocator = TypedDict(
     "CensusLocator",
     {
         "uri": str,  # resource URI
+        "relative_uri": str,  # relative URI
         "s3_region": Optional[str],  # if an S3 URI, has optional region
     },
 )

@@ -35,8 +35,9 @@ class CensusBuildConfig:
     )  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
     #
     # Paths and census version name determined by spec.
-    cellxgene_census_S3_path: str = field(default="s3://cellxgene-data-public/cell-census")
-    cellxgene_census_S3_replica_path: str = field(default=None)
+    cellxgene_census_S3_bucket: str = field(default="cellxgene-data-public")
+    cellxgene_census_S3_prefix: str = field(default="/cell-census")
+    cellxgene_census_S3_replica_bucket: str = field(default=None)
     logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
     build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
     #
