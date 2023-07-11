@@ -751,7 +751,7 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> 
             mode="w",
             context=SOMA_TileDB_Context(),
         ) as X_normalized:
-            with create_thread_pool_executor(max_workers=3) as pool:
+            with create_thread_pool_executor(max_workers=8) as pool:
                 lazy_reader = EagerIterator(
                     X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),)).tables(),
                     pool=pool,
