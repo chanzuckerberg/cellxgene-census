@@ -8,18 +8,6 @@ import cellxgene_census
 from cellxgene_census.experimental import pp
 
 
-@pytest.fixture
-def small_mem_context() -> soma.SOMATileDBContext:
-    """used to keep memory usage smaller for GHA runners."""
-    cfg = {
-        "tiledb_config": {
-            "soma.init_buffer_bytes": 32 * 1024**2,
-            "vfs.s3.no_sign_request": True,
-        },
-    }
-    return soma.SOMATileDBContext().replace(**cfg)
-
-
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
@@ -62,6 +50,21 @@ def test_mean_variance(
                 assert math.isclose(
                     row.todense().var(), mean_variance.loc[test_soma_joinid, "variance"], rel_tol=0.01  # type: ignore
                 )
+
+
+def test_mean_variance_no_flags() -> None:
+    with pytest.raises(ValueError):
+        pp.mean_variance(None, calculate_mean=False, calculate_variance=False)
+
+
+def test_mean_variance_empty_query() -> None:
+    with pytest.raises(ValueError):
+        pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True)
+
+
+def test_mean_variance_wrong_layer() -> None:
+    with pytest.raises(ValueError):
+        pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True, layer="foo")
 
 
 @pytest.mark.experimental

@@ -71,13 +71,11 @@ def mean_variance(
             if calculate_mean:
                 result["mean"] = all_u
             result["variance"] = all_var
-        del mvn
     else:
         mn = MeanAccumulator(n_batches, n_samples, query.n_obs)
         for obs_dim, data in iterate():
             mn.update_single_batch(obs_dim, data)
             _, all_u = mn.finalize()
             result["mean"] = all_u
-        del mn
 
     return result
