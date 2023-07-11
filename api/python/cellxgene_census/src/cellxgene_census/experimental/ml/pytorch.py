@@ -370,7 +370,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 through data. Defaults to ``True``.
 
         Returns:
-            ``ExperimentDataPipe``
+            The constructed ``ExperimentDataPipe``.
 
         Lifecycle:
             experimental
@@ -514,10 +514,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         """
         Get data loading stats for this ``ExperimentDataPipe``.
 
-        Args: None.
-
         Returns:
-            ``Stats`` object.
+            The ``Stats`` object for this ``ExperimentDataPipe``.
 
         Lifecycle:
             experimental
@@ -532,10 +530,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         (i.e. DataLoader instantiated with num_workers > 0), the obs (cell) count will reflect the size of the
         partition of the data assigned to the active process.
 
-        Args: None.
-
         Returns:
-            2-tuple of ``int``s, for obs and var counts, respectively.
+            A 2-tuple of ``int``s, for obs and var counts, respectively.
 
         Lifecycle:
             experimental
@@ -558,7 +554,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         See https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html.
 
         Returns:
-            ``Dict[str, LabelEncoder]`` mapping column names to ``LabelEncoder``s.
+            A ``Dict[str, LabelEncoder]``, mapping column names to ``LabelEncoder``s.
         """
         self._init()
         assert self._encoders is not None
@@ -579,8 +575,8 @@ def experiment_dataloader(
 ) -> DataLoader:
     """
     Factory method for PyTorch ``DataLoader``. This method can be used to safely instantiate a
-    ``DataLoader`` that works with the ``ExperimentDataPipe``, since not all of the ``DataLoader`` constructor params
-    can be used (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
+    ``DataLoader`` that works with the ``ExperimentDataPipe``, since some of the ``DataLoader`` constructor params
+    are not applicable when using a ``IterDataPipe`` (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
 
     Args:
         datapipe:
