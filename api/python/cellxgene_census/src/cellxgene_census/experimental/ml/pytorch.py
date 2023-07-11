@@ -181,7 +181,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         batch_size: int,
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
-        sparse_X: bool,
+        return_sparse_X: bool,
         use_eager_fetch: bool,
     ) -> None:
         self.soma_batch_iter = _ObsAndXSOMAIterator(X, obs_tables_iter, pa.array(var_joinids))
@@ -190,7 +190,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.soma_batch = None
         self.var_joinids = var_joinids
         self.batch_size = batch_size
-        self.sparse_X = sparse_X
+        self.return_sparse_X = return_sparse_X
         self.encoders = encoders
         self.stats = stats
 
@@ -221,7 +221,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         # `to_numpy()` avoids copying the numpy array data
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
-        if not self.sparse_X:
+        if not self.return_sparse_X:
             X_tensor = torch.from_numpy(X.todense())
         else:
             coo = X.tocoo()
@@ -294,8 +294,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                  [2416,    0,    4],
                  [2417,    0,    3]], dtype=torch.int64))
 
-    The ``sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse Tensor.  If the model
-    supports use of sparse Tensors, this will reduce memory usage.
+    The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse Tensor.  If the
+    model supports use of sparse Tensors, this will reduce memory usage.
 
     The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
     element is always the ``soma_joinid`` of the ``obs`` DataFrame (or, equiavalently, the ``soma_dim_0`` of the ``X``
@@ -330,7 +330,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
-        sparse_X: bool = False,
+        return_sparse_X: bool = False,
         soma_buffer_bytes: Optional[int] = None,
         use_eager_fetch: bool = True,
     ) -> None:
@@ -357,7 +357,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to 1. A value of 1
                 will result in Tensors of rank 1 being returns (a single row); larger values will result in Tensors of
                 rank 2 (multiple rows).
-            sparse_X:
+            return_sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
                 setting this to ``True`` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
                 to ``False``, since sparse Tensors are still experimental in PyTorch.
@@ -384,7 +384,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.var_query = var_query
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
-        self.sparse_X = sparse_X
+        self.return_sparse_X = return_sparse_X
         # TODO: This will control the SOMA batch sizes, and could be replaced with a row count once TileDB-SOMA
         #  supports `batch_size` param. It affects both the obs and X read operations.
         self.soma_buffer_bytes = soma_buffer_bytes
@@ -454,7 +454,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         assert self._obs_joinids is not None
         assert self._var_joinids is not None
 
-        if self.sparse_X and torch.utils.data.get_worker_info() and torch.utils.data.get_worker_info().num_workers > 0:
+        if (
+            self.return_sparse_X
+            and torch.utils.data.get_worker_info()
+            and torch.utils.data.get_worker_info().num_workers > 0
+        ):
             raise NotImplementedError(
                 "torch does not work with sparse tensors in multi-processing mode "
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
@@ -476,7 +480,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 batch_size=self.batch_size,
                 encoders=self.obs_encoders,
                 stats=self._stats,
-                sparse_X=self.sparse_X,
+                return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
             )
 

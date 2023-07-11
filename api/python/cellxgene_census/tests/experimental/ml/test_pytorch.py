@@ -274,7 +274,7 @@ def test_sparse_output__non_batched(soma_experiment: Experiment, use_eager_fetch
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
-        sparse_X=True,
+        return_sparse_X=True,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -297,7 +297,7 @@ def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bo
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
-        sparse_X=True,
+        return_sparse_X=True,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
