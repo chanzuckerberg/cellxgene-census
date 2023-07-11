@@ -366,9 +366,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 value. Maximum memory utilization is controlled by this parameter, with larger values providing better
                 read performance.
             use_eager_fetch:
-                Controls whether the returned iterator will eagerly fetch data from SOMA while client code is iterating
-                through data. Defaults to ``True``.
-
+                Fetch the next SOMA batch of ``obs`` and ``X`` data immediately after a previously fetched SOMA batch is made
+                available for processing via the iterator. This allows network (or filesystem) requests to be made in
+                parallel with client-side processing of the SOMA data, potentially improving overall performance at the
+                cost of doubling memory utilization. Defaults to ``True``.
         Returns:
             The constructed ``ExperimentDataPipe``.
 
