@@ -523,7 +523,7 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
-            assert np.all(norm['soma_data'].to_numpy() >= 0.)
+            assert np.all(norm["soma_data"].to_numpy() >= 0.0)
 
             dim0 = norm["soma_dim_0"].to_numpy()
             dim1 = norm["soma_dim_1"].to_numpy()
