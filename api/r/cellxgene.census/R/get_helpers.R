@@ -61,6 +61,51 @@ get_seurat <- function(
   ))
 }
 
+#' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
+#' query, and return it as a `Single Cell Experiment` object.
+#'
+#' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
+#' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
+#' @param measurement_name The measurement object to query. Defaults to `RNA`.
+#' @param X_layers A named character of `X` layers to add to the Seurat assay, where the names are
+#'        the names of Seurat slots (`counts` or `data`) and the values are the names of layers
+#'        within `X`.
+#' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
+#' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
+#' @param obs_column_names Columns to fetch for the `obs` data frame.
+#' @param var_value_filter Same as `obs_value_filter` but for `var`.
+#' @param var_coords Same as `obs_coords` but for `var`.
+#' @param var_column_names Columns to fetch for the `var` data frame.
+#'
+#' @return A `Seurat` object containing the sensus slice.
+#' @importFrom tiledbsoma SOMAExperimentAxisQuery
+#' @export
+#'
+#' @examples
+get_seurat <- function(
+    census,
+    organism,
+    measurement_name = "RNA",
+    X_layers = c(counts = "raw", data = NULL),
+    obs_value_filter = NULL,
+    obs_coords = NULL,
+    obs_column_names = NULL,
+    var_value_filter = NULL,
+    var_coords = NULL,
+    var_column_names = NULL) {
+  expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    get_experiment(census, organism),
+    measurement_name,
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter, coords = obs_coords),
+    var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
+  )
+  return(expt_query$to_seurat(
+    X_layers = X_layers,
+    obs_column_names = obs_column_names,
+    var_column_names = var_column_names
+  ))
+}
+
 #' Get the SOMAExperiment for a named organism
 #'
 #' @param census The census SOMACollection.
