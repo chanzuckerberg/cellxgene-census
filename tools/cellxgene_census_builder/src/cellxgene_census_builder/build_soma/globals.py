@@ -5,7 +5,7 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-CENSUS_SCHEMA_VERSION = "1.0.0"
+CENSUS_SCHEMA_VERSION = "1.1.0"
 
 CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
