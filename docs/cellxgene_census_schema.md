@@ -1,6 +1,6 @@
 # CZ CELLxGENE Discover Census Schema 
 
-**Version**: 1.1.1
+**Version**: 1.1.0
 
 **Last edited**: July, 2023.
 
@@ -844,7 +844,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ## Changelog
 
-### Version 1.1.1
+### Version 1.1.0
 * Adds `dataset_version_id` to "Census table of CELLxGENE Discover datasets – `census_obj["census_info"]["datasets"]`"
 
 ### Version 1.0.0
