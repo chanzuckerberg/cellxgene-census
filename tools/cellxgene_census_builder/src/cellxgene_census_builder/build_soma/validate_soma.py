@@ -116,6 +116,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
         assert (df["collection_id"] != "").all()
         assert (df["collection_name"] != "").all()
         assert (df["dataset_title"] != "").all()
+        assert (df["dataset_version_id"] != "").all()
 
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]

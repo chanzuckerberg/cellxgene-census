@@ -54,6 +54,7 @@ def test_load_manifest_from_cxg() -> None:
                     {"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"},
                     {"filesize": 234, "filetype": "RDS", "url": "https://fake.url/dataset_id_1.rds"},
                 ],
+                "dataset_version_id": "dataset_id_1",
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -63,6 +64,7 @@ def test_load_manifest_from_cxg() -> None:
                 "title": "dataset #2",
                 "schema_version": "3.0.0",
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
+                "dataset_version_id": "dataset_id_2",
             },
         ]
 
@@ -90,6 +92,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
                 "title": "dataset #1",
                 "schema_version": "3.0.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+                "dataset_version_id": "dataset_id_1",
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -99,6 +102,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
                 "title": "dataset #2",
                 "schema_version": "2.0.0",  # Old schema version
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
+                "dataset_version_id": "dataset_id_2",
             },
         ]
 
@@ -122,6 +126,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
                 "title": "dataset #1",
                 "schema_version": "3.0.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+                "dataset_version_id": "dataset_id_1",
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -131,6 +136,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
                 "title": "dataset #2",
                 "schema_version": "3.0.0",
                 "assets": [],
+                "dataset_version_id": "dataset_id_2",
             },
         ]
 
