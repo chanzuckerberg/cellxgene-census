@@ -10,6 +10,7 @@ Get started:
 - [Census data and schema](cellxgene_census_docsite_schema.md)
 - [Python tutorials](examples.rst)
 - *Coming soon: R tutorials.*
+- [Github repository](https://github.com/chanzuckerberg/cellxgene-census).
 
 ![image](cellxgene_census_docsite_workflow.svg)
 
