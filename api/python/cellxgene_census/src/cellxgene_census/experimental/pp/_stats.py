@@ -67,15 +67,15 @@ def mean_variance(
         mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_obs)
         for obs_dim, data in iterate():
             mvn.update_single_batch(obs_dim, data)
-            _, _, all_u, all_var = mvn.finalize()
-            if calculate_mean:
-                result["mean"] = all_u
-            result["variance"] = all_var
-    else:
-        mn = MeanAccumulator(n_batches, n_samples, query.n_obs)
-        for obs_dim, data in iterate():
-            mn.update_single_batch(obs_dim, data)
-            _, all_u = mn.finalize()
+        _, _, all_u, all_var = mvn.finalize()
+        if calculate_mean:
             result["mean"] = all_u
+        result["variance"] = all_var
+    else:
+        mn = MeanAccumulator(query.n_vars, query.n_obs)
+        for obs_dim, data in iterate():
+            mn.update(obs_dim, data)
+        all_u = mn.finalize()
+        result["mean"] = all_u
 
     return result

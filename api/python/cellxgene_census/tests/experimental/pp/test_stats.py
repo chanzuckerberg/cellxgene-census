@@ -1,8 +1,10 @@
-import math
+from typing import Any, Union
 
+import numpy as np
 import pandas as pd
 import pytest
 import tiledbsoma as soma
+from scipy import sparse
 
 import cellxgene_census
 from cellxgene_census.experimental import pp
@@ -32,24 +34,24 @@ def test_mean_variance(
             assert isinstance(mean_variance, pd.DataFrame)
             assert "mean" in mean_variance
             assert "variance" in mean_variance
+            assert mean_variance["mean"].dtype == np.float64
+            assert mean_variance["variance"].dtype == np.float64
+
             assert mean_variance.index.name == "soma_joinid"
+            assert np.array_equal(mean_variance.index, query.obs_joinids())
 
-            # Pick one element from the dataframe
-            test_soma_joinid = int(mean_variance.index[0])  # type: ignore
+            table = query.X("raw").tables().concat()
+            data = table["soma_data"].to_numpy()
 
-            with census["census_data"][experiment_name].axis_query(
-                measurement_name="RNA", obs_query=soma.AxisQuery(coords=([test_soma_joinid],))
-            ) as row_query:
-                sparse_row = row_query.X("raw").coos((1 + test_soma_joinid, row_query.n_vars)).concat()
-                sparse_mat = sparse_row.to_scipy()
-                row = sparse_mat.tocsr().getrow(test_soma_joinid)
+            dim_0 = query.indexer.by_obs(table["soma_dim_0"])
+            dim_1 = query.indexer.by_var(table["soma_dim_1"])
+            coo = sparse.coo_matrix((data, (dim_0, dim_1)))
 
-                assert math.isclose(
-                    row.todense().mean(), mean_variance.loc[test_soma_joinid, "mean"], rel_tol=0.01  # type: ignore
-                )
-                assert math.isclose(
-                    row.todense().var(), mean_variance.loc[test_soma_joinid, "variance"], rel_tol=0.01  # type: ignore
-                )
+            mean = coo.mean(axis=1)
+            variance = var(coo, axis=1)
+
+            assert np.allclose(mean, mean_variance["mean"], atol=1e-5, rtol=1e-2)
+            assert np.allclose(variance, mean_variance["variance"], atol=1e-5, rtol=1e-2)
 
 
 def test_mean_variance_no_flags() -> None:
@@ -91,21 +93,32 @@ def test_mean(
             assert isinstance(mean_variance, pd.DataFrame)
             assert "mean" in mean_variance
             assert "variance" not in mean_variance
+            assert mean_variance["mean"].dtype == np.float64
+
             assert mean_variance.index.name == "soma_joinid"
+            assert np.array_equal(mean_variance.index, query.obs_joinids())
 
-            # Pick one element from the dataframe
-            test_soma_joinid = int(mean_variance.index[0])  # type: ignore
+            table = query.X("raw").tables().concat()
+            data = table["soma_data"].to_numpy()
 
-            with census["census_data"][experiment_name].axis_query(
-                measurement_name="RNA", obs_query=soma.AxisQuery(coords=([test_soma_joinid],))
-            ) as row_query:
-                sparse_row = row_query.X("raw").coos((1 + test_soma_joinid, row_query.n_vars)).concat()
-                sparse_mat = sparse_row.to_scipy()
-                row = sparse_mat.tocsr().getrow(test_soma_joinid)
+            dim_0 = query.indexer.by_obs(table["soma_dim_0"])
+            dim_1 = query.indexer.by_var(table["soma_dim_1"])
+            coo = sparse.coo_matrix((data, (dim_0, dim_1)))
 
-                assert math.isclose(
-                    row.todense().mean(), mean_variance.loc[test_soma_joinid, "mean"], rel_tol=0.01  # type: ignore
-                )
+            mean = coo.mean(axis=1)
+
+            assert np.allclose(mean.T, mean_variance["mean"], atol=1e-5, rtol=1e-2)
+
+
+def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int = 1) -> Any:
+    """
+    Variance of a sparse matrix calculated as mean(X**2) - mean(X)**2
+    with Bessel's correction applied for unbiased estimate
+    """
+    X_squared = X.copy()
+    X_squared.data **= 2
+    n = X.shape[axis]
+    return ((X_squared.sum(axis=axis).A1 / n) - np.square(X.sum(axis=axis).A1 / n)) * (n / (n - ddof))
 
 
 @pytest.mark.experimental
@@ -130,18 +143,18 @@ def test_variance(
             assert isinstance(mean_variance, pd.DataFrame)
             assert "mean" not in mean_variance
             assert "variance" in mean_variance
+            assert mean_variance["variance"].dtype == np.float64
+
             assert mean_variance.index.name == "soma_joinid"
+            assert np.array_equal(mean_variance.index, query.obs_joinids())
 
-            # Pick one element from the dataframe
-            test_soma_joinid = int(mean_variance.index[0])  # type: ignore
+            table = query.X("raw").tables().concat()
+            data = table["soma_data"].to_numpy()
 
-            with census["census_data"][experiment_name].axis_query(
-                measurement_name="RNA", obs_query=soma.AxisQuery(coords=([test_soma_joinid],))
-            ) as row_query:
-                sparse_row = row_query.X("raw").coos((1 + test_soma_joinid, row_query.n_vars)).concat()
-                sparse_mat = sparse_row.to_scipy()
-                row = sparse_mat.tocsr().getrow(test_soma_joinid)
+            dim_0 = query.indexer.by_obs(table["soma_dim_0"])
+            dim_1 = query.indexer.by_var(table["soma_dim_1"])
+            coo = sparse.coo_matrix((data, (dim_0, dim_1)))
 
-                assert math.isclose(
-                    row.todense().var(), mean_variance.loc[test_soma_joinid, "variance"], rel_tol=0.01  # type: ignore
-                )
+            variance = var(coo, axis=1)
+
+            assert np.allclose(variance, mean_variance["variance"], atol=1e-5, rtol=1e-2)

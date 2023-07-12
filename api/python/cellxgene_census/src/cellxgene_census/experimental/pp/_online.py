@@ -57,30 +57,19 @@ class MeanVarianceAccumulator:
 
 
 class MeanAccumulator:
-    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int):
-        if n_samples.sum() <= 0:
-            raise ValueError("No samples provided - can't calculate mean or variance.")
+    def __init__(self, n_samples: int, n_variables: int):
+        if n_samples <= 0:
+            raise ValueError("No samples provided - can't calculate mean.")
 
-        self.n_batches = n_batches
+        self.u = np.zeros(n_variables, dtype=np.float64)
         self.n_samples = n_samples
-        self.n = np.zeros((n_batches, n_variables), dtype=np.int32)
-        self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
 
-    def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        assert self.n_batches == 1
-        _mbom_update_single_batch(var_vec, val_vec, self.n, self.u)
+    def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
+        for col, val in zip(var_vec, val_vec):
+            self.u[col] = self.u[col] + val
 
-    def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        # correct each batch to account for sparsity
-        _mbom_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u)
-
-        # compute u for each batch
-        batches_u = self.u
-
-        # accum all batches
-        all_u = _mbom_combine_batches(self.n_batches, self.n_samples, self.u)
-
-        return batches_u, all_u
+    def finalize(self) -> npt.NDArray[np.float64]:
+        return self.u / self.n_samples
 
 
 class CountsAccumulator:
