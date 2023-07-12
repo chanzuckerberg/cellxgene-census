@@ -3,7 +3,7 @@ import numpy.typing as npt
 import pytest
 from scipy import sparse
 
-from cellxgene_census.experimental.pp._online import MeanVarianceAccumulator
+from cellxgene_census.experimental.pp._online import MeanAccumulator, MeanVarianceAccumulator
 
 
 def allclose(a: npt.NDArray[np.float64], b: npt.NDArray[np.float64]) -> bool:
@@ -62,3 +62,19 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None
         dense = matrix[batches == batch, :].toarray()
         assert allclose(batches_u[batch], dense.mean(axis=0))
         assert allclose(batches_var[batch], dense.var(axis=0, ddof=1, dtype=np.float64))
+
+
+@pytest.mark.experimental
+@pytest.mark.parametrize("stride", [101, 53])
+@pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
+def test_mean(matrix: sparse.coo_matrix, stride: int) -> None:
+    m_acc = MeanAccumulator(matrix.shape[0], matrix.shape[1])
+    for i in range(0, matrix.nnz, stride):
+        m_acc.update(matrix.col[i : i + stride], matrix.data[i : i + stride])
+    u = m_acc.finalize()
+
+    assert isinstance(u, np.ndarray)
+    assert u.shape == (matrix.shape[1],)
+
+    dense = matrix.toarray()
+    assert allclose(u, dense.mean(axis=0))
