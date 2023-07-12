@@ -12,6 +12,7 @@ from cellxgene_census.experimental import pp
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
+@pytest.mark.parametrize("axis", [0, 1])
 @pytest.mark.parametrize(
     "experiment_name,obs_value_filter",
     [
@@ -24,13 +25,14 @@ from cellxgene_census.experimental import pp
 def test_mean_variance(
     experiment_name: str,
     obs_value_filter: str,
+    axis: int,
     small_mem_context: soma.SOMATileDBContext,
 ) -> None:
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
         ) as query:
-            mean_variance = pp.mean_variance(query, calculate_mean=True, calculate_variance=True)
+            mean_variance = pp.mean_variance(query, calculate_mean=True, calculate_variance=True, axis=axis)
             assert isinstance(mean_variance, pd.DataFrame)
             assert "mean" in mean_variance
             assert "variance" in mean_variance
@@ -38,17 +40,20 @@ def test_mean_variance(
             assert mean_variance["variance"].dtype == np.float64
 
             assert mean_variance.index.name == "soma_joinid"
-            assert np.array_equal(mean_variance.index, query.obs_joinids())
+            if axis == 0:
+                assert np.array_equal(mean_variance.index, query.var_joinids())
+            else:
+                assert np.array_equal(mean_variance.index, query.obs_joinids())
 
             table = query.X("raw").tables().concat()
             data = table["soma_data"].to_numpy()
 
             dim_0 = query.indexer.by_obs(table["soma_dim_0"])
             dim_1 = query.indexer.by_var(table["soma_dim_1"])
-            coo = sparse.coo_matrix((data, (dim_0, dim_1)))
+            coo = sparse.coo_matrix((data, (dim_0, dim_1)), shape=(query.n_obs, query.n_vars))
 
-            mean = coo.mean(axis=1)
-            variance = var(coo, axis=1)
+            mean = coo.mean(axis=axis)
+            variance = var(coo, axis=axis)
 
             assert np.allclose(mean, mean_variance["mean"], atol=1e-5, rtol=1e-2)
             assert np.allclose(variance, mean_variance["variance"], atol=1e-5, rtol=1e-2)
@@ -81,7 +86,7 @@ def test_mean_variance_wrong_axis() -> None:
     "experiment_name,obs_value_filter",
     [
         ("mus_musculus", 'tissue_general == "liver" and is_primary_data == True'),
-        # ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
+        ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
         pytest.param("mus_musculus", "is_primary_data == True", marks=pytest.mark.expensive),
         pytest.param("homo_sapiens", "is_primary_data == True", marks=pytest.mark.expensive),
     ],
@@ -103,7 +108,10 @@ def test_mean(
             assert mean_variance["mean"].dtype == np.float64
 
             assert mean_variance.index.name == "soma_joinid"
-            # assert np.array_equal(mean_variance.index, query.obs_joinids())
+            if axis == 0:
+                assert np.array_equal(mean_variance.index, query.var_joinids())
+            else:
+                assert np.array_equal(mean_variance.index, query.obs_joinids())
 
             table = query.X("raw").tables().concat()
             data = table["soma_data"].to_numpy()
@@ -157,7 +165,10 @@ def test_variance(
             assert mean_variance["variance"].dtype == np.float64
 
             assert mean_variance.index.name == "soma_joinid"
-            # assert np.array_equal(mean_variance.index, query.obs_joinids())
+            if axis == 0:
+                assert np.array_equal(mean_variance.index, query.var_joinids())
+            else:
+                assert np.array_equal(mean_variance.index, query.obs_joinids())
 
             table = query.X("raw").tables().concat()
             data = table["soma_data"].to_numpy()
