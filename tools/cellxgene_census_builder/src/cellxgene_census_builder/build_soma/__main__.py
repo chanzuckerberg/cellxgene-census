@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 
 from ..build_state import CensusBuildArgs, CensusBuildConfig
-from ..util import process_init
+from ..util import log_process_resource_status, process_init
 from .build_soma import build
 from .validate_soma import validate
 
@@ -27,6 +27,7 @@ def main() -> int:
     if cc == 0 and (cli_args.subcommand == "validate" or cli_args.validate):
         validate(args)
 
+    log_process_resource_status(level=logging.INFO)
     return cc
 
 
