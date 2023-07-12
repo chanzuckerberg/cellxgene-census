@@ -1,12 +1,13 @@
 import contextlib
 import logging
 import multiprocessing
-import queue
 import threading
+from collections import deque
 from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
 from functools import partial
 from types import TracebackType
-from typing import Any, Callable, Generic, Iterable, Iterator, Mapping, Optional, ParamSpec, TypeVar, Union
+from typing import Any, Callable, Generic, Iterable, Iterator, Literal, Mapping, Optional, ParamSpec, TypeVar, Union
 
 import attrs
 
@@ -123,9 +124,14 @@ class _WorkItem(Generic[_T]):
     kwargs: Mapping[str, Any]
 
 
-def _work_item_done(scheduler: "_SchedulerThread", wi: _WorkItem[_T], future: Future[_T]) -> None:
+_MightBeWork = Union[bool, _WorkItem[Any]]
+_SchedulerMethod = Literal["best-fit", "first-fit"]
+
+
+def _work_item_done(scheduler: "_Scheduler", wi: _WorkItem[_T], future: Future[_T]) -> None:
     """Callback when Future is cancelled or completes."""
     assert not future.running() and future.done()
+    scheduler._debug_msg(f"done - {id(wi):#x} {future}")
     if future.cancelled():
         wi.future.cancel()
     else:
@@ -138,73 +144,143 @@ def _work_item_done(scheduler: "_SchedulerThread", wi: _WorkItem[_T], future: Fu
     scheduler._release_resouces(wi)
 
 
-class _SchedulerThread(threading.Thread):
+class _Scheduler(threading.Thread):
     def __init__(self, executor: "ResourcePoolProcessExecutor", max_resources: int):
         super().__init__(name="ResourcePoolProcessExecutor_scheduler")
         self.executor = executor
         self.max_resources: int = max_resources
 
         self.resources_in_use: int = 0
+        self._pending_work: deque[_WorkItem[Any]] = deque()
 
         self.shutdown_requested: bool = False
 
-        self.mutex_lock: threading.Lock = threading.Lock()
-        self.wakeup: threading.Condition = threading.Condition(self.mutex_lock)
+        self._condition: threading.Condition = threading.Condition()
 
     def shutdown(self) -> None:
         self.shutdown_requested = True
-        with self.wakeup:
-            self.wakeup.notify()
+        with self._condition:
+            while len(self._pending_work):
+                wi = self._pending_work.popleft()
+                wi.future.cancel()
+            self._condition.notify()
+
+    def submit(self, wi: _WorkItem[_T]) -> Future[_T]:
+        f = Future[_T]()
+        with self._condition:
+            self._pending_work.append(wi)
+            self._condition.notify()
+        return f
+
+    def _get_work(self, method: _SchedulerMethod = "best-fit") -> _MightBeWork:
+        """
+        Get next work item to schedule.
+
+        IMPORTANT: caller MUST own scheduler _condition lock to call this.
+
+        Return values:
+        * True - shutdown requested
+        * False - no work, please wait
+        * _WorkItem - some work to schedule
+        """
+
+        def _get_best_work(method: _SchedulerMethod) -> int | None:
+            """Return index of "best" work item to scheudle, or None if work is unavailable."""
+            if method == "first-fit":
+                # first fit: return first work item that fits in the available resources
+                for i in range(len(self._pending_work)):
+                    if self._pending_work[i].resources + self.resources_in_use <= self.max_resources:
+                        return i
+                return None
+            elif method == "best-fit":
+                # Best fit: return the largest resource consumer that fits in available space
+                max_available_resources = self.max_resources - self.resources_in_use
+                candidate_work = filter(
+                    lambda v: v[1].resources <= max_available_resources, enumerate(self._pending_work)
+                )
+                return max(candidate_work, key=lambda v: v[1].resources, default=(None,))[0]
+            else:
+                raise NotImplementedError("Unknown scheduler method")
+
+        if self.executor.process_pool._broken:
+            logging.critical(f"Process pool broken and may fail or hang: {self.executor.process_pool._broken}")
+            self.shutdown_requested = True
+
+        if self.shutdown_requested:
+            return True
+
+        if len(self._pending_work):
+            if (i := _get_best_work(method)) is not None:
+                # pop ith item from the deque
+                self._pending_work.rotate(-i)
+                wi = self._pending_work.popleft()
+                self._pending_work.rotate(i)
+                return wi
+
+            if self.resources_in_use == 0:
+                # We always want at least one job, regardless of cost
+                return self._pending_work.popleft()
+
+        return False
 
     def run(self) -> None:
         while True:
-            with self.wakeup:
-                while not self.shutdown_requested and self.executor.pending_work.qsize() == 0:
-                    self.wakeup.wait()
+            with self._condition:
+                work: _MightBeWork
+                while not (work := self._get_work()):
+                    self._condition.wait()
 
                 if self.shutdown_requested:
-                    logging.debug("ResourcePoolProcessExecutor: shutdown request received by scheduler")
+                    assert work is True
+                    self._debug_msg("shutdown request received by scheduler")
                     return
 
-                # there is work, so peek to see how much. We may need to wait for resources to be available.
-                #
-                # TODO: this always schedules in LIFO order. There are opportunties for better
-                # packing algos, which would lead to higher resource utilization.
-                #
-                wi: _WorkItem[Any] = self.executor.pending_work.queue[0]
-                while (
-                    not self.shutdown_requested
-                    and (self.resources_in_use > 0)
-                    and (wi.resources + self.resources_in_use > self.max_resources)
-                ):
-                    self.wakeup.wait()
+                assert isinstance(work, _WorkItem)
+                self._debug_msg(f"adding work item {id(work):#x} [resources={work.resources}] to process pool")
+                self.resources_in_use += work.resources
+                try:
+                    ftr: Future[Any] = self.executor.process_pool.submit(work.fn, *work.args, **work.kwargs)
+                    ftr.add_done_callback(partial(_work_item_done, self, work))
+                    del ftr
+                except BrokenProcessPool as bpe:
+                    logging.critical(f"Process pool broken and may fail or hang: {bpe.args}")
+                    work.future.cancel()
+                    self.shutdow_requested = True
 
-                if self.shutdown_requested:
-                    logging.debug("ResourcePoolProcessExecutor: shutdown request received by scheduler")  # type: ignore[unreachable]
-                    return
-
-                logging.debug(
-                    "ResourcePoolProcessExecutor: adding work item to process pool "
-                    f"[free={self.max_resources-self.resources_in_use}, "
-                    f"utilization={self.resources_in_use/self.max_resources:0.3f}]"
-                )
-                wi = self.executor.pending_work.get(block=False)
-                self.resources_in_use += wi.resources
-                ftr: Future[Any] = self.executor.process_pool.submit(wi.fn, *wi.args, **wi.kwargs)
-                ftr.add_done_callback(partial(_work_item_done, self, wi))
+                del work  # don't hold onto references
 
     def _release_resouces(self, wi: _WorkItem[Any]) -> None:
-        with self.wakeup:
+        with self._condition:
             self.resources_in_use -= wi.resources
-            self.wakeup.notify()
+            self._debug_msg(f"release resources ({wi.resources}) for {id(wi):#x}")
+            self._condition.notify()
+
+    def _debug_msg(self, msg: str) -> None:
+        logging.debug(
+            f"ResourcePoolProcessExecutor: {msg} "
+            f"[free={self.max_resources-self.resources_in_use}, "
+            f"in_use={self.resources_in_use} "
+            f"unsched={len(self._pending_work)} "
+            f"sched={len(self.executor.process_pool._pending_work_items)}]"
+        )
 
 
 class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoolProcessExecutor"]):
+    """
+    Provides a ProcessPoolExecutor-like API, scheduling based upon static "resource" reservation
+    requests. A "resource" is any shared capacity or resource, expressed as an integer
+    value. Class holds a queue of "work items", scheduling them into an actual ProcessPoolExecutor
+    when sufficient resources are available.
+
+    Primarily use case is managing finite memory, by throttling submissions until memory is
+    available.
+    """
+
     def __init__(self, max_resources: int, *args: Any, **kwargs: Any):
         super().__init__()
-        self.pending_work: queue.Queue[_WorkItem[Any]] = queue.Queue()
+        logging.debug(f"ResourcePoolProcessExecutor: starting process pool with args ({args} {kwargs})")
         self.process_pool: ProcessPoolExecutor = ProcessPoolExecutor(*args, **kwargs)
-        self.scheduler = _SchedulerThread(self, max_resources)
+        self.scheduler = _Scheduler(self, max_resources)
         self.scheduler.start()
 
     @property
@@ -213,16 +289,11 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
 
     def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
         f = Future[_T]()
-        w = _WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs)
-        self.pending_work.put(w)
-        with self.scheduler.wakeup:
-            self.scheduler.wakeup.notify()
+        self.scheduler.submit(_WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs))
         return f
 
     def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
         self.scheduler.shutdown()
-        while not self.pending_work.empty():
-            self.pending_work.get(block=False).future.cancel()
         self.process_pool.shutdown(wait, cancel_futures=cancel_futures)
 
     def __exit__(
