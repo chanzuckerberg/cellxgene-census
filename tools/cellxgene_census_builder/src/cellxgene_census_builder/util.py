@@ -72,8 +72,10 @@ class ProcessResourceGetter:
     provides current and high water mark for:
     * thread count
     * mmaps
+    * major page faults
 
     Linux-only at the moment.
+    https://docs.kernel.org/filesystems/proc.html
     """
 
     # historical maxima
@@ -104,18 +106,32 @@ class ProcessResourceGetter:
             self.max_map_count = max(map_count, self.max_map_count)
         return map_count
 
+    @property
+    def majflt(self) -> tuple[int, int]:
+        """Return the major faults and cummulative major faults (includes children) for current process."""
+        if platform.system() != "Linux":
+            return (-1, -1)
 
-_resouce_getter = ProcessResourceGetter()
+        with open("/proc/self/stat") as f:
+            stats = f.read()
+            stats_fields = stats.split()
+
+        return int(stats_fields[11]), int(stats_fields[12])
 
 
-def log_process_resource_status(preface: str = "Resource use:") -> None:
+_resource_getter = ProcessResourceGetter()
+
+
+def log_process_resource_status(preface: str = "Resource use:", level: int = logging.DEBUG) -> None:
     """Print current and historical max of thread and (memory) map counts"""
     if platform.system() == "Linux":
-        logging.debug(
-            f"{preface} threads: {_resouce_getter.thread_count} "
-            f"[max: {_resouce_getter.max_thread_count}], "
-            f"maps: {_resouce_getter.map_count} "
-            f"[max: {_resouce_getter.max_map_count}]"
+        logging.log(
+            level,
+            f"{preface} threads: {_resource_getter.thread_count} "
+            f"[max: {_resource_getter.max_thread_count}], "
+            f"maps: {_resource_getter.map_count} "
+            f"[max: {_resource_getter.max_map_count}], "
+            f"page faults (cumm): {_resource_getter.majflt[1]}",
         )
 
 
