@@ -67,23 +67,21 @@ def mean_variance(
     n_batches = 1
     n_samples = np.array([n_dim_1], dtype=np.int64)
 
-    indexer = query.indexer
+    idx = pd.Index(data=query.obs_joinids() if axis == 1 else query.var_joinids(), name="soma_joinid")
 
     def iterate() -> Generator[Tuple[npt.NDArray[np.int64], Any], None, None]:
         max_workers = (os.cpu_count() or 4) + 2
         with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
                 if axis == 1:
-                    dim = indexer.by_obs(arrow_tbl["soma_dim_0"])
+                    dim = idx.get_indexer(arrow_tbl["soma_dim_0"].to_numpy())  # type: ignore[no-untyped-call]
                 else:
-                    dim = indexer.by_var(arrow_tbl["soma_dim_1"])
+                    dim = idx.get_indexer(arrow_tbl["soma_dim_1"].to_numpy())  # type: ignore[no-untyped-call]
                 data = arrow_tbl["soma_data"].to_numpy()
                 yield dim, data
 
-    joinids = query.obs_joinids() if axis == 1 else query.var_joinids()
-
     result = pd.DataFrame(
-        index=pd.Index(data=joinids, name="soma_joinid"),
+        index=idx,
     )
 
     if calculate_variance:
