@@ -490,8 +490,10 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
 
             # Use C layout offset for unique test
             offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
+            del slice_of_X
             unique_offsets = np.unique(offsets)
             assert len(offsets) == len(unique_offsets)
+            del offsets
             gc.collect()
 
         logging.info(
