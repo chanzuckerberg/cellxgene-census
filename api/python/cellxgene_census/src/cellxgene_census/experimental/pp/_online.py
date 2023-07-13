@@ -46,15 +46,14 @@ class MeanVarianceAccumulator:
 
         # compute u, var for each batch
         batches_u = self.u
-        # if self.ddof >= self.n_samples:
-        # Mirrors the behavior of numpy's var function, which returns Inf if ddof >= n_samples
-        # batches_var = np.inf
-        # else:
-        batches_var = (self.M2.T / (self.n_samples - self.ddof)).T
+
+        # Note: if N-ddof is less than or equal to 0, we will return Inf - this is consistent
+        # with the numpy.var behavior.
+        batches_var = (self.M2.T / np.maximum(np.zeros(self.n_samples.size), (self.n_samples - self.ddof))).T
 
         # accum all batches using Chan's
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
-        all_var = all_M2 / max(1, (self.n_samples.sum() - self.ddof))
+        all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
 
         return batches_u, batches_var, all_u, all_var
 

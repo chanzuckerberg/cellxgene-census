@@ -23,7 +23,8 @@ def matrix(m: int, n: int) -> sparse.coo_matrix:
 @pytest.mark.parametrize("stride", [101, 53])
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
-def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None:
+@pytest.mark.parametrize("ddof", [1, 100, 10000])
+def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int) -> None:
     rng = np.random.default_rng()
     batches_prob = rng.random(n_batches)
     batches_prob /= batches_prob.sum()
@@ -36,7 +37,7 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None
     assert n_samples.sum() == matrix.shape[0]
     assert len(n_samples) == n_batches
 
-    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1])
+    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof)
     for i in range(0, matrix.nnz, stride):
         olmv.update_by_batch(
             batches[matrix.row[i : i + stride]], matrix.col[i : i + stride], matrix.data[i : i + stride]
@@ -55,13 +56,13 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None
 
     dense = matrix.toarray()
     assert allclose(all_u, dense.mean(axis=0))
-    assert allclose(all_var, dense.var(axis=0, ddof=1, dtype=np.float64))
+    assert allclose(all_var, dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
     matrix = matrix.tocsr()  # COO not conveniently indexable
     for batch in range(n_batches):
         dense = matrix[batches == batch, :].toarray()
         assert allclose(batches_u[batch], dense.mean(axis=0))
-        assert allclose(batches_var[batch], dense.var(axis=0, ddof=1, dtype=np.float64))
+        assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
 
 @pytest.mark.experimental
