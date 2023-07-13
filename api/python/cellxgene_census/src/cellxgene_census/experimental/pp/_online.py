@@ -66,8 +66,7 @@ class MeanAccumulator:
         self.n_samples = n_samples
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        for col, val in zip(var_vec, val_vec):
-            self.u[col] = self.u[col] + val
+        _reduce_mean_vector(self.u, var_vec, val_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
         return self.u / self.n_samples
@@ -298,3 +297,21 @@ def _accum_clipped_counts_by_batch(
             val = clip_val[bid, col]
         counts_sum[bid, col] += val
         squared_counts_sum[bid, col] += val**2
+
+
+@numba.jit(
+    numba.void(
+        numba.float64[:],
+        numba.types.Array(numba.int64, 1, "C", readonly=True),
+        numba.types.Array(numba.float32, 1, "C", readonly=True),
+    ),
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _reduce_mean_vector(
+    u: npt.NDArray[np.float64],
+    var_vec: npt.NDArray[np.int64],
+    val_vec: npt.NDArray[np.float32],
+) -> None:
+    for col, val in zip(var_vec, val_vec):
+        u[col] = u[col] + val
