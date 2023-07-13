@@ -431,6 +431,7 @@ class ExperimentBuilder:
                     # prop exceptions by calling result
                     f.result()
                     logging.info(f"Write X normalized ({self.name}): {n} of {len(futures)} complete.")
+                    log_process_resource_status()
 
         else:
             _write_X_normalized((self.experiment.uri, 0, self.n_obs, raw_sum))

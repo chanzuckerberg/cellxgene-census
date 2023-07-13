@@ -59,6 +59,9 @@ def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_laye
     assert len(result) == 1
     _, h5ad = result[0]
 
+    # raw should always clobber X
+    assert h5ad.raw is None
+
     # Check that the var has a new row with feature_is_filtered=True and unknown
     # for the two other parameters
     assert h5ad.var.shape == (4, 4)
@@ -68,15 +71,10 @@ def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_laye
     assert added_var.feature_reference == "unknown"
 
     # raw.var should not have feature_is_filtered at all
-    assert h5ad.raw.shape == (4, 4)
-    assert not h5ad.raw.var.feature_is_filtered.all()
+    assert h5ad.shape == (4, 4)
 
-    # The X matrix should have the same size as raw.X
-    assert h5ad.X.shape == h5ad.raw.X.shape
-
-    # The 4th column (correspnding to the added gene) is all zeros
-    added_col = h5ad.X.todense()[:, 3]
-    assert np.array_equal(added_col.A1, np.zeros(4))
+    # The X matrix should have the same size as original raw.X
+    assert h5ad.X.shape == (4, 4)
 
 
 def test_make_anndata_cell_filter(h5ad_simple: ad.AnnData) -> None:
