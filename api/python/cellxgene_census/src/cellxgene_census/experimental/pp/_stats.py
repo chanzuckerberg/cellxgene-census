@@ -58,7 +58,8 @@ def mean_variance(
     if calculate_mean is False and calculate_variance is False:
         raise ValueError("At least one of `calculate_mean` or `calculate_variance` must be True")
 
-    # if query.n_obs == 0 or query.n_vars == 0:
+    if query.n_obs == 0 or query.n_vars == 0:
+        raise ValueError("The query cannot yield an empty result")
 
     n_dim_0 = query.n_obs if axis == 1 else query.n_vars
     n_dim_1 = query.n_vars if axis == 1 else query.n_obs

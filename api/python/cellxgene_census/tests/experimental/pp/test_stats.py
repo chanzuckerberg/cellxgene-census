@@ -64,9 +64,14 @@ def test_mean_variance_no_flags() -> None:
         pp.mean_variance(soma.AxisQuery(), calculate_mean=False, calculate_variance=False)
 
 
-def test_mean_variance_empty_query() -> None:
-    with pytest.raises(ValueError):
-        pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True)
+@pytest.mark.parametrize("experiment_name", ["mus_musculus"])
+def test_mean_variance_empty_query(experiment_name: str, small_mem_context: soma.SOMATileDBContext) -> None:
+    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+        with census["census_data"][experiment_name].axis_query(
+            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter='tissue_general == "foo"')
+        ) as query:
+            with pytest.raises(ValueError):
+                pp.mean_variance(query, calculate_mean=True, calculate_variance=True)
 
 
 def test_mean_variance_wrong_layer() -> None:
