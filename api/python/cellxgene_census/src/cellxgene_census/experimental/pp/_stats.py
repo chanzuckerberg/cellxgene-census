@@ -55,31 +55,34 @@ def mean_variance(
     if axis not in [0, 1]:
         raise ValueError("axis must be 0 or 1")
 
-    n_dim_0 = query.n_obs if axis == 1 else query.n_vars
-    n_dim_1 = query.n_vars if axis == 1 else query.n_obs
-
     if calculate_mean is False and calculate_variance is False:
         raise ValueError("At least one of `calculate_mean` or `calculate_variance` must be True")
 
+    # if query.n_obs == 0 or query.n_vars == 0:
+
+    n_dim_0 = query.n_obs if axis == 1 else query.n_vars
+    n_dim_1 = query.n_vars if axis == 1 else query.n_obs
+
     n_batches = 1
     n_samples = np.array([n_dim_1], dtype=np.int64)
+
+    indexer = query.indexer
 
     def iterate() -> Generator[Tuple[npt.NDArray[np.int64], Any], None, None]:
         max_workers = (os.cpu_count() or 4) + 2
         with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
-                obs_indexer = query.indexer
                 if axis == 1:
-                    obs_dim = obs_indexer.by_obs(arrow_tbl["soma_dim_0"])
+                    obs_dim = indexer.by_obs(arrow_tbl["soma_dim_0"])
                 else:
-                    obs_dim = obs_indexer.by_var(arrow_tbl["soma_dim_1"])
+                    obs_dim = indexer.by_var(arrow_tbl["soma_dim_1"])
                 data = arrow_tbl["soma_data"].to_numpy()
                 yield obs_dim, data
 
-    joinid = query.obs_joinids() if axis == 1 else query.var_joinids()
+    joinids = query.obs_joinids() if axis == 1 else query.var_joinids()
 
     result = pd.DataFrame(
-        index=pd.Index(data=joinid, name="soma_joinid"),
+        index=pd.Index(data=joinids, name="soma_joinid"),
     )
 
     if calculate_variance:

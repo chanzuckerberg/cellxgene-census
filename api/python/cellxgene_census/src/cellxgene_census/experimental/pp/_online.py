@@ -18,7 +18,7 @@ class MeanVarianceAccumulator:
         Knuth, Art of Computer Programming, volume II
     """
 
-    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int):
+    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int, ddof: int = 1):
         if n_samples.sum() <= 0:
             raise ValueError("No samples provided - can't calculate mean or variance.")
 

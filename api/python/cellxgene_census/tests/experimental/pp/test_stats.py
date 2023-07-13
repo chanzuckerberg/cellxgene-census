@@ -61,7 +61,7 @@ def test_mean_variance(
 
 def test_mean_variance_no_flags() -> None:
     with pytest.raises(ValueError):
-        pp.mean_variance(None, calculate_mean=False, calculate_variance=False)
+        pp.mean_variance(soma.AxisQuery(), calculate_mean=False, calculate_variance=False)
 
 
 def test_mean_variance_empty_query() -> None:
