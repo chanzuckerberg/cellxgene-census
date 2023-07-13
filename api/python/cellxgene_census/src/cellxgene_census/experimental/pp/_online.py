@@ -41,13 +41,15 @@ class MeanVarianceAccumulator:
     def finalize(
         self,
     ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        # TODO: do we want to add ddof param?  Currently hard-wired to 1 (see var calcs)
-
         # correct each batch to account for sparsity
         _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
 
         # compute u, var for each batch
         batches_u = self.u
+        # if self.ddof >= self.n_samples:
+        # Mirrors the behavior of numpy's var function, which returns Inf if ddof >= n_samples
+        # batches_var = np.inf
+        # else:
         batches_var = (self.M2.T / (self.n_samples - self.ddof)).T
 
         # accum all batches using Chan's
@@ -300,11 +302,18 @@ def _accum_clipped_counts_by_batch(
 
 
 @numba.jit(
-    numba.void(
-        numba.float64[:],
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-    ),
+    [
+        numba.void(
+            numba.float64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+        ),
+        numba.void(
+            numba.float64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
