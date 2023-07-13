@@ -74,11 +74,11 @@ def mean_variance(
         with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
                 if axis == 1:
-                    obs_dim = indexer.by_obs(arrow_tbl["soma_dim_0"])
+                    dim = indexer.by_obs(arrow_tbl["soma_dim_0"])
                 else:
-                    obs_dim = indexer.by_var(arrow_tbl["soma_dim_1"])
+                    dim = indexer.by_var(arrow_tbl["soma_dim_1"])
                 data = arrow_tbl["soma_data"].to_numpy()
-                yield obs_dim, data
+                yield dim, data
 
     joinids = query.obs_joinids() if axis == 1 else query.var_joinids()
 
@@ -88,16 +88,16 @@ def mean_variance(
 
     if calculate_variance:
         mvn = MeanVarianceAccumulator(n_batches, n_samples, n_dim_0)
-        for obs_dim, data in iterate():
-            mvn.update_single_batch(obs_dim, data)
+        for dim, data in iterate():
+            mvn.update_single_batch(dim, data)
         _, _, all_u, all_var = mvn.finalize()
         if calculate_mean:
             result["mean"] = all_u
         result["variance"] = all_var
     else:
         mn = MeanAccumulator(n_dim_1, n_dim_0)
-        for obs_dim, data in iterate():
-            mn.update(obs_dim, data)
+        for dim, data in iterate():
+            mn.update(dim, data)
         all_u = mn.finalize()
         result["mean"] = all_u
 
