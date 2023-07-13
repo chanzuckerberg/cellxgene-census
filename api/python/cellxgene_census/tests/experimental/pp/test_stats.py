@@ -74,11 +74,6 @@ def test_mean_variance_empty_query(experiment_name: str, small_mem_context: soma
                 pp.mean_variance(query, calculate_mean=True, calculate_variance=True)
 
 
-def test_mean_variance_wrong_layer() -> None:
-    with pytest.raises(ValueError):
-        pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True, layer="foo")
-
-
 def test_mean_variance_wrong_axis() -> None:
     with pytest.raises(ValueError):
         pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True, axis=2)

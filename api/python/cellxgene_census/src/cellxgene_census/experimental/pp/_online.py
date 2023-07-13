@@ -22,6 +22,7 @@ class MeanVarianceAccumulator:
         if n_samples.sum() <= 0:
             raise ValueError("No samples provided - can't calculate mean or variance.")
 
+        self.ddof = ddof
         self.n_batches = n_batches
         self.n_samples = n_samples
         self.n = np.zeros((n_batches, n_variables), dtype=np.int32)
@@ -47,11 +48,11 @@ class MeanVarianceAccumulator:
 
         # compute u, var for each batch
         batches_u = self.u
-        batches_var = (self.M2.T / (self.n_samples - 1)).T
+        batches_var = (self.M2.T / (self.n_samples - self.ddof)).T
 
         # accum all batches using Chan's
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
-        all_var = all_M2 / max(1, (self.n_samples.sum() - 1))
+        all_var = all_M2 / max(1, (self.n_samples.sum() - self.ddof))
 
         return batches_u, batches_var, all_u, all_var
 
