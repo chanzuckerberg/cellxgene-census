@@ -53,6 +53,8 @@ def test_mean_variance(
             coo = sparse.coo_matrix((data, (dim_0, dim_1)), shape=(query.n_obs, query.n_vars))
 
             mean = coo.mean(axis=axis)
+            if axis == 1:
+                mean = mean.T
             variance = var(coo, axis=axis)
 
             assert np.allclose(mean, mean_variance["mean"], atol=1e-5, rtol=1e-2)
