@@ -28,7 +28,7 @@ from somacore.options import OpenMode
 from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
-from ..util import urlcat
+from ..util import log_process_resource_status, urlcat
 from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .globals import (
@@ -234,7 +234,7 @@ class ExperimentBuilder:
 
     def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
         anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
-        return anndata_cell_filter(ad, retain_X=False)
+        return anndata_cell_filter(ad, need_X=False)
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
         """
@@ -377,6 +377,7 @@ class ExperimentBuilder:
         Save presence matrix per Experiment
         """
         _assert_open_for_write(self.experiment)
+        logging.info(f"Save presence matrix for {self.name} - start")
 
         # SOMA does not currently support arrays with a zero length domain, so special case this corner-case
         # where no data has been read for this experiment.
@@ -404,6 +405,8 @@ class ExperimentBuilder:
             )
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
+        logging.info(f"Save presence matrix for {self.name} - finish")
+
     def write_X_normalized(self, args: CensusBuildArgs) -> None:
         assert self.experiment is not None
         if self.n_obs == 0:
@@ -414,7 +417,7 @@ class ExperimentBuilder:
         raw_sum = self.obs_df.raw_sum.to_numpy()
 
         if args.config.multi_process:
-            STRIDE = 2_000_000  # controls TileDB fragment size, which impacts consolidation time
+            STRIDE = 1_000_000  # controls TileDB fragment size, which impacts consolidation time
             # memory budget: 3 attributes
             mem_budget = 3 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
             n_workers = n_workers_from_memory_budget(args, mem_budget)
@@ -427,7 +430,7 @@ class ExperimentBuilder:
                     log_on_broken_process_pool(pe)
                     # prop exceptions by calling result
                     f.result()
-                    logging.info(f"Write X normalized: {n} of {len(futures)} complete.")
+                    logging.info(f"Write X normalized ({self.name}): {n} of {len(futures)} complete.")
 
         else:
             _write_X_normalized((self.experiment.uri, 0, self.n_obs, raw_sum))
@@ -475,9 +478,9 @@ def _accumulate_all_X_layers(
 
     This is a helper function for ExperimentBuilder.accumulate_X
     """
+    logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     gc.collect()
-    logging.info(f"Loading AnnData for dataset {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    unfiltered_ad = next(open_anndata(assets_path, [dataset]))[1]
+    unfiltered_ad = next(open_anndata(assets_path, [dataset], need_X=True))[1]
     assert unfiltered_ad.isbacked is False
 
     results: List[AccumulateXResult] = []
@@ -557,6 +560,7 @@ def _accumulate_all_X_layers(
         )
 
     gc.collect()
+    logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     return results
 
 
@@ -604,14 +608,13 @@ def _accumulate_X(
 
     if executor is not None:
         return executor.submit(
-            # Heuristic: AnnData uses gzip, which normally achieves ~4X compression. 100% pad.
-            8 * dataset.asset_h5ad_filesize,
+            8 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
             _accumulate_all_X_layers,
             assets_path,
             dataset,
             experiment_builders,
             dataset_obs_joinid_starts,
-            "RNA",
+            MEASUREMENT_RNA_NAME,
             progress,
         )
     else:
@@ -654,6 +657,7 @@ def populate_X_layers(
                 # propagate exceptions - not expecting any other return values
                 results += f.result()
                 logging.info(f"populate X for dataset {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
+                log_process_resource_status()
 
     else:
         for n, dataset in enumerate(datasets, start=1):

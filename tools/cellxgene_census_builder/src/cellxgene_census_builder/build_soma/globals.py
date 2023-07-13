@@ -328,7 +328,7 @@ DEFAULT_TILEDB_CONFIG = {
     "py.init_buffer_bytes": 1 * 1024**3,
     "py.deduplicate": "true",
     "soma.init_buffer_bytes": 1 * 1024**3,
-    "sm.consolidation.buffer_size": 1 * 1024**3,
+    "sm.consolidation.buffer_size": 3 * 1024**3,
 }
 
 
