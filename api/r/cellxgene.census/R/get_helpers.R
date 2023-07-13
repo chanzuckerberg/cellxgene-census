@@ -22,7 +22,9 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
-#' @param X_name The `X` layer to query. Defaults to `raw`.
+#' @param X_layers A named character of `X` layers to add to the Seurat assay, where the names are
+#'        the names of Seurat slots (`counts` or `data`) and the values are the names of layers
+#'        within `X`.
 #' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
 #' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
 #' @param obs_column_names Columns to fetch for the `obs` data frame.
@@ -39,7 +41,7 @@ get_seurat <- function(
     census,
     organism,
     measurement_name = "RNA",
-    X_name = "raw",
+    X_layers = c(counts = "raw", data = NULL),
     obs_value_filter = NULL,
     obs_coords = NULL,
     obs_column_names = NULL,
@@ -53,8 +55,7 @@ get_seurat <- function(
     var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
   )
   return(expt_query$to_seurat(
-    # TODO: should we allow selection of the seurat 'counts' or 'data' slot?
-    c(counts = X_name),
+    X_layers = X_layers,
     obs_column_names = obs_column_names,
     var_column_names = var_column_names
   ))

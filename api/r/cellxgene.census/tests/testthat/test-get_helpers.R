@@ -103,3 +103,33 @@ test_that("get_seurat allows missing obs or var filter", {
   expect_equal(ncol(seurat[["RNA"]]), 10001)
   expect_equal(nrow(seurat[["RNA"]]), 1)
 })
+
+test_that("get_seurat X_layers allows slot selection", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  # default: raw X layer gets loaded into counts (which Seurat implicitly copies into data)
+  seurat <- get_seurat(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
+  )
+  expect_equal(nrow(seurat$RNA@counts), 2)
+  expect_equal(nrow(seurat$RNA@data), 2)
+
+  # expressly load raw X data into data; then counts is empty
+  seurat <- get_seurat(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length"),
+    X_layers = c(counts = NULL, data = "raw")
+  )
+  expect_equal(nrow(seurat$RNA@counts), 0)
+  expect_equal(nrow(seurat$RNA@data), 2)
+})
