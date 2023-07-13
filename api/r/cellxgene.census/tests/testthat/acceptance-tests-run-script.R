@@ -4,4 +4,4 @@ library("testthat")
 source("./ListReporterToFile.R")
 
 reporter <- ListReporterToFile$new(paste0("acceptance-tests-logs-", Sys.Date(), ".csv"))
-test_file("acceptance-tests.R", reporter = reporter)
+test_file("acceptance-tests2.R", reporter = reporter)
