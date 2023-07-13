@@ -73,10 +73,7 @@ def mean_variance(
         max_workers = (os.cpu_count() or 4) + 2
         with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
-                if axis == 1:
-                    dim = idx.get_indexer(arrow_tbl["soma_dim_0"].to_numpy())  # type: ignore[no-untyped-call]
-                else:
-                    dim = idx.get_indexer(arrow_tbl["soma_dim_1"].to_numpy())  # type: ignore[no-untyped-call]
+                dim = idx.get_indexer(arrow_tbl[f"soma_dim_{1-axis}"].to_numpy())  # type: ignore[no-untyped-call]
                 data = arrow_tbl["soma_data"].to_numpy()
                 yield dim, data
 
