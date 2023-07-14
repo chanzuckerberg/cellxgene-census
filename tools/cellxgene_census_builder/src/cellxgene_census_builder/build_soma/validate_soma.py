@@ -51,11 +51,13 @@ class EbInfo:
     n_obs: int = 0
     vars: set[str] = dataclasses.field(default_factory=set)
     dataset_ids: set[str] = dataclasses.field(default_factory=set)
+    dataset_version_ids: set[str] = dataclasses.field(default_factory=set)
 
     def update(self: Self, b: Self) -> Self:
         self.n_obs += b.n_obs
         self.vars |= b.vars
         self.dataset_ids |= b.dataset_ids
+        self.dataset_version_ids |= b.dataset_version_ids
         return self
 
     @property
@@ -180,6 +182,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
             if ad.n_obs > 0:
                 eb_info[eb.name].n_obs += ad.n_obs
                 eb_info[eb.name].dataset_ids.add(dataset_id)
+                eb_info[eb.name].dataset_version_ids.add(dataset.dataset_version_id)
                 eb_info[eb.name].vars |= set(ad.var.index.array)
                 ad_obs = ad.obs[list(CXG_OBS_TERM_COLUMNS)].reset_index(drop=True)
                 assert (dataset_obs == ad_obs).all().all(), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
