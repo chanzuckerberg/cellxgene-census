@@ -51,13 +51,11 @@ class EbInfo:
     n_obs: int = 0
     vars: set[str] = dataclasses.field(default_factory=set)
     dataset_ids: set[str] = dataclasses.field(default_factory=set)
-    dataset_version_ids: set[str] = dataclasses.field(default_factory=set)
 
     def update(self: Self, b: Self) -> Self:
         self.n_obs += b.n_obs
         self.vars |= b.vars
         self.dataset_ids |= b.dataset_ids
-        self.dataset_version_ids |= b.dataset_version_ids
         return self
 
     @property
@@ -182,7 +180,6 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
             if ad.n_obs > 0:
                 eb_info[eb.name].n_obs += ad.n_obs
                 eb_info[eb.name].dataset_ids.add(dataset_id)
-                eb_info[eb.name].dataset_version_ids.add(dataset.dataset_version_id)
                 eb_info[eb.name].vars |= set(ad.var.index.array)
                 ad_obs = ad.obs[list(CXG_OBS_TERM_COLUMNS)].reset_index(drop=True)
                 assert (dataset_obs == ad_obs).all().all(), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
@@ -247,11 +244,12 @@ def validate_axis_dataframes(
         with open_experiment(soma_path, eb) as exp:
             n_vars = len(eb_info[eb.name].vars)
 
-            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
+            census_obs_df = (
+                exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
+            )
             assert eb_info[eb.name].n_obs == len(census_obs_df)
             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
-            assert eb_info[eb.name].dataset_version_ids == set(census_obs_df.dataset_version_id.unique())
 
             census_var_df = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
@@ -504,6 +502,8 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         df = census[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
         df["dataset_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: urlcat(assets_path, p))
+        assert df.dataset_version_id.is_unique
+        assert df.dataset_id.is_unique
         datasets = Dataset.from_dataframe(df)
         return datasets
 
