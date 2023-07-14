@@ -244,9 +244,7 @@ def validate_axis_dataframes(
         with open_experiment(soma_path, eb) as exp:
             n_vars = len(eb_info[eb.name].vars)
 
-            census_obs_df = (
-                exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
-            )
+            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
             assert eb_info[eb.name].n_obs == len(census_obs_df)
             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
