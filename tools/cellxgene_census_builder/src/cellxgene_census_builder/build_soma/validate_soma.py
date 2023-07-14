@@ -248,6 +248,7 @@ def validate_axis_dataframes(
             assert eb_info[eb.name].n_obs == len(census_obs_df)
             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+            assert eb_info[eb.name].dataset_version_ids == set(census_obs_df.dataset_version_id.unique())
 
             census_var_df = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
