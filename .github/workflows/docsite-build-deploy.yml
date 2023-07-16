@@ -31,34 +31,15 @@ jobs:
         run: |
           sudo apt-get install -y pandoc
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          extra-repositories: https://tiledb-inc.r-universe.dev
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          working-directory: ./api/r/cellxgene.census
-          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::pkgdown
-          needs: check
-          cache: true
-
       - name: Build Sphinx website
         run: |
           cd docs/
           make clean && make html
           cp -r _build/html/* ../docsite/.
 
-      - name: Build pkgdown website
-        run: |
-          cd api/r/cellxgene.census
-          Rscript -e 'pkgdown::build_site()'
-          cd ../../../
-          mkdir -p docsite/r/vignettes
+          # Copy R pkgdown docs (static HTML checked into git)
+          mkdir -p docsite/r
           cp -r api/r/cellxgene.census/docs/* docsite/r/.
-
-          # copy vignettes from static HTMLs checked into git;
-          # see api/r/cellxgene.census/vignettes_/README.md
-          cp api/r/cellxgene.census/vignettes_/*.html docsite/r/vignettes
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4

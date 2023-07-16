@@ -1,0 +1,11 @@
+pandoc: 3.1.4
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  census_dataset_presence: census_dataset_presence.html
+  census_datasets: census_datasets.html
+  census_query_extract: census_query_extract.html
+  comp_bio_census_info: comp_bio_census_info.html
+  comp_bio_summarize_axis_query: comp_bio_summarize_axis_query.html
+last_built: 2023-07-16T02:30Z
+
