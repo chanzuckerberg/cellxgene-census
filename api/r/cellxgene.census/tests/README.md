@@ -202,7 +202,7 @@ START TEST ( 2023-07-14 19:37:35.299182 ):  test_sce_whole-enchilada-large-buffe
 END TEST ( 2023-07-14 19:37:35.305957 ):  test_sce_whole-enchilada-large-buffer-size 
 ```
 
-- `acceptance-tests-logs-2023-07-02.csv`
+- `acceptance-tests-logs-2023-07-14.csv`
 
 ```
 test,user,system,real,test_result
