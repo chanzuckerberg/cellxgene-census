@@ -37,6 +37,7 @@ def _mp_config_checks() -> bool:
 
 
 def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
+    """Trivial helper to estimate appropriate number of fixed-memory-budget workers from total memory available"""
     n_workers: int = int(args.config.memory_budget // per_worker_budget)
     return min(max(1, n_workers), cpu_count() + 2)
 
@@ -79,7 +80,7 @@ def log_on_broken_process_pool(ppe: Union[ProcessPoolExecutor, "ResourcePoolProc
 
 
 # TODO: when the builder is updated to cellxgene_census 1.3+, we can pull
-# this out of the experimental.util package. Until then, it is hard to keep
+# EagerIterator out of the experimental.util package. Until then, it is hard to keep
 # it DRY.
 
 _T = TypeVar("_T")
@@ -183,6 +184,8 @@ class _Scheduler(threading.Thread):
         * True - shutdown requested
         * False - no work, please wait
         * _WorkItem - some work to schedule
+
+        TODO: if it becomes useful, expose scheduler algo at top-level.
         """
 
         def _get_best_work(method: _SchedulerMethod) -> int | None:

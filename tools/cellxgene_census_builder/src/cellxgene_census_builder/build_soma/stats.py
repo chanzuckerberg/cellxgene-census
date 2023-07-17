@@ -20,7 +20,6 @@ def get_obs_stats(
     raw_sum = raw_X.sum(axis=1).A1
     nnz = raw_X.getnnz(axis=1)
     raw_mean = raw_sum / nnz
-    # _, raw_variance = sparse_mean_var(raw_X, axis=1, ddof=1)
     raw_variance = _var(raw_X, axis=1, ddof=1)
     n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0) > 0).sum(), dtype=np.int64)
 
@@ -63,7 +62,10 @@ def get_var_stats(
     nopython=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _var_ndarray(data: npt.NDArray[np.float32], ddof: int) -> float:
-    """Return variance of an ndarray."""
+    """
+    Return variance of an ndarray. Computed as variance of shifted distribution,
+    https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    """
     n = len(data)
     if n < 2:
         return 0.0

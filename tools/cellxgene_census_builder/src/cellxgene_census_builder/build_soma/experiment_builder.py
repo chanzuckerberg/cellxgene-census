@@ -560,7 +560,7 @@ def _accumulate_all_X_layers(
         )
 
         # tidy
-        del ad, raw_X, raw_var, local_var_joinids  # , row, col, X_remap, pres_data, pres_cols, obs_stats, var_stats
+        del ad, raw_X, raw_var, local_var_joinids, row, col, X_remap, pres_data, pres_cols, obs_stats, var_stats
 
     gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
@@ -687,12 +687,14 @@ def populate_X_layers(
     for eb in experiment_builders:
         assert eb.obs_df is None or np.array_equal(eb.obs_df.index.to_numpy(), eb.obs_df.soma_joinid.to_numpy())
 
+    logging.debug("populate_X_layers - begin presence summary")
     for presence, _ in results:
         eb_by_name[presence.eb_name].presence[presence.dataset_soma_joinid] = (
             presence.data,
             presence.cols,
         )
 
+    logging.debug("populate_X_layers - begin axis stats summary")
     for _, axis_stats in results:
         eb = eb_by_name[axis_stats.eb_name]
         if eb.obs_df is not None:
