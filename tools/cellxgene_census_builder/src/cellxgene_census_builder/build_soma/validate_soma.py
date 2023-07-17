@@ -577,7 +577,7 @@ def validate_X_layers(
 
     Raises on error.  Returns True on success.
     """
-    logging.debug("validate_X_layers")
+    logging.info("validate_X_layers start")
     avg_row_nnz = 0
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
@@ -660,6 +660,7 @@ def validate_X_layers(
         for eb in experiment_specifications:
             assert _validate_Xnorm_layer((eb, soma_path, 0, eb_info[eb.name].n_obs))
 
+    logging.info("validate_X_layers finished")
     return True
 
 
@@ -740,6 +741,7 @@ def validate_internal_consistency(
     """
     Internal checks that various computed stats match.
     """
+    logging.info("validate_internal_consistency - cross-checks start")
     datasets_df: pd.DataFrame = Dataset.to_dataframe(datasets).set_index("soma_joinid")
 
     for eb in experiment_specifications:
@@ -803,6 +805,7 @@ def validate_internal_consistency(
                 ).all(), f"{eb.name}: var.n_measured_obs does not match presence matrix."
                 del tmp
 
+    logging.info("validate_internal_consistency - cross-checks finished")
     return True
 
 
