@@ -298,9 +298,9 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         max_workers = kwargs.pop("max_workers", None)
         initializer = kwargs.pop("initializer", None)
         initargs = kwargs.pop("initargs", None)
-        maxtasksperchild = kwargs.pop("maxtasksperchild", None)
+        max_tasks_per_child = kwargs.pop("max_tasks_per_child", None)
         self.process_pool: multiprocessing.pool.Pool = multiprocessing.Pool(
-            processes=max_workers, initializer=initializer, initargs=initargs, maxtasksperchild=maxtasksperchild
+            processes=max_workers, initializer=initializer, initargs=initargs, maxtasksperchild=max_tasks_per_child
         )
 
         # create and start scheduler thread
@@ -336,17 +336,17 @@ def create_resource_pool_executor(
     max_tasks_per_child: Optional[int] = None,
 ) -> ResourcePoolProcessExecutor:
     assert _mp_config_checks()
+
     if max_resources is None:
         max_resources = args.config.memory_budget
     if max_workers is None:
         max_workers = cpu_count() + 2
-    if max_tasks_per_child is None:
-        max_tasks_per_child = 10
+
     logging.debug(f"create_resource_pool_executor [max_workers={max_workers}, max_resources={max_resources}]")
     return ResourcePoolProcessExecutor(
         max_resources=max_resources,
         max_workers=max_workers,
-        maxtasksperchild=max_tasks_per_child,
+        max_tasks_per_child=max_tasks_per_child,
         initializer=process_init,
         initargs=(args,),
     )
