@@ -53,11 +53,12 @@ def process_init(args: CensusBuildArgs) -> None:
     """
     Called on every process start to configure global package/module behavior.
     """
+    logging_init(args)
+
     if multiprocessing.get_start_method(True) != "spawn":
         multiprocessing.set_start_method("spawn", True)
 
     env_var_init(args)
-    logging_init(args)
 
     # these are super noisy!
     numba_logger = logging.getLogger("numba")
