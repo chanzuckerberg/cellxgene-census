@@ -11,6 +11,8 @@ from typing import Dict, Optional, Union, cast
 import requests
 from typing_extensions import TypedDict
 
+from ._util import _uri_join
+
 """
 The following types describe the expected directory of Census builds, used
 to bootstrap all data location requests.
@@ -20,6 +22,7 @@ CensusLocator = TypedDict(
     "CensusLocator",
     {
         "uri": str,  # resource URI
+        "relative_uri": str,  # resource URI (relative)
         "s3_region": Optional[str],  # if an S3 URI, has optional region
     },
 )
@@ -35,9 +38,22 @@ CensusVersionDescription = TypedDict(
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
+CensusMirrorName = str  # name of the mirror
+CensusMirror = TypedDict(
+    "CensusMirror",
+    {
+        "protocol": str,  # protocol of the mirror. Only S3 is supported.
+        "bucket": str,  # name of the bucket or resource
+        "region": str,  # region of the bucket or resource
+    },
+)
+
+CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
+
 
 # URL for the default top-level directory of all public data
 CELL_CENSUS_RELEASE_DIRECTORY_URL = "https://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json"
+CELL_CENSUS_MIRRORS_DIRECTORY_URL = "https://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json"
 
 
 def get_census_version_description(census_version: str) -> CensusVersionDescription:
@@ -133,3 +149,18 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
 
     # Cast is safe, as we have removed all aliases
     return cast(Dict[CensusVersionName, CensusVersionDescription], directory)
+
+
+def get_census_mirrors() -> CensusMirrors:
+    response = requests.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL)
+    response.raise_for_status()
+    return cast(CensusMirrors, response.json())
+
+
+def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> CensusLocator:
+    if "relative_uri" in locator:
+        uri = _uri_join(f"s3://{mirror['bucket']}/", locator["relative_uri"])
+    else:
+        uri = locator["uri"]
+    region = mirror.get("region") or locator.get("s3_region")
+    return CensusLocator(uri=uri, s3_region=region)

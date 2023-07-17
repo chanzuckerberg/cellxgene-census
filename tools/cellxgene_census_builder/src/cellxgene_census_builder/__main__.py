@@ -209,9 +209,8 @@ def do_the_release(args: CensusBuildArgs) -> bool:
             "s3_region": "us-west-2",
         },
     }
-    make_a_release(
-        args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun
-    )
+    census_base_url = urlcat(args.config.cellxgene_census_S3_bucket, args.config.cellxgene_census_S3_prefix)
+    make_a_release(census_base_url, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun)
     return True
 
 

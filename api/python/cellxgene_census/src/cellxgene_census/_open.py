@@ -15,7 +15,12 @@ import certifi
 import s3fs
 import tiledbsoma as soma
 
-from ._release_directory import CensusLocator, get_census_version_description
+from ._release_directory import (
+    CensusLocator,
+    _resolve_census_locator,
+    get_census_mirrors,
+    get_census_version_description,
+)
 from ._util import _uri_join
 
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
@@ -66,6 +71,7 @@ def _build_soma_tiledb_context(
 def open_soma(
     *,
     census_version: Optional[str] = "stable",
+    mirror: Optional[str] = None,
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
@@ -74,6 +80,10 @@ def open_soma(
     Args:
         census_version:
             The version of the Census, e.g. "latest".
+
+        mirror:
+            The mirror used to retrieve the Census. Defaults to the `us-west-2` mirror.
+
         uri:
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
@@ -126,6 +136,14 @@ def open_soma(
     if census_version is None:
         raise ValueError("Must specify either a census version or an explicit URI.")
 
+    mirrors = get_census_mirrors()
+    if mirror is not None:
+        if mirror not in mirrors:
+            raise KeyError("Mirror not found.")
+        selected_mirror = mirrors[mirror]
+    else:
+        selected_mirror = mirrors[mirrors["default"]]
+
     try:
         description = get_census_version_description(census_version)  # raises
     except KeyError:
@@ -149,7 +167,9 @@ def open_soma(
             "consistency."
         )
 
-    return _open_soma(description["soma"], context)
+    locator = _resolve_census_locator(description["soma"], selected_mirror)
+
+    return _open_soma(locator, context)
 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:

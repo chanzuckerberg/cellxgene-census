@@ -12,11 +12,20 @@ import tiledbsoma as soma
 
 import cellxgene_census
 from cellxgene_census._open import DEFAULT_TILEDB_CONFIGURATION
-from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
+from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
+
+# Temporary mock for the mirrors.json route
+mirrors_json = {
+    "default": "private",
+    "private": {"protocol": "S3", "bucket": "cellxgene-data-public", "region": "us-west-2"},
+}
 
 
 @pytest.mark.live_corpus
-def test_open_soma_stable() -> None:
+def test_open_soma_stable(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
+
     # There should _always_ be a 'stable'
     with cellxgene_census.open_soma(census_version="stable") as census:
         assert census is not None
@@ -37,7 +46,10 @@ def test_open_soma_stable() -> None:
 
 
 @pytest.mark.live_corpus
-def test_open_soma_latest() -> None:
+def test_open_soma_latest(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
+
     # There should _always_ be a 'latest'
     with cellxgene_census.open_soma(census_version="latest") as census:
         assert census is not None
@@ -45,7 +57,10 @@ def test_open_soma_latest() -> None:
 
 
 @pytest.mark.live_corpus
-def test_open_soma_with_context() -> None:
+def test_open_soma_with_context(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
+
     description = cellxgene_census.get_census_version_description("latest")
     uri = description["soma"]["uri"]
     s3_region = description["soma"].get("s3_region")
@@ -89,6 +104,61 @@ def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
         ),
     ):
         cellxgene_census.open_soma(census_version="does-not-exist")
+
+
+def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
+    mock_mirrors = {
+        "default": "test-mirror",
+        "test-mirror": {"protocol": "S3", "bucket": "mirror-bucket-1", "region": "region-1"},
+        "test-mirror-2": {"protocol": "S3", "bucket": "mirror-bucket-2", "region": "region-2"},
+    }
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
+
+    dir = {
+        "latest": "2022-11-01",
+        "2022-11-01": {
+            "release_date": "2022-11-30",
+            "release_build": "2022-11-01",
+            "soma": {
+                "uri": "s3://ignored-bucket/cell-census/2022-11-01/soma/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
+                "s3_region": "ignored",
+            },
+            "h5ads": {
+                "uri": "s3://ignored-bucket/cell-census/2022-11-01/h5ads/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
+                "s3_region": "ignored",
+            },
+        },
+    }
+
+    requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
+
+    # Verify that the default mirror is used if no mirror is specified
+    with patch("cellxgene_census._open._open_soma") as m:
+        cellxgene_census.open_soma()
+        m.assert_called_once_with(
+            {"uri": "s3://mirror-bucket-1/cell-census/2022-11-01/soma/", "s3_region": "region-1"}, None
+        )
+
+    # Verify that the correct mirror is used if a mirror parameter is specified
+    with patch("cellxgene_census._open._open_soma") as m:
+        cellxgene_census.open_soma(mirror="test-mirror-2")
+        m.assert_called_once_with(
+            {"uri": "s3://mirror-bucket-2/cell-census/2022-11-01/soma/", "s3_region": "region-2"}, None
+        )
+
+    # Verify that an error is raised if a non existing mirror is specified
+    with patch("cellxgene_census._open._open_soma") as m:
+        with pytest.raises(
+            KeyError,
+            match=re.escape("Mirror not found."),
+        ):
+            cellxgene_census.open_soma(mirror="bogus-mirror")
+
+
+def test_open_soma_works_if_no_relative_url(requests_mock: rm.Mocker) -> None:
+    pass
 
 
 def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker) -> None:
