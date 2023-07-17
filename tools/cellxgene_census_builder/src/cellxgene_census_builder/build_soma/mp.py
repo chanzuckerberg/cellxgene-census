@@ -2,12 +2,24 @@ import contextlib
 import logging
 import multiprocessing
 import threading
+import weakref
 from collections import deque
 from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
-from concurrent.futures.process import BrokenProcessPool
 from functools import partial
 from types import TracebackType
-from typing import Any, Callable, Generic, Iterable, Iterator, Literal, Mapping, Optional, ParamSpec, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    Iterable,
+    Iterator,
+    Literal,
+    Mapping,
+    Optional,
+    ParamSpec,
+    TypeVar,
+    Union,
+)
 
 import attrs
 
@@ -128,26 +140,15 @@ _MightBeWork = Union[bool, _WorkItem[Any]]
 _SchedulerMethod = Literal["best-fit", "first-fit"]
 
 
-def _work_item_done(scheduler: "_Scheduler", wi: _WorkItem[_T], future: Future[_T]) -> None:
-    """Callback when Future is cancelled or completes."""
-    assert not future.running() and future.done()
-    scheduler._debug_msg(f"done - {id(wi):#x} {future}")
-    if future.cancelled():
-        wi.future.cancel()
-    else:
-        exc = future.exception()
-        if exc is None:
-            wi.future.set_result(future.result())
-        else:
-            wi.future.set_exception(exc)
-
-    scheduler._release_resouces(wi)
-
-
 class _Scheduler(threading.Thread):
     def __init__(self, executor: "ResourcePoolProcessExecutor", max_resources: int):
         super().__init__(name="ResourcePoolProcessExecutor_scheduler")
-        self.executor = executor
+
+        def _weakref_collected(_: weakref.ReferenceType[Any], scheduler: "_Scheduler" = self) -> None:
+            scheduler.shutdown()
+
+        assert isinstance(executor.process_pool, multiprocessing.pool.Pool)
+        self.executor_ref = weakref.ref(executor, _weakref_collected)
         self.max_resources: int = max_resources
 
         self.resources_in_use: int = 0
@@ -202,10 +203,6 @@ class _Scheduler(threading.Thread):
             else:
                 raise NotImplementedError("Unknown scheduler method")
 
-        if self.executor.process_pool._broken:
-            logging.critical(f"Process pool broken and may fail or hang: {self.executor.process_pool._broken}")
-            self.shutdown_requested = True
-
         if self.shutdown_requested:
             return True
 
@@ -218,10 +215,10 @@ class _Scheduler(threading.Thread):
                 return wi
 
             if self.resources_in_use == 0:
-                # We always want at least one job, regardless of cost
+                # We always want at least one job, regardless of cost of the work item.
                 return self._pending_work.popleft()
 
-        return False
+        return False  # no work for you
 
     def run(self) -> None:
         while True:
@@ -236,32 +233,48 @@ class _Scheduler(threading.Thread):
                     return
 
                 assert isinstance(work, _WorkItem)
-                self._debug_msg(f"adding work item {id(work):#x} [resources={work.resources}] to process pool")
-                self.resources_in_use += work.resources
-                try:
-                    ftr: Future[Any] = self.executor.process_pool.submit(work.fn, *work.args, **work.kwargs)
-                    ftr.add_done_callback(partial(_work_item_done, self, work))
-                    del ftr
-                except BrokenProcessPool as bpe:
-                    logging.critical(f"Process pool broken and may fail or hang: {bpe.args}")
-                    work.future.cancel()
-                    self.shutdow_requested = True
-
+                self._schedule_work(work)
                 del work  # don't hold onto references
+
+    @classmethod
+    def _work_item_done(
+        cls, scheduler: "_Scheduler", wi: _WorkItem[_T], is_error_callback: bool, result: _T | BaseException
+    ) -> None:
+        """Callback when async_apply is complete."""
+        if is_error_callback:
+            assert isinstance(result, BaseException)
+            wi.future.set_exception(result)
+        else:
+            assert not isinstance(result, BaseException)
+            wi.future.set_result(result)
+        scheduler._release_resouces(wi)
+
+    def _schedule_work(self, work: _WorkItem[Any]) -> None:
+        """must hold lock"""
+        executor = self.executor_ref()
+        if executor is None:
+            # can happen if the ResourcePoolExeuctor was collected
+            return
+        self._debug_msg(f"adding work to pool {id(work):#x} [resources={work.resources}]")
+        self.resources_in_use += work.resources
+        _work_item_done = partial(self._work_item_done, self, work, False)
+        _work_item_error = partial(self._work_item_done, self, work, True)
+        executor.process_pool.apply_async(
+            work.fn, work.args, work.kwargs, callback=_work_item_done, error_callback=_work_item_error
+        )
 
     def _release_resouces(self, wi: _WorkItem[Any]) -> None:
         with self._condition:
             self.resources_in_use -= wi.resources
-            self._debug_msg(f"release resources ({wi.resources}) for {id(wi):#x}")
             self._condition.notify()
 
     def _debug_msg(self, msg: str) -> None:
         logging.debug(
-            f"ResourcePoolProcessExecutor: {msg} "
-            f"[free={self.max_resources-self.resources_in_use}, "
+            f"ResourcePoolProcessExecutor: {msg} ["
+            f"free={self.max_resources-self.resources_in_use} "
             f"in_use={self.resources_in_use} "
-            f"unsched={len(self._pending_work)} "
-            f"sched={len(self.executor.process_pool._pending_work_items)}]"
+            f"unsched={len(self._pending_work)}"
+            "]"
         )
 
 
@@ -277,24 +290,37 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
     """
 
     def __init__(self, max_resources: int, *args: Any, **kwargs: Any):
+        _mp_config_checks()
+
         super().__init__()
         logging.debug(f"ResourcePoolProcessExecutor: starting process pool with args ({args} {kwargs})")
-        self.process_pool: ProcessPoolExecutor = ProcessPoolExecutor(*args, **kwargs)
+
+        max_workers = kwargs.pop("max_workers", None)
+        initializer = kwargs.pop("initializer", None)
+        initargs = kwargs.pop("initargs", None)
+        maxtasksperchild = kwargs.pop("maxtasksperchild", None)
+        self.process_pool: multiprocessing.pool.Pool = multiprocessing.Pool(
+            processes=max_workers, initializer=initializer, initargs=initargs, maxtasksperchild=maxtasksperchild
+        )
+
+        # create and start scheduler thread
         self.scheduler = _Scheduler(self, max_resources)
         self.scheduler.start()
 
     @property
     def _broken(self) -> bool:
-        return self.process_pool._broken
+        return self.process_pool._state not in ["RUN", "INIT", "CLOSE"]  # type: ignore[attr-defined]
 
     def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
         f = Future[_T]()
         self.scheduler.submit(_WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs))
         return f
 
+    # TODO: implement map
+
     def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
         self.scheduler.shutdown()
-        self.process_pool.shutdown(wait, cancel_futures=cancel_futures)
+        self.process_pool.close()
 
     def __exit__(
         self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]
@@ -304,14 +330,23 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
 
 
 def create_resource_pool_executor(
-    args: CensusBuildArgs, max_resources: Optional[int] = None, max_workers: Optional[int] = None
+    args: CensusBuildArgs,
+    max_resources: Optional[int] = None,
+    max_workers: Optional[int] = None,
+    max_tasks_per_child: Optional[int] = None,
 ) -> ResourcePoolProcessExecutor:
     assert _mp_config_checks()
     if max_resources is None:
         max_resources = args.config.memory_budget
     if max_workers is None:
         max_workers = cpu_count() + 2
+    if max_tasks_per_child is None:
+        max_tasks_per_child = 10
     logging.debug(f"create_resource_pool_executor [max_workers={max_workers}, max_resources={max_resources}]")
     return ResourcePoolProcessExecutor(
-        max_resources=max_resources, max_workers=max_workers, initializer=process_init, initargs=(args,)
+        max_resources=max_resources,
+        max_workers=max_workers,
+        maxtasksperchild=max_tasks_per_child,
+        initializer=process_init,
+        initargs=(args,),
     )
