@@ -59,11 +59,7 @@ from .summary_cell_counts import (
     accumulate_summary_counts,
     init_summary_counts_accumulator,
 )
-from .util import (
-    anndata_ordered_bool_issue_853_workaround,
-    array_chunker,
-    is_nonnegative_integral,
-)
+from .util import anndata_ordered_bool_issue_853_workaround, array_chunker, is_nonnegative_integral
 
 
 @attrs.define
@@ -162,27 +158,10 @@ class ExperimentBuilder:
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.obs_df_accumulation: List[pd.DataFrame] = []
-        self.obs_df: pd.DataFrame = pd.DataFrame(
-            data={
-                k: pd.Series(
-                    [],
-                    dtype=v.to_pandas_dtype() if v != pa.large_string() else np.object_,
-                )
-                for k, v in CENSUS_OBS_TERM_COLUMNS.items()
-            }
-        )
-        self.var_df: pd.DataFrame = pd.DataFrame(
-            data={
-                k: pd.Series(
-                    [],
-                    dtype=v.to_pandas_dtype() if v != pa.large_string() else np.object_,
-                )
-                for k, v in CENSUS_VAR_TERM_COLUMNS.items()
-            }
-        )
-
+        self.obs_df: Optional[pd.DataFrame] = None
+        self.var_df: Optional[pd.DataFrame] = None
         self.dataset_obs_joinid_start: Dict[str, int] = {}
-        self.census_summary_cell_counts = init_summary_counts_accumulator()
+        self.census_summary_cell_counts: pd.DataFrame = init_summary_counts_accumulator()
         self.experiment: Optional[soma.Experiment] = None  # initialized in create()
         self.experiment_uri: Optional[str] = None  # initialized in create()
         self.global_var_joinids: Optional[pd.DataFrame] = None
@@ -283,7 +262,9 @@ class ExperimentBuilder:
         for key in CENSUS_VAR_TERM_COLUMNS:
             if key not in tv:
                 tv[key] = np.full((len(tv),), 0, dtype=CENSUS_VAR_TERM_COLUMNS[key].to_pandas_dtype())
-        self.var_df = pd.concat([self.var_df, tv], ignore_index=True).drop_duplicates()
+        self.var_df = (
+            pd.concat([self.var_df, tv], ignore_index=True).drop_duplicates() if self.var_df is not None else tv
+        )
 
         self.n_obs += len(obs_df)
         self.n_unique_obs += (obs_df.is_primary_data == True).sum()  # noqa: E712
@@ -307,7 +288,7 @@ class ExperimentBuilder:
         logging.info(f"{self.name}: writing obs dataframe")
         _assert_open_for_write(self.experiment)
 
-        if len(self.obs_df) == 0:
+        if self.obs_df is None or len(self.obs_df) == 0:
             logging.info(f"{self.name}: empty obs dataframe")
         else:
             logging.debug(f"experiment {self.name} obs = {self.obs_df.shape}")
@@ -323,7 +304,7 @@ class ExperimentBuilder:
         logging.info(f"{self.name}: writing var dataframe")
         _assert_open_for_write(self.experiment)
 
-        if len(self.var_df) == 0:
+        if self.var_df is None or len(self.var_df) == 0:
             logging.info(f"{self.name}: empty var dataframe")
         else:
             logging.debug(f"experiment {self.name} var = {self.var_df.shape}")
@@ -338,7 +319,7 @@ class ExperimentBuilder:
         logging.info(f"{self.name}: populate var axis")
 
         # it is possible there is nothing to write
-        if len(self.var_df) > 0:
+        if self.var_df is not None and len(self.var_df) > 0:
             self.var_df["soma_joinid"] = range(len(self.var_df))
             self.var_df = self.var_df.drop(columns=["feature_length"]).join(self.gene_feature_length, on="feature_id")
             self.var_df.feature_length.fillna(0, inplace=True)
@@ -346,8 +327,9 @@ class ExperimentBuilder:
             self.var_df = self.var_df.set_index("soma_joinid", drop=False)
 
             self.global_var_joinids = self.var_df[["feature_id", "soma_joinid"]].set_index("feature_id")
-
-        self.n_var = len(self.var_df)
+            self.n_var = len(self.var_df)
+        else:
+            self.n_var = 0
 
     def create_X_with_layers(self) -> None:
         """
@@ -406,10 +388,11 @@ class ExperimentBuilder:
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
         logging.info(f"Save presence matrix for {self.name} - finish")
+        log_process_resource_status()
 
     def write_X_normalized(self, args: CensusBuildArgs) -> None:
         assert self.experiment is not None
-        if self.n_obs == 0:
+        if self.obs_df is None or self.n_obs == 0:
             return
 
         logging.info(f"Write X normalized: {self.name} - starting")
@@ -418,8 +401,8 @@ class ExperimentBuilder:
 
         if args.config.multi_process:
             STRIDE = 1_000_000  # controls TileDB fragment size, which impacts consolidation time
-            # memory budget: 3 attributes
-            mem_budget = 3 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
+            # memory budget: 3 attribute buffers * 3 threads * 100% buffer
+            mem_budget = 3 * 3 * 2 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
@@ -437,6 +420,7 @@ class ExperimentBuilder:
             _write_X_normalized((self.experiment.uri, 0, self.n_obs, raw_sum))
 
         logging.info(f"Write X normalized: {self.name} - finished")
+        log_process_resource_status()
 
 
 def _get_axis_stats(
@@ -462,10 +446,25 @@ def _get_axis_stats(
     return (obs_stats, var_stats)
 
 
+@attrs.define(frozen=True)
+class AccumXEBParams:
+    """The ExperimentBuilder params/info we want to pass to our worker
+    processes. Do not just send an ExperimentBuilder as it is a huge
+    object that takes forever to pickle.
+    """
+
+    name: str
+    n_obs: int
+    n_var: int
+    anndata_cell_filter_spec: AnnDataFilterSpec
+    global_var_joinids: pd.DataFrame
+    experiment_uri: str
+
+
 def _accumulate_all_X_layers(
     assets_path: str,
     dataset: Dataset,
-    experiment_builders: List[ExperimentBuilder],
+    experiment_builders: List[AccumXEBParams],
     dataset_obs_joinid_starts: List[Union[None, int]],
     ms_name: str,
     progress: Tuple[int, int],
@@ -481,7 +480,7 @@ def _accumulate_all_X_layers(
     """
     logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     gc.collect()
-    unfiltered_ad = next(open_anndata(assets_path, [dataset], need_X=True))[1]
+    _, unfiltered_ad = next(open_anndata(assets_path, [dataset], need_X=True))
     assert unfiltered_ad.isbacked is False
 
     results: List[AccumulateXResult] = []
@@ -560,6 +559,9 @@ def _accumulate_all_X_layers(
             )
         )
 
+        # tidy
+        del ad, raw_X, raw_var, local_var_joinids  # , row, col, X_remap, pres_data, pres_cols, obs_stats, var_stats
+
     gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     return results
@@ -597,11 +599,25 @@ def _accumulate_X(
     Save X layer data for a single AnnData, for all Experiments. Return a future if
     executor is specified, otherwise immediately do the work.
     """
+
+    # build params to pass to child workers - this avoids pickling unecessary
+    # data (or data that can't be pickled)
+    eb_params = []
     for eb in experiment_builders:
         # sanity checks
         assert eb.dataset_obs_joinid_start is not None
-        # clear the experiment object to avoid pickling error
-        eb.experiment = None
+        assert eb.global_var_joinids is not None
+        assert eb.experiment_uri is not None
+        eb_params.append(
+            AccumXEBParams(
+                name=eb.name,
+                n_obs=eb.n_obs,
+                n_var=eb.n_var,
+                anndata_cell_filter_spec=eb.anndata_cell_filter_spec,
+                global_var_joinids=eb.global_var_joinids,
+                experiment_uri=eb.experiment_uri,
+            )
+        )
 
     dataset_obs_joinid_starts = [
         eb.dataset_obs_joinid_start.get(dataset.dataset_id, None) for eb in experiment_builders
@@ -609,11 +625,11 @@ def _accumulate_X(
 
     if executor is not None:
         return executor.submit(
-            8 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
+            12 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
             _accumulate_all_X_layers,
             assets_path,
             dataset,
-            experiment_builders,
+            eb_params,
             dataset_obs_joinid_starts,
             MEASUREMENT_RNA_NAME,
             progress,
@@ -622,7 +638,7 @@ def _accumulate_X(
         return _accumulate_all_X_layers(
             assets_path,
             dataset,
-            experiment_builders,
+            eb_params,
             dataset_obs_joinid_starts,
             MEASUREMENT_RNA_NAME,
             progress,
@@ -639,6 +655,7 @@ def populate_X_layers(
     Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
     """
     # populate X layers
+    logging.debug("populate_X_layers begin")
     results: List[AccumulateXResult] = []
     if args.config.multi_process:
         with create_resource_pool_executor(args) as pe:
@@ -668,7 +685,7 @@ def populate_X_layers(
 
     # sanity check
     for eb in experiment_builders:
-        assert np.array_equal(eb.obs_df.index.to_numpy(), eb.obs_df.soma_joinid.to_numpy())
+        assert eb.obs_df is None or np.array_equal(eb.obs_df.index.to_numpy(), eb.obs_df.soma_joinid.to_numpy())
 
     for presence, _ in results:
         eb_by_name[presence.eb_name].presence[presence.dataset_soma_joinid] = (
@@ -678,11 +695,16 @@ def populate_X_layers(
 
     for _, axis_stats in results:
         eb = eb_by_name[axis_stats.eb_name]
-        eb.obs_df.update(axis_stats.obs_stats)
-        eb.var_df.loc[
-            axis_stats.var_stats.index.to_numpy(),
-            axis_stats.var_stats.columns.to_list(),
-        ] += axis_stats.var_stats
+        if eb.obs_df is not None:
+            eb.obs_df.update(axis_stats.obs_stats)
+        if eb.var_df is not None:
+            eb.var_df.loc[
+                axis_stats.var_stats.index.to_numpy(),
+                axis_stats.var_stats.columns.to_list(),
+            ] += axis_stats.var_stats
+
+    logging.debug("populate_X_layers finish")
+    log_process_resource_status()
 
 
 class SummaryStats(TypedDict):
