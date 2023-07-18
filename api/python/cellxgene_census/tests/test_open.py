@@ -157,8 +157,9 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
             cellxgene_census.open_soma(mirror="bogus-mirror")
 
 
-def test_open_soma_works_if_no_relative_url(requests_mock: rm.Mocker) -> None:
-    pass
+def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) -> None:
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
+    requests_mock.real_http = True
 
 
 def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker) -> None:
