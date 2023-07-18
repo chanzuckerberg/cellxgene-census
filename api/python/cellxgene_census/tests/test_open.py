@@ -284,8 +284,6 @@ def small_dataset_id(requests_mock: rm.Mocker) -> str:
 
 @pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path, small_dataset_id: str) -> None:
-    # requests_mock.real_http = True
-    # requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     adata_path = tmp_path / "adata.h5ad"
     cellxgene_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="latest")
     assert adata_path.exists() and adata_path.is_file()
