@@ -23,7 +23,7 @@ def matrix(m: int, n: int) -> sparse.coo_matrix:
 @pytest.mark.parametrize("stride", [101, 53])
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
-@pytest.mark.parametrize("ddof", [1, 100, 10000])
+@pytest.mark.parametrize("ddof", [0, 1, 100])
 def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int) -> None:
     rng = np.random.default_rng()
     batches_prob = rng.random(n_batches)
@@ -79,3 +79,11 @@ def test_mean(matrix: sparse.coo_matrix, stride: int) -> None:
 
     dense = matrix.toarray()
     assert allclose(u, dense.mean(axis=0))
+
+
+@pytest.mark.experimental
+def test_mean_fails_no_variables_or_samples() -> None:
+    with pytest.raises(ValueError, match=r"No samples provided - can't calculate mean."):
+        MeanAccumulator(n_samples=0, n_variables=100)
+    with pytest.raises(ValueError, match=r"No variables provided - can't calculate mean."):
+        MeanAccumulator(n_samples=1000, n_variables=0)

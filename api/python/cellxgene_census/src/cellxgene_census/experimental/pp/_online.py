@@ -49,11 +49,13 @@ class MeanVarianceAccumulator:
 
         # Note: if N-ddof is less than or equal to 0, we will return Inf - this is consistent
         # with the numpy.var behavior.
-        batches_var = (self.M2.T / np.maximum(np.zeros(self.n_samples.size), (self.n_samples - self.ddof))).T
+        with np.errstate(divide="ignore"):
+            batches_var = (self.M2.T / np.maximum(0, (self.n_samples - self.ddof))).T
 
         # accum all batches using Chan's
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
-        all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
+        with np.errstate(divide="ignore"):
+            all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
 
         return batches_u, batches_var, all_u, all_var
 
@@ -63,11 +65,14 @@ class MeanAccumulator:
         if n_samples <= 0:
             raise ValueError("No samples provided - can't calculate mean.")
 
+        if n_variables <= 0:
+            raise ValueError("No variables provided - can't calculate mean.")
+
         self.u = np.zeros(n_variables, dtype=np.float64)
         self.n_samples = n_samples
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        _reduce_mean_vector(self.u, var_vec, val_vec)
+        _update_mean_vector(self.u, var_vec, val_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
         return self.u / self.n_samples
@@ -316,7 +321,7 @@ def _accum_clipped_counts_by_batch(
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
-def _reduce_mean_vector(
+def _update_mean_vector(
     u: npt.NDArray[np.float64],
     var_vec: npt.NDArray[np.int64],
     val_vec: npt.NDArray[np.float32],

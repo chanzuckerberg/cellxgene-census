@@ -52,7 +52,7 @@ def mean_variance(
         experimental
     """
 
-    if axis not in [0, 1]:
+    if axis not in (0, 1):
         raise ValueError("axis must be 0 or 1")
 
     if calculate_mean is False and calculate_variance is False:
