@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from concurrent import futures
 from typing import Any, Generator, Tuple
 
@@ -70,8 +69,7 @@ def mean_variance(
     idx = pd.Index(data=query.obs_joinids() if axis == 1 else query.var_joinids(), name="soma_joinid")
 
     def iterate() -> Generator[Tuple[npt.NDArray[np.int64], Any], None, None]:
-        max_workers = (os.cpu_count() or 4) + 2
-        with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        with futures.ThreadPoolExecutor(max_workers=1) as pool:  # Note: _EagerIterator only supports one thread
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
                 dim = idx.get_indexer(arrow_tbl[f"soma_dim_{1-axis}"].to_numpy())  # type: ignore[no-untyped-call]
                 data = arrow_tbl["soma_data"].to_numpy()

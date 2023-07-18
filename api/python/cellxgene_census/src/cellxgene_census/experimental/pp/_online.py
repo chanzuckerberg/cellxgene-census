@@ -271,13 +271,22 @@ def _mbomv_combine_batches(
 
 
 @numba.jit(
-    numba.void(
-        numba.float64[:],
-        numba.float64[:],
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-        numba.float64[:],
-    ),
+    [
+        numba.void(
+            numba.float64[:],
+            numba.float64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:],
+        ),
+        numba.void(
+            numba.float64[:],
+            numba.float64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:],
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
@@ -296,14 +305,24 @@ def _accum_clipped_counts(
 
 
 @numba.jit(
-    numba.void(
-        numba.float64[:, :],
-        numba.float64[:, :],
-        numba.int64[:],
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-        numba.float64[:, :],
-    ),
+    [
+        numba.void(
+            numba.float64[:, :],
+            numba.float64[:, :],
+            numba.int64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:, :],
+        ),
+        numba.void(
+            numba.float64[:, :],
+            numba.float64[:, :],
+            numba.int64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:, :],
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
