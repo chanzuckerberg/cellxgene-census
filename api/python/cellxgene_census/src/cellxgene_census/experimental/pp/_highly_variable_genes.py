@@ -94,6 +94,7 @@ def _highly_variable_genes_seurat_v3(
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
                 mvn.update(var_dim, data, _batch_vec)
             else:
+                var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 mvn.update(var_dim, data)
 
         batches_u, batches_var, all_u, all_var = mvn.finalize()
