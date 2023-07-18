@@ -15,6 +15,7 @@ from cellxgene_census._open import DEFAULT_TILEDB_CONFIGURATION
 from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 # Temporary mock for the mirrors.json route
+# Remove once the mirror.json route is released.
 mirrors_json = {
     "default": "private",
     "private": {"protocol": "S3", "bucket": "cellxgene-data-public", "region": "us-west-2"},
@@ -97,6 +98,8 @@ def test_open_soma_invalid_args() -> None:
 
 def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
     requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json={})
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
+    requests_mock.real_http = True
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -158,11 +161,39 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
 
 
 def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) -> None:
+    """
+    This test ensures that the Census works even if the relative_uri is not specified in the directory.
+    This ensures backwards compatibility with the v1 route.
+    """
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
-    requests_mock.real_http = True
+
+    dir = {
+        "latest": "2022-11-01",
+        "2022-11-01": {
+            "release_date": "2022-11-30",
+            "release_build": "2022-11-01",
+            "soma": {
+                "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/",
+                "s3_region": "us-west-2",
+            },
+            "h5ads": {
+                "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/h5ads/",
+                "s3_region": "us-west-2",
+            },
+        },
+    }
+
+    requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
+    with patch("cellxgene_census._open._open_soma") as m:
+        cellxgene_census.open_soma(census_version="stable")
+        m.assert_called_once_with(
+            {"uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/", "s3_region": "us-west-2"}, None
+        )
 
 
 def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     dir_missing_stable = {
         "latest": "2022-11-01",
         "2022-11-01": {
@@ -170,10 +201,12 @@ def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker
             "release_build": "2022-11-01",
             "soma": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
                 "s3_region": "us-west-2",
             },
             "h5ads": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
                 "s3_region": "us-west-2",
             },
         },
@@ -188,6 +221,8 @@ def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker
 
 
 def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     directory_with_stable = {
         "stable": "2022-10-01",
         "2022-10-01": {
@@ -195,10 +230,12 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
             "release_build": "2022-10-01",
             "soma": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/",
+                "relative_uri": "/cell-census/2022-10-01/soma/",
                 "s3_region": "us-west-2",
             },
             "h5ads": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-10-01/h5ads/",
+                "relative_uri": "/cell-census/2022-10-01/soma/",
                 "s3_region": "us-west-2",
             },
         },
@@ -213,7 +250,9 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
 
 
 @pytest.mark.live_corpus
-def test_get_source_h5ad_uri() -> None:
+def test_get_source_h5ad_uri(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     with cellxgene_census.open_soma(census_version="latest") as census:
         census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
@@ -232,7 +271,9 @@ def test_get_source_h5ad_uri_errors() -> None:
 
 
 @pytest.fixture
-def small_dataset_id() -> str:
+def small_dataset_id(requests_mock: rm.Mocker) -> str:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     with cellxgene_census.open_soma(census_version="latest") as census:
         census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
@@ -243,6 +284,8 @@ def small_dataset_id() -> str:
 
 @pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path, small_dataset_id: str) -> None:
+    # requests_mock.real_http = True
+    # requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     adata_path = tmp_path / "adata.h5ad"
     cellxgene_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="latest")
     assert adata_path.exists() and adata_path.is_file()
@@ -250,7 +293,9 @@ def test_download_source_h5ad(tmp_path: pathlib.Path, small_dataset_id: str) -> 
     assert ad is not None
 
 
-def test_download_source_h5ad_errors(tmp_path: pathlib.Path, small_dataset_id: str) -> None:
+def test_download_source_h5ad_errors(requests_mock: rm.Mocker, tmp_path: pathlib.Path, small_dataset_id: str) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     existing_file = tmp_path / "existing_file.h5ad"
     existing_file.touch()
     assert existing_file.exists()
@@ -272,10 +317,12 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
 
 
 @pytest.mark.live_corpus
-def test_can_open_with_anonymous_access() -> None:
+def test_can_open_with_anonymous_access(requests_mock: rm.Mocker) -> None:
     """
     With anonymous access, `open_soma` must be able to access the census even with bogus credentials
     """
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     with cellxgene_census.open_soma(census_version="latest") as census:
