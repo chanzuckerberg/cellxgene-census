@@ -160,13 +160,22 @@ def _mbomv_update_by_batch(
 
 
 @numba.jit(
-    numba.void(
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-        numba.int32[:, :],
-        numba.float64[:, :],
-        numba.float64[:, :],
-    ),
+    [
+        numba.void(
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.int32[:, :],
+            numba.float64[:, :],
+            numba.float64[:, :],
+        ),
+        numba.void(
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.int32[:, :],
+            numba.float64[:, :],
+            numba.float64[:, :],
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
