@@ -92,10 +92,10 @@ def _highly_variable_genes_seurat_v3(
                 _batch_take_at_future = pool.submit(batch_indexer, arrow_tbl["soma_dim_0"])
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
-                mvn.update_by_batch(_batch_vec, var_dim, data)
+                mvn.update(_batch_vec, var_dim, data)
             else:
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
-                mvn.update_single_batch(var_dim, data)
+                mvn.update(var_dim, data)
 
         batches_u, batches_var, all_u, all_var = mvn.finalize()
         del mvn
@@ -158,10 +158,10 @@ def _highly_variable_genes_seurat_v3(
                 _batch_take_at_future = pool.submit(batch_indexer, arrow_tbl["soma_dim_0"])
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
-                acc.update_by_batch(_batch_vec, var_dim, data)
+                acc.update(_batch_vec, var_dim, data)
             else:
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
-                acc.update_single_batch(var_dim, data)
+                acc.update(var_dim, data)
 
         counts_sum, squared_counts_sum = acc.finalize()
         norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (

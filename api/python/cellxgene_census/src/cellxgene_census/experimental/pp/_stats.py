@@ -84,7 +84,7 @@ def mean_variance(
     if calculate_variance:
         mvn = MeanVarianceAccumulator(n_batches, n_samples, n_dim_0, ddof=ddof)
         for dim, data in iterate():
-            mvn.update_single_batch(dim, data)
+            mvn.update(dim, data)
         _, _, all_u, all_var = mvn.finalize()
         if calculate_mean:
             result["mean"] = all_u

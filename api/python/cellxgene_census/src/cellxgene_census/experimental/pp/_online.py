@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numba
 import numpy as np
@@ -29,14 +29,18 @@ class MeanVarianceAccumulator:
         self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
         self.M2 = np.zeros((n_batches, n_variables), dtype=np.float64)
 
-    def update_by_batch(
-        self, batch_vec: npt.NDArray[np.int64], var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]
+    def update(
+        self,
+        var_vec: npt.NDArray[np.int64],
+        val_vec: npt.NDArray[np.float32],
+        batch_vec: Optional[npt.NDArray[np.int64]] = None,
     ) -> None:
-        _mbomv_update_by_batch(batch_vec, var_vec, val_vec, self.n, self.u, self.M2)
-
-    def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        assert self.n_batches == 1
-        _mbomv_update_single_batch(var_vec, val_vec, self.n, self.u, self.M2)
+        if self.n_batches == 1:
+            assert batch_vec is None
+            _mbomv_update_single_batch(var_vec, val_vec, self.n, self.u, self.M2)
+        else:
+            assert batch_vec is not None
+            _mbomv_update_by_batch(batch_vec, var_vec, val_vec, self.n, self.u, self.M2)
 
     def finalize(
         self,
@@ -86,16 +90,20 @@ class CountsAccumulator:
         self.counts_sum = np.zeros((n_batches, n_variables), dtype=np.float64)  # clipped
         self.squared_counts_sum = np.zeros((n_batches, n_variables), dtype=np.float64)  # clipped
 
-    def update_by_batch(
-        self, batch_vec: npt.NDArray[np.int64], var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]
+    def update(
+        self,
+        var_vec: npt.NDArray[np.int64],
+        val_vec: npt.NDArray[np.float32],
+        batch_vec: Optional[npt.NDArray[np.int64]] = None,
     ) -> None:
-        _accum_clipped_counts_by_batch(
-            self.counts_sum, self.squared_counts_sum, batch_vec, var_vec, val_vec, self.clip_val
-        )
-
-    def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        assert self.n_batches == 1
-        _accum_clipped_counts(self.counts_sum[0], self.squared_counts_sum[0], var_vec, val_vec, self.clip_val[0])
+        if self.n_batches == 1:
+            assert batch_vec is None
+            _accum_clipped_counts(self.counts_sum[0], self.squared_counts_sum[0], var_vec, val_vec, self.clip_val[0])
+        else:
+            assert batch_vec is not None
+            _accum_clipped_counts_by_batch(
+                self.counts_sum, self.squared_counts_sum, batch_vec, var_vec, val_vec, self.clip_val
+            )
 
     def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         return self.counts_sum, self.squared_counts_sum
