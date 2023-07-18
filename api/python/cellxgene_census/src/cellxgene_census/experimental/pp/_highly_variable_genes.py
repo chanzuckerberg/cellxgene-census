@@ -88,13 +88,13 @@ def _highly_variable_genes_seurat_v3(
         mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_vars)
         for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
             data = arrow_tbl["soma_data"].to_numpy()
-            var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
             if batch_indexer:
                 _batch_take_at_future = pool.submit(batch_indexer, arrow_tbl["soma_dim_0"])
+                var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
+                mvn.update(var_dim, data, _batch_vec)
             else:
-                _batch_vec = None
-            mvn.update(var_dim, data, _batch_vec)
+                mvn.update(var_dim, data)
 
         batches_u, batches_var, all_u, all_var = mvn.finalize()
         del mvn
@@ -153,13 +153,14 @@ def _highly_variable_genes_seurat_v3(
         acc = CountsAccumulator(n_batches, query.n_vars, clip_val)
         for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
             data = arrow_tbl["soma_data"].to_numpy()
-            var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
             if batch_indexer:
                 _batch_take_at_future = pool.submit(batch_indexer, arrow_tbl["soma_dim_0"])
+                var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
+                acc.update(var_dim, data, _batch_vec)
             else:
-                _batch_vec = None
-            acc.update(var_dim, data, _batch_vec)
+                var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
+                acc.update(var_dim, data)
 
         counts_sum, squared_counts_sum = acc.finalize()
         norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
