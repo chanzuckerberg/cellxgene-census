@@ -84,9 +84,6 @@ def test_mean(matrix: sparse.coo_matrix, stride: int) -> None:
 @pytest.mark.parametrize("stride", [101, 53])
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
-# @pytest.mark.parametrize("n_batches", [1, 3])
-# @pytest.mark.parametrize("stride", [53])
-# @pytest.mark.parametrize("m,n", [(5, 6)])
 def test_counts(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None:
     rng = np.random.default_rng()
     batches_prob = rng.random(n_batches)
