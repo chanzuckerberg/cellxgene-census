@@ -344,6 +344,9 @@ def create_resource_pool_executor(
         max_resources = args.config.memory_budget
     if max_workers is None:
         max_workers = cpu_count() + 2
+    if max_tasks_per_child is None:
+        # not strictly necessary, but helps avoid leaks by turning over sub-processes
+        max_tasks_per_child = 10
 
     logging.debug(f"create_resource_pool_executor [max_workers={max_workers}, max_resources={max_resources}]")
     return ResourcePoolProcessExecutor(

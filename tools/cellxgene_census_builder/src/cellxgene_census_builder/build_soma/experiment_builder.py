@@ -606,7 +606,7 @@ def _accumulate_X(
     for eb in experiment_builders:
         # sanity checks
         assert eb.dataset_obs_joinid_start is not None
-        assert eb.global_var_joinids is not None
+        assert eb.n_var == 0 or eb.global_var_joinids is not None
         assert eb.experiment_uri is not None
         eb_params.append(
             AccumXEBParams(

@@ -2,6 +2,7 @@ import concurrent.futures
 import dataclasses
 import gc
 import logging
+import math
 import os.path
 import pathlib
 from dataclasses import dataclass
@@ -602,7 +603,7 @@ def validate_X_layers(
                     assert X.schema.field("soma_dim_1").type == pa.int64()
                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                     assert X.shape == (n_obs, n_vars)
-                avg_row_nnz = max(avg_row_nnz, int(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
+                avg_row_nnz = max(avg_row_nnz, math.ceil(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
 
     if args.config.multi_process:
         ROWS_PER_PROCESS = 1_000_000
@@ -611,7 +612,7 @@ def validate_X_layers(
             futures = (
                 [
                     ppe.submit(
-                        750_000 * mem_budget_factor,
+                        1_000_000 * mem_budget_factor,
                         _validate_Xnorm_layer,
                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
                     )
@@ -620,7 +621,7 @@ def validate_X_layers(
                 ]
                 + [
                     ppe.submit(
-                        250_000 * mem_budget_factor,
+                        500_000 * mem_budget_factor,
                         _validate_X_layer_has_unique_coords,
                         (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
                     )
