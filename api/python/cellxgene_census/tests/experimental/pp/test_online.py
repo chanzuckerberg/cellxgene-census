@@ -39,7 +39,7 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
 
     olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof)
     for i in range(0, matrix.nnz, stride):
-        olmv.update(batches[matrix.row[i : i + stride]], matrix.col[i : i + stride], matrix.data[i : i + stride])
+        olmv.update(matrix.col[i : i + stride], matrix.data[i : i + stride], batches[matrix.row[i : i + stride]])
     batches_u, batches_var, all_u, all_var = olmv.finalize()
 
     assert isinstance(all_u, np.ndarray)

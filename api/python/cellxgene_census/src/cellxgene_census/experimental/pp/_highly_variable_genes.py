@@ -94,7 +94,7 @@ def _highly_variable_genes_seurat_v3(
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
             else:
                 _batch_vec = None
-            mvn.update(_batch_vec, var_dim, data)
+            mvn.update(var_dim, data, _batch_vec)
 
         batches_u, batches_var, all_u, all_var = mvn.finalize()
         del mvn
@@ -159,7 +159,7 @@ def _highly_variable_genes_seurat_v3(
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
             else:
                 _batch_vec = None
-            acc.update(_batch_vec, var_dim, data)
+            acc.update(var_dim, data, _batch_vec)
 
         counts_sum, squared_counts_sum = acc.finalize()
         norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
