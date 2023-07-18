@@ -457,7 +457,7 @@ class AccumXEBParams:
     n_obs: int
     n_var: int
     anndata_cell_filter_spec: AnnDataFilterSpec
-    global_var_joinids: pd.DataFrame
+    global_var_joinids: Optional[pd.DataFrame]
     experiment_uri: str
 
 
@@ -492,6 +492,8 @@ def _accumulate_all_X_layers(
         if eb.n_var == 0:
             # edge case for test builds that have no data for an entire experiment (organism)
             continue
+
+        assert eb.global_var_joinids is not None
 
         anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad)
