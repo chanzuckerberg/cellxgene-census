@@ -1,3 +1,4 @@
+import gc
 import logging
 import os
 from contextlib import contextmanager
@@ -8,6 +9,7 @@ from typing import Any, Dict, Iterator, Optional, Sequence, Tuple
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import psutil
 import pyarrow as pa
 import scipy
 import somacore
@@ -153,6 +155,17 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         return _ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
 
 
+def run_gc() -> None:
+    proc = psutil.Process(os.getpid())
+
+    pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
+    gc.collect()
+    post_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
+
+    pytorch_logger.debug(f"gc:  pre={pre_gc}")
+    pytorch_logger.debug(f"gc: post={post_gc}")
+
+
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     """
     Iterates through a set of ``obs`` and corresponding ``X`` rows, where the rows to be returned are specified by
@@ -219,7 +232,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
             obs_encoded[col] = enc.transform(obs[col])
 
         # `to_numpy()` avoids copying the numpy array data
-        #obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
+        # obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
         # if not self.return_sparse_X:
         #     X_tensor = torch.from_numpy(X.todense())
@@ -238,7 +251,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         #     obs_tensor = obs_tensor[0]
 
         # return X_tensor, obs_tensor
-        return torch.empty((0,1)), torch.empty((0,1))
+        return torch.empty((0, 1)), torch.empty((0, 1))
 
     def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
         """Reads a torch-size batch of data from the current SOMA batch, returning a torch-size batch whose size may
@@ -246,6 +259,8 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         SOMA batch are fewer than the requested ``batch_size``."""
 
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
+            self.soma_batch = None
+            run_gc()
             self.soma_batch: _ObsAndXSOMABatch = next(self.soma_batch_iter)
             self.stats += self.soma_batch.stats
             self.i = 0
