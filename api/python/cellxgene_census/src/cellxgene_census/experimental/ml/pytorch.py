@@ -219,25 +219,26 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
             obs_encoded[col] = enc.transform(obs[col])
 
         # `to_numpy()` avoids copying the numpy array data
-        obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
+        #obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
-        if not self.return_sparse_X:
-            X_tensor = torch.from_numpy(X.todense())
-        else:
-            coo = X.tocoo()
+        # if not self.return_sparse_X:
+        #     X_tensor = torch.from_numpy(X.todense())
+        # else:
+        #     coo = X.tocoo()
 
-            X_tensor = torch.sparse_coo_tensor(
-                # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
-                indices=torch.from_numpy(np.array([coo.row, coo.col])),
-                values=coo.data,
-                size=coo.shape,
-            )
+        #     X_tensor = torch.sparse_coo_tensor(
+        #         # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
+        #         indices=torch.from_numpy(np.array([coo.row, coo.col])),
+        #         values=coo.data,
+        #         size=coo.shape,
+        #     )
 
-        if self.batch_size == 1:
-            X_tensor = X_tensor[0]
-            obs_tensor = obs_tensor[0]
+        # if self.batch_size == 1:
+        #     X_tensor = X_tensor[0]
+        #     obs_tensor = obs_tensor[0]
 
-        return X_tensor, obs_tensor
+        # return X_tensor, obs_tensor
+        return None, None
 
     def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
         """Reads a torch-size batch of data from the current SOMA batch, returning a torch-size batch whose size may
