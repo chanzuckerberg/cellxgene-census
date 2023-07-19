@@ -87,6 +87,7 @@ def test_do_the_release(tmp_path: pathlib.Path, dryrun: bool) -> None:
         "release_date": None,
         "soma": {"uri": f"{TEST_BUCKET_PATH}/{build_tag}/soma/", "s3_region": "us-west-2"},
         "h5ads": {"uri": f"{TEST_BUCKET_PATH}/{build_tag}/h5ads/", "s3_region": "us-west-2"},
+        "do_not_delete": False,
     }
     assert make_a_release_patch.call_count == 1
     assert make_a_release_patch.call_args == (

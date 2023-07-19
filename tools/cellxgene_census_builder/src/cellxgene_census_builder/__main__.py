@@ -178,6 +178,7 @@ def do_the_release(args: CensusBuildArgs) -> bool:
             "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "h5ads/"),
             "s3_region": "us-west-2",
         },
+        "do_not_delete": False,
     }
     make_a_release(
         args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun

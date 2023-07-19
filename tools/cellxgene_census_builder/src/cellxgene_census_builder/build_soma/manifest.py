@@ -62,8 +62,9 @@ def load_manifest_from_CxG() -> List[Dataset]:
         schema_version = dataset["schema_version"]
 
         if schema_version not in CXG_SCHEMA_VERSION_IMPORT:
-            logging.warning(f"Dropping dataset {dataset_id} due to unsupported schema version")
-            continue
+            msg = f"Manifest fetch: dataset {dataset_id} contains unsupported schema version {schema_version}."
+            logging.error(msg)
+            raise RuntimeError(msg)
 
         assets = dataset.get("assets", [])
         assets_h5ad = [a for a in assets if a["filetype"] == "H5AD"]
