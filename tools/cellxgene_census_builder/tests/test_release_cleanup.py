@@ -14,8 +14,8 @@ def tag_days_old(days_old: int) -> str:
 TAG_NOW = tag_days_old(0)
 TAG_10D_OLD = tag_days_old(10)
 TAG_100D_OLD = tag_days_old(100)
-TAG_LTS_A = tag_days_old(1000)
-TAG_LTS_B = tag_days_old(1001)
+TAG_LTS_CURRENT_STABLE = tag_days_old(1000)
+TAG_LTS_PREVIOUS_STABLE = tag_days_old(1001)
 
 S3_PREFIX = "s3://bucket/path/"
 
@@ -36,16 +36,16 @@ RELEASE_MANIFEST: CensusReleaseManifest = {
         "soma": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/soma/", "s3_region": "us-west-2"},
         "h5ads": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/h5ads/", "s3_region": "us-west-2"},
     },
-    "stable": TAG_LTS_A,
-    TAG_LTS_A: {  # mock LTS release with an alias, but without a do_not_delete flag
-        "release_build": TAG_LTS_A,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_A}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_A}/h5ads/", "s3_region": "us-west-2"},
+    "stable": TAG_LTS_CURRENT_STABLE,
+    TAG_LTS_CURRENT_STABLE: {  # mock LTS release with an alias, but without a do_not_delete flag
+        "release_build": TAG_LTS_CURRENT_STABLE,
+        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/soma/", "s3_region": "us-west-2"},
+        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/h5ads/", "s3_region": "us-west-2"},
     },
-    TAG_LTS_B: {  # mock LTS release lacking an alias, but with a do_not_delete flag
-        "release_build": TAG_LTS_B,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_B}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_B}/h5ads/", "s3_region": "us-west-2"},
+    TAG_LTS_PREVIOUS_STABLE: {  # mock LTS release lacking an alias, but with a do_not_delete flag
+        "release_build": TAG_LTS_PREVIOUS_STABLE,
+        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/soma/", "s3_region": "us-west-2"},
+        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/h5ads/", "s3_region": "us-west-2"},
         "do_not_delete": True,
     },
 }
@@ -98,9 +98,20 @@ def test_remove_releases_older_than(
             assert commit_release_manifest_patch.call_count == 0
         else:
             assert delete_patch.mock_calls == expected_delete_calls
+            assert commit_release_manifest_patch.call_count == 1 or len(expected_delete_tags) == 0
             if len(expected_delete_tags) > 0:
                 assert commit_release_manifest_patch.call_count == 1
                 assert commit_release_manifest_patch.call_args == ((S3_PREFIX, expected_new_manifest),)
+
+                # Confirm that we did not delete anythign that is which has do_not_delete set
+                # print(commit_release_manifest_patch.call_args[0][1])
+                for tag in release_manifest:
+                    if isinstance(release_manifest[tag], dict) and release_manifest[tag].get("do_not_delete", False):
+                        assert tag in commit_release_manifest_patch.call_args[0][1]
+
+                # Extra belt and suspenders!
+                assert TAG_LTS_CURRENT_STABLE in commit_release_manifest_patch.call_args[0][1]
+                assert TAG_LTS_PREVIOUS_STABLE in commit_release_manifest_patch.call_args[0][1]
 
 
 @pytest.mark.parametrize(
