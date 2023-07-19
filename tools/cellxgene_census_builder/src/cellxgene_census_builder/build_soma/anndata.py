@@ -42,8 +42,9 @@ def open_anndata(
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
         if h5ad.schema_version not in CXG_SCHEMA_VERSION_IMPORT:
-            logging.warning(f"H5AD has old schema version, skipping {h5ad.dataset_h5ad_path}")
-            continue
+            msg = f"H5AD has unsupported schema version {h5ad.dataset_h5ad_path}, expected {CXG_SCHEMA_VERSION}"
+            logging.error(msg)
+            raise RuntimeError(msg)
 
         # Multi-organism datasets - any dataset with 2+ feature_reference organisms is ignored,
         # exclusive of values in FEATURE_REFERENCE_IGNORE. See also, cell filter for mismatched
