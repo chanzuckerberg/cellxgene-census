@@ -42,7 +42,7 @@ def open_anndata(
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
         if h5ad.schema_version not in CXG_SCHEMA_VERSION_IMPORT:
-            msg = f"H5AD has unsupported schema version {h5ad.dataset_h5ad_path}, expected {CXG_SCHEMA_VERSION}"
+            msg = f"H5AD {h5ad.dataset_h5ad_path} has unsupported schema version {h5ad.schema_version}, expected {CXG_SCHEMA_VERSION}"
             logging.error(msg)
             raise RuntimeError(msg)
 
