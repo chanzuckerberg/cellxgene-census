@@ -238,7 +238,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         #     obs_tensor = obs_tensor[0]
 
         # return X_tensor, obs_tensor
-        return None, None
+        return torch.empty((0,1)), torch.empty((0,1))
 
     def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
         """Reads a torch-size batch of data from the current SOMA batch, returning a torch-size batch whose size may
@@ -469,6 +469,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
             X: soma.SparseNDArray = exp.ms[self.measurement_name].X[self.layer_name]
 
+            # TODO: Get all IDs, close experiment. Iterate through obs IDs using custom stride, not based upon soma_buffer_bytes
             obs_tables_iter = exp.obs.read(
                 coords=(self._partition_obs_joinids(self._obs_joinids),),
                 batch_size=somacore.BatchSize(),
