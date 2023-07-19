@@ -14,6 +14,8 @@ def tag_days_old(days_old: int) -> str:
 TAG_NOW = tag_days_old(0)
 TAG_10D_OLD = tag_days_old(10)
 TAG_100D_OLD = tag_days_old(100)
+TAG_LTS_A = tag_days_old(1000)
+TAG_LTS_B = tag_days_old(1001)
 
 S3_PREFIX = "s3://bucket/path/"
 
@@ -33,6 +35,18 @@ RELEASE_MANIFEST: CensusReleaseManifest = {
         "release_build": TAG_100D_OLD,
         "soma": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/soma/", "s3_region": "us-west-2"},
         "h5ads": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/h5ads/", "s3_region": "us-west-2"},
+    },
+    "stable": TAG_LTS_A,
+    TAG_LTS_A: {  # mock LTS release with an alias, but without a do_not_delete flag
+        "release_build": TAG_LTS_A,
+        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_A}/soma/", "s3_region": "us-west-2"},
+        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_A}/h5ads/", "s3_region": "us-west-2"},
+    },
+    TAG_LTS_B: {  # mock LTS release lacking an alias, but with a do_not_delete flag
+        "release_build": TAG_LTS_B,
+        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_B}/soma/", "s3_region": "us-west-2"},
+        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_B}/h5ads/", "s3_region": "us-west-2"},
+        "do_not_delete": True,
     },
 }
 
