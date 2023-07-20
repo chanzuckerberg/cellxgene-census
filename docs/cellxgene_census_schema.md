@@ -679,6 +679,8 @@ Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read count
 
 #### Matrix Data, normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
 
+This is an experimental data artifact - it may be removed at any time.
+
 A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
 For a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
 as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
