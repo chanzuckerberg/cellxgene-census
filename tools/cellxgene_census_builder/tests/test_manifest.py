@@ -51,8 +51,16 @@ def test_load_manifest_from_cxg() -> None:
                 "title": "dataset #1",
                 "schema_version": "3.0.0",
                 "assets": [
-                    {"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"},
-                    {"filesize": 234, "filetype": "RDS", "url": "https://fake.url/dataset_id_1.rds"},
+                    {
+                        "filesize": 123,
+                        "filetype": "H5AD",
+                        "url": "https://fake.url/dataset_id_1.h5ad",
+                    },
+                    {
+                        "filesize": 234,
+                        "filetype": "RDS",
+                        "url": "https://fake.url/dataset_id_1.rds",
+                    },
                 ],
             },
             {
@@ -62,7 +70,13 @@ def test_load_manifest_from_cxg() -> None:
                 "collection_doi": None,
                 "title": "dataset #2",
                 "schema_version": "3.0.0",
-                "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
+                "assets": [
+                    {
+                        "filesize": 456,
+                        "filetype": "H5AD",
+                        "url": "https://fake.url/dataset_id_2.h5ad",
+                    }
+                ],
             },
         ]
 
@@ -76,7 +90,7 @@ def test_load_manifest_from_cxg() -> None:
         assert manifest[1].asset_h5ad_filesize == 456
 
 
-def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
+def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema() -> None:
     """
     `load_manifest` should exclude datasets that do not have a current schema version.
     """
@@ -89,7 +103,13 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
                 "collection_doi": None,
                 "title": "dataset #1",
                 "schema_version": "3.0.0",
-                "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+                "assets": [
+                    {
+                        "filesize": 123,
+                        "filetype": "H5AD",
+                        "url": "https://fake.url/dataset_id_1.h5ad",
+                    }
+                ],
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -98,14 +118,18 @@ def test_load_manifest_from_cxg_excludes_datasets_with_old_schema() -> None:
                 "collection_doi": None,
                 "title": "dataset #2",
                 "schema_version": "2.0.0",  # Old schema version
-                "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
+                "assets": [
+                    {
+                        "filesize": 456,
+                        "filetype": "H5AD",
+                        "url": "https://fake.url/dataset_id_2.h5ad",
+                    }
+                ],
             },
         ]
 
-        manifest = load_manifest(None)
-        assert len(manifest) == 1
-        assert manifest[0].dataset_id == "dataset_id_1"
-        assert manifest[0].dataset_asset_h5ad_uri == "https://fake.url/dataset_id_1.h5ad"
+        with pytest.raises(RuntimeError, match=r"unsupported schema version"):
+            load_manifest(None)
 
 
 def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
@@ -121,7 +145,13 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
                 "collection_doi": None,
                 "title": "dataset #1",
                 "schema_version": "3.0.0",
-                "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
+                "assets": [
+                    {
+                        "filesize": 123,
+                        "filetype": "H5AD",
+                        "url": "https://fake.url/dataset_id_1.h5ad",
+                    }
+                ],
             },
             {
                 "dataset_id": "dataset_id_2",

@@ -57,6 +57,7 @@ def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
                 "release_build": "2022-01-10",
                 "soma": soma_locator("2022-01-10"),
                 "h5ads": h5ads_locator("2022-01-10"),
+                "do_not_delete": False,
             },
         },
         {
@@ -68,6 +69,7 @@ def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
                         "release_build": tag,
                         "soma": soma_locator(tag),
                         "h5ads": h5ads_locator(tag),
+                        "do_not_delete": False,
                     },
                 )
                 for tag in ["2022-01-10", "2023-09-12"]
