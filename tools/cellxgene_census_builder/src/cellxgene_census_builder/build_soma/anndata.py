@@ -58,7 +58,14 @@ def open_anndata(
         # The "census" specification requires that any filtered features be added back to
         # the final layer.
         #
-        # Follow CXG 3 conventions: use raw if present, else X.
+        # NOTE: As currently defined, the Census only includes raw counts. Most H5ADs
+        # contain multiple X layers, plus a number of other matrices (obsm, etc). These
+        # other objects use substantial memory (and have other overhead when the AnnData
+        # is sliced in the filtering step).
+        #
+        # To minimize that overhead, this code drops all AnnData fileds unused by the
+        # Census, following the CXG 3 conventions: use raw if present, else X.
+        #
         if ad.raw is not None:
             missing_from_var = ad.raw.var.index.difference(ad.var.index)
             if len(missing_from_var) > 0:

@@ -145,7 +145,7 @@ def accumulate_axes(
     N = len(datasets) * len(experiment_builders)
     n = 0
 
-    with create_thread_pool_executor(max_workers=2) as pool:
+    with create_thread_pool_executor() as pool:
         adata_iter = open_anndata(assets_path, datasets, need_X=False, backed="r")
         if args.config.multi_process:
             adata_iter = EagerIterator(adata_iter, pool)

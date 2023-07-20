@@ -282,7 +282,6 @@ class ExperimentBuilder:
         self.obs_df_accumulation.clear()
         assert self.n_obs == len(self.obs_df)
         gc.collect()
-        return
 
     def write_obs_dataframe(self) -> None:
         logging.info(f"{self.name}: writing obs dataframe")
