@@ -17,6 +17,8 @@ import tiledbsoma as soma
 
 from ._release_directory import (
     CensusLocator,
+    CensusMirror,
+    ResolvedCensusLocator,
     _resolve_census_locator,
     get_census_mirrors,
     get_census_version_description,
@@ -36,13 +38,15 @@ api_logger.setLevel(logging.INFO)
 api_logger.addHandler(logging.StreamHandler())
 
 
-def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
+def _open_soma(
+    locator: ResolvedCensusLocator, context: Optional[soma.options.SOMATileDBContext] = None
+) -> soma.Collection:
     """Private. Merge config defaults and return open census as a soma Collection/context."""
-    context = _build_soma_tiledb_context(locator.get("s3_region"), context)
+    context = _build_soma_tiledb_context_s3(locator.get("region"), context)
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def _build_soma_tiledb_context(
+def _build_soma_tiledb_context_s3(
     s3_region: Optional[str] = None, context: Optional[soma.options.SOMATileDBContext] = None
 ) -> soma.options.SOMATileDBContext:
     """
@@ -131,18 +135,19 @@ def open_soma(
     """
 
     if uri is not None:
-        return _open_soma({"uri": uri, "s3_region": None}, context)
+        return _open_soma({"uri": uri, "region": None, "provider": "file"}, context)
 
     if census_version is None:
         raise ValueError("Must specify either a census version or an explicit URI.")
 
     mirrors = get_census_mirrors()
+    selected_mirror: CensusMirror
     if mirror is not None:
         if mirror not in mirrors:
             raise KeyError("Mirror not found.")
-        selected_mirror = mirrors[mirror]
+        selected_mirror = mirrors[mirror]  # type: ignore
     else:
-        selected_mirror = mirrors[mirrors["default"]]
+        selected_mirror = mirrors[mirrors["default"]]  # type: ignore
 
     try:
         description = get_census_version_description(census_version)  # raises
@@ -197,7 +202,13 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         's3_region': 'us-west-2'}
     """
     description = get_census_version_description(census_version)  # raises
-    census = _open_soma(description["soma"])
+
+    # For h5ads, it makes sense to use the default mirror, since the artifacts themselves won't be mirrored
+    mirrors = get_census_mirrors()
+    selected_mirror: CensusMirror = mirrors[mirrors["default"]]  # type: ignore
+    census_locator = _resolve_census_locator(description["soma"], selected_mirror)
+
+    census = _open_soma(census_locator)
     dataset = census["census_info"]["datasets"].read(value_filter=f"dataset_id == '{dataset_id}'").concat().to_pandas()
     if len(dataset) == 0:
         raise KeyError("Unknown dataset_id")

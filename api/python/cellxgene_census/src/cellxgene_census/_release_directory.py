@@ -13,6 +13,8 @@ from typing_extensions import TypedDict
 
 from ._util import _uri_join
 
+SUPPORTED_PROVIDERS = ["S3", "file"]
+
 """
 The following types describe the expected directory of Census builds, used
 to bootstrap all data location requests.
@@ -42,13 +44,22 @@ CensusMirrorName = str  # name of the mirror
 CensusMirror = TypedDict(
     "CensusMirror",
     {
-        "protocol": str,  # protocol of the mirror. Only S3 is supported.
+        "provider": str,  # provider of the mirror. Only S3 is supported in this version.
         "bucket": str,  # name of the bucket or resource
-        "region": str,  # region of the bucket or resource
+        "region": Optional[str],  # region of the bucket or resource
     },
 )
 
 CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
+
+ResolvedCensusLocator = TypedDict(
+    "ResolvedCensusLocator",
+    {
+        "uri": str,  # resource URI (absolute)
+        "region": Optional[str],  # if an S3 URI, has optional region
+        "provider": str,  # Provider
+    },
+)
 
 
 # URL for the default top-level directory of all public data
@@ -157,10 +168,23 @@ def get_census_mirrors() -> CensusMirrors:
     return cast(CensusMirrors, response.json())
 
 
-def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> CensusLocator:
-    if "relative_uri" in locator:
+def _assert_mirror_supported(mirror: CensusMirror) -> None:
+    """
+    Verifies if the mirror is supported by this version of the census.
+    This method provides a proper error message in case an old version of the census
+    tries to connect to an unsupported mirror.
+    """
+    if mirror["provider"] not in SUPPORTED_PROVIDERS:
+        raise ValueError(f"Unsupported mirror provider: {mirror['provider']}. Try upgrading the census package.")
+
+
+def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> ResolvedCensusLocator:
+    _assert_mirror_supported(mirror)
+
+    if locator.get("relative_uri"):
         uri = _uri_join(f"s3://{mirror['bucket']}/", locator["relative_uri"])
+        region = mirror["region"]
     else:
         uri = locator["uri"]
-    region = mirror.get("region") or locator.get("s3_region")
-    return CensusLocator(uri=uri, s3_region=region)
+        region = locator.get("s3_region")
+    return ResolvedCensusLocator(uri=uri, region=region, provider=mirror["provider"])

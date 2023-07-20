@@ -18,7 +18,7 @@ from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_UR
 # Remove once the mirror.json route is released.
 mirrors_json = {
     "default": "private",
-    "private": {"protocol": "S3", "bucket": "cellxgene-data-public", "region": "us-west-2"},
+    "private": {"provider": "S3", "bucket": "cellxgene-data-public", "region": "us-west-2"},
 }
 
 
@@ -112,8 +112,8 @@ def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
 def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     mock_mirrors = {
         "default": "test-mirror",
-        "test-mirror": {"protocol": "S3", "bucket": "mirror-bucket-1", "region": "region-1"},
-        "test-mirror-2": {"protocol": "S3", "bucket": "mirror-bucket-2", "region": "region-2"},
+        "test-mirror": {"provider": "S3", "bucket": "mirror-bucket-1", "region": "region-1"},
+        "test-mirror-2": {"provider": "S3", "bucket": "mirror-bucket-2", "region": "region-2"},
     }
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
@@ -141,14 +141,14 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma()
         m.assert_called_once_with(
-            {"uri": "s3://mirror-bucket-1/cell-census/2022-11-01/soma/", "s3_region": "region-1"}, None
+            {"uri": "s3://mirror-bucket-1/cell-census/2022-11-01/soma/", "region": "region-1", "provider": "S3"}, None
         )
 
     # Verify that the correct mirror is used if a mirror parameter is specified
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma(mirror="test-mirror-2")
         m.assert_called_once_with(
-            {"uri": "s3://mirror-bucket-2/cell-census/2022-11-01/soma/", "s3_region": "region-2"}, None
+            {"uri": "s3://mirror-bucket-2/cell-census/2022-11-01/soma/", "region": "region-2", "provider": "S3"}, None
         )
 
     # Verify that an error is raised if a non existing mirror is specified
@@ -158,6 +158,20 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
             match=re.escape("Mirror not found."),
         ):
             cellxgene_census.open_soma(mirror="bogus-mirror")
+
+
+def test_open_soma_rejects_non_s3_mirror(requests_mock: rm.Mocker) -> None:
+    mock_mirrors = {
+        "default": "test-mirror",
+        "test-mirror": {"provider": "GCP", "bucket": "mirror-bucket-1", "region": "region-1"},
+    }
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
+
+    with pytest.raises(
+        ValueError, match=re.escape("Unsupported mirror provider: GCP. Try upgrading the census package.")
+    ):
+        cellxgene_census.open_soma(census_version="latest")
 
 
 def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) -> None:
@@ -187,7 +201,12 @@ def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) 
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma(census_version="stable")
         m.assert_called_once_with(
-            {"uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/", "s3_region": "us-west-2"}, None
+            {
+                "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/",
+                "region": "us-west-2",
+                "provider": "S3",
+            },
+            None,
         )
 
 
@@ -216,7 +235,8 @@ def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma(census_version="stable")
         m.assert_called_once_with(
-            {"uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/", "s3_region": "us-west-2"}, None
+            {"uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/", "region": "us-west-2", "provider": "S3"},
+            None,
         )
 
 
@@ -245,7 +265,8 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma()
         m.assert_called_once_with(
-            {"uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/", "s3_region": "us-west-2"}, None
+            {"uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/", "region": "us-west-2", "provider": "S3"},
+            None,
         )
 
 
@@ -265,7 +286,9 @@ def test_get_source_h5ad_uri(requests_mock: rm.Mocker) -> None:
         assert locator["uri"].endswith(a_dataset.dataset_h5ad_path)
 
 
-def test_get_source_h5ad_uri_errors() -> None:
+def test_get_source_h5ad_uri_errors(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mirrors_json)
     with pytest.raises(KeyError):
         cellxgene_census.get_source_h5ad_uri(dataset_id="no/such/id")
 
