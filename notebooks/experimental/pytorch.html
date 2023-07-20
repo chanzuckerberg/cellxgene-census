@@ -69,20 +69,20 @@
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
                     </span>
                     <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
                     </span>
                     <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
                     </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>    
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
                   </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
@@ -105,7 +105,7 @@
                 
                 
                 <div class="version">
-                    1.3.0
+                    1.3.1
                 </div>
                 
             
@@ -202,7 +202,7 @@
 <h2>Open the Census<a class="headerlink" href="#Open-the-Census" title="Permalink to this heading">¶</a></h2>
 <p>First, obtain a handle to the Census data, in the usual manner:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
@@ -224,7 +224,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <h2>Create a DataLoader<a class="headerlink" href="#Create-a-DataLoader" title="Permalink to this heading">¶</a></h2>
 <p>To train a model in PyTorch using this <code class="docutils literal notranslate"><span class="pre">census</span></code> data object, first instantiate an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> as follows:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census.experimental.ml</span> <span class="k">as</span> <span class="nn">census_ml</span>
@@ -252,7 +252,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <p>(Note: PyTorch also provides <code class="docutils literal notranslate"><span class="pre">DataSet</span></code> as a legacy interface for wrapping and accessing training data sources, but a <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code> can be used interchangeably.)</p>
 <p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span>
@@ -260,7 +260,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -272,7 +272,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <h3>Splitting the dataset<a class="headerlink" href="#Splitting-the-dataset" title="Permalink to this heading">¶</a></h3>
 <p>You may split the overall dataset into the typical training, validation, and test sets by using the PyTorch <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.RandomSplitter.html#torchdata.datapipes.iter.RandomSplitter">RandomSplitter</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Using PyTorch’s functional form for chaining <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>s, this is done as follows:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_datapipe</span><span class="p">,</span> <span class="n">validation_datapipe</span><span class="p">,</span> <span class="n">test_datapipe</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span>
@@ -286,7 +286,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <h3>Shuffling the training dataset<a class="headerlink" href="#Shuffling-the-training-dataset" title="Permalink to this heading">¶</a></h3>
 <p>Commonly, you will want to randomize the ordering of the training data for each training epoch. You can use PyTorch <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.Shuffler.html">Shuffler</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>, chaining it to the earlier <code class="docutils literal notranslate"><span class="pre">experiment_dataloader</span></code> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Again, using PyTorch’s functional form for chaining the <code class="docutils literal notranslate"><span class="pre">Datapipe</span></code>s, we have:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shuffled_train_datapipe</span> <span class="o">=</span> <span class="n">train_datapipe</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
@@ -300,7 +300,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <h3>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading">¶</a></h3>
 <p>With the full set of DataPipe operations chained together, we can now instantiate a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> on the training data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">shuffled_train_datapipe</span><span class="p">)</span>
@@ -314,7 +314,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <h2>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading">¶</a></h2>
 <p>With the training data retrieval code now in place, we can move on to defining a simple logistic regression model, using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.nn.Linear</span></code> class:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -334,7 +334,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 </div>
 <p>Next, we define a function to train the model for a single epoch:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
@@ -347,7 +347,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
         <span class="n">X_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="o">=</span> <span class="n">batch</span>
 
-        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
         <span class="c1"># Perform prediction</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
@@ -404,13 +404,13 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([1, 1, 3, ..., 2, 1, 4])
 </pre></div>
 </div>
-<p>Note that cell type values are integer-encoded values, which can be decoded using <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders()</span></code> (more on this below).</p>
+<p>Note that cell type values are integer-encoded values, which can be decoded using <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders</span></code> (more on this below).</p>
 </section>
 <section id="Train-the-model">
 <h2>Train the model<a class="headerlink" href="#Train-the-model" title="Permalink to this heading">¶</a></h2>
 <p>Finally, we are ready to train the model. Here we instantiate the model, a loss function, and an optimization method and then iterate through the desired number of training epochs. Note how the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> is passed into <code class="docutils literal notranslate"><span class="pre">train_epoch</span></code>, where for each epoch it will provide a new iterator through the training dataset.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">RANDOM_SEED</span> <span class="o">=</span> <span class="mi">12345</span>
@@ -423,7 +423,7 @@ avoiding having to load the entire training dataset into memory at once.</p>
 <span class="n">input_dim</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="c1"># The size of the output dimension is the number of distinct cell_type values</span>
-<span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">()[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
+<span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
 <span class="n">output_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
@@ -441,11 +441,11 @@ avoiding having to load the entire training dataset into memory at once.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 1: Train Loss: 0.1156322 Accuracy 0.4494
-Epoch 2: Train Loss: 0.1095988 Accuracy 0.7357
-Epoch 3: Train Loss: 0.1089615 Accuracy 0.7300
-Epoch 4: Train Loss: 0.1080885 Accuracy 0.7275
-Epoch 5: Train Loss: 0.1101440 Accuracy 0.4220
+Epoch 1: Train Loss: 0.1156352 Accuracy 0.4472
+Epoch 2: Train Loss: 0.1096967 Accuracy 0.7261
+Epoch 3: Train Loss: 0.1082206 Accuracy 0.7729
+Epoch 4: Train Loss: 0.1071653 Accuracy 0.8268
+Epoch 5: Train Loss: 0.1067613 Accuracy 0.8481
 </pre></div></div>
 </div>
 </section>
@@ -453,7 +453,7 @@ Epoch 5: Train Loss: 0.1101440 Accuracy 0.4220
 <h2>Make predictions with the model<a class="headerlink" href="#Make-predictions-with-the-model" title="Permalink to this heading">¶</a></h2>
 <p>To make predictions with the model, we first create a new <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> using the <code class="docutils literal notranslate"><span class="pre">test_datapipe</span></code>, which provides the “test” split of the original dataset. For this example, we will only make predictions on a single batch of data from the test split.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">test_datapipe</span><span class="p">)</span>
@@ -464,12 +464,12 @@ Epoch 5: Train Loss: 0.1101440 Accuracy 0.4220
 </div>
 <p>Next, we invoke the model on the <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> input data and extract the predictions:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
-<span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_batch</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
 
 <span class="n">probabilities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
@@ -479,21 +479,21 @@ Epoch 5: Train Loss: 0.1101440 Accuracy 0.4220
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+tensor([5, 1, 5, 5, 5, 5, 5, 5, 1, 5, 5, 1, 5, 5, 1, 1])
 </pre></div></div>
 </div>
-<p>The predictions are returned as the encoded values of <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> label. To recover the original cell type labels as strings, we decode using the <code class="docutils literal notranslate"><span class="pre">cell_type_encoder</span></code>. Here, we obtain the encoder from <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders()</span></code>.</p>
+<p>The predictions are returned as the encoded values of <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> label. To recover the original cell type labels as strings, we decode using the encoders from <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders</span></code>.</p>
 <p>At inference time, if the model inputs are not obtained via an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, one could pickle the encoder at training time and save it along with the model. Then, at inference time it can be unpickled and used as shown below.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">()[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
 
 <span class="n">predicted_cell_types</span> <span class="o">=</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
 
@@ -502,21 +502,22 @@ tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;],
+array([&#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
+       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
+       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;],
       dtype=object)
 </pre></div></div>
 </div>
 <p>Finally, we create a Pandas DataFrame to examine the predictions:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -531,7 +532,7 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -561,7 +562,7 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
     <tr>
       <th>0</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>1</th>
@@ -571,32 +572,32 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
     <tr>
       <th>2</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>3</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>4</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>5</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>6</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>7</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>8</th>
@@ -606,12 +607,12 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
     <tr>
       <th>9</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>10</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>11</th>
@@ -621,12 +622,12 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
     <tr>
       <th>12</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>13</th>
       <td>epithelial cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>14</th>
@@ -642,7 +643,7 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
 </table>
 </div></div>
 </div>
-<p>As we can see, the predictions are poor. It is as left as an excercise to the reader to find a better performing model.</p>
+<p>As we can see, the predictions are poor. It is as left as an exercise to the reader to find a better performing model.</p>
 </section>
 </section>
 
@@ -673,6 +674,26 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- Hubspot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
@@ -680,6 +701,47 @@ array([&#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;ba
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
+  </script>
+
+  <script>
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
   </script>
 
   

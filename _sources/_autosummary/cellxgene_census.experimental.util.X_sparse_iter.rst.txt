@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.util.X\_sparse\_iter
+===================================================
+
+.. currentmodule:: cellxgene_census.experimental.util
+
+.. autofunction:: X_sparse_iter
