@@ -231,27 +231,30 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         for col, enc in self.encoders.items():
             obs_encoded[col] = enc.transform(obs[col])
 
+        # return empty tensors, for memory utilization testing
+        if bool(os.getenv("PYTORCH_DEBUG_EMPTY_TENSORS", False)):
+            return torch.empty((0, 1)), torch.empty((0, 1))
+
         # `to_numpy()` avoids copying the numpy array data
-        # obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
+        obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
-        # if not self.return_sparse_X:
-        #     X_tensor = torch.from_numpy(X.todense())
-        # else:
-        #     coo = X.tocoo()
+        if not self.return_sparse_X:
+            X_tensor = torch.from_numpy(X.todense())
+        else:
+            coo = X.tocoo()
 
-        #     X_tensor = torch.sparse_coo_tensor(
-        #         # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
-        #         indices=torch.from_numpy(np.array([coo.row, coo.col])),
-        #         values=coo.data,
-        #         size=coo.shape,
-        #     )
+            X_tensor = torch.sparse_coo_tensor(
+                # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
+                indices=torch.from_numpy(np.array([coo.row, coo.col])),
+                values=coo.data,
+                size=coo.shape,
+            )
 
-        # if self.batch_size == 1:
-        #     X_tensor = X_tensor[0]
-        #     obs_tensor = obs_tensor[0]
+        if self.batch_size == 1:
+            X_tensor = X_tensor[0]
+            obs_tensor = obs_tensor[0]
 
-        # return X_tensor, obs_tensor
-        return torch.empty((0, 1)), torch.empty((0, 1))
+        return X_tensor, obs_tensor
 
     def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
         """Reads a torch-size batch of data from the current SOMA batch, returning a torch-size batch whose size may
@@ -259,8 +262,11 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         SOMA batch are fewer than the requested ``batch_size``."""
 
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
-            self.soma_batch = None
-            run_gc()
+            # perform GC, for memory utilization testing
+            if bool(os.getenv("PYTORCH_DEBUG_GC", False)):
+                self.soma_batch = None
+                run_gc()
+
             self.soma_batch: _ObsAndXSOMABatch = next(self.soma_batch_iter)
             self.stats += self.soma_batch.stats
             self.i = 0
