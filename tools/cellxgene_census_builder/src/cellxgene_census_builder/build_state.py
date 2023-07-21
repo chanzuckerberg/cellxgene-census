@@ -35,8 +35,10 @@ CENSUS_CONFIG_DEFAULTS = {
     "logs_S3_path": "s3://cellxgene-data-public-logs/builder",
     "build_tag": datetime.now().astimezone().date().isoformat(),
     #
-    # Default multi-process. Memory scaling based on empirical tests.
+    # Default mode is multi-process.
     "multi_process": True,
+    # The memory budget used to determine appropriate parallelism in many steps of build.
+    # Only set to a smaller number if you want to not use all available RAM.
     "memory_budget": int(psutil.virtual_memory().total),
     #
     # Host minimum resource validation

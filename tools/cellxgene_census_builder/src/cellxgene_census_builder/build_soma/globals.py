@@ -79,7 +79,7 @@ CXG_OBS_TERM_COLUMNS = {
     "tissue_ontology_term_id": pa.large_string(),
 }
 CENSUS_OBS_STATS_COLUMNS = {
-    # Columns computed during the census build
+    # Columns computed during the Census build and written to the Census obs dataframe.
     "raw_sum": pa.float32(),
     "nnz": pa.int64(),
     "raw_mean_nnz": pa.float32(),
@@ -175,10 +175,12 @@ CENSUS_OBS_PLATFORM_CONFIG = {
 }
 
 CENSUS_VAR_STATS_COLUMNS = {
+    # Columns computed during the Census build and written to the Census var dataframe.
     "nnz": pa.int64(),
     "n_measured_obs": pa.int64(),
 }
 CENSUS_VAR_TERM_COLUMNS = {
+    # Columns written to the Census var dataframe.
     "soma_joinid": pa.int64(),
     "feature_id": pa.large_string(),
     "feature_name": pa.large_string(),

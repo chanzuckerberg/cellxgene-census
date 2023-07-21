@@ -17,6 +17,7 @@ from typing import (
     Mapping,
     Optional,
     ParamSpec,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -137,7 +138,7 @@ class _WorkItem(Generic[_T]):
     kwargs: Mapping[str, Any]
 
 
-_MightBeWork = Union[bool, _WorkItem[Any]]
+_MightBeWork = Tuple[bool, Optional[_WorkItem[Any]]]
 _SchedulerMethod = Literal["best-fit", "first-fit"]
 
 
@@ -174,70 +175,61 @@ class _Scheduler(threading.Thread):
             self._condition.notify()
         return f
 
-    def _get_work(self, method: _SchedulerMethod = "best-fit") -> _MightBeWork:
+    def _get_work(self) -> _MightBeWork:
         """
         Get next work item to schedule.
 
         IMPORTANT: caller MUST own scheduler _condition lock to call this.
 
-        Return values:
-        * True - shutdown requested
-        * False - no work, please wait
-        * _WorkItem - some work to schedule
-
-        TODO: if it becomes useful, expose scheduler algo at top-level.
+        Return value is a tuple, where:
+        * First item is a bool indicating that _either_ a shutdown request or work item
+          needs to be handled. If True, there is either work or a shutdown request.
+        * second element is an optional work item. Will be None in case of shutdown
+          request.
         """
 
-        def _get_best_work(method: _SchedulerMethod) -> int | None:
+        def _get_next_work() -> int | None:
             """Return index of "best" work item to scheudle, or None if work is unavailable."""
-            if method == "first-fit":
-                # first fit: return first work item that fits in the available resources
-                for i in range(len(self._pending_work)):
-                    if self._pending_work[i].resources + self.resources_in_use <= self.max_resources:
-                        return i
-                return None
-            elif method == "best-fit":
-                # Best fit: return the largest resource consumer that fits in available space
-                max_available_resources = self.max_resources - self.resources_in_use
-                candidate_work = filter(
-                    lambda v: v[1].resources <= max_available_resources, enumerate(self._pending_work)
-                )
-                return max(candidate_work, key=lambda v: v[1].resources, default=(None,))[0]
-            else:
-                raise NotImplementedError("Unknown scheduler method")
+
+            # Best fit: return the largest resource consumer that fits in available space
+            max_available_resources = self.max_resources - self.resources_in_use
+            candidate_work = filter(lambda v: v[1].resources <= max_available_resources, enumerate(self._pending_work))
+            return max(candidate_work, key=lambda v: v[1].resources, default=(None,))[0]
 
         if self.shutdown_requested:
-            return True
+            return (True, None)
 
         if len(self._pending_work):
-            if (i := _get_best_work(method)) is not None:
+            if (i := _get_next_work()) is not None:
                 # pop ith item from the deque
                 self._pending_work.rotate(-i)
                 wi = self._pending_work.popleft()
                 self._pending_work.rotate(i)
-                return wi
+                return (True, wi)
 
             if self.resources_in_use == 0:
                 # We always want at least one job, regardless of cost of the work item.
-                return self._pending_work.popleft()
+                return (True, self._pending_work.popleft())
 
-        return False  # no work for you
+        return (False, None)  # no work for you
 
     def run(self) -> None:
         while True:
             with self._condition:
                 work: _MightBeWork
-                while not (work := self._get_work()):
+                while not (work := self._get_work())[0]:
                     self._condition.wait()
 
                 if self.shutdown_requested:
-                    assert work is True
+                    assert work[0] is True and work[1] is None
                     self._debug_msg("shutdown request received by scheduler")
                     return
 
-                assert isinstance(work, _WorkItem)
-                self._schedule_work(work)
-                del work  # don't hold onto references
+                assert work[1] is not None
+                work_item: _WorkItem[Any] = work[1]
+                assert isinstance(work_item, _WorkItem)
+                self._schedule_work(work_item)
+                del work, work_item  # don't hold onto references
 
     @classmethod
     def _work_item_done(
@@ -256,7 +248,7 @@ class _Scheduler(threading.Thread):
         """must hold lock"""
         executor = self.executor_ref()
         if executor is None:
-            # can happen if the ResourcePoolExeuctor was collected
+            # can happen if the ResourcePoolExecutor was collected
             return
         self._debug_msg(f"adding work to pool {id(work):#x} [resources={work.resources}]")
         self.resources_in_use += work.resources
@@ -318,8 +310,6 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         f = Future[_T]()
         self.scheduler.submit(_WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs))
         return f
-
-    # TODO: implement map
 
     def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
         self.scheduler.shutdown()

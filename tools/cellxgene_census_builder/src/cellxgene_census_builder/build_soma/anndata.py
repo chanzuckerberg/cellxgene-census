@@ -67,6 +67,7 @@ def open_anndata(
         # Census, following the CXG 3 conventions: use raw if present, else X.
         #
         if ad.raw is not None:
+            X = ad.raw.X
             missing_from_var = ad.raw.var.index.difference(ad.var.index)
             if len(missing_from_var) > 0:
                 raw_var = ad.raw.var.loc[missing_from_var].copy()
@@ -74,16 +75,15 @@ def open_anndata(
                 # TODO - these should be looked up in the ontology
                 raw_var["feature_name"] = "unknown"
                 raw_var["feature_reference"] = "unknown"
-                new_var = pd.concat([ad.var, raw_var])
+                var = pd.concat([ad.var, raw_var])
             else:
-                new_var = ad.raw.var
-            ad = anndata.AnnData(
-                X=ad.raw.X if need_X else None, obs=ad.obs, var=new_var, raw=None, uns=ad.uns, dtype=np.float32
-            )
+                var = ad.raw.var
+
         else:
-            ad = anndata.AnnData(
-                X=ad.X if need_X else None, obs=ad.obs, var=ad.var, raw=None, uns=ad.uns, dtype=np.float32
-            )
+            X = ad.X
+            var = ad.var
+
+        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns, dtype=np.float32)
 
         assert not need_X or ad.X.shape == (len(ad.obs), len(ad.var))
         # TODO: In principle, we could look up missing feature_name, but for now, just assert they exist

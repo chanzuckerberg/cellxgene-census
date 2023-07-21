@@ -244,7 +244,7 @@ def build_step5_save_axis_and_summary_info(
     filtered_datasets: List[Dataset],
     build_tag: str,
 ) -> None:
-    logging.info("Build step 5 - Populate axis and summary info - started")
+    logging.info("Build step 5 - Save axis and summary info - started")
 
     for eb in reopen_experiment_builders(experiment_builders):
         eb.write_obs_dataframe()
@@ -255,13 +255,13 @@ def build_step5_save_axis_and_summary_info(
         create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
         create_census_summary(census_info, experiment_builders, build_tag)
 
-    logging.info("Build step 5 - Populate axis and summary info - finished")
+    logging.info("Build step 5 - Save axis and summary info - finished")
 
 
 def build_step6_save_derived_data(
     root_collection: soma.Collection, experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
 ) -> None:
-    logging.info("Build step 6 - creating derived objects - started")
+    logging.info("Build step 6 - Creating derived objects - started")
 
     for eb in reopen_experiment_builders(experiment_builders):
         eb.write_X_normalized(args)
@@ -270,5 +270,5 @@ def build_step6_save_derived_data(
         # feature presence matrix building into this step, and build from
         # X['raw'] rather than building from source H5AD.
 
-    logging.info("Build step 6 - creating derived objects - finished")
+    logging.info("Build step 6 - Creating derived objects - finished")
     return

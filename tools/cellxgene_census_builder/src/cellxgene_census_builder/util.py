@@ -109,7 +109,7 @@ class ProcessResourceGetter:
 
     @property
     def majflt(self) -> tuple[int, int]:
-        """Return the major faults and cummulative major faults (includes children) for current process."""
+        """Return the major faults and cumulative major faults (includes children) for current process."""
         if platform.system() != "Linux":
             return (-1, -1)
 
@@ -137,7 +137,11 @@ def log_process_resource_status(preface: str = "Resource use:", level: int = log
 
 
 def cpu_count() -> int:
-    """Sign, os.cpu_count() returns None if "undetermined" number of CPUs"""
+    """
+    os.cpu_count() returns None if "undetermined" number of CPUs.
+    This function exists to always return a default of `1` when
+    os.cpu_count returns None.
+    """
     cpu_count = os.cpu_count()
     if os.cpu_count() is None:
         return 1
