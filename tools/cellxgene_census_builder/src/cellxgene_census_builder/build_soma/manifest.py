@@ -101,8 +101,9 @@ def load_manifest_from_CxG() -> List[Dataset]:
 def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
     blocked_dataset_ids: Set[str] = set()
     if dataset_id_blocklist_uri is None:
-        logging.info("No dataset blocklist specified - skipping")
-        return blocked_dataset_ids
+        msg = "No dataset blocklist specified - builder is misconfigured"
+        logging.error(msg)
+        raise ValueError(msg)
 
     with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
         for line in fp:
@@ -124,8 +125,8 @@ def apply_blocklist(datasets: List[Dataset], dataset_id_blocklist_uri: str | Non
 
     except FileNotFoundError:
         # Blocklist may not exist, so just skip the filtering in this case
-        logging.info("No dataset blocklist found - skipping")
-        return datasets
+        logging.error("No dataset blocklist found")
+        raise
 
 
 def load_manifest(
@@ -134,7 +135,7 @@ def load_manifest(
 ) -> List[Dataset]:
     """
     Load dataset manifest from the file pointer if provided, else bootstrap
-    the from the CELLxGENE REST API.  Apply the blocklist if provided.
+    from the CELLxGENE REST API.  Apply the blocklist if provided.
     """
     if manifest_fp is not None:
         if isinstance(manifest_fp, str):
