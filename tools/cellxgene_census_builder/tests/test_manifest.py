@@ -39,7 +39,7 @@ def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str) -> None:
 
 def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str) -> None:
     blocklist_fname = f"{tmp_path}/blocklist.txt"
-    blocklist_content = """dataset_id_1\n"""
+    blocklist_content = """# a comment\n\ndataset_id_1\n\n"""
     with open(blocklist_fname, "w+") as f:
         f.writelines(blocklist_content.strip())
 
