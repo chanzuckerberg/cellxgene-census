@@ -21,34 +21,33 @@ def mean_variance(
     ddof: int = 1,
 ) -> pd.DataFrame:
     """
-    Calculate  mean and/or variance along the `obs` axis from query results. Calculations
+    Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations
     are done in an accumulative chunked fashion. For the mean and variance calculations,
     the total number of elements (N) is the corresponding dimension size:
-    for column-wise calculations (`axis = 0`) N is number of rows,
-    for row-wise calculations (`axis = 1`) N is number of columns.
+    for column-wise calculations (``axis = 0``) N is number of rows,
+    for row-wise calculations (``axis = 1``) N is number of columns.
 
     Args:
         query:
             A SOMA query, specifying the obs/var selection over which mean and variance are calculated.
 
         layer:
-            X layer used, e.g., `raw`
+            X layer used, e.g., ``raw``
 
         axis:
            Axis or axes along which the statistics are computed
 
         calculate_mean:
-            If `True it calculates mean, otherwise skips calculation
+            If ``True`` it calculates mean, otherwise skips calculation
 
         calculate_variance:
-            If `True it calculates variance, otherwise skips calculation
+            If ``True`` it calculates variance, otherwise skips calculation
 
         ddof:
-            "Delta Degrees of Freedom": the divisor used in the calculation for variance is N - ddof, where N represents the number of elements.
+            "Delta Degrees of Freedom": the divisor used in the calculation for variance is ``N - ddof``, where ``N`` represents the number of elements.
 
     Returns:
-        Pandas DataFrame indexed by the obs `soma_joinid` and with columns
-       `mean` (if `calculate_mean = True`), and `variance` (if `calculate_variance = True`)
+        Pandas DataFrame indexed by the ``soma_joinid`` and with columns ``mean`` (if ``calculate_mean = True``), and ``variance`` (if ``calculate_variance = True``)
 
     Lifecycle:
         experimental
