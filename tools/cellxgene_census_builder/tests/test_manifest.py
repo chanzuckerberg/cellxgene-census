@@ -51,8 +51,6 @@ def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str, empty
         f.writelines(blocklist_content.strip())
 
     manifest = load_manifest(manifest_csv, blocklist_fname)
-    print(manifest)
-    print(first_dataset_id)
     assert len(manifest) == 1
     assert not any(d.dataset_id == first_dataset_id for d in manifest)
 

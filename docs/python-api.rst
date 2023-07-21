@@ -60,6 +60,7 @@ Experimental: Processing
 
     cellxgene_census.experimental.pp.get_highly_variable_genes
     cellxgene_census.experimental.pp.highly_variable_genes
+    cellxgene_census.experimental.pp.mean_variance
     
 Experimental: Utility
 --------------------------------
