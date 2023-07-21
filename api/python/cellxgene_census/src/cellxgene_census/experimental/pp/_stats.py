@@ -22,7 +22,10 @@ def mean_variance(
 ) -> pd.DataFrame:
     """
     Calculate  mean and/or variance along the `obs` axis from query results. Calculations
-    are done in an accumulative chunked fashion.
+    are done in an accumulative chunked fashion. For the mean and variance calculations,
+    the total number of elements (N) is the corresponding dimension size:
+    for column-wise calculations (`axis = 0`) N is number of rows,
+    for row-wise calculations (`axis = 1`) N is number of columns.
 
     Args:
         query:
