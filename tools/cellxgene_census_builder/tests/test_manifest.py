@@ -38,13 +38,20 @@ def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str) -> None:
 
 
 def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str) -> None:
+    # grab first item from the manifest, and block it.
+    with open(manifest_csv) as f:
+        first_dataset_id = f.readline().split(',')[0].strip()
+
     blocklist_fname = f"{tmp_path}/blocklist.txt"
-    blocklist_content = """# a comment\n\ndataset_id_1\n\n"""
+    blocklist_content = f"# a comment\n\n{first_dataset_id}\n\n"
     with open(blocklist_fname, "w+") as f:
         f.writelines(blocklist_content.strip())
 
     manifest = load_manifest(manifest_csv, blocklist_fname)
+    print(manifest)
+    print(first_dataset_id)
     assert len(manifest) == 1
+    assert not any(d.dataset_id == first_dataset_id for d in manifest)
 
 
 def test_load_manifest_from_cxg() -> None:
