@@ -4,7 +4,7 @@ import pathlib
 import sys
 from datetime import datetime
 
-from ..build_state import CensusBuildArgs, CensusBuildConfig, CENSUS_CONFIG_DEFAULTS
+from ..build_state import CENSUS_CONFIG_DEFAULTS, CensusBuildArgs, CensusBuildConfig
 from ..util import log_process_resource_status, process_init
 from .build_soma import build
 from .validate_soma import validate
@@ -67,7 +67,11 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=True,
         help="Consolidate TileDB objects after build",
     )
-    build_parser.add_argument("--dataset_id_blocklist_uri", help="Dataset blocklist URI", default=CENSUS_CONFIG_DEFAULTS['dataset_id_blocklist_uri'])
+    build_parser.add_argument(
+        "--dataset_id_blocklist_uri",
+        help="Dataset blocklist URI",
+        default=CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"],
+    )
     # hidden option for testing by devs. Will process only the first 'n' datasets
     build_parser.add_argument("--test-first-n", type=int)
     # hidden option for testing by devs. Allow for WIP testing by devs.
