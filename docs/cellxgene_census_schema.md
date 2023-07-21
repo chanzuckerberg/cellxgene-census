@@ -864,17 +864,17 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   <tr>
     <td>raw_sum</td>
     <td>float32</td>
-    <td>For this observation, the sum of the count (raw) matrix values.</td>
+    <td>For this observation, the sum of the `X['raw']` counts (raw) matrix values.</td>
   </tr>
   <tr>
     <td>raw_mean_nnz</td>
     <td>float32</td>
-    <td>For this observation, the mean of the count (raw) matrix values.</td>
+    <td>For this observation, the mean of the `X['raw']` counts (raw) matrix values.</td>
   </tr>
   <tr>
     <td>raw_variance_nnz</td>
     <td>float32</td>
-    <td>For this observation, the variance of the counts (raw) matrix values.</td>
+    <td>For this observation, the variance of the `X['raw']` counts (raw) matrix values.</td>
   </tr>
 </tbody>
 </table>
