@@ -67,6 +67,7 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=True,
         help="Consolidate TileDB objects after build",
     )
+    build_parser.add_argument("--dataset_id_blocklist_uri", help="Dataset blocklist URI")
     # hidden option for testing by devs. Will process only the first 'n' datasets
     build_parser.add_argument("--test-first-n", type=int)
     # hidden option for testing by devs. Allow for WIP testing by devs.
