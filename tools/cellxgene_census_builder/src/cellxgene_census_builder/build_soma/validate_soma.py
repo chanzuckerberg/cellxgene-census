@@ -330,15 +330,15 @@ def _validate_X_obs_axis_stats(
     nnz = expected_X.getnnz(axis=1)
     assert np.array_equal(census_obs.nnz.to_numpy(), nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
-    # obs.raw_mean - mean of the explicitly stored values (zeros are _ignored_)
+    # obs.raw_mean_nnz - mean of the explicitly stored values (zeros are _ignored_)
     assert np.allclose(
-        census_obs.raw_mean.to_numpy(), raw_sum / nnz
-    ), f"{eb.name}:{dataset.dataset_id} obs.raw_mean incorrect."
+        census_obs.raw_mean_nnz.to_numpy(), raw_sum / nnz
+    ), f"{eb.name}:{dataset.dataset_id} obs.raw_mean_nnz incorrect."
 
-    # obs.raw_variance
+    # obs.raw_variance_nnz
     assert np.allclose(
-        census_obs.raw_variance.to_numpy(), var(expected_X, axis=1, ddof=1), rtol=1e-03, atol=1e-05
-    ), f"{eb.name}:{dataset.dataset_id} obs.raw_variance incorrect."
+        census_obs.raw_variance_nnz.to_numpy(), var(expected_X, axis=1, ddof=1), rtol=1e-03, atol=1e-05
+    ), f"{eb.name}:{dataset.dataset_id} obs.raw_variance_nnz incorrect."
 
     # obs.n_measured_vars
     assert (

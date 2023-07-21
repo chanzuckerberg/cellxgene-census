@@ -73,7 +73,7 @@ class PresenceResult:
 
 @attrs.define
 class AxisStats:
-    # obs/var stats computed (example: raw_mean)
+    # obs/var stats computed (example: raw_mean_nnz)
     eb_name: str
     obs_stats: pd.DataFrame
     var_stats: pd.DataFrame

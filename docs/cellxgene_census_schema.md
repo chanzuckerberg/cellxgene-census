@@ -867,12 +867,12 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
     <td>For this observation, the sum of the count (raw) matrix values.</td>
   </tr>
   <tr>
-    <td>raw_mean</td>
+    <td>raw_mean_nnz</td>
     <td>float32</td>
     <td>For this observation, the mean of the count (raw) matrix values.</td>
   </tr>
   <tr>
-    <td>raw_variance</td>
+    <td>raw_variance_nnz</td>
     <td>float32</td>
     <td>For this observation, the variance of the counts (raw) matrix values.</td>
   </tr>
@@ -885,7 +885,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 ### Version 1.1.0
 * Add `X["normalized"]` layer
 * Add `nnz` and `n_measured_obs` columsn to `ms["RNA"].var` dataframe
-* Add `nnz`, `n_measured_vars`, `raw_sum`, `raw_mean` and `raw_variance` columns to `obs` dataframe
+* Add `nnz`, `n_measured_vars`, `raw_sum`, `raw_mean_nnz` and `raw_variance_nnz` columns to `obs` dataframe
 
 ### Version 1.0.0
 * Updates text to reflect official name: CZ CELLxGENE Discover Census.

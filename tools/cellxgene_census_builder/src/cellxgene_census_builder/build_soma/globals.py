@@ -82,8 +82,8 @@ CENSUS_OBS_STATS_COLUMNS = {
     # Columns computed during the census build
     "raw_sum": pa.float32(),
     "nnz": pa.int64(),
-    "raw_mean": pa.float32(),
-    "raw_variance": pa.float32(),
+    "raw_mean_nnz": pa.float32(),
+    "raw_variance_nnz": pa.float32(),
     "n_measured_vars": pa.int64(),
 }
 CENSUS_OBS_TERM_COLUMNS = {
@@ -132,7 +132,7 @@ _RepetativeStringLabelObs = [
     "tissue_general",
     "tissue_general_ontology_term_id",
 ]
-_NumericObs = ["raw_sum", "nnz", "raw_mean", "raw_variance", "n_measured_vars"]
+_NumericObs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {

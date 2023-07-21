@@ -19,16 +19,16 @@ def get_obs_stats(
 
     raw_sum = raw_X.sum(axis=1).A1
     nnz = raw_X.getnnz(axis=1)
-    raw_mean = raw_sum / nnz
-    raw_variance = _var(raw_X, axis=1, ddof=1)
+    raw_mean_nnz = raw_sum / nnz
+    raw_variance_nnz = _var(raw_X, axis=1, ddof=1)
     n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0) > 0).sum(), dtype=np.int64)
 
     return pd.DataFrame(
         data={
             "raw_sum": raw_sum.astype(CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()),
             "nnz": nnz.astype(CENSUS_OBS_STATS_COLUMNS["nnz"].to_pandas_dtype()),
-            "raw_mean": raw_mean.astype(CENSUS_OBS_STATS_COLUMNS["raw_mean"].to_pandas_dtype()),
-            "raw_variance": raw_variance.astype(CENSUS_OBS_STATS_COLUMNS["raw_variance"].to_pandas_dtype()),
+            "raw_mean_nnz": raw_mean_nnz.astype(CENSUS_OBS_STATS_COLUMNS["raw_mean_nnz"].to_pandas_dtype()),
+            "raw_variance_nnz": raw_variance_nnz.astype(CENSUS_OBS_STATS_COLUMNS["raw_variance_nnz"].to_pandas_dtype()),
             "n_measured_vars": n_measured_vars.astype(CENSUS_OBS_STATS_COLUMNS["n_measured_vars"].to_pandas_dtype()),
         }
     )
