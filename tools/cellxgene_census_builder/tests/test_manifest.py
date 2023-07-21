@@ -5,11 +5,11 @@ import pytest
 from cellxgene_census_builder.build_soma.manifest import load_manifest
 
 
-def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str) -> None:
+def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
     """
     If specified a parameter, `load_manifest` should load the dataset manifest from such file.
     """
-    manifest = load_manifest(manifest_csv)
+    manifest = load_manifest(manifest_csv, empty_blocklist)
     assert len(manifest) == 2
     assert manifest[0].dataset_id == "dataset_id_1"
     assert manifest[1].dataset_id == "dataset_id_2"
@@ -17,7 +17,7 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str) -> N
     assert manifest[1].dataset_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
 
     with open(manifest_csv) as fp:
-        manifest = load_manifest(fp)
+        manifest = load_manifest(fp, empty_blocklist)
         assert len(manifest) == 2
         assert manifest[0].dataset_id == "dataset_id_1"
         assert manifest[1].dataset_id == "dataset_id_2"
@@ -25,19 +25,19 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str) -> N
         assert manifest[1].dataset_asset_h5ad_uri == f"{tmp_path}/data/h5ads/dataset_id_2.h5ad"
 
 
-def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str) -> None:
+def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str, empty_blocklist: str) -> None:
     """
     `load_manifest` should not include duplicate datasets from the manifest
     """
-    manifest = load_manifest(manifest_csv_with_duplicates)
+    manifest = load_manifest(manifest_csv_with_duplicates, empty_blocklist)
     assert len(manifest) == 2
 
     with open(manifest_csv_with_duplicates) as fp:
-        manifest = load_manifest(fp)
+        manifest = load_manifest(fp, empty_blocklist)
         assert len(manifest) == 2
 
 
-def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str) -> None:
+def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
     # grab first item from the manifest, and block it.
     with open(manifest_csv) as f:
         first_dataset_id = f.readline().split(",")[0].strip()
@@ -54,7 +54,7 @@ def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str) -> No
     assert not any(d.dataset_id == first_dataset_id for d in manifest)
 
 
-def test_load_manifest_from_cxg() -> None:
+def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
     """
     If no parameters are specified, `load_manifest` should load the dataset list from Discover API.
     """
@@ -97,7 +97,7 @@ def test_load_manifest_from_cxg() -> None:
             },
         ]
 
-        manifest = load_manifest(None)
+        manifest = load_manifest(None, empty_blocklist)
         assert len(manifest) == 2
         assert manifest[0].dataset_id == "dataset_id_1"
         assert manifest[1].dataset_id == "dataset_id_2"
@@ -107,7 +107,7 @@ def test_load_manifest_from_cxg() -> None:
         assert manifest[1].asset_h5ad_filesize == 456
 
 
-def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema() -> None:
+def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(empty_blocklist: str) -> None:
     """
     `load_manifest` should exclude datasets that do not have a current schema version.
     """
@@ -146,10 +146,10 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema() -> None:
         ]
 
         with pytest.raises(RuntimeError, match=r"unsupported schema version"):
-            load_manifest(None)
+            load_manifest(None, empty_blocklist)
 
 
-def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
+def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist: str) -> None:
     """
     `load_manifest` should raise error if it finds datasets without assets
     """
@@ -182,4 +182,4 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets() -> None:
         ]
 
         with pytest.raises(RuntimeError):
-            load_manifest(None)
+            load_manifest(None, empty_blocklist)
