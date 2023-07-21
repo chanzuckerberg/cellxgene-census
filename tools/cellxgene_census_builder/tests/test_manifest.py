@@ -40,7 +40,7 @@ def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str) -> None:
 def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str) -> None:
     # grab first item from the manifest, and block it.
     with open(manifest_csv) as f:
-        first_dataset_id = f.readline().split(',')[0].strip()
+        first_dataset_id = f.readline().split(",")[0].strip()
 
     blocklist_fname = f"{tmp_path}/blocklist.txt"
     blocklist_content = f"# a comment\n\n{first_dataset_id}\n\n"
