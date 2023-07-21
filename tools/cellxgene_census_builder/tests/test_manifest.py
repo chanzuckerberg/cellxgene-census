@@ -1,8 +1,11 @@
 import pathlib
+import uuid
 from unittest.mock import patch
 
+import fsspec
 import pytest
 from cellxgene_census_builder.build_soma.manifest import load_manifest
+from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
 
 
 def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
@@ -181,3 +184,29 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist
 
         with pytest.raises(RuntimeError):
             load_manifest(None, empty_blocklist)
+
+
+def test_blocklist_alive_and_well() -> None:
+    """
+    Perform three checks:
+    1. Block list is specified in the default configuration
+    2. The file exists at the specified location
+    3. The file "looks like" a block list
+    """
+
+    assert CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
+
+    dataset_id_blocklist_uri = CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
+
+    # test for existance by reading it. NOTE: if the file moves, this test will fail until
+    # the new file location is merged to main.
+    with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
+        for line in fp:
+            # each line must be a comment, blank or a UUID
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            # UUID() raises ValueError upon malformed UUID
+            # Equality check enforces formatting (i.e., dashes)
+            assert line == str(uuid.UUID(hex=line))
