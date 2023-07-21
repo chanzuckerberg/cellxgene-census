@@ -193,14 +193,15 @@ def test_blocklist_alive_and_well() -> None:
     Perform three checks:
     1. Block list is specified in the default configuration
     2. The file exists at the specified location
-    3. The file "looks like a block list
+    3. The file "looks like" a block list
     """
 
     assert CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
 
     dataset_id_blocklist_uri = CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
 
-    # test for existance by reading it
+    # test for existance by reading it. NOTE: if the file moves, this test will fail until
+    # the new file location is merged to main.
     with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
         for line in fp:
             # each line must be a comment, blank or a UUID
