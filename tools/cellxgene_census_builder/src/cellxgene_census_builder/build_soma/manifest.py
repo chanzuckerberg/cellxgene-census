@@ -100,7 +100,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
 
 def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
     blocked_dataset_ids: Set[str] = set()
-    if dataset_id_blocklist_uri is None:
+    if not dataset_id_blocklist_uri:
         msg = "No dataset blocklist specified - builder is misconfigured"
         logging.error(msg)
         raise ValueError(msg)
