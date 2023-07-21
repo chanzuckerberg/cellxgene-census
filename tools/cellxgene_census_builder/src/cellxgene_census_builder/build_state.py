@@ -48,6 +48,9 @@ CENSUS_CONFIG_DEFAULTS = {
     # Release clean up
     "release_cleanup_days": 32,  # Census builds older than this are deleted
     #
+    # Block list of dataset IDs
+    "dataset_id_blocklist_uri": "https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt",
+    #
     # For testing convenience only
     "manifest": None,
     "test_first_n": None,
