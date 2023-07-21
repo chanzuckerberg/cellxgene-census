@@ -2,7 +2,9 @@ import csv
 import io
 import logging
 import os.path
-from typing import List, Optional, Union
+from typing import List, Set
+
+import fsspec
 
 from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION_IMPORT
@@ -42,7 +44,7 @@ def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
     return datasets
 
 
-def null_to_empty_str(val: Union[None, str]) -> str:
+def null_to_empty_str(val: str | None) -> str:
     if val is None:
         return ""
     return val
@@ -96,10 +98,43 @@ def load_manifest_from_CxG() -> List[Dataset]:
     return response
 
 
-def load_manifest(manifest_fp: Optional[Union[str, io.TextIOBase]] = None) -> List[Dataset]:
+def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
+    blocked_dataset_ids: Set[str] = set()
+    if dataset_id_blocklist_uri is None:
+        logging.info("No dataset blocklist specified - skipping")
+        return blocked_dataset_ids
+
+    with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
+        for line in fp:
+            line = line.strip()
+            if len(line) == 0 or line.startswith("#"):
+                # strip blank lines and comments (hash is never in a UUID)
+                continue
+            blocked_dataset_ids.add(line)
+
+        logging.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
+
+    return blocked_dataset_ids
+
+
+def apply_blocklist(datasets: List[Dataset], dataset_id_blocklist_uri: str | None) -> List[Dataset]:
+    try:
+        blocked_dataset_ids = load_blocklist(dataset_id_blocklist_uri)
+        return list(filter(lambda d: d.dataset_id not in blocked_dataset_ids, datasets))
+
+    except FileNotFoundError:
+        # Blocklist may not exist, so just skip the filtering in this case
+        logging.info("No dataset blocklist found - skipping")
+        return datasets
+
+
+def load_manifest(
+    manifest_fp: str | io.TextIOBase | None = None,
+    dataset_id_blocklist_uri: str | None = None,
+) -> List[Dataset]:
     """
     Load dataset manifest from the file pointer if provided, else bootstrap
-    the load rom the CELLxGENE REST API.
+    the from the CELLxGENE REST API.  Apply the blocklist if provided.
     """
     if manifest_fp is not None:
         if isinstance(manifest_fp, str):
@@ -110,6 +145,7 @@ def load_manifest(manifest_fp: Optional[Union[str, io.TextIOBase]] = None) -> Li
     else:
         datasets = load_manifest_from_CxG()
 
-    logging.info(f"Loaded {len(datasets)} datasets.")
+    datasets = apply_blocklist(datasets, dataset_id_blocklist_uri)
     datasets = dedup_datasets(datasets)
+    logging.info(f"After blocklist and dedup, will load {len(datasets)} datasets.")
     return datasets

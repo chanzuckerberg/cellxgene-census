@@ -37,6 +37,16 @@ def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str) -> None:
         assert len(manifest) == 2
 
 
+def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str) -> None:
+    blocklist_fname = f"{tmp_path}/blocklist.txt"
+    blocklist_content = """dataset_id_1\n"""
+    with open(blocklist_fname, "w+") as f:
+        f.writelines(blocklist_content.strip())
+
+    manifest = load_manifest(manifest_csv, blocklist_fname)
+    assert len(manifest) == 1
+
+
 def test_load_manifest_from_cxg() -> None:
     """
     If no parameters are specified, `load_manifest` should load the dataset list from Discover API.
