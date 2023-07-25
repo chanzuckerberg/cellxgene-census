@@ -55,6 +55,9 @@ def main() -> int:
             do_report_copy,
             do_log_copy,
         ],
+        "cleanup": [
+            do_old_release_cleanup,
+        ],
         "full-build": [
             do_prebuild_set_defaults,
             do_prebuild_checks,
@@ -189,6 +192,9 @@ def do_data_copy(args: CensusBuildArgs) -> bool:
 
 
 def do_the_release(args: CensusBuildArgs) -> bool:
+    """
+    Perform the release
+    """
     from .release_manifest import CensusVersionDescription, make_a_release
 
     release: CensusVersionDescription = {
@@ -211,10 +217,6 @@ def do_the_release(args: CensusBuildArgs) -> bool:
     }
     census_base_url = urlcat(args.config.cellxgene_census_S3_bucket, args.config.cellxgene_census_S3_prefix)
     make_a_release(census_base_url, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun)
-    return True
-
-
-def do_replica_release(args: CensusBuildArgs) -> bool:
     return True
 
 
