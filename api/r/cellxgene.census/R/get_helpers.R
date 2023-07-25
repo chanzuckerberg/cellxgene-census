@@ -37,6 +37,14 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @export
 #'
 #' @examples
+#' census <- open_soma()
+#' seurat_obj <- get_seurat(
+#'   census,
+#'   organism = "Homo sapiens",
+#'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
+#'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+#' )
+#' seurat_obj
 get_seurat <- function(
     census,
     organism,
@@ -47,17 +55,20 @@ get_seurat <- function(
     obs_column_names = NULL,
     var_value_filter = NULL,
     var_coords = NULL,
-    var_column_names = NULL) {
+    var_column_names = NULL,
+    var_index = "feature_id") {
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     get_experiment(census, organism),
     measurement_name,
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter, coords = obs_coords),
     var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
   )
+
   return(expt_query$to_seurat(
     X_layers = X_layers,
     obs_column_names = obs_column_names,
-    var_column_names = var_column_names
+    var_column_names = var_column_names,
+    var_index = var_index
   ))
 }
 
@@ -85,6 +96,14 @@ get_seurat <- function(
 #' @export
 #'
 #' @examples
+#' census <- open_soma()
+#' sce_obj <- get_single_cell_experiment(
+#'   census,
+#'   organism = "Homo sapiens",
+#'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
+#'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+#' )
+#' sce_obj
 get_single_cell_experiment <- function(
     census,
     organism,
@@ -103,6 +122,7 @@ get_single_cell_experiment <- function(
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter, coords = obs_coords),
     var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
   )
+
   return(expt_query$to_single_cell_experiment(
     X_layers = X_layers,
     obs_column_names = obs_column_names,
