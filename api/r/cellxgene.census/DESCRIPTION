@@ -14,12 +14,14 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Additional_repositories: https://tiledb-inc.r-universe.dev
+Remotes: bioc::release/SingleCellExperiment
 Imports:
   aws.s3,
   httr,
   jsonlite,
   methods,
   Seurat (>= 4.1.0),
+  SingleCellExperiment (>= 1.20.0),
   stats,
   tiledbsoma,
   tiledb
