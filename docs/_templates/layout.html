@@ -270,6 +270,10 @@
   {% include "versions.html" %}
 
   <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
     var script = document.createElement('script');
     script.src = 'https://js.hsforms.net/forms/v2.js';
     script.defer = true;
@@ -295,8 +299,11 @@
       });
     };
 
+    checkNewsletterBanner();
+
     document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
       document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
     });
 
     const modal = document.querySelector('#newsletter-modal');
@@ -308,6 +315,30 @@
     document.querySelector('#newsletter-close-button').addEventListener('click', () => {
       modal.close();
     });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   {# Do not conflict with RTD insertion of analytics script #}

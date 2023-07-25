@@ -140,7 +140,7 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     position: fixed;
     bottom: 0;
     z-index: 991;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
 }
