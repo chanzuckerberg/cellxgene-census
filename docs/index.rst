@@ -7,6 +7,7 @@
 
    cellxgene_census_docsite_installation.md
    cellxgene_census_docsite_quick_start.md
+   articles
    examples
    cellxgene_census_docsite_schema.md
    cellxgene_census_docsite_data_release_info.md
