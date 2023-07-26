@@ -28,6 +28,7 @@ get_census_version_description <- function(census_version) {
 #' @return Data frame of available cell census releases, including location and
 #'   metadata.
 #' @importFrom jsonlite fromJSON
+#' @importFrom dplyr bind_rows
 #' @export
 #'
 #' @examples
@@ -50,7 +51,7 @@ get_census_version_directory <- function() {
   raw <- simple_rapply(raw, function(x) ifelse(is.null(x), "", x))
 
   # Convert nested list to data frame
-  df <- do.call(rbind, lapply(raw, as.data.frame))
+  df <- do.call(dplyr::bind_rows, lapply(raw, as.data.frame))
   rownames(df) <- names(raw)
   return(df)
 }

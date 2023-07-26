@@ -16,6 +16,7 @@ RoxygenNote: 7.2.3
 Additional_repositories: https://tiledb-inc.r-universe.dev
 Imports:
   aws.s3,
+  dplyr,
   httr,
   jsonlite,
   methods,
