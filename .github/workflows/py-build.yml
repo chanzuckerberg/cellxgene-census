@@ -57,7 +57,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_PROD_ROLE_TO_ASSUME }}
           role-session-name: PushDockerImage
 
       - name: Login to Amazon ECR
@@ -74,7 +74,7 @@ jobs:
 
       - name: Build and tag docker image to Amazon ECR
         env:
-          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REGISTRY: ${{ secrets.ECR_PROD_REGISTRY }}
           REPOSITORY: cellxgene-census-builder
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
@@ -84,7 +84,7 @@ jobs:
       - name: Push docker image to Amazon ECR
         if: ${{ github.ref == 'refs/heads/main' }}
         env:
-          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REGISTRY: ${{ secrets.ECR_PROD_REGISTRY }}
           REPOSITORY: cellxgene-census-builder
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
