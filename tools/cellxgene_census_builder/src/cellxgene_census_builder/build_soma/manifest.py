@@ -54,7 +54,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
     logging.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
-    datasets = fetch_json(f"{CXG_BASE_URI}curation/v1/datasets")
+    datasets = fetch_json(f"{CXG_BASE_URI}curation/v1/datasets?schema_version=3.0.0")
     assert isinstance(datasets, list), "Unexpected REST API response, /curation/v1/datasets"
 
     response = []
