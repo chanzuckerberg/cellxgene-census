@@ -7,7 +7,7 @@ from typing import List, Set
 import fsspec
 
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION_IMPORT
+from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT
 from .util import fetch_json
 
 CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
@@ -54,7 +54,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
     logging.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
-    datasets = fetch_json(f"{CXG_BASE_URI}curation/v1/datasets?schema_version=3.0.0")
+    datasets = fetch_json(f"{CXG_BASE_URI}curation/v1/datasets?schema_version={CXG_SCHEMA_VERSION}")
     assert isinstance(datasets, list), "Unexpected REST API response, /curation/v1/datasets"
 
     response = []
