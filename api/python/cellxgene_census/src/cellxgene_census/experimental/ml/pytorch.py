@@ -17,6 +17,8 @@ import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
 from attr import define
+from psutil import pfullmem
+from psutil._common import sswap
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore.query import _fast_csr
@@ -155,7 +157,7 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         return _ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
 
 
-def run_gc() -> None:
+def run_gc() -> tuple[tuple[pfullmem, Any, sswap], tuple[pfullmem, Any, sswap]]:
     proc = psutil.Process(os.getpid())
 
     pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
@@ -164,6 +166,8 @@ def run_gc() -> None:
 
     pytorch_logger.debug(f"gc:  pre={pre_gc}")
     pytorch_logger.debug(f"gc: post={post_gc}")
+
+    return pre_gc, post_gc
 
 
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
@@ -206,6 +210,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.return_sparse_X = return_sparse_X
         self.encoders = encoders
         self.stats = stats
+        self.max_process_mem_usage_bytes = 0
 
     def __next__(self) -> ObsAndXDatum:
         """Read the next torch batch, possibly across multiple soma batches"""
@@ -258,10 +263,10 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         SOMA batch are fewer than the requested ``batch_size``."""
 
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
-            # perform GC, for memory utilization testing
-            if bool(os.getenv("PYTORCH_DEBUG_GC")):
-                self.soma_batch = None
-                run_gc()
+            # GC memory from previous soma_batch
+            self.soma_batch = None
+            mem_info = run_gc()
+            self.max_process_mem_usage_bytes = max(self.max_process_mem_usage_bytes, mem_info[0][0].uss)
 
             self.soma_batch: _ObsAndXSOMABatch = next(self.soma_batch_iter)
             self.stats += self.soma_batch.stats
@@ -506,6 +511,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
             for datum_ in obs_and_x_iter:
                 yield datum_
+
+            pytorch_logger.debug(f"max process memory usage={obs_and_x_iter.max_process_mem_usage_bytes}")
 
     def __len__(self) -> int:
         self._init()
