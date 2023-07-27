@@ -54,7 +54,7 @@ When run, please record the results in this file (below) and commit the change t
 
 ## 2023-07-26
 
-- Host: EC2 instance type: `r6id.x32xlarge`, all nvme mounted as swap.
+- Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux 5.19.0-1028-aws #29~22.04.1-Ubuntu SMP Tue Jun 20 19:12:11 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
 
@@ -239,7 +239,7 @@ api/python/cellxgene_census/tests/experimental/pp/test_stats.py::test_mean_varia
 
 ## 2023-06-23
 
-- Host: EC2 instance type: `r6id.x32xlarge`, all nvme mounted as swap.
+- Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux 5.19.0-1025-aws #26~22.04.1-Ubuntu SMP Mon Apr 24 01:58:15 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
 ```
@@ -422,7 +422,7 @@ test_util.py::test_uri_join PASSED                                       [100%]
 
 ## 2023-05-16
 
-- Host: EC2 instance type: `r6id.x32xlarge`, all nvme mounted as swap.
+- Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux 5.19.0-1022-aws #23~22.04.1-Ubuntu SMP Fri Mar 17 15:38:24 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
 ```
@@ -569,7 +569,7 @@ tests/test_util.py::test_uri_join PASSED                                 [100%]
 
 **Config**
 
-- Host: EC2 instance type: `r6id.x32xlarge`, all nvme mounted as swap.
+- Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux bruce.aegea 5.15.0-1033-aws #37~20.04.1-Ubuntu SMP Fri Mar 17 11:39:30 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
 
