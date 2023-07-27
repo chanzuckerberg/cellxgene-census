@@ -510,7 +510,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             for datum_ in obs_and_x_iter:
                 yield datum_
 
-            pytorch_logger.debug(f"max process memory usage={obs_and_x_iter.max_process_mem_usage_bytes}")
+            pytorch_logger.debug(
+                "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
+            )
 
     def __len__(self) -> int:
         self._init()
