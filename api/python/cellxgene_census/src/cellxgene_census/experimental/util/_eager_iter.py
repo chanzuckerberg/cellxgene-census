@@ -10,7 +10,7 @@ util_logger = logging.getLogger("cellxgene_census.experimental.util")
 _T = TypeVar("_T")
 
 
-class EagerIterator(Iterator[_T]):
+class _EagerIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],
@@ -21,9 +21,9 @@ class EagerIterator(Iterator[_T]):
         self._pool = pool or futures.ThreadPoolExecutor()
         self._own_pool = pool is None
         self._future: Optional[Future[_T]] = None
-        self.fetch_next()
+        self._begin_next()
 
-    def fetch_next(self) -> None:
+    def _begin_next(self) -> None:
         self._future = self._pool.submit(self.iterator.__next__)
         util_logger.debug("Fetching next iterator element, eagerly")
 
@@ -31,7 +31,7 @@ class EagerIterator(Iterator[_T]):
         try:
             assert self._future
             res = self._future.result()
-            self.fetch_next()
+            self._begin_next()
             return res
         except StopIteration:
             self._cleanup()
@@ -51,7 +51,7 @@ class EagerIterator(Iterator[_T]):
         super_del()
 
 
-class EagerBufferedIterator(Iterator[_T]):
+class _EagerBufferedIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],

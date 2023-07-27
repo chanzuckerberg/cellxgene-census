@@ -1,4 +1,5 @@
 import pytest
+import tiledbsoma as soma
 
 TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
 
@@ -28,3 +29,15 @@ def pytest_configure(config: pytest.Config) -> None:
     if config.option.markexpr and excluded_markexprs:
         config.option.markexpr += " and "
     config.option.markexpr += " and ".join([f"not {m}" for m in excluded_markexprs])
+
+
+@pytest.fixture
+def small_mem_context() -> soma.SOMATileDBContext:
+    """used to keep memory usage smaller for GHA runners."""
+    cfg = {
+        "tiledb_config": {
+            "soma.init_buffer_bytes": 32 * 1024**2,
+            "vfs.s3.no_sign_request": True,
+        },
+    }
+    return soma.SOMATileDBContext().replace(**cfg)

@@ -113,10 +113,10 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    datasets = load_manifest(args.config.manifest)
+    datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
     if len(datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
-        raise AssertionError("No H5AD files in the manifest (or we can't find the files)")
+        raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
     if args.config.test_first_n is not None and args.config.test_first_n > 0:

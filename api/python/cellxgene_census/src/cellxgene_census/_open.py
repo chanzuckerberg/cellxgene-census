@@ -18,6 +18,8 @@ import tiledbsoma as soma
 from ._release_directory import CensusLocator, get_census_version_description
 from ._util import _uri_join
 
+DEFAULT_CENSUS_VERSION = "stable"
+
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
@@ -65,7 +67,7 @@ def _build_soma_tiledb_context(
 
 def open_soma(
     *,
-    census_version: Optional[str] = "stable",
+    census_version: Optional[str] = DEFAULT_CENSUS_VERSION,
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
@@ -73,7 +75,7 @@ def open_soma(
 
     Args:
         census_version:
-            The version of the Census, e.g. "latest".
+            The version of the Census, e.g. "latest" or "stable". Defaults to "stable".
         uri:
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
@@ -152,7 +154,7 @@ def open_soma(
     return _open_soma(description["soma"], context)
 
 
-def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
+def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> CensusLocator:
     """Open the named version of the census, and return the URI for the ``dataset_id``. This
     does not guarantee that the H5AD exists or is accessible to the user.
 
@@ -160,7 +162,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         dataset_id:
             The ``dataset_id`` of interest.
         census_version:
-            The census version.
+            The census version. Defaults to `stable`.
 
     Returns:
         A :py:obj:`CensusLocator` object that contains the URI and optional S3 region for the source H5AD.
@@ -189,7 +191,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     return locator
 
 
-def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
+def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> None:
     """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
     file name.
 
@@ -199,7 +201,7 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
         to_path:
             The file name where the downloaded H5AD will be written.  Must not already exist.
         census_version:
-            The census version name. Defaults to `latest`.
+            The census version name. Defaults to `stable`.
 
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite

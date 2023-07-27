@@ -20,8 +20,8 @@ try:
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
-        ObsAndXSOMABatch,
         Stats,
+        _ObsAndXSOMABatch,
         experiment_dataloader,
     )
 except ImportError:
@@ -121,10 +121,17 @@ def soma_experiment(
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_non_batched(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"]
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        use_eager_fetch=use_eager_fetch,
     )
     row_iter = iter(exp_data_pipe)
 
@@ -135,10 +142,18 @@ def test_non_batched(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_batching__all_batches_full_size(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -156,10 +171,18 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(range(100_000_000, 100_000_003), 3, pytorch_x_value_gen)])
-def test_unique_soma_joinids(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(range(100_000_000, 100_000_003), 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_unique_soma_joinids(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        use_eager_fetch=use_eager_fetch,
     )
 
     soma_joinids = np.concatenate([batch[1][:, 0].numpy() for batch in exp_data_pipe])
@@ -169,10 +192,18 @@ def test_unique_soma_joinids(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(5, 3, pytorch_x_value_gen)])
-def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(5, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_batching__partial_final_batch_size(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -186,10 +217,18 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment) -> None
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
-def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(3, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_batching__exactly_one_batch(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -203,8 +242,11 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_batching__empty_query_result(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
@@ -212,6 +254,7 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
         obs_query=AxisQuery(coords=([],)),
         obs_column_names=["label"],
         batch_size=3,
+        use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -221,14 +264,18 @@ def test_batching__empty_query_result(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_sparse_output__non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
-        sparse_X=True,
+        return_sparse_X=True,
+        use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -239,15 +286,19 @@ def test_sparse_output__non_batched(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_sparse_output__batched(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
-        sparse_X=True,
+        return_sparse_X=True,
+        use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
 
@@ -258,14 +309,17 @@ def test_sparse_output__batched(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(10, 1, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXSOMAIterator.__next__") as mock_soma_iterator_next:
         # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
         mock_soma_iterator_next.side_effect = [
-            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
+            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
+            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
+            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
         ]
 
         exp_data_pipe = ExperimentDataPipe(
@@ -274,6 +328,7 @@ def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experi
             X_name="raw",
             obs_column_names=[],
             batch_size=3,
+            use_eager_fetch=use_eager_fetch,
         )
 
         full_result = list(exp_data_pipe)
@@ -325,9 +380,18 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
-def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(3, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        use_eager_fetch=use_eager_fetch,
+    )
     dl = experiment_dataloader(dp)
     torch_data = [row for row in dl]
 
@@ -338,10 +402,18 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment) -> None
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_experiment_dataloader__batched(soma_experiment: Experiment) -> None:
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     dp = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], batch_size=3
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
     torch_data = [row for row in dl]

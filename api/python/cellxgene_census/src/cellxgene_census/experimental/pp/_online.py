@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numba
 import numpy as np
@@ -18,42 +18,68 @@ class MeanVarianceAccumulator:
         Knuth, Art of Computer Programming, volume II
     """
 
-    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int):
+    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int, ddof: int = 1):
         if n_samples.sum() <= 0:
             raise ValueError("No samples provided - can't calculate mean or variance.")
 
+        self.ddof = ddof
         self.n_batches = n_batches
         self.n_samples = n_samples
         self.n = np.zeros((n_batches, n_variables), dtype=np.int32)
         self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
         self.M2 = np.zeros((n_batches, n_variables), dtype=np.float64)
 
-    def update_by_batch(
-        self, batch_vec: npt.NDArray[np.int64], var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]
+    def update(
+        self,
+        var_vec: npt.NDArray[np.int64],
+        val_vec: npt.NDArray[np.float32],
+        batch_vec: Optional[npt.NDArray[np.int64]] = None,
     ) -> None:
-        _mbomv_update_by_batch(batch_vec, var_vec, val_vec, self.n, self.u, self.M2)
-
-    def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        assert self.n_batches == 1
-        _mbomv_update_single_batch(var_vec, val_vec, self.n, self.u, self.M2)
+        if self.n_batches == 1:
+            assert batch_vec is None
+            _mbomv_update_single_batch(var_vec, val_vec, self.n, self.u, self.M2)
+        else:
+            assert batch_vec is not None
+            _mbomv_update_by_batch(batch_vec, var_vec, val_vec, self.n, self.u, self.M2)
 
     def finalize(
         self,
     ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        # TODO: do we want to add ddof param?  Currently hard-wired to 1 (see var calcs)
-
         # correct each batch to account for sparsity
         _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
 
         # compute u, var for each batch
         batches_u = self.u
-        batches_var = (self.M2.T / (self.n_samples - 1)).T
+
+        # Note: if N-ddof is less than or equal to 0, we will return Inf - this is consistent
+        # with the numpy.var behavior.
+        with np.errstate(divide="ignore"):
+            batches_var = (self.M2.T / np.maximum(0, (self.n_samples - self.ddof))).T
 
         # accum all batches using Chan's
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
-        all_var = all_M2 / max(1, (self.n_samples.sum() - 1))
+        with np.errstate(divide="ignore"):
+            all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
 
         return batches_u, batches_var, all_u, all_var
+
+
+class MeanAccumulator:
+    def __init__(self, n_samples: int, n_variables: int):
+        if n_samples <= 0:
+            raise ValueError("No samples provided - can't calculate mean.")
+
+        if n_variables <= 0:
+            raise ValueError("No variables provided - can't calculate mean.")
+
+        self.u = np.zeros(n_variables, dtype=np.float64)
+        self.n_samples = n_samples
+
+    def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
+        _update_mean_vector(self.u, var_vec, val_vec)
+
+    def finalize(self) -> npt.NDArray[np.float64]:
+        return self.u / self.n_samples
 
 
 class CountsAccumulator:
@@ -64,16 +90,20 @@ class CountsAccumulator:
         self.counts_sum = np.zeros((n_batches, n_variables), dtype=np.float64)  # clipped
         self.squared_counts_sum = np.zeros((n_batches, n_variables), dtype=np.float64)  # clipped
 
-    def update_by_batch(
-        self, batch_vec: npt.NDArray[np.int64], var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]
+    def update(
+        self,
+        var_vec: npt.NDArray[np.int64],
+        val_vec: npt.NDArray[np.float32],
+        batch_vec: Optional[npt.NDArray[np.int64]] = None,
     ) -> None:
-        _accum_clipped_counts_by_batch(
-            self.counts_sum, self.squared_counts_sum, batch_vec, var_vec, val_vec, self.clip_val
-        )
-
-    def update_single_batch(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        assert self.n_batches == 1
-        _accum_clipped_counts(self.counts_sum[0], self.squared_counts_sum[0], var_vec, val_vec, self.clip_val[0])
+        if self.n_batches == 1:
+            assert batch_vec is None
+            _accum_clipped_counts(self.counts_sum[0], self.squared_counts_sum[0], var_vec, val_vec, self.clip_val[0])
+        else:
+            assert batch_vec is not None
+            _accum_clipped_counts_by_batch(
+                self.counts_sum, self.squared_counts_sum, batch_vec, var_vec, val_vec, self.clip_val
+            )
 
     def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         return self.counts_sum, self.squared_counts_sum
@@ -130,13 +160,22 @@ def _mbomv_update_by_batch(
 
 
 @numba.jit(
-    numba.void(
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-        numba.int32[:, :],
-        numba.float64[:, :],
-        numba.float64[:, :],
-    ),
+    [
+        numba.void(
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.int32[:, :],
+            numba.float64[:, :],
+            numba.float64[:, :],
+        ),
+        numba.void(
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.int32[:, :],
+            numba.float64[:, :],
+            numba.float64[:, :],
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
@@ -232,13 +271,22 @@ def _mbomv_combine_batches(
 
 
 @numba.jit(
-    numba.void(
-        numba.float64[:],
-        numba.float64[:],
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-        numba.float64[:],
-    ),
+    [
+        numba.void(
+            numba.float64[:],
+            numba.float64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:],
+        ),
+        numba.void(
+            numba.float64[:],
+            numba.float64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:],
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
@@ -257,14 +305,24 @@ def _accum_clipped_counts(
 
 
 @numba.jit(
-    numba.void(
-        numba.float64[:, :],
-        numba.float64[:, :],
-        numba.int64[:],
-        numba.types.Array(numba.int64, 1, "C", readonly=True),
-        numba.types.Array(numba.float32, 1, "C", readonly=True),
-        numba.float64[:, :],
-    ),
+    [
+        numba.void(
+            numba.float64[:, :],
+            numba.float64[:, :],
+            numba.int64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:, :],
+        ),
+        numba.void(
+            numba.float64[:, :],
+            numba.float64[:, :],
+            numba.int64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+            numba.float64[:, :],
+        ),
+    ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
@@ -281,3 +339,28 @@ def _accum_clipped_counts_by_batch(
             val = clip_val[bid, col]
         counts_sum[bid, col] += val
         squared_counts_sum[bid, col] += val**2
+
+
+@numba.jit(
+    [
+        numba.void(
+            numba.float64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+        ),
+        numba.void(
+            numba.float64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+        ),
+    ],
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _update_mean_vector(
+    u: npt.NDArray[np.float64],
+    var_vec: npt.NDArray[np.int64],
+    val_vec: npt.NDArray[np.float32],
+) -> None:
+    for col, val in zip(var_vec, val_vec):
+        u[col] = u[col] + val

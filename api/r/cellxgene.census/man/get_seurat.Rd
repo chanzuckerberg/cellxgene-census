@@ -9,7 +9,7 @@ get_seurat(
   census,
   organism,
   measurement_name = "RNA",
-  X_name = "raw",
+  X_layers = c(counts = "raw", data = NULL),
   obs_value_filter = NULL,
   obs_coords = NULL,
   obs_column_names = NULL,
@@ -25,7 +25,9 @@ get_seurat(
 
 \item{measurement_name}{The measurement object to query. Defaults to \code{RNA}.}
 
-\item{X_name}{The \code{X} layer to query. Defaults to \code{raw}.}
+\item{X_layers}{A named character of \code{X} layers to add to the Seurat assay, where the names are
+the names of Seurat slots (\code{counts} or \code{data}) and the values are the names of layers
+within \code{X}.}
 
 \item{obs_value_filter}{A SOMA \code{value_filter} across columns in the \code{obs} dataframe, expressed as string.}
 

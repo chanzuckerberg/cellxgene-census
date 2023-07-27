@@ -6,7 +6,16 @@ The documentation site is rebuilt each time a tag is created on the repo, which 
 
 A full rebuild can also be triggered manually as the workflow supports `workflow_dispatch`. This should be done if a bug in the documentation is found and a release is not necessary.
 
-In order to test docsite changes locally, one can run the following command:
+In order to test docsite changes locally, first install the necessary requirements:
+
+```
+pip install -r docs/requirements.txt
+brew install pandoc # Mac OS
+```
+
+Then,
+
+And then run the following command:
 
 ```
 cd docs

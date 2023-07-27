@@ -150,7 +150,7 @@ def test_get_source_h5ad_uri() -> None:
     rng = np.random.default_rng()
     for idx in rng.choice(np.arange(len(census_datasets)), size=3, replace=False):
         a_dataset = census_datasets.iloc[idx]
-        locator = cellxgene_census.get_source_h5ad_uri(a_dataset.dataset_id)
+        locator = cellxgene_census.get_source_h5ad_uri(a_dataset.dataset_id, census_version="latest")
         assert isinstance(locator, dict)
         assert "uri" in locator
         assert locator["uri"].endswith(a_dataset.dataset_h5ad_path)

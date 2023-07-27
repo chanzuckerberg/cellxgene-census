@@ -11,7 +11,7 @@ from somacore.options import SparseDFCoord
 from typing_extensions import Literal
 
 from ..._experiment import _get_experiment
-from ..util import EagerIterator
+from ..util._eager_iter import _EagerIterator
 from ._online import CountsAccumulator, MeanVarianceAccumulator
 
 """
@@ -86,16 +86,16 @@ def _highly_variable_genes_seurat_v3(
 
     with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
         mvn = MeanVarianceAccumulator(n_batches, n_samples, query.n_vars)
-        for arrow_tbl in EagerIterator(query.X(layer).tables(), pool=pool):
+        for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
             data = arrow_tbl["soma_data"].to_numpy()
             if batch_indexer:
                 _batch_take_at_future = pool.submit(batch_indexer, arrow_tbl["soma_dim_0"])
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
-                mvn.update_by_batch(_batch_vec, var_dim, data)
+                mvn.update(var_dim, data, _batch_vec)
             else:
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
-                mvn.update_single_batch(var_dim, data)
+                mvn.update(var_dim, data)
 
         batches_u, batches_var, all_u, all_var = mvn.finalize()
         del mvn
@@ -152,16 +152,16 @@ def _highly_variable_genes_seurat_v3(
     # Read counts again, clip and save sum of counts and sum of counts squared
     with futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
         acc = CountsAccumulator(n_batches, query.n_vars, clip_val)
-        for arrow_tbl in EagerIterator(query.X(layer).tables(), pool=pool):
+        for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
             data = arrow_tbl["soma_data"].to_numpy()
             if batch_indexer:
                 _batch_take_at_future = pool.submit(batch_indexer, arrow_tbl["soma_dim_0"])
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
                 _batch_vec = batch_codes[_batch_take_at_future.result()]
-                acc.update_by_batch(_batch_vec, var_dim, data)
+                acc.update(var_dim, data, _batch_vec)
             else:
                 var_dim = var_indexer.by_var(arrow_tbl["soma_dim_1"])
-                acc.update_single_batch(var_dim, data)
+                acc.update(var_dim, data)
 
         counts_sum, squared_counts_sum = acc.finalize()
         norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
