@@ -231,10 +231,6 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         for col, enc in self.encoders.items():
             obs_encoded[col] = enc.transform(obs[col])
 
-        # return empty tensors, for memory utilization testing
-        if bool(os.getenv("PYTORCH_DEBUG_EMPTY_TENSORS", False)):
-            return torch.empty((0, 1)), torch.empty((0, 1))
-
         # `to_numpy()` avoids copying the numpy array data
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
@@ -263,7 +259,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
             # perform GC, for memory utilization testing
-            if bool(os.getenv("PYTORCH_DEBUG_GC", False)):
+            if bool(os.getenv("PYTORCH_DEBUG_GC")):
                 self.soma_batch = None
                 run_gc()
 
