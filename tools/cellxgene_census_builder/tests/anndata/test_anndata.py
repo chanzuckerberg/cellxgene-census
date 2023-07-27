@@ -2,6 +2,7 @@ from typing import List
 
 import anndata as ad
 import numpy as np
+import pytest
 from cellxgene_census_builder.build_soma.anndata import (
     get_cellxgene_schema_version,
     make_anndata_cell_filter,
@@ -45,8 +46,8 @@ def test_open_anndata_filters_out_wrong_schema_version_datasets(
     """
     Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`
     """
-    result = list(open_anndata(".", datasets_with_incorrect_schema_version))
-    assert len(result) == 0
+    with pytest.raises(RuntimeError, match="unsupported schema version"):
+        _ = list(open_anndata(".", datasets_with_incorrect_schema_version))
 
 
 def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_layer: List[Dataset]) -> None:

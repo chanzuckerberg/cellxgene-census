@@ -140,7 +140,7 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     position: fixed;
     bottom: 0;
     z-index: 991;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
 }
@@ -169,6 +169,14 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     max-width: 400px!important;
     max-height: 266px!important;
     padding: 24px;
+
+}
+
+/*
+ * We should only add `display: flex` to open state, otherwise it will be shown
+ * as a flexbox even when it's closed.
+ */
+#newsletter-modal[open] {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
