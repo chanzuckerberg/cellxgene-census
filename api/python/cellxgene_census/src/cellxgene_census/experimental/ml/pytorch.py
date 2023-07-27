@@ -17,8 +17,6 @@ import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
 from attr import define
-from psutil import pfullmem
-from psutil._common import sswap
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore.query import _fast_csr
@@ -157,7 +155,7 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         return _ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
 
 
-def run_gc() -> tuple[tuple[pfullmem, Any, sswap], tuple[pfullmem, Any, sswap]]:
+def run_gc() -> tuple[tuple[Any, Any, Any], tuple[Any, Any, Any]]:
     proc = psutil.Process(os.getpid())
 
     pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
