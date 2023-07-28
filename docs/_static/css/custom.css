@@ -295,8 +295,7 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     padding: 4px 6px;
     margin-left: 4px;
     font-size: 10px;
-    line-height: 12px;
+    line-height: 8px;
     letter-spacing: 1px;
-    font-weight: 600;
     height: 16px!important;
 }
