@@ -58,7 +58,7 @@ query, and return it as a <code>Seurat</code> object.</p>
 <span>  <span class="va">census</span>,</span>
 <span>  <span class="va">organism</span>,</span>
 <span>  measurement_name <span class="op">=</span> <span class="st">"RNA"</span>,</span>
-<span>  X_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
+<span>  X_layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="st">"raw"</span>, data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
 <span>  obs_value_filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  obs_coords <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  obs_column_names <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -82,8 +82,10 @@ query, and return it as a <code>Seurat</code> object.</p>
 <dd><p>The measurement object to query. Defaults to <code>RNA</code>.</p></dd>
 
 
-<dt>X_name</dt>
-<dd><p>The <code>X</code> layer to query. Defaults to <code>raw</code>.</p></dd>
+<dt>X_layers</dt>
+<dd><p>A named character of <code>X</code> layers to add to the Seurat assay, where the names are
+the names of Seurat slots (<code>counts</code> or <code>data</code>) and the values are the names of layers
+within <code>X</code>.</p></dd>
 
 
 <dt>obs_value_filter</dt>

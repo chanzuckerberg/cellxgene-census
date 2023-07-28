@@ -74,6 +74,12 @@
                     <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
                     </span>
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      <div style="height: 16px!important; display: flex;">
+                        <span class="beta">BETA</span>
+                      </div>
+                    </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
                       <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
@@ -105,7 +111,7 @@
                 
                 
                 <div class="version">
-                    1.3.1
+                    1.4.0
                 </div>
                 
             
@@ -226,8 +232,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
-The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
 </pre></div></div>
 </div>
 </section>
@@ -273,20 +279,20 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-There are 604 cell types in the Census! The first 10 are: [&#39;CL:0000763&#39;, &#39;CL:0000136&#39;, &#39;CL:0000235&#39;, &#39;CL:0000115&#39;, &#39;CL:0000669&#39;, &#39;CL:0009099&#39;, &#39;CL:0000542&#39;, &#39;CL:0000095&#39;, &#39;CL:0000192&#39;, &#39;CL:0000077&#39;]
+There are 613 cell types in the Census! The first 10 are: [&#39;CL:0000525&#39;, &#39;CL:2000060&#39;, &#39;CL:0008036&#39;, &#39;CL:0002488&#39;, &#39;CL:0002343&#39;, &#39;CL:0000084&#39;, &#39;CL:0001078&#39;, &#39;CL:0000815&#39;, &#39;CL:0000235&#39;, &#39;CL:3000001&#39;]
 
 The top 10 cell types and their counts are:
 cell_type_ontology_term_id
-CL:0000540    5187927
-CL:0000679    1889047
-CL:0000128    1843917
-CL:0000624    1510892
-CL:0000625    1440552
-CL:0000860    1349543
-CL:0000235    1333574
-CL:0000057    1298708
+CL:0000540    7665340
+CL:0000679    1894047
+CL:0000128    1881077
+CL:0000624    1508920
+CL:0000625    1477453
+CL:0000235    1419507
+CL:0000057    1397813
+CL:0000860    1369142
+CL:0000003    1308000
 CL:4023040    1229658
-CL:0000003    1224679
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -333,17 +339,17 @@ Name: count, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-There are 185 cell types in the Census where tissue_ontology_term_id == UBERON:0002048! The first 10 are: [&#39;CL:0000003&#39;, &#39;CL:4028004&#39;, &#39;CL:0002145&#39;, &#39;CL:0000625&#39;, &#39;CL:0000624&#39;, &#39;CL:4028006&#39;, &#39;CL:0002144&#39;, &#39;CL:0009089&#39;, &#39;CL:0000861&#39;, &#39;CL:0000583&#39;]
+There are 185 cell types in the Census where tissue_ontology_term_id == UBERON:0002048! The first 10 are: [&#39;CL:0002063&#39;, &#39;CL:0000775&#39;, &#39;CL:0001044&#39;, &#39;CL:0001050&#39;, &#39;CL:0000814&#39;, &#39;CL:0000071&#39;, &#39;CL:0000192&#39;, &#39;CL:0002503&#39;, &#39;CL:0000235&#39;, &#39;CL:0002370&#39;]
 
 Top 10 cell types where tissue_ontology_term_id == UBERON:0002048
 cell_type_ontology_term_id
 CL:0000003    562038
 CL:0000583    526859
-CL:0000625    323433
-CL:0000624    323067
-CL:0000235    254173
-CL:0002063    246279
-CL:0000860    203526
+CL:0000625    323985
+CL:0000624    323610
+CL:0000235    266333
+CL:0002063    255425
+CL:0000860    205013
 CL:0000623    164944
 CL:0001064    149067
 CL:0002632    132243
@@ -432,15 +438,15 @@ Name: count, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Complete census contains 57880760 cells.
-homo_sapiens
-        Unique cell_type_ontology_term_id values: 604
-        Unique assay_ontology_term_id values: 20
-        Unique tissue_ontology_term_id values: 227
+Complete census contains 61656118 cells.
 mus_musculus
-        Unique cell_type_ontology_term_id values: 226
+        Unique cell_type_ontology_term_id values: 248
         Unique assay_ontology_term_id values: 9
-        Unique tissue_ontology_term_id values: 51
+        Unique tissue_ontology_term_id values: 66
+homo_sapiens
+        Unique cell_type_ontology_term_id values: 613
+        Unique assay_ontology_term_id values: 19
+        Unique tissue_ontology_term_id values: 220
 </pre></div></div>
 </div>
 <p>Close the census</p>
@@ -496,7 +502,7 @@ mus_musculus
       <div id="newsletter-content">
         <div id="newsletter-callout">Join Our Newsletter</div>
         <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
-        <!-- Hubspot Form target -->
+        <!-- HubSpot Form target -->
         <div id="newsletter-form-container"></div>
       </div>
 
@@ -505,13 +511,11 @@ mus_musculus
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
-
   <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
     var script = document.createElement('script');
     script.src = 'https://js.hsforms.net/forms/v2.js';
     script.defer = true;
@@ -537,8 +541,11 @@ mus_musculus
       });
     };
 
+    checkNewsletterBanner();
+
     document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
       document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
     });
 
     const modal = document.querySelector('#newsletter-modal');
@@ -550,6 +557,30 @@ mus_musculus
     document.querySelector('#newsletter-close-button').addEventListener('click', () => {
       modal.close();
     });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

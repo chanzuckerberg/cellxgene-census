@@ -71,6 +71,12 @@
                     <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
                     </span>
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      <div style="height: 16px!important; display: flex;">
+                        <span class="beta">BETA</span>
+                      </div>
+                    </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
                       <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
@@ -102,7 +108,7 @@
                 
                 
                 <div class="version">
-                    1.3.1
+                    1.4.0
                 </div>
                 
             
@@ -155,6 +161,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#experimental-processing">Experimental: Processing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html">cellxgene_census.experimental.pp.get_highly_variable_genes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html">cellxgene_census.experimental.pp.highly_variable_genes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.mean_variance.html">cellxgene_census.experimental.pp.mean_variance</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#experimental-utility">Experimental: Utility</a><ul>
@@ -236,7 +243,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata" title="cellxgene_census.get_anndata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata</span></code></a></p></td>
-<td><p>Convience wrapper around <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.10.0.dev62+gd381be9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
+<td><p>Convience wrapper around <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.10.0.dev68+g0c4c0b0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -289,6 +296,9 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html#cellxgene_census.experimental.pp.highly_variable_genes" title="cellxgene_census.experimental.pp.highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.highly_variable_genes</span></code></a></p></td>
 <td><p>Identify and annotate highly variable genes contained in the query results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.mean_variance.html#cellxgene_census.experimental.pp.mean_variance" title="cellxgene_census.experimental.pp.mean_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.mean_variance</span></code></a></p></td>
+<td><p>Calculate  mean and/or variance along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis from query results.</p></td>
 </tr>
 </tbody>
 </table>
@@ -346,7 +356,7 @@
       <div id="newsletter-content">
         <div id="newsletter-callout">Join Our Newsletter</div>
         <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
-        <!-- Hubspot Form target -->
+        <!-- HubSpot Form target -->
         <div id="newsletter-form-container"></div>
       </div>
 
@@ -355,13 +365,11 @@
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
-
   <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
     var script = document.createElement('script');
     script.src = 'https://js.hsforms.net/forms/v2.js';
     script.defer = true;
@@ -387,8 +395,11 @@
       });
     };
 
+    checkNewsletterBanner();
+
     document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
       document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
     });
 
     const modal = document.querySelector('#newsletter-modal');
@@ -400,6 +411,30 @@
     document.querySelector('#newsletter-close-button').addEventListener('click', () => {
       modal.close();
     });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

@@ -74,6 +74,12 @@
                     <span class="navbar-cxg-link">
                         <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
                     </span>
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      <div style="height: 16px!important; display: flex;">
+                        <span class="beta">BETA</span>
+                      </div>
+                    </span>
                     <hr class="navbar-divider">
                     <span class="navbar-cxg-link">
                       <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
@@ -105,7 +111,7 @@
                 
                 
                 <div class="version">
-                    1.3.1
+                    1.4.0
                 </div>
                 
             
@@ -224,7 +230,12 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Global seed set to 0
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scvi/_settings.py:63: UserWarning: Since v1.0.0, scvi-tools no longer uses a random seed by default. Run `scvi.settings.seed = 0` to reproduce results from previous versions.
+  self.seed = seed
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scvi/_settings.py:70: UserWarning: Setting `dl_pin_memory_gpu_training` is deprecated in v1.0 and will be removed in v1.1. Please pass in `pin_memory` to the data loaders instead.
+  self.dl_pin_memory_gpu_training = (
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
 </pre></div></div>
 </div>
 <p>Now we can open the Census, if you are not familiar with the basics of the Census API you should take a look at the notebook <a class="reference external" href="https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CELLxGENE Census</a>.</p>
@@ -241,7 +252,7 @@ Global seed set to 0
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-The &#34;latest&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+The &#34;latest&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
 </pre></div></div>
 </div>
 <p>In this notebook we will use Tabula Muris Senis data from the liver as it contains cells from both 10X Genomics and Smart-Seq2 technologies.</p>
@@ -294,7 +305,7 @@ The &#34;latest&#34; release is currently 2023-05-15. Specify &#39;census_versio
   <tbody>
     <tr>
       <th>13</th>
-      <td>494</td>
+      <td>525</td>
       <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>
       <td>Tabula Muris Senis</td>
       <td>10.1038/s41586-020-2496-1</td>
@@ -305,7 +316,7 @@ The &#34;latest&#34; release is currently 2023-05-15. Specify &#39;census_versio
     </tr>
     <tr>
       <th>34</th>
-      <td>516</td>
+      <td>547</td>
       <td>0b9d8a04-bb9d-44da-aa27-705bb65b54eb</td>
       <td>Tabula Muris Senis</td>
       <td>10.1038/s41586-020-2496-1</td>
@@ -469,7 +480,7 @@ Name: count, dtype: int64
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -493,7 +504,7 @@ Name: count, dtype: int64
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -558,7 +569,7 @@ HPU available: False, using: 0 HPUs
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.55it/s, loss=555, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:25&lt;00:00,  1.15it/s, v_num=1, train_loss_step=545, train_loss_epoch=560]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -574,7 +585,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.52it/s, loss=555, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:25&lt;00:00,  1.17it/s, v_num=1, train_loss_step=545, train_loss_epoch=560]
 </pre></div></div>
 </div>
 <p>And finally let’s get the latent representations as cell embeddings and use those for UMAP visualization.</p>
@@ -601,7 +612,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -625,7 +636,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:05&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -684,7 +695,7 @@ HPU available: False, using: 0 HPUs
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.54it/s, loss=549, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:19&lt;00:00,  1.27it/s, v_num=1, train_loss_step=520, train_loss_epoch=550]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -700,7 +711,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.51it/s, loss=549, v_num=1]
+Epoch 100/100: 100%|██████████| 100/100 [01:19&lt;00:00,  1.25it/s, v_num=1, train_loss_step=520, train_loss_epoch=550]
 </pre></div></div>
 </div>
 <p>And we get the latent variables as embeddings.</p>
@@ -727,7 +738,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -751,7 +762,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ubuntu/.local/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -815,7 +826,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
       <div id="newsletter-content">
         <div id="newsletter-callout">Join Our Newsletter</div>
         <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
-        <!-- Hubspot Form target -->
+        <!-- HubSpot Form target -->
         <div id="newsletter-form-container"></div>
       </div>
 
@@ -824,13 +835,11 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
-
   <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
     var script = document.createElement('script');
     script.src = 'https://js.hsforms.net/forms/v2.js';
     script.defer = true;
@@ -856,8 +865,11 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
       });
     };
 
+    checkNewsletterBanner();
+
     document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
       document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
     });
 
     const modal = document.querySelector('#newsletter-modal');
@@ -869,6 +881,30 @@ Epoch 100/100: 100%|██████████| 100/100 [01:06&lt;00:00,  1.
     document.querySelector('#newsletter-close-button').addEventListener('click', () => {
       modal.close();
     });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   
