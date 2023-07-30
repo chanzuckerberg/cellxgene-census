@@ -19,6 +19,7 @@ CENSUS_DATASETS_COLUMNS = [
     "collection_name",
     "collection_doi",
     "dataset_id",
+    "dataset_version_id",
     "dataset_title",
     "dataset_h5ad_path",
     "dataset_total_cell_count",

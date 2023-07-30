@@ -20,6 +20,7 @@ class Dataset:
     # Required
     dataset_id: str  # CELLxGENE dataset_id
     dataset_asset_h5ad_uri: str  # the URI from which we originally read the H5AD asset
+    dataset_version_id: str = ""  # CELLxGENE dataset_version_id
     dataset_h5ad_path: str = ""  # set after staging, required by end of process
 
     # Optional - as reported by REST API

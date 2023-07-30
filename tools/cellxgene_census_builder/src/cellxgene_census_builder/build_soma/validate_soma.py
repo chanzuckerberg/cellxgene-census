@@ -124,6 +124,7 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
         assert (df["collection_id"] != "").all()
         assert (df["collection_name"] != "").all()
         assert (df["dataset_title"] != "").all()
+        assert (df["dataset_version_id"] != "").all()
 
         # there should be an experiment for each builder
         census_data = census[CENSUS_DATA_NAME]
@@ -671,6 +672,8 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         df = census[CENSUS_INFO_NAME][CENSUS_DATASETS_NAME].read().concat().to_pandas()
         df["dataset_asset_h5ad_uri"] = df.dataset_h5ad_path.map(lambda p: urlcat(assets_path, p))
+        assert df.dataset_version_id.is_unique
+        assert df.dataset_id.is_unique
         df["asset_h5ad_filesize"] = df.dataset_asset_h5ad_uri.map(lambda p: os.path.getsize(p))
         datasets = Dataset.from_dataframe(df)
         return datasets

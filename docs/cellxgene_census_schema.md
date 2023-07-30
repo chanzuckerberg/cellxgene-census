@@ -1,6 +1,10 @@
 # CZ CELLxGENE Discover Census Schema 
 
+<<<<<<< HEAD
+**Version**: 1.1.0
+=======
 **Version**: 1.1.0.
+>>>>>>> main
 
 **Last edited**: July, 2023.
 
@@ -379,6 +383,11 @@ All datasets used to build the Census MUST be included in a table modeled as a `
     <td>dataset_total_cell_count</td>
     <td>int</td>
     <td>Total number of cells from the dataset included in the Census.</td>
+  </tr>
+  <tr>
+    <td>dataset_version_id</td>
+    <td>string</td>
+    <td>As defined in CELLxGENE Discover [data schema](https://api.cellxgene.cziscience.com/curation/ui/) (see "Schemas" section for field definitions)".</td>
   </tr>
 </tbody>
 </table>
@@ -883,6 +892,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 ## Changelog
 
 ### Version 1.1.0
+* Adds `dataset_version_id` to "Census table of CELLxGENE Discover datasets – `census_obj["census_info"]["datasets"]`"
 * Add `X["normalized"]` layer
 * Add `nnz` and `n_measured_obs` columns to `ms["RNA"].var` dataframe
 * Add `nnz`, `n_measured_vars`, `raw_sum`, `raw_mean_nnz` and `raw_variance_nnz` columns to `obs` dataframe
