@@ -100,6 +100,11 @@ def census_build_args(request: pytest.FixtureRequest, tmp_path: pathlib.Path) ->
     except AttributeError:
         config = {}
 
+    # blocklist file is mandatory
+    blocklist_path = tmp_path / "blocklist.txt"
+    pathlib.Path(blocklist_path).touch()
+    config["dataset_id_blocklist_uri"] = blocklist_path.as_posix()
+
     if config.get("manifest") is True:  # if bool True, replace with an IOstream
         config["manifest"] = request.getfixturevalue("manifest_csv")
     return CensusBuildArgs(working_dir=tmp_path, config=CensusBuildConfig(**config))
@@ -186,3 +191,10 @@ def has_aws_credentials() -> bool:
         print(e)
 
     return False
+
+
+@pytest.fixture
+def empty_blocklist(tmp_path: pathlib.Path) -> str:
+    blocklist_path = tmp_path / "blocklist.txt"
+    pathlib.Path(blocklist_path).touch()
+    return blocklist_path.as_posix()

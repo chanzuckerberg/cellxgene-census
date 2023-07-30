@@ -10,18 +10,6 @@ import cellxgene_census
 from cellxgene_census.experimental.pp import get_highly_variable_genes, highly_variable_genes
 
 
-@pytest.fixture
-def small_mem_context() -> soma.SOMATileDBContext:
-    """used to keep memory usage smaller for GHA runners."""
-    cfg = {
-        "tiledb_config": {
-            "soma.init_buffer_bytes": 32 * 1024**2,
-            "vfs.s3.no_sign_request": True,
-        },
-    }
-    return soma.SOMATileDBContext().replace(**cfg)
-
-
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(

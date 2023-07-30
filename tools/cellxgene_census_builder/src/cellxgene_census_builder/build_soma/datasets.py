@@ -23,16 +23,16 @@ class Dataset:
     dataset_version_id: str = ""  # CELLxGENE dataset_version_id
     dataset_h5ad_path: str = ""  # set after staging, required by end of process
 
-    # Optional
+    # Optional - as reported by REST API
     dataset_title: str = ""  # CELLxGENE dataset title
-    collection_id: str = ""  # CELlxGENE collection id
-    collection_name: str = ""  # CELlxGENE collection name
+    collection_id: str = ""  # CELLxGENE collection id
+    collection_name: str = ""  # CELLxGENE collection name
     collection_doi: str = ""  # CELLxGENE collection doi
     asset_h5ad_filesize: int = -1
 
     # Optional, inferred from data if not already known
     schema_version: str = ""  # empty string if version unknown
-    dataset_total_cell_count: int = 0  # number of cells in the census by dataset
+    dataset_total_cell_count: int = 0  # number of cells in the census by dataset, POST-filter
 
     # Assigned late in the game, only to datasets we incorporate into the census
     soma_joinid: int = -1
