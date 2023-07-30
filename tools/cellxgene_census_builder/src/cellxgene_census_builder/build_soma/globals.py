@@ -5,7 +5,7 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-CENSUS_SCHEMA_VERSION = "1.0.0"
+CENSUS_SCHEMA_VERSION = "1.1.0"
 
 CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
@@ -59,6 +59,7 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 # NOTE: a few additional columns are added (they are not defined in the CXG schema),
 # eg., dataset_id, tissue_general, etc.
 CXG_OBS_TERM_COLUMNS = {
+    # Columns pulled from the CXG H5AD
     "assay": pa.large_string(),
     "assay_ontology_term_id": pa.large_string(),
     "cell_type": pa.large_string(),
@@ -77,12 +78,22 @@ CXG_OBS_TERM_COLUMNS = {
     "tissue": pa.large_string(),
     "tissue_ontology_term_id": pa.large_string(),
 }
+CENSUS_OBS_STATS_COLUMNS = {
+    # Columns computed during the Census build and written to the Census obs dataframe.
+    "raw_sum": pa.float32(),
+    "nnz": pa.int64(),
+    "raw_mean_nnz": pa.float32(),
+    "raw_variance_nnz": pa.float32(),
+    "n_measured_vars": pa.int64(),
+}
 CENSUS_OBS_TERM_COLUMNS = {
+    # Columns written to the Census obs dataframe.
     "soma_joinid": pa.int64(),
     "dataset_id": pa.large_string(),
     **CXG_OBS_TERM_COLUMNS,
     "tissue_general": pa.large_string(),
     "tissue_general_ontology_term_id": pa.large_string(),
+    **CENSUS_OBS_STATS_COLUMNS,
 }
 
 """
@@ -121,35 +132,98 @@ _RepetativeStringLabelObs = [
     "tissue_general",
     "tissue_general_ontology_term_id",
 ]
+_NumericObs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
+            "dims": {
+                "soma_joinid": {
+                    "filters": [
+                        "DoubleDeltaFilter",
+                        {"_type": "ZstdFilter", "level": 19},
+                    ]
+                }
+            },
             "attrs": {
                 **{
-                    k: {"filters": ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]}
+                    k: {
+                        "filters": [
+                            "DictionaryFilter",
+                            {"_type": "ZstdFilter", "level": 19},
+                        ]
+                    }
                     for k in _RepetativeStringLabelObs
                 },
+                **{
+                    k: {
+                        "filters": [
+                            "ByteShuffleFilter",
+                            {"_type": "ZstdFilter", "level": 5},
+                        ]
+                    }
+                    for k in _NumericObs
+                },
             },
-            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+            "offsets_filters": [
+                "DoubleDeltaFilter",
+                {"_type": "ZstdFilter", "level": 19},
+            ],
             "allows_duplicates": True,
         }
     }
 }
 
+CENSUS_VAR_STATS_COLUMNS = {
+    # Columns computed during the Census build and written to the Census var dataframe.
+    "nnz": pa.int64(),
+    "n_measured_obs": pa.int64(),
+}
 CENSUS_VAR_TERM_COLUMNS = {
+    # Columns written to the Census var dataframe.
     "soma_joinid": pa.int64(),
     "feature_id": pa.large_string(),
     "feature_name": pa.large_string(),
     "feature_length": pa.int64(),
+    **CENSUS_VAR_STATS_COLUMNS,
 }
+_StringLabelVar = ["feature_id", "feature_name"]
+_NumericVar = ["nnz", "n_measured_obs", "feature_length"]
 CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
-            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
-            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
+            "dims": {
+                "soma_joinid": {
+                    "filters": [
+                        "DoubleDeltaFilter",
+                        {"_type": "ZstdFilter", "level": 19},
+                    ]
+                }
+            },
+            "attrs": {
+                **{
+                    k: {
+                        "filters": [
+                            {"_type": "ZstdFilter", "level": 19},
+                        ]
+                    }
+                    for k in _StringLabelVar
+                },
+                **{
+                    k: {
+                        "filters": [
+                            "ByteShuffleFilter",
+                            {"_type": "ZstdFilter", "level": 5},
+                        ]
+                    }
+                    for k in _NumericVar
+                },
+            },
+            "offsets_filters": [
+                "DoubleDeltaFilter",
+                {"_type": "ZstdFilter", "level": 19},
+            ],
             "allows_duplicates": True,
         }
     }
@@ -157,26 +231,64 @@ CENSUS_VAR_PLATFORM_CONFIG = {
 
 CENSUS_X_LAYERS = {
     "raw": pa.float32(),
+    "normalized": pa.float32(),
+}
+CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG = {
+    "tiledb": {
+        "create": {
+            "capacity": 2**16,
+            "dims": {
+                "soma_dim_0": {
+                    "tile": 2048,
+                    "filters": [{"_type": "ZstdFilter", "level": 5}],
+                },
+                "soma_dim_1": {
+                    "tile": 2048,
+                    "filters": [
+                        "ByteShuffleFilter",
+                        {"_type": "ZstdFilter", "level": 5},
+                    ],
+                },
+            },
+            "attrs": {
+                "soma_data": {
+                    "filters": [
+                        "ByteShuffleFilter",
+                        {"_type": "ZstdFilter", "level": 5},
+                    ]
+                }
+            },
+            "cell_order": "row-major",
+            "tile_order": "row-major",
+            "allows_duplicates": True,
+        },
+    }
 }
 CENSUS_X_LAYERS_PLATFORM_CONFIG = {
     "raw": {
+        **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG,
+    },
+    "normalized": {
         "tiledb": {
             "create": {
-                "capacity": 2**16,
-                "dims": {
-                    "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
-                    "soma_dim_1": {
-                        "tile": 2048,
-                        "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}],
-                    },
+                **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
+                "attrs": {
+                    "soma_data": {
+                        "filters": [
+                            {
+                                "_type": "FloatScaleFilter",
+                                "factor": 1.0 / 2**18,
+                                "offset": 0.5,
+                                "bytewidth": 4,
+                            },
+                            "ByteShuffleFilter",
+                            {"_type": "ZstdFilter", "level": 5},
+                        ]
+                    }
                 },
-                "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
-                "cell_order": "row-major",
-                "tile_order": "row-major",
-                "allows_duplicates": True,
-            },
+            }
         }
-    }
+    },
 }
 
 # list of EFO terms that correspond to RNA seq modality/measurement
@@ -215,10 +327,10 @@ FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
 # The default configuration for TileDB contexts used in the builder.
 DEFAULT_TILEDB_CONFIG = {
-    "py.init_buffer_bytes": 512 * 1024**2,
+    "py.init_buffer_bytes": 1 * 1024**3,
     "py.deduplicate": "true",
-    "soma.init_buffer_bytes": 512 * 1024**2,
-    "sm.consolidation.buffer_size": 1 * 1024**3,
+    "soma.init_buffer_bytes": 1 * 1024**3,
+    "sm.consolidation.buffer_size": 3 * 1024**3,
 }
 
 
