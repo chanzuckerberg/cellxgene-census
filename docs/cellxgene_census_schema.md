@@ -884,7 +884,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ### Version 1.1.0
 * Add `X["normalized"]` layer
-* Add `nnz` and `n_measured_obs` columsn to `ms["RNA"].var` dataframe
+* Add `nnz` and `n_measured_obs` columns to `ms["RNA"].var` dataframe
 * Add `nnz`, `n_measured_vars`, `raw_sum`, `raw_mean_nnz` and `raw_variance_nnz` columns to `obs` dataframe
 
 ### Version 1.0.0
