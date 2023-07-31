@@ -45,7 +45,7 @@ CENSUS_CONFIG_DEFAULTS = {
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
     "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
-    "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
+    "host_validation_min_free_disk_space": 1.8 * 1024**4,  # 1.8TiB
     #
     # Release clean up
     "release_cleanup_days": 32,  # Census builds older than this are deleted
