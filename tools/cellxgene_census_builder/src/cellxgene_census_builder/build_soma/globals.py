@@ -5,7 +5,7 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-CENSUS_SCHEMA_VERSION = "1.1.0"
+CENSUS_SCHEMA_VERSION = "1.2.0"
 
 CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
@@ -95,6 +95,7 @@ CENSUS_OBS_TERM_COLUMNS = {
     "tissue_general": pa.large_string(),
     "tissue_general_ontology_term_id": pa.large_string(),
     **CENSUS_OBS_STATS_COLUMNS,
+    "observation_joinid": pa.large_string(),
 }
 
 """
@@ -134,6 +135,10 @@ _RepetativeStringLabelObs = [
     "tissue_general_ontology_term_id",
 ]
 _NumericObs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+_OtherObs = [
+    key
+    for key in set(CENSUS_OBS_TERM_COLUMNS) - set(["soma_joinid"]) - set(_RepetativeStringLabelObs) - set(_NumericObs)
+]
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
@@ -164,6 +169,14 @@ CENSUS_OBS_PLATFORM_CONFIG = {
                         ]
                     }
                     for k in _NumericObs
+                },
+                **{
+                    k: {
+                        "filters": [
+                            {"_type": "ZstdFilter", "level": 5},
+                        ]
+                    }
+                    for k in _OtherObs
                 },
             },
             "offsets_filters": [

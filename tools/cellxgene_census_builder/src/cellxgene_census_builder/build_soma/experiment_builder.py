@@ -2,6 +2,7 @@ import concurrent.futures
 import gc
 import io
 import logging
+from base64 import b85encode
 from contextlib import ExitStack
 from typing import (
     Dict,
@@ -26,6 +27,7 @@ import tiledbsoma as soma
 from scipy import sparse
 from somacore.options import OpenMode
 from typing_extensions import Self
+from xxhash import xxh3_64_intdigest
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
@@ -225,9 +227,15 @@ class ExperimentBuilder:
         assert len(ad.obs) > 0
 
         # Narrow columns just to minimize memory footprint. Summary cell counting
-        # requires 'organism', do be careful not to delete that.
-        obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]].reset_index(drop=True).copy()
-
+        # requires 'organism' -- be careful not to delete that.
+        obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]]
+        obs_df["observation_joinid"] = (
+            obs_df.index.to_series()
+            .map(xxh3_64_intdigest)
+            .astype(np.uint64)
+            .apply(lambda v: b85encode(v.to_bytes(8, "big")))
+        )
+        obs_df = obs_df.reset_index(drop=True)
         obs_df["soma_joinid"] = range(self.n_obs, self.n_obs + len(obs_df))
         obs_df["dataset_id"] = dataset.dataset_id
 

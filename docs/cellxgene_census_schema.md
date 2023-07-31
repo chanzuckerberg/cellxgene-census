@@ -1,8 +1,8 @@
 # CZ CELLxGENE Discover Census Schema 
 
-**Version**: 1.1.0
+**Version**: 1.2.0
 
-**Last edited**: July, 2023.
+**Last edited**: August, 2023.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -881,11 +881,19 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
     <td>float32</td>
     <td>For this observation, the variance of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
   </tr>
+  <tr>
+    <td>observation_joinid</td>
+    <td>string</td>
+    <td>A short string which uniquely identifies the cell *within* its source dataset. This ID does not guarantee global uniqueness.</td>
+  </tr>
 </tbody>
 </table>
 
 
 ## Changelog
+
+### Version 1.2.0
+* Add `observation_joinid` to `obs` dataframe
 
 ### Version 1.1.0
 * Adds `dataset_version_id` to "Census table of CELLxGENE Discover datasets – `census_obj["census_info"]["datasets"]`"

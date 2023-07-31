@@ -184,6 +184,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
                         "tissue_general",
                         "tissue_general_ontology_term_id",
                         *CENSUS_OBS_STATS_COLUMNS,
+                        "observation_joinid",
                     ]
                 )
                 .sort_values(by="soma_joinid")
