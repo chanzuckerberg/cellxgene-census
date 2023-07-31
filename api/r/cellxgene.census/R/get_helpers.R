@@ -1,6 +1,6 @@
 #' Read the feature dataset presence matrix.
 #'
-#' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
+#' @param census The census object from `cellxgene.census::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #'
@@ -10,6 +10,9 @@
 #' @export
 #'
 #' @examples
+#' census <- open_soma()
+#' on.exit(census$close(), add = TRUE)
+#' print(get_presence_matrix(census, "Homo sapiens")$dim())
 get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
   exp <- get_experiment(census, organism)
   presence <- exp$ms$get(measurement_name)$get("feature_dataset_presence_matrix")

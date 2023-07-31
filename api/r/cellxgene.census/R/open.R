@@ -1,8 +1,9 @@
 #' Open the Cell Census
 #'
 #' @param census_version The version of the Census, e.g., "stable".
-#' @param uri The URI containing the Census SOMA objects. If specified, takes
-#'            precedence over `census_version`.
+#' @param uri A URI containing the Census SOMA objects to open instead of a
+#'            released version. (If supplied, takes precedence over
+#'            `census_version`.)
 #' @param tiledbsoma_ctx A `tiledbsoma::SOMATileDBContext` built using
 #'        `new_SOMATileDBContext_for_census()`. Optional (created automatically)
 #'        if using `census_version` and the context does not need to be reused.
@@ -16,6 +17,9 @@
 #' @export
 #'
 #' @examples
+#' census <- open_soma()
+#' on.exit(census$close(), add = TRUE)
+#' as.data.frame(census$get("census_info")$get("summary")$read()$concat())
 open_soma <- function(census_version = "stable", uri = NULL, tiledbsoma_ctx = NULL) {
   if (is.null(uri) || is.null(tiledbsoma_ctx)) {
     description <- get_census_version_description(census_version)
@@ -45,18 +49,22 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 
 #' Create SOMATileDBContext for Cell Census
 #' @description Create a SOMATileDBContext suitable for using with `open_soma()`.
-#' Typically `open_soma()` creates a context automatically, but it can be created
-#' separately in order to set custom configuration options or to share it between
+#' Typically `open_soma()` creates a context automatically, but one can be created
+#' separately in order to set custom configuration options, or to share it between
 #' multiple open Census handles.
 #'
 #' @param census_version_description The result of `get_census_version_description()`
 #'        for the desired Census version.
 #' @param ... Custom configuration options.
 #'
-#' @return
+#' @return SOMATileDBContext object for `open_soma()`.
 #' @export
 #'
 #' @examples
+#' census_desc <- get_census_version_description("stable")
+#' ctx <- new_SOMATileDBContext_for_census(census_desc, "soma.init_buffer_bytes" = paste(4 * 1024**3))
+#' census <- open_soma("stable", tiledbsoma_ctx = ctx)
+#' on.exit(census$close(), add = TRUE)
 new_SOMATileDBContext_for_census <- function(census_version_description, ...) {
   # start with default configuration
   cfg <- DEFAULT_TILEDB_CONFIGURATION
