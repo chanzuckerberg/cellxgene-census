@@ -94,9 +94,9 @@ def _find_removal_candidates(release_manifest: CensusReleaseManifest, days_older
     # In practice, we REQUIRE at least a `latest` tag, so this list should never be empty
     assert len(is_aliased) > 0
 
-    candidates = []
+    candidates: List[CensusVersionName] = []
     for rls_tag, rls_info in release_manifest.items():
-        if isinstance(rls_info, dict) and rls_tag not in is_aliased:
+        if isinstance(rls_info, dict) and (rls_tag not in is_aliased) and not rls_info.get("do_not_delete", False):
             # candidate for deletion - check timestamp
             rls_build_date = datetime.fromisoformat(rls_info["release_build"])
             if rls_build_date < delete_before_date:

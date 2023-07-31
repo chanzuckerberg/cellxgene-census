@@ -8,7 +8,7 @@ import s3fs
 
 from . import __version__
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
-from .util import process_init, urlcat
+from .util import log_process_resource_status, process_init, urlcat
 
 
 def main() -> int:
@@ -88,6 +88,7 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         logging.critical("Caught exception, exiting", exc_info=True)
         return 1
 
+    log_process_resource_status(level=logging.INFO)
     return 0
 
 
@@ -178,6 +179,7 @@ def do_the_release(args: CensusBuildArgs) -> bool:
             "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "h5ads/"),
             "s3_region": "us-west-2",
         },
+        "do_not_delete": False,
     }
     make_a_release(
         args.config.cellxgene_census_S3_path, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun

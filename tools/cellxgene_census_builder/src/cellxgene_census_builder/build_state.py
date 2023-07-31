@@ -35,18 +35,23 @@ CENSUS_CONFIG_DEFAULTS = {
     "logs_S3_path": "s3://cellxgene-data-public-logs/builder",
     "build_tag": datetime.now().astimezone().date().isoformat(),
     #
-    # Default multi-process. Memory scaling based on empirical tests.
+    # Default mode is multi-process.
     "multi_process": True,
-    "max_workers": 2 + int(psutil.virtual_memory().total / (96 * 1024**3)),
+    # The memory budget used to determine appropriate parallelism in many steps of build.
+    # Only set to a smaller number if you want to not use all available RAM.
+    "memory_budget": int(psutil.virtual_memory().total),
     #
     # Host minimum resource validation
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
     "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
-    "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
+    "host_validation_min_free_disk_space": 1.8 * 1024**4,  # 1.8TiB
     #
     # Release clean up
     "release_cleanup_days": 32,  # Census builds older than this are deleted
+    #
+    # Block list of dataset IDs
+    "dataset_id_blocklist_uri": "https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt",
     #
     # For testing convenience only
     "manifest": None,

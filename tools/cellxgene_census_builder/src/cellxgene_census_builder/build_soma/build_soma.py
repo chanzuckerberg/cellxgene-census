@@ -22,6 +22,7 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
+from .mp import EagerIterator, create_thread_pool_executor
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
@@ -73,14 +74,21 @@ def build(args: CensusBuildArgs) -> int:
     gc.collect()
 
     # Step 3 - populate axes
-    filtered_datasets = build_step3_populate_obs_and_var_axes(args.h5ads_path.as_posix(), datasets, experiment_builders)
+    filtered_datasets = build_step3_populate_obs_and_var_axes(
+        args.h5ads_path.as_posix(), datasets, experiment_builders, args
+    )
 
     # Step 4 - populate X layers
     build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
     gc.collect()
 
     # Step 5- write out dataset manifest and summary information
-    build_step5_populate_summary_info(root_collection, experiment_builders, filtered_datasets, args.config.build_tag)
+    build_step5_save_axis_and_summary_info(
+        root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+    )
+
+    # Step 6 - create and save derived artifacts
+    build_step6_save_derived_data(root_collection, experiment_builders, args)
 
     # consolidate TileDB data
     if args.config.consolidate:
@@ -113,7 +121,7 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    datasets = load_manifest(args.config.manifest)
+    datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
     if len(datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
@@ -130,43 +138,42 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     return datasets
 
 
-def populate_obs_axis(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder]
+def accumulate_axes(
+    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
 ) -> List[Dataset]:
     filtered_datasets = []
     N = len(datasets) * len(experiment_builders)
     n = 0
 
-    for dataset, ad in open_anndata(assets_path, datasets, backed="r"):
-        dataset_total_cell_count = 0
+    with create_thread_pool_executor() as pool:
+        adata_iter = open_anndata(assets_path, datasets, need_X=False, backed="r")
+        if args.config.multi_process:
+            adata_iter = EagerIterator(adata_iter, pool)
 
-        for eb in reopen_experiment_builders(experiment_builders):
-            n += 1
-            logging.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
-            ad_filtered = eb.filter_anndata_cells(ad)
+        for dataset, ad in adata_iter:
+            dataset_total_cell_count = 0
+            for eb in experiment_builders:
+                n += 1
+                logging.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
+                ad_filtered = eb.filter_anndata_cells(ad)
 
-            if len(ad_filtered.obs) == 0:  # type:ignore
-                logging.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
-                continue
+                if len(ad_filtered.obs) == 0:  # type:ignore
+                    logging.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
+                    continue
 
-            # append to `obs`; accumulate `var` data
-            dataset_total_cell_count += eb.accumulate_axes(dataset, ad_filtered)
+                # accumulate `obs` and `var` data
+                dataset_total_cell_count += eb.accumulate_axes(dataset, ad_filtered)
 
-        # dataset passes filter if either experiment includes cells from the dataset
-        if dataset_total_cell_count > 0:
-            filtered_datasets.append(dataset)
-            dataset.dataset_total_cell_count = dataset_total_cell_count
+            # dataset passes filter if either experiment includes cells from the dataset
+            if dataset_total_cell_count > 0:
+                filtered_datasets.append(dataset)
+                dataset.dataset_total_cell_count = dataset_total_cell_count
 
     for eb in experiment_builders:
+        eb.finalize_obs_axes()
         logging.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
 
     return filtered_datasets
-
-
-def populate_var_axis_and_presence(experiment_builders: List[ExperimentBuilder]) -> None:
-    for eb in reopen_experiment_builders(experiment_builders):
-        # populate `var`; create empty `presence` now that we have its dimensions
-        eb.populate_var_axis()
 
 
 def build_step2_create_root_collection(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
@@ -188,19 +195,18 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: List
 
 
 def build_step3_populate_obs_and_var_axes(
-    assets_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
+    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
 ) -> List[Dataset]:
     """
     Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built.
     """
     logging.info("Build step 3 - Populate obs and var axes - started")
 
-    filtered_datasets = populate_obs_axis(assets_path, datasets, experiment_builders)
+    filtered_datasets = accumulate_axes(assets_path, datasets, experiment_builders, args)
     logging.info(f"({len(filtered_datasets)} of {len(datasets)}) datasets suitable for processing.")
 
-    populate_var_axis_and_presence(experiment_builders)
+    for e in experiment_builders:
+        e.populate_var_axis()
 
     assign_dataset_soma_joinids(filtered_datasets)
 
@@ -232,17 +238,37 @@ def build_step4_populate_X_layers(
     logging.info("Build step 4 - Populate X layers - finished")
 
 
-def build_step5_populate_summary_info(
+def build_step5_save_axis_and_summary_info(
     root_collection: soma.Collection,
     experiment_builders: List[ExperimentBuilder],
     filtered_datasets: List[Dataset],
     build_tag: str,
 ) -> None:
-    logging.info("Build step 5 - Populate summary info - started")
+    logging.info("Build step 5 - Save axis and summary info - started")
+
+    for eb in reopen_experiment_builders(experiment_builders):
+        eb.write_obs_dataframe()
+        eb.write_var_dataframe()
 
     with soma.Collection.open(root_collection[CENSUS_INFO_NAME].uri, "w", context=SOMA_TileDB_Context()) as census_info:
         create_dataset_manifest(census_info, filtered_datasets)
         create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
         create_census_summary(census_info, experiment_builders, build_tag)
 
-    logging.info("Build step 5 - Populate summary info - finished")
+    logging.info("Build step 5 - Save axis and summary info - finished")
+
+
+def build_step6_save_derived_data(
+    root_collection: soma.Collection, experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
+) -> None:
+    logging.info("Build step 6 - Creating derived objects - started")
+
+    for eb in reopen_experiment_builders(experiment_builders):
+        eb.write_X_normalized(args)
+
+        # TODO: to simplify code at some build time expense, we could move
+        # feature presence matrix building into this step, and build from
+        # X['raw'] rather than building from source H5AD.
+
+    logging.info("Build step 6 - Creating derived objects - finished")
+    return

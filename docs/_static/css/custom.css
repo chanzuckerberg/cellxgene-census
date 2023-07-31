@@ -15,7 +15,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-cxg-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     background: none;
     border-radius: 0;
     color: #A7B6C2;
@@ -140,7 +141,7 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     position: fixed;
     bottom: 0;
     z-index: 991;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
 }
@@ -169,6 +170,14 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     max-width: 400px!important;
     max-height: 266px!important;
     padding: 24px;
+
+}
+
+/*
+ * We should only add `display: flex` to open state, otherwise it will be shown
+ * as a flexbox even when it's closed.
+ */
+#newsletter-modal[open] {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -277,4 +286,16 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
 
 .hs-error-msg {
     color: rgb(220, 19, 44);
+}
+
+.beta {
+    background: #7a41ce;
+    color: white;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin-left: 4px;
+    font-size: 10px;
+    line-height: 8px;
+    letter-spacing: 1px;
+    height: 16px!important;
 }

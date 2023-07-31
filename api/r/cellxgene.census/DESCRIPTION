@@ -17,6 +17,7 @@ Additional_repositories: https://tiledb-inc.r-universe.dev
 biocViews:
 Imports:
   aws.s3,
+  dplyr,
   httr,
   jsonlite,
   methods,

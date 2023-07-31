@@ -1,8 +1,12 @@
 # CZ CELLxGENE Discover Census Schema 
 
-**Version**: 1.0.0.
+<<<<<<< HEAD
+**Version**: 1.1.0
+=======
+**Version**: 1.1.0.
+>>>>>>> main
 
-**Last edited**: Apr, 2023.
+**Last edited**: July, 2023.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -380,6 +384,11 @@ All datasets used to build the Census MUST be included in a table modeled as a `
     <td>int</td>
     <td>Total number of cells from the dataset included in the Census.</td>
   </tr>
+  <tr>
+    <td>dataset_version_id</td>
+    <td>string</td>
+    <td>As defined in CELLxGENE Discover [data schema](https://api.cellxgene.cziscience.com/curation/ui/) (see "Schemas" section for field definitions)".</td>
+  </tr>
 </tbody>
 </table>
 
@@ -669,6 +678,7 @@ For each organism the `SOMAExperiment` MUST contain the following:
 * Data  –  `census_obj["census_data"][organism].ms` – `SOMACollection`. This `SOMACollection` MUST only contain one `SOMAMeasurement` in `census_obj["census_data"][organism].ms["RNA"]` with the following:
 	* Matrix  data –  `census_obj["census_data"][organism].ms["RNA"].X` – `SOMACollection`. It MUST contain exactly one layer: 
 		* Count matrix – `census_obj["census_data"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
+		* Normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
 	* Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
 	* Feature dataset presence matrix – `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
 
@@ -676,6 +686,13 @@ For each organism the `SOMAExperiment` MUST contain the following:
 
 Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNDArray` with a fill value of zero (0), and no explicitly stored zero values.
 
+#### Matrix Data, normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
+
+This is an experimental data artifact - it may be removed at any time.
+
+A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
+For a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
+as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
 
 #### Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMADataFrame`
 
@@ -702,12 +719,22 @@ The following columns MUST be included:
   <tr>
     <td>feature_name</td>
     <td>str</td>
-    <td>As defined in CELLxGENE dataset schema </td>
+    <td>As defined in CELLxGENE dataset schema</td>
   </tr>
   <tr>
     <td>feature_length</td>
     <td>int</td>
     <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+  </tr>
+  <tr>
+    <td>nnz</td>
+    <td>int64</td>
+    <td>For this feature, the number of non-zero values present in the `X['raw']` counts (raw) matrix.</td>
+  </tr>
+  <tr>
+    <td>n_measured_obs</td>
+    <td>int64</td>
+    <td>For this feature, the number of observations present in the source H5AD (sum of feature presence matrix).</td>
   </tr>
 </tbody>
 </table>
@@ -833,11 +860,42 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   <tr>
     <td>tissue</td>
   </tr>
+  <tr>
+    <td>nnz</td>
+    <td>int64</td>
+    <td>For this observation, the number of non-zero measurements in the `X['raw']` counts (raw) matrix.</td>
+  </tr>
+  <tr>
+    <td>n_measured_vars</td>
+    <td>int64</td>
+    <td>For this observation, the number of features present in the source H5AD (sum of feature presence matrix).</td>
+  </tr>
+  <tr>
+    <td>raw_sum</td>
+    <td>float32</td>
+    <td>For this observation, the sum of the `X['raw']` counts (raw) matrix values.</td>
+  </tr>
+  <tr>
+    <td>raw_mean_nnz</td>
+    <td>float32</td>
+    <td>For this observation, the mean of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
+  </tr>
+  <tr>
+    <td>raw_variance_nnz</td>
+    <td>float32</td>
+    <td>For this observation, the variance of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
+  </tr>
 </tbody>
 </table>
 
 
 ## Changelog
+
+### Version 1.1.0
+* Adds `dataset_version_id` to "Census table of CELLxGENE Discover datasets – `census_obj["census_info"]["datasets"]`"
+* Add `X["normalized"]` layer
+* Add `nnz` and `n_measured_obs` columns to `ms["RNA"].var` dataframe
+* Add `nnz`, `n_measured_vars`, `raw_sum`, `raw_mean_nnz` and `raw_variance_nnz` columns to `obs` dataframe
 
 ### Version 1.0.0
 * Updates text to reflect official name: CZ CELLxGENE Discover Census.

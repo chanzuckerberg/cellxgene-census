@@ -62,6 +62,45 @@ census <- open_soma(census_version = "latest")
 
 ## List of LTS Census data releases
 
+### LTS 2023-07-25
+
+Open this data release by specifying `census_version = "2023-07-25"` in future calls to `open_soma()`.
+
+#### Version information
+
+
+| Information                       | Value      |
+|-----------------------------------|------------|
+| Census schema version             | [1.0.0](https://github.com/chanzuckerberg/cellxgene-census/blob/f06bcebb6471735681fd84734d2d581c44e049e7/docs/cellxgene_census_schema.md) |
+| Census build date                 | 2023-07-25 |
+| Dataset schema version            | [3.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/a64ac9eb70e3e777ee34098ae82120c2d21692b0/schema/3.0.0/schema.md)      |
+| Number of datasets                | 593        |
+
+
+#### Cell and donor counts
+
+| Type              | _Homo sapiens_ | _Mus musculus_ |
+|-------------------|----------------|----------------|
+| Total cells       | 56,400,873     | 5,255,245      |    
+| Unique cells      | 33,758,887     | 4,083,531     |
+| Number of donors  | 13,035         | 1,417          |
+
+
+
+#### Cell metadata
+
+| Category                | _Homo sapiens_ | _Mus musculus_ |
+|-------------------------|----------------|----------------|
+| Assay                   | 19             | 9              |
+| Cell type               | 613            | 248            |
+| Development stage       | 164            | 33             |
+| Disease                 | 64             | 5              |
+| Self-reported ethnicity | 26             | _NA_           |
+| Sex                     | 3              | 3              |
+| Suspension type         | 2              | 2              |
+| Tissue                  | 220            | 66             |
+| Tissue general          | 54             | 27             | 
+
 ### LTS 2023-05-15
 
 Open this data release by specifying `census_version = "2023-05-15"` in future calls to `open_soma()`.
@@ -85,15 +124,15 @@ If you wish to use this data release, you can consider filtering out all of thes
 | Census schema version             | [1.0.0](https://github.com/chanzuckerberg/cellxgene-census/blob/f06bcebb6471735681fd84734d2d581c44e049e7/docs/cellxgene_census_schema.md) |
 | Census build date                 | 2023-05-15 |
 | Dataset schema version            | [3.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/a64ac9eb70e3e777ee34098ae82120c2d21692b0/schema/3.0.0/schema.md)      |
-| Number of datasets                | 596        |
+| Number of datasets                | 562        |
 
 
 #### Cell and donor counts
 
 | Type              | _Homo sapiens_ | _Mus musculus_ |
 |-------------------|----------------|----------------|
-| Total cells       | 57,264,902     | 5,255,245      |    
-| Unique cells      | 33,702,979     | 4,083,531      |
+| Total cells       | 53,794,728     | 4,086,032      |    
+| Unique cells      | 33,758,887     | 2,914,318      |
 | Number of donors  | 12,493         | 1,362          |
 
 
@@ -103,11 +142,11 @@ If you wish to use this data release, you can consider filtering out all of thes
 | Category                | _Homo sapiens_ | _Mus musculus_ |
 |-------------------------|----------------|----------------|
 | Assay                   | 20             | 9              |
-| Cell type               | 605            | 248            |
-| Development stage       | 164            | 33             |
+| Cell type               | 604            | 226            |
+| Development stage       | 164            | 30             |
 | Disease                 | 68             | 5              |
 | Self-reported ethnicity | 26             | _NA_           |
 | Sex                     | 3              | 3              |
 | Suspension type         | 2              | 2              |
-| Tissue                  | 230            | 66             |
-| Tissue general          | 60             | 27             | 
+| Tissue                  | 227            | 51             |
+| Tissue general          | 61             | 27             | 
