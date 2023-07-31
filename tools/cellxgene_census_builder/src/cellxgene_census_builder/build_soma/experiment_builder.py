@@ -233,7 +233,7 @@ class ExperimentBuilder:
             obs_df.index.to_series()
             .map(xxh3_64_intdigest)
             .astype(np.uint64)
-            .apply(lambda v: b85encode(v.to_bytes(8, "big")))
+            .apply(lambda v: b85encode(v.to_bytes(8, "big")).decode("ascii"))
         )
         obs_df = obs_df.reset_index(drop=True)
         obs_df["soma_joinid"] = range(self.n_obs, self.n_obs + len(obs_df))
