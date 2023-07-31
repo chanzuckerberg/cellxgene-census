@@ -884,7 +884,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   <tr>
     <td>observation_joinid</td>
     <td>string</td>
-    <td>A short string which uniquely identifies the observation <b>within</b> its source dataset. This ID does not guarantee global uniqueness, nor is the ID value guaranteed to remain constant across releases of the Census.</td>
+    <td>A string value which uniquely identifies the observation <b>within</b> its source dataset. This ID does not guarantee global uniqueness, nor is the ID value guaranteed to remain constant across releases of the Census.</td>
   </tr>
 </tbody>
 </table>
