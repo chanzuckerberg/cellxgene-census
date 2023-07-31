@@ -1,10 +1,6 @@
 # CZ CELLxGENE Discover Census Schema 
 
-<<<<<<< HEAD
 **Version**: 1.1.0
-=======
-**Version**: 1.1.0.
->>>>>>> main
 
 **Last edited**: July, 2023.
 
