@@ -1,4 +1,4 @@
-❗ **R API in beta.**
+ <span style="color: Coral; font-size: 18px"> 🎉 🎉 **The R API stable version has launched. Find out more about it [here.](articles/2023/20230808-r_api_release.md)** <span>
 
 # CZ CELLxGENE Discover Census
 

@@ -16,7 +16,7 @@ Users can install `cellxgene.census` and its dependencies following the [install
 
 To learn more about the package please make sure to check out the following resources:
 
-* [Quick start guide.](cellxgene_census_docsite_quick_start.md)
+* [Quick start guide.](../../cellxgene_census_docsite_quick_start.md)
 * [R reference docs and tutorials.](https://chanzuckerberg.github.io/cellxgene-census/r/index.html)
 * Querying and slicing data tutorial << INSERT LINK >>.
 
