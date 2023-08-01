@@ -155,7 +155,7 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         return _ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
 
 
-def run_gc() -> tuple[tuple[Any, Any, Any], tuple[Any, Any, Any]]:
+def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:
     proc = psutil.Process(os.getpid())
 
     pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
