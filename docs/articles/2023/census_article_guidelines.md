@@ -45,7 +45,7 @@ census <- open_soma()
 
 # Your work!
 
-census.close()
+census$close()
 ``` 
 
 ### Querying and reading single-cell metadata from Census
@@ -74,7 +74,7 @@ cell_metadata <- cell_metadata$concat()
 # Convert to R tibble (dataframe)
 cell_metadata = as.data.frame(cell_metadata)
 
-census.close()
+census$close()
 ```
 
 ### Exporting Census slices to `Seurat` and `SingleCellExperiment`
@@ -95,7 +95,7 @@ seurat_obj = get_seurat(census = census, organism = organism, var_value_filter =
 
 sce_obj = get_single_cell_experiment(census = census, organism = organism, var_value_filter = gene_filter, obs_value_filter = cell_filter, obs_column_names = cell_columns)
 
-census.close()
+census$close()
 ```
 
 ### Streaming data incrementally in chunks
