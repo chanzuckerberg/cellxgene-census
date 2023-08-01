@@ -43,6 +43,12 @@ def create_args_parser() -> argparse.ArgumentParser:
         help="Use multiple processes",
     )
     parser.add_argument(
+        "--max_worker_processes",
+        type=int,
+        default=CENSUS_CONFIG_DEFAULTS["max_worker_processes"],
+        help="Limit on number of worker processes",
+    )
+    parser.add_argument(
         "--build-tag",
         type=str,
         default=datetime.now().astimezone().date().isoformat(),
