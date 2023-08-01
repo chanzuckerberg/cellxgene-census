@@ -22,7 +22,7 @@ To learn more about the package please make sure to check out the following reso
 
 ## Census R package is made possible by `tiledbsoma`
 
-The `cellxgene.census` package relies for on [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) R's package `tiledbsoma` for all of its data access capabilities as shown in the next section. 
+The `cellxgene.census` package relies on [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) R's package `tiledbsoma` for all of its data access capabilities as shown in the next section. 
 
 CZI and TileDB have worked closely on the development of `tiledbsoma` and recently promoted it from beta stage to its first stable version.  << INSERT link their release notes >>
 
@@ -45,8 +45,7 @@ census <- open_soma()
 
 # Your work!
 
-close(census)
-
+census.close()
 ``` 
 
 ### Querying and reading single-cell metadata from Census
@@ -75,8 +74,7 @@ cell_metadata <- cell_metadata$concat()
 # Convert to R tibble (dataframe)
 cell_metadata = as.data.frame(cell_metadata)
 
-close(census)
-
+census.close()
 ```
 
 ### Exporting Census slices to `Seurat` and `SingleCellExperiment`
@@ -97,7 +95,7 @@ seurat_obj = get_seurat(census = census, organism = organism, var_value_filter =
 
 sce_obj = get_single_cell_experiment(census = census, organism = organism, var_value_filter = gene_filter, obs_value_filter = cell_filter, obs_column_names = cell_columns)
 
-close(census)
+census.close()
 ```
 
 ### Streaming data incrementally in chunks
