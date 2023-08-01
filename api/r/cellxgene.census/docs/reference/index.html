@@ -18,17 +18,23 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main doc-site</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <h6 class="dropdown-header" data-toc-skip>Learn about the data do analysis</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
+    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -51,7 +57,7 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="open-retrieve-census-data">Open/retrieve Census data<a class="anchor" aria-label="anchor" href="#open-retrieve-census-data"></a></h2>
       
       
 
@@ -63,10 +69,69 @@
 
       <dl><dt>
           
+          <code><a href="open_soma.html">open_soma()</a></code> 
+        </dt>
+        <dd>Open the Cell Census</dd>
+      </dl><dl><dt>
+          
+          <code><a href="new_SOMATileDBContext_for_census.html">new_SOMATileDBContext_for_census()</a></code> 
+        </dt>
+        <dd>Create SOMATileDBContext for Cell Census</dd>
+      </dl><dl><dt>
+          
           <code><a href="download_source_h5ad.html">download_source_h5ad()</a></code> 
         </dt>
         <dd>Download source H5AD to local file name.</dd>
       </dl><dl><dt>
+          
+          <code><a href="get_source_h5ad_uri.html">get_source_h5ad_uri()</a></code> 
+        </dt>
+        <dd>Locate source h5ad file for a dataset.</dd>
+      </dl></div><div class="section level2">
+      <h2 id="export-slices-of-data">Export slices of data<a class="anchor" aria-label="anchor" href="#export-slices-of-data"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="get_seurat.html">get_seurat()</a></code> 
+        </dt>
+        <dd>Convenience wrapper around <code>SOMAExperimentAxisQuery</code>, to build and execute a
+query, and return it as a <code>Seurat</code> object.</dd>
+      </dl></div><div class="section level2">
+      <h2 id="feature-presence-matrix">Feature presence matrix<a class="anchor" aria-label="anchor" href="#feature-presence-matrix"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="get_presence_matrix.html">get_presence_matrix()</a></code> 
+        </dt>
+        <dd>Read the feature dataset presence matrix.</dd>
+      </dl></div><div class="section level2">
+      <h2 id="versioning-of-census-builds">Versioning of Census builds<a class="anchor" aria-label="anchor" href="#versioning-of-census-builds"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
           <code><a href="get_census_version_description.html">get_census_version_description()</a></code> 
         </dt>
@@ -76,34 +141,9 @@
           <code><a href="get_census_version_directory.html">get_census_version_directory()</a></code> 
         </dt>
         <dd>Get the directory of cell census releases currently available</dd>
-      </dl><dl><dt>
-          
-          <code><a href="get_presence_matrix.html">get_presence_matrix()</a></code> 
-        </dt>
-        <dd>Read the feature dataset presence matrix.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="get_seurat.html">get_seurat()</a></code> 
-        </dt>
-        <dd>Convenience wrapper around <code>SOMAExperimentAxisQuery</code>, to build and execute a
-query, and return it as a <code>Seurat</code> object.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="get_source_h5ad_uri.html">get_source_h5ad_uri()</a></code> 
-        </dt>
-        <dd>Locate source h5ad file for a dataset.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="new_SOMATileDBContext_for_census.html">new_SOMATileDBContext_for_census()</a></code> 
-        </dt>
-        <dd>Create SOMATileDBContext for Cell Census</dd>
-      </dl><dl><dt>
-          
-          <code><a href="open_soma.html">open_soma()</a></code> 
-        </dt>
-        <dd>Open the Cell Census</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

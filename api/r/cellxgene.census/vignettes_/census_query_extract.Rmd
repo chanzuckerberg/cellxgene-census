@@ -136,10 +136,12 @@ seurat_obj <- cellxgene.census::get_seurat(
   census, "Homo sapiens",
   obs_column_names = c("cell_type", "tissue_general", "disease", "sex"),
   var_value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
-  obs_value_filter = "cell_type == 'B cell' && tissue_general == 'lung' && disease == 'COVID-19'"
+  obs_value_filter = "cell_type == 'B cell' && tissue_general == 'lung'"
 )
 seurat_obj
 ```
+
+**FIXME: restore `&& disease == 'COVID-19'` to `obs_value_filter` above**
 
 ```{r}
 head(seurat_obj@meta.data)

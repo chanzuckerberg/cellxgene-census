@@ -36,16 +36,22 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main doc-site</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <h6 class="dropdown-header" data-toc-skip>Learn about the data do analysis</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
+    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
   </div>
 </li>
       </ul>
@@ -104,11 +110,11 @@ contained therein. You can read this <code>SOMADataFrame</code> into an
 Table</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The stable Census release is currently 2023-05-15. Specify census_version = "2023-05-15" in future calls to open_soma() to ensure data consistency.</span></span>
+<span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span>
 <span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Table</span></span>
-<span><span class="co">#&gt; 562 rows x 8 columns</span></span>
+<span><span class="co">#&gt; 593 rows x 8 columns</span></span>
 <span><span class="co">#&gt; $soma_joinid &lt;int64 not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_id &lt;large_string not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_name &lt;large_string not null&gt;</span></span>
@@ -125,124 +131,36 @@ Table</a>:</p>
 <span>  <span class="st">"dataset_title"</span>,</span>
 <span>  <span class="st">"dataset_total_cell_count"</span></span>
 <span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                              dataset_id</span></span>
-<span><span class="co">#&gt; 1  9d8e5dca-03a3-457d-b7fb-844c75735c83</span></span>
-<span><span class="co">#&gt; 2  a6388a6f-6076-401b-9b30-7d4306a20035</span></span>
-<span><span class="co">#&gt; 3  842c6f5d-4a94-4eef-8510-8c792d1124bc</span></span>
-<span><span class="co">#&gt; 4  74520626-b0ba-4ee9-86b5-714649554def</span></span>
-<span><span class="co">#&gt; 5  396a9124-fb20-4822-bf9c-e93fdf7c999a</span></span>
-<span><span class="co">#&gt; 6  e84f2780-51e8-4cfa-8aa0-13bbfef677c7</span></span>
-<span><span class="co">#&gt; 7  dfdf1ae2-d624-4004-9353-f18b902f6bca</span></span>
-<span><span class="co">#&gt; 8  d1cbed97-d88f-4954-8925-13302fe30b39</span></span>
-<span><span class="co">#&gt; 9  b03e4ef8-4e6b-47f4-84a7-e8ed033d08cd</span></span>
-<span><span class="co">#&gt; 10 f1f123cc-ca2c-460f-b7f1-88240efb1e82</span></span>
-<span><span class="co">#&gt; 11 de94c504-4b58-4f42-b68d-74a8e4892f0e</span></span>
-<span><span class="co">#&gt; 12 da684768-fb01-455b-9f0f-b63a3e2f844f</span></span>
-<span><span class="co">#&gt; 13 9f222629-9e39-47d0-b83f-e08d610c7479</span></span>
-<span><span class="co">#&gt; 14 b0e547f0-462b-4f81-b31b-5b0a5d96f537</span></span>
-<span><span class="co">#&gt; 15 d41f45c1-1b7b-4573-a998-ac5c5acb1647</span></span>
-<span><span class="co">#&gt; 16 f801b7a9-80a6-4d09-9161-71474deb58ae</span></span>
-<span><span class="co">#&gt; 17 be39785b-67cb-4177-be19-a40ee3747e45</span></span>
-<span><span class="co">#&gt; 18 4c6f9f26-5470-455b-8933-c408232fbf56</span></span>
-<span><span class="co">#&gt; 19 be35c935-ee4f-475c-9d3c-97630d59a735</span></span>
-<span><span class="co">#&gt; 20 975e13b6-bec1-4eed-b46a-9be1f1357373</span></span>
-<span><span class="co">#&gt; 21 24ec2dc5-3573-4d66-a9e1-25b7dcf43e27</span></span>
-<span><span class="co">#&gt; 22 0ba636a1-4754-4786-a8be-7ab3cf760fd6</span></span>
-<span><span class="co">#&gt; 23 c2876b1b-06d8-4d96-a56b-5304f815b99a</span></span>
-<span><span class="co">#&gt; 24 3f32121d-126b-4e8d-9f69-d86502d2a1b1</span></span>
-<span><span class="co">#&gt; 25 be46dfdc-0f99-4731-8957-64ca37364985</span></span>
-<span><span class="co">#&gt; 26 ac2fea99-ce08-4fca-8d03-a19f37bf21a3</span></span>
-<span><span class="co">#&gt; 27 a13bda79-9134-46c9-9ed1-a2858be9aafe</span></span>
-<span><span class="co">#&gt; 28 5695d556-974e-4d92-9e99-5f61b8695313</span></span>
-<span><span class="co">#&gt; 29 535e9336-2d8d-43c3-944d-bcbebe20df8a</span></span>
-<span><span class="co">#&gt; 30 4fb330ab-2d74-4649-b58f-7ffef457efdf</span></span>
-<span><span class="co">#&gt; 31 290d50c7-7158-4198-acf5-6d4b624fd3dc</span></span>
-<span><span class="co">#&gt; 32 18e2a8c5-33f7-455e-a58a-b2ba6921db27</span></span>
-<span><span class="co">#&gt; 33 12967895-3d58-4e93-be2c-4e1bcf4388d5</span></span>
-<span><span class="co">#&gt;                                                                                                                            dataset_title</span></span>
-<span><span class="co">#&gt; 1                                                                                                                  22 integrated samples</span></span>
-<span><span class="co">#&gt; 2                                                                                                         scRNA-seq data - myeloid cells</span></span>
-<span><span class="co">#&gt; 3                                                                                                             scRNA-seq data - all cells</span></span>
-<span><span class="co">#&gt; 4                                                                                                               scRNA-seq data - T cells</span></span>
-<span><span class="co">#&gt; 5                                                                                                               scRNA-seq data - B cells</span></span>
-<span><span class="co">#&gt; 6                                                                                                     All cells from human liver dataset</span></span>
-<span><span class="co">#&gt; 7                                                                                                 Myeloid cells from human liver dataset</span></span>
-<span><span class="co">#&gt; 8                                                                                           CD45 negative cells from human liver dataset</span></span>
-<span><span class="co">#&gt; 9                                                                                                Lymphoid cells from human liver dataset</span></span>
-<span><span class="co">#&gt; 10                                                                                        UMAP visualization of keratinocyte subclusters</span></span>
-<span><span class="co">#&gt; 11                                                                                                 UMAP visualization of all 12 datasets</span></span>
-<span><span class="co">#&gt; 12                                                                                          UMAP visualization of fibroblast subclusters</span></span>
-<span><span class="co">#&gt; 13                                                               An integrated cell atlas of the human lung in health and disease (full)</span></span>
-<span><span class="co">#&gt; 14                                AIDA Phase 1: Chinese, Indian, Japanese, Korean, and Malay donors in Japan, Singapore, and South Korea</span></span>
-<span><span class="co">#&gt; 15  Transcriptional connectivity of regulatory T cells in the tumor microenvironment informs novel combination cancer therapy strategies</span></span>
-<span><span class="co">#&gt; 16 normal - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
-<span><span class="co">#&gt; 17  ccRCC - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
-<span><span class="co">#&gt; 18  chRCC - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
-<span><span class="co">#&gt; 19                                                                                                                         HBCA - stroma</span></span>
-<span><span class="co">#&gt; 20                                                                                                                     HBCA - epithelial</span></span>
-<span><span class="co">#&gt; 21                                                                                                                         HBCA - immune</span></span>
-<span><span class="co">#&gt; 22                                                                                                                         HBCA - global</span></span>
-<span><span class="co">#&gt; 23                                                                      Whole Taxonomy - MTG: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 24                                                                                        fetal and neonatal human small intestine cells</span></span>
-<span><span class="co">#&gt; 25                                                                                                            Mouse Somatic Cell Lineage</span></span>
-<span><span class="co">#&gt; 26                                                                                                             Human Immune Cell Lineage</span></span>
-<span><span class="co">#&gt; 27                                                                                                                            Mouse Male</span></span>
-<span><span class="co">#&gt; 28                                                                                                                      Mouse Germ Cells</span></span>
-<span><span class="co">#&gt; 29                                                                                                                            Human Male</span></span>
-<span><span class="co">#&gt; 30                                                                                                            Human Somatic Cell Lineage</span></span>
-<span><span class="co">#&gt; 31                                                                                                                      Human Germ Cells</span></span>
-<span><span class="co">#&gt; 32                                                                                                                          Human Female</span></span>
-<span><span class="co">#&gt; 33                                                                                                                          Mouse Female</span></span>
-<span><span class="co">#&gt;    dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 1                     72335</span></span>
-<span><span class="co">#&gt; 2                     30789</span></span>
-<span><span class="co">#&gt; 3                    714331</span></span>
-<span><span class="co">#&gt; 4                     76567</span></span>
-<span><span class="co">#&gt; 5                     12510</span></span>
-<span><span class="co">#&gt; 6                    167598</span></span>
-<span><span class="co">#&gt; 7                     40821</span></span>
-<span><span class="co">#&gt; 8                     15481</span></span>
-<span><span class="co">#&gt; 9                    105790</span></span>
-<span><span class="co">#&gt; 10                     9471</span></span>
-<span><span class="co">#&gt; 11                    15243</span></span>
-<span><span class="co">#&gt; 12                     2303</span></span>
-<span><span class="co">#&gt; 13                  2282447</span></span>
-<span><span class="co">#&gt; 14                  1058909</span></span>
-<span><span class="co">#&gt; 15                    82991</span></span>
-<span><span class="co">#&gt; 16                     6044</span></span>
-<span><span class="co">#&gt; 17                    20509</span></span>
-<span><span class="co">#&gt; 18                     2576</span></span>
-<span><span class="co">#&gt; 19                   413997</span></span>
-<span><span class="co">#&gt; 20                   353167</span></span>
-<span><span class="co">#&gt; 21                    23714</span></span>
-<span><span class="co">#&gt; 22                   800198</span></span>
-<span><span class="co">#&gt; 23                  1226855</span></span>
-<span><span class="co">#&gt; 24                    36359</span></span>
-<span><span class="co">#&gt; 25                    50933</span></span>
-<span><span class="co">#&gt; 26                    20556</span></span>
-<span><span class="co">#&gt; 27                    32889</span></span>
-<span><span class="co">#&gt; 28                    10411</span></span>
-<span><span class="co">#&gt; 29                   133811</span></span>
-<span><span class="co">#&gt; 30                   191230</span></span>
-<span><span class="co">#&gt; 31                    10993</span></span>
-<span><span class="co">#&gt; 32                   213898</span></span>
-<span><span class="co">#&gt; 33                    69709</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 529 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 593 × 3</span></span></span>
+<span><span class="co">#&gt;    dataset_id                           dataset_title             dataset_total_cell_c…¹</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> f171db61-e57e-4535-a06a-35d8b6ef8f2b donor_p13_trophoblasts                     <span style="text-decoration: underline;">31</span>497</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ecf2e08e-2032-4a9e-b466-b65b395f4a02 All donors trophoblasts                    <span style="text-decoration: underline;">67</span>070</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 74cff64f-9da9-4b2a-9b3b-8a04a1598040 All donors all cell stat…                 <span style="text-decoration: underline;">286</span>326</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 5af90777-6760-4003-9dba-8f945fec6fdf Single-cell transcriptom…                 <span style="text-decoration: underline;">270</span>855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bd65a70f-b274-4133-b9dd-0d1431b6af34 Single-cell sequencing l…                 <span style="text-decoration: underline;">167</span>283</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ff45e623-7f5f-46e3-b47d-56be0341f66b Tabula Sapiens - Pancreas                  <span style="text-decoration: underline;">13</span>497</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> f01bdd17-4902-40f5-86e3-240d66dd2587 Tabula Sapiens - Salivar…                  <span style="text-decoration: underline;">27</span>199</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> e6a11140-2545-46bc-929e-da243eed2cae Tabula Sapiens - Heart                     <span style="text-decoration: underline;">11</span>505</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> e5c63d94-593c-4338-a489-e1048599e751 Tabula Sapiens - Bladder                   <span style="text-decoration: underline;">24</span>583</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> d8732da6-8d1d-42d9-b625-f2416c30054b Tabula Sapiens - Trachea                    <span style="text-decoration: underline;">9</span>522</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 583 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​dataset_total_cell_count</span></span></span></code></pre></div>
 <p>The sum of cell counts across all datasets should match the number of
 cells across all SOMA experiments (human, mouse).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_data</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span></span>
 <span><span class="va">all_experiments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">census_data</span><span class="op">$</span><span class="fu">to_list</span><span class="op">(</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">it</span><span class="op">)</span> <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">it</span><span class="op">$</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_experiments</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $homo_sapiens</span></span>
+<span><span class="co">#&gt; $mus_musculus</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
-<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-05-15/soma/census_data/homo_sapiens </span></span>
+<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-07-25/soma/census_data/mus_musculus </span></span>
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms* </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $mus_musculus</span></span>
+<span><span class="co">#&gt; $homo_sapiens</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
-<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-05-15/soma/census_data/mus_musculus </span></span>
+<span><span class="co">#&gt;   uri: s3://cellxgene-data-public/cell-census/2023-07-25/soma/census_data/homo_sapiens </span></span>
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms*</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -250,12 +168,12 @@ cells across all SOMA experiments (human, mouse).</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">it</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Found"</span>, <span class="va">experiments_total_cells</span>, <span class="st">"cells in all experiments."</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Found 57880760 cells in all experiments."</span></span>
+<span><span class="co">#&gt; [1] "Found 61656118 cells in all experiments."</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Found"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_total_cell_count</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="st">"cells in all datasets."</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Found 57880760 cells in all datasets."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Found 61656118 cells in all datasets."</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fetching-the-expression-data-from-a-single-dataset">Fetching the expression data from a single dataset<a class="anchor" aria-label="anchor" href="#fetching-the-expression-data-from-a-single-dataset"></a>
@@ -265,14 +183,11 @@ Seurat in-memory object. (This requires the <code>Seurat</code> package
 to have been installed beforehand.)</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_datasets</span><span class="op">[</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;     soma_joinid                        collection_id    collection_name</span></span>
-<span><span class="co">#&gt; 492         491 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
-<span><span class="co">#&gt;                collection_doi                           dataset_id</span></span>
-<span><span class="co">#&gt; 492 10.1038/s41586-020-2496-1 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149</span></span>
-<span><span class="co">#&gt;                                                                                        dataset_title</span></span>
-<span><span class="co">#&gt; 492 Bone marrow - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
-<span><span class="co">#&gt;                             dataset_h5ad_path dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 492 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad                    40220</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
+<span><span class="co">#&gt;   soma_joinid collection_id      collection_name collection_doi dataset_id dataset_title</span></span>
+<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         522 0b9d8a04-bb9d-44d… Tabula Muris S… 10.1038/s4158… 0bd1a1de-… Bone marrow …</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: dataset_h5ad_path &lt;chr&gt;, dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
 <p>Create a query on the mouse experiment, “RNA” measurement, for the
 <code>dataset_id</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -317,7 +232,7 @@ download to your system.</p>
 <code class="sourceCode R"><span><span class="co"># Option 2: Get location and download via preferred method</span></span>
 <span><span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_source_h5ad_uri.html">get_source_h5ad_uri</a></span><span class="op">(</span><span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $uri</span></span>
-<span><span class="co">#&gt; [1] "s3://cellxgene-data-public/cell-census/2023-05-15/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
+<span><span class="co">#&gt; [1] "s3://cellxgene-data-public/cell-census/2023-07-25/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $s3_region</span></span>
 <span><span class="co">#&gt; [1] "us-west-2"</span></span></code></pre></div>

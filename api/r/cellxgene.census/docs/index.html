@@ -40,16 +40,22 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main doc-site</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <h6 class="dropdown-header" data-toc-skip>Learn about the data do analysis</h6>
     <a class="dropdown-item" href="articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
+    <a class="dropdown-item" href="articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
   </div>
 </li>
       </ul>
@@ -103,47 +109,8 @@
 <p>For more help, please file a issue on the repo, or contact us at <a href="mailto:soma@chanzuckerberg.com" class="email">soma@chanzuckerberg.com</a></p>
 <p>If you believe you have found a security issue, we would appreciate notification. Please send email to <a href="mailto:security@chanzuckerberg.com" class="email">security@chanzuckerberg.com</a>.</p>
 </div>
-<div class="section level2">
-<h2 id="internal-vignettes-and-pkgdown-docs">(internal) vignettes and pkgdown docs<a class="anchor" aria-label="anchor" href="#internal-vignettes-and-pkgdown-docs"></a>
-</h2>
-<p>Our vignettes use too much time and memory to build routinely in the standard <code>R CMD build</code> procedure (especially in the limited memory available on GitHub Actions workers used by r-universe, which also doesn’t provide build flags like <code>--no-build-vignettes</code>). For this reason, the vignettes are stored under <a href="vignettes_"><code>vignettes_/</code></a> instead of <code>vignettes/</code> so that <code>R CMD build</code> doesn’t find them.</p>
-<p>The vignettes are included in our pkgdown documentation site. To build this, the <a href="update_docs.sh"><code>update_docs.sh</code></a> script locally+temporarily symlinks <code>vignettes/</code> to <code>vignettes_/</code> so that pkgdown finds them. We then check in the resulting <code>docs/</code> folder to git, to be copied into the docsite by the <a href="../../../.github/workflows/docsite-build-deploy.yml">docsite-build-deploy workflow</a>.</p>
 </div>
-</div>
-  </main><aside class="col-md-3"><div class="links">
-<h2 data-toc-skip>Links</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/chanzuckerberg/cellxgene-census/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/chanzuckerberg/cellxgene-census/issues" class="external-link">Report a bug</a></li>
-</ul>
-</div>
-
-<div class="license">
-<h2 data-toc-skip>License</h2>
-<ul class="list-unstyled">
-<li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
-</ul>
-</div>
-
-
-<div class="citation">
-<h2 data-toc-skip>Citation</h2>
-<ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing cellxgene.census</a></li>
-</ul>
-</div>
-
-<div class="developers">
-<h2 data-toc-skip>Developers</h2>
-<ul class="list-unstyled">
-<li>Chan Zuckerberg Initiative <br><small class="roles"> Author, maintainer, copyright holder, funder </small>  </li>
-</ul>
-</div>
-
-
-
-  </aside>
+  </main><aside class="col-md-3"></aside>
 </div>
 
 
