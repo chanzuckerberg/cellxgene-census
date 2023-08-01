@@ -1,4 +1,5 @@
 #!/bin/bash
+# SEE vignettes_/README.md
 
 set -euo pipefail
 
