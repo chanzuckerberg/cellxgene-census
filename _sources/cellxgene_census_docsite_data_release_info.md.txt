@@ -82,7 +82,7 @@ Open this data release by specifying `census_version = "2023-07-25"` in future c
 | Type              | _Homo sapiens_ | _Mus musculus_ |
 |-------------------|----------------|----------------|
 | Total cells       | 56,400,873     | 5,255,245      |    
-| Unique cells      | 33,758,887     | 4,083,531     |
+| Unique cells      | 33,364,242     | 4,083,531     |
 | Number of donors  | 13,035         | 1,417          |
 
 

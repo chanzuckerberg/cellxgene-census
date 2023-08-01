@@ -106,7 +106,7 @@
                 
                 
                 <div class="version">
-                    1.4.0
+                    v1.4.0
                 </div>
                 
             
@@ -172,8 +172,8 @@
                 
   <section id="cz-cellxgene-discover-census-schema">
 <h1>CZ CELLxGENE Discover Census Schema<a class="headerlink" href="#cz-cellxgene-discover-census-schema" title="Permalink to this heading">¶</a></h1>
-<p><strong>Version</strong>: 1.0.0.</p>
-<p><strong>Last edited</strong>: Apr, 2023.</p>
+<p><strong>Version</strong>: 1.1.0</p>
+<p><strong>Last edited</strong>: July, 2023.</p>
 <p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED” “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <a class="reference external" href="https://tools.ietf.org/html/bcp14">BCP 14</a>, <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc2119.txt">RFC2119</a>, and <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc8174.txt">RFC8174</a> when, and only when, they appear in all capitals, as shown here.</p>
 <section id="census-overview">
 <h2>Census overview<a class="headerlink" href="#census-overview" title="Permalink to this heading">¶</a></h2>
@@ -566,6 +566,11 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
     <td>int</td>
     <td>Total number of cells from the dataset included in the Census.</td>
   </tr>
+  <tr>
+    <td>dataset_version_id</td>
+    <td>string</td>
+    <td>As defined in CELLxGENE Discover [data schema](https://api.cellxgene.cziscience.com/curation/ui/) (see "Schemas" section for field definitions)".</td>
+  </tr>
 </tbody>
 </table>
 </section>
@@ -853,6 +858,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 <li><p>Matrix  data –  <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. It MUST contain exactly one layer:</p>
 <ul>
 <li><p>Count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code></p></li>
+<li><p>Normalized count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;normalized&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code></p></li>
 </ul>
 </li>
 <li><p>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMAIndexedDataFrame</span></code></p></li>
@@ -863,6 +869,13 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 <section id="matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray">
 <h4>Matrix Data, count (raw) matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray" title="Permalink to this heading">¶</a></h4>
 <p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. These counts MUST be encoded as <code class="docutils literal notranslate"><span class="pre">float32</span></code> in this <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code> with a fill value of zero (0), and no explicitly stored zero values.</p>
+</section>
+<section id="matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray">
+<h4>Matrix Data, normalized count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;normalized&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray" title="Permalink to this heading">¶</a></h4>
+<p>This is an experimental data artifact - it may be removed at any time.</p>
+<p>A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
+For a value <code class="docutils literal notranslate"><span class="pre">X[i,j]</span></code> in the counts (raw) matrix, library-size normalized values are defined
+as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]</span> <span class="pre">=</span> <span class="pre">X[i,j]</span> <span class="pre">/</span> <span class="pre">sum(X[i,</span> <span class="pre">])</span></code>.</p>
 </section>
 <section id="feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe">
 <h4>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe" title="Permalink to this heading">¶</a></h4>
@@ -886,12 +899,22 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <tr>
     <td>feature_name</td>
     <td>str</td>
-    <td>As defined in CELLxGENE dataset schema </td>
+    <td>As defined in CELLxGENE dataset schema</td>
   </tr>
   <tr>
     <td>feature_length</td>
     <td>int</td>
     <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+  </tr>
+  <tr>
+    <td>nnz</td>
+    <td>int64</td>
+    <td>For this feature, the number of non-zero values present in the `X['raw']` counts (raw) matrix.</td>
+  </tr>
+  <tr>
+    <td>n_measured_obs</td>
+    <td>int64</td>
+    <td>For this feature, the number of observations present in the source H5AD (sum of feature presence matrix).</td>
   </tr>
 </tbody>
 </table>
@@ -1012,6 +1035,31 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <tr>
     <td>tissue</td>
   </tr>
+  <tr>
+    <td>nnz</td>
+    <td>int64</td>
+    <td>For this observation, the number of non-zero measurements in the `X['raw']` counts (raw) matrix.</td>
+  </tr>
+  <tr>
+    <td>n_measured_vars</td>
+    <td>int64</td>
+    <td>For this observation, the number of features present in the source H5AD (sum of feature presence matrix).</td>
+  </tr>
+  <tr>
+    <td>raw_sum</td>
+    <td>float32</td>
+    <td>For this observation, the sum of the `X['raw']` counts (raw) matrix values.</td>
+  </tr>
+  <tr>
+    <td>raw_mean_nnz</td>
+    <td>float32</td>
+    <td>For this observation, the mean of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
+  </tr>
+  <tr>
+    <td>raw_variance_nnz</td>
+    <td>float32</td>
+    <td>For this observation, the variance of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
+  </tr>
 </tbody>
 </table>
 </section>
@@ -1019,6 +1067,15 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 </section>
 <section id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h2>
+<section id="version-1-1-0">
+<h3>Version 1.1.0<a class="headerlink" href="#version-1-1-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">dataset_version_id</span></code> to “Census table of CELLxGENE Discover datasets – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code>”</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code> layer</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">nnz</span></code> and <code class="docutils literal notranslate"><span class="pre">n_measured_obs</span></code> columns to <code class="docutils literal notranslate"><span class="pre">ms[&quot;RNA&quot;].var</span></code> dataframe</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">nnz</span></code>, <code class="docutils literal notranslate"><span class="pre">n_measured_vars</span></code>, <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code>, <code class="docutils literal notranslate"><span class="pre">raw_mean_nnz</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_variance_nnz</span></code> columns to <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe</p></li>
+</ul>
+</section>
 <section id="version-1-0-0">
 <h3>Version 1.0.0<a class="headerlink" href="#version-1-0-0" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">

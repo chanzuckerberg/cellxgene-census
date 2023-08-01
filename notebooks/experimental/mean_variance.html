@@ -1,0 +1,834 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Out-of-core (incremental) mean and variance calculation &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Training a PyTorch Model" href="pytorch.html" />
+    <link rel="prev" title="Experimental Highly Variable Genes API" href="highly_variable_genes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 48px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span style="display:flex; gap: 16px;">
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                    </span>
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                      <div style="height: 16px!important; display: flex;">
+                        <span class="beta">BETA</span>
+                      </div>
+                    </span>
+                    <hr class="navbar-divider">
+                    <span class="navbar-cxg-link">
+                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+        
+        <!-- top 48px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.4.0
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#experimental">Experimental</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="highly_variable_genes.html">Experimental Highly Variable Genes API</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Out-of-core (incremental) mean and variance calculation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#The-mean-and-variance-API">The mean and variance API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Example:-calculate-mean-and-variance-for-a-slice-of-the-Census">Example: calculate mean and variance for a slice of the Census</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pytorch.html">Training a PyTorch Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Out-of-core (incremental) mean and variance calculation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/experimental/mean_variance.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Out-of-core-(incremental)-mean-and-variance-calculation">
+<h1>Out-of-core (incremental) mean and variance calculation<a class="headerlink" href="#Out-of-core-(incremental)-mean-and-variance-calculation" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial describes use of the cellxgene_census.experimental.pp API for calculating out-of-core mean and variance in the Census. The variance calculation is performed using <a class="reference external" href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">Welford’s online algorithm</a>.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>The mean and variance API.</p></li>
+<li><p>Example: calculate mean and variance for a slice of the Census.</p></li>
+</ol>
+<section id="The-mean-and-variance-API">
+<h2>The mean and variance API<a class="headerlink" href="#The-mean-and-variance-API" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mean_variance()</span></code> calculates the mean and the variance for an <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>. The following additional arguments are supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">layer</span></code>: the X layer used for the calculation, defaults to <code class="docutils literal notranslate"><span class="pre">raw</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis</span></code>: the axis along which the calculation is performed. Specify 0 for the <code class="docutils literal notranslate"><span class="pre">var</span></code> axis and 1 for the <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">calculate_mean</span></code>: if False, do not include the mean in the result</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">calculate_variance</span></code>: if False, do not compute the variance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ddof</span></code>: <em>Delta Degrees of Freedom</em>: the divisor used in the calculation for variance is N - ddof, where N represents the number of elements.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import packages</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.pp</span> <span class="kn">import</span> <span class="n">mean_variance</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Example:-calculate-mean-and-variance-for-a-slice-of-the-Census">
+<h2>Example: calculate mean and variance for a slice of the Census<a class="headerlink" href="#Example:-calculate-mean-and-variance-for-a-slice-of-the-Census" title="Permalink to this heading">¶</a></h2>
+<p>As an example, we’ll calculate the mean and variance along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis for a subset of cells from the Mouse census.</p>
+<p>The return value will be a Pandas dataframe indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> (in this case, it will be relative to <code class="docutils literal notranslate"><span class="pre">obs</span></code>) and will contain the <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">variance</span></code> columns.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_name</span> <span class="o">=</span> <span class="s2">&quot;mus_musculus&quot;</span>
+<span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s1">&#39;is_primary_data == True and tissue_general == &quot;skin of body&quot;&#39;</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;stable&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">experiment_name</span><span class="p">]</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span> <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">)</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">mv_df</span> <span class="o">=</span> <span class="n">mean_variance</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">calculate_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">calculate_variance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">obs_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="n">mv_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>variance</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3095357</th>
+      <td>15.915025</td>
+      <td>69571.774917</td>
+    </tr>
+    <tr>
+      <th>3095359</th>
+      <td>5.972801</td>
+      <td>9471.427044</td>
+    </tr>
+    <tr>
+      <th>3095363</th>
+      <td>25.169472</td>
+      <td>139042.208628</td>
+    </tr>
+    <tr>
+      <th>3095366</th>
+      <td>8.049836</td>
+      <td>24762.926397</td>
+    </tr>
+    <tr>
+      <th>3095368</th>
+      <td>17.345415</td>
+      <td>150412.440839</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>3278898</th>
+      <td>0.164319</td>
+      <td>5.339741</td>
+    </tr>
+    <tr>
+      <th>3278899</th>
+      <td>0.368339</td>
+      <td>24.930156</td>
+    </tr>
+    <tr>
+      <th>3278900</th>
+      <td>0.246049</td>
+      <td>11.886186</td>
+    </tr>
+    <tr>
+      <th>3278901</th>
+      <td>0.240724</td>
+      <td>10.307266</td>
+    </tr>
+    <tr>
+      <th>3278902</th>
+      <td>0.278420</td>
+      <td>16.086994</td>
+    </tr>
+  </tbody>
+</table>
+<p>9314 rows × 2 columns</p>
+</div></div>
+</div>
+<p>We can now concatenate the resulting dataframe to <code class="docutils literal notranslate"><span class="pre">obs</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">obs_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">),</span> <span class="n">mv_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">combined_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>dataset_id</th>
+      <th>assay</th>
+      <th>assay_ontology_term_id</th>
+      <th>cell_type</th>
+      <th>cell_type_ontology_term_id</th>
+      <th>development_stage</th>
+      <th>development_stage_ontology_term_id</th>
+      <th>disease</th>
+      <th>disease_ontology_term_id</th>
+      <th>donor_id</th>
+      <th>...</th>
+      <th>self_reported_ethnicity_ontology_term_id</th>
+      <th>sex</th>
+      <th>sex_ontology_term_id</th>
+      <th>suspension_type</th>
+      <th>tissue</th>
+      <th>tissue_ontology_term_id</th>
+      <th>tissue_general</th>
+      <th>tissue_general_ontology_term_id</th>
+      <th>mean</th>
+      <th>variance</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3095357</th>
+      <td>98e5ea9f-16d6-47ec-a529-686e76515e39</td>
+      <td>Smart-seq2</td>
+      <td>EFO:0008931</td>
+      <td>keratinocyte stem cell</td>
+      <td>CL:0002337</td>
+      <td>18 month-old stage</td>
+      <td>MmusDv:0000089</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>18_53_M</td>
+      <td>...</td>
+      <td>na</td>
+      <td>male</td>
+      <td>PATO:0000384</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>15.915025</td>
+      <td>69571.774917</td>
+    </tr>
+    <tr>
+      <th>3095359</th>
+      <td>98e5ea9f-16d6-47ec-a529-686e76515e39</td>
+      <td>Smart-seq2</td>
+      <td>EFO:0008931</td>
+      <td>keratinocyte stem cell</td>
+      <td>CL:0002337</td>
+      <td>18 month-old stage</td>
+      <td>MmusDv:0000089</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>18_47_F</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>5.972801</td>
+      <td>9471.427044</td>
+    </tr>
+    <tr>
+      <th>3095363</th>
+      <td>98e5ea9f-16d6-47ec-a529-686e76515e39</td>
+      <td>Smart-seq2</td>
+      <td>EFO:0008931</td>
+      <td>keratinocyte stem cell</td>
+      <td>CL:0002337</td>
+      <td>18 month-old stage</td>
+      <td>MmusDv:0000089</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>18_47_F</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>25.169472</td>
+      <td>139042.208628</td>
+    </tr>
+    <tr>
+      <th>3095366</th>
+      <td>98e5ea9f-16d6-47ec-a529-686e76515e39</td>
+      <td>Smart-seq2</td>
+      <td>EFO:0008931</td>
+      <td>keratinocyte stem cell</td>
+      <td>CL:0002337</td>
+      <td>18 month-old stage</td>
+      <td>MmusDv:0000089</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>18_53_M</td>
+      <td>...</td>
+      <td>na</td>
+      <td>male</td>
+      <td>PATO:0000384</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>8.049836</td>
+      <td>24762.926397</td>
+    </tr>
+    <tr>
+      <th>3095368</th>
+      <td>98e5ea9f-16d6-47ec-a529-686e76515e39</td>
+      <td>Smart-seq2</td>
+      <td>EFO:0008931</td>
+      <td>keratinocyte stem cell</td>
+      <td>CL:0002337</td>
+      <td>18 month-old stage</td>
+      <td>MmusDv:0000089</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>18_47_F</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>17.345415</td>
+      <td>150412.440839</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>3278898</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>basal cell of epidermis</td>
+      <td>CL:0002187</td>
+      <td>20 month-old stage and over</td>
+      <td>MmusDv:0000091</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>21-F-55</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>0.164319</td>
+      <td>5.339741</td>
+    </tr>
+    <tr>
+      <th>3278899</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>basal cell of epidermis</td>
+      <td>CL:0002187</td>
+      <td>20 month-old stage and over</td>
+      <td>MmusDv:0000091</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>21-F-55</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>0.368339</td>
+      <td>24.930156</td>
+    </tr>
+    <tr>
+      <th>3278900</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>epidermal cell</td>
+      <td>CL:0000362</td>
+      <td>20 month-old stage and over</td>
+      <td>MmusDv:0000091</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>21-F-55</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>0.246049</td>
+      <td>11.886186</td>
+    </tr>
+    <tr>
+      <th>3278901</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>basal cell of epidermis</td>
+      <td>CL:0002187</td>
+      <td>20 month-old stage and over</td>
+      <td>MmusDv:0000091</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>21-F-55</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>0.240724</td>
+      <td>10.307266</td>
+    </tr>
+    <tr>
+      <th>3278902</th>
+      <td>48b37086-25f7-4ecd-be66-f5bb378e3aea</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>epidermal cell</td>
+      <td>CL:0000362</td>
+      <td>20 month-old stage and over</td>
+      <td>MmusDv:0000091</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>21-F-55</td>
+      <td>...</td>
+      <td>na</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>skin of body</td>
+      <td>UBERON:0002097</td>
+      <td>0.278420</td>
+      <td>16.086994</td>
+    </tr>
+  </tbody>
+</table>
+<p>9314 rows × 22 columns</p>
+</div></div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="highly_variable_genes.html" class="btn btn-neutral float-left" title="Experimental Highly Variable Genes API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pytorch.html" class="btn btn-neutral float-right" title="Training a PyTorch Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
