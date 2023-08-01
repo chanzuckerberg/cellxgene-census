@@ -37,9 +37,20 @@ CENSUS_CONFIG_DEFAULTS = {
     #
     # Default mode is multi-process.
     "multi_process": True,
+    #
     # The memory budget used to determine appropriate parallelism in many steps of build.
     # Only set to a smaller number if you want to not use all available RAM.
     "memory_budget": int(psutil.virtual_memory().total),
+    #
+    # 'max_worker_processes' sets a limit on the number of worker processes. On high-CPU boxes,
+    # this limit is needed to avoid exceeding the VM map kernel limit (vm.max_map_count). On Ubuntu 22.04,
+    # the default value is 65536. This kernel limitation becomes an issue due to excess thread allocation
+    # by TileDB-SOMA: https://github.com/single-cell-data/TileDB-SOMA/issues/1550. Currently, the per-process
+    # TileDB context allocates approximately 650 threads (and VM maps) per worker process, as currently
+    # utilized by the Census builder. This hard-cap can be increased when this issue is resolved, but
+    # should not be removed (with sufficient number of worker processes, it will always be possible to
+    # trip over this limit). The default of 96 was chosen as:  (96+1) * 650 == 63050, which is < 65536.
+    "max_worker_processes": 96,
     #
     # Host minimum resource validation
     "host_validation_disable": False,  # if True, host validation checks will be skipped
