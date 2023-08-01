@@ -5,14 +5,15 @@ template:
     in_header: <script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
 
 home:
-  sidebar: FALSE
+  sidebar:
+    structure: [links, license, community, authors]
       
 navbar:
   structure:
     left: [docsite, reference, articles]
   components:
     docsite:
-      text: Main doc-site
+      text: Main Census Site
       href: https://chanzuckerberg.github.io/cellxgene-census/
         
 reference:
@@ -35,10 +36,11 @@ reference:
 
 articles:
 - title: Analysis
-  navbar: "Learn about the data do analysis"
+  navbar: "Explore anda analyze the data"
   contents:
     - comp_bio_census_info
     - comp_bio_summarize_axis_query
+    - comp_bio_data_integration
 - title: API
   navbar: "cellxgene.census capabilities"
   contents:

@@ -36,16 +36,23 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main doc-site</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <h6 class="dropdown-header" data-toc-skip>Explore anda analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
+    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
   </div>
 </li>
       </ul>
@@ -85,22 +92,15 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_summarize_axis_query.ipynb
 -->
-<p>This vignette provides examples for basic axis metadata handling. The
-CZ CELLxGENE Census stores <code>obs</code> (cell) and <code>var</code>
-(gene) metadata in a SOMA DataFrame objects via the <a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">TileDB-SOMA</a>
-API (<a href="https://tiledbsoma.readthedocs.io/en/latest/" class="external-link">documentation</a>),
-which can be queried and read as an R data frame. The Census also has a
-convenience package which simplifies opening the census.</p>
-<p>R data frames are in-memory objects. Take care that queries are small
-enough for results to fit in memory.</p>
+<p>This vignette provides examples for basic axis metadata handling. The CZ CELLxGENE Census stores <code>obs</code> (cell) and <code>var</code> (gene) metadata in a SOMA DataFrame objects via the <a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">TileDB-SOMA</a> API (<a href="https://tiledbsoma.readthedocs.io/en/latest/" class="external-link">documentation</a>), which can be queried and read as an R data frame. The Census also has a convenience package which simplifies opening the census.</p>
+<p>R data frames are in-memory objects. Take care that queries are small enough for results to fit in memory.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Opening the Census</li>
 <li>Summarizing cell metadata
 <ul>
 <li>Example: Summarize all cell types</li>
-<li>Example: Summarize a subset of cell types, selected with a
-<code>value_filter</code>
+<li>Example: Summarize a subset of cell types, selected with a <code>value_filter</code>
 </li>
 </ul>
 </li>
@@ -109,42 +109,27 @@ enough for results to fit in memory.</p>
 <div class="section level2">
 <h2 id="opening-the-census">Opening the Census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
 </h2>
-<p>The <code>cellxgene.census</code> R package contains a convenient API
-to open any version of the Census (by default, the newest stable
-version).</p>
+<p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The stable Census release is currently 2023-05-15. Specify census_version = "2023-05-15" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
-<p>If you open the Census, you should close it with
-<code>census$close()</code>. This can be automated using
-<code>on.exit(census$close(), add = TRUE)</code> immediately after
-<code>census &lt;- open_soma()</code>.</p>
-<p>You can learn more about the cellxgene.census methods by accessing
-their corresponding documentation. For example
-<code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
+<span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
+<p>If you open the Census, you should close it with <code>census$close()</code>. This can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
+<p>You can learn more about the cellxgene.census methods by accessing their corresponding documentation. For example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="summarizing-cell-metadata">Summarizing cell metadata<a class="anchor" aria-label="anchor" href="#summarizing-cell-metadata"></a>
 </h2>
-<p>Once the Census is open you can use its TileDB-SOMA methods as it is
-itself a <code>SOMACollection</code>. You can thus access the metadata
-<code>SOMADataFram</code>e objects encoding cell and gene metadata.</p>
+<p>Once the Census is open you can use its TileDB-SOMA methods as it is itself a <code>SOMACollection</code>. You can thus access the metadata <code>SOMADataFram</code>e objects encoding cell and gene metadata.</p>
 <p>Tips:</p>
 <ul>
-<li>You can read an <em>entire</em> <code>SOMADataFrame</code> into R
-using <code>as.data.frame(soma_df$read()$concat())</code>.</li>
-<li>Queries will be much faster if you request only the DataFrame
-columns required for your analysis
-(e.g. <code>column_names = c("soma_joinid", "cell_type_ontology_term_id")</code>).</li>
-<li>You can also further refine query results by using a
-<code>value_filter</code>, which will filter the census for matching
-records.</li>
+<li>You can read an <em>entire</em> <code>SOMADataFrame</code> into R using <code>as.data.frame(soma_df$read()$concat())</code>.</li>
+<li>Queries will be much faster if you request only the DataFrame columns required for your analysis (e.g. <code>column_names = c("soma_joinid", "cell_type_ontology_term_id")</code>).</li>
+<li>You can also further refine query results by using a <code>value_filter</code>, which will filter the census for matching records.</li>
 </ul>
 <div class="section level3">
 <h3 id="example-summarize-all-cell-types">Example: Summarize all cell types<a class="anchor" aria-label="anchor" href="#example-summarize-all-cell-types"></a>
 </h3>
-<p>This example reads the cell metadata (obs) into an R data frame to
-summarize in a variety of ways.</p>
+<p>This example reads the cell metadata (obs) into an R data frame to summarize in a variety of ways.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span></span>
 <span></span>
@@ -161,18 +146,14 @@ summarize in a variety of ways.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span>,</span>
 <span>  <span class="st">"cell types in the Census! The first few are:"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; There are 604 cell types in the Census! The first few are:</span></span>
+<span><span class="co">#&gt; There are 613 cell types in the Census! The first few are:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "CL:0000763" "CL:0000136" "CL:0000235" "CL:0000115" "CL:0000669" "CL:0009099"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "CL:0000525" "CL:2000060" "CL:0008036" "CL:0002488" "CL:0002343" "CL:0000084"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="example-summarize-a-subset-of-cell-types-selected-with-a-value_filter">Example: Summarize a subset of cell types, selected with a
-<code>value_filter</code><a class="anchor" aria-label="anchor" href="#example-summarize-a-subset-of-cell-types-selected-with-a-value_filter"></a>
+<h3 id="example-summarize-a-subset-of-cell-types-selected-with-a-value_filter">Example: Summarize a subset of cell types, selected with a <code>value_filter</code><a class="anchor" aria-label="anchor" href="#example-summarize-a-subset-of-cell-types-selected-with-a-value_filter"></a>
 </h3>
-<p>This example utilizes a SOMA “value filter” to read the subset of
-cells with <code>tissue_ontology_term_id</code> equal to
-<code>UBERON:0002048</code> (lung tissue), and summarizes the query
-result.</p>
+<p>This example utilizes a SOMA “value filter” to read the subset of cells with <code>tissue_ontology_term_id</code> equal to <code>UBERON:0002048</code> (lung tissue), and summarizes the query result.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Read cell_type terms for cells which have a specific tissue term</span></span>
 <span><span class="va">LUNG_TISSUE</span> <span class="op">&lt;-</span> <span class="st">"UBERON:0002048"</span></span>
@@ -195,7 +176,7 @@ result.</p>
 <span><span class="co">#&gt; There are 185 cell types in the Census where tissue_ontology_term_id == UBERON:0002048!</span></span>
 <span><span class="co">#&gt; The first few are:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "CL:0000003" "CL:4028004" "CL:0002145" "CL:0000625" "CL:0000624" "CL:4028006"</span></span>
+<span><span class="co">#&gt; [1] "CL:0002063" "CL:0000775" "CL:0001044" "CL:0001050" "CL:0000814" "CL:0000071"</span></span>
 <span></span>
 <span><span class="co"># Report the 10 most common</span></span>
 <span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type_ontology_term_id</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
@@ -204,7 +185,7 @@ result.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">top_10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; CL:0000003 CL:0000583 CL:0000625 CL:0000624 CL:0000235 CL:0002063 CL:0000860 CL:0000623 </span></span>
-<span><span class="co">#&gt;     562038     526859     323433     323067     254173     246279     203526     164944 </span></span>
+<span><span class="co">#&gt;     562038     526859     323985     323610     266333     255425     205013     164944 </span></span>
 <span><span class="co">#&gt; CL:0001064 CL:0002632 </span></span>
 <span><span class="co">#&gt;     149067     132243</span></span></code></pre></div>
 <p>You can also define much more complex value filters. For example:</p>
@@ -233,8 +214,7 @@ result.</p>
 <div class="section level2">
 <h2 id="full-census-metadata-stats">Full Census metadata stats<a class="anchor" aria-label="anchor" href="#full-census-metadata-stats"></a>
 </h2>
-<p>This example queries all organisms in the Census, and summarizes the
-diversity of various metadata labels.</p>
+<p>This example queries all organisms in the Census, and summarizes the diversity of various metadata labels.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cols_to_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"cell_type_ontology_term_id"</span>,</span>
@@ -253,27 +233,23 @@ diversity of various metadata labels.</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"  Unique "</span>, <span class="va">col</span>, <span class="st">" values: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; [1] "homo_sapiens"</span></span>
-<span><span class="co">#&gt;   Unique cell_type_ontology_term_id values: 604</span></span>
-<span><span class="co">#&gt;   Unique assay_ontology_term_id values: 20</span></span>
-<span><span class="co">#&gt;   Unique tissue_ontology_term_id values: 227</span></span>
 <span><span class="co">#&gt; [1] "mus_musculus"</span></span>
-<span><span class="co">#&gt;   Unique cell_type_ontology_term_id values: 226</span></span>
+<span><span class="co">#&gt;   Unique cell_type_ontology_term_id values: 248</span></span>
 <span><span class="co">#&gt;   Unique assay_ontology_term_id values: 9</span></span>
-<span><span class="co">#&gt;   Unique tissue_ontology_term_id values: 51</span></span>
+<span><span class="co">#&gt;   Unique tissue_ontology_term_id values: 66</span></span>
+<span><span class="co">#&gt; [1] "homo_sapiens"</span></span>
+<span><span class="co">#&gt;   Unique cell_type_ontology_term_id values: 613</span></span>
+<span><span class="co">#&gt;   Unique assay_ontology_term_id values: 19</span></span>
+<span><span class="co">#&gt;   Unique tissue_ontology_term_id values: 220</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Complete Census contains"</span>, <span class="va">total_cells</span>, <span class="st">"cells."</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Complete Census contains 57880760 cells.</span></span></code></pre></div>
+<span><span class="co">#&gt; Complete Census contains 61656118 cells.</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
-<p>After use, the census object should be closed to release memory and
-other resources.</p>
+<p>After use, the census object should be closed to release memory and other resources.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This also closes all SOMA objects accessed via the top-level
-<code>census</code>. Closing can be automated using
-<code>on.exit(census$close(), add = TRUE)</code> immediately after
-<code>census &lt;- open_soma()</code>.</p>
+<p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

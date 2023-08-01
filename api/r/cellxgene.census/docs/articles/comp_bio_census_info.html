@@ -36,16 +36,23 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main doc-site</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <h6 class="dropdown-header" data-toc-skip>Explore anda analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
+    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
   </div>
 </li>
       </ul>
@@ -81,11 +88,7 @@
 
     
     
-<p>This notebook showcases the Census contents and how to obtain
-high-level information about it. It covers the organization of data
-within the Census, what cell and gene metadata are available, and it
-provides simple demonstrations to summarize cell counts across cell
-metadata.</p>
+<p>This notebook showcases the Census contents and how to obtain high-level information about it. It covers the organization of data within the Census, what cell and gene metadata are available, and it provides simple demonstrations to summarize cell counts across cell metadata.</p>
 <p><strong>Contents</strong></p>
 <ul>
 <li>Opening the census</li>
@@ -98,93 +101,59 @@ metadata.</p>
 <div class="section level2">
 <h2 id="opening-the-census">Opening the Census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
 </h2>
-<p>The <code>cellxgene.census</code> R package contains a convenient
-<code><a href="../reference/open_soma.html">open_soma()</a></code> API to open any version of the Census
-(<code>stable</code> by default).</p>
+<p>The <code>cellxgene.census</code> R package contains a convenient <code><a href="../reference/open_soma.html">open_soma()</a></code> API to open any version of the Census (<code>stable</code> by default).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The stable Census release is currently 2023-05-15. Specify census_version = "2023-05-15" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
-<p>You can learn more about the cellxgene.census methods by accessing
-their corresponding documentation, for example
-<code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
+<span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
+<p>You can learn more about the cellxgene.census methods by accessing their corresponding documentation, for example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="census-organization">Census organization<a class="anchor" aria-label="anchor" href="#census-organization"></a>
 </h2>
-<p>The <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census
-schema</a> defines the structure of the Census. In short, you can think
-of the Census as a structured collection of items that stores different
-pieces of information. All of these items and the parent collection are
-SOMA objects of various types and can all be accessed with the <a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">TileDB-SOMA
-API</a> (<a href="https://tiledbsoma.readthedocs.io/en/latest/" class="external-link">documentation</a>).</p>
-<p>The <code>cellxgene.census</code> package contains some convenient
-wrappers of the TileDB-SOMA API. An example of this is the function we
-used to open the Census: <code>cellxgene_census.open_soma()</code>.</p>
+<p>The <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a> defines the structure of the Census. In short, you can think of the Census as a structured collection of items that stores different pieces of information. All of these items and the parent collection are SOMA objects of various types and can all be accessed with the <a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">TileDB-SOMA API</a> (<a href="https://tiledbsoma.readthedocs.io/en/latest/" class="external-link">documentation</a>).</p>
+<p>The <code>cellxgene.census</code> package contains some convenient wrappers of the TileDB-SOMA API. An example of this is the function we used to open the Census: <code>cellxgene_census.open_soma()</code>.</p>
 <div class="section level3">
 <h3 id="main-census-components">Main Census components<a class="anchor" aria-label="anchor" href="#main-census-components"></a>
 </h3>
-<p>With the command above you created <code>census</code>, which is a
-<code>SOMACollection</code>, an R6 class providing a key-value
-associative map. Its <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> method can access the two
-top-level collection members, <code>census_info</code> and
-<code>census_data</code>, each themselves instances of
-<code>SOMACollection</code>.</p>
+<p>With the command above you created <code>census</code>, which is a <code>SOMACollection</code>, an R6 class providing a key-value associative map. Its <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> method can access the two top-level collection members, <code>census_info</code> and <code>census_data</code>, each themselves instances of <code>SOMACollection</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="census-summary-info">Census summary info<a class="anchor" aria-label="anchor" href="#census-summary-info"></a>
 </h3>
 <ul>
 <li>
-<code>census$get("census_info")</code>: A collection of data frames
-providing information of the census as a whole.
+<code>census$get("census_info")</code>: A collection of data frames providing information of the census as a whole.
 <ul>
 <li>
-<code>census$get("census_info")$get("summary")</code>: A data frame
-with high-level information of this Census, e.g. build date, total cell
-count, etc.</li>
+<code>census$get("census_info")$get("summary")</code>: A data frame with high-level information of this Census, e.g. build date, total cell count, etc.</li>
 <li>
-<code>census$get("census_info")$get("datasets")</code>: A data frame
-with all datasets from <a href="https://cellxgene.cziscience.com/" class="external-link">CELLxGENE Discover</a> used to
-create the Census.</li>
+<code>census$get("census_info")$get("datasets")</code>: A data frame with all datasets from <a href="https://cellxgene.cziscience.com/" class="external-link">CELLxGENE Discover</a> used to create the Census.</li>
 <li>
-<code>census$get("census_info")$get("summary_cell_counts")</code>: A
-data frame with cell counts stratified by <strong>relevant</strong> cell
-metadata</li>
+<code>census$get("census_info")$get("summary_cell_counts")</code>: A data frame with cell counts stratified by <strong>relevant</strong> cell metadata</li>
 </ul>
 </li>
 <li><h3 id="census-data">Census data</h3></li>
 </ul>
-<p>Data for each organism is stored in independent
-<code>SOMAExperiment</code> objects which are a specialized form of a
-<code>SOMACollection</code>. Each of these store a data matrix (cell by
-genes), cell metadata, gene metadata, and some other useful components
-not covered in this notebook.</p>
-<p>This is how the data is organized for one organism – <em>Homo
-sapiens</em>:</p>
+<p>Data for each organism is stored in independent <code>SOMAExperiment</code> objects which are a specialized form of a <code>SOMACollection</code>. Each of these store a data matrix (cell by genes), cell metadata, gene metadata, and some other useful components not covered in this notebook.</p>
+<p>This is how the data is organized for one organism – <em>Homo sapiens</em>:</p>
 <ul>
 <li>
-<code>census$get("census_data")$get("homo_sapiens")$obs</code>: Cell
-metadata</li>
+<code>census$get("census_data")$get("homo_sapiens")$obs</code>: Cell metadata</li>
 <li>
-<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")</code>:
-Data matrices, currently only…</li>
+<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")</code>: Data matrices, currently only…</li>
 <li>
-<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$X$get("raw")</code>:
-a matrix of raw counts as a <code>SOMASparseNDArray</code>
+<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$X$get("raw")</code>: a matrix of raw counts as a <code>SOMASparseNDArray</code>
 </li>
 <li>
-<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>:
-Gene Metadata</li>
+<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>: Gene Metadata</li>
 </ul>
 </div>
 </div>
 <div class="section level2">
 <h2 id="cell-metadata">Cell metadata<a class="anchor" aria-label="anchor" href="#cell-metadata"></a>
 </h2>
-<p>You can obtain all cell metadata variables by directly querying the
-columns of the corresponding <code>SOMADataFrame</code>.</p>
-<p>All of these variables can be used for querying the Census in case
-you want to work with specific cells.</p>
+<p>You can obtain all cell metadata variables by directly querying the columns of the corresponding <code>SOMADataFrame</code>.</p>
+<p>All of these variables can be used for querying the Census in case you want to work with specific cells.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "soma_joinid"                             </span></span>
@@ -208,134 +177,99 @@ you want to work with specific cells.</p>
 <span><span class="co">#&gt; [19] "tissue_ontology_term_id"                 </span></span>
 <span><span class="co">#&gt; [20] "tissue_general"                          </span></span>
 <span><span class="co">#&gt; [21] "tissue_general_ontology_term_id"</span></span></code></pre></div>
-<p>All of these variables are defined in the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#obs-cell-metadata" class="external-link">CELLxGENE
-dataset schema</a> except for the following:</p>
+<p>All of these variables are defined in the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#obs-cell-metadata" class="external-link">CELLxGENE dataset schema</a> except for the following:</p>
 <ul>
 <li>
-<code>soma_joinid</code>: a SOMA-defined value use for join
-operations.</li>
+<code>soma_joinid</code>: a SOMA-defined value use for join operations.</li>
 <li>
-<code>dataset_id</code>: the dataset id as encoded in
-<code>census$get("census_info")$get("datasets")</code>.</li>
+<code>dataset_id</code>: the dataset id as encoded in <code>census$get("census_info")$get("datasets")</code>.</li>
 <li>
-<code>tissue_general</code> and
-<code>tissue_general_ontology_term_id</code>: the high-level tissue
-mapping.</li>
+<code>tissue_general</code> and <code>tissue_general_ontology_term_id</code>: the high-level tissue mapping.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="gene-metadata">Gene metadata<a class="anchor" aria-label="anchor" href="#gene-metadata"></a>
 </h2>
-<p>Similarly, we can obtain all gene metadata variables by directly
-querying the columns of the corresponding
-<code>SOMADataFrame</code>.</p>
-<p>These are the variables you can use for querying the Census in case
-there are specific genes you are interested in.</p>
+<p>Similarly, we can obtain all gene metadata variables by directly querying the columns of the corresponding <code>SOMADataFrame</code>.</p>
+<p>These are the variables you can use for querying the Census in case there are specific genes you are interested in.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length"</span></span></code></pre></div>
-<p>All of these variables are defined in the CELLxGENE dataset schema
-except for the following:</p>
+<p>All of these variables are defined in the CELLxGENE dataset schema except for the following:</p>
 <ul>
 <li>
-<code>soma_joinid</code>: a SOMA-defined value use for join
-operations.</li>
+<code>soma_joinid</code>: a SOMA-defined value use for join operations.</li>
 <li>
-<code>feature_length</code>: the length in base pairs of the
-gene.</li>
+<code>feature_length</code>: the length in base pairs of the gene.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="census-summary-content-tables">Census summary content tables<a class="anchor" aria-label="anchor" href="#census-summary-content-tables"></a>
 </h2>
-<p>You can take a quick look at the high-level Census information by
-looking at <code>census$get("census_info")$get("summary")</code>:</p>
+<p>You can take a quick look at the high-level Census information by looking at <code>census$get("census_info")$get("summary")</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   soma_joinid                      label      value</span></span>
-<span><span class="co">#&gt; 1           0      census_schema_version      1.0.0</span></span>
-<span><span class="co">#&gt; 2           1          census_build_date 2023-05-15</span></span>
-<span><span class="co">#&gt; 3           2     dataset_schema_version      3.0.0</span></span>
-<span><span class="co">#&gt; 4           3           total_cell_count   57880760</span></span>
-<span><span class="co">#&gt; 5           4          unique_cell_count   36673205</span></span>
-<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      12493</span></span>
-<span><span class="co">#&gt; 7           6 number_donors_mus_musculus       1362</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span></span>
+<span><span class="co">#&gt;   soma_joinid label                      value     </span></span>
+<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0 census_schema_version      1.0.0     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1 census_build_date          2023-07-25</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2 dataset_schema_version     3.0.0     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           3 total_cell_count           61656118  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           4 unique_cell_count          37447773  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           5 number_donors_homo_sapiens 13035     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>           6 number_donors_mus_musculus 1417</span></span></code></pre></div>
 <p>Of special interest are the label-value combinations for:</p>
 <ul>
 <li>
-<code>total_cell_count</code> is the total number of cells in the
-Census.</li>
+<code>total_cell_count</code> is the total number of cells in the Census.</li>
 <li>
-<code>unique_cell_count</code> is the number of unique cells, as
-some cells may be present twice due to meta-analysis or consortia-like
-data.</li>
+<code>unique_cell_count</code> is the number of unique cells, as some cells may be present twice due to meta-analysis or consortia-like data.</li>
 <li>
-<code>number_donors_homo_sapiens</code> and
-<code>number_donors_mus_musculus</code> are the number of individuals
-for human and mouse. These are not guaranteed to be unique as one
-individual ID may be present or identical in different datasets.</li>
+<code>number_donors_homo_sapiens</code> and <code>number_donors_mus_musculus</code> are the number of individuals for human and mouse. These are not guaranteed to be unique as one individual ID may be present or identical in different datasets.</li>
 </ul>
 <div class="section level3">
 <h3 id="cell-counts-by-cell-metadata">Cell counts by cell metadata<a class="anchor" aria-label="anchor" href="#cell-counts-by-cell-metadata"></a>
 </h3>
-<p>By looking at
-<code>census$get("census_info)$get("summary_cell_counts")</code> you can
-get a general idea of cell counts stratified by <strong>some
-relevant</strong> cell metadata. Not all cell metadata is included in
-this table, you can take a look at all cell and gene metadata available
-in the sections below “Cell metadata” and “Gene metadata”.</p>
-<p>The line below retrieves this table and casts it into an R data
-frame:</p>
+<p>By looking at <code>census$get("census_info)$get("summary_cell_counts")</code> you can get a general idea of cell counts stratified by <strong>some relevant</strong> cell metadata. Not all cell metadata is included in this table, you can take a look at all cell and gene metadata available in the sections below “Cell metadata” and “Gene metadata”.</p>
+<p>The line below retrieves this table and casts it into an R data frame:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary_cell_counts"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">census_counts</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   soma_joinid     organism category ontology_term_id unique_cell_count total_cell_count</span></span>
-<span><span class="co">#&gt; 1           0 Homo sapiens      all               na          33758887         53794728</span></span>
-<span><span class="co">#&gt; 2           1 Homo sapiens    assay      EFO:0008722            264166           279635</span></span>
-<span><span class="co">#&gt; 3           2 Homo sapiens    assay      EFO:0008780             25652            51304</span></span>
-<span><span class="co">#&gt; 4           3 Homo sapiens    assay      EFO:0008913            133511           133511</span></span>
-<span><span class="co">#&gt; 5           4 Homo sapiens    assay      EFO:0008919             89477           206754</span></span>
-<span><span class="co">#&gt; 6           5 Homo sapiens    assay      EFO:0008931             78750           161197</span></span>
-<span><span class="co">#&gt;                        label</span></span>
-<span><span class="co">#&gt; 1                         na</span></span>
-<span><span class="co">#&gt; 2                   Drop-seq</span></span>
-<span><span class="co">#&gt; 3                     inDrop</span></span>
-<span><span class="co">#&gt; 4 single-cell RNA sequencing</span></span>
-<span><span class="co">#&gt; 5                   Seq-Well</span></span>
-<span><span class="co">#&gt; 6                 Smart-seq2</span></span></code></pre></div>
-<p>For each combination of <code>organism</code> and values for each
-<code>category</code> of cell metadata you can take a look at
-<code>total_cell_count</code> and <code>unique_cell_count</code> for the
-cell counts of that combination.</p>
-<p>The values for each <code>category</code> are specified in
-<code>ontology_term_id</code> and <code>label</code>, which are the
-value’s IDs and labels, respectively.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">#&gt;   soma_joinid organism     category ontology_term_id unique_cell_count total_cell_count</span></span>
+<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0 Homo sapiens all      na                        33<span style="text-decoration: underline;">364</span>242         56<span style="text-decoration: underline;">400</span>873</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1 Homo sapiens assay    EFO:0008722                 <span style="text-decoration: underline;">264</span>166           <span style="text-decoration: underline;">279</span>635</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2 Homo sapiens assay    EFO:0008780                  <span style="text-decoration: underline;">25</span>652            <span style="text-decoration: underline;">51</span>304</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           3 Homo sapiens assay    EFO:0008919                  <span style="text-decoration: underline;">89</span>477           <span style="text-decoration: underline;">206</span>754</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           4 Homo sapiens assay    EFO:0008931                  <span style="text-decoration: underline;">78</span>750           <span style="text-decoration: underline;">188</span>248</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           5 Homo sapiens assay    EFO:0008953                   <span style="text-decoration: underline;">4</span>693             <span style="text-decoration: underline;">9</span>386</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: label &lt;chr&gt;</span></span></span></code></pre></div>
+<p>For each combination of <code>organism</code> and values for each <code>category</code> of cell metadata you can take a look at <code>total_cell_count</code> and <code>unique_cell_count</code> for the cell counts of that combination.</p>
+<p>The values for each <code>category</code> are specified in <code>ontology_term_id</code> and <code>label</code>, which are the value’s IDs and labels, respectively.</p>
 <div class="section level4">
 <h4 id="example-cell-metadata-included-in-the-summary-counts-table">Example: cell metadata included in the summary counts table<a class="anchor" aria-label="anchor" href="#example-cell-metadata-included-in-the-summary-counts-table"></a>
 </h4>
-<p>To get all the available cell metadata in the summary counts table
-you can do the following. Remember this is not all the cell metadata
-available, as some variables were omitted in the creation of this
-table.</p>
+<p>To get all the available cell metadata in the summary counts table you can do the following. Remember this is not all the cell metadata available, as some variables were omitted in the creation of this table.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">census_counts</span><span class="op">$</span><span class="va">organism</span>, <span class="va">census_counts</span><span class="op">$</span><span class="va">category</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                          </span></span>
 <span><span class="co">#&gt;                           Homo sapiens Mus musculus</span></span>
 <span><span class="co">#&gt;   all                                1            1</span></span>
-<span><span class="co">#&gt;   assay                             20            9</span></span>
-<span><span class="co">#&gt;   cell_type                        604          226</span></span>
-<span><span class="co">#&gt;   disease                           68            5</span></span>
+<span><span class="co">#&gt;   assay                             19            9</span></span>
+<span><span class="co">#&gt;   cell_type                        613          248</span></span>
+<span><span class="co">#&gt;   disease                           64            5</span></span>
 <span><span class="co">#&gt;   self_reported_ethnicity           26            1</span></span>
 <span><span class="co">#&gt;   sex                                3            3</span></span>
 <span><span class="co">#&gt;   suspension_type                    1            1</span></span>
-<span><span class="co">#&gt;   tissue                           227           51</span></span>
-<span><span class="co">#&gt;   tissue_general                    61           27</span></span></code></pre></div>
+<span><span class="co">#&gt;   tissue                           220           66</span></span>
+<span><span class="co">#&gt;   tissue_general                    54           27</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="example-cell-counts-for-each-sequencing-assay-in-human-data">Example: cell counts for each sequencing assay in human data<a class="anchor" aria-label="anchor" href="#example-cell-counts-for-each-sequencing-assay-in-human-data"></a>
 </h4>
-<p>To get the cell counts for each sequencing assay type in human data,
-you can perform the following operations:</p>
+<p>To get the cell counts for each sequencing assay type in human data, you can perform the following operations:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_assay_counts</span> <span class="op">&lt;-</span> <span class="va">census_counts</span><span class="op">[</span><span class="va">census_counts</span><span class="op">$</span><span class="va">organism</span> <span class="op">==</span> <span class="st">"Homo sapiens"</span> <span class="op">&amp;</span> <span class="va">census_counts</span><span class="op">$</span><span class="va">category</span> <span class="op">==</span> <span class="st">"assay"</span>, <span class="op">]</span></span>
 <span><span class="va">human_assay_counts</span> <span class="op">&lt;-</span> <span class="va">human_assay_counts</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">human_assay_counts</span><span class="op">$</span><span class="va">total_cell_count</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
@@ -343,184 +277,56 @@ you can perform the following operations:</p>
 <div class="section level4">
 <h4 id="example-number-of-microglial-cells-in-the-census">Example: number of microglial cells in the Census<a class="anchor" aria-label="anchor" href="#example-number-of-microglial-cells-in-the-census"></a>
 </h4>
-<p>If you have a specific term from any of the categories shown above
-you can directly find out the number of cells for that term.</p>
+<p>If you have a specific term from any of the categories shown above you can directly find out the number of cells for that term.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_counts</span><span class="op">[</span><span class="va">census_counts</span><span class="op">$</span><span class="va">label</span> <span class="op">==</span> <span class="st">"microglial cell"</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;      soma_joinid     organism  category ontology_term_id unique_cell_count</span></span>
-<span><span class="co">#&gt; 71            70 Homo sapiens cell_type       CL:0000129            264424</span></span>
-<span><span class="co">#&gt; 1049        1048 Mus musculus cell_type       CL:0000129             48998</span></span>
-<span><span class="co">#&gt;      total_cell_count           label</span></span>
-<span><span class="co">#&gt; 71             363182 microglial cell</span></span>
-<span><span class="co">#&gt; 1049            62617 microglial cell</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
+<span><span class="co">#&gt;   soma_joinid organism     category  ontology_term_id unique_cell_count total_cell_count</span></span>
+<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          69 Homo sapiens cell_type CL:0000129                  <span style="text-decoration: underline;">268</span>114           <span style="text-decoration: underline;">370</span>771</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        <span style="text-decoration: underline;">1</span>038 Mus musculus cell_type CL:0000129                   <span style="text-decoration: underline;">48</span>998            <span style="text-decoration: underline;">62</span>617</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: label &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="understanding-census-contents-beyond-the-summary-tables">Understanding Census contents beyond the summary tables<a class="anchor" aria-label="anchor" href="#understanding-census-contents-beyond-the-summary-tables"></a>
 </h2>
-<p>While using the pre-computed tables in
-<code>census$get("census_info")</code> is an easy and quick way to
-understand the contents of the Census, it falls short if you want to
-learn more about certain slices of the Census.</p>
+<p>While using the pre-computed tables in <code>census$get("census_info")</code> is an easy and quick way to understand the contents of the Census, it falls short if you want to learn more about certain slices of the Census.</p>
 <p>For example, you may want to learn more about:</p>
 <ul>
 <li>What are the cell types available for human liver?</li>
-<li>What are the total number of cells in all lung datasets stratified
-by sequencing technology?</li>
+<li>What are the total number of cells in all lung datasets stratified by sequencing technology?</li>
 <li>What is the sex distribution of all cells from brain in mouse?</li>
 <li>What are the diseases available for T cells?</li>
 </ul>
-<p>All of these questions can be answered by directly querying the cell
-metadata as shown in the examples below.</p>
+<p>All of these questions can be answered by directly querying the cell metadata as shown in the examples below.</p>
 <div class="section level3">
 <h3 id="example-all-cell-types-available-in-human">Example: all cell types available in human<a class="anchor" aria-label="anchor" href="#example-all-cell-types-available-in-human"></a>
 </h3>
-<p>To exemplify the process of accessing and slicing cell metadata for
-summary stats, let’s start with a trivial example and take a look at all
-human cell types available in the Census:</p>
+<p>To exemplify the process of accessing and slicing cell metadata for summary stats, let’s start with a trivial example and take a look at all human cell types available in the Census:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
 <span>    column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"is_primary_data"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;                            cell_type is_primary_data</span></span>
-<span><span class="co">#&gt; 1                       myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 2                       myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 3                           fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 4                       myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 5                           fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 6                           fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 7                           fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 8                           fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 9                           fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 10                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 11                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 12                      myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 13                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 14                      myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 15                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 16                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 17                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 18                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 19                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 20                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 21                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 22                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 23                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 24                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 25                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 26                          pericyte            TRUE</span></span>
-<span><span class="co">#&gt; 27                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 28                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 29                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 30                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 31                      myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 32                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 33                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 34                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 35                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 36                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 37                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 38                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 39  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 40                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 41                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 42                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 43                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 44                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 45  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 46                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 47                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 48                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 49                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 50  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 51  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 52                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 53                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 54                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 55                          pericyte            TRUE</span></span>
-<span><span class="co">#&gt; 56                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 57  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 58                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 59                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 60  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 61  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 62                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 63  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 64                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 65                      myeloid cell            TRUE</span></span>
-<span><span class="co">#&gt; 66  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 67                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 68                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 69                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 70                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 71                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 72                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 73                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 74                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 75                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 76                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 77                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 78                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 79                          pericyte            TRUE</span></span>
-<span><span class="co">#&gt; 80                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 81                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 82                        lymphocyte            TRUE</span></span>
-<span><span class="co">#&gt; 83                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 84                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 85                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 86  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 87  fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 88            neuron associated cell            TRUE</span></span>
-<span><span class="co">#&gt; 89                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 90                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 91                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 92                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 93                        macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 94                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 95                        lymphocyte            TRUE</span></span>
-<span><span class="co">#&gt; 96                          fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 97                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 98                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 99                  endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 100                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 101                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 102                       macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 103                       macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 104                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 105                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 106                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 107               smooth muscle cell            TRUE</span></span>
-<span><span class="co">#&gt; 108                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 109                         pericyte            TRUE</span></span>
-<span><span class="co">#&gt; 110                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 111                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 112                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 113                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 114                       macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 115                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 116                       macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 117 fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 118                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 119                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 120                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 121                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 122                         fat cell            TRUE</span></span>
-<span><span class="co">#&gt; 123                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 124 fibro/adipogenic progenitor cell            TRUE</span></span>
-<span><span class="co">#&gt; 125                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt; 126                       macrophage            TRUE</span></span>
-<span><span class="co">#&gt; 127                         pericyte            TRUE</span></span>
-<span><span class="co">#&gt; 128                 endothelial cell            TRUE</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 53794600 rows ]</span></span></code></pre></div>
-<p>The number of rows is the total number of cells for humans. Now, if
-you wish to get the cell counts per cell type we can work with this data
-frame.</p>
-<p>In addition, we will only focus on cells that are marked with
-<code>is_primary_data=TRUE</code> as this ensures we de-duplicate cells
-that appear more than once in CELLxGENE Discover.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56,400,873 × 2</span></span></span>
+<span><span class="co">#&gt;    cell_type                     is_primary_data</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> syncytiotrophoblast cell      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> placental villous trophoblast FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> syncytiotrophoblast cell      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> syncytiotrophoblast cell      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> extravillous trophoblast      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> placental villous trophoblast FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> syncytiotrophoblast cell      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> extravillous trophoblast      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> placental villous trophoblast FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> syncytiotrophoblast cell      FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 56,400,863 more rows</span></span></span></code></pre></div>
+<p>The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data frame.</p>
+<p>In addition, we will only focus on cells that are marked with <code>is_primary_data=TRUE</code> as this ensures we de-duplicate cells that appear more than once in CELLxGENE Discover.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_cell_types</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
@@ -529,46 +335,36 @@ that appear more than once in CELLxGENE Discover.</p>
 <span>  <span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span><span class="op">$</span><span class="va">cell_type</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">human_cell_types</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 33758887</span></span></code></pre></div>
-<p>This is the number of unique cells. Now let’s look at the counts per
-cell type:</p>
+<span><span class="co">#&gt; [1] 33364242</span></span></code></pre></div>
+<p>This is the number of unique cells. Now let’s look at the counts per cell type:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_cell_type_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">human_cell_types</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="co">#&gt; human_cell_types</span></span>
 <span><span class="co">#&gt;                          neuron            glutamatergic neuron </span></span>
-<span><span class="co">#&gt;                         2682728                         1539105 </span></span>
+<span><span class="co">#&gt;                         2673669                         1541605 </span></span>
 <span><span class="co">#&gt; CD4-positive, alpha-beta T cell CD8-positive, alpha-beta T cell </span></span>
-<span><span class="co">#&gt;                         1274999                         1211278 </span></span>
+<span><span class="co">#&gt;                         1258976                         1235987 </span></span>
 <span><span class="co">#&gt;              classical monocyte                          B cell </span></span>
-<span><span class="co">#&gt;                          998008                          943900 </span></span>
-<span><span class="co">#&gt;                      fibroblast                     native cell </span></span>
-<span><span class="co">#&gt;                          826495                          806177 </span></span>
-<span><span class="co">#&gt;             natural killer cell                 oligodendrocyte </span></span>
-<span><span class="co">#&gt;                          766437                          692112</span></span></code></pre></div>
-<p>This shows you that the most abundant cell types are “glutamatergic
-neuron”, “CD8-positive, alpha-beta T cell”, and “CD4-positive,
-alpha-beta T cell”.</p>
+<span><span class="co">#&gt;                         1030996                          908651 </span></span>
+<span><span class="co">#&gt;                     native cell             natural killer cell </span></span>
+<span><span class="co">#&gt;                          889262                          768755 </span></span>
+<span><span class="co">#&gt;                      macrophage                 oligodendrocyte </span></span>
+<span><span class="co">#&gt;                          721687                          710242</span></span></code></pre></div>
+<p>This shows you that the most abundant cell types are “glutamatergic neuron”, “CD8-positive, alpha-beta T cell”, and “CD4-positive, alpha-beta T cell”.</p>
 <p>Now let’s take a look at the number of unique cell types:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 588</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 599</span></span></code></pre></div>
 <p>That is the total number of different cell types for human.</p>
-<p>All the information in this example can be quickly obtained from the
-summary table at
-<code>census$get("census-info")$get("summary_cell_counts")</code>.</p>
-<p>The examples below are more complex and can only be achieved by
-accessing the cell metadata.</p>
+<p>All the information in this example can be quickly obtained from the summary table at <code>census$get("census-info")$get("summary_cell_counts")</code>.</p>
+<p>The examples below are more complex and can only be achieved by accessing the cell metadata.</p>
 </div>
 <div class="section level3">
 <h3 id="example-cell-types-available-in-human-liver">Example: cell types available in human liver<a class="anchor" aria-label="anchor" href="#example-cell-types-available-in-human-liver"></a>
 </h3>
-<p>Similar to the example above, we can learn what cell types are
-available for a specific tissue, e.g. liver.</p>
-<p>To achieve this goal we just need to limit our cell metadata to that
-tissue. We will use the information in the cell metadata variable
-<code>tissue_general</code>. This variable contains the high-level
-tissue label for all cells in the Census:</p>
+<p>Similar to the example above, we can learn what cell types are available for a specific tissue, e.g. liver.</p>
+<p>To achieve this goal we just need to limit our cell metadata to that tissue. We will use the information in the cell metadata variable <code>tissue_general</code>. This variable contains the high-level tissue label for all cells in the Census:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_liver_cell_types</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
@@ -579,25 +375,21 @@ tissue label for all cells in the Census:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">human_liver_cell_types</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="co">#&gt; human_liver_cell_types</span></span>
 <span><span class="co">#&gt;                          T cell                     hepatoblast </span></span>
-<span><span class="co">#&gt;                           86780                           58447 </span></span>
+<span><span class="co">#&gt;                           85739                           58447 </span></span>
 <span><span class="co">#&gt;                 neoplastic cell                    erythroblast </span></span>
 <span><span class="co">#&gt;                           52431                           45605 </span></span>
 <span><span class="co">#&gt;                        monocyte                      hepatocyte </span></span>
-<span><span class="co">#&gt;                           34585                           30909 </span></span>
+<span><span class="co">#&gt;                           31388                           28309 </span></span>
 <span><span class="co">#&gt;             natural killer cell    periportal region hepatocyte </span></span>
 <span><span class="co">#&gt;                           26871                           23509 </span></span>
 <span><span class="co">#&gt;                      macrophage centrilobular region hepatocyte </span></span>
-<span><span class="co">#&gt;                           16760                           15819</span></span></code></pre></div>
-<p>These are the cell types and their cell counts in the human
-liver.</p>
+<span><span class="co">#&gt;                           16707                           15819</span></span></code></pre></div>
+<p>These are the cell types and their cell counts in the human liver.</p>
 </div>
 <div class="section level3">
 <h3 id="example-diseased-t-cells-in-human-tissues">Example: diseased T cells in human tissues<a class="anchor" aria-label="anchor" href="#example-diseased-t-cells-in-human-tissues"></a>
 </h3>
-<p>In this example we are going to get the counts for all diseased cells
-annotated as T cells. For the sake of the example we will focus on
-“CD8-positive, alpha-beta T cell” and “CD4-positive, alpha-beta T
-cell”:</p>
+<p>In this example we are going to get the counts for all diseased cells annotated as T cells. For the sake of the example we will focus on “CD8-positive, alpha-beta T cell” and “CD4-positive, alpha-beta T cell”:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">t_cells_diseased</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
@@ -607,89 +399,75 @@ cell”:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">t_cells_diseased</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                 adrenal gland  blood bone marrow  brain breast</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                       0  62499           0      0      0</span></span>
-<span><span class="co">#&gt;   breast cancer                                     0      0           0      0   1850</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease             0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                                  0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   COVID-19                                          0 834850           0      0      0</span></span>
-<span><span class="co">#&gt;   Crohn disease                                     0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                                   0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   Down syndrome                                     0      0         181      0      0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                               0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   influenza                                         0   8871           0      0      0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                         0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                             205      0           0   3274      0</span></span>
-<span><span class="co">#&gt;   lung large cell carcinoma                         0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   lymphangioleiomyomatosis                          0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   non-small cell lung carcinoma                     0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   pleomorphic carcinoma                             0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   pneumonia                                         0      0           0      0      0</span></span>
-<span><span class="co">#&gt;   pulmonary fibrosis                                0      0           0      0      0</span></span>
+<span><span class="co">#&gt; disease                                 adipose tissue adrenal gland  blood blood clot</span></span>
+<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                        0             0  62499          0</span></span>
+<span><span class="co">#&gt;   breast cancer                                      0             0      0          0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease              0             0      0          0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                                   0             0      0          0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                         0             0   6548          0</span></span>
+<span><span class="co">#&gt;   COVID-19                                           0             0 819428          0</span></span>
+<span><span class="co">#&gt;   Crohn disease                                      0             0      0          0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                                    0             0      0          0</span></span>
+<span><span class="co">#&gt;   Down syndrome                                      0             0      0          0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                                0             0      0          0</span></span>
+<span><span class="co">#&gt;   influenza                                          0             0   8871          0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                          0             0      0          0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                             0             0     20          0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                                  0             0     16          0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                                0           205      0          0</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                  colon  liver   lung lymph node   nose</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                0      0      0          0      0</span></span>
-<span><span class="co">#&gt;   breast cancer                              0      0      0          0      0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease      0      0   9382          0      0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                           0      0      0          0    909</span></span>
-<span><span class="co">#&gt;   COVID-19                                   0      0  30578          0     13</span></span>
-<span><span class="co">#&gt;   Crohn disease                          17490      0      0          0      0</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                            0      0      7          0      0</span></span>
-<span><span class="co">#&gt;   Down syndrome                              0      0      0          0      0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                        0      0      0       1089      0</span></span>
-<span><span class="co">#&gt;   influenza                                  0      0      0          0      0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                  0      0   1803          0      0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                        0    507 215013      24969      0</span></span>
-<span><span class="co">#&gt;   lung large cell carcinoma                  0      0   5922          0      0</span></span>
-<span><span class="co">#&gt;   lymphangioleiomyomatosis                   0      0    513          0      0</span></span>
-<span><span class="co">#&gt;   non-small cell lung carcinoma              0      0  36573          0      0</span></span>
-<span><span class="co">#&gt;   pleomorphic carcinoma                      0      0   1715          0      0</span></span>
-<span><span class="co">#&gt;   pneumonia                                  0      0    856          0      0</span></span>
-<span><span class="co">#&gt;   pulmonary fibrosis                         0      0   1671          0      0</span></span>
+<span><span class="co">#&gt; disease                                 bone marrow  brain breast  colon kidney  liver</span></span>
+<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                     0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   breast cancer                                   0      0   1850      0      0      0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease           0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                                0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                      0      0      0      0  20540      0</span></span>
+<span><span class="co">#&gt;   COVID-19                                        0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   Crohn disease                                   0      0      0  17490      0      0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                                 0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   Down syndrome                                 181      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                             0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   influenza                                       0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                       0      0      0      0      0      0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                          0      0      0      0     10      0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                               0      0      0      0   2408      0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                             0   3274      0      0      0    507</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                 pleural fluid respiratory system saliva</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                       0                  0      0</span></span>
-<span><span class="co">#&gt;   breast cancer                                     0                  0      0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease             0                  0      0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                                  0                  0      0</span></span>
-<span><span class="co">#&gt;   COVID-19                                          0                  4     41</span></span>
-<span><span class="co">#&gt;   Crohn disease                                     0                  0      0</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                                   0                  0      0</span></span>
-<span><span class="co">#&gt;   Down syndrome                                     0                  0      0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                               0                  0      0</span></span>
-<span><span class="co">#&gt;   influenza                                         0                  0      0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                         0                  0      0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                           11558                  0      0</span></span>
-<span><span class="co">#&gt;   lung large cell carcinoma                         0                  0      0</span></span>
-<span><span class="co">#&gt;   lymphangioleiomyomatosis                          0                  0      0</span></span>
-<span><span class="co">#&gt;   non-small cell lung carcinoma                     0                  0      0</span></span>
-<span><span class="co">#&gt;   pleomorphic carcinoma                             0                  0      0</span></span>
-<span><span class="co">#&gt;   pneumonia                                         0                  0      0</span></span>
-<span><span class="co">#&gt;   pulmonary fibrosis                                0                  0      0</span></span>
+<span><span class="co">#&gt; disease                                   lung lymph node   nose pleural fluid</span></span>
+<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                0          0      0             0</span></span>
+<span><span class="co">#&gt;   breast cancer                              0          0      0             0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease   9382          0      0             0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                           0          0    909             0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                 0         36      0             0</span></span>
+<span><span class="co">#&gt;   COVID-19                               30578          0     13             0</span></span>
+<span><span class="co">#&gt;   Crohn disease                              0          0      0             0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                            7          0      0             0</span></span>
+<span><span class="co">#&gt;   Down syndrome                              0          0      0             0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                        0       1089      0             0</span></span>
+<span><span class="co">#&gt;   influenza                                  0          0      0             0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease               1803          0      0             0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                     0          0      0             0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                          0          0      0             0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                   215013      24969      0         11558</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                 small intestine</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                         0</span></span>
-<span><span class="co">#&gt;   breast cancer                                       0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease               0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                                    0</span></span>
-<span><span class="co">#&gt;   COVID-19                                            0</span></span>
-<span><span class="co">#&gt;   Crohn disease                                   52029</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                                     0</span></span>
-<span><span class="co">#&gt;   Down syndrome                                       0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                                 0</span></span>
-<span><span class="co">#&gt;   influenza                                           0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                           0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                                 0</span></span>
-<span><span class="co">#&gt;   lung large cell carcinoma                           0</span></span>
-<span><span class="co">#&gt;   lymphangioleiomyomatosis                            0</span></span>
-<span><span class="co">#&gt;   non-small cell lung carcinoma                       0</span></span>
-<span><span class="co">#&gt;   pleomorphic carcinoma                               0</span></span>
-<span><span class="co">#&gt;   pneumonia                                           0</span></span>
-<span><span class="co">#&gt;   pulmonary fibrosis                                  0</span></span>
-<span><span class="co">#&gt;  [ reached getOption("max.print") -- omitted 3 rows ]</span></span></code></pre></div>
-<p>These are the cell counts annotated with the indicated disease across
-human tissues for “CD8-positive, alpha-beta T cell” or “CD4-positive,
-alpha-beta T cell”.</p>
+<span><span class="co">#&gt; disease                                 respiratory system saliva small intestine</span></span>
+<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                            0      0               0</span></span>
+<span><span class="co">#&gt;   breast cancer                                          0      0               0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease                  0      0               0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                                       0      0               0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                             0      0               0</span></span>
+<span><span class="co">#&gt;   COVID-19                                               4     41               0</span></span>
+<span><span class="co">#&gt;   Crohn disease                                          0      0           52029</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                                        0      0               0</span></span>
+<span><span class="co">#&gt;   Down syndrome                                          0      0               0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                                    0      0               0</span></span>
+<span><span class="co">#&gt;   influenza                                              0      0               0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                              0      0               0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                                 0      0               0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                                      0      0               0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                                    0      0               0</span></span>
+<span><span class="co">#&gt;  [ reached getOption("max.print") -- omitted 10 rows ]</span></span></code></pre></div>
+<p>These are the cell counts annotated with the indicated disease across human tissues for “CD8-positive, alpha-beta T cell” or “CD4-positive, alpha-beta T cell”.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
