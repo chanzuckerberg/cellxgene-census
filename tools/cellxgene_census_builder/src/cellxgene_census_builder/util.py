@@ -1,8 +1,10 @@
 import logging
 import multiprocessing
+import os
 import platform
 import re
 import urllib.parse
+from typing import cast
 
 from .build_state import CensusBuildArgs
 from .logging import logging_init
@@ -39,14 +41,30 @@ def urlcat(base: str, *paths: str) -> str:
     return url
 
 
+def env_var_init(args: CensusBuildArgs) -> None:
+    """
+    Set environment variables as needed by dependencies, etc.
+    """
+    if "NUMEXPR_MAX_THREADS" not in os.environ:
+        os.environ["NUMEXPR_MAX_THREADS"] = str(min(1, cpu_count() // 2))
+
+
 def process_init(args: CensusBuildArgs) -> None:
     """
     Called on every process start to configure global package/module behavior.
     """
+    logging_init(args)
+
     if multiprocessing.get_start_method(True) != "spawn":
         multiprocessing.set_start_method("spawn", True)
 
-    logging_init(args)
+    env_var_init(args)
+
+    # these are super noisy!
+    numba_logger = logging.getLogger("numba")
+    numba_logger.setLevel(logging.WARNING)
+    h5py_logger = logging.getLogger("h5py")
+    h5py_logger.setLevel(logging.WARNING)
 
 
 class ProcessResourceGetter:
@@ -55,8 +73,10 @@ class ProcessResourceGetter:
     provides current and high water mark for:
     * thread count
     * mmaps
+    * major page faults
 
     Linux-only at the moment.
+    https://docs.kernel.org/filesystems/proc.html
     """
 
     # historical maxima
@@ -87,16 +107,42 @@ class ProcessResourceGetter:
             self.max_map_count = max(map_count, self.max_map_count)
         return map_count
 
+    @property
+    def majflt(self) -> tuple[int, int]:
+        """Return the major faults and cumulative major faults (includes children) for current process."""
+        if platform.system() != "Linux":
+            return (-1, -1)
 
-_resouce_getter = ProcessResourceGetter()
+        with open("/proc/self/stat") as f:
+            stats = f.read()
+            stats_fields = stats.split()
+
+        return int(stats_fields[11]), int(stats_fields[12])
 
 
-def log_process_resource_status(preface: str = "Resource use:") -> None:
+_resource_getter = ProcessResourceGetter()
+
+
+def log_process_resource_status(preface: str = "Resource use:", level: int = logging.DEBUG) -> None:
     """Print current and historical max of thread and (memory) map counts"""
     if platform.system() == "Linux":
-        logging.debug(
-            f"{preface} threads: {_resouce_getter.thread_count} "
-            f"[max: {_resouce_getter.max_thread_count}], "
-            f"maps: {_resouce_getter.map_count} "
-            f"[max: {_resouce_getter.max_map_count}]"
+        logging.log(
+            level,
+            f"{preface} threads: {_resource_getter.thread_count} "
+            f"[max: {_resource_getter.max_thread_count}], "
+            f"maps: {_resource_getter.map_count} "
+            f"[max: {_resource_getter.max_map_count}], "
+            f"page faults (cumm): {_resource_getter.majflt[1]}",
         )
+
+
+def cpu_count() -> int:
+    """
+    os.cpu_count() returns None if "undetermined" number of CPUs.
+    This function exists to always return a default of `1` when
+    os.cpu_count returns None.
+    """
+    cpu_count = os.cpu_count()
+    if os.cpu_count() is None:
+        return 1
+    return cast(int, cpu_count)

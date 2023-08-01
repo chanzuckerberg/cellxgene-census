@@ -9,8 +9,9 @@ open_soma(census_version = "stable", uri = NULL, tiledbsoma_ctx = NULL)
 \arguments{
 \item{census_version}{The version of the Census, e.g., "stable".}
 
-\item{uri}{The URI containing the Census SOMA objects. If specified, takes
-precedence over \code{census_version}.}
+\item{uri}{A URI containing the Census SOMA objects to open instead of a
+released version. (If supplied, takes precedence over
+\code{census_version}.)}
 
 \item{tiledbsoma_ctx}{A \code{tiledbsoma::SOMATileDBContext} built using
 \code{new_SOMATileDBContext_for_census()}. Optional (created automatically)
@@ -24,4 +25,9 @@ will also close all SOMA objects accessed through it.
 }
 \description{
 Open the Cell Census
+}
+\examples{
+census <- open_soma()
+on.exit(census$close(), add = TRUE)
+as.data.frame(census$get("census_info")$get("summary")$read()$concat())
 }

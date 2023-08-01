@@ -1,10 +1,11 @@
 import argparse
+import logging
 import pathlib
 import sys
 from datetime import datetime
 
-from ..build_state import CensusBuildArgs, CensusBuildConfig
-from ..util import process_init
+from ..build_state import CENSUS_CONFIG_DEFAULTS, CensusBuildArgs, CensusBuildConfig
+from ..util import log_process_resource_status, process_init
 from .build_soma import build
 from .validate_soma import validate
 
@@ -17,6 +18,7 @@ def main() -> int:
     config = CensusBuildConfig(**cli_args.__dict__)
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=config)
     process_init(args)
+    logging.info(args)
 
     cc = 0
     if cli_args.subcommand == "build":
@@ -25,6 +27,7 @@ def main() -> int:
     if cc == 0 and (cli_args.subcommand == "validate" or cli_args.validate):
         validate(args)
 
+    log_process_resource_status(level=logging.INFO)
     return cc
 
 
@@ -39,7 +42,6 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=False,
         help="Use multiple processes",
     )
-    parser.add_argument("--max-workers", type=int, help="Concurrency")
     parser.add_argument(
         "--build-tag",
         type=str,
@@ -65,7 +67,11 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=True,
         help="Consolidate TileDB objects after build",
     )
-    build_parser.add_argument("--dataset_id_blocklist_uri", help="Dataset blocklist URI")
+    build_parser.add_argument(
+        "--dataset_id_blocklist_uri",
+        help="Dataset blocklist URI",
+        default=CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"],
+    )
     # hidden option for testing by devs. Will process only the first 'n' datasets
     build_parser.add_argument("--test-first-n", type=int)
     # hidden option for testing by devs. Allow for WIP testing by devs.

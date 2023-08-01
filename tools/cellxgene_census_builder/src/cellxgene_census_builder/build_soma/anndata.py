@@ -19,7 +19,7 @@ AnnDataFilterSpec = TypedDict(
 
 
 def open_anndata(
-    base_path: str, datasets: Union[List[Dataset], Dataset], *args: Any, **kwargs: Any
+    base_path: str, datasets: Union[List[Dataset], Dataset], need_X: Optional[bool] = True, *args: Any, **kwargs: Any
 ) -> Iterator[Tuple[Dataset, anndata.AnnData]]:
     """
     Generator to open anndata in a given mode, and filter out those H5ADs which do not match our base
@@ -54,10 +54,20 @@ def open_anndata(
             logging.info(f"H5AD ignored due to multi-organism feature_reference: {h5ad.dataset_id}")
             continue
 
-        # shape of raw and final must be same shape. Schema 2.0 disallows cell filtering,
-        # but DOES allow feature/gene filtering. The "census" specification requires that
-        # any filtered features be added back to the final layer.
+        # Schema 3.0 disallows cell filtering, but DOES allow feature/gene filtering.
+        # The "census" specification requires that any filtered features be added back to
+        # the final layer.
+        #
+        # NOTE: As currently defined, the Census only includes raw counts. Most H5ADs
+        # contain multiple X layers, plus a number of other matrices (obsm, etc). These
+        # other objects use substantial memory (and have other overhead when the AnnData
+        # is sliced in the filtering step).
+        #
+        # To minimize that overhead, this code drops all AnnData fileds unused by the
+        # Census, following the CXG 3 conventions: use raw if present, else X.
+        #
         if ad.raw is not None:
+            X = ad.raw.X
             missing_from_var = ad.raw.var.index.difference(ad.var.index)
             if len(missing_from_var) > 0:
                 raw_var = ad.raw.var.loc[missing_from_var].copy()
@@ -65,20 +75,17 @@ def open_anndata(
                 # TODO - these should be looked up in the ontology
                 raw_var["feature_name"] = "unknown"
                 raw_var["feature_reference"] = "unknown"
-                new_var = pd.concat([ad.var, raw_var])
-                if ad.isbacked:
-                    ad = ad.to_memory()
-                ad.X.resize(ad.n_obs, len(new_var))
-                ad = anndata.AnnData(X=ad.X, obs=ad.obs, var=new_var, raw=ad.raw, dtype=np.float32)
+                var = pd.concat([ad.var, raw_var])
+            else:
+                var = ad.raw.var
 
-        # sanity checks & expectations for any AnnData we can handle
-        if ad.raw is not None:
-            assert ad.X.shape == ad.raw.X.shape
-            assert len(ad.raw.var) == len(ad.var)
-            assert len(ad.raw.var.index.difference(ad.var.index)) == 0
-            assert len(ad.var.index.difference(ad.raw.var.index)) == 0
-        assert ad.X.shape == (len(ad.obs), len(ad.var))
+        else:
+            X = ad.X
+            var = ad.var
 
+        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns, dtype=np.float32)
+
+        assert not need_X or ad.X.shape == (len(ad.obs), len(ad.var))
         # TODO: In principle, we could look up missing feature_name, but for now, just assert they exist
         assert ((ad.var.feature_name != "") & (ad.var.feature_name != None)).all()  # noqa: E711
 
@@ -86,7 +93,7 @@ def open_anndata(
 
 
 class AnnDataFilterFunction(Protocol):
-    def __call__(self, ad: anndata.AnnData, retain_X: Optional[bool] = True) -> anndata.AnnData:
+    def __call__(self, ad: anndata.AnnData, need_X: Optional[bool] = True) -> anndata.AnnData:
         ...
 
 
@@ -106,7 +113,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     organism_ontology_term_id = filter_spec.get("organism_ontology_term_id", None)
     assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids", None)
 
-    def _filter(ad: anndata.AnnData, retain_X: Optional[bool] = True) -> anndata.AnnData:
+    def _filter(ad: anndata.AnnData, need_X: Optional[bool] = True) -> anndata.AnnData:
         obs_mask = ~(  # noqa: E712
             ad.obs.tissue_ontology_term_id.str.endswith(" (organoid)")
             | ad.obs.tissue_ontology_term_id.str.endswith(" (cell culture)")
@@ -130,22 +137,15 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         obs = ad.obs
         var = ad.var
         var.index.rename("feature_id", inplace=True)
-        X = ad.X if retain_X else None
-        raw = ad.raw if retain_X and ad.n_obs > 0 else None
+        X = ad.X if need_X else None
+        assert ad.raw is None
 
-        if raw:
-            # remove non-gene features
-            mask = ad.raw.var.feature_biotype == "gene"
-            raw = anndata.AnnData(X=ad.raw.X[:, mask], obs=ad.obs, var=ad.raw.var[mask], dtype=np.float32)
+        # This discards all other ancillary state, eg, obsm/varm/....
+        if not need_X:
+            ad = anndata.AnnData(X=None, obs=obs, var=var, dtype=np.float32)
+        else:
+            ad = anndata.AnnData(X=X, obs=obs, var=var, dtype=np.float32)
 
-        # sanity checks
-        if raw is not None:
-            assert ad.var.index.difference(raw.var.index).empty
-            assert raw.var.index.difference(ad.var.index).empty
-            assert ad.X.shape == raw.X.shape
-
-        # this dumps all other ancillary state, eg, obsm/varm/....
-        ad = anndata.AnnData(X=X, obs=obs, var=var, raw=raw, dtype=np.float32)
         return ad
 
     return _filter

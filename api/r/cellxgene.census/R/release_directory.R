@@ -9,6 +9,7 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/ce
 #' @export
 #'
 #' @examples
+#' as.data.frame(get_census_version_description("stable"))
 get_census_version_description <- function(census_version) {
   census_directory <- get_census_version_directory()
   description <- census_directory[census_version, ]
@@ -32,6 +33,7 @@ get_census_version_description <- function(census_version) {
 #' @export
 #'
 #' @examples
+#' get_census_version_directory()
 get_census_version_directory <- function() {
   raw <- jsonlite::fromJSON(CELL_CENSUS_RELEASE_DIRECTORY_URL)
 
