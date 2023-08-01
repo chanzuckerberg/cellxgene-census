@@ -4,7 +4,7 @@
 
 *By: [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
-The Census team is pleased to announce the release of the R package `cellxgene.census`. :tada: :tada:  
+The Census team is pleased to announce the release of the R package `cellxgene.census`. 🎉 🎉 
 
 This has been long coming since our Python release back in May. Now, from R computational biologists can access the Census data which is the largest harmonized aggregation of single-cell data, composed of >30M cells and >60K genes.
  
