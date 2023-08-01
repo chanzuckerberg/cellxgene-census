@@ -12,11 +12,11 @@ With `cellxgene.census` in a few seconds users can slice and access Census data 
 
 ## Installation and usage
 
-Users can install `cellxgene.census` and its dependencies following the [installation instructions](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_installation.html).
+Users can install `cellxgene.census` and its dependencies following the [installation instructions](../../cellxgene_census_docsite_installation.md).
 
 To learn more about the package please make sure to check out the following resources:
 
-* [Quick start guide.](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_quick_start.html)
+* [Quick start guide.](cellxgene_census_docsite_quick_start.md)
 * [R reference docs and tutorials.](https://chanzuckerberg.github.io/cellxgene-census/r/index.html)
 * Querying and slicing data tutorial << INSERT LINK >>.
 
@@ -28,9 +28,9 @@ CZI and TileDB have worked closely on the development of `tiledbsoma` and recent
 
 ## Efficient access to single-cell data for >30M cells from R
 
-Census hosts ever-increasing [data releases](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_data_release_info.html) from CZ CELLxGENE Discover, representing the largest aggregation of standardized single-cell data. 
+Census hosts ever-increasing [data releases](../../cellxgene_census_docsite_data_release_info.md) from CZ CELLxGENE Discover, representing the largest aggregation of standardized single-cell data. 
 
-Census data are accompanied by cell and gene metadata that have been harmonized on ontologies across all datasets hosted in CZ CELLxGENE Discover. For example all cell types and tissues have been mapped to a value of the CL and UBERON ontologies, respectively. You can find more about the data in the [Census data and schema](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html) page.
+Census data are accompanied by cell and gene metadata that have been harmonized on ontologies across all datasets hosted in CZ CELLxGENE Discover. For example all cell types and tissues have been mapped to a value of the CL and UBERON ontologies, respectively. You can find more about the data in the [Census data and schema](../../cellxgene_census_docsite_schema.md) page.
 
 With the R package `cellxgene.census` researchers can have access to all of these data and metadata directly from an R session with following capabilities:
 
@@ -50,7 +50,7 @@ census$close()
 
 ### Querying and reading single-cell metadata from Census
 
-Following our [Census data and schema](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html), users can navigate and query Census data and metadata by using any combination of gene and cell filters.
+Following our [Census data and schema](../../cellxgene_census_docsite_schema.md), users can navigate and query Census data and metadata by using any combination of gene and cell filters.
 
 For example, reading a slice of the human cell metadata for about 300K cells with Microglial cells or Neurons from female donors :
 
@@ -104,5 +104,5 @@ Sometimes Census queries can be too large to be loaded in memory. TileDB-SOMA al
 
 To find out more about iterable-based queries you can check out the following resources:
 
-* [Memory-efficient queries from R.](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_quick_start.html#id2)
+* [Memory-efficient queries from R.](../../cellxgene_census_docsite_quick_start.md#id2)
 * [The SOMA objects overview from TileDB-SOMA.](https://single-cell-data.github.io/TileDB-SOMA/articles/soma-objects.html)
