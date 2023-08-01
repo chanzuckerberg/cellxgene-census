@@ -47,8 +47,9 @@ CENSUS_CONFIG_DEFAULTS = {
     # the default value is 65536. This kernel limitation becomes an issue due to excess thread allocation
     # by TileDB-SOMA: https://github.com/single-cell-data/TileDB-SOMA/issues/1550. Currently, the per-process
     # TileDB context allocates approximately 650 threads (and VM maps) per worker process, as currently
-    # utilized by the Census builder. This hard-cap can be increased when this issue is resolved.
-    # 96 * 650 == 62400, which is < 65536.
+    # utilized by the Census builder. This hard-cap can be increased when this issue is resolved, but
+    # should not be removed (with sufficient number of worker processes, it will always be possible to
+    # trip over this limit). The default of 96 was chosen as:  (96+1) * 650 == 63050, which is < 65536.
     "max_worker_processes": 96,
     #
     # Host minimum resource validation
