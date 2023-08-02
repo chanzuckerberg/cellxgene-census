@@ -50,7 +50,7 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <h6 class="dropdown-header" data-toc-skip>Explore anda analyze the data</h6>
+    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
     <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
@@ -277,9 +277,9 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt; Merging objects</span></span>
 <span><span class="co">#&gt; Finding neighborhoods</span></span>
 <span><span class="co">#&gt; Finding anchors</span></span>
-<span><span class="co">#&gt;  Found 7019 anchors</span></span>
+<span><span class="co">#&gt;  Found 7026 anchors</span></span>
 <span><span class="co">#&gt; Filtering anchors</span></span>
-<span><span class="co">#&gt;  Retained 4871 anchors</span></span>
+<span><span class="co">#&gt;  Retained 4880 anchors</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Merging dataset 1 into 2</span></span>
 <span><span class="co">#&gt; Extracting anchors for merged samples</span></span>
@@ -293,20 +293,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 16:55:33 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 16:55:33 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 16:55:33 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 16:55:33 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 13:02:30 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 13:02:30 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 13:02:30 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 13:02:30 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 16:55:36 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//RtmpRt4LyQ/filed97a3fc4ce4c</span></span>
-<span><span class="co">#&gt; 16:55:36 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 16:55:41 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 16:55:42 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 16:55:43 Initializing from normalized Laplacian + noise (using irlba)</span></span>
-<span><span class="co">#&gt; 16:55:44 Commencing optimization for 200 epochs, with 410956 positive edges</span></span>
-<span><span class="co">#&gt; 16:55:52 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 13:02:32 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//Rtmpfho1WF/file7d5027ced41d</span></span>
+<span><span class="co">#&gt; 13:02:32 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 13:02:38 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 13:02:38 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 13:02:39 Initializing from normalized Laplacian + noise (using irlba)</span></span>
+<span><span class="co">#&gt; 13:02:40 Commencing optimization for 200 epochs, with 410804 positive edges</span></span>
+<span><span class="co">#&gt; 13:02:49 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
