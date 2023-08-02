@@ -47,7 +47,7 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' )
 #'
 #' seurat_obj
-#' 
+#'
 #' census$close()
 get_seurat <- function(
     census,
@@ -109,7 +109,7 @@ get_seurat <- function(
 #' )
 #'
 #' sce_obj
-#' 
+#'
 #' census$close()
 get_single_cell_experiment <- function(
     census,
