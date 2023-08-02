@@ -7,7 +7,7 @@ template:
 home:
   sidebar:
     structure: [links, license, community, authors]
-      
+
 navbar:
   structure:
     left: [docsite, reference, articles]
@@ -15,7 +15,7 @@ navbar:
     docsite:
       text: Main Census Site
       href: https://chanzuckerberg.github.io/cellxgene-census/
-        
+
 reference:
 - title: Open/retrieve Census data
   contents:
@@ -41,6 +41,7 @@ articles:
     - comp_bio_census_info
     - comp_bio_summarize_axis_query
     - comp_bio_data_integration
+    - comp_bio_normalizing_full_gene_sequencing
 - title: API
   navbar: "cellxgene.census capabilities"
   contents:
