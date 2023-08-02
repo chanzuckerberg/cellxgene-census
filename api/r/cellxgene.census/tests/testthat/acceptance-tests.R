@@ -217,7 +217,6 @@ test_that("test_seurat_small-query", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_value_filter = "tissue == 'aorta'"
   )
 
@@ -232,7 +231,6 @@ test_that("test_seurat_10K-cells-human", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_coords = 1:10000
   )
 
@@ -247,7 +245,6 @@ test_that("test_seurat_100K-cells-human", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_coords = 1:100000
   )
 
@@ -262,7 +259,6 @@ test_that("test_seurat_250K-cells-human", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_coords = 1:250000
   )
 
@@ -277,7 +273,6 @@ test_that("test_seurat_500K-cells-human", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_coords = 1:500000
   )
 
@@ -292,7 +287,6 @@ test_that("test_seurat_750K-cells-human", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_coords = 1:750000
   )
 
@@ -307,7 +301,6 @@ test_that("test_seurat_1M-cells-human", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_coords = 1:1e6
   )
 
@@ -322,7 +315,6 @@ test_that("test_seurat_common-tissue", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_value_filter = "tissue == 'brain'"
   )
 
@@ -337,7 +329,6 @@ test_that("test_seurat_common-tissue-large-buffer-size", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_value_filter = "tissue == 'brain'"
   )
 
@@ -352,7 +343,6 @@ test_that("test_seurat_common-cell-type", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_value_filter = "cell_type == 'neuron'"
   )
 
@@ -367,7 +357,6 @@ test_that("test_seurat_common-cell-type-large-buffer-size", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    X_name = "raw",
     obs_value_filter = "cell_type == 'neuron'"
   )
 
@@ -383,11 +372,182 @@ test_that("test_seurat_whole-enchilada-large-buffer-size", {
     test_args <- list(
       census = census,
       organism = "Homo sapiens",
-      measurement_name = "RNA",
-      X_name = "raw"
+      measurement_name = "RNA"
     )
 
     test_seurat(test_args)
+  }
+
+  expect_true(TRUE)
+})
+
+test_that("test_sce_small-query", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "tissue == 'aorta'"
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_10K-cells-human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_coords = 1:10000
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_100K-cells-human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_coords = 1:100000
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_250K-cells-human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_coords = 1:250000
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_500K-cells-human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_coords = 1:500000
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_750K-cells-human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_coords = 1:750000
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_1M-cells-human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_coords = 1:1e6
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_common-tissue", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "tissue == 'brain'"
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_common-tissue-large-buffer-size", {
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "tissue == 'brain'"
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_common-cell-type", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "cell_type == 'neuron'"
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_common-cell-type-large-buffer-size", {
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+
+  test_args <- list(
+    census = census,
+    organism = "Homo sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "cell_type == 'neuron'"
+  )
+
+  test_sce(test_args)
+})
+
+test_that("test_sce_whole-enchilada-large-buffer-size", {
+  # SKIP: R is not capable to load into memory
+  if (FALSE) {
+    census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+    on.exit(census$close(), add = TRUE)
+
+    test_args <- list(
+      census = census,
+      organism = "Homo sapiens",
+      measurement_name = "RNA",
+    )
+
+    test_sce(test_args)
   }
 
   expect_true(TRUE)
