@@ -1,6 +1,7 @@
 .Rproj.user
 .Rhistory
-docs
 inst/doc
 /doc/
 /Meta/
+# see vignettes_/README.md for explanation:
+vignettes

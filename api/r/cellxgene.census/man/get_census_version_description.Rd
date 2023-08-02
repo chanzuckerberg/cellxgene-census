@@ -15,3 +15,6 @@ List with the release location and metadata
 \description{
 Get release description for given census version
 }
+\examples{
+as.data.frame(get_census_version_description("stable"))
+}

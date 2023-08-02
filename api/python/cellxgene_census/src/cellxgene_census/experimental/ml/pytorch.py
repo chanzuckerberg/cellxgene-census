@@ -1,3 +1,4 @@
+import gc
 import logging
 import os
 from contextlib import contextmanager
@@ -8,6 +9,7 @@ from typing import Any, Dict, Iterator, Optional, Sequence, Tuple
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import psutil
 import pyarrow as pa
 import scipy
 import somacore
@@ -153,6 +155,19 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         return _ObsAndXSOMABatch(obs=obs_batch, X=X_batch, stats=stats)
 
 
+def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:
+    proc = psutil.Process(os.getpid())
+
+    pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
+    gc.collect()
+    post_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
+
+    pytorch_logger.debug(f"gc:  pre={pre_gc}")
+    pytorch_logger.debug(f"gc: post={post_gc}")
+
+    return pre_gc, post_gc
+
+
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     """
     Iterates through a set of ``obs`` and corresponding ``X`` rows, where the rows to be returned are specified by
@@ -193,6 +208,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.return_sparse_X = return_sparse_X
         self.encoders = encoders
         self.stats = stats
+        self.max_process_mem_usage_bytes = 0
 
     def __next__(self) -> ObsAndXDatum:
         """Read the next torch batch, possibly across multiple soma batches"""
@@ -245,6 +261,11 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         SOMA batch are fewer than the requested ``batch_size``."""
 
         if self.soma_batch is None or not (0 <= self.i < len(self.soma_batch)):
+            # GC memory from previous soma_batch
+            self.soma_batch = None
+            mem_info = run_gc()
+            self.max_process_mem_usage_bytes = max(self.max_process_mem_usage_bytes, mem_info[0][0].uss)
+
             self.soma_batch: _ObsAndXSOMABatch = next(self.soma_batch_iter)
             self.stats += self.soma_batch.stats
             self.i = 0
@@ -468,6 +489,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
             X: soma.SparseNDArray = exp.ms[self.measurement_name].X[self.layer_name]
 
+            # TODO: Get all IDs, close experiment. Iterate through obs IDs using custom stride, not based upon soma_buffer_bytes
             obs_tables_iter = exp.obs.read(
                 coords=(self._partition_obs_joinids(self._obs_joinids),),
                 batch_size=somacore.BatchSize(),
@@ -487,6 +509,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
             for datum_ in obs_and_x_iter:
                 yield datum_
+
+            pytorch_logger.debug(
+                "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
+            )
 
     def __len__(self) -> int:
         self._init()

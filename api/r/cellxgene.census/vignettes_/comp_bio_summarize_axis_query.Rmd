@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 80)
+options(width = 88, max.print=256)
 ```
 
 <!--`

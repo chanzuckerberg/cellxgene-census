@@ -37,16 +37,32 @@ def _mp_config_checks() -> bool:
     return True
 
 
+def _hard_process_cap(args: CensusBuildArgs, n_proc: int) -> int:
+    """
+    Enforce the configured worker process limit.
+
+    NOTE: logic below only enforces this limit in cases using the default worker count,
+    as there are special cases where we want higher limits, due to special knowledge that we
+    will not be subject to the default resource constraints (e.g., VM map usage by SOMA).
+    """
+    return min(int(args.config.max_worker_processes), n_proc)
+
+
+def _default_worker_process_count(args: CensusBuildArgs) -> int:
+    """Return the default worker process count, subject to configured limit."""
+    return _hard_process_cap(args, cpu_count() + 2)
+
+
 def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
     """Trivial helper to estimate appropriate number of fixed-memory-budget workers from total memory available"""
     n_workers: int = int(args.config.memory_budget // per_worker_budget)
-    return min(max(1, n_workers), cpu_count() + 2)
+    return min(n_workers, _default_worker_process_count(args))
 
 
 def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
     assert _mp_config_checks()
     if max_workers is None:
-        max_workers = cpu_count() + 2
+        max_workers = _default_worker_process_count(args)
     logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
     return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
 
@@ -333,7 +349,7 @@ def create_resource_pool_executor(
     if max_resources is None:
         max_resources = args.config.memory_budget
     if max_workers is None:
-        max_workers = cpu_count() + 2
+        max_workers = _default_worker_process_count(args)
     if max_tasks_per_child is None:
         # not strictly necessary, but helps avoid leaks by turning over sub-processes
         max_tasks_per_child = 10

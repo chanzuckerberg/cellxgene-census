@@ -28,3 +28,6 @@ to reuse a handle if calling \code{download_source_h5ad()} multiple times.}
 \description{
 Download source H5AD to local file name.
 }
+\examples{
+download_source_h5ad("0895c838-e550-48a3-a777-dbcd35d30272", "/tmp/data.h5ad", overwrite = TRUE)
+}

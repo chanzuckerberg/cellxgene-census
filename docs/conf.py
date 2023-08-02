@@ -10,9 +10,12 @@ project = 'cellxgene-census'
 copyright = '2022-2023 Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
-import cellxgene_census
+import git
+repo = git.Repo(search_parent_directories=True)
+tags = sorted(repo.tags, key=lambda t: t.tag.tagged_date)
+latest_tag = tags[-1]
 
-version = cellxgene_census.__version__
+version = str(latest_tag)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
