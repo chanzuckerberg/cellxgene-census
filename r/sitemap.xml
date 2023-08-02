@@ -10,6 +10,27 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/census_dataset_presence.html</loc>
+  </url>
+  <url>
+    <loc>/articles/census_datasets.html</loc>
+  </url>
+  <url>
+    <loc>/articles/census_query_extract.html</loc>
+  </url>
+  <url>
+    <loc>/articles/comp_bio_census_info.html</loc>
+  </url>
+  <url>
+    <loc>/articles/comp_bio_data_integration.html</loc>
+  </url>
+  <url>
+    <loc>/articles/comp_bio_summarize_axis_query.html</loc>
+  </url>
+  <url>
+    <loc>/articles/index.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
@@ -29,6 +50,9 @@
   </url>
   <url>
     <loc>/reference/get_seurat.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_single_cell_experiment.html</loc>
   </url>
   <url>
     <loc>/reference/get_source_h5ad_uri.html</loc>
