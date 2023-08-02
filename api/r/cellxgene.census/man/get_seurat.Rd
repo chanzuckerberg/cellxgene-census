@@ -41,6 +41,8 @@ within \code{X}.}
 \item{var_coords}{Same as \code{obs_coords} but for \code{var}.}
 
 \item{var_column_names}{Columns to fetch for the \code{var} data frame.}
+
+\item{var_index}{Name of column in ‘var’ to add as feature names.}
 }
 \value{
 A \code{Seurat} object containing the sensus slice.
@@ -57,5 +59,8 @@ seurat_obj <- get_seurat(
   obs_value_filter = "cell_type == 'leptomeningeal cell'",
   var_value_filter = "feature_id \%in\% c('ENSG00000107317', 'ENSG00000106034')"
 )
+
 seurat_obj
+
+census$close()
 }

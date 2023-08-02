@@ -31,6 +31,7 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @param var_value_filter Same as `obs_value_filter` but for `var`.
 #' @param var_coords Same as `obs_coords` but for `var`.
 #' @param var_column_names Columns to fetch for the `var` data frame.
+#' @param var_index Name of column in ‘var’ to add as feature names.
 #'
 #' @return A `Seurat` object containing the sensus slice.
 #' @importFrom tiledbsoma SOMAExperimentAxisQuery
@@ -44,7 +45,10 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
 #'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
 #' )
+#'
 #' seurat_obj
+#' 
+#' census$close()
 get_seurat <- function(
     census,
     organism,
@@ -103,7 +107,10 @@ get_seurat <- function(
 #'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
 #'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
 #' )
+#'
 #' sce_obj
+#' 
+#' census$close()
 get_single_cell_experiment <- function(
     census,
     organism,
