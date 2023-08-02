@@ -19,6 +19,9 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
   return(presence$read()$sparse_matrix(zero_based = TRUE)$concat())
 }
 
+
+#' Export Census slices to `Seurat`
+#' 
 #' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
 #' query, and return it as a `Seurat` object.
 #'
@@ -81,6 +84,8 @@ get_seurat <- function(
   ))
 }
 
+#' Export Census slices to `SingleCellExperiment`
+#'
 #' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
 #' query, and return it as a `SingleCellExperiment` object.
 #'

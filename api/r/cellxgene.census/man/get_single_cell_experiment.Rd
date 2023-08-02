@@ -2,8 +2,7 @@
 % Please edit documentation in R/get_helpers.R
 \name{get_single_cell_experiment}
 \alias{get_single_cell_experiment}
-\title{Convenience wrapper around \code{SOMAExperimentAxisQuery}, to build and execute a
-query, and return it as a \code{SingleCellExperiment} object.}
+\title{Export Census slices to \code{SingleCellExperiment}}
 \usage{
 get_single_cell_experiment(
   census,

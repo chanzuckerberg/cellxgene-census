@@ -2,8 +2,7 @@
 % Please edit documentation in R/get_helpers.R
 \name{get_seurat}
 \alias{get_seurat}
-\title{Convenience wrapper around \code{SOMAExperimentAxisQuery}, to build and execute a
-query, and return it as a \code{Seurat} object.}
+\title{Export Census slices to \code{Seurat}}
 \usage{
 get_seurat(
   census,

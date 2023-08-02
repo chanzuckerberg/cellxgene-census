@@ -27,7 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <h6 class="dropdown-header" data-toc-skip>Explore anda analyze the data</h6>
+    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
     <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
@@ -72,12 +72,12 @@
           
           <code><a href="open_soma.html">open_soma()</a></code> 
         </dt>
-        <dd>Open the Cell Census</dd>
+        <dd>Open the Census</dd>
       </dl><dl><dt>
           
           <code><a href="new_SOMATileDBContext_for_census.html">new_SOMATileDBContext_for_census()</a></code> 
         </dt>
-        <dd>Create SOMATileDBContext for Cell Census</dd>
+        <dd>Create <code>SOMATileDBContext</code> for Census</dd>
       </dl><dl><dt>
           
           <code><a href="download_source_h5ad.html">download_source_h5ad()</a></code> 
@@ -103,8 +103,12 @@
           
           <code><a href="get_seurat.html">get_seurat()</a></code> 
         </dt>
-        <dd>Convenience wrapper around <code>SOMAExperimentAxisQuery</code>, to build and execute a
-query, and return it as a <code>Seurat</code> object.</dd>
+        <dd>Export Census slices to <code>Seurat</code></dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_single_cell_experiment.html">get_single_cell_experiment()</a></code> 
+        </dt>
+        <dd>Export Census slices to <code>SingleCellExperiment</code></dd>
       </dl></div><div class="section level2">
       <h2 id="feature-presence-matrix">Feature presence matrix<a class="anchor" aria-label="anchor" href="#feature-presence-matrix"></a></h2>
       
@@ -136,12 +140,12 @@ query, and return it as a <code>Seurat</code> object.</dd>
           
           <code><a href="get_census_version_description.html">get_census_version_description()</a></code> 
         </dt>
-        <dd>Get release description for given census version</dd>
+        <dd>Get release description for a Census version</dd>
       </dl><dl><dt>
           
           <code><a href="get_census_version_directory.html">get_census_version_directory()</a></code> 
         </dt>
-        <dd>Get the directory of cell census releases currently available</dd>
+        <dd>Get the directory of Census releases currently available</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

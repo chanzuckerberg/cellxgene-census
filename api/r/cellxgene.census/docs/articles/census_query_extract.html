@@ -50,7 +50,7 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <h6 class="dropdown-header" data-toc-skip>Explore anda analyze the data</h6>
+    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
     <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
@@ -305,9 +305,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; cell5952197 unknown</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">@</span><span class="va">meta.features</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                   feature_id feature_name feature_length</span></span>
-<span><span class="co">#&gt; feature8626  ENSG00000161798         AQP5           1884</span></span>
-<span><span class="co">#&gt; feature27047 ENSG00000188229       TUBB4B           2037</span></span></code></pre></div>
+<span><span class="co">#&gt;                 feature_name feature_length</span></span>
+<span><span class="co">#&gt; ENSG00000161798         AQP5           1884</span></span>
+<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037</span></span></code></pre></div>
 <p>For a full description refer to <code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
