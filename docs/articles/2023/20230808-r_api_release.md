@@ -6,9 +6,9 @@
 
 The Census team is pleased to announce the release of the R package `cellxgene.census`. 🎉 🎉 
 
-This has been long coming since our Python release back in May. Now, from R computational biologists can access the Census data which is the largest harmonized aggregation of single-cell data, composed of >30M cells and >60K genes.
+This has been long coming since our Python release back in May. Now, from R, computational biologists can access the Census data which is the largest standardized aggregation of single-cell data, composed of >30M cells and >60K genes.
  
-With `cellxgene.census` in a few seconds users can slice and access Census data using cell or gene filters across hundreds of datasets. The data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, and [Seurat](https://satijalab.org/seurat/) or [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) for downstream analysis.
+With `cellxgene.census` in a few seconds users can access any slice of Census data using cell or gene filters across hundreds of datasets. The data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, and [Seurat](https://satijalab.org/seurat/) or [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) for downstream analysis.
 
 ## Installation and usage
 
@@ -24,19 +24,20 @@ To learn more about the package please make sure to check out the following reso
 
 The `cellxgene.census` package relies on [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) R's package `tiledbsoma` for all of its data access capabilities as shown in the next section. 
 
-CZI and TileDB have worked closely on the development of `tiledbsoma` and recently promoted it from beta stage to its first stable version.  << INSERT link their release notes >>
+CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded  it from beta to its first stable version. << INSERT link their release notes >>.
 
 ## Efficient access to single-cell data for >30M cells from R
 
-Census hosts ever-increasing [data releases](../../cellxgene_census_docsite_data_release_info.md) from CZ CELLxGENE Discover, representing the largest aggregation of standardized single-cell data. 
+Census hosts ever-growing [data releases](../../cellxgene_census_docsite_data_release_info.md) from CZ CELLxGENE Discover, representing the largest aggregation of standardized single-cell data.
 
-Census data are accompanied by cell and gene metadata that have been harmonized on ontologies across all datasets hosted in CZ CELLxGENE Discover. For example all cell types and tissues have been mapped to a value of the CL and UBERON ontologies, respectively. You can find more about the data in the [Census data and schema](../../cellxgene_census_docsite_schema.md) page.
+Census data are accompanied by cell and gene metadata that have been standardized on ontologies across all datasets hosted in CZ CELLxGENE Discover. For example all cell types and tissues have been mapped to a value of the CL and UBERON ontologies, respectively. You can find more about the data in the [Census data and schema](../../cellxgene_census_docsite_schema.md) page.
 
 With the R package `cellxgene.census` researchers can have access to all of these data and metadata directly from an R session with following capabilities:
 
+
 ### Easy-to-use handles to the cloud-hosted Census data
 
-From R users can get handle to the data by opening the census.
+From R users can get a handle to the data by opening the census.
 
 ```r
 library("cellxgene.census")
@@ -52,7 +53,7 @@ census$close()
 
 Following our [Census data and schema](../../cellxgene_census_docsite_schema.md), users can navigate and query Census data and metadata by using any combination of gene and cell filters.
 
-For example, reading a slice of the human cell metadata for about 300K cells with Microglial cells or Neurons from female donors :
+For example, reading a slice of the human cell metadata for about 300K cells with Microglial cells or Neurons from female donors:
 
 ```r
 library("cellxgene.census")
@@ -87,12 +88,14 @@ library("cellxgene.census")
 census = open_soma()
 
 organism = "Homo sapiens"
-gene_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"
-cell_filter =  "sex == 'female' & cell_type %in% c('microglial cell', 'neuron')"
+gene_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+cell_filter =  "cell_type == 'leptomeningeal cell'"
 cell_columns = c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
 
+# Get Seurat object
 seurat_obj = get_seurat(census = census, organism = organism, var_value_filter = gene_filter, obs_value_filter = cell_filter, obs_column_names = cell_columns)
 
+# Get SingleCellExperiment object
 sce_obj = get_single_cell_experiment(census = census, organism = organism, var_value_filter = gene_filter, obs_value_filter = cell_filter, obs_column_names = cell_columns)
 
 census$close()
