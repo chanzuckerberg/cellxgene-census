@@ -98,13 +98,14 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
 -->
-<p>This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames and Seurat assays.</p>
+<p>This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames, <a href="https://satijalab.org/seurat/" class="external-link">Seurat</a> assays, and <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a> objects.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Opening the census.</li>
 <li>Querying cell metadata (obs).</li>
 <li>Querying gene metadata (var).</li>
-<li>Querying expression data.</li>
+<li>Querying expression data as <code>Seurat</code>.</li>
+<li>Querying expression data as <code>SingleCellExperiment</code>.</li>
 </ol>
 <div class="section level2">
 <h2 id="opening-the-census">Opening the census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
@@ -248,10 +249,10 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TUBB4B                 <span style="text-decoration: underline;">2</span>037</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="querying-expression-data">Querying expression data<a class="anchor" aria-label="anchor" href="#querying-expression-data"></a>
+<h2 id="querying-expression-data-as-seurat">Querying expression data as <code>Seurat</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-seurat"></a>
 </h2>
 <p>A convenient way to query and fetch expression data is to use the <code>get_seurat</code> method of the <code>cellxgene.census</code> API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
-<p>The method will return a <code>Seurat</code> object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
+<p>The method will return a <a href="https://satijalab.org/seurat/" class="external-link"><code>Seurat</code> object</a>, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
 <ul>
 <li>
 <code>obs_column_names</code> — character vector indicating the columns to select for cell metadata.</li>
@@ -269,26 +270,20 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <li>With all gene metadata and adding <code>sex</code> cell metadata.</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://satijalab.org/seurat" class="external-link">"Seurat"</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span>, <span class="st">"Homo sapiens"</span>,</span>
 <span>  obs_column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"tissue_general"</span>, <span class="st">"disease"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span>
 <span>  var_value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
 <span>  obs_value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung' &amp; disease == 'COVID-19'"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
-<span><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
-<span><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
-<span><span class="co">#&gt; https://r-spatial.org/r/2023/05/15/evolution4.html.</span></span>
-<span><span class="co">#&gt; It may be desirable to make the sf package available;</span></span>
-<span><span class="co">#&gt; package maintainers should consider adding sf to Suggests:.</span></span>
-<span><span class="co">#&gt; The sp package is now running under evolution status 2</span></span>
-<span><span class="co">#&gt;      (status 2 uses the sf package in place of rgdal)</span></span>
 <span><span class="va">seurat_obj</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
 <span><span class="co">#&gt; 2 features across 2729 samples within 1 assay </span></span>
 <span><span class="co">#&gt; Active assay: RNA (2 features, 0 variable features)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
 <span><span class="co">#&gt; cell5946018 SeuratProject          0            0    B cell           lung COVID-19</span></span>
 <span><span class="co">#&gt; cell5948526 SeuratProject          1            1    B cell           lung COVID-19</span></span>
@@ -304,16 +299,62 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; cell5950730    male</span></span>
 <span><span class="co">#&gt; cell5952197 unknown</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">@</span><span class="va">meta.features</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 feature_name feature_length</span></span>
 <span><span class="co">#&gt; ENSG00000161798         AQP5           1884</span></span>
 <span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037</span></span></code></pre></div>
 <p>For a full description refer to <code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="querying-expression-data-as-singlecellexperiment">Querying expression data as <code>SingleCellExperiment</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-singlecellexperiment"></a>
+</h2>
+<p>Similarly to the previous section, there is a <code>get_single_cell_experiment</code> method in the <code>cellxgene.census</code> API. It behaves exactly the same as <code>get_seurat</code> but it returns a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link"><code>SingleCellExperiment</code> object</a>.</p>
+<p>For example, to repeat the same query we can simply do the following.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sce_obj</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_single_cell_experiment.html">get_single_cell_experiment</a></span><span class="op">(</span></span>
+<span>  <span class="va">census</span>, <span class="st">"Homo sapiens"</span>,</span>
+<span>  obs_column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"tissue_general"</span>, <span class="st">"disease"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span>
+<span>  var_value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
+<span>  obs_value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung' &amp; disease == 'COVID-19'"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sce_obj</span></span>
+<span><span class="co">#&gt; class: SingleCellExperiment </span></span>
+<span><span class="co">#&gt; dim: 2 2729 </span></span>
+<span><span class="co">#&gt; metadata(0):</span></span>
+<span><span class="co">#&gt; assays(1): counts</span></span>
+<span><span class="co">#&gt; rownames(2): ENSG00000161798 ENSG00000188229</span></span>
+<span><span class="co">#&gt; rowData names(2): feature_name feature_length</span></span>
+<span><span class="co">#&gt; colnames(2729): obs5946018 obs5948526 ... obs48038140 obs48038164</span></span>
+<span><span class="co">#&gt; colData names(4): cell_type tissue_general disease sex</span></span>
+<span><span class="co">#&gt; reducedDimNames(0):</span></span>
+<span><span class="co">#&gt; mainExpName: RNA</span></span>
+<span><span class="co">#&gt; altExpNames(0):</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DataFrame with 6 rows and 4 columns</span></span>
+<span><span class="co">#&gt;              cell_type tissue_general     disease         sex</span></span>
+<span><span class="co">#&gt;            &lt;character&gt;    &lt;character&gt; &lt;character&gt; &lt;character&gt;</span></span>
+<span><span class="co">#&gt; obs5946018      B cell           lung    COVID-19        male</span></span>
+<span><span class="co">#&gt; obs5948526      B cell           lung    COVID-19     unknown</span></span>
+<span><span class="co">#&gt; obs5949180      B cell           lung    COVID-19        male</span></span>
+<span><span class="co">#&gt; obs5949686      B cell           lung    COVID-19     unknown</span></span>
+<span><span class="co">#&gt; obs5950730      B cell           lung    COVID-19        male</span></span>
+<span><span class="co">#&gt; obs5952197      B cell           lung    COVID-19     unknown</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">sce_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DataFrame with 2 rows and 2 columns</span></span>
+<span><span class="co">#&gt;                 feature_name feature_length</span></span>
+<span><span class="co">#&gt;                  &lt;character&gt;      &lt;integer&gt;</span></span>
+<span><span class="co">#&gt; ENSG00000161798         AQP5           1884</span></span>
+<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037</span></span></code></pre></div>
+<p>For a full description refer to <code><a href="../reference/get_single_cell_experiment.html">?cellxgene.census::get_single_cell_experiment</a></code>.</p>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
 <p>After use, the census object should be closed to release memory and other resources.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
 </div>
