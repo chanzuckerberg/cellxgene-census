@@ -21,7 +21,7 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 
 
 #' Export Census slices to `Seurat`
-#' 
+#'
 #' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
 #' query, and return it as a `Seurat` object.
 #'
