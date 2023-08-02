@@ -12,9 +12,18 @@ for the desired Census version.}
 
 \item{...}{Custom configuration options.}
 }
+\value{
+SOMATileDBContext object for \code{open_soma()}.
+}
 \description{
 Create a SOMATileDBContext suitable for using with \code{open_soma()}.
-Typically \code{open_soma()} creates a context automatically, but it can be created
-separately in order to set custom configuration options or to share it between
+Typically \code{open_soma()} creates a context automatically, but one can be created
+separately in order to set custom configuration options, or to share it between
 multiple open Census handles.
+}
+\examples{
+census_desc <- get_census_version_description("stable")
+ctx <- new_SOMATileDBContext_for_census(census_desc, "soma.init_buffer_bytes" = paste(4 * 1024**3))
+census <- open_soma("stable", tiledbsoma_ctx = ctx)
+census$close()
 }

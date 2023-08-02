@@ -13,3 +13,6 @@ metadata.
 \description{
 Get the directory of cell census releases currently available
 }
+\examples{
+get_census_version_directory()
+}

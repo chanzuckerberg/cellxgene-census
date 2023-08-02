@@ -4,3 +4,46 @@ template:
   includes:
     in_header: <script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
 
+home:
+  sidebar:
+    structure: [links, license, community, authors]
+      
+navbar:
+  structure:
+    left: [docsite, reference, articles]
+  components:
+    docsite:
+      text: Main Census Site
+      href: https://chanzuckerberg.github.io/cellxgene-census/
+        
+reference:
+- title: Open/retrieve Census data
+  contents:
+    - open_soma
+    - new_SOMATileDBContext_for_census
+    - download_source_h5ad
+    - get_source_h5ad_uri
+- title: Export slices of data
+  contents:
+    - get_seurat
+- title: Feature presence matrix
+  contents:
+    - get_presence_matrix
+- title: Versioning of Census builds
+  contents:
+    - get_census_version_description
+    - get_census_version_directory
+
+articles:
+- title: Analysis
+  navbar: "Explore anda analyze the data"
+  contents:
+    - comp_bio_census_info
+    - comp_bio_summarize_axis_query
+    - comp_bio_data_integration
+- title: API
+  navbar: "cellxgene.census capabilities"
+  contents:
+    - census_query_extract
+    - census_datasets
+    - census_dataset_presence

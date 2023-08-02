@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 88)
+options(width = 88, max.print=256)
 ```
 
 This notebook showcases the Census contents and how to obtain high-level information about it. It covers the organization of data within the Census, what cell and gene metadata are available, and it provides simple demonstrations to summarize cell counts across cell metadata.
@@ -117,7 +117,7 @@ The line below retrieves this table and casts it into an R data frame:
 
 ```{r}
 census_counts <- as.data.frame(census$get("census_info")$get("summary_cell_counts")$read()$concat())
-census_counts
+head(census_counts)
 ```
 
 For each combination of `organism` and values for each `category` of cell metadata you can take a look at `total_cell_count` and `unique_cell_count` for the cell counts of that combination.

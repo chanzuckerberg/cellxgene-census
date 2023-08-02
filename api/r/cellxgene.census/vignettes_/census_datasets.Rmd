@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 80)
+options(width = 88, max.print=100)
 ```
 
 <!--
@@ -46,7 +46,7 @@ print(census_datasets[, c(
   "dataset_id",
   "dataset_title",
   "dataset_total_cell_count"
-)], n = 5)
+)])
 ```
 
 The sum of cell counts across all datasets should match the number of cells across all SOMA experiments (human, mouse).
