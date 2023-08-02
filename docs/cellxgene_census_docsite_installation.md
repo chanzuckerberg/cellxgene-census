@@ -29,7 +29,7 @@ If installing in a Databricks notebook environment, use `%pip install`. Do not u
 
 ## R
 
-From an R session, first install `tiledb` from R-Universe, the latest release in CRAN version is not yet available.
+From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
 
 ```r
 install.packages("tiledb", repos = "https://tiledb-inc.r-universe.dev")
