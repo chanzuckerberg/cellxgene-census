@@ -53,7 +53,7 @@ census$close()
 
 Following our [Census data and schema](../../cellxgene_census_docsite_schema.md), users can navigate and query Census data and metadata by using any combination of gene and cell filters.
 
-For example, reading a slice of the human cell metadata for about 300K cells with Microglial cells or Neurons from female donors:
+For example, reading a slice of the human cell metadata for more than 300K cells with Microglial cells or Neurons from female donors:
 
 ```r
 library("cellxgene.census")
