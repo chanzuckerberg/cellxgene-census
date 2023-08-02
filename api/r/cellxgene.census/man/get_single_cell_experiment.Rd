@@ -53,3 +53,18 @@ A \code{SingleCellExperiment} object containing the sensus slice.
 Convenience wrapper around \code{SOMAExperimentAxisQuery}, to build and execute a
 query, and return it as a \code{SingleCellExperiment} object.
 }
+\examples{
+\dontrun{
+census <- open_soma()
+sce_obj <- get_single_cell_experiment(
+  census,
+  organism = "Homo sapiens",
+  obs_value_filter = "cell_type == 'leptomeningeal cell'",
+  var_value_filter = "feature_id \%in\% c('ENSG00000107317', 'ENSG00000106034')"
+)
+
+sce_obj
+
+census$close()
+}
+}

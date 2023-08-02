@@ -51,3 +51,18 @@ A \code{Seurat} object containing the sensus slice.
 Convenience wrapper around \code{SOMAExperimentAxisQuery}, to build and execute a
 query, and return it as a \code{Seurat} object.
 }
+\examples{
+\dontrun{
+census <- open_soma()
+seurat_obj <- get_seurat(
+  census,
+  organism = "Homo sapiens",
+  obs_value_filter = "cell_type == 'leptomeningeal cell'",
+  var_value_filter = "feature_id \%in\% c('ENSG00000107317', 'ENSG00000106034')"
+)
+
+seurat_obj
+
+census$close()
+}
+}
