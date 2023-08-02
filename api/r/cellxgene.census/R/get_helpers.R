@@ -38,17 +38,6 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @export
 #'
 #' @examples
-#' census <- open_soma()
-#' seurat_obj <- get_seurat(
-#'   census,
-#'   organism = "Homo sapiens",
-#'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
-#'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
-#' )
-#'
-#' seurat_obj
-#'
-#' census$close()
 get_seurat <- function(
     census,
     organism,
@@ -100,17 +89,6 @@ get_seurat <- function(
 #' @export
 #'
 #' @examples
-#' census <- open_soma()
-#' sce_obj <- get_single_cell_experiment(
-#'   census,
-#'   organism = "Homo sapiens",
-#'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
-#'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
-#' )
-#'
-#' sce_obj
-#'
-#' census$close()
 get_single_cell_experiment <- function(
     census,
     organism,
