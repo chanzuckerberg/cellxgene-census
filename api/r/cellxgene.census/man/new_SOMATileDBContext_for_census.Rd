@@ -25,5 +25,5 @@ multiple open Census handles.
 census_desc <- get_census_version_description("stable")
 ctx <- new_SOMATileDBContext_for_census(census_desc, "soma.init_buffer_bytes" = paste(4 * 1024**3))
 census <- open_soma("stable", tiledbsoma_ctx = ctx)
-on.exit(census$close(), add = TRUE)
+census$close()
 }

@@ -7,6 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="cellxgene.census">
 <title>Integrating multi-dataset slices of data with Seurat • cellxgene.census</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -36,7 +42,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
-  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main doc-site</a>
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
@@ -287,20 +293,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 13:57:45 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 13:57:45 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 13:57:45 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 13:57:45 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 16:55:33 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 16:55:33 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 16:55:33 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 16:55:33 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 13:57:46 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//Rtmp8c6MzO/file711c40f06b85</span></span>
-<span><span class="co">#&gt; 13:57:46 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 13:57:49 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 13:57:50 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 13:57:50 Initializing from normalized Laplacian + noise (using irlba)</span></span>
-<span><span class="co">#&gt; 13:57:51 Commencing optimization for 200 epochs, with 410956 positive edges</span></span>
-<span><span class="co">#&gt; 13:57:56 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 16:55:36 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//RtmpRt4LyQ/filed97a3fc4ce4c</span></span>
+<span><span class="co">#&gt; 16:55:36 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 16:55:41 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 16:55:42 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 16:55:43 Initializing from normalized Laplacian + noise (using irlba)</span></span>
+<span><span class="co">#&gt; 16:55:44 Commencing optimization for 200 epochs, with 410956 positive edges</span></span>
+<span><span class="co">#&gt; 16:55:52 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>

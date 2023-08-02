@@ -28,6 +28,6 @@ Open the Cell Census
 }
 \examples{
 census <- open_soma()
-on.exit(census$close(), add = TRUE)
 as.data.frame(census$get("census_info")$get("summary")$read()$concat())
+census$close()
 }
