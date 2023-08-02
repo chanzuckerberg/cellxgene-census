@@ -29,11 +29,14 @@ If installing in a Databricks notebook environment, use `%pip install`. Do not u
 
 ## R
 
-The R package will be soon deposited into R-Universe. In the meantime you can directly install from github using the [devtools](https://devtools.r-lib.org/) R package.
-
-From an R session:
+From an R session, first install `tiledb` from R-Universe, the latest release in CRAN version is not yet available.
 
 ```r
-install.packages("devtools")
-devtools::install_github("chanzuckerberg/cellxgene-census/api/r/cellxgene.census")
+install.packages("tiledb", repos = "https://tiledb-inc.r-universe.dev")
+```
+
+Then install `cellxgene.census` from R-Universe.
+
+```r
+install.packages("cellxgene.census", repos = "https://chanzuckerberg.r-universe.dev")
 ```
