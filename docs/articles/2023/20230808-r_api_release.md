@@ -1,4 +1,4 @@
-# R package `cellxgene.census` v1.0.0 is out!
+# R package `cellxgene.census` V1 is out!
 
 *Published: TBD August 2023*
 
