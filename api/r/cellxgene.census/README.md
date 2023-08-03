@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-This is the documentation for the R package `cellxgene.census` which is part of Census by CZ CELLxGENE Discover. For full details on Census data and capabilities please go to the [main Census site](https://chanzuckerberg.github.io/cellxgene-census/).  
+This is the documentation for the R package `cellxgene.census` which is part of CZ CELLxGENE Discover Census. For full details on Census data and capabilities please go to the [main Census site](https://chanzuckerberg.github.io/cellxgene-census/).  
 
 `cellxgene.census` provides an API to efficiently access the cloud-hosted Census single-cell data from R. In just a few seconds users can access any slice of Census data using cell or gene filters across hundreds of single-cell datasets. 
 
