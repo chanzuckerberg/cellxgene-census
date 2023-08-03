@@ -160,22 +160,22 @@ The `cellxgene.census` package uses [R6](https://r6.r-lib.org/articles/Introduct
 ```r
 library("cellxgene.census")
 
-census = open_soma()
+census <- open_soma()
 
 # Open obs SOMADataFrame
-cell_metadata = census$get("census_data")$get("homo_sapiens")$get("obs")
+cell_metadata <-  census$get("census_data")$get("homo_sapiens")$get("obs")
 
 # Read as Arrow Table
-cell_metadata = cell_metadata$read(
+cell_metadata <-  cell_metadata$read(
    value_filter = "sex == 'female' & cell_type %in% c('microglial cell', 'neuron')",
    column_names = c("assay", "cell_type", "sex", "tissue", "tissue_general", "suspension_type", "disease")
 )
 
 # Concatenates results to an Arrow Table
-cell_metadata = cell_metadata$concat()
+cell_metadata <-  cell_metadata$concat()
 
 # Convert to R tibble (dataframe)
-cell_metadata = as.data.frame(cell_metadata)
+cell_metadata <-  as.data.frame(cell_metadata)
 
 print(cell_metadata)
 
@@ -210,14 +210,14 @@ The following creates a Seurat object on-demand with a smaller set of cells and 
 library("cellxgene.census")
 library("Seurat")
 
-census = open_soma()
+census <-  open_soma()
 
-organism = "Homo sapiens"
-gene_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
-cell_filter =  "cell_type == 'sympathetic neuron'"
-cell_columns = c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
+organism <-  "Homo sapiens"
+gene_filter <-  "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+cell_filter <-   "cell_type == 'sympathetic neuron'"
+cell_columns <-  c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
 
-seurat_obj = get_seurat(
+seurat_obj <-  get_seurat(
    census = census,
    organism = organism,
    var_value_filter = gene_filter,
@@ -241,7 +241,7 @@ Similarly a `SingleCellExperiment` object can be created.
 ```r
 library("SingleCellExperiment")
 
-sce_obj = get_single_cell_experiment(
+sce_obj <-  get_single_cell_experiment(
    census = census,
    organism = organism,
    var_value_filter = gene_filter,
@@ -279,8 +279,8 @@ First we initiate a lazy-evaluation query to access all brain and male cells fro
 library("cellxgene.census")
 library("tiledbsoma")
     
-human = census$get("census_data")$get("homo_sapiens")
-query = human$axis_query(
+human <-  census$get("census_data")$get("homo_sapiens")
+query <-  human$axis_query(
   measurement_name = "RNA",
   obs_query = SOMAAxisQuery$new(
     value_filter = "tissue == 'brain' & sex == 'male'"
@@ -297,11 +297,11 @@ Now we can iterate over the matrix count, as well as the cell and gene metadata.
 ```r
 # Continued from above 
 
-iterator = query$X("raw")$tables()
+iterator <-  query$X("raw")$tables()
 # For sparse matrices use query$X("raw")$sparse_matrix()
 
 # Get an iterative slice as an Arrow Table
-raw_slice = iterator$read_next() 
+raw_slice <-  iterator$read_next() 
 
 #...
 ```

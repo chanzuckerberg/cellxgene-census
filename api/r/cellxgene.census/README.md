@@ -42,14 +42,14 @@ The following creates a `Seurat` object on-demand with all sympathetic neurons i
 library("cellxgene.census")
 library("Seurat")
 
-census = open_soma()
+census <- open_soma()
 
-organism = "Homo sapiens"
-gene_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
-cell_filter =  "cell_type == 'sympathetic neuron'"
-cell_columns = c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
+organism <- "Homo sapiens"
+gene_filter <- "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+cell_filter <-  "cell_type == 'sympathetic neuron'"
+cell_columns <- c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
 
-seurat_obj = get_seurat(
+seurat_obj <- get_seurat(
    census = census,
    organism = organism,
    var_value_filter = gene_filter,
@@ -63,7 +63,7 @@ And the following retrieves the same data as a `SingleCellExperiment` object.
 ```r
 library("SingleCellExperiment")
 
-sce_obj = get_single_cell_experiment(
+sce_obj <- get_single_cell_experiment(
    census = census,
    organism = organism,
    var_value_filter = gene_filter,
