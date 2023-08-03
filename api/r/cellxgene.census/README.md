@@ -15,13 +15,20 @@ Census data can be fetched in an iterative fashion for bigger-than-memory slices
 From an R session, first install `tiledb` from R-Universe, as the latest release in CRAN is not yet available.
 
 ```r
-install.packages("tiledb", repos = "https://tiledb-inc.r-universe.dev")
+install.packages(
+  "tiledb",
+  version = "0.20.2", 
+  repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
+)
 ```
 
 Then install `cellxgene.census` from R-Universe.
 
 ```r
-install.packages("cellxgene.census", repos = "https://chanzuckerberg.r-universe.dev")
+install.packages(
+  "cellxgene.census",
+  repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
+)
 ```
 
 ## Usage
