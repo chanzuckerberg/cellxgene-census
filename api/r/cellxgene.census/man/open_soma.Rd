@@ -2,7 +2,7 @@
 % Please edit documentation in R/open.R
 \name{open_soma}
 \alias{open_soma}
-\title{Open the Cell Census}
+\title{Open the Census}
 \usage{
 open_soma(census_version = "stable", uri = NULL, tiledbsoma_ctx = NULL)
 }
@@ -24,7 +24,7 @@ should be closed to release memory and other resources, usually with
 will also close all SOMA objects accessed through it.
 }
 \description{
-Open the Cell Census
+Open the Census
 }
 \examples{
 census <- open_soma()

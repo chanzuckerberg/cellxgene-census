@@ -1,4 +1,4 @@
-#' Open the Cell Census
+#' Open the Census
 #'
 #' @param census_version The version of the Census, e.g., "stable".
 #' @param uri A URI containing the Census SOMA objects to open instead of a
@@ -47,7 +47,7 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
   "soma.init_buffer_bytes" = paste(1 * 1024**3)
 )
 
-#' Create SOMATileDBContext for Cell Census
+#' Create `SOMATileDBContext` for Census
 #' @description Create a SOMATileDBContext suitable for using with `open_soma()`.
 #' Typically `open_soma()` creates a context automatically, but one can be created
 #' separately in order to set custom configuration options, or to share it between
