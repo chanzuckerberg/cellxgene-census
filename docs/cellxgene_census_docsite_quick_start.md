@@ -204,7 +204,7 @@ The output is a `tibble` with over 300K cells meeting our query criteria and the
 
 ### Obtaining a slice as a `Seurat` or `SingleCellExperiment` object 
 
-The following creates an Seurat object on-demand with a smaller set of cells  and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
+The following creates a Seurat object on-demand with a smaller set of cells and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
 
 ```r
 library("cellxgene.census")
