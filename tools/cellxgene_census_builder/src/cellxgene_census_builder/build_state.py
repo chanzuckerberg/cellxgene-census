@@ -58,7 +58,7 @@ class CensusBuildConfig:
     host_validation_min_free_disk_space: int = field(converter=int, default=1 * 1024**4)  # 1 TiB
     #
     # Release clean up
-    release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are deleted)
+    release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are deleted
     #
     # For testing convenience only
     manifest: str = field(default=None)
