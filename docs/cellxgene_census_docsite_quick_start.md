@@ -49,23 +49,24 @@ with cellxgene_census.open_soma() as census:
     print(cell_metadata)
 ```
 
-The output is a `pandas.DataFrame` with about 300K cells meeting our query criteria and the selected columns.
+The output is a `pandas.DataFrame` with over 300K cells meeting our query criteria and the selected columns.
 
 ```bash
-            assay        cell_type           tissue tissue_general suspension_type disease     sex
-0       10x 3' v3  microglial cell              eye            eye            cell  normal  female
-1       10x 3' v3  microglial cell              eye            eye            cell  normal  female
-2       10x 3' v3  microglial cell              eye            eye            cell  normal  female
-3       10x 3' v3  microglial cell              eye            eye            cell  normal  female
-4       10x 3' v3  microglial cell              eye            eye            cell  normal  female
-...           ...              ...              ...            ...             ...     ...     ...
-299617  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
-299618  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
-299619  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
-299620  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
-299621  10x 3' v3           neuron  cerebral cortex          brain         nucleus  normal  female
+The "stable" release is currently 2023-07-25. Specify 'census_version="2023-07-25"' in future calls to open_soma() to ensure data consistency.
+                assay        cell_type         tissue tissue_general suspension_type disease     sex
+0           10x 3' v3  microglial cell            eye            eye            cell  normal  female
+1           10x 3' v3  microglial cell            eye            eye            cell  normal  female
+2           10x 3' v3  microglial cell            eye            eye            cell  normal  female
+3           10x 3' v3  microglial cell            eye            eye            cell  normal  female
+4           10x 3' v3  microglial cell            eye            eye            cell  normal  female
+...               ...              ...            ...            ...             ...     ...     ...
+379219  microwell-seq           neuron  adrenal gland  adrenal gland            cell  normal  female
+379220  microwell-seq           neuron  adrenal gland  adrenal gland            cell  normal  female
+379221  microwell-seq           neuron  adrenal gland  adrenal gland            cell  normal  female
+379222  microwell-seq           neuron  adrenal gland  adrenal gland            cell  normal  female
+379223  microwell-seq           neuron  adrenal gland  adrenal gland            cell  normal  female
 
-[299622 rows x 7 columns]
+[379224 rows x 7 columns]
 ```
 
 ### Obtaining a slice as AnnData 
@@ -85,13 +86,12 @@ with cellxgene_census.open_soma() as census:
     )
     
     print(adata)
-    
 ```
 
-The output with about 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
+The output with over 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
 
 ``` bash
-AnnData object with n_obs × n_vars = 299622 × 2
+AnnData object with n_obs × n_vars = 379224 × 2
     obs: 'assay', 'cell_type', 'tissue', 'tissue_general', 'suspension_type', 'disease', 'sex'
     var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'
 ```
