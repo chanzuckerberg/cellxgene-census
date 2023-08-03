@@ -123,7 +123,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span></code></pre></div>
 <p>Now we can open the Census.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
 <p>In this notebook we will use Tabula Muris Senis data from the liver as it contains cells from both 10X Genomics and Smart-Seq2 technologies.</p>
 <p>Let’s query the <code>datasets</code> table of the Census by filtering on <code>collection_name</code> for “Tabula Muris Senis” and <code>dataset_title</code> for “liver”.</p>
@@ -145,7 +145,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tabula_muris_liver_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"4546e757-34d0-4d17-be06-538318925fcd"</span>, <span class="st">"6202a243-b713-4e12-9ced-c387f8483dea"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
+<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span>,</span>
 <span>  organism <span class="op">=</span> <span class="st">"Mus musculus"</span>,</span>
 <span>  obs_value_filter <span class="op">=</span> <span class="st">"dataset_id %in% tabula_muris_liver_ids"</span></span>
@@ -163,7 +163,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <p>Smart-seq2 read counts have to be normalized by gene length.</p>
 <p>Lets first get the gene lengths from <code>var.feature_length</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">smart_seq_gene_lengths</span> <span class="op">&lt;-</span> <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"RNA"</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">meta.features</span><span class="op">$</span><span class="va">feature_length</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">smart_seq_gene_lengths</span> <span class="op">&lt;-</span> <span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">feature_length</span></span></code></pre></div>
 <p>Now we can use those to normalize Smart-seq data. So let’s split the object by assay.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seurat_obj.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/SplitObject.html" class="external-link">SplitObject</a></span><span class="op">(</span><span class="va">seurat_obj</span>, split.by <span class="op">=</span> <span class="st">"assay"</span><span class="op">)</span></span></code></pre></div>
@@ -188,7 +188,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <p>And now perform PCA and UMAP</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj</span>, features <span class="op">=</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seurat_obj</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seurat_obj</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"assay"</span><span class="op">)</span></span>
@@ -293,20 +293,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 13:02:30 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 13:02:30 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 13:02:30 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 13:02:30 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 16:10:11 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 16:10:11 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 16:10:11 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 16:10:11 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 13:02:32 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//Rtmpfho1WF/file7d5027ced41d</span></span>
-<span><span class="co">#&gt; 13:02:32 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 13:02:38 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 13:02:38 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 13:02:39 Initializing from normalized Laplacian + noise (using irlba)</span></span>
-<span><span class="co">#&gt; 13:02:40 Commencing optimization for 200 epochs, with 410804 positive edges</span></span>
-<span><span class="co">#&gt; 13:02:49 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 16:10:13 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//RtmpJsaOXU/file122861c13d73b</span></span>
+<span><span class="co">#&gt; 16:10:13 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 16:10:16 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 16:10:16 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 16:10:17 Initializing from normalized Laplacian + noise (using irlba)</span></span>
+<span><span class="co">#&gt; 16:10:18 Commencing optimization for 200 epochs, with 410804 positive edges</span></span>
+<span><span class="co">#&gt; 16:10:23 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
