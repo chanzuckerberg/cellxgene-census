@@ -104,6 +104,7 @@ First we initiate a lazy-evaluation query to access all brain and male cells fro
 
 ```python
 import cellxgene_census
+import tiledbsoma
 
 with cellxgene_census.open_soma() as census:
     
@@ -141,7 +142,6 @@ And you must close the query.
 ```
 
 ## R quick start
-
 
 Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via `?`:
 
