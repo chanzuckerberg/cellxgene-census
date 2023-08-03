@@ -2,7 +2,7 @@
 % Please edit documentation in R/release_directory.R
 \name{get_census_version_description}
 \alias{get_census_version_description}
-\title{Get release description for given census version}
+\title{Get release description for a Census version}
 \usage{
 get_census_version_description(census_version)
 }
@@ -13,7 +13,7 @@ get_census_version_description(census_version)
 List with the release location and metadata
 }
 \description{
-Get release description for given census version
+Get release description for a Census version
 }
 \examples{
 as.data.frame(get_census_version_description("stable"))

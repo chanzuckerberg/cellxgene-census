@@ -26,6 +26,7 @@ reference:
 - title: Export slices of data
   contents:
     - get_seurat
+    - get_single_cell_experiment
 - title: Feature presence matrix
   contents:
     - get_presence_matrix
@@ -36,7 +37,7 @@ reference:
 
 articles:
 - title: Analysis
-  navbar: "Explore anda analyze the data"
+  navbar: "Explore and analyze the data"
   contents:
     - comp_bio_census_info
     - comp_bio_summarize_axis_query

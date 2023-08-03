@@ -2,7 +2,7 @@
 % Please edit documentation in R/open.R
 \name{new_SOMATileDBContext_for_census}
 \alias{new_SOMATileDBContext_for_census}
-\title{Create SOMATileDBContext for Cell Census}
+\title{Create \code{SOMATileDBContext} for Census}
 \usage{
 new_SOMATileDBContext_for_census(census_version_description, ...)
 }

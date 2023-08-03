@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v4
         with:
@@ -38,6 +40,7 @@ jobs:
           cp -r _build/html/* ../docsite/.
 
           # Copy R pkgdown docs (static HTML checked into git)
+          cd ../
           mkdir -p docsite/r
           cp -r api/r/cellxgene.census/docs/* docsite/r/.
 
