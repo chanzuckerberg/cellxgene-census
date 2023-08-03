@@ -36,7 +36,7 @@ You can also check out out the [quick start guide](https://chanzuckerberg.github
 
 ### Example `Seurat` and `SingleCellExperiment` query
 
-The following creates an `Seurat` object on-demand with all sympathetic neurons in Census and filtering only for the genes `ENSG00000161798`, `ENSG00000188229`.
+The following creates a `Seurat` object on-demand with all sympathetic neurons in Census and filtering only for the genes `ENSG00000161798`, `ENSG00000188229`.
 
 ```r
 library("cellxgene.census")
