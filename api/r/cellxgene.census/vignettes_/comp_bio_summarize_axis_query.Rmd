@@ -37,7 +37,8 @@ R data frames are in-memory objects. Take care that queries are small enough for
 The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
 
 ```{r}
-census <- cellxgene.census::open_soma()
+library("cellxgene.census")
+census <- open_soma()
 ```
 
 If you open the Census, you should close it with `census$close()`. This can be automated using `on.exit(census$close(), add = TRUE)` immediately after `census <- open_soma()`.
@@ -62,19 +63,18 @@ This example reads the cell metadata (obs) into an R data frame to summarize in 
 human <- census$get("census_data")$get("homo_sapiens")
 
 # Read obs into an R data frame (tibble).
-obs_df <- as.data.frame(human$obs$read(
-  column_names = c("soma_joinid", "cell_type_ontology_term_id")
-)$concat())
+obs_df <- human$obs$read(column_names = c("cell_type"))
+obs_df <- as.data.frame(obs_df$concat())
 
 # Find all unique values in the cell_type_ontology_term_id column.
-unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
+unique_cell_type <- unique(obs_df$cell_type)
 
-cat(paste(
+cat(
   "There are",
-  length(unique_cell_type_ontology_term_id),
-  "cell types in the Census! The first few are:"
-))
-head(unique_cell_type_ontology_term_id)
+  length(unique_cell_type),
+  "cell types in the Census! The first few are: ",
+  paste(head(unique_cell_type), collapse = ", ")
+)
 ```
 
 ### Example: Summarize a subset of cell types, selected with a `value_filter`
@@ -85,40 +85,44 @@ This example utilizes a SOMA "value filter" to read the subset of cells with `ti
 # Read cell_type terms for cells which have a specific tissue term
 LUNG_TISSUE <- "UBERON:0002048"
 
-obs_df <- as.data.frame(human$obs$read(
-  column_names = c("cell_type_ontology_term_id"),
-  value_filter = paste("tissue_ontology_term_id == '", LUNG_TISSUE, "'", sep = "")
-)$concat())
+obs_df <- human$obs$read(column_names = c("cell_type"), value_filter = paste0("tissue_ontology_term_id == '", LUNG_TISSUE, "'"))
+obs_df <- as.data.frame(obs_df$concat())
 
 # Find all unique values in the cell_type_ontology_term_id column as an R data frame.
-unique_cell_type_ontology_term_id <- unique(obs_df$cell_type_ontology_term_id)
-cat(paste(
+unique_cell_type <- unique(obs_df$cell_type)
+cat(
   "There are ",
-  length(unique_cell_type_ontology_term_id),
+  length(unique_cell_type),
   " cell types in the Census where tissue_ontology_term_id == ",
   LUNG_TISSUE,
   "!\nThe first few are:",
-  sep = ""
-))
-head(unique_cell_type_ontology_term_id)
+  paste(head(unique_cell_type), collapse = ", "),
+  "\n"
+)
 
 # Report the 10 most common
-top_10 <- sort(table(obs_df$cell_type_ontology_term_id), decreasing = TRUE)[1:10]
-cat(paste("The top 10 cell types where tissue_ontology_term_id ==", LUNG_TISSUE))
-print(top_10)
+top_10 <- sort(table(obs_df$cell_type), decreasing = TRUE)[1:10]
+cat(
+  "The top 10 cell types where tissue_ontology_term_id ==", 
+  LUNG_TISSUE,
+  "are: ",
+  paste(names(top_10), collapse = ", ")
+)
 ```
 
 You can also define much more complex value filters. For example:
 
-* combine terms with `and` and `or`
+* combine terms with `&` and `|`
 * use the `%in%` operator to query on multiple values
 
 ```{r}
 # You can also do more complex queries, such as testing for inclusion in a list of values
-obs_df <- as.data.frame(human$obs$read(
+obs_df <- human$obs$read(
   column_names = c("cell_type_ontology_term_id"),
   value_filter = "tissue_ontology_term_id %in% c('UBERON:0002082', 'UBERON:OOO2084', 'UBERON:0002080')"
-)$concat())
+)
+
+obs_df <- as.data.frame(obs_df$concat())
 
 # Summarize
 top_10 <- sort(table(obs_df$cell_type_ontology_term_id), decreasing = TRUE)[1:10]
@@ -139,15 +143,16 @@ cols_to_query <- c(
 total_cells <- 0
 for (organism in census$get("census_data")$names()) {
   print(organism)
-  obs_df <- as.data.frame(
-    census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)$concat()
-  )
+  
+  obs_df <- census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)
+  obs_df <- as.data.frame(obs_df$concat())
+  
   total_cells <- total_cells + nrow(obs_df)
   for (col in cols_to_query) {
-    cat(paste("  Unique ", col, " values: ", length(unique(obs_df[[col]])), "\n", sep = ""))
+    cat("  Unique ", col, " values: ", length(unique(obs_df[[col]])), "\n")
   }
 }
-cat(paste("Complete Census contains", total_cells, "cells."))
+cat("Complete Census contains ", total_cells, " cells.")
 ```
 
 ### Close the census

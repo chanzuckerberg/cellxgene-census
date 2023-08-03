@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 88, max.print = 100)
+options(width = 88, max.print = 256)
 ```
 
 <!--
@@ -33,7 +33,8 @@ This tutorial demonstrates basic use of the `census_datasets` data frame that co
 Each Census contains a top-level data frame itemizing the datasets contained therein. You can read this `SOMADataFrame` into an [Arrow Table](https://arrow.apache.org/docs/r/reference/Table.html):
 
 ```{r}
-census <- cellxgene.census::open_soma()
+library("cellxgene.census")
+census <- open_soma()
 census_datasets <- census$get("census_info")$get("datasets")$read()$concat()
 print(census_datasets)
 ```
@@ -53,14 +54,15 @@ The sum of cell counts across all datasets should match the number of cells acro
 
 ```{r}
 census_data <- census$get("census_data")
-all_experiments <- lapply(census_data$to_list(), function(it) census_data$get(it$name))
+all_experiments <- lapply(census_data$to_list(), function(x) census_data$get(x$name))
 print(all_experiments)
 ```
 
 ```{r}
-experiments_total_cells <- sum(sapply(all_experiments, function(it) {
-  nrow(it$obs$read(column_names = c("soma_joinid"))$concat())
+experiments_total_cells <- sum(sapply(all_experiments, function(x) {
+  nrow(x$obs$read(column_names = c("soma_joinid"))$concat())
 }))
+
 print(paste("Found", experiments_total_cells, "cells in all experiments."))
 print(paste(
   "Found", sum(as.vector(census_datasets$dataset_total_cell_count)),
@@ -79,11 +81,12 @@ census_datasets[census_datasets$dataset_id == "0bd1a1de-3aee-40e0-b2ec-86c7a30c7
 Create a query on the mouse experiment, "RNA" measurement, for the `dataset_id`.
 
 ```{r}
-obs_query <- tiledbsoma::SOMAAxisQuery$new(
+library("tiledbsoma")
+obs_query <- SOMAAxisQuery$new(
   value_filter = "dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"
 )
-expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
-  census_data$get("mus_musculus"), "RNA",
+expt_query <-census_data$get("mus_musculus")$axis_query(
+  measurement_name ="RNA",
   obs_query = obs_query
 )
 dataset_seurat <- expt_query$to_seurat(c(counts = "raw"))
@@ -98,14 +101,16 @@ To do this you can fetch the location in the cloud or directly download to your 
 
 ```{r}
 # Option 1: Direct download
-cellxgene.census::download_source_h5ad("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149",
+download_source_h5ad(
+  dataset_id = "0bd1a1de-3aee-40e0-b2ec-86c7a30c7149",
   file = "/tmp/Tabula_Muris_Senis-bone_marrow.h5ad",
   overwrite = TRUE
 )
 ```
+
 ```{r}
 # Option 2: Get location and download via preferred method
-cellxgene.census::get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
+get_source_h5ad_uri("0bd1a1de-3aee-40e0-b2ec-86c7a30c7149")
 ```
 
 The local H5AD file can be used in R using [SeuratDisk's anndata converter](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html).
