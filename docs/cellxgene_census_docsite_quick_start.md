@@ -88,7 +88,7 @@ with cellxgene_census.open_soma() as census:
     print(adata)
 ```
 
-The output with over 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
+The output with about 300K cells and 2 genes can be now used for downstream analysis using [scanpy](https://scanpy.readthedocs.io/en/stable/).
 
 ``` bash
 AnnData object with n_obs × n_vars = 379224 × 2
