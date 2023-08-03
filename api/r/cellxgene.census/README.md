@@ -12,7 +12,7 @@ Census data can be fetched in an iterative fashion for bigger-than-memory slices
 
 ## Installation
 
-From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
+From an R session, first install `tiledb` from R-Universe, as the latest release in CRAN is not yet available.
 
 ```r
 install.packages("tiledb", repos = "https://tiledb-inc.r-universe.dev")
