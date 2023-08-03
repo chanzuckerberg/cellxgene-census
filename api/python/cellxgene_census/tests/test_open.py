@@ -18,7 +18,7 @@ from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_UR
 # Remove once the mirror.json route is released.
 mirrors_json = {
     "default": "private",
-    "private": {"provider": "S3", "bucket": "cellxgene-data-public", "region": "us-west-2"},
+    "private": {"provider": "S3", "base_uri": "s3://cellxgene-data-public/", "region": "us-west-2"},
 }
 
 
@@ -112,8 +112,8 @@ def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
 def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     mock_mirrors = {
         "default": "test-mirror",
-        "test-mirror": {"provider": "S3", "bucket": "mirror-bucket-1", "region": "region-1"},
-        "test-mirror-2": {"provider": "S3", "bucket": "mirror-bucket-2", "region": "region-2"},
+        "test-mirror": {"provider": "S3", "base_uri": "s3://mirror-bucket-1/", "region": "region-1"},
+        "test-mirror-2": {"provider": "S3", "base_uri": "s3://mirror-bucket-2/", "region": "region-2"},
     }
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
@@ -163,13 +163,13 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
 def test_open_soma_rejects_non_s3_mirror(requests_mock: rm.Mocker) -> None:
     mock_mirrors = {
         "default": "test-mirror",
-        "test-mirror": {"provider": "GCP", "bucket": "mirror-bucket-1", "region": "region-1"},
+        "test-mirror": {"provider": "GCS", "bucket": "gcs://mirror-bucket-1/"},
     }
     requests_mock.real_http = True
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
     with pytest.raises(
-        ValueError, match=re.escape("Unsupported mirror provider: GCP. Try upgrading the census package.")
+        ValueError, match=re.escape("Unsupported mirror provider: GCS. Try upgrading the census package.")
     ):
         cellxgene_census.open_soma(census_version="latest")
 

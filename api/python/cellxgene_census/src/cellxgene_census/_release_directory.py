@@ -45,7 +45,7 @@ CensusMirror = TypedDict(
     "CensusMirror",
     {
         "provider": str,  # provider of the mirror. Only S3 is supported in this version.
-        "bucket": str,  # name of the bucket or resource
+        "base_uri": str,  # name of the bucket or resource
         "region": Optional[str],  # region of the bucket or resource
     },
 )
@@ -182,7 +182,7 @@ def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> Res
     _assert_mirror_supported(mirror)
 
     if locator.get("relative_uri"):
-        uri = _uri_join(f"s3://{mirror['bucket']}/", locator["relative_uri"])
+        uri = _uri_join(mirror["base_uri"], locator["relative_uri"])
         region = mirror["region"]
     else:
         uri = locator["uri"]
