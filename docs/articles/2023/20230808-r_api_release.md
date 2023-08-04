@@ -32,12 +32,12 @@ Census hosts ever-growing [data releases](../../cellxgene_census_docsite_data_re
 
 Census data are accompanied by cell and gene metadata that have been standardized on ontologies across all datasets hosted in CZ CELLxGENE Discover. For example all cell types and tissues have been mapped to a value of the CL and UBERON ontologies, respectively. You can find more about the data in the [Census data and schema](../../cellxgene_census_docsite_schema.md) page.
 
-With the R package `cellxgene.census` researchers can have access to all of these data and metadata directly from an R session with following capabilities:
+With the `cellxgene.census` R package, researchers can have access to all of these data and metadata directly from an R session with the following capabilities:
 
 
 ### Easy-to-use handles to the cloud-hosted Census data
 
-From R users can get a handle to the data by opening the census.
+From R users can get a handle to the data by opening the Census.
 
 ```r
 library("cellxgene.census")
@@ -80,7 +80,7 @@ census$close()
 
 ### Exporting Census slices to `Seurat` and `SingleCellExperiment`
 
-Similarly querying both the single-cell data along metadata can be easily exported to  `Seurat` or `SingleCellExperiment` object for downstream analysis:
+Similarly, querying both the single-cell data along with its metadata, it can be easily exported to  `Seurat` or `SingleCellExperiment` object for downstream analysis:
 
 ```r
 library("cellxgene.census")

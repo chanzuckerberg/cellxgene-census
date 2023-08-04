@@ -12,7 +12,7 @@ The goals of these articles are to have:
 * Master reference articles to link for other channels (e.g. slack, twitter). 
 * One-stop place for users to have a historical view of Census developments and analysis.
 
-A great model has been used for the [Apache Arrow Blog](https://arrow.apache.org/blog/).
+A great example of this approach is the [Apache Arrow Blog](https://arrow.apache.org/blog/).
 
 ## Location
 
@@ -43,7 +43,7 @@ Examples:
 
 ### Date & author
 
-Immediately below the title, and date and author(s) should be added to the article in italics. The date should be in format "[DD] [Month] [YYY]" and followed by the keyword "Published: ", and the author(s) must be written after the keyboard "By: " have an email link. Both must be in italics.
+Immediately below the title, and date and author(s) should be added to the article in italics. The date should be in format "[DD] [Month] [YYYY]" and followed by the keyword "Published: ", and the author(s) must be written after the keyboard "By: " have an email link. Both must be in italics.
 
 Example:
 
@@ -57,7 +57,7 @@ Example:
 
 ### Introduction
 
-Introductory text of 1-2 paragraphs must be included right underneath the the date and authors.
+Introductory text of 1-2 paragraphs must be included right underneath the date and authors.
 
 * It must provide a one paragraph summary of the article.
 * It must not contain an explanation of the Census.
