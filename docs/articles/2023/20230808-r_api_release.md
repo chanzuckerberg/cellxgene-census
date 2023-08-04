@@ -1,6 +1,6 @@
 # R package `cellxgene.census` V1 is out!
 
-*Published: TBD August 2023*
+*Published: August 8th, 2023*
 
 *By: [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
@@ -10,6 +10,9 @@ This has been long coming since our Python release back in May. Now, from R, com
  
 With `cellxgene.census` in a few seconds users can access any slice of Census data using cell or gene filters across hundreds of datasets. The data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, and [Seurat](https://satijalab.org/seurat/) or [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) for downstream analysis.
 
+![image](20230808-r_api_release.svg)
+
+
 ## Installation and usage
 
 Users can install `cellxgene.census` and its dependencies following the [installation instructions](../../cellxgene_census_docsite_installation.md).
@@ -18,13 +21,13 @@ To learn more about the package please make sure to check out the following reso
 
 * [Quick start guide.](../../cellxgene_census_docsite_quick_start.md)
 * [R reference docs and tutorials.](https://chanzuckerberg.github.io/cellxgene-census/r/index.html)
-* Querying and slicing data tutorial << INSERT LINK >>.
+* [Querying and slicing data tutorial.](https://chanzuckerberg.github.io/cellxgene-census/r/articles/census_query_extract.html)
 
 ## Census R package is made possible by `tiledbsoma`
 
 The `cellxgene.census` package relies on [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) R's package `tiledbsoma` for all of its data access capabilities as shown in the next section. 
 
-CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded it from beta to its first stable version. << INSERT link their release notes >>.
+CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded it from beta to its first stable version. Release notes can be found [here](https://github.com/single-cell-data/TileDB-SOMA/releases/tag/1.3.0).
 
 ## Efficient access to single-cell data for >30M cells from R
 
