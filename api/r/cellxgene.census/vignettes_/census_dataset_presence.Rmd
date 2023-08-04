@@ -85,7 +85,7 @@ Now that we have the dataset table, the genes metadata table, and the dataset pr
 - the first dimension of the presence matrix is the dataset's `soma_joinid`, as stored in the `census_datasets` dataframe.
 - the second dimension of the presence matrix is the feature's `soma_joinid`, as stored in the `var` dataframe.
 
-The presence matrix has a method `$take()` that let's you slice it by the `soma_joinid` from dataset and var joinid. And the full presence matrix or slices of it can be then exported to a regular matrix with the method `$get_one_based_matrix()`
+The presence matrix has a method `$take()` that lets you slice it by `soma_joinid`s from `census_datasets` and `var`. And the full presence matrix, or slices of it, can then be exported to a regular matrix with the method `$get_one_based_matrix()`
 
 Let's find out if the the gene `"ENSG00000286096"` was measured in the dataset with id `"97a17473-e2b1-4f31-a544-44a60773e2dd"`.
 
