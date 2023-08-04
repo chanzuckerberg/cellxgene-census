@@ -24,7 +24,7 @@ To learn more about the package please make sure to check out the following reso
 
 The `cellxgene.census` package relies on [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) R's package `tiledbsoma` for all of its data access capabilities as shown in the next section. 
 
-CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded  it from beta to its first stable version. << INSERT link their release notes >>.
+CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded it from beta to its first stable version. << INSERT link their release notes >>.
 
 ## Efficient access to single-cell data for >30M cells from R
 
@@ -69,7 +69,7 @@ cell_metadata <- cell_metadata$read(
    column_names = c("assay", "cell_type", "sex", "tissue", "tissue_general", "suspension_type", "disease")
 )
 
-# Concatenate iterations
+# Retrieve all metadata at once
 cell_metadata <- cell_metadata$concat()
 
 # Convert to R tibble (dataframe)
