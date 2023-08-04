@@ -85,8 +85,8 @@ library("tiledbsoma")
 obs_query <- SOMAAxisQuery$new(
   value_filter = "dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"
 )
-expt_query <-census_data$get("mus_musculus")$axis_query(
-  measurement_name ="RNA",
+expt_query <- census_data$get("mus_musculus")$axis_query(
+  measurement_name = "RNA",
   obs_query = obs_query
 )
 dataset_seurat <- expt_query$to_seurat(c(counts = "raw"))

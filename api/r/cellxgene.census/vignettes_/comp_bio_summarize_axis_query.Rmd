@@ -66,7 +66,7 @@ human <- census$get("census_data")$get("homo_sapiens")
 obs_df <- human$obs$read(column_names = c("cell_type"))
 obs_df <- as.data.frame(obs_df$concat())
 
-# Find all unique values in the cell_type_ontology_term_id column.
+# Find all unique values in the cell_type column.
 unique_cell_type <- unique(obs_df$cell_type)
 
 cat(
@@ -88,7 +88,7 @@ LUNG_TISSUE <- "UBERON:0002048"
 obs_df <- human$obs$read(column_names = c("cell_type"), value_filter = paste0("tissue_ontology_term_id == '", LUNG_TISSUE, "'"))
 obs_df <- as.data.frame(obs_df$concat())
 
-# Find all unique values in the cell_type_ontology_term_id column as an R data frame.
+# Find all unique values in the cell_type column as an R data frame.
 unique_cell_type <- unique(obs_df$cell_type)
 cat(
   "There are ",
