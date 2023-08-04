@@ -194,8 +194,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">obs_query</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">expt_query</span> <span class="op">&lt;-</span><span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"mus_musculus"</span><span class="op">)</span><span class="op">$</span><span class="fu">axis_query</span><span class="op">(</span></span>
-<span>  measurement_name <span class="op">=</span><span class="st">"RNA"</span>,</span>
+<span><span class="va">expt_query</span> <span class="op">&lt;-</span> <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"mus_musculus"</span><span class="op">)</span><span class="op">$</span><span class="fu">axis_query</span><span class="op">(</span></span>
+<span>  measurement_name <span class="op">=</span> <span class="st">"RNA"</span>,</span>
 <span>  obs_query <span class="op">=</span> <span class="va">obs_query</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">dataset_seurat</span> <span class="op">&lt;-</span> <span class="va">expt_query</span><span class="op">$</span><span class="fu">to_seurat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span></span>
