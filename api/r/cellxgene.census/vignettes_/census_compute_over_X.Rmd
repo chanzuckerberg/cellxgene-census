@@ -1,0 +1,80 @@
+---
+title: "Computing on X using online (incremental) algorithms"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Computing on X using online (incremental) algorithms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 88, max.print=100)
+```
+
+<!--
+THIS VIGNETTE IS BASED ON:
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_compute_over_X.ipynb
+-->
+
+This tutorial showcases computing a variety of per-gene and per-cell statistics for a user-defined query using out-of-core operations.
+
+*NOTE:* when query results are small enough to fit in memory, it's usually easier to use `get_seurat()` or `get_single_cell_experiment()`. This tutorial shows means of incrementally processing larger-than-core (RAM) data, where incremental (online) algorithms are needed.
+
+**Contents**
+
+* Incremental count and mean calculation.
+* Incremental variance calculation.
+* Counting cells per gene, grouped by `dataset_id`.
+
+## Incremental count and mean calculation.
+
+Many statistics, such as mean, are easy to calculate incrementally. Let's begin with a query on the `X$raw` sparse matrix of read counts, which will return results in batches. Incrementally accumulate the read count per gene into `raw_sum` and the gene count into `raw_n`; then compute mean read count per gene.
+
+First define a query - in this case a slice over the obs axis for cells with a specific tissue & sex value, and all genes on the var axis. The `query$X()` method returns an iterator of results, each as an Arrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:
+
+* `soma_data` - the X values (float)
+* `soma_dim_0` - the obs coordinate (int64)
+* `soma_dim_1` - the var coordinate (int64)
+
+**Important:** the X matrices are joined to var/obs axis DataFrames by an integer join "id" (aka `soma_joinid`). They are NOT positionally indexed, and any given cell or gene may have a `soma_joinid` of any value (e.g., a large integer). In other words, for any given X value, the `soma_dim_0` corresponds to the soma_joinid in the `obs` dataframe, and the `soma_dim_1` coordinate corresponds to the `soma_joinid` in the `var` dataframe.
+
+For convenience, the query package contains a utility function to simplify operations on query slices. `query$indexer` returns an indexer that can be used to wrap the output of `query$X()`, converting from `soma_joinid`s to positional indexing. Positions are `[0, N)`, where N are the number of results on the query for any given axis. TODO: discuss 0up/1up issue here
+
+Key points:
+
+* it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations.
+* by default, data in the census is indexed by `soma_joinid` and not positionally.
+
+```{r,warning=FALSE,message=FALSE}
+library(tiledbsoma)
+census <- cellxgene.census::open_soma()
+
+query <- census$get("census_data")$get("mus_musculus")$axis_query(
+  "RNA", obs_query = SOMAAxisQuery$new(value_filter = "tissue=='brain' && sex=='male'")
+)
+
+genes_df <- as.data.frame(query$var()$concat())
+n_genes <- nrow(genes_df)
+
+raw_n <- numeric(n_genes)
+raw_sum <- numeric(n_genes)
+
+tables <- query$X("raw")$tables()
+while (!tables$read_complete()) {
+  table_part <- tables$read_next()
+  
+  # compute the total count for each gene (group by soma_dim_1)
+  count_by_gene <- tapply(as.vector(table_part$soma_data), as.vector(table_part$soma_dim_1), sum)
+  genes_loc <- query$indexer$by_var(as.integer(names(count_by_gene)))$as_vector() + 1
+  raw_n[genes_loc] <- raw_n[genes_loc] + 1
+  raw_sum[genes_loc] <- raw_sum[genes_loc] + count_by_gene
+}
+
+genes_df$raw_n <- raw_n
+genes_df$raw_mean <- raw_sum / query$n_obs
+genes_df
+```
