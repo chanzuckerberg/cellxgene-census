@@ -115,7 +115,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 </h2>
 <p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -150,9 +151,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <h2 id="fetching-the-dataset-presence-matrix">Fetching the dataset presence matrix<a class="anchor" aria-label="anchor" href="#fetching-the-dataset-presence-matrix"></a>
 </h2>
 <p>Now let’s fetch the dataset presence matrix.</p>
-<p>For convenience, read the entire presence matrix (for Homo sapiens) into a sparse matrix. There is a convenience API providing this capability:</p>
+<p>For convenience, read the entire presence matrix (for Homo sapiens) into a sparse matrix. There is a convenience function providing this capability:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">presence_matrix</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_presence_matrix.html">get_presence_matrix</a></span><span class="op">(</span><span class="va">census</span>, <span class="st">"Homo sapiens"</span>, <span class="st">"RNA"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">presence_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_presence_matrix.html">get_presence_matrix</a></span><span class="op">(</span><span class="va">census</span>, <span class="st">"Homo sapiens"</span>, <span class="st">"RNA"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">presence_matrix</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>We also need the <code>var</code> dataframe, which is read into an R data frame for convenient manipulation:</p>
@@ -183,11 +184,21 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <li>the first dimension of the presence matrix is the dataset’s <code>soma_joinid</code>, as stored in the <code>census_datasets</code> dataframe.</li>
 <li>the second dimension of the presence matrix is the feature’s <code>soma_joinid</code>, as stored in the <code>var</code> dataframe.</li>
 </ul>
+<p>The presence matrix has a method <code>$take()</code> that let’s you slice it by the <code>soma_joinid</code> from dataset and var joinid. And the full presence matrix or slices of it can be then exported to a regular matrix with the method <code>$get_one_based_matrix()</code></p>
 <p>Let’s find out if the the gene <code>"ENSG00000286096"</code> was measured in the dataset with id <code>"97a17473-e2b1-4f31-a544-44a60773e2dd"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="co"># Get somo_joinid for datasets and genes of interest</span></span>
+<span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
 <span><span class="va">dataset_joinid</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">datasets_df</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"97a17473-e2b1-4f31-a544-44a60773e2dd"</span><span class="op">]</span></span>
-<span><span class="va">is_present</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span><span class="va">dataset_joinid</span>, <span class="va">var_joinid</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Slice presence matrix with datasets and genes of interest</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>i <span class="op">=</span> <span class="va">dataset_joinid</span>, j <span class="op">=</span> <span class="va">var_joinid</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Convert presence matrix to regular matrix</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix_slice</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Find how if the gene is present in this dataset</span></span>
+<span><span class="va">is_present</span> <span class="op">&lt;-</span> <span class="va">presence_matrix_slice</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Feature is"</span>, <span class="kw">if</span> <span class="op">(</span><span class="va">is_present</span><span class="op">)</span> <span class="st">"present."</span> <span class="kw">else</span> <span class="st">"not present."</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Feature is present.</span></span></code></pre></div>
 </div>
@@ -201,9 +212,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span></span>
 <span><span class="co"># The presence matrix is indexed by the joinids of the dataset and var dataframes,</span></span>
 <span><span class="co"># so slice out the feature of interest by its joinid.</span></span>
-<span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span></span>
-<span>  <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>j <span class="op">=</span> <span class="va">var_joinid</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span></span>
-<span><span class="op">]</span></span>
+<span><span class="va">presence_matrix_slice</span>  <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>j <span class="op">=</span> <span class="va">var_joinid</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">measured_datasets</span> <span class="op">&lt;-</span> <span class="va">presence_matrix_slice</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span></span>
+<span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">measured_datasets</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># From the datasets dataframe, slice out the datasets which have a joinid in the list</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">datasets_df</span><span class="op">[</span><span class="va">dataset_joinids</span>, <span class="op">]</span><span class="op">)</span></span>
@@ -232,9 +243,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">datasets_df</span><span class="op">$</span><span class="va">collection_id</span> <span class="op">==</span> <span class="st">"17481d16-ee44-49e5-bcf0-28c0780d8c4a"</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># Slice the presence matrix by the first dimension, i.e., by dataset</span></span>
-<span><span class="va">var_joinids</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>i <span class="op">=</span> <span class="va">dataset_joinids</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="op">]</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>i <span class="op">=</span> <span class="va">dataset_joinids</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">genes_measured</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">presence_matrix_slice</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
+<span><span class="va">var_joinids</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">genes_measured</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">[</span><span class="va">var_joinids</span>, <span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 27,210 × 4</span></span></span>
