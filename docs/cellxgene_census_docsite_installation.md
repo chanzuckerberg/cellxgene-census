@@ -31,12 +31,14 @@ If installing in a Databricks notebook environment, use `%pip install`. Do not u
 
 From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
 
-If installing from Ubuntu, you may need to install the following libraries via `apt install`:  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`
+If installing from Ubuntu, you may need to install the following libraries via `apt install`:  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`.
+
+If installing from MacOS, you will need to install the [developer tools Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
 
 ```r
 install.packages(
   "tiledb",
-  version = "0.20.2", 
+  version = "0.20.3", 
   repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
 )
 ```

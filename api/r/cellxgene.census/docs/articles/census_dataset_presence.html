@@ -184,10 +184,10 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <li>the first dimension of the presence matrix is the dataset’s <code>soma_joinid</code>, as stored in the <code>census_datasets</code> dataframe.</li>
 <li>the second dimension of the presence matrix is the feature’s <code>soma_joinid</code>, as stored in the <code>var</code> dataframe.</li>
 </ul>
-<p>The presence matrix has a method <code>$take()</code> that let’s you slice it by the <code>soma_joinid</code> from dataset and var joinid. And the full presence matrix or slices of it can be then exported to a regular matrix with the method <code>$get_one_based_matrix()</code></p>
+<p>The presence matrix has a method <code>$take()</code> that lets you slice it by <code>soma_joinid</code>s from <code>census_datasets</code> and <code>var</code>. And the full presence matrix, or slices of it, can then be exported to a regular matrix with the method <code>$get_one_based_matrix()</code></p>
 <p>Let’s find out if the the gene <code>"ENSG00000286096"</code> was measured in the dataset with id <code>"97a17473-e2b1-4f31-a544-44a60773e2dd"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get somo_joinid for datasets and genes of interest</span></span>
+<code class="sourceCode R"><span><span class="co"># Get soma_joinid for datasets and genes of interest</span></span>
 <span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
 <span><span class="va">dataset_joinid</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">datasets_df</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"97a17473-e2b1-4f31-a544-44a60773e2dd"</span><span class="op">]</span></span>
 <span></span>

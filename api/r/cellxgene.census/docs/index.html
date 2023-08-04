@@ -36,7 +36,7 @@
     
     <a class="navbar-brand me-2" href="index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9.9</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,18 +87,27 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="r-package-of-cz-cellxgene-discover-census">R package of CZ CELLxGENE Discover Census<a class="anchor" aria-label="anchor" href="#r-package-of-cz-cellxgene-discover-census"></a>
 </h1></div>
-<!-- badges: start --><!-- badges: end --><p>This is the documentation for the R package <code>cellxgene.census</code> which is part of Census by CZ CELLxGENE Discover. For full details on Census data and capabilities please go to the <a href="https://chanzuckerberg.github.io/cellxgene-census/" class="external-link">main Census site</a>.</p>
+<!-- badges: start --><!-- badges: end --><p>This is the documentation for the R package <code>cellxgene.census</code> which is part of CZ CELLxGENE Discover Census. For full details on Census data and capabilities please go to the <a href="https://chanzuckerberg.github.io/cellxgene-census/" class="external-link">main Census site</a>.</p>
 <p><code>cellxgene.census</code> provides an API to efficiently access the cloud-hosted Census single-cell data from R. In just a few seconds users can access any slice of Census data using cell or gene filters across hundreds of single-cell datasets.</p>
 <p>Census data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, as well as <code>Seurat</code> or <code>SingleCellExperiment</code> objects for downstream analysis.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>From an R session, first install <code>tiledb</code> from R-Universe, the latest release in CRAN is not yet available.</p>
+<p>If installing from Ubuntu, you may need to install the following libraries via <code>apt install</code>: <code>libxml2-dev</code> <code>libssl-dev</code> <code>libcurl4-openssl-dev</code>.</p>
+<p>If installing from MacOS, you will need to install the <a href="https://apps.apple.com/us/app/xcode/id497799835?mt=12" class="external-link">developer tools <code>Xcode</code></a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tiledb"</span>, repos <span class="op">=</span> <span class="st">"https://tiledb-inc.r-universe.dev"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"tiledb"</span>,</span>
+<span>  version <span class="op">=</span> <span class="st">"0.20.3"</span>, </span>
+<span>  repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://tiledb-inc.r-universe.dev'</span>,<span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Then install <code>cellxgene.census</code> from R-Universe.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cellxgene.census"</span>, repos <span class="op">=</span> <span class="st">"https://chanzuckerberg.r-universe.dev"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"cellxgene.census"</span>,</span>
+<span>  repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://chanzuckerberg.r-universe.dev'</span>, <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
@@ -112,19 +121,19 @@
 <div class="section level3">
 <h3 id="example-seurat-and-singlecellexperiment-query">Example <code>Seurat</code> and <code>SingleCellExperiment</code> query<a class="anchor" aria-label="anchor" href="#example-seurat-and-singlecellexperiment-query"></a>
 </h3>
-<p>The following creates an <code>Seurat</code> object on-demand with all sympathetic neurons in Census and filtering only for the genes <code>ENSG00000161798</code>, <code>ENSG00000188229</code>.</p>
+<p>The following creates a <code>Seurat</code> object on-demand with all sympathetic neurons in Census and filtering only for the genes <code>ENSG00000161798</code>, <code>ENSG00000188229</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://satijalab.org/seurat" class="external-link">"Seurat"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">census</span> <span class="op">=</span> <span class="fu"><a href="reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">organism</span> <span class="op">=</span> <span class="st">"Homo sapiens"</span></span>
-<span><span class="va">gene_filter</span> <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"</span></span>
-<span><span class="va">cell_filter</span> <span class="op">=</span>  <span class="st">"cell_type == 'sympathetic neuron'"</span></span>
-<span><span class="va">cell_columns</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"assay"</span>, <span class="st">"cell_type"</span>, <span class="st">"tissue"</span>, <span class="st">"tissue_general"</span>, <span class="st">"suspension_type"</span>, <span class="st">"disease"</span><span class="op">)</span></span>
+<span><span class="va">organism</span> <span class="op">&lt;-</span> <span class="st">"Homo sapiens"</span></span>
+<span><span class="va">gene_filter</span> <span class="op">&lt;-</span> <span class="st">"feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"</span></span>
+<span><span class="va">cell_filter</span> <span class="op">&lt;-</span>  <span class="st">"cell_type == 'sympathetic neuron'"</span></span>
+<span><span class="va">cell_columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"assay"</span>, <span class="st">"cell_type"</span>, <span class="st">"tissue"</span>, <span class="st">"tissue_general"</span>, <span class="st">"suspension_type"</span>, <span class="st">"disease"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">seurat_obj</span> <span class="op">=</span> <span class="fu"><a href="reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
+<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
 <span>   census <span class="op">=</span> <span class="va">census</span>,</span>
 <span>   organism <span class="op">=</span> <span class="va">organism</span>,</span>
 <span>   var_value_filter <span class="op">=</span> <span class="va">gene_filter</span>,</span>
@@ -135,7 +144,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">sce_obj</span> <span class="op">=</span> <span class="fu"><a href="reference/get_single_cell_experiment.html">get_single_cell_experiment</a></span><span class="op">(</span></span>
+<span><span class="va">sce_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_single_cell_experiment.html">get_single_cell_experiment</a></span><span class="op">(</span></span>
 <span>   census <span class="op">=</span> <span class="va">census</span>,</span>
 <span>   organism <span class="op">=</span> <span class="va">organism</span>,</span>
 <span>   var_value_filter <span class="op">=</span> <span class="va">gene_filter</span>,</span>
