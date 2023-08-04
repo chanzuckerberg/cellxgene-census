@@ -61,10 +61,10 @@ library("cellxgene.census")
 census <- open_soma()
 
 # Open obs SOMADataFrame
-cell_metadata = census$get("census_data")$get("homo_sapiens")$get("obs")
+cell_metadata <- census$get("census_data")$get("homo_sapiens")$get("obs")
 
 # Read as an iterator of Arrow Tables
-cell_metadata = cell_metadata$read(
+cell_metadata <- cell_metadata$read(
    value_filter = "sex == 'female' & cell_type %in% c('microglial cell', 'neuron')",
    column_names = c("assay", "cell_type", "sex", "tissue", "tissue_general", "suspension_type", "disease")
 )
@@ -73,7 +73,7 @@ cell_metadata = cell_metadata$read(
 cell_metadata <- cell_metadata$concat()
 
 # Convert to R tibble (dataframe)
-cell_metadata = as.data.frame(cell_metadata)
+cell_metadata <- as.data.frame(cell_metadata)
 
 census$close()
 ```
@@ -85,18 +85,30 @@ Similarly querying both the single-cell data along metadata can be easily export
 ```r
 library("cellxgene.census")
 
-census = open_soma()
+census <- open_soma()
 
-organism = "Homo sapiens"
-gene_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
-cell_filter =  "cell_type == 'leptomeningeal cell'"
-cell_columns = c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
+organism <- "Homo sapiens"
+gene_filter <- "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+cell_filter <-  "cell_type == 'leptomeningeal cell'"
+cell_columns <- c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
 
 # Get Seurat object
-seurat_obj = get_seurat(census = census, organism = organism, var_value_filter = gene_filter, obs_value_filter = cell_filter, obs_column_names = cell_columns)
+seurat_obj <- get_seurat(
+  census = census,
+  organism = organism,
+  var_value_filter = gene_filter,
+  obs_value_filter = cell_filter,
+  obs_column_names = cell_columns
+)
 
 # Get SingleCellExperiment object
-sce_obj = get_single_cell_experiment(census = census, organism = organism, var_value_filter = gene_filter, obs_value_filter = cell_filter, obs_column_names = cell_columns)
+sce_obj <- get_single_cell_experiment(
+  census = census,
+  organism = organism,
+  var_value_filter = gene_filter,
+  obs_value_filter = cell_filter,
+  obs_column_names = cell_columns
+)
 
 census$close()
 ```
