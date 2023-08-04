@@ -31,6 +31,8 @@ If installing in a Databricks notebook environment, use `%pip install`. Do not u
 
 From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
 
+If installing from Ubuntu, you may need to install the following libraries via `apt install`:  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`
+
 ```r
 install.packages(
   "tiledb",
@@ -44,6 +46,6 @@ Then install `cellxgene.census` from R-Universe.
 ```r
 install.packages(
   "cellxgene.census",
-  repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
+  repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
 )
 ```
