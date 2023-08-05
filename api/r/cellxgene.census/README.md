@@ -35,6 +35,20 @@ install.packages(
 )
 ```
 
+To be able to export Census data to `Seurat` or `SingleCellExperiment` you also need to install their respective packages.
+
+```r
+# Seurat
+install.packages("Seurat")
+
+# SingleCellExperiment
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+    
+BiocManager::install("SingleCellExperiment")
+```
+
+
 ## Usage
 
 Check out the vignettes in the "Articles" section of the navigation bar on this site. We highly recommend the following vignettes as a starting point:

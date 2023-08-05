@@ -69,6 +69,11 @@ get_seurat <- function(
     var_coords = NULL,
     var_column_names = NULL,
     var_index = "feature_id") {
+  stopifnot(
+    !require("Seurat"),
+    "R package 'Seurat' is not installed."
+  )
+  
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     get_experiment(census, organism),
     measurement_name,
@@ -135,6 +140,10 @@ get_single_cell_experiment <- function(
     var_coords = NULL,
     var_column_names = NULL,
     var_index = "feature_id") {
+  stopifnot(
+    !require("SingleCellExperiment"),
+    "R package 'Seurat' is not installed."
+  )
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     get_experiment(census, organism),
     measurement_name,

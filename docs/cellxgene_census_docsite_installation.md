@@ -51,3 +51,17 @@ install.packages(
   repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
 )
 ```
+
+To be able to export Census data to `Seurat` or `SingleCellExperiment` you also need to install their respective packages.
+
+```r
+# Seurat
+install.packages("Seurat")
+
+# SingleCellExperiment
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+    
+BiocManager::install("SingleCellExperiment")
+```
+
