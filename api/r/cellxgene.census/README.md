@@ -12,11 +12,13 @@ Census data can be fetched in an iterative fashion for bigger-than-memory slices
 
 ## Installation
 
+If installing from **Ubuntu**, you may need to install the following libraries via `apt install`,  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`. In addition you must have `camke` v3.21 or greater.
+
+If installing from **MacOS**, you will need to install the [developer tools `Xcode`](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
+
+**Windows** is not supported.
+
 From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
-
-If installing from Ubuntu, you may need to install the following libraries via `apt install`:  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`.
-
-If installing from MacOS, you will need to install the [developer tools `Xcode`](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
 
 ```r
 install.packages(
@@ -26,7 +28,7 @@ install.packages(
 )
 ```
 
-Then install `cellxgene.census` from R-Universe.
+Then in an R session install `cellxgene.census` from R-Universe.
 
 ```r
 install.packages(
