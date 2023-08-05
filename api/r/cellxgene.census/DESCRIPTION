@@ -4,7 +4,7 @@ Version: 0.0.9.9
 Authors@R: 
     person("Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com",
            role = c("aut", "cre", "cph", "fnd"))
-Description: API to facilitate the use of the CZ CELLxGENE Discover Cell 
+Description: API to facilitate the use of the CZ CELLxGENE Discover 
   Census. For more information about the API and the project visit
   https://github.com/chanzuckerberg/cellxgene-census/
 License: MIT + file LICENSE
