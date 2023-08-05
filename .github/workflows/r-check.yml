@@ -10,6 +10,9 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        tiledbsoma_version: [release, latest]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,10 +25,15 @@ jobs:
           extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::remotes
           cache: true
       - name: install tiledbsoma
-        # Install the latest tiledbsoma package, overwriting any version cached by
-        # setup-r-dependencies. TODO: once there are release versions, set up a build matrix with
-        # both the released and latest versions.
-        run: Rscript -e 'remotes::install_git("https://github.com/single-cell-data/TileDB-SOMA.git", subdir="apis/r")'
+        # install tiledbsoma either from r-universe (release) or git HEAD (latest),
+        # overwriting any version cached by setup-r-dependencies.
+        run: |
+          if [[ '${{ matrix.tiledbsoma_version }}' == 'latest' ]]; then
+            Rscript -e 'remotes::install_git("https://github.com/single-cell-data/TileDB-SOMA.git", subdir="apis/r")'
+          else
+            Rscript -e 'install.packages("tiledbsoma", repos = c("https://tiledb-inc.r-universe.dev",
+                                                                 "https://cloud.r-project.org"))'
+          fi
       - name: styler
         run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
       - name: check session info
