@@ -14,6 +14,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Additional_repositories: https://tiledb-inc.r-universe.dev
+Remotes: bioc::release/SingleCellExperiment
 biocViews:
 Imports:
   aws.s3,
