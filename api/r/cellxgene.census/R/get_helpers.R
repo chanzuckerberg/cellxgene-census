@@ -70,7 +70,7 @@ get_seurat <- function(
     var_column_names = NULL,
     var_index = "feature_id") {
   stopifnot(
-    !require("Seurat"),
+    require("Seurat"),
     "R package 'Seurat' is not installed."
   )
   
@@ -141,7 +141,7 @@ get_single_cell_experiment <- function(
     var_column_names = NULL,
     var_index = "feature_id") {
   stopifnot(
-    !require("SingleCellExperiment"),
+    require("SingleCellExperiment"),
     "R package 'Seurat' is not installed."
   )
   
