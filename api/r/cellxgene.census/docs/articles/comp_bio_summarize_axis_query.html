@@ -117,7 +117,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 </h2>
 <p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
 <p>If you open the Census, you should close it with <code>census$close()</code>. This can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
 <p>You can learn more about the cellxgene.census methods by accessing their corresponding documentation. For example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
@@ -140,21 +141,19 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <code class="sourceCode R"><span><span class="va">human</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Read obs into an R data frame (tibble).</span></span>
-<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>  column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span>, <span class="st">"cell_type_ontology_term_id"</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="va">human</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Find all unique values in the cell_type_ontology_term_id column.</span></span>
-<span><span class="va">unique_cell_type_ontology_term_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type_ontology_term_id</span><span class="op">)</span></span>
+<span><span class="co"># Find all unique values in the cell_type column.</span></span>
+<span><span class="va">unique_cell_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span></span>
 <span>  <span class="st">"There are"</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span>,</span>
-<span>  <span class="st">"cell types in the Census! The first few are:"</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; There are 613 cell types in the Census! The first few are:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "CL:0000525" "CL:2000060" "CL:0008036" "CL:0002488" "CL:0002343" "CL:0000084"</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_cell_type</span><span class="op">)</span>,</span>
+<span>  <span class="st">"cell types in the Census! The first few are: "</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; There are 613 cell types in the Census! The first few are:  syncytiotrophoblast cell, placental villous trophoblast, extravillous trophoblast, trophoblast giant cell, decidual natural killer cell, human, T cell</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="example-summarize-a-subset-of-cell-types-selected-with-a-value_filter">Example: Summarize a subset of cell types, selected with a <code>value_filter</code><a class="anchor" aria-label="anchor" href="#example-summarize-a-subset-of-cell-types-selected-with-a-value_filter"></a>
@@ -164,48 +163,46 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <code class="sourceCode R"><span><span class="co"># Read cell_type terms for cells which have a specific tissue term</span></span>
 <span><span class="va">LUNG_TISSUE</span> <span class="op">&lt;-</span> <span class="st">"UBERON:0002048"</span></span>
 <span></span>
-<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>  column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type_ontology_term_id"</span><span class="op">)</span>,</span>
-<span>  value_filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"tissue_ontology_term_id == '"</span>, <span class="va">LUNG_TISSUE</span>, <span class="st">"'"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="va">human</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span><span class="op">)</span>, value_filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"tissue_ontology_term_id == '"</span>, <span class="va">LUNG_TISSUE</span>, <span class="st">"'"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Find all unique values in the cell_type_ontology_term_id column as an R data frame.</span></span>
-<span><span class="va">unique_cell_type_ontology_term_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type_ontology_term_id</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
+<span><span class="co"># Find all unique values in the cell_type column as an R data frame.</span></span>
+<span><span class="va">unique_cell_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span></span>
 <span>  <span class="st">"There are "</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_cell_type</span><span class="op">)</span>,</span>
 <span>  <span class="st">" cell types in the Census where tissue_ontology_term_id == "</span>,</span>
 <span>  <span class="va">LUNG_TISSUE</span>,</span>
 <span>  <span class="st">"!\nThe first few are:"</span>,</span>
-<span>  sep <span class="op">=</span> <span class="st">""</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; There are 185 cell types in the Census where tissue_ontology_term_id == UBERON:0002048!</span></span>
-<span><span class="co">#&gt; The first few are:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type_ontology_term_id</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "CL:0002063" "CL:0000775" "CL:0001044" "CL:0001050" "CL:0000814" "CL:0000071"</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span>
+<span>  <span class="st">"\n"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; There are  185  cell types in the Census where tissue_ontology_term_id ==  UBERON:0002048 !</span></span>
+<span><span class="co">#&gt; The first few are: type II pneumocyte, neutrophil, effector CD4-positive, alpha-beta T cell, effector CD8-positive, alpha-beta T cell, mature NK T cell, blood vessel endothelial cell</span></span>
 <span></span>
 <span><span class="co"># Report the 10 most common</span></span>
-<span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type_ontology_term_id</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"The top 10 cell types where tissue_ontology_term_id =="</span>, <span class="va">LUNG_TISSUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The top 10 cell types where tissue_ontology_term_id == UBERON:0002048</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">top_10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; CL:0000003 CL:0000583 CL:0000625 CL:0000624 CL:0000235 CL:0002063 CL:0000860 CL:0000623 </span></span>
-<span><span class="co">#&gt;     562038     526859     323985     323610     266333     255425     205013     164944 </span></span>
-<span><span class="co">#&gt; CL:0001064 CL:0002632 </span></span>
-<span><span class="co">#&gt;     149067     132243</span></span></code></pre></div>
+<span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span></span>
+<span>  <span class="st">"The top 10 cell types where tissue_ontology_term_id =="</span>, </span>
+<span>  <span class="va">LUNG_TISSUE</span>,</span>
+<span>  <span class="st">"are: "</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">top_10</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; The top 10 cell types where tissue_ontology_term_id == UBERON:0002048 are:  native cell, alveolar macrophage, CD8-positive, alpha-beta T cell, CD4-positive, alpha-beta T cell, macrophage, type II pneumocyte, classical monocyte, natural killer cell, malignant cell, epithelial cell of lower respiratory tract</span></span></code></pre></div>
 <p>You can also define much more complex value filters. For example:</p>
 <ul>
-<li>combine terms with <code>and</code> and <code>or</code>
+<li>combine terms with <code>&amp;</code> and <code>|</code>
 </li>
 <li>use the <code>%in%</code> operator to query on multiple values</li>
 </ul>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># You can also do more complex queries, such as testing for inclusion in a list of values</span></span>
-<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="va">human</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
 <span>  column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type_ontology_term_id"</span><span class="op">)</span>,</span>
 <span>  value_filter <span class="op">=</span> <span class="st">"tissue_ontology_term_id %in% c('UBERON:0002082', 'UBERON:OOO2084', 'UBERON:0002080')"</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summarize</span></span>
 <span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type_ontology_term_id</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
@@ -231,24 +228,25 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">total_cells</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">organism</span> <span class="kw">in</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">names</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">organism</span><span class="op">)</span></span>
-<span>  <span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>    <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">organism</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="va">cols_to_query</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">organism</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="va">cols_to_query</span><span class="op">)</span></span>
+<span>  <span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  </span>
 <span>  <span class="va">total_cells</span> <span class="op">&lt;-</span> <span class="va">total_cells</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">)</span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">col</span> <span class="kw">in</span> <span class="va">cols_to_query</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"  Unique "</span>, <span class="va">col</span>, <span class="st">" values: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Unique "</span>, <span class="va">col</span>, <span class="st">" values: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span><span class="co">#&gt; [1] "mus_musculus"</span></span>
-<span><span class="co">#&gt;   Unique cell_type_ontology_term_id values: 248</span></span>
-<span><span class="co">#&gt;   Unique assay_ontology_term_id values: 9</span></span>
-<span><span class="co">#&gt;   Unique tissue_ontology_term_id values: 66</span></span>
+<span><span class="co">#&gt;   Unique  cell_type_ontology_term_id  values:  248 </span></span>
+<span><span class="co">#&gt;   Unique  assay_ontology_term_id  values:  9 </span></span>
+<span><span class="co">#&gt;   Unique  tissue_ontology_term_id  values:  66 </span></span>
 <span><span class="co">#&gt; [1] "homo_sapiens"</span></span>
-<span><span class="co">#&gt;   Unique cell_type_ontology_term_id values: 613</span></span>
-<span><span class="co">#&gt;   Unique assay_ontology_term_id values: 19</span></span>
-<span><span class="co">#&gt;   Unique tissue_ontology_term_id values: 220</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Complete Census contains"</span>, <span class="va">total_cells</span>, <span class="st">"cells."</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Complete Census contains 61656118 cells.</span></span></code></pre></div>
+<span><span class="co">#&gt;   Unique  cell_type_ontology_term_id  values:  613 </span></span>
+<span><span class="co">#&gt;   Unique  assay_ontology_term_id  values:  19 </span></span>
+<span><span class="co">#&gt;   Unique  tissue_ontology_term_id  values:  220</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Complete Census contains "</span>, <span class="va">total_cells</span>, <span class="st">" cells."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Complete Census contains  61656118  cells.</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>

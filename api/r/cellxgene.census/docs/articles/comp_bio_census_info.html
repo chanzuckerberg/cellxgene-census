@@ -109,7 +109,8 @@
 </h2>
 <p>The <code>cellxgene.census</code> R package contains a convenient <code><a href="../reference/open_soma.html">open_soma()</a></code> API to open any version of the Census (<code>stable</code> by default).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
 <p>You can learn more about the cellxgene.census methods by accessing their corresponding documentation, for example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
@@ -312,11 +313,8 @@
 </h3>
 <p>To exemplify the process of accessing and slicing cell metadata for summary stats, let’s start with a trivial example and take a look at all human cell types available in the Census:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>    column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"is_primary_data"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">obs_df</span> <span class="op">&lt;-</span>   <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"is_primary_data"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56,400,873 × 2</span></span></span>
 <span><span class="co">#&gt;    cell_type                     is_primary_data</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          </span></span>
@@ -334,19 +332,19 @@
 <p>The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data frame.</p>
 <p>In addition, we will only focus on cells that are marked with <code>is_primary_data=TRUE</code> as this ensures we de-duplicate cells that appear more than once in CELLxGENE Discover.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">human_cell_types</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>    column_names <span class="op">=</span> <span class="st">"cell_type"</span>,</span>
-<span>    value_filter <span class="op">=</span> <span class="st">"is_primary_data == TRUE"</span></span>
-<span>  <span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="va">cell_type</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">human_cell_types</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
+<span>  column_names <span class="op">=</span> <span class="st">"cell_type"</span>,</span>
+<span>  value_filter <span class="op">=</span> <span class="st">"is_primary_data == TRUE"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 33364242</span></span></code></pre></div>
 <p>This is the number of unique cells. Now let’s look at the counts per cell type:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">human_cell_type_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">human_cell_types</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">human_cell_type_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
-<span><span class="co">#&gt; human_cell_types</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                          neuron            glutamatergic neuron </span></span>
 <span><span class="co">#&gt;                         2673669                         1541605 </span></span>
 <span><span class="co">#&gt; CD4-positive, alpha-beta T cell CD8-positive, alpha-beta T cell </span></span>
@@ -360,7 +358,7 @@
 <p>This shows you that the most abundant cell types are “glutamatergic neuron”, “CD8-positive, alpha-beta T cell”, and “CD4-positive, alpha-beta T cell”.</p>
 <p>Now let’s take a look at the number of unique cell types:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 599</span></span></code></pre></div>
 <p>That is the total number of different cell types for human.</p>
 <p>All the information in this example can be quickly obtained from the summary table at <code>census$get("census-info")$get("summary_cell_counts")</code>.</p>
@@ -372,14 +370,15 @@
 <p>Similar to the example above, we can learn what cell types are available for a specific tissue, e.g. liver.</p>
 <p>To achieve this goal we just need to limit our cell metadata to that tissue. We will use the information in the cell metadata variable <code>tissue_general</code>. This variable contains the high-level tissue label for all cells in the Census:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">human_liver_cell_types</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>    column_names <span class="op">=</span> <span class="st">"cell_type"</span>,</span>
-<span>    value_filter <span class="op">=</span> <span class="st">"is_primary_data == TRUE &amp;&amp; tissue_general == 'liver'"</span></span>
-<span>  <span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="va">cell_type</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">human_liver_cell_types</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
-<span><span class="co">#&gt; human_liver_cell_types</span></span>
+<code class="sourceCode R"><span><span class="va">obs_liver_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
+<span>  column_names <span class="op">=</span> <span class="st">"cell_type"</span>,</span>
+<span>  value_filter <span class="op">=</span> <span class="st">"is_primary_data == TRUE &amp; tissue_general == 'liver'"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">obs_liver_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_liver_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_liver_df</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                          T cell                     hepatoblast </span></span>
 <span><span class="co">#&gt;                           85739                           58447 </span></span>
 <span><span class="co">#&gt;                 neoplastic cell                    erythroblast </span></span>
@@ -397,13 +396,14 @@
 </h3>
 <p>In this example we are going to get the counts for all diseased cells annotated as T cells. For the sake of the example we will focus on “CD8-positive, alpha-beta T cell” and “CD4-positive, alpha-beta T cell”:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">t_cells_diseased</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>    column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"disease"</span>, <span class="st">"tissue_general"</span><span class="op">)</span>,</span>
-<span>    value_filter <span class="op">=</span> <span class="st">"is_primary_data == TRUE &amp;&amp; disease != 'normal' &amp;&amp; cell_type %in% c('CD8-positive, alpha-beta T cell', 'CD4-positive, alpha-beta T cell')"</span></span>
-<span>  <span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">obs_t_cells_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
+<span>  column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"disease"</span>, <span class="st">"tissue_general"</span><span class="op">)</span>,</span>
+<span>  value_filter <span class="op">=</span> <span class="st">"is_primary_data == TRUE &amp; disease != 'normal' &amp; cell_type %in% c('CD8-positive, alpha-beta T cell', 'CD4-positive, alpha-beta T cell')"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">t_cells_diseased</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">obs_t_cells_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_t_cells_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_t_cells_df</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
 <span><span class="co">#&gt; disease                                 adipose tissue adrenal gland  blood blood clot</span></span>
 <span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                        0             0  62499          0</span></span>
