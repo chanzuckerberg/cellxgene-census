@@ -7,7 +7,7 @@ Sys.setenv(MAKE = "make -j8")
 
 install.packages(
   "tiledb",
-  version = "0.20.2",
+  version = "0.20.3",
   repos = c("https://tiledb-inc.r-universe.dev", "https://cloud.r-project.org")
 )
 
