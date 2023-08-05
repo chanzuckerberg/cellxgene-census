@@ -70,8 +70,7 @@ get_seurat <- function(
     var_column_names = NULL,
     var_index = "feature_id") {
   stopifnot(
-    require("Seurat"),
-    "R package 'Seurat' is not installed."
+    "R package 'Seurat' is not installed." = require("Seurat", quietly = T)
   )
 
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
@@ -141,8 +140,7 @@ get_single_cell_experiment <- function(
     var_column_names = NULL,
     var_index = "feature_id") {
   stopifnot(
-    require("SingleCellExperiment"),
-    "R package 'SingleCellExperiment' is not installed."
+    "R package 'SingleCellExperiment' is not installed." = require("SingleCellExperiment", quietly = T)
   )
 
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
