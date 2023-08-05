@@ -29,7 +29,7 @@ If installing in a Databricks notebook environment, use `%pip install`. Do not u
 
 ## R
 
-If installing from **Ubuntu**, you may need to install the following libraries via `apt install`,  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`. In addition you must have `camke` v3.21 or greater.
+If installing from **Ubuntu**, you may need to install the following libraries via `apt install`,  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`. In addition you must have `cmake` v3.21 or greater.
 
 If installing from **MacOS**, you will need to install the [developer tools `Xcode`](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
 
