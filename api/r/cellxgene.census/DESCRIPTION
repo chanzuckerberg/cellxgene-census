@@ -22,7 +22,6 @@ Imports:
   jsonlite,
   methods,
   Seurat (>= 4.1.0),
-  SingleCellExperiment (>= 1.20.0),
   stats,
   tiledbsoma,
   tiledb
@@ -30,6 +29,7 @@ Suggests:
   bit64,
   knitr,
   rmarkdown,
+  SingleCellExperiment (>= 1.20.0),
   testthat (>= 3.0.0),
   withr
 Config/testthat/edition: 3
