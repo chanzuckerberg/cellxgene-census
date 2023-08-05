@@ -144,6 +144,7 @@ get_single_cell_experiment <- function(
     !require("SingleCellExperiment"),
     "R package 'Seurat' is not installed."
   )
+  
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     get_experiment(census, organism),
     measurement_name,
