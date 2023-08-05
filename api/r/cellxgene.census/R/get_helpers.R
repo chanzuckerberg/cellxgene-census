@@ -142,7 +142,7 @@ get_single_cell_experiment <- function(
     var_index = "feature_id") {
   stopifnot(
     require("SingleCellExperiment"),
-    "R package 'Seurat' is not installed."
+    "R package 'SingleCellExperiment' is not installed."
   )
   
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
