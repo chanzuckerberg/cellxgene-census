@@ -108,7 +108,7 @@
                 
                 
                 <div class="version">
-                    v1.4.0
+                    v1.5.0
                 </div>
                 
             
@@ -134,11 +134,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -204,10 +204,25 @@
 </section>
 <section id="r">
 <h2>R<a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h2>
-<p>The R package will be soon deposited into R-Universe. In the meantime you can directly install from github using the <a class="reference external" href="https://devtools.r-lib.org/">devtools</a> R package.</p>
-<p>From an R session:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;devtools&quot;</span><span class="p">)</span>
-<span class="n">devtools</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;chanzuckerberg/cellxgene-census/api/r/cellxgene.census&quot;</span><span class="p">)</span>
+<p>If installing from <strong>Ubuntu</strong>, you may need to install the following libraries via <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span></code>,  <code class="docutils literal notranslate"><span class="pre">libxml2-dev</span></code> <code class="docutils literal notranslate"><span class="pre">libssl-dev</span></code> <code class="docutils literal notranslate"><span class="pre">libcurl4-openssl-dev</span></code>. In addition you must have <code class="docutils literal notranslate"><span class="pre">cmake</span></code> v3.21 or greater.</p>
+<p>If installing from <strong>MacOS</strong>, you will need to install the <a class="reference external" href="https://apps.apple.com/us/app/xcode/id497799835?mt=12">developer tools <code class="docutils literal notranslate"><span class="pre">Xcode</span></code></a>.</p>
+<p><strong>Windows</strong> is not supported.</p>
+<p>From an R session, first install <code class="docutils literal notranslate"><span class="pre">tiledb</span></code> from R-Universe, the latest release in CRAN is not yet available.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span>
+<span class="w">  </span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">repos</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">&#39;https://chanzuckerberg.r-universe.dev&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;https://cloud.r-project.org&#39;</span><span class="p">)</span><span class="w"> </span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>To be able to export Census data to <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> or <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> you also need to install their respective packages.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Seurat</span>
+<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;Seurat&quot;</span><span class="p">)</span>
+
+<span class="c1"># SingleCellExperiment</span>
+<span class="nf">if </span><span class="p">(</span><span class="o">!</span><span class="nf">require</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">quietly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">))</span>
+<span class="w">    </span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">)</span>
+<span class="w">    </span>
+<span class="n">BiocManager</span><span class="o">::</span><span class="nf">install</span><span class="p">(</span><span class="s">&quot;SingleCellExperiment&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
