@@ -171,7 +171,7 @@ liver_seurat <- RunPCA(
 )
 liver_seurat <- FindNeighbors(liver_seurat, dims = 1:40)
 liver_seurat <- RunUMAP(liver_seurat, dims = 1:40)
-Seurat::DimPlot(liver_seurat, reduction = "umap", group.by = "cell_type")
+DimPlot(liver_seurat, reduction = "umap", group.by = "cell_type")
 ```
 
 With a few exceptions we can see that all cells from the same cell type cluster near each other which serves as a sanity check for the gene-length normalization that we applied.
