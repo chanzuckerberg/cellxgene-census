@@ -65,7 +65,7 @@ liver_dataset_id <- liver_dataset[1,"dataset_id"]
 liver_seurat <- cellxgene.census::get_seurat(
   census,
   organism = "Mus musculus",
-  obs_value_filter = paste("dataset_id == '", liver_dataset_id, "'", sep="")
+  obs_value_filter = paste0("dataset_id == '", liver_dataset_id, "'")
 )
 ```
 
