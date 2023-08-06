@@ -165,7 +165,7 @@ liver_seurat <- Seurat::ScaleData(liver_seurat, features = all.genes)
 Now we can proceed to do clustering analysis.
 
 ```{r,warning=FALSE,message=FALSE,fig.width=7,fig.height=5}
-liver_seurat <- Seurat::RunPCA(
+liver_seurat <- RunPCA(
   liver_seurat,
   features = Seurat::VariableFeatures(object = liver_seurat)
 )
