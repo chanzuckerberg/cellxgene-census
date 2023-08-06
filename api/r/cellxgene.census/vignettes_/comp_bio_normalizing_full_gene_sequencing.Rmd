@@ -106,7 +106,7 @@ We can see that out of all genes in the Census **17,992** were measured in this 
 Now let's normalize these genes by gene length. We can easily do this because the Census has gene lengths included in the gene metadata under `feature_length`.
 
 ```{r}
-liver_seurat[1:5, 1:5]$RNA@data
+GetAssayData(liver_seurat[1:5, 1:5], slot = "data")
 ```
 
 ```{r}
