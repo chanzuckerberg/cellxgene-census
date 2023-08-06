@@ -118,7 +118,7 @@ liver_seurat <- SetAssayData(
 ```
 
 ```{r}
-liver_seurat[1:5, 1:5]$RNA@data
+GetAssayData(liver_seurat[1:5, 1:5], slot = "data")
 ```
 
 All done! You can now see that we have real numbers instead of integers.
