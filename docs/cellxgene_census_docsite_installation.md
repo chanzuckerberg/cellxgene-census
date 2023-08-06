@@ -39,16 +39,6 @@ From an R session, first install `tiledb` from R-Universe, the latest release in
 
 ```r
 install.packages(
-  "tiledb",
-  version = "0.20.3", 
-  repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
-)
-```
-
-Then in an R session install `cellxgene.census` from R-Universe.
-
-```r
-install.packages(
   "cellxgene.census",
   repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
 )
