@@ -113,7 +113,7 @@ GetAssayData(liver_seurat[1:5, 1:5], slot = "data")
 gene_lengths <- liver_seurat$RNA@meta.features$feature_length
 liver_seurat <- SetAssayData(
   liver_seurat, 
-  new.data = sweep(liver_seurat$RNA@data, 1, gene_lengths, "/")
+  new.data = sweep(GetAssayData(liver_seurat, slot = "data"), 1, gene_lengths, "/")
 )
 ```
 
