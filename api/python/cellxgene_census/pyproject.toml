@@ -48,6 +48,7 @@ experimental = [
     "torchdata==0.6.1",
     "scikit-learn==1.2.2",
     "scikit-misc==0.2.0",
+    "psutil==5.9.5",
 ]
 
 [project.urls]

@@ -35,15 +35,28 @@ CENSUS_CONFIG_DEFAULTS = {
     "logs_S3_path": "s3://cellxgene-data-public-logs/builder",
     "build_tag": datetime.now().astimezone().date().isoformat(),
     #
-    # Default multi-process. Memory scaling based on empirical tests.
+    # Default mode is multi-process.
     "multi_process": True,
-    "max_workers": 2 + int(psutil.virtual_memory().total / (96 * 1024**3)),
+    #
+    # The memory budget used to determine appropriate parallelism in many steps of build.
+    # Only set to a smaller number if you want to not use all available RAM.
+    "memory_budget": int(psutil.virtual_memory().total),
+    #
+    # 'max_worker_processes' sets a limit on the number of worker processes. On high-CPU boxes,
+    # this limit is needed to avoid exceeding the VM map kernel limit (vm.max_map_count). On Ubuntu 22.04,
+    # the default value is 65536. This kernel limitation becomes an issue due to excess thread allocation
+    # by TileDB-SOMA: https://github.com/single-cell-data/TileDB-SOMA/issues/1550. Currently, the per-process
+    # TileDB context allocates approximately 650 threads (and VM maps) per worker process, as currently
+    # utilized by the Census builder. This hard-cap can be increased when this issue is resolved, but
+    # should not be removed (with sufficient number of worker processes, it will always be possible to
+    # trip over this limit). The default of 96 was chosen as:  (96+1) * 650 == 63050, which is < 65536.
+    "max_worker_processes": 96,
     #
     # Host minimum resource validation
     "host_validation_disable": False,  # if True, host validation checks will be skipped
     "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
     "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
-    "host_validation_min_free_disk_space": 1 * 1024**4,  # 1 TiB
+    "host_validation_min_free_disk_space": 1.8 * 1024**4,  # 1.8TiB
     #
     # Release clean up
     "release_cleanup_days": 32,  # Census builds older than this are deleted

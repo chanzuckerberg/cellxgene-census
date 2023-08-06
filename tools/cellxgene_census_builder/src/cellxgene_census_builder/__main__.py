@@ -8,7 +8,7 @@ import s3fs
 
 from . import __version__
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
-from .util import process_init, urlcat
+from .util import log_process_resource_status, process_init, urlcat
 
 
 def main() -> int:
@@ -88,6 +88,7 @@ def do_build(args: CensusBuildArgs, skip_completed_steps: bool = False) -> int:
         logging.critical("Caught exception, exiting", exc_info=True)
         return 1
 
+    log_process_resource_status(level=logging.INFO)
     return 0
 
 

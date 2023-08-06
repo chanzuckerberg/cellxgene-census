@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 88)
+options(width = 88, max.print = 256)
 ```
 
 <!--
@@ -20,21 +20,23 @@ THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
 -->
 
-This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames and Seurat assays.
+This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames, [Seurat](https://satijalab.org/seurat/) assays, and [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) objects.
 
 **Contents**
 
 1. Opening the census.
 2. Querying cell metadata (obs).
 3. Querying gene metadata (var).
-4. Querying expression data.
+4. Querying expression data as `Seurat`.
+5. Querying expression data as `SingleCellExperiment`.
 
 ## Opening the census
 
 The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
 
 ```{r}
-census <- cellxgene.census::open_soma()
+library("cellxgene.census")
+census <- open_soma()
 ```
 
 You can learn more about the `cellxgene.census` methods by accessing their corresponding documentation, for example `?cellxgene.census::open_soma`.
@@ -81,12 +83,13 @@ as.data.frame(census$get("census_data")$get("homo_sapiens")$obs$read(value_filte
 You can use both `column_names` and `value_filter` to perform specific queries. For example let's fetch the `disease` column for the `cell_type` `"B cell"` in the `tissue_general` `"lung"`.
 
 ```{r}
-cell_metadata_b_cell <- as.data.frame(
-  census$get("census_data")$get("homo_sapiens")$obs$read(
-    value_filter = "cell_type == 'B cell' && tissue_general == 'lung'",
-    column_names = "disease"
-  )$concat()
+cell_metadata_b_cell <- census$get("census_data")$get("homo_sapiens")$obs$read(
+  value_filter = "cell_type == 'B cell' & tissue_general == 'lung'",
+  column_names = "disease"
 )
+
+cell_metadata_b_cell <- as.data.frame(cell_metadata_b_cell$concat())
+
 table(cell_metadata_b_cell)
 ```
 
@@ -107,18 +110,19 @@ With the exception of soma_joinid these columns are defined in the [Census schem
 For example, to get the `feature_name` and `feature_length` of the genes `"ENSG00000161798"` and `"ENSG00000188229"` we can do the following.
 
 ```{r}
-as.data.frame(
-  census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var$read(
-    value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
-    column_names = c("feature_name", "feature_length")
-  )$concat()
+var_df <- census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var$read(
+  value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
+  column_names = c("feature_name", "feature_length")
 )
+
+as.data.frame(var_df$concat())
 ```
-## Querying expression data
+
+## Querying expression data as `Seurat`
 
 A convenient way to query and fetch expression data is to use the `get_seurat` method of the `cellxgene.census` API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.
 
-The method will return a `Seurat` object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:
+The method will return a [`Seurat` object](https://satijalab.org/seurat/), it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:
 
 - `obs_column_names` — character vector indicating the columns to select for cell metadata.
 - `obs_value_filter` — expression with selection conditions to fetch cells meeting a criteria.
@@ -131,26 +135,58 @@ For example if we want to fetch the expression data for:
 - All `"B cells"` of `"lung"` with `"COVID-19"`.
 - With all gene metadata and adding `sex` cell metadata.
 
-```{r}
-seurat_obj <- cellxgene.census::get_seurat(
+```{r, warning = FALSE, message = FALSE}
+library("Seurat")
+
+seurat_obj <- get_seurat(
   census, "Homo sapiens",
   obs_column_names = c("cell_type", "tissue_general", "disease", "sex"),
   var_value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
-  obs_value_filter = "cell_type == 'B cell' && tissue_general == 'lung' && disease == 'COVID-19'"
+  obs_value_filter = "cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'"
 )
 seurat_obj
 ```
 
 ```{r}
-head(seurat_obj@meta.data)
+head(seurat_obj[[]])
 ```
 
 
 ```{r}
-head(seurat_obj$RNA@meta.features)
+head(seurat_obj$RNA[[]])
 ```
 
 For a full description refer to `?cellxgene.census::get_seurat`.
+
+## Querying expression data as `SingleCellExperiment`
+
+Similarly to the previous section, there is a `get_single_cell_experiment` method in the `cellxgene.census` API. It behaves exactly the same as `get_seurat` but it returns a [`SingleCellExperiment` object](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html).
+
+For example, to repeat the same query we can simply do the following.
+
+```{r, warning = FALSE, message = FALSE}
+library("SingleCellExperiment")
+
+sce_obj <- get_single_cell_experiment(
+  census, "Homo sapiens",
+  obs_column_names = c("cell_type", "tissue_general", "disease", "sex"),
+  var_value_filter = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')",
+  obs_value_filter = "cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'"
+)
+sce_obj
+```
+
+
+```{r}
+head(colData(sce_obj))
+```
+
+
+```{r}
+head(rowData(sce_obj))
+```
+
+For a full description refer to `?cellxgene.census::get_single_cell_experiment`.
 
 ### Close the census
 

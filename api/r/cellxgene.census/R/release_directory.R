@@ -1,7 +1,7 @@
 CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json"
 
 
-#' Get release description for given census version
+#' Get release description for a Census version
 #'
 #' @param census_version The census version name.
 #'
@@ -9,6 +9,7 @@ CELL_CENSUS_RELEASE_DIRECTORY_URL <- "https://census.cellxgene.cziscience.com/ce
 #' @export
 #'
 #' @examples
+#' as.data.frame(get_census_version_description("stable"))
 get_census_version_description <- function(census_version) {
   census_directory <- get_census_version_directory()
   description <- census_directory[census_version, ]
@@ -23,7 +24,7 @@ get_census_version_description <- function(census_version) {
   return(ans)
 }
 
-#' Get the directory of cell census releases currently available
+#' Get the directory of Census releases currently available
 #'
 #' @return Data frame of available cell census releases, including location and
 #'   metadata.
@@ -32,6 +33,7 @@ get_census_version_description <- function(census_version) {
 #' @export
 #'
 #' @examples
+#' get_census_version_directory()
 get_census_version_directory <- function() {
   raw <- jsonlite::fromJSON(CELL_CENSUS_RELEASE_DIRECTORY_URL)
 

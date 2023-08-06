@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 80)
+options(width = 88, max.print = 100)
 ```
 
 <!--
@@ -40,7 +40,8 @@ Contents
 The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
 
 ```{r}
-census <- cellxgene.census::open_soma()
+library("cellxgene.census")
+census <- open_soma()
 ```
 
 ## Fetching the IDs of the Census datasets
@@ -61,10 +62,10 @@ print(datasets_df)
 
 Now let's fetch the dataset presence matrix.
 
-For convenience, read the entire presence matrix (for Homo sapiens) into a sparse matrix. There is a convenience API providing this capability:
+For convenience, read the entire presence matrix (for Homo sapiens) into a sparse matrix. There is a convenience function providing this capability:
 
 ```{r}
-presence_matrix <- cellxgene.census::get_presence_matrix(census, "Homo sapiens", "RNA")
+presence_matrix <- get_presence_matrix(census, "Homo sapiens", "RNA")
 print(dim(presence_matrix))
 ```
 
@@ -84,12 +85,23 @@ Now that we have the dataset table, the genes metadata table, and the dataset pr
 - the first dimension of the presence matrix is the dataset's `soma_joinid`, as stored in the `census_datasets` dataframe.
 - the second dimension of the presence matrix is the feature's `soma_joinid`, as stored in the `var` dataframe.
 
+The presence matrix has a method `$take()` that lets you slice it by `soma_joinid`s from `census_datasets` and `var`. And the full presence matrix, or slices of it, can then be exported to a regular matrix with the method `$get_one_based_matrix()`
+
 Let's find out if the the gene `"ENSG00000286096"` was measured in the dataset with id `"97a17473-e2b1-4f31-a544-44a60773e2dd"`.
 
 ```{r}
+# Get soma_joinid for datasets and genes of interest
 var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 dataset_joinid <- datasets_df$soma_joinid[datasets_df$dataset_id == "97a17473-e2b1-4f31-a544-44a60773e2dd"]
-is_present <- presence_matrix$take(dataset_joinid, var_joinid)$get_one_based_matrix()[, , drop = TRUE]
+
+# Slice presence matrix with datasets and genes of interest
+presence_matrix_slice <- presence_matrix$take(i = dataset_joinid, j = var_joinid)
+
+# Convert presence matrix to regular matrix
+presence_matrix_slice <- presence_matrix_slice$get_one_based_matrix()
+
+# Find how if the gene is present in this dataset
+is_present <- presence_matrix_slice[, , drop = TRUE]
 cat(paste("Feature is", if (is_present) "present." else "not present."))
 ```
 
@@ -103,9 +115,9 @@ var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 
 # The presence matrix is indexed by the joinids of the dataset and var dataframes,
 # so slice out the feature of interest by its joinid.
-dataset_joinids <- datasets_df$soma_joinid[
-  presence_matrix$take(j = var_joinid)$get_one_based_matrix()[, , drop = TRUE] != 0
-]
+presence_matrix_slice  <- presence_matrix$take(j = var_joinid)$get_one_based_matrix()
+measured_datasets <- presence_matrix_slice[, , drop = TRUE] != 0
+dataset_joinids <- datasets_df$soma_joinid[measured_datasets]
 
 # From the datasets dataframe, slice out the datasets which have a joinid in the list
 print(datasets_df[dataset_joinids, ])
@@ -120,9 +132,9 @@ Finally, we can find the set of genes that were measured in the cells of a given
 dataset_joinids <- datasets_df$soma_joinid[datasets_df$collection_id == "17481d16-ee44-49e5-bcf0-28c0780d8c4a"]
 
 # Slice the presence matrix by the first dimension, i.e., by dataset
-var_joinids <- var_df$soma_joinid[
-  which(Matrix::colSums(presence_matrix$take(i = dataset_joinids)$get_one_based_matrix()[, , drop = TRUE]) > 0)
-]
+presence_matrix_slice <- presence_matrix$take(i = dataset_joinids)$get_one_based_matrix()
+genes_measured <- Matrix::colSums(presence_matrix_slice) > 0
+var_joinids <- var_df$soma_joinid[genes_measured]
 
 print(var_df[var_joinids, ])
 ```
