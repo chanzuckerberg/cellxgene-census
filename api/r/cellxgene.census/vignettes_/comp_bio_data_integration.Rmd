@@ -43,8 +43,8 @@ This notebook provides a demonstration for integrating two Census datasets using
 Let's load all packages needed for this notebook.
 
 ```{r, warning=FALSE, message=FALSE}
-library(cellxgene.census)
-library(Seurat)
+library("cellxgene.census")
+library("Seurat")
 ```
 
 Now we can open the Census.
