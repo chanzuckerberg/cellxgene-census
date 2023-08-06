@@ -18,16 +18,6 @@ If installing from **MacOS**, you will need to install the [developer tools `Xco
 
 **Windows** is not supported.
 
-From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
-
-```r
-install.packages(
-  "tiledb",
-  version = "0.20.3", 
-  repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
-)
-```
-
 Then in an R session install `cellxgene.census` from R-Universe.
 
 ```r
