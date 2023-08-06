@@ -130,7 +130,7 @@ Let's perform some basic clustering analysis to see if cell types cluster as exp
 First we do some basic filtering of cells and genes.
 
 ```{r}
-cells_per_gene <- Matrix::rowSums(liver_seurat$RNA@counts > 0)
+cells_per_gene <- rowSums(GetAssayData(liver_seurat, slot = "counts") > 0)
 genes_per_cell <- Matrix::colSums(liver_seurat$RNA@counts > 0)
 liver_seurat <- liver_seurat[cells_per_gene >= 5, genes_per_cell >= 500]
 ```
