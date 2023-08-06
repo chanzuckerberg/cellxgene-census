@@ -169,7 +169,7 @@ liver_seurat <- RunPCA(
   liver_seurat,
   features = VariableFeatures(object = liver_seurat)
 )
-liver_seurat <- Seurat::FindNeighbors(liver_seurat, dims = 1:10)
+liver_seurat <- FindNeighbors(liver_seurat, dims = 1:40)
 liver_seurat <- Seurat::RunUMAP(liver_seurat, dims = 1:10)
 Seurat::DimPlot(liver_seurat, reduction = "umap", group.by = "cell_type")
 ```
