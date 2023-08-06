@@ -167,7 +167,7 @@ Now we can proceed to do clustering analysis.
 ```{r,warning=FALSE,message=FALSE,fig.width=7,fig.height=5}
 liver_seurat <- RunPCA(
   liver_seurat,
-  features = Seurat::VariableFeatures(object = liver_seurat)
+  features = VariableFeatures(object = liver_seurat)
 )
 liver_seurat <- Seurat::FindNeighbors(liver_seurat, dims = 1:10)
 liver_seurat <- Seurat::RunUMAP(liver_seurat, dims = 1:10)
