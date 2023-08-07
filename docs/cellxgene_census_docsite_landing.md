@@ -9,7 +9,7 @@ Get started:
 - [Quick start (Python and R)](cellxgene_census_docsite_quick_start.md)
 - [Census data and schema](cellxgene_census_docsite_schema.md)
 - [Python tutorials](examples.rst)
-- *Coming soon: R tutorials.*
+- [R tutorials](https://chanzuckerberg.github.io/cellxgene-census/r/articles/)
 - [Github repository](https://github.com/chanzuckerberg/cellxgene-census)
 
 
