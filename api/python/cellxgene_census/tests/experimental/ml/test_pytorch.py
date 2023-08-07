@@ -13,6 +13,7 @@ from scipy.sparse import coo_matrix, spmatrix
 from somacore import AxisQuery
 from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
+from torch.utils.data._utils.worker import WorkerInfo
 
 # conditionally import torch, as it will not be available in all test environments
 try:
@@ -364,18 +365,89 @@ def test_encoders(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
+    """Tests the ExperimentDataPipe provides all data, as collected from multiple processes that are managed by a
+    PyTorch DataLoader with multiple workers configured."""
+
     dp = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
     )
+    # Note we're testing the ExperimentDataPipe via a DataLoader, since this is what sets up the multiprocessing
     dl = experiment_dataloader(dp, num_workers=2)
 
     full_result = list(iter(dl))
 
     soma_joinids = [t[1][0].item() for t in full_result]
     assert sorted(soma_joinids) == list(range(6))
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
+def test_distributed__returns_data_partition_for_rank(soma_experiment: Experiment) -> None:
+    """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
+    using mocks to avoid having to do real PyTorch distributed setup."""
+
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+    )
+    with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
+    ) as mock_dist_get_rank, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
+    ) as mock_dist_get_world_size:
+        mock_dist_is_initialized.return_value = True
+        mock_dist_get_rank.return_value = 1
+        mock_dist_get_world_size.return_value = 3
+
+        full_result = list(iter(dp))
+
+        soma_joinids = [t[1][0].item() for t in full_result]
+
+        # Of the 6 obs rows, the PyTorch process of rank 1 should get [2, 3]
+        # (rank 0 gets [0, 1], rank 2 gets [4, 5])
+        assert sorted(soma_joinids) == [2, 3]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(12, 3, pytorch_x_value_gen)])
+def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_experiment: Experiment) -> None:
+    """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode and
+    DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
+    setup or real DataLoader multiprocessing."""
+
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+    )
+    with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
+    ) as mock_dist_is_initialized, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
+    ) as mock_dist_get_rank, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
+    ) as mock_dist_get_world_size:
+        mock_get_worker_info.return_value = WorkerInfo(id=1, num_workers=2, seed=1234)
+        mock_dist_is_initialized.return_value = True
+        mock_dist_get_rank.return_value = 1
+        mock_dist_get_world_size.return_value = 3
+
+        full_result = list(iter(dp))
+
+        soma_joinids = [t[1][0].item() for t in full_result]
+
+        # Of the 12 obs rows, the PyTorch process of rank 1 should get [4..7], and then within that partition,
+        # the 2nd DataLoader process should get the second half of the rank's partition, which is just [6, 7]
+        # (rank 0 gets [0..3], rank 2 gets [8..11])
+        assert sorted(soma_joinids) == [6, 7]
 
 
 @pytest.mark.experimental

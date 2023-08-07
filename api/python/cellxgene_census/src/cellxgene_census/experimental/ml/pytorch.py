@@ -1,6 +1,7 @@
 import gc
 import logging
 import os
+import sys
 from contextlib import contextmanager
 from datetime import timedelta
 from time import time
@@ -21,6 +22,7 @@ from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore.query import _fast_csr
 from torch import Tensor
+from torch import distributed as dist
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 
@@ -28,7 +30,9 @@ from ..._open import _build_soma_tiledb_context
 from ..util._eager_iter import _EagerIterator
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
-
+if not pytorch_logger.hasHandlers():
+    pytorch_logger.addHandler(logging.StreamHandler(sys.stderr))
+    pytorch_logger.setLevel(logging.DEBUG)
 
 # TODO: Rename to reflect the correct order of the Tensors within the tuple: (X, obs)
 ObsAndXDatum = Tuple[Tensor, Tensor]
@@ -444,26 +448,34 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @staticmethod
     def _partition_obs_joinids(ids: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
+        dist_partition = loader_partition = 0
+        dist_partitions = loader_partitions = 1
+
+        if dist.is_initialized() and dist.get_rank() >= 0:
+            dist_partition = dist.get_rank()
+            dist_partitions = dist.get_world_size()
+
         # NOTE: Can alternately use a `worker_init_fn` to split among workers split workload
         worker_info = torch.utils.data.get_worker_info()
+        if worker_info is not None:
+            loader_partition = worker_info.id
+            loader_partitions = worker_info.num_workers
 
-        if worker_info is None or worker_info.num_workers < 2:
-            return ids
+        total_partitions = dist_partitions * loader_partitions
+        partition = dist_partition * loader_partitions + loader_partition
 
-        partition, num_partitions = worker_info.id, worker_info.num_workers
-
-        partitions = np.array_split(ids, num_partitions)
-        ids = partitions[partition]
+        partitioned_ids = np.array_split(ids, total_partitions)
+        ids = partitioned_ids[partition]
 
         if pytorch_logger.isEnabledFor(logging.DEBUG) and len(ids) > 0:
             joinids_start = ids[0]
             joinids_end = ids[-1]
-            lens = [len(p) for p in partitions]
+            lens = [len(p) for p in partitioned_ids]
             partition_start = sum(lens[:partition])
             partition_end_excl = partition_start + lens[partition]
 
             pytorch_logger.debug(
-                f"Process {os.getpid()} handling partition {partition + 1} of {num_partitions}, "
+                f"Process {os.getpid()} handling partition {partition + 1} of {total_partitions}, "
                 f"index range=[{partition_start}:{partition_end_excl}), "
                 f"soma_joinid range=[{joinids_start}:{joinids_end}], "
                 f"partition_size={len(ids)}"
