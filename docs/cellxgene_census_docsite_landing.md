@@ -1,5 +1,3 @@
-❗ **R API in beta.**
-
 # CZ CELLxGENE Discover Census
 
 The Census provides efficient computational tooling to **access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover**. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data harmonization.
@@ -9,7 +7,7 @@ Get started:
 - [Quick start (Python and R)](cellxgene_census_docsite_quick_start.md)
 - [Census data and schema](cellxgene_census_docsite_schema.md)
 - [Python tutorials](examples.rst)
-- *Coming soon: R tutorials.*
+- [R API & tutorials](https://chanzuckerberg.github.io/cellxgene-census/r/index.html)
 - [Github repository](https://github.com/chanzuckerberg/cellxgene-census)
 
 

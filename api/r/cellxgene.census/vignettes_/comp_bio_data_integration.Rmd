@@ -2,7 +2,7 @@
 title: "Integrating multi-dataset slices of data with Seurat"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Census query & extract subsets}
+  %\VignetteIndexEntry{Integrating multi-dataset slices of data with Seurat}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
