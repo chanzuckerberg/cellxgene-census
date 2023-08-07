@@ -1,3 +1,5 @@
+ <span style="color: Coral; font-size: 18px"> 🎉 🎉 **The R API stable version has launched. Find out more about it [here.](articles/2023/20230808-r_api_release.md)** </span>
+
 # CZ CELLxGENE Discover Census
 
 The Census provides efficient computational tooling to **access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover**. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data harmonization.

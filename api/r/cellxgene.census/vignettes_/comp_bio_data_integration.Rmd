@@ -40,12 +40,11 @@ This notebook provides a demonstration for integrating two Census datasets using
 
 ## Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2)
 
-Let's load all modules needed for this notebook.
+Let's load all packages needed for this notebook.
 
 ```{r, warning=FALSE, message=FALSE}
-library(cellxgene.census)
-library(Seurat)
-library(patchwork)
+library("cellxgene.census")
+library("Seurat")
 ```
 
 Now we can open the Census.
@@ -67,7 +66,7 @@ census_datasets <- as.data.frame(census_datasets$concat())
 census_datasets[grep("Liver", census_datasets$dataset_title), ]
 ```
 
-Now we can use the values from `dataset_id` to query and load an AnnData object with all the cells from those datasets. 
+Now we can use the values from `dataset_id` to query and load a Seurat object with all the cells from those datasets. 
 
 ```{r, warning=FALSE, message=FALSE, message=FALSE, results='hide'}
 tabula_muris_liver_ids <- c("4546e757-34d0-4d17-be06-538318925fcd", "6202a243-b713-4e12-9ced-c387f8483dea")
