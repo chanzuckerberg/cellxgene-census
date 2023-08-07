@@ -49,7 +49,7 @@ library("Seurat")
 
 Now we can open the Census.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 census <- open_soma()
 ```
 
