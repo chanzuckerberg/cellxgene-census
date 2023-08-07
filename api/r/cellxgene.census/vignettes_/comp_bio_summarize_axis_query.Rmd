@@ -36,7 +36,7 @@ R data frames are in-memory objects. Take care that queries are small enough for
 
 The `cellxgene.census` R package contains a convenient API to open any version of the Census (by default, the newest stable version).
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 library("cellxgene.census")
 census <- open_soma()
 ```
