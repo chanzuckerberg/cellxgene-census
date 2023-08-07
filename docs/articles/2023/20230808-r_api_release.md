@@ -6,7 +6,7 @@
 
 The Census team is pleased to announce the release of the R package `cellxgene.census`. 🎉 🎉 
 
-This has been long coming since our Python release back in May. Now, from R, computational biologists can access the Census data which is the largest standardized aggregation of single-cell data, composed of >30M cells and >60K genes.
+This has been long coming since our Python release back in May. Now, from R, computational biologists can access the Census data which is the largest standardized aggregation of single-cell data, composed of >33M cells and >60K genes.
  
 With `cellxgene.census` in a few seconds users can access any slice of Census data using cell or gene filters across hundreds of datasets. The data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, and [Seurat](https://satijalab.org/seurat/) or [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) for downstream analysis.
 
@@ -27,9 +27,9 @@ To learn more about the package please make sure to check out the following reso
 
 The `cellxgene.census` package relies on [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA) R's package `tiledbsoma` for all of its data access capabilities as shown in the next section. 
 
-CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded it from beta to its first stable version. Release notes can be found [here](https://github.com/single-cell-data/TileDB-SOMA/releases/tag/1.3.0).
+CZI and TileDB have worked closely on the development of `tiledbsoma` and recently upgraded it from beta to its first stable version. Release notes can be found [here](https://github.com/single-cell-data/TileDB-SOMA/releases/tag/1.4.0).
 
-## Efficient access to single-cell data for >30M cells from R
+## Efficient access to single-cell data for >33M cells from R
 
 Census hosts ever-growing [data releases](../../cellxgene_census_docsite_data_release_info.md) from CZ CELLxGENE Discover, representing the largest aggregation of standardized single-cell data.
 
