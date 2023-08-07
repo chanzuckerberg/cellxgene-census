@@ -83,7 +83,7 @@ census$close()
 
 ### Exporting Census slices to `Seurat` and `SingleCellExperiment`
 
-Similarly, querying both the single-cell data along with its metadata, it can be easily exported to  `Seurat` or `SingleCellExperiment` object for downstream analysis:
+Similarly, users can query both the single-cell data along with its metadata and export them to  `Seurat` or `SingleCellExperiment` objects for downstream analysis:
 
 ```r
 library("cellxgene.census")
