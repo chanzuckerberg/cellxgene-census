@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CZ CELLxGENE Discover Census &mdash; cellxgene-census  documentation</title>
+  <title>Census “what’s new?” article editorial guidelines &mdash; cellxgene-census  documentation</title>
   
 
   
@@ -45,8 +45,7 @@
 
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="cellxgene_census_docsite_installation.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -97,7 +96,7 @@
             
 
             
-                <a href="#" class="icon icon-home"> cellxgene-census
+                <a href="index.html" class="icon icon-home"> cellxgene-census
             
 
             
@@ -150,7 +149,7 @@
         <nav class="wy-nav-top" aria-label="top navigation">
             
             <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-            <a href="#">cellxgene-census</a>
+            <a href="index.html">cellxgene-census</a>
             
         </nav>
 
@@ -161,10 +160,10 @@
             
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">CZ CELLxGENE Discover Census</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Census “what’s new?” article editorial guidelines</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/census_article_guidelines.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -172,96 +171,113 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <p><span style="color: Coral; font-size: 18px"> 🎉 🎉 <strong>The R API stable version has launched. Find out more about it <a class="reference internal" href="articles/2023/20230808-r_api_release.html"><span class="std std-doc">here.</span></a></strong> <span></p>
-<section id="cz-cellxgene-discover-census">
-<h1>CZ CELLxGENE Discover Census<a class="headerlink" href="#cz-cellxgene-discover-census" title="Permalink to this heading">¶</a></h1>
-<p>The Census provides efficient computational tooling to <strong>access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover</strong>. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data harmonization.</p>
-<p>Get started:</p>
+  <section id="census-what-s-new-article-editorial-guidelines">
+<h1>Census “what’s new?” article editorial guidelines<a class="headerlink" href="#census-what-s-new-article-editorial-guidelines" title="Permalink to this heading">¶</a></h1>
+<p>“What’s new?” articles are blog-like short pieces intended to deliver information to the user on the following:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="cellxgene_census_docsite_quick_start.html"><span class="std std-doc">Quick start (Python and R)</span></a></p></li>
-<li><p><a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">Census data and schema</span></a></p></li>
-<li><p><a class="reference internal" href="examples.html"><span class="std std-doc">Python tutorials</span></a></p></li>
-<li><p><em>Coming soon: R tutorials.</em></p></li>
-<li><p><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census">Github repository</a></p></li>
+<li><p>Short descriptions of API updates.</p></li>
+<li><p>Short descriptions of Census data updates.</p></li>
+<li><p>Small description of an in-house analysis with the Census.</p></li>
+<li><p>Blurbs on external uses of the Census.</p></li>
 </ul>
-<p><img alt="image" src="_images/cellxgene_census_docsite_workflow.svg" /></p>
-<section id="citing-the-census">
-<h2>Citing the Census<a class="headerlink" href="#citing-the-census" title="Permalink to this heading">¶</a></h2>
-<p>Please follow the <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citation guidelines</a> offered by CZ CELLxGENE Discover.</p>
-</section>
-<section id="census-capabilities">
-<h2>Census Capabilities<a class="headerlink" href="#census-capabilities" title="Permalink to this heading">¶</a></h2>
-<p>The Census is a data object publicly hosted online and an API to open it. The object is built using the <a class="reference external" href="https://github.com/single-cell-data/SOMA">SOMA</a> API specification and data model, and it is implemented via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a>. As such, the Census has all the data capabilities offered by TileDB-SOMA including:</p>
-<p><strong>Data access at scale</strong></p>
+<p>The goals of these articles are to have:</p>
 <ul class="simple">
-<li><p>Cloud-based data access.</p></li>
-<li><p>Efficient access for larger-than-memory slices of data.</p></li>
-<li><p>Query and access data based on cell or gene metadata at low latency.</p></li>
+<li><p>Master reference articles to link for other channels (e.g. slack, twitter).</p></li>
+<li><p>One-stop place for users to have a historical view of Census developments and analysis.</p></li>
 </ul>
-<p><strong>Interoperability with existing single-cell toolkits</strong></p>
+<p>A great example of this approach is the <a class="reference external" href="https://arrow.apache.org/blog/">Apache Arrow Blog</a>.</p>
+<section id="location">
+<h2>Location<a class="headerlink" href="#location" title="Permalink to this heading">¶</a></h2>
+<p>The articles should be placed in the folder <code class="docutils literal notranslate"><span class="pre">./docs/articles/</span></code> and further organized in year subdirectories <code class="docutils literal notranslate"><span class="pre">[YYYY]/</span></code>. The articles should be in markdown format <code class="docutils literal notranslate"><span class="pre">*.md</span></code></p>
+<p>The articles should be named with a date prefix followed by a name <code class="docutils literal notranslate"><span class="pre">[YYYYMMDD]-[name].md</span></code>, the name is left to the discretion of the user.</p>
+<p>For example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">./docs/articles/2023/20230810-r_api_is_out.md</span></code></p>
+</section>
+<section id="guidelines">
+<h2>Guidelines<a class="headerlink" href="#guidelines" title="Permalink to this heading">¶</a></h2>
+<section id="title">
+<h3>Title<a class="headerlink" href="#title" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
-<li><p>Load and create <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> objects.</p></li>
-<li><p>Load and create <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> objects.</p></li>
+<li><p>It must use the highest-level markdown header <code class="docutils literal notranslate"><span class="pre">#</span></code>.</p></li>
+<li><p>It should be concise and self-explanatory.</p></li>
 </ul>
-<p><strong>Interoperability with existing Python or R data structures</strong></p>
-<ul class="simple">
-<li><p>From Python create <a class="reference external" href="https://arrow.apache.org/docs/python/index.html">PyArrow</a> objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.</p></li>
-<li><p>From R create <a class="reference external" href="https://arrow.apache.org/docs/r/index.html">R Arrow</a> objects, sparse matrices (via the <a class="reference external" href="https://cran.r-project.org/package=Matrix">Matrix</a> package), and standard data frames and (dense) matrices.</p></li>
-</ul>
+<p>Examples:</p>
+<p>:white_check_mark: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">R</span> <span class="pre">package</span> <span class="pre">cellxgene.census</span> <span class="pre">1.0.0</span> <span class="pre">is</span> <span class="pre">out</span></code></p>
+<p>:white_check_mark: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">A</span> <span class="pre">new</span> <span class="pre">normalized</span> <span class="pre">layer</span> <span class="pre">has</span> <span class="pre">been</span> <span class="pre">added</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">Census</span> <span class="pre">data</span></code></p>
+<p>:x: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Cool</span> <span class="pre">new</span> <span class="pre">feature</span> <span class="pre">is</span> <span class="pre">out</span></code> <em>not self-explanatory</em></p>
+<p>:x: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Errors</span> <span class="pre">in</span> <span class="pre">Census</span> <span class="pre">data</span> <span class="pre">2023-05-15</span></code> <em>not self-explanatory</em></p>
 </section>
-<section id="census-data-and-schema">
-<h2>Census Data and Schema<a class="headerlink" href="#census-data-and-schema" title="Permalink to this heading">¶</a></h2>
-<p>A description of the Census data and its schema is detailed <a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">here</span></a>.</p>
-<p>⚠️ Note that the data includes:</p>
-<ul class="simple">
-<li><p><strong>Full-gene sequencing read counts</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
-<li><p><strong>Duplicate cells</strong> present across multiple datasets, these can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>
-</ul>
-</section>
-<section id="census-data-releases">
-<h2>Census Data Releases<a class="headerlink" href="#census-data-releases" title="Permalink to this heading">¶</a></h2>
-<p>The Census data release plans are detailed <a class="reference internal" href="cellxgene_census_docsite_data_release_info.html"><span class="std std-doc">here</span></a>.</p>
-<p>Starting May 15th, 2023, Census data releases with long-term support will be published every six months. These releases will be publicly accessible for at least five years. In addition, weekly releases may be published without any guarantee of permanence.</p>
-</section>
-<section id="questions-feedback-and-issues">
-<h2>Questions, Feedback and Issues<a class="headerlink" href="#questions-feedback-and-issues" title="Permalink to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Users are encouraged to submit questions and feature requests about the Census via <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issues</a>.</p></li>
-<li><p>For quick support, you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p></li>
-<li><p>Users are encouraged to share their feedback by emailing <a class="reference external" href="mailto:soma&#37;&#52;&#48;chanzuckerberg&#46;com">soma<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a>.</p></li>
-<li><p>Bugs can be submitted via <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issues</a>.</p></li>
-<li><p>If you believe you have found a security issue, please disclose it by contacting <a class="reference external" href="mailto:security&#37;&#52;&#48;chanzuckerberg&#46;com">security<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a>.</p></li>
-<li><p>Additional FAQs can be found <a class="reference internal" href="cellxgene_census_docsite_FAQ.html"><span class="std std-doc">here</span></a>.</p></li>
-</ul>
-</section>
-<section id="coming-soon">
-<h2>Coming Soon!<a class="headerlink" href="#coming-soon" title="Permalink to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and <a class="reference external" href="https://pytorch.org/">PyTorch</a>.</p></li>
-<li><p>To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas:</p>
-<ul>
-<li><p>Include organism-wide normalized layers.</p></li>
-<li><p>Include organism-wide embeddings.</p></li>
-<li><p>On-demand information-rich subsampling.</p></li>
-</ul>
-</li>
-</ul>
-</section>
-<section id="projects-and-tools-using-census">
-<h2>Projects and Tools Using Census<a class="headerlink" href="#projects-and-tools-using-census" title="Permalink to this heading">¶</a></h2>
-<p>If you are interested in listing a project here, please reach out to us at <a class="reference external" href="mailto:soma&#37;&#52;&#48;chanzuckerberg&#46;com">soma<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a></p>
-</section>
-</section>
-<div class="toctree-wrapper compound">
+<section id="date-author">
+<h3>Date &amp; author<a class="headerlink" href="#date-author" title="Permalink to this heading">¶</a></h3>
+<p>Immediately below the title, and date and author(s) should be added to the article in italics. The date should be in format “[DD] [Month] [YYYY]” and followed by the keyword “Published: “, and the author(s) must be written after the keyboard “By: ” have an email link. Both must be in italics.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*</span><span class="n">Published</span><span class="p">:</span> <span class="mi">10</span> <span class="n">August</span> <span class="mi">2023</span><span class="o">*</span>
+
+<span class="o">*</span><span class="n">By</span><span class="p">:</span> <span class="p">[</span><span class="n">John</span> <span class="n">Smith</span><span class="p">](</span><span class="n">author1</span><span class="nd">@chanzuckerberg</span><span class="o">.</span><span class="n">com</span><span class="p">),</span> <span class="p">[</span><span class="n">Phil</span> <span class="n">Scoot</span><span class="p">](</span><span class="n">author2</span><span class="nd">@chanzuckerberg</span><span class="o">.</span><span class="n">com</span><span class="p">)</span><span class="o">*</span>
+</pre></div>
 </div>
+</section>
+<section id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h3>
+<p>Introductory text of 1-2 paragraphs must be included right underneath the date and authors.</p>
+<ul class="simple">
+<li><p>It must provide a one paragraph summary of the article.</p></li>
+<li><p>It must not contain an explanation of the Census.</p></li>
+</ul>
+<p>Example:</p>
+<blockquote>
+<div><p>The Census team is pleased to announce the release of the R package <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code>, this has been long coming since our Python release back in May. Now, from R users can access the Census data which is the largest harmonized aggregation of single-cell data, composed of &gt;30M cells and &gt;60K genes.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> users can access Census access and slice the data using cell or gene filters across hundreds of datasets. Users can fetch the data in an iterative fashion for bigger-than-memory slices of data, or export to Seurat or SingleCellExperiment objects</p>
+</div></blockquote>
+</section>
+<section id="sections">
+<h3>Sections<a class="headerlink" href="#sections" title="Permalink to this heading">¶</a></h3>
+<p>The rest of the article content must be organized within sections:</p>
+<ul class="simple">
+<li><p>The section title must use the second-level markdown header <code class="docutils literal notranslate"><span class="pre">##</span></code>. <strong>This is important as the python doc-site renders these in the sidebar and in the full view of all notebooks.</strong></p></li>
+<li><p>The section title should be concise, self-explanatory.</p></li>
+<li><p>The section’s contents and presence or absence of sub-headers are left to the discretion of the writer.</p></li>
+</ul>
+</section>
+</section>
+<section id="example-article">
+<h2>Example article<a class="headerlink" href="#example-article" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># R package cellxgene.census 1.0.0 is out
+
+*Published: 10 August 2023*
+
+*By: [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*  
+
+The Census team is pleased to announce the release of the R package
+`cellxgene.census`, this has been long coming since our Python
+release back in May. Now, from R users can access the Census data
+which is the largest harmonized aggregation of single-cell data,
+composed of &gt;30M cells and &gt;60K genes.
+ 
+With `cellxgene.census` users can access Census access and slice
+the data using cell or gene filters across hundreds of datasets.
+Users can fetch the data in an iterative fashion for bigger-than-memory
+slices of data, or export to Seurat or SingleCellExperiment objects.
+
+## Installation &amp; usage
+
+Link to installation usage
+
+## Capabitlies
+
+List of R API capabilities
+
+[...]
+</pre></div>
+</div>
+</section>
+</section>
 
 
             </div>
             
             </div>
-            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cellxgene_census_docsite_installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+            <footer>
 
   <hr/>
 
