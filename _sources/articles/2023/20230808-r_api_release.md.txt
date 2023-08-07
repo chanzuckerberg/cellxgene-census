@@ -1,6 +1,6 @@
 # R package `cellxgene.census` V1 is out!
 
-*Published: August 7th, 2023*
+*Published: August 8th, 2023*
 
 *By: [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
