@@ -1,4 +1,4 @@
-# Cell Census API notebook/vignette editorial guidelines
+# Census API notebook/vignette editorial guidelines
 
 API demonstration code that is part of the documentation should be deposited here: 
 
@@ -25,7 +25,7 @@ Examples:
 
 :x: `# Census datasets presence` *not self-explanatory, has "Census" in it.*
 
-:x: `# Normalizing full-length gene sequencing data from the Cell Census` *has "Census" in it.*
+:x: `# Normalizing full-length gene sequencing data from the Census` *has "Census" in it.*
 
 ### Introduction
 
