@@ -1,6 +1,6 @@
 Package: cellxgene.census
 Title: CZ CELLxGENE Discover Cell Census
-Version: 1.5.0
+Version: 1.5.1
 Authors@R: 
     person("Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com",
            role = c("aut", "cre", "cph", "fnd"))
