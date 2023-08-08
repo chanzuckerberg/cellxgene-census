@@ -1,10 +1,10 @@
 Package: cellxgene.census
 Title: CZ CELLxGENE Discover Cell Census
-Version: 0.0.0.9000
+Version: 1.5.0
 Authors@R: 
     person("Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com",
            role = c("aut", "cre", "cph", "fnd"))
-Description: API to facilitate the use of the CZ CELLxGENE Discover Cell 
+Description: API to facilitate the use of the CZ CELLxGENE Discover 
   Census. For more information about the API and the project visit
   https://github.com/chanzuckerberg/cellxgene-census/
 License: MIT + file LICENSE
@@ -21,8 +21,6 @@ Imports:
   httr,
   jsonlite,
   methods,
-  Seurat (>= 4.1.0),
-  SingleCellExperiment (>= 1.20.0),
   stats,
   tiledbsoma,
   tiledb
@@ -30,7 +28,10 @@ Suggests:
   bit64,
   knitr,
   rmarkdown,
+  SingleCellExperiment (>= 1.20.0),
+  Seurat (>= 4.1.0),
   testthat (>= 3.0.0),
   withr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+OS_type: unix

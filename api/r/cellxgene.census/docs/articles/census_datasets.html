@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
       <img src="" class="logo" alt=""><h1>Census Datasets example</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/HEAD/vignettes/census_datasets.Rmd" class="external-link"><code>vignettes/census_datasets.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_/census_datasets.Rmd" class="external-link"><code>vignettes/census_datasets.Rmd</code></a></small>
       <div class="d-none name"><code>census_datasets.Rmd</code></div>
     </div>
 
@@ -110,7 +110,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 </h2>
 <p>Each Census contains a top-level data frame itemizing the datasets contained therein. You can read this <code>SOMADataFrame</code> into an <a href="https://arrow.apache.org/docs/r/reference/Table.html" class="external-link">Arrow Table</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span>
 <span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">)</span></span>
@@ -150,7 +151,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <p>The sum of cell counts across all datasets should match the number of cells across all SOMA experiments (human, mouse).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_data</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span></span>
-<span><span class="va">all_experiments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">census_data</span><span class="op">$</span><span class="fu">to_list</span><span class="op">(</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">it</span><span class="op">)</span> <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">it</span><span class="op">$</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">all_experiments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">census_data</span><span class="op">$</span><span class="fu">to_list</span><span class="op">(</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_experiments</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $mus_musculus</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
@@ -164,9 +165,10 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms*</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">experiments_total_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">all_experiments</span>, <span class="kw">function</span><span class="op">(</span><span class="va">it</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">it</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">experiments_total_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">all_experiments</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Found"</span>, <span class="va">experiments_total_cells</span>, <span class="st">"cells in all experiments."</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Found 61656118 cells in all experiments."</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
@@ -188,11 +190,13 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: dataset_h5ad_path &lt;chr&gt;, dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
 <p>Create a query on the mouse experiment, “RNA” measurement, for the <code>dataset_id</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">obs_query</span> <span class="op">&lt;-</span> <span class="fu">tiledbsoma</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">"tiledbsoma"</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: package 'tiledbsoma' was built under R version 4.3.1</span></span>
+<span><span class="va">obs_query</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">expt_query</span> <span class="op">&lt;-</span> <span class="fu">tiledbsoma</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAExperimentAxisQuery.html" class="external-link">SOMAExperimentAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
-<span>  <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"mus_musculus"</span><span class="op">)</span>, <span class="st">"RNA"</span>,</span>
+<span><span class="va">expt_query</span> <span class="op">&lt;-</span> <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"mus_musculus"</span><span class="op">)</span><span class="op">$</span><span class="fu">axis_query</span><span class="op">(</span></span>
+<span>  measurement_name <span class="op">=</span> <span class="st">"RNA"</span>,</span>
 <span>  obs_query <span class="op">=</span> <span class="va">obs_query</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">dataset_seurat</span> <span class="op">&lt;-</span> <span class="va">expt_query</span><span class="op">$</span><span class="fu">to_seurat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span></span>
@@ -216,13 +220,14 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <p>To do this you can fetch the location in the cloud or directly download to your system.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Option 1: Direct download</span></span>
-<span><span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/download_source_h5ad.html">download_source_h5ad</a></span><span class="op">(</span><span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>,</span>
+<span><span class="fu"><a href="../reference/download_source_h5ad.html">download_source_h5ad</a></span><span class="op">(</span></span>
+<span>  dataset_id <span class="op">=</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>,</span>
 <span>  file <span class="op">=</span> <span class="st">"/tmp/Tabula_Muris_Senis-bone_marrow.h5ad"</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Option 2: Get location and download via preferred method</span></span>
-<span><span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_source_h5ad_uri.html">get_source_h5ad_uri</a></span><span class="op">(</span><span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/get_source_h5ad_uri.html">get_source_h5ad_uri</a></span><span class="op">(</span><span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $uri</span></span>
 <span><span class="co">#&gt; [1] "s3://cellxgene-data-public/cell-census/2023-07-25/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
 <span><span class="co">#&gt; </span></span>

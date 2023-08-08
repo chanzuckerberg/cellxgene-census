@@ -31,7 +31,8 @@ This notebook showcases the Census contents and how to obtain high-level informa
 The `cellxgene.census` R package  contains a convenient `open_soma()` API to open any version of the Census (`stable` by default).
 
 ```{r}
-census <- cellxgene.census::open_soma()
+library("cellxgene.census")
+census <- open_soma()
 ```
 
 You can learn more about the cellxgene.census methods by accessing their corresponding documentation, for example `?cellxgene.census::open_soma`.
@@ -168,11 +169,8 @@ All of these questions can be answered by directly querying the cell metadata as
 To exemplify the process of accessing and slicing cell metadata for summary stats, let's start with a trivial example and take a look at all human cell types available in the Census:
 
 ```{r}
-as.data.frame(
-  census$get("census_data")$get("homo_sapiens")$obs$read(
-    column_names = c("cell_type", "is_primary_data")
-  )$concat()
-)
+obs_df <-   census$get("census_data")$get("homo_sapiens")$obs$read(column_names = c("cell_type", "is_primary_data"))
+as.data.frame(obs_df$concat())
 ```
 
 The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data frame.
@@ -180,19 +178,19 @@ The number of rows is the total number of cells for humans. Now, if you wish to 
 In addition, we will only focus on cells that are marked with `is_primary_data=TRUE` as this ensures we de-duplicate cells that appear more than once in CELLxGENE Discover.
 
 ```{r}
-human_cell_types <- as.data.frame(
-  census$get("census_data")$get("homo_sapiens")$obs$read(
-    column_names = "cell_type",
-    value_filter = "is_primary_data == TRUE"
-  )$concat()
-)$cell_type
-length(human_cell_types)
+obs_df <- census$get("census_data")$get("homo_sapiens")$obs$read(
+  column_names = "cell_type",
+  value_filter = "is_primary_data == TRUE"
+)
+
+obs_df <- as.data.frame(obs_df$concat())
+nrow(obs_df)
 ```
 
 This is the number of unique cells. Now let's look at the counts per cell type:
 
 ```{r}
-human_cell_type_counts <- table(human_cell_types)
+human_cell_type_counts <- table(obs_df$cell_type)
 sort(human_cell_type_counts, decreasing = TRUE)[1:10]
 ```
 
@@ -202,7 +200,7 @@ This shows you that the most abundant cell types are "glutamatergic neuron", "CD
 Now let's take a look at the number of unique cell types:
 
 ```{r}
-dim(human_cell_type_counts)
+length(human_cell_type_counts)
 ```
 
 That is the total number of different cell types for human.
@@ -218,13 +216,14 @@ Similar to the example above, we can learn what cell types are available for a s
 To achieve this goal we just need to limit our cell metadata to that tissue. We will use the information in the cell metadata variable `tissue_general`. This variable contains the high-level tissue label for all cells in the Census:
 
 ```{r}
-human_liver_cell_types <- as.data.frame(
-  census$get("census_data")$get("homo_sapiens")$obs$read(
-    column_names = "cell_type",
-    value_filter = "is_primary_data == TRUE && tissue_general == 'liver'"
-  )$concat()
-)$cell_type
-sort(table(human_liver_cell_types), decreasing = TRUE)[1:10]
+obs_liver_df <- census$get("census_data")$get("homo_sapiens")$obs$read(
+  column_names = "cell_type",
+  value_filter = "is_primary_data == TRUE & tissue_general == 'liver'"
+)
+
+obs_liver_df <- as.data.frame(obs_liver_df$concat())
+
+sort(table(obs_liver_df$cell_type), decreasing = TRUE)[1:10]
 ```
 
 These are the cell types and their cell counts in the human liver.
@@ -234,13 +233,14 @@ These are the cell types and their cell counts in the human liver.
 In this example we are going to get the counts for all diseased cells annotated as T cells. For the sake of the example we will focus on "CD8-positive, alpha-beta T cell" and "CD4-positive, alpha-beta T cell":
 
 ```{r}
-t_cells_diseased <- as.data.frame(
-  census$get("census_data")$get("homo_sapiens")$obs$read(
-    column_names = c("disease", "tissue_general"),
-    value_filter = "is_primary_data == TRUE && disease != 'normal' && cell_type %in% c('CD8-positive, alpha-beta T cell', 'CD4-positive, alpha-beta T cell')"
-  )$concat()
+obs_t_cells_df <- census$get("census_data")$get("homo_sapiens")$obs$read(
+  column_names = c("disease", "tissue_general"),
+  value_filter = "is_primary_data == TRUE & disease != 'normal' & cell_type %in% c('CD8-positive, alpha-beta T cell', 'CD4-positive, alpha-beta T cell')"
 )
-print(table(t_cells_diseased))
+
+obs_t_cells_df <- as.data.frame(obs_t_cells_df$concat())
+
+print(table(obs_t_cells_df))
 ```
 
 These are the cell counts annotated with the indicated disease across human tissues for "CD8-positive, alpha-beta T cell" or "CD4-positive, alpha-beta T cell".

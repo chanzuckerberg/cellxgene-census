@@ -3,7 +3,14 @@ template:
   bootstrap: 5
   includes:
     in_header: <script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
-
+      
+repo:
+  url:
+    home: https://github.com/chanzuckerberg/cellxgene-census/
+    source: https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/
+    issue: https://github.com/chanzuckerberg/cellxgene-census/issues
+    user: https://github.com/
+      
 home:
   sidebar:
     structure: [links, license, community, authors]

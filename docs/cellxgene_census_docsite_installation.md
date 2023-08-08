@@ -29,11 +29,30 @@ If installing in a Databricks notebook environment, use `%pip install`. Do not u
 
 ## R
 
-The R package will be soon deposited into R-Universe. In the meantime you can directly install from github using the [devtools](https://devtools.r-lib.org/) R package.
+If installing from **Ubuntu**, you may need to install the following libraries via `apt install`,  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`. In addition you must have `cmake` v3.21 or greater.
 
-From an R session:
+If installing from **MacOS**, you will need to install the [developer tools `Xcode`](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
+
+**Windows** is not supported.
+
+From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
 
 ```r
-install.packages("devtools")
-devtools::install_github("chanzuckerberg/cellxgene-census/api/r/cellxgene.census")
+install.packages(
+  "cellxgene.census",
+  repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
+)
+```
+
+To be able to export Census data to `Seurat` or `SingleCellExperiment` you also need to install their respective packages.
+
+```r
+# Seurat
+install.packages("Seurat")
+
+# SingleCellExperiment
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+    
+BiocManager::install("SingleCellExperiment")
 ```
