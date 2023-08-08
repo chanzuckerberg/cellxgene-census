@@ -7,8 +7,9 @@ import aiohttp
 import fsspec
 
 from ..build_state import CensusBuildArgs
+from ..util import cpu_count
 from .datasets import Dataset
-from .mp import cpu_count, create_process_pool_executor
+from .mp import create_process_pool_executor
 
 
 def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
@@ -22,8 +23,8 @@ def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
 
     N = len(datasets)
     if args.config.multi_process:
-        n_workers = max(min(8, cpu_count()), 64)
-        with create_process_pool_executor(args, n_workers) as pe:
+        n_workers = min(max(8, cpu_count()), 256)
+        with create_process_pool_executor(args, max_workers=n_workers) as pe:
             paths = list(
                 pe.map(copy_file, ((n, dataset, assets_dir, N) for n, dataset in enumerate(datasets, start=1)))
             )

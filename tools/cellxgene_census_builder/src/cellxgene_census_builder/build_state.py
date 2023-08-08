@@ -34,20 +34,30 @@ class CensusBuildConfig:
         converter=bool, default=False
     )  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
     #
-    # Primary bucket name
-    cellxgene_census_S3_bucket: str = field(default="cellxgene-data-public")
-    # Path prefix for the build
-    cellxgene_census_S3_prefix: str = field(default="/cell-census")
-    # Replica bucket name
-    cellxgene_census_S3_replica_bucket: str = field(default=None)
-    # Replica bucket path
-    cellxgene_census_S3_replica_path: str = field(default="/cell-census")
+    # Primary bucket location
+    cellxgene_census_S3_path: str = field(default="s3://cellxgene-data-public/cell-census")
+    #
+    # Replica bucket location
+    cellxgene_census_S3_replica_path: str = field(default=None)
     logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
     build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
     #
     # Default multi-process. Memory scaling based on empirical tests.
     multi_process: bool = field(converter=bool, default=True)
-    max_workers: int = field(default=2 + int(psutil.virtual_memory().total / (96 * 1024**3)))
+    #
+    # The memory budget used to determine appropriate parallelism in many steps of build.
+    # Only set to a smaller number if you want to not use all available RAM.
+    memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
+    #
+    # 'max_worker_processes' sets a limit on the number of worker processes. On high-CPU boxes,
+    # this limit is needed to avoid exceeding the VM map kernel limit (vm.max_map_count). On Ubuntu 22.04,
+    # the default value is 65536. This kernel limitation becomes an issue due to excess thread allocation
+    # by TileDB-SOMA: https://github.com/single-cell-data/TileDB-SOMA/issues/1550. Currently, the per-process
+    # TileDB context allocates approximately 650 threads (and VM maps) per worker process, as currently
+    # utilized by the Census builder. This hard-cap can be increased when this issue is resolved, but
+    # should not be removed (with sufficient number of worker processes, it will always be possible to
+    # trip over this limit). The default of 96 was chosen as:  (96+1) * 650 == 63050, which is < 65536.
+    max_worker_processes: int = field(converter=int, default=96)
     #
     # Host minimum resource validation
     host_validation_disable: int = field(
@@ -55,10 +65,15 @@ class CensusBuildConfig:
     )  # if True, host validation checks will be skipped
     host_validation_min_physical_memory: int = field(converter=int, default=512 * 1024**3)  # 512GiB
     host_validation_min_swap_memory: int = field(converter=int, default=2 * 1024**4)  # 2TiB
-    host_validation_min_free_disk_space: int = field(converter=int, default=1 * 1024**4)  # 1 TiB
+    host_validation_min_free_disk_space: int = field(converter=int, default=int(1.8 * 1024**4))  # 1.8 TiB
     #
     # Release clean up
     release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are deleted
+    #
+    # Block list of dataset IDs
+    dataset_id_blocklist_uri: str = field(
+        default="https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt"
+    )
     #
     # For testing convenience only
     manifest: str = field(default=None)

@@ -12,6 +12,7 @@
 #' @export
 #'
 #' @examples
+#' get_source_h5ad_uri("0895c838-e550-48a3-a777-dbcd35d30272")
 get_source_h5ad_uri <- function(dataset_id, census_version = "stable", census = NULL) {
   description <- get_census_version_description(census_version)
   if (is.null(census)) {
@@ -60,6 +61,7 @@ get_source_h5ad_uri <- function(dataset_id, census_version = "stable", census = 
 #' @export
 #'
 #' @examples
+#' download_source_h5ad("0895c838-e550-48a3-a777-dbcd35d30272", "/tmp/data.h5ad", overwrite = TRUE)
 download_source_h5ad <- function(dataset_id, file, overwrite = FALSE,
                                  census_version = "stable", census = NULL) {
   stopifnot("specify local filename, not directory" = !dir.exists(file))

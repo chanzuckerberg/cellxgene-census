@@ -8,6 +8,7 @@ import anndata
 import numpy as np
 import pytest
 import requests_mock as rm
+import tiledb
 import tiledbsoma as soma
 
 import cellxgene_census
@@ -280,7 +281,7 @@ def test_get_source_h5ad_uri(requests_mock: rm.Mocker) -> None:
     rng = np.random.default_rng()
     for idx in rng.choice(np.arange(len(census_datasets)), size=3, replace=False):
         a_dataset = census_datasets.iloc[idx]
-        locator = cellxgene_census.get_source_h5ad_uri(a_dataset.dataset_id)
+        locator = cellxgene_census.get_source_h5ad_uri(a_dataset.dataset_id, census_version="latest")
         assert isinstance(locator, dict)
         assert "uri" in locator
         assert locator["uri"].endswith(a_dataset.dataset_h5ad_path)
@@ -333,7 +334,7 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     # Passing an empty context
-    with pytest.raises(Exception):
+    with pytest.raises(tiledb.TileDBError, match=r"The AWS Access Key Id you provided does not exist in our records"):
         cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
 
 

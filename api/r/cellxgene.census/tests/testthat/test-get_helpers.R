@@ -103,3 +103,140 @@ test_that("get_seurat allows missing obs or var filter", {
   expect_equal(ncol(seurat[["RNA"]]), 10001)
   expect_equal(nrow(seurat[["RNA"]]), 1)
 })
+
+test_that("get_seurat X_layers allows slot selection", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  # default: raw X layer gets loaded into counts (which Seurat implicitly copies into data)
+  seurat <- get_seurat(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
+  )
+  expect_equal(nrow(seurat$RNA@counts), 2)
+  expect_equal(nrow(seurat$RNA@data), 2)
+
+  # expressly load raw X data into data; then counts is empty
+  seurat <- get_seurat(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length"),
+    X_layers = c(counts = NULL, data = "raw")
+  )
+  expect_equal(nrow(seurat$RNA@counts), 0)
+  expect_equal(nrow(seurat$RNA@data), 2)
+})
+
+test_that("get_single_cell_experiment", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  sce <- get_single_cell_experiment(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
+  )
+
+  expect_s4_class(sce, "SingleCellExperiment")
+  expect_equal(nrow(sce), 2)
+  expect_gt(ncol(sce), 0)
+
+  expect_s4_class(SingleCellExperiment::colData(sce), "DFrame")
+  expect_s4_class(SingleCellExperiment::rowData(sce), "DFrame")
+
+  expect_equal(nrow(SingleCellExperiment::rowData(sce)), 2)
+  expect_gt(ncol(SingleCellExperiment::colData(sce)), 0)
+
+  expect_setequal(SingleCellExperiment::rowData(sce)[, "feature_name"], c("0610010K14Rik", "Gm53058"))
+  expect_equal(sum(SingleCellExperiment::colData(sce)[, "tissue_general"] == "vasculature"), ncol(sce))
+})
+
+test_that("get_single_cell_experiment coords", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+  sce <- get_single_cell_experiment(
+    census,
+    "Mus musculus",
+    obs_coords = list(soma_joinid = bit64::as.integer64(0:1000)),
+    var_coords = list(soma_joinid = bit64::as.integer64(0:2000))
+  )
+  expect_equal(nrow(SingleCellExperiment::colData(sce)), 1001)
+  expect_equal(nrow(SingleCellExperiment::rowData(sce)), 2001)
+  expect_equal(nrow(SummarizedExperiment::assay(sce)), 2001)
+  expect_equal(ncol(SummarizedExperiment::assay(sce)), 1001)
+})
+
+test_that("get_single_cell_experiment allows missing obs or var filter", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  obs_value_filter <- "tissue == 'aorta'"
+
+  obs_query <- tiledbsoma::SOMAAxisQuery$new(
+    value_filter = obs_value_filter
+  )
+  sce <- get_single_cell_experiment(
+    census,
+    "Mus musculus",
+    obs_value_filter = obs_value_filter,
+    obs_column_names = c("soma_joinid"),
+    var_column_names = c("soma_joinid")
+  )
+  control_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    get_experiment(census, "Mus musculus"),
+    "RNA",
+    obs_query = obs_query
+  )
+  expect_equal(ncol(sce), control_query$n_obs)
+  expect_equal(nrow(sce), control_query$n_vars)
+
+  sce <- get_single_cell_experiment(census, "Mus musculus",
+    obs_coords = list(soma_joinid = bit64::as.integer64(0:10000)),
+    var_value_filter = "feature_id == 'ENSMUSG00000069581'"
+  )
+  expect_equal(ncol(sce), 10001)
+  expect_equal(nrow(sce), 1)
+})
+
+test_that("get_single_cell_experiment X_layers allows slot selection", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  # default: raw X layer gets loaded into counts
+  sce <- get_single_cell_experiment(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
+  )
+  expect_equal(nrow(SummarizedExperiment::assay(sce)), 2)
+
+  # load raw X into "counts" and "normcounts"
+  sce <- get_single_cell_experiment(
+    census,
+    "Mus musculus",
+    obs_value_filter = "tissue_general == 'vasculature'",
+    obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
+    var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length"),
+    X_layers = c(counts = "raw", normcounts = "raw")
+  )
+
+  expect_equal(nrow(SummarizedExperiment::assay(sce, "counts")), 2)
+  expect_equal(nrow(SummarizedExperiment::assay(sce, "normcounts")), 2)
+  expect_equal(
+    sum(SummarizedExperiment::assay(sce, "counts") != SummarizedExperiment::assay(sce, "normcounts")),
+    0
+  )
+})

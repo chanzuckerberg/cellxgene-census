@@ -19,12 +19,13 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ./api/r/cellxgene.census
-          extra-packages: any::rcmdcheck, any::styler, any::roxygen2
-          needs: check
-          # Disable dependency caching so long as we depend on bleeding-edge
-          # builds of tiledbsoma from r-universe. Its DESCRIPTION version
-          # number isn't routinely updated to invalidate our cache.
-          cache: false
+          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::remotes
+          cache: true
+      - name: install tiledbsoma
+        # Install the latest tiledbsoma package, overwriting any version cached by
+        # setup-r-dependencies. TODO: once there are release versions, set up a build matrix with
+        # both the released and latest versions.
+        run: Rscript -e 'remotes::install_git("https://github.com/single-cell-data/TileDB-SOMA.git", subdir="apis/r")'
       - name: styler
         run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
       - name: check session info

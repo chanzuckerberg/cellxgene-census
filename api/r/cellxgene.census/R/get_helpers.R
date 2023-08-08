@@ -1,6 +1,6 @@
 #' Read the feature dataset presence matrix.
 #'
-#' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
+#' @param census The census object from `cellxgene.census::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
 #'
@@ -10,53 +10,143 @@
 #' @export
 #'
 #' @examples
+#' census <- open_soma()
+#' on.exit(census$close(), add = TRUE)
+#' print(get_presence_matrix(census, "Homo sapiens")$dim())
 get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
   exp <- get_experiment(census, organism)
   presence <- exp$ms$get(measurement_name)$get("feature_dataset_presence_matrix")
   return(presence$read()$sparse_matrix(zero_based = TRUE)$concat())
 }
 
+
+#' Export Census slices to `Seurat`
+#'
 #' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
 #' query, and return it as a `Seurat` object.
 #'
 #' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
 #' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
 #' @param measurement_name The measurement object to query. Defaults to `RNA`.
-#' @param X_name The `X` layer to query. Defaults to `raw`.
+#' @param X_layers A named character of `X` layers to add to the Seurat assay, where the names are
+#'        the names of Seurat slots (`counts` or `data`) and the values are the names of layers
+#'        within `X`.
 #' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
 #' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
 #' @param obs_column_names Columns to fetch for the `obs` data frame.
 #' @param var_value_filter Same as `obs_value_filter` but for `var`.
 #' @param var_coords Same as `obs_coords` but for `var`.
 #' @param var_column_names Columns to fetch for the `var` data frame.
+#' @param var_index Name of column in ‘var’ to add as feature names.
 #'
 #' @return A `Seurat` object containing the sensus slice.
 #' @importFrom tiledbsoma SOMAExperimentAxisQuery
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' census <- open_soma()
+#' seurat_obj <- get_seurat(
+#'   census,
+#'   organism = "Homo sapiens",
+#'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
+#'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+#' )
+#'
+#' seurat_obj
+#'
+#' census$close()
+#' }
 get_seurat <- function(
     census,
     organism,
     measurement_name = "RNA",
-    X_name = "raw",
+    X_layers = c(counts = "raw", data = NULL),
     obs_value_filter = NULL,
     obs_coords = NULL,
     obs_column_names = NULL,
     var_value_filter = NULL,
     var_coords = NULL,
-    var_column_names = NULL) {
+    var_column_names = NULL,
+    var_index = "feature_id") {
   expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
     get_experiment(census, organism),
     measurement_name,
     obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter, coords = obs_coords),
     var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
   )
+
   return(expt_query$to_seurat(
-    # TODO: should we allow selection of the seurat 'counts' or 'data' slot?
-    c(counts = X_name),
+    X_layers = X_layers,
     obs_column_names = obs_column_names,
-    var_column_names = var_column_names
+    var_column_names = var_column_names,
+    var_index = var_index
+  ))
+}
+
+#' Export Census slices to `SingleCellExperiment`
+#'
+#' Convenience wrapper around `SOMAExperimentAxisQuery`, to build and execute a
+#' query, and return it as a `SingleCellExperiment` object.
+#'
+#' @param census The census object, usually returned by `cellxgene.census::open_soma()`.
+#' @param organism The organism to query, usually one of `Homo sapiens` or `Mus musculus`
+#' @param measurement_name The measurement object to query. Defaults to `RNA`.
+#' @param X_layers A character vector of X layers to add as assays in
+#'        the main experiment; may optionally be named to set the
+#'        name of the resulting assay (eg. ‘X_layers = c(counts =
+#'        "raw")’ will load in X layer “‘raw’” as assay “‘counts’”);
+#'        by default, loads in all X layers
+#' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
+#' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
+#' @param obs_column_names Columns to fetch for the `obs` data frame.
+#' @param var_value_filter Same as `obs_value_filter` but for `var`.
+#' @param var_coords Same as `obs_coords` but for `var`.
+#' @param var_column_names Columns to fetch for the `var` data frame.
+#' @param var_index Name of column in ‘var’ to add as feature names.
+#'
+#' @return A `SingleCellExperiment` object containing the sensus slice.
+#' @importFrom tiledbsoma SOMAExperimentAxisQuery
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' census <- open_soma()
+#' sce_obj <- get_single_cell_experiment(
+#'   census,
+#'   organism = "Homo sapiens",
+#'   obs_value_filter = "cell_type == 'leptomeningeal cell'",
+#'   var_value_filter = "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+#' )
+#'
+#' sce_obj
+#'
+#' census$close()
+#' }
+get_single_cell_experiment <- function(
+    census,
+    organism,
+    measurement_name = "RNA",
+    X_layers = c(counts = "raw"),
+    obs_value_filter = NULL,
+    obs_coords = NULL,
+    obs_column_names = NULL,
+    var_value_filter = NULL,
+    var_coords = NULL,
+    var_column_names = NULL,
+    var_index = "feature_id") {
+  expt_query <- tiledbsoma::SOMAExperimentAxisQuery$new(
+    get_experiment(census, organism),
+    measurement_name,
+    obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = obs_value_filter, coords = obs_coords),
+    var_query = tiledbsoma::SOMAAxisQuery$new(value_filter = var_value_filter, coords = var_coords)
+  )
+
+  return(expt_query$to_single_cell_experiment(
+    X_layers = X_layers,
+    obs_column_names = obs_column_names,
+    var_column_names = var_column_names,
+    var_index = var_index
   ))
 }
 

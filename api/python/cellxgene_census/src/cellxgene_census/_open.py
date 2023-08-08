@@ -25,6 +25,8 @@ from ._release_directory import (
 )
 from ._util import _uri_join
 
+DEFAULT_CENSUS_VERSION = "stable"
+
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
@@ -74,7 +76,7 @@ def _build_soma_tiledb_context_s3(
 
 def open_soma(
     *,
-    census_version: Optional[str] = "stable",
+    census_version: Optional[str] = DEFAULT_CENSUS_VERSION,
     mirror: Optional[str] = None,
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
@@ -83,11 +85,9 @@ def open_soma(
 
     Args:
         census_version:
-            The version of the Census, e.g. "latest".
-
+            The version of the Census, e.g. "latest" or "stable". Defaults to "stable".
         mirror:
             The mirror used to retrieve the Census. Defaults to the `us-west-2` mirror.
-
         uri:
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
@@ -103,7 +103,7 @@ def open_soma(
             or a version are specified.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     Examples:
         Open the default Census version, using a context manager which will automatically
@@ -177,7 +177,7 @@ def open_soma(
     return _open_soma(locator, context)
 
 
-def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> CensusLocator:
+def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> CensusLocator:
     """Open the named version of the census, and return the URI for the ``dataset_id``. This
     does not guarantee that the H5AD exists or is accessible to the user.
 
@@ -185,7 +185,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         dataset_id:
             The ``dataset_id`` of interest.
         census_version:
-            The census version.
+            The census version. Defaults to `stable`.
 
     Returns:
         A :py:obj:`CensusLocator` object that contains the URI and optional S3 region for the source H5AD.
@@ -194,7 +194,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
         KeyError: if either `dataset_id` or `census_version` do not exist.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     Examples:
         >>> cellxgene_census.get_source_h5ad_uri("cb5efdb0-f91c-4cbd-9ad4-9d4fa41c572d")
@@ -220,7 +220,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = "latest") -> C
     return locator
 
 
-def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = "latest") -> None:
+def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> None:
     """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
     file name.
 
@@ -230,14 +230,14 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
         to_path:
             The file name where the downloaded H5AD will be written.  Must not already exist.
         census_version:
-            The census version name. Defaults to `latest`.
+            The census version name. Defaults to `stable`.
 
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite
             an existing file), or is not a file.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     See Also:
         :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.

@@ -10,12 +10,7 @@ from typing import Optional
 
 import anndata
 import tiledbsoma as soma
-
-# TODO: waiting on https://github.com/single-cell-data/TileDB-SOMA/issues/872.
 from somacore.options import SparseDFCoord
-
-# TODO: rm this import and use `soma.AxisColumnNames` after https://github.com/single-cell-data/TileDB-SOMA/issues/791
-from somacore.query.query import AxisColumnNames
 
 from ._experiment import _get_experiment
 
@@ -29,7 +24,7 @@ def get_anndata(
     obs_coords: Optional[SparseDFCoord] = None,
     var_value_filter: Optional[str] = None,
     var_coords: Optional[SparseDFCoord] = None,
-    column_names: Optional[AxisColumnNames] = None,
+    column_names: Optional[soma.AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
     Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
@@ -63,7 +58,7 @@ def get_anndata(
         An :class:`anndata.AnnData` object containing the census slice.
 
     Lifecycle:
-        Experimental.
+        maturing
 
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")

@@ -8,7 +8,7 @@ from typing import Callable, Sequence
 import s3fs
 
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
-from .util import process_init, urlcat
+from .util import log_process_resource_status, process_init, urlcat
 
 
 def main() -> int:
@@ -115,6 +115,7 @@ def _do_steps(
         logging.critical("Caught exception, exiting", exc_info=True)
         return 1
 
+    log_process_resource_status(level=logging.INFO)
     return 0
 
 
@@ -195,27 +196,29 @@ def do_the_release(args: CensusBuildArgs) -> bool:
     """
     Perform the release
     """
+    from urllib.parse import urlparse
+
     from .release_manifest import CensusVersionDescription, make_a_release
+
+    parsed_url = urlparse(args.config.cellxgene_census_S3_path)
+    prefix = parsed_url.path.lstrip("/")
 
     release: CensusVersionDescription = {
         "release_date": None,
         "release_build": args.build_tag,
         "soma": {
-            "uri": urlcat(
-                args.config.cellxgene_census_S3_bucket, args.config.cellxgene_census_S3_prefix, args.build_tag, "soma/"
-            ),
-            "relative_uri": urlcat(args.config.cellxgene_census_S3_prefix, args.build_tag, "soma/"),
+            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "soma/"),
+            "relative_uri": urlcat(prefix, args.build_tag, "soma/"),
             "s3_region": "us-west-2",
         },
         "h5ads": {
-            "uri": urlcat(
-                args.config.cellxgene_census_S3_bucket, args.config.cellxgene_census_S3_prefix, args.build_tag, "h5ads/"
-            ),
-            "relative_uri": urlcat(args.config.cellxgene_census_S3_prefix, args.build_tag, "h5ads/"),
+            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "h5ads/"),
+            "relative_uri": urlcat(prefix, args.build_tag, "h5ads/"),
             "s3_region": "us-west-2",
         },
+        "do_not_delete": False,
     }
-    census_base_url = urlcat(args.config.cellxgene_census_S3_bucket, args.config.cellxgene_census_S3_prefix)
+    census_base_url = args.config.cellxgene_census_S3_path
     make_a_release(census_base_url, args.build_tag, release, make_latest=True, dryrun=args.config.dryrun)
     return True
 

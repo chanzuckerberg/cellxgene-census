@@ -7,7 +7,7 @@
 get_presence_matrix(census, organism, measurement_name = "RNA")
 }
 \arguments{
-\item{census}{The census object, usually returned by \code{cellxgene.census::open_soma()}.}
+\item{census}{The census object from \code{cellxgene.census::open_soma()}.}
 
 \item{organism}{The organism to query, usually one of \verb{Homo sapiens} or \verb{Mus musculus}}
 
@@ -20,4 +20,9 @@ is accessed with zero-based indexes since the join id's may be zero.
 }
 \description{
 Read the feature dataset presence matrix.
+}
+\examples{
+census <- open_soma()
+on.exit(census$close(), add = TRUE)
+print(get_presence_matrix(census, "Homo sapiens")$dim())
 }

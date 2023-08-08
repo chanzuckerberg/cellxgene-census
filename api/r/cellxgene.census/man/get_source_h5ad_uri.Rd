@@ -21,3 +21,6 @@ A list with \code{uri} and optional \code{s3_region}.
 \description{
 Locate source h5ad file for a dataset.
 }
+\examples{
+get_source_h5ad_uri("0895c838-e550-48a3-a777-dbcd35d30272")
+}
