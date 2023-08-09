@@ -55,6 +55,9 @@ def main() -> int:
             do_report_copy,
             do_log_copy,
         ],
+        "mock-build": [
+            do_mock_build,
+        ],
         "cleanup": [
             do_old_release_cleanup,
         ],
@@ -176,6 +179,18 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
     logging.info("Creating diff report (new build vs 'latest')")
     with open(reports_dir / f"census-diff-{args.build_tag}.txt", mode="w") as f:
         display_diff(uri=args.soma_path.as_posix(), previous_census_version="latest", file=f)
+
+    return True
+
+
+def do_mock_build(args: CensusBuildArgs) -> bool:
+    """Mock build. Used for testing"""
+    args.soma_path.mkdir(parents=True, exist_ok=False)
+    args.h5ads_path.mkdir(parents=True, exist_ok=False)
+    with open(f"{args.soma_path}/test.soma", "w") as f:
+        f.write("test")
+    with open(f"{args.h5ads_path}/test.h5ad", "w") as f:
+        f.write("test")
 
     return True
 
