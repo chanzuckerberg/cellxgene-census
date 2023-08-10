@@ -4,6 +4,7 @@ import os
 import pathlib
 import sys
 from typing import Callable, Sequence
+from urllib.parse import urlparse
 
 import s3fs
 
@@ -57,6 +58,7 @@ def main() -> int:
         ],
         "mock-build": [
             do_mock_build,
+            do_data_copy,
         ],
         "cleanup": [
             do_old_release_cleanup,
@@ -211,12 +213,11 @@ def do_the_release(args: CensusBuildArgs) -> bool:
     """
     Perform the release
     """
-    from urllib.parse import urlparse
 
     from .release_manifest import CensusVersionDescription, make_a_release
 
     parsed_url = urlparse(args.config.cellxgene_census_S3_path)
-    prefix = parsed_url.path.lstrip("/")
+    prefix = parsed_url.path
 
     release: CensusVersionDescription = {
         "release_date": None,

@@ -118,9 +118,27 @@ def _validate_release_info(
     if rls_info["release_build"] != rls_tag:
         raise ValueError("release_build must be the same as the release tag")
 
-    if rls_info["soma"] != {"uri": urlcat(census_base_url, rls_tag, "soma/"), "s3_region": CENSUS_AWS_REGION}:
+    from urllib.parse import urlparse
+
+    parsed_url = urlparse(census_base_url)
+    prefix = parsed_url.path
+
+    expected_soma_locator = {
+        "uri": urlcat(census_base_url, rls_tag, "soma/"),
+        "relative_uri": urlcat(prefix, rls_tag, "soma/"),
+        "s3_region": CENSUS_AWS_REGION,
+    }
+    expected_h5ads_locator = {
+        "uri": urlcat(census_base_url, rls_tag, "h5ads/"),
+        "relative_uri": urlcat(prefix, rls_tag, "h5ads/"),
+        "s3_region": CENSUS_AWS_REGION,
+    }
+
+    print(rls_info["soma"], expected_soma_locator)
+
+    if rls_info["soma"] != expected_soma_locator:
         raise ValueError(f"Release record for {rls_tag} contained unexpected SOMA locator")
-    if rls_info["h5ads"] != {"uri": urlcat(census_base_url, rls_tag, "h5ads/"), "s3_region": CENSUS_AWS_REGION}:
+    if rls_info["h5ads"] != expected_h5ads_locator:
         raise ValueError(f"Release record for {rls_tag} contained unexpected H5AD locator")
 
 
