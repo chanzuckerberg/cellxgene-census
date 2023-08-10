@@ -17,35 +17,76 @@ TAG_100D_OLD = tag_days_old(100)
 TAG_LTS_CURRENT_STABLE = tag_days_old(1000)
 TAG_LTS_PREVIOUS_STABLE = tag_days_old(1001)
 
-S3_PREFIX = "s3://bucket/path/"
+S3_URI = "s3://bucket/path/"
+S3_PREFIX = "/path/"
 
 RELEASE_MANIFEST: CensusReleaseManifest = {
     "latest": TAG_NOW,
     TAG_NOW: {
         "release_build": TAG_NOW,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_NOW}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_NOW}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_NOW}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_NOW}/soma",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_NOW}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_NOW}/h5ads",
+            "s3_region": "us-west-2",
+        },
     },
     TAG_10D_OLD: {
         "release_build": TAG_10D_OLD,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_10D_OLD}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_10D_OLD}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_10D_OLD}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_10D_OLD}/soma",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_10D_OLD}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_10D_OLD}/h5ads",
+            "s3_region": "us-west-2",
+        },
     },
     TAG_100D_OLD: {
         "release_build": TAG_100D_OLD,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_100D_OLD}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_100D_OLD}/soma",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_100D_OLD}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_100D_OLD}/h5ads",
+            "s3_region": "us-west-2",
+        },
     },
     "stable": TAG_LTS_CURRENT_STABLE,
     TAG_LTS_CURRENT_STABLE: {  # mock LTS release with an alias, but without a do_not_delete flag
         "release_build": TAG_LTS_CURRENT_STABLE,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_LTS_CURRENT_STABLE}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/soma",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_LTS_CURRENT_STABLE}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/h5ads",
+            "s3_region": "us-west-2",
+        },
     },
     TAG_LTS_PREVIOUS_STABLE: {  # mock LTS release lacking an alias, but with a do_not_delete flag
         "release_build": TAG_LTS_PREVIOUS_STABLE,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_LTS_PREVIOUS_STABLE}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/soma",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_LTS_PREVIOUS_STABLE}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/h5ads",
+            "s3_region": "us-west-2",
+        },
         "do_not_delete": True,
     },
 }
@@ -125,11 +166,11 @@ def test_remove_releases_older_than(
                 "latest": TAG_NOW,
                 TAG_NOW: {
                     "release_build": TAG_NOW,
-                    "soma": {"uri": f"{S3_PREFIX}{TAG_NOW}/soma/"},
-                    "h5ads": {"uri": f"{S3_PREFIX}{TAG_NOW}/h5ads/oops/"},
+                    "soma": {"uri": f"{S3_URI}{TAG_NOW}/soma/"},
+                    "h5ads": {"uri": f"{S3_URI}{TAG_NOW}/h5ads/oops/"},
                 },
             },
-            dict(days=0, census_base_url=S3_PREFIX, dryrun=False),
+            dict(days=0, census_base_url=S3_URI, dryrun=False),
             ValueError,
         ),
     ],
