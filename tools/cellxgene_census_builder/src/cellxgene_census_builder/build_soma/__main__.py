@@ -4,7 +4,7 @@ import pathlib
 import sys
 from datetime import datetime
 
-from ..build_state import CENSUS_CONFIG_DEFAULTS, CensusBuildArgs, CensusBuildConfig
+from ..build_state import CensusBuildArgs, CensusBuildConfig
 from ..util import log_process_resource_status, process_init
 from .build_soma import build
 from .validate_soma import validate
@@ -32,6 +32,7 @@ def main() -> int:
 
 
 def create_args_parser() -> argparse.ArgumentParser:
+    config = CensusBuildConfig()
     parser = argparse.ArgumentParser(prog="cellxgene_census_builder.build_soma")
     parser.add_argument("uri", type=str, help="Census top-level URI")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
@@ -45,7 +46,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max_worker_processes",
         type=int,
-        default=CENSUS_CONFIG_DEFAULTS["max_worker_processes"],
+        default=config.max_worker_processes,
         help="Limit on number of worker processes",
     )
     parser.add_argument(
@@ -76,7 +77,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     build_parser.add_argument(
         "--dataset_id_blocklist_uri",
         help="Dataset blocklist URI",
-        default=CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"],
+        default=config.dataset_id_blocklist_uri,
     )
     # hidden option for testing by devs. Will process only the first 'n' datasets
     build_parser.add_argument("--test-first-n", type=int)

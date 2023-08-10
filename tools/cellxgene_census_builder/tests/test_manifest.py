@@ -5,7 +5,7 @@ from unittest.mock import patch
 import fsspec
 import pytest
 from cellxgene_census_builder.build_soma.manifest import load_manifest
-from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
+from cellxgene_census_builder.build_state import CensusBuildConfig
 
 
 def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
@@ -176,9 +176,11 @@ def test_blocklist_alive_and_well() -> None:
     3. The file "looks like" a block list
     """
 
-    assert CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
+    config = CensusBuildConfig()
 
-    dataset_id_blocklist_uri = CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
+    assert config.dataset_id_blocklist_uri
+
+    dataset_id_blocklist_uri = config.dataset_id_blocklist_uri
 
     # test for existance by reading it. NOTE: if the file moves, this test will fail until
     # the new file location is merged to main.
