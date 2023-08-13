@@ -42,7 +42,7 @@ dependencies= [
     "Cython", # required by owlready2
     "wheel",  # required by owlready2
     "owlready2==0.38",
-    "gitpython==3.1.31",
+    "gitpython==3.1.32",
     "attrs==23.1.0",
     "psutil==5.9.5",
     "pyyaml==6.0",
