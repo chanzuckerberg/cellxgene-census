@@ -140,3 +140,5 @@ temp
 .Rproj.user
 .Rhistory
 
+# vscode
+.vscode
