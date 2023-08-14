@@ -81,10 +81,10 @@ CXG_OBS_TERM_COLUMNS = {
 }
 CENSUS_OBS_STATS_COLUMNS = {
     # Columns computed during the Census build and written to the Census obs dataframe.
-    "raw_sum": pa.float32(),
+    "raw_sum": pa.float64(),
     "nnz": pa.int64(),
-    "raw_mean_nnz": pa.float32(),
-    "raw_variance_nnz": pa.float32(),
+    "raw_mean_nnz": pa.float64(),
+    "raw_variance_nnz": pa.float64(),
     "n_measured_vars": pa.int64(),
 }
 CENSUS_OBS_TERM_COLUMNS = {
@@ -265,6 +265,7 @@ CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG = {
         },
     }
 }
+CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR = 1.0 / 2**18
 CENSUS_X_LAYERS_PLATFORM_CONFIG = {
     "raw": {
         **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG,
@@ -278,7 +279,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
                         "filters": [
                             {
                                 "_type": "FloatScaleFilter",
-                                "factor": 1.0 / 2**18,
+                                "factor": CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR,
                                 "offset": 0.5,
                                 "bytewidth": 4,
                             },

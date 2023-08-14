@@ -17,11 +17,11 @@ def get_obs_stats(
     if not isinstance(raw_X, sparse.csr_matrix) and not isinstance(raw_X, sparse.csc_matrix):
         raise NotImplementedError(f"get_obs_stats: unsupported type {type(raw_X)}")
 
-    raw_sum = raw_X.sum(axis=1).A1
+    raw_sum = raw_X.sum(axis=1, dtype=np.float64).A1
     nnz = raw_X.getnnz(axis=1)
     raw_mean_nnz = raw_sum / nnz
     raw_variance_nnz = _var(raw_X, axis=1, ddof=1)
-    n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0) > 0).sum(), dtype=np.int64)
+    n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0, dtype=np.float64) > 0).sum(), dtype=np.int64)
 
     return pd.DataFrame(
         data={
@@ -46,7 +46,7 @@ def get_var_stats(
     else:
         raise NotImplementedError(f"get_var_stats: unsupported array type {type(raw_X)}")
 
-    n_measured_obs = raw_X.shape[0] * (raw_X.sum(axis=0) > 0).A1
+    n_measured_obs = raw_X.shape[0] * (raw_X.sum(axis=0, dtype=np.float64) > 0).A1
 
     return pd.DataFrame(
         data={
@@ -87,13 +87,13 @@ def _var_ndarray(data: npt.NDArray[np.float32], ddof: int) -> float:
             numba.types.Array(numba.float32, 1, "C", readonly=True),
             numba.types.Array(numba.int32, 1, "C", readonly=True),
             numba.int64,
-            numba.float32[:],
+            numba.float64[:],
         ),
         numba.void(
             numba.types.Array(numba.float32, 1, "C", readonly=True),
             numba.types.Array(numba.int64, 1, "C", readonly=True),
             numba.int64,
-            numba.float32[:],
+            numba.float64[:],
         ),
     ],
     nopython=True,
@@ -103,7 +103,7 @@ def _var_matrix(
     data: npt.NDArray[np.float32],
     indptr: npt.NDArray[np.int32],
     ddof: int,
-    out: npt.NDArray[np.float32],
+    out: npt.NDArray[np.float64],
 ) -> None:
     n_elem = len(indptr) - 1
     for i in range(n_elem):
@@ -114,7 +114,7 @@ def _var(
     matrix: Union[sparse.csr_matrix, sparse.csc_matrix],
     axis: int = 0,
     ddof: int = 1,
-) -> npt.NDArray[np.float32]:
+) -> npt.NDArray[np.float64]:
     if axis == 0:
         n_elem, axis_len = matrix.shape
         matrix = matrix.tocsc()
@@ -122,6 +122,6 @@ def _var(
         axis_len, n_elem = matrix.shape
         matrix = matrix.tocsr()
 
-    out = np.empty((axis_len,), dtype=np.float32)
+    out = np.empty((axis_len,), dtype=np.float64)
     _var_matrix(matrix.data, matrix.indptr, ddof, out)
     return out
