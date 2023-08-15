@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 import urllib.parse
 from typing import List, Tuple, cast
 
@@ -46,7 +47,20 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
     dataset_path = f"{asset_dir}/{dataset_file_name}"
 
     logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) to {dataset_path}")
-    fs.get_file(dataset.dataset_asset_h5ad_uri, dataset_path)
+
+    sleep_for_secs = 10
+    last_error: aiohttp.ClientPayloadError | None = None
+    for attempt in range(4):
+        try:
+            fs.get_file(dataset.dataset_asset_h5ad_uri, dataset_path)
+            break
+        except aiohttp.ClientPayloadError as e:
+            logging.error(f"Fetch of {dataset_path} failed: {str(e)}")
+            last_error = e
+            time.sleep(2**attempt * sleep_for_secs)
+    else:
+        assert last_error is not None
+        raise last_error
 
     # verify file size is as expected, if we know the size a priori
     assert (dataset.asset_h5ad_filesize == -1) or (dataset.asset_h5ad_filesize == os.path.getsize(dataset_path))
