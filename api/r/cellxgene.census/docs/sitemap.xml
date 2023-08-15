@@ -10,6 +10,9 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/census_compute_over_X.html</loc>
+  </url>
+  <url>
     <loc>/articles/census_dataset_presence.html</loc>
   </url>
   <url>
@@ -23,6 +26,9 @@
   </url>
   <url>
     <loc>/articles/comp_bio_data_integration.html</loc>
+  </url>
+  <url>
+    <loc>/articles/comp_bio_normalizing_full_gene_sequencing.html</loc>
   </url>
   <url>
     <loc>/articles/comp_bio_summarize_axis_query.html</loc>
