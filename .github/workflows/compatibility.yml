@@ -1,0 +1,28 @@
+name: Python cellxgene_census package unit tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - "api/r/**"
+  push:
+    branches: [main]
+
+jobs:
+  unit_tests_python_api:
+    strategy:
+      matrix:
+        census-version: ["1.0.0", "1.1.0", "1.2.0"]
+
+    runs-on: ${{matrix.census-version}}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+      - name: Install dependencies (including experimental)
+        run: |
+          python -m pip install -U pip setuptools wheel
+          pip install cellxgene-census==${{ matrix.census-version }}
+      - name: Test with pytest
+        run: |
+          PYTHONPATH=. pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/test_open.py
