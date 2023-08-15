@@ -55,7 +55,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
             fs.get_file(dataset.dataset_asset_h5ad_uri, dataset_path)
             break
         except aiohttp.ClientPayloadError as e:
-            logging.error(f"Fetch of {dataset_path} failed: {str(e)}")
+            logging.error(f"Fetch of {dataset.dataset_id} at {dataset_path} failed: {str(e)}")
             last_error = e
             time.sleep(2**attempt * sleep_for_secs)
     else:
