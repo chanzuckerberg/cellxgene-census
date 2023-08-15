@@ -32,7 +32,7 @@ This tutorial demonstrates basic use of the `census_datasets` data frame that co
 
 Each Census contains a top-level data frame itemizing the datasets contained therein. You can read this `SOMADataFrame` into an [Arrow Table](https://arrow.apache.org/docs/r/reference/Table.html):
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 library("cellxgene.census")
 census <- open_soma()
 census_datasets <- census$get("census_info")$get("datasets")$read()$concat()
