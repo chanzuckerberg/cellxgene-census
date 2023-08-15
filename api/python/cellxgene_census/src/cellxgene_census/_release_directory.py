@@ -6,14 +6,10 @@
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
-from typing import Dict, Optional, Union, cast
+from typing import Dict, Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import TypedDict
-
-from ._util import _uri_join
-
-SUPPORTED_PROVIDERS = ["S3", "file"]
 
 """
 The following types describe the expected directory of Census builds, used
@@ -23,9 +19,9 @@ CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-
 CensusLocator = TypedDict(
     "CensusLocator",
     {
-        "uri": str,  # resource URI
+        "uri": str,  # [deprecated: only used in census < 1.6.0] absolute resource URI.
         "relative_uri": str,  # resource URI (relative)
-        "s3_region": Optional[str],  # if an S3 URI, has optional region
+        "s3_region": Optional[str],  # [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
     },
 )
 CensusVersionDescription = TypedDict(
@@ -40,12 +36,19 @@ CensusVersionDescription = TypedDict(
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
+"""
+A provider identifies a storage medium for the Census, which can either be a cloud provider or a local file.
+A value of "unknown" can be specified if the provider isn't specified - the API will try to determine
+the correct configuration based on the URI.
+"""
+Provider = Literal["S3", "unknown"]
+
 CensusMirrorName = str  # name of the mirror
 CensusMirror = TypedDict(
     "CensusMirror",
     {
-        "provider": str,  # provider of the mirror. Only S3 is supported in this version.
-        "base_uri": str,  # name of the bucket or resource
+        "provider": Provider,  # provider of the mirror.
+        "base_uri": str,  # base URI for the mirror location, e.g. s3://cellxgene-data-public/
         "region": Optional[str],  # region of the bucket or resource
     },
 )
@@ -78,7 +81,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         ``CensusVersionDescription`` - a dictionary containing a description of the release.
 
     Raises:
-        KeyError: if unknown census_version value.
+        ValueError: if unknown census_version value.
 
     Lifecycle:
         maturing
@@ -98,7 +101,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     census_directory = get_census_version_directory()
     description = census_directory.get(census_version, None)
     if description is None:
-        raise KeyError(f"Unable to locate Census version: {census_version}.")
+        raise ValueError(f"Unable to locate Census version: {census_version}.")
     return description
 
 
@@ -162,29 +165,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
     return cast(Dict[CensusVersionName, CensusVersionDescription], directory)
 
 
-def get_census_mirrors() -> CensusMirrors:
+def _get_census_mirrors() -> CensusMirrors:
     response = requests.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL)
     response.raise_for_status()
     return cast(CensusMirrors, response.json())
-
-
-def _assert_mirror_supported(mirror: CensusMirror) -> None:
-    """
-    Verifies if the mirror is supported by this version of the census.
-    This method provides a proper error message in case an old version of the census
-    tries to connect to an unsupported mirror.
-    """
-    if mirror["provider"] not in SUPPORTED_PROVIDERS:
-        raise ValueError(f"Unsupported mirror provider: {mirror['provider']}. Try upgrading the census package.")
-
-
-def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> ResolvedCensusLocator:
-    _assert_mirror_supported(mirror)
-
-    if locator.get("relative_uri"):
-        uri = _uri_join(mirror["base_uri"], locator["relative_uri"])
-        region = mirror["region"]
-    else:
-        uri = locator["uri"]
-        region = locator.get("s3_region")
-    return ResolvedCensusLocator(uri=uri, region=region, provider=mirror["provider"])

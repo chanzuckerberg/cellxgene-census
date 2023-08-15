@@ -39,13 +39,6 @@ def test_open_soma_stable(requests_mock: rm.Mocker) -> None:
         for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
             assert census.context.tiledb_ctx.config()[k] == str(v)
 
-    # TODO: After the first "stable" build is available, this commented-out code can be replace this above block
-    # and it should always be the default
-    # with cellxgene_census.open_soma() as default_census:
-    #     assert default_census.uri == census.uri
-    #     for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
-    #         assert census.context.tiledb_ctx.config()[k] == str(v)
-
 
 @pytest.mark.live_corpus
 def test_open_soma_latest(requests_mock: rm.Mocker) -> None:
@@ -164,7 +157,7 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
 def test_open_soma_rejects_non_s3_mirror(requests_mock: rm.Mocker) -> None:
     mock_mirrors = {
         "default": "test-mirror",
-        "test-mirror": {"provider": "GCS", "bucket": "gcs://mirror-bucket-1/"},
+        "test-mirror": {"provider": "GCS", "base_uri": "gcs://mirror-bucket-1/"},
     }
     requests_mock.real_http = True
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)

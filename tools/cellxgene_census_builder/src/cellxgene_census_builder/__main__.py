@@ -78,8 +78,10 @@ def main() -> int:
     }
 
     # The build command is set via the CENSUS_BUILD_COMMAND environment variable.
-    # If the variable is not defined, perform a full build by default.
-    command = os.getenv("CENSUS_BUILD_COMMAND", "full-build")
+    command = os.getenv("CENSUS_BUILD_COMMAND")
+    if command is None:
+        logging.critical("A census command must be specified in the CENSUS_BUILD_COMMAND environment variable.")
+        return 1
 
     # Used for testing.
     if command == "pass":

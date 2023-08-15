@@ -15,8 +15,8 @@ def main() -> int:
     cli_args = cli_parser.parse_args()
     assert cli_args.subcommand in ["build", "validate"]
 
-    config = CensusBuildConfig(**cli_args.__dict__)
-    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=config)
+    default_config = CensusBuildConfig(**cli_args.__dict__)
+    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=default_config)
     process_init(args)
     logging.info(args)
 
@@ -32,7 +32,7 @@ def main() -> int:
 
 
 def create_args_parser() -> argparse.ArgumentParser:
-    config = CensusBuildConfig()
+    default_config = CensusBuildConfig()
     parser = argparse.ArgumentParser(prog="cellxgene_census_builder.build_soma")
     parser.add_argument("uri", type=str, help="Census top-level URI")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
@@ -46,7 +46,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max_worker_processes",
         type=int,
-        default=config.max_worker_processes,
+        default=default_config.max_worker_processes,
         help="Limit on number of worker processes",
     )
     parser.add_argument(
@@ -77,7 +77,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     build_parser.add_argument(
         "--dataset_id_blocklist_uri",
         help="Dataset blocklist URI",
-        default=config.dataset_id_blocklist_uri,
+        default=default_config.dataset_id_blocklist_uri,
     )
     # hidden option for testing by devs. Will process only the first 'n' datasets
     build_parser.add_argument("--test-first-n", type=int)
