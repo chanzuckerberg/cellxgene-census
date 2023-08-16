@@ -146,7 +146,9 @@ while (!tables$read_complete()) {
   n_cells_part$cell_id <- NULL
 
   # fold those into n_cells_grouped
-  n_cells_grouped <- bind_rows(n_cells_grouped, n_cells_part) %>%
+  n_cells_grouped <- n_cells_part %>%
+                     select(-cell_id) %>%
+                     bind_rows(n_cells_grouped) %>%
                       group_by(dataset_id, gene_id) %>%
                       summarise(n_cells = sum(n_cells)) %>%
                       ungroup()
