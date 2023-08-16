@@ -51,7 +51,7 @@ Key points:
 ```{r,warning=FALSE,message=FALSE}
 library("tiledbsoma")
 library("cellxgene.census")
-census <- cellxgene.census::open_soma()
+census <- open_soma()
 
 query <- census$get("census_data")$get("mus_musculus")$axis_query(
   measurement_name = "RNA",
