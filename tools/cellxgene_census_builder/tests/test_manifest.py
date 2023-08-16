@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import uuid
 from unittest.mock import patch
@@ -104,7 +105,9 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
         assert manifest[1].asset_h5ad_filesize == 456
 
 
-def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(empty_blocklist: str) -> None:
+def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
+    caplog: pytest.LogCaptureFixture, empty_blocklist: str
+) -> None:
     """
     `load_manifest` should exclude datasets that do not have a current schema version.
     """
@@ -132,11 +135,18 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(empty_blockli
             },
         ]
 
-        with pytest.raises(RuntimeError, match=r"unsupported schema version"):
-            load_manifest(None, empty_blocklist)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(RuntimeError, match=r"unsupported schema version"):
+                load_manifest(None, empty_blocklist)
+
+            for record in caplog.records:
+                assert record.levelname == "ERROR"
+                assert "unsupported schema version" in record.msg
 
 
-def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist: str) -> None:
+def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
+    caplog: pytest.LogCaptureFixture, empty_blocklist: str
+) -> None:
     """
     `load_manifest` should raise error if it finds datasets without assets
     """
@@ -164,8 +174,13 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist
             },
         ]
 
-        with pytest.raises(RuntimeError):
-            load_manifest(None, empty_blocklist)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(RuntimeError, match=r"unable to find H5AD asset"):
+                load_manifest(None, empty_blocklist)
+
+            for record in caplog.records:
+                assert record.levelname == "ERROR"
+                assert "unable to find H5AD asset" in record.msg
 
 
 def test_blocklist_alive_and_well() -> None:
