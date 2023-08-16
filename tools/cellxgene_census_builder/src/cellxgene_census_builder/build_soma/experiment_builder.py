@@ -36,6 +36,7 @@ from .globals import (
     CENSUS_OBS_TERM_COLUMNS,
     CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TERM_COLUMNS,
+    CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR,
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
@@ -773,6 +774,23 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> 
     """
     experiment_uri, obs_joinid_start, n, raw_sum = args
     logging.info(f"Write X normalized - starting block {obs_joinid_start}")
+
+    """
+    Adjust normlized layer to never encode zero-valued cells where the raw count
+    value is greater than zero. In our current schema configuration, FloatScaleFilter
+    reduces the precision of each value, storing ``round((raw_float - offset) / factor)``
+    as a four byte int.
+
+    To ensure non-zero raw values, which would _normally_ scale to zero under
+    these conditions, we add the smallest possible sigma to each value (note that
+    zero valued coordinates are not stored, as this is a sparse array).
+
+    Reducing the above transformation, and assuming float32 values, the smallest sigma is
+    1/2 of the scale factor (bits of precision). Accounting for IEEE float precision,
+    this reduces to:
+    """
+    sigma = 0.5 * (CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR + np.finfo(np.float32).epsneg)
+
     with soma.open(
         urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
     ) as X_raw:
@@ -791,13 +809,14 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> 
                         (
                             X_tbl["soma_dim_0"],
                             X_tbl["soma_dim_1"],
-                            X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]],
+                            X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]] + sigma,
                         )
                         for X_tbl in lazy_reader
                     ),
                     pool=pool,
                 )
                 for soma_dim_0, soma_dim_1, soma_data in lazy_divider:
+                    assert np.all(soma_data > 0.0), "Found unexpected zero value in raw layer data"
                     X_normalized.write(
                         pa.Table.from_arrays(
                             [soma_dim_0, soma_dim_1, soma_data],
