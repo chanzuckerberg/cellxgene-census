@@ -1,4 +1,4 @@
-# CZ CELLxGENE Discover Census Schema 
+# CZ CELLxGENE Discover Census Schema
 
 **Version**: 1.1.0
 
@@ -9,7 +9,6 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## Census overview
 
 The CZ CELLxGENE Discover Census, hereafter referred as Census, is a versioned data object and API for most of the single-cell data hosted at [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). To learn more about the Census visit the `chanzuckerberg/cellxgene-census` [github repository](https://github.com/chanzuckerberg/cellxgene-census)
-
 
 To better understand this document the reader should be familiar with the [CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md) and [SOMA](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md).
 
@@ -29,19 +28,17 @@ The following terms are used throughout this document:
 The Census Schema follows [Semver](https://semver.org/) for its versioning:
 
 * Major: any schema changes that make the Census incompatible with the Census API or SOMA API. Examples:
-	* Column deletion in Census `obs`
-	* Addition of new modality
+  * Column deletion in Census `obs`
+  * Addition of new modality
 * Minor: schema additions that are compatible with public API(s) and SOMA. Examples:
-	* New column to Census `obs` is added
-	* tissue/tissue_general mapping changes
+  * New column to Census `obs` is added
+  * tissue/tissue_general mapping changes
 * Patch: schema fixes. Examples:
-	* Editorial schema changes
-
+  * Editorial schema changes
 
 Changes MUST be documented in the schema [Changelog](#changelog) at the end of this document.
 
 Census data releases are versioned separately from the schema.
-
 
 ## Schema
 
@@ -57,7 +54,7 @@ The Census MUST only contain features (genes) with a [`feature_reference`](https
 
 #### Multi-species data constraints
 
-Per the CELLxGENE dataset schema, [multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#general-requirements), as defined in [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id) and [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference) respectively. 
+Per the CELLxGENE dataset schema, [multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#general-requirements), as defined in [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id) and [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference) respectively.
 
 For a given multi-species dataset, the table below shows all possible combinations of organisms for both observations and features. For each combination, inclusion criteria for the Census is provided.
 
@@ -222,7 +219,7 @@ an `assay_ontology_term_id` value from the list below:
 
 Additional Notes:
 
-* EFO:0030026 "sci-Plex" is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include. 
+* EFO:0030026 "sci-Plex" is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include.
 * EFO:0009920 and EFO:0030062 "Slide-seq" and "Slide-seqV2", respectively, are not included as coverage is low compared to other assays and data lacks context without spatial metadata not included in CELLxGENE dataset schema.
 
 #### Data matrix types
@@ -272,28 +269,28 @@ Census metadata MUST be stored as a `SOMADataFrame` with two columns:
 </table>
 
 This `SOMADataFrame` MUST have the following rows:
- 
+
 1. Census schema version:
-	1. label: `"census_schema_version"`
-	1. value: Semver schema version.
-1. Census build date:
-	1. label: `"census_build_date"`
-	1. value: The date this Census was built in ISO 8601 date format
-1. Dataset schema version:
-	1. label: `"dataset_schema_version"`
-	1. value: The CELLxGENE Discover schema version of the source H5AD files.
-1. Total number of cells included in this Census build:
-	1. label: `"total_cell_count"`
-	1. value: Cell count
-1. Unique number of cells included in this Census build (is_primary_data == True)
-	1. label: `"unique_cell_count"`
-	1. value: Cell count
-1. Number of human donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
-	1. label: `"number_donors_homo_sapiens"`
-	1. value: Donor count
-1. Number of mouse donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
-	1. label: `"number_donors_mus_musculus"`
-	1. value: Donor count
+   1. label: `"census_schema_version"`
+   2. value: Semver schema version.
+2. Census build date:
+   1. label: `"census_build_date"`
+   2. value: The date this Census was built in ISO 8601 date format
+3. Dataset schema version:
+   1. label: `"dataset_schema_version"`
+   2. value: The CELLxGENE Discover schema version of the source H5AD files.
+4. Total number of cells included in this Census build:
+   1. label: `"total_cell_count"`
+   2. value: Cell count
+5. Unique number of cells included in this Census build (is_primary_data == True)
+   1. label: `"unique_cell_count"`
+   2. value: Cell count
+6. Number of human donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
+   1. label: `"number_donors_homo_sapiens"`
+   2. value: Donor count
+7. Number of mouse donors included in this Census build. Donors are guaranteed to be unique within datasets, not across all Census.
+   1. label: `"number_donors_mus_musculus"`
+   2. value: Donor count
 
 An example of this `SOMADataFrame` is shown below:
 
@@ -430,7 +427,7 @@ Summary cell counts grouped by organism and relevant cell metadata MUST be model
   <tr>
     <td>ontology_term_id</td>
     <td>string</td>
-    <td>ID associated to instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td> 
+    <td>ID associated to instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -672,11 +669,11 @@ For each organism the `SOMAExperiment` MUST contain the following:
 
 * Cell metadata – `census_obj["census_data"][organism].obs` – `SOMADataFrame`
 * Data  –  `census_obj["census_data"][organism].ms` – `SOMACollection`. This `SOMACollection` MUST only contain one `SOMAMeasurement` in `census_obj["census_data"][organism].ms["RNA"]` with the following:
-	* Matrix  data –  `census_obj["census_data"][organism].ms["RNA"].X` – `SOMACollection`. It MUST contain exactly one layer: 
-		* Count matrix – `census_obj["census_data"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
-		* Normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
-	* Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
-	* Feature dataset presence matrix – `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
+  * Matrix  data –  `census_obj["census_data"][organism].ms["RNA"].X` – `SOMACollection`. It MUST contain exactly one layer:
+    * Count matrix – `census_obj["census_data"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
+    * Normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
+  * Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMAIndexedDataFrame`
+  * Feature dataset presence matrix – `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]` – `SOMASparseNDArray`
 
 #### Matrix Data, count (raw) matrix – `census_obj["census_data"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
 
@@ -694,7 +691,7 @@ as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
 
 The Census MUST only contain features with a [`feature_biotype`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_biotype) value of "gene".
 
-The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema. 
+The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema.
 
 The following columns MUST be included:
 
@@ -884,31 +881,33 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </tbody>
 </table>
 
-
 ## Changelog
 
 ### Version 1.1.0
+
 * Adds `dataset_version_id` to "Census table of CELLxGENE Discover datasets – `census_obj["census_info"]["datasets"]`"
 * Add `X["normalized"]` layer
 * Add `nnz` and `n_measured_obs` columns to `ms["RNA"].var` dataframe
 * Add `nnz`, `n_measured_vars`, `raw_sum`, `raw_mean_nnz` and `raw_variance_nnz` columns to `obs` dataframe
 
 ### Version 1.0.0
+
 * Updates text to reflect official name: CZ CELLxGENE Discover Census.
 * Updates `census["census_info"]["summary"]` to reflect official name in the column `label`:
-   * From `"cell_census_build_date"` to `"census_build_date"`.
-   * From `"cell_census_schema_version"` to `"census_schema_version"`.
+  * From `"cell_census_build_date"` to `"census_build_date"`.
+  * From `"cell_census_schema_version"` to `"census_schema_version"`.
 * Adds the following row to `census["census_info"]["summary"]`:
-   * `"dataset_schema_version"`
-
+  * `"dataset_schema_version"`
 
 ### Version 0.1.1
+
 * Adds clarifying text for "Feature Dataset Presence Matrix"
 
 ### Version 0.1.0
+
 * The "Dataset Presence Matrix" was renamed to "Feature Dataset Presence Matrix" and moved from  `census_obj["census_data"][organism].ms["RNA"].varp["dataset_presence_matrix"]`  to `census_obj["census_data"][organism].ms["RNA"]["feature_dataset_presence_matrix"]`.
 * Editorial: changes all double quotes in the schema to ASCII quotes 0x22.
 
 ### Version 0.0.1
-* Initial Census schema is published.
 
+* Initial Census schema is published.

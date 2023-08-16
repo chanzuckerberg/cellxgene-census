@@ -24,9 +24,9 @@ Provide a description of your system and the software versions.
 
 - Machine
 - OS
-* Software versions: 
-    - Python user: `pip list`
-    - R user: `sessionInfo()`
+- Software versions:
+  - Python user: `pip list`
+  - R user: `sessionInfo()`
 
 ## Additional context
 

@@ -36,7 +36,7 @@ You can also combine them, e.g.,
 
 > pytest -m 'not live_corpus' --expensive --experimental
 
-# Acceptance (expensive) tests
+## Acceptance (expensive) tests
 
 These tests are periodically run, and are not part of CI due to their overhead.
 
@@ -52,13 +52,13 @@ When run, please record the results in this file (below) and commit the change t
 - any run notes
 - full output of: `pytest -v --durations=0 --expensive ./api/python/cellxgene_census/tests/`
 
-## 2023-07-26
+### 2023-07-26
 
 - Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux 5.19.0-1028-aws #29~22.04.1-Ubuntu SMP Tue Jun 20 19:12:11 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
 
-```
+```python
 >>> import cellxgene_census, tiledbsoma
 >>> tiledbsoma.show_package_versions()
 tiledbsoma.__version__        1.2.7
@@ -71,7 +71,7 @@ OS version                    Linux 5.19.0-1028-aws
 
 **Pytest output:**
 
-```
+```text
 ============================= test session starts ==============================
 platform linux -- Python 3.10.6, pytest-7.1.3, pluggy-1.0.0 -- /home/ubuntu/venv/bin/python
 cachedir: .pytest_cache
@@ -237,12 +237,13 @@ api/python/cellxgene_census/tests/experimental/pp/test_stats.py::test_mean_varia
 =============== 72 passed, 202 deselected in 14584.03s (4:03:04) ===============
 ```
 
-## 2023-06-23
+### 2023-06-23
 
 - Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux 5.19.0-1025-aws #26~22.04.1-Ubuntu SMP Mon Apr 24 01:58:15 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
-```
+
+```python
 >>> import cellxgene_census, tiledbsoma
 >>> tiledbsoma.show_package_versions()
 tiledbsoma.__version__        1.2.5
@@ -250,7 +251,7 @@ TileDB-Py tiledb.version()    (0, 21, 5)
 TileDB core version           2.15.4
 libtiledbsoma version()       libtiledb=2.15.2
 python version                3.10.6.final.0
-OS version  
+OS version
 >>> cellxgene_census.__version__
 '1.2.1'
 >>> cellxgene_census.get_census_version_description('latest')
@@ -259,7 +260,7 @@ OS version
 
 **Pytest output:**
 
-```
+```text
 ============================= test session starts ==============================
 platform linux -- Python 3.10.6, pytest-7.4.0, pluggy-1.2.0 -- /home/ubuntu/venv/bin/python3
 cachedir: .pytest_cache
@@ -420,12 +421,13 @@ test_util.py::test_uri_join PASSED                                       [100%]
 =============== 69 passed, 111 deselected in 15040.59s (4:10:40) ===============
 ```
 
-## 2023-05-16
+### 2023-05-16
 
 - Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux 5.19.0-1022-aws #23~22.04.1-Ubuntu SMP Fri Mar 17 15:38:24 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
-```
+
+```python
 >>> import cellxgene_census, tiledbsoma
 >>> tiledbsoma.show_package_versions()
 tiledbsoma.__version__        1.2.3
@@ -442,7 +444,7 @@ OS version                    Linux 5.19.0-1022-aws
 
 **Pytest output:**
 
-```
+```text
 ============================= test session starts ==============================
 platform linux -- Python 3.10.6, pytest-7.3.1, pluggy-1.0.0 -- /home/ubuntu/venv-cellxgene-census/bin/python3
 cachedir: .pytest_cache
@@ -565,15 +567,15 @@ tests/test_util.py::test_uri_join PASSED                                 [100%]
 ======================= 51 passed in 10696.20s (2:58:16) =======================
 ```
 
-## 2023-03-29
+### 2023-03-29
 
-**Config**
+**Config:**
 
 - Host: EC2 instance type: `r6id.32xlarge`, all nvme mounted as swap.
 - Uname: Linux bruce.aegea 5.15.0-1033-aws #37~20.04.1-Ubuntu SMP Fri Mar 17 11:39:30 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 - Python & census versions:
 
-```
+```python
 In [1]: import cell_census, tiledbsoma
 
 In [2]: tiledbsoma.show_package_versions()
@@ -585,7 +587,7 @@ python version                3.9.16.final.0
 OS version                    Linux 5.15.0-1033-aws
 
 In [3]: cell_census.get_census_version_description('latest')
-Out[3]: 
+Out[3]:
 {'release_date': None,
  'release_build': '2023-03-16',
  'soma': {'uri': 's3://cellxgene-data-public/cell-census/2023-03-16/soma/',
@@ -603,14 +605,14 @@ The test `test_acceptance.py::test_get_anndata[None-homo_sapiens]` manifest a la
 
 **Pytest output:**
 
-```
+```text
 $ pytest -v --durations=0 --expensive ./api/python/cell_census/tests/
 ==================================================== test session starts =====================================================
 platform linux -- Python 3.9.16, pytest-7.2.2, pluggy-1.0.0 -- /home/bruce/cell-census/venv/bin/python
 cachedir: .pytest_cache
 rootdir: /home/bruce/cell-census/api/python/cell_census, configfile: pyproject.toml
 plugins: requests-mock-1.10.0, anyio-3.6.2
-collected 45 items                                                                                                           
+collected 45 items
 
 api/python/cell_census/tests/test_acceptance.py::test_load_axes[homo_sapiens] PASSED                                   [  2%]
 api/python/cell_census/tests/test_acceptance.py::test_load_axes[mus_musculus] PASSED                                   [  4%]

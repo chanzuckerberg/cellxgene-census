@@ -9,7 +9,7 @@
 
 The goals of these articles are to have:
 
-* Master reference articles to link for other channels (e.g. slack, twitter). 
+* Master reference articles to link for other channels (e.g. slack, twitter).
 * One-stop place for users to have a historical view of Census developments and analysis.
 
 A great example of this approach is the [Apache Arrow Blog](https://arrow.apache.org/blog/).
@@ -47,13 +47,11 @@ Immediately below the title, and date and author(s) should be added to the artic
 
 Example:
 
-```
+```markdown
 *Published: 10 August 2023*
 
 *By: [John Smith](author1@chanzuckerberg.com), [Phil Scoot](author2@chanzuckerberg.com)*
 ```
-
-
 
 ### Introduction
 
@@ -62,11 +60,10 @@ Introductory text of 1-2 paragraphs must be included right underneath the date a
 * It must provide a one paragraph summary of the article.
 * It must not contain an explanation of the Census.
 
-Example: 
-
+Example:
 
 > The Census team is pleased to announce the release of the R package `cellxgene.census`, this has been long coming since our Python release back in May. Now, from R users can access the Census data which is the largest harmonized aggregation of single-cell data, composed of >30M cells and >60K genes.
-> 
+>
 > With `cellxgene.census` users can access Census access and slice the data using cell or gene filters across hundreds of datasets. Users can fetch the data in an iterative fashion for bigger-than-memory slices of data, or export to Seurat or SingleCellExperiment objects
 
 ### Sections
@@ -77,22 +74,21 @@ The rest of the article content must be organized within sections:
 * The section title should be concise, self-explanatory.
 * The section's contents and presence or absence of sub-headers are left to the discretion of the writer.
 
+## Example article
 
-## Example article 
-
-```
+```markdown
 # R package cellxgene.census 1.0.0 is out
 
 *Published: 10 August 2023*
 
-*By: [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*  
+*By: [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
 The Census team is pleased to announce the release of the R package
 `cellxgene.census`, this has been long coming since our Python
 release back in May. Now, from R users can access the Census data
 which is the largest harmonized aggregation of single-cell data,
 composed of >30M cells and >60K genes.
- 
+
 With `cellxgene.census` users can access Census access and slice
 the data using cell or gene filters across hundreds of datasets.
 Users can fetch the data in an iterative fashion for bigger-than-memory
