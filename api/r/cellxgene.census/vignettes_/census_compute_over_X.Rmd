@@ -49,7 +49,8 @@ Key points:
 * by default, data in the census is indexed by `soma_joinid` and not positionally.
 
 ```{r,warning=FALSE,message=FALSE}
-library(tiledbsoma)
+library("tiledbsoma")
+library("cellxgene.census")
 census <- cellxgene.census::open_soma()
 
 query <- census$get("census_data")$get("mus_musculus")$axis_query(
