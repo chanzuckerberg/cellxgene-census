@@ -76,7 +76,7 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
 
 def test_get_census_version_description_errors() -> None:
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         cellxgene_census.get_census_version_description(census_version="no/such/version/exists")
 
 
