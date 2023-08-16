@@ -189,7 +189,7 @@ def open_soma(
 
     try:
         description = get_census_version_description(census_version)  # raises
-    except KeyError:
+    except ValueError:
         # TODO: After the first "stable" is available, this conditional can be removed (keep the 'else' logic)
         if census_version == "stable":
             description = get_census_version_description("latest")

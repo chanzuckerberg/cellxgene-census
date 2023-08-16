@@ -148,7 +148,7 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     # Verify that an error is raised if a non existing mirror is specified
     with patch("cellxgene_census._open._open_soma") as m:
         with pytest.raises(
-            KeyError,
+            ValueError,
             match=re.escape("Mirror not found."),
         ):
             cellxgene_census.open_soma(mirror="bogus-mirror")
@@ -163,7 +163,10 @@ def test_open_soma_rejects_non_s3_mirror(requests_mock: rm.Mocker) -> None:
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
     with pytest.raises(
-        ValueError, match=re.escape("Unsupported mirror provider: GCS. Try upgrading the census package.")
+        ValueError,
+        match=re.escape(
+            "Unsupported mirror provider: GCS. Try upgrading the cellxgene-census package to the latest version."
+        ),
     ):
         cellxgene_census.open_soma(census_version="latest")
 
