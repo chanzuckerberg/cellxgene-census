@@ -72,14 +72,14 @@ def _open_soma(
     """
 
     if locator["provider"] == "S3":
-        context = _build_soma_tiledb_context_s3(locator.get("region"), context)
-    else:  # If no provider is otherwise specified, just assume the passed context
-        pass
+        context = _build_soma_tiledb_context(locator.get("region"), context)
+    else:  # If no provider is specified, build a default context (don't pass region)
+        context = _build_soma_tiledb_context(None, context)
 
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def _build_soma_tiledb_context_s3(
+def _build_soma_tiledb_context(
     s3_region: Optional[str] = None, context: Optional[soma.options.SOMATileDBContext] = None
 ) -> soma.options.SOMATileDBContext:
     """
