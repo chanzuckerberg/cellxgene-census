@@ -134,8 +134,6 @@ def _validate_release_info(
         "s3_region": CENSUS_AWS_REGION,
     }
 
-    print("******", rls_info["soma"], expected_soma_locator)
-
     if rls_info["soma"] != expected_soma_locator:
         raise ValueError(f"Release record for {rls_tag} contained unexpected SOMA locator")
     if rls_info["h5ads"] != expected_h5ads_locator:
