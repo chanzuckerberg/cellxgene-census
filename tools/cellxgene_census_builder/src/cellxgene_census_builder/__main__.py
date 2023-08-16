@@ -293,12 +293,14 @@ def do_sync_release_file_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
 
 
 def do_sync_artifact_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
-    """Copy data to replica S3 bucket"""
+    """
+    Copy data to replica S3 bucket. Only copy the soma artifacts, not the h5ads.
+    """
     from .data_copy import sync_to_S3_remote
 
     sync_to_S3_remote(
-        urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
-        urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag),
+        urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "/soma/"),
+        urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag, "/soma/"),
         dryrun=args.config.dryrun,
     )
     return True
