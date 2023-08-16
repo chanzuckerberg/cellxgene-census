@@ -44,7 +44,7 @@ def _sync_to_S3(from_path: str, to_path: str, dryrun: bool = False) -> None:
 
     returncode = -1
     try:
-        _log_it(f"Starting copy {from_path} -> {to_path}", dryrun)
+        _log_it(f"Starting sync {from_path} -> {to_path}", dryrun)
         with subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True) as proc:
             print(proc.returncode)
             if proc.stdout is not None:
@@ -56,7 +56,7 @@ def _sync_to_S3(from_path: str, to_path: str, dryrun: bool = False) -> None:
             raise subprocess.CalledProcessError(returncode, proc.args)
 
     finally:
-        _log_it(f"Completed copy, return code {returncode}, {from_path} -> {to_path}", dryrun)
+        _log_it(f"Completed sync, return code {returncode}, {from_path} -> {to_path}", dryrun)
 
 
 def _log_it(msg: str, dryrun: bool) -> None:

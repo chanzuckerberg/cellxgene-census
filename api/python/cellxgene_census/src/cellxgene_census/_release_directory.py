@@ -41,8 +41,22 @@ A provider identifies a storage medium for the Census, which can either be a clo
 A value of "unknown" can be specified if the provider isn't specified - the API will try to determine
 the correct configuration based on the URI.
 """
-Provider = Literal["S3", "unknown"]
+Provider = Literal["S3", "file", "unknown"]
 
+"""
+A mirror identifies a location that can host the census artifacts. A dict of available mirrors exists
+in the mirrors.json file, and looks like this:
+
+{
+    "default": "default-mirror",
+    "default-mirror": {
+        "provider": "S3",
+        "base_uri": "s3://a-public-bucket/",
+        "region": "us-west-2"
+    }
+}
+
+"""
 CensusMirrorName = str  # name of the mirror
 CensusMirror = TypedDict(
     "CensusMirror",
@@ -55,6 +69,10 @@ CensusMirror = TypedDict(
 
 CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
 
+"""
+A `ResolvedCensusLocator` represent an absolute location of a Census resource, including the provider info.
+It is obtained by resolving a relative location against a specified mirror.
+"""
 ResolvedCensusLocator = TypedDict(
     "ResolvedCensusLocator",
     {
@@ -163,6 +181,22 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
 
     # Cast is safe, as we have removed all aliases
     return cast(Dict[CensusVersionName, CensusVersionDescription], directory)
+
+
+def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
+    """
+    Get the directory of Census mirrors currently available.
+
+    Returns:
+        A dictionary that contains mirror names and their corresponding info,
+        like the provider and the region.
+
+    Lifecycle:
+        maturing
+    """
+    mirrors = _get_census_mirrors()
+    del mirrors["default"]
+    return cast(Dict[CensusMirrorName, CensusMirror], mirrors)
 
 
 def _get_census_mirrors() -> CensusMirrors:

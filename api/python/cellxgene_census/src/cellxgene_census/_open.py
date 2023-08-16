@@ -69,10 +69,13 @@ def _open_soma(
 ) -> soma.Collection:
     """
     Private. Merge config defaults and return open census as a soma Collection/context.
-    In the future, use locator["provider"] for creating a suitable TileDB context.
-    A value of `unknown` should cause this method to infer the context from the uri's scheme.
     """
-    context = _build_soma_tiledb_context_s3(locator.get("region"), context)
+
+    if locator["provider"] == "S3":
+        context = _build_soma_tiledb_context_s3(locator.get("region"), context)
+    else:  # If no provider is otherwise specified, just assume the passed context
+        pass
+
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 

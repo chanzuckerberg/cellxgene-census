@@ -25,7 +25,11 @@ from importlib import metadata
 from ._get_anndata import get_anndata
 from ._open import download_source_h5ad, get_source_h5ad_uri, open_soma
 from ._presence_matrix import get_presence_matrix
-from ._release_directory import get_census_version_description, get_census_version_directory
+from ._release_directory import (
+    get_census_mirror_directory,
+    get_census_version_description,
+    get_census_version_directory,
+)
 
 try:
     __version__ = metadata.version("cellxgene_census")
@@ -38,6 +42,7 @@ __all__ = [
     "get_anndata",
     "get_census_version_description",
     "get_census_version_directory",
+    "get_census_mirror_directory",
     "get_presence_matrix",
     "get_source_h5ad_uri",
     "open_soma",

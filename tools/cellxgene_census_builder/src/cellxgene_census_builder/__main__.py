@@ -213,7 +213,7 @@ def do_data_copy(args: CensusBuildArgs) -> bool:
 
 def do_the_release(args: CensusBuildArgs) -> bool:
     """
-    Perform the release
+    Perform the release by publishing changes to the release.json file. Respects `dryrun` flag.
     """
 
     from .release_manifest import CensusVersionDescription, make_a_release

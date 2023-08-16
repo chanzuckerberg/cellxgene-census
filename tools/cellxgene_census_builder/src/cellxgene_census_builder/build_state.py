@@ -101,8 +101,9 @@ class CensusBuildConfig:
     def load_from_env_vars(cls) -> Self:
         config = cls()
         for fld in fields(CensusBuildConfig):
-            if fld.name.upper() in os.environ:
-                setattr(config, fld.name, os.environ[fld.name.upper()])
+            fld_env_var = f"CENSUS_BUILD_{fld.name.upper()}"
+            if fld_env_var in os.environ:
+                setattr(config, fld.name, os.environ[fld_env_var])
         return config
 
 
