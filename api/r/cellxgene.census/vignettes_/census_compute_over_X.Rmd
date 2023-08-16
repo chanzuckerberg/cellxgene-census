@@ -143,7 +143,6 @@ while (!tables$read_complete()) {
   )
   n_cells_part <- left_join(n_cells_part, obs_df, by = "cell_id")
   stopifnot(sum(is.null(n_cells_part$dataset_id)) == 0)
-  n_cells_part$cell_id <- NULL
 
   # fold those into n_cells_grouped
   n_cells_grouped <- n_cells_part %>%
