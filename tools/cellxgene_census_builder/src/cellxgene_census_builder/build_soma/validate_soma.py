@@ -418,7 +418,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
 
                 # positionally re-index
                 cols_by_position = var_index.get_indexer(X_raw_var_joinids)
-                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)  # type: ignore[no-untyped-call]
+                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)
                 del X_raw_obs_joinids
 
                 # Check that raw_sum stat matches raw layer
