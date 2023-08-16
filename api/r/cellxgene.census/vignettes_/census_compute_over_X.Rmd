@@ -31,7 +31,7 @@ This tutorial showcases computing per-gene and per-cell statistics for a user-de
 
 ## Incremental mean calculation
 
-Many statistics, such as marginal means, are easy to calculate incrementally. Let's begin with a query on the `X$raw` sparse matrix of unnormalized read counts, which will return results in shards Incrementally accumulate the read count for each gene, then divide by the cell count to get the mean reads per cell for each gene.
+Many statistics, such as marginal means, are easy to calculate incrementally. Let's begin with a query on the `X$raw` sparse matrix of unnormalized read counts, which will return results in shards incrementally accumulate the read count for each gene, then divide by the cell count to get the mean reads per cell for each gene.
 
 First define a query - in this case a slice over the obs axis for cells with a specific tissue & sex value, and all genes on the var axis. The `query$X()` method returns an iterator of results, each as an Arrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:
 
