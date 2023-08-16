@@ -103,7 +103,7 @@ The goal of this example is to count the number of cells with nonzero reads, gro
 For this multi-factor aggregation, we'll take advantage of `dplyr` routines instead of the lower-level vector indexer shown above. And for presentation purposes, we'll limit the query to four genes, but this can be expanded to all genes easily.
 
 ```{r,warning=FALSE,message=FALSE}
-library(dplyr)
+library("dplyr")
 
 query <- census$get("census_data")$get("mus_musculus")$axis_query(
   measurement_name = "RNA",
