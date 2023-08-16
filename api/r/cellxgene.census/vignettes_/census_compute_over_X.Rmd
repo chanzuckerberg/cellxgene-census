@@ -64,6 +64,7 @@ n_genes <- nrow(genes_df)
 
 # accumulator vector (for each gene) for the total count over all cells in X("raw")
 raw_sum_by_gene <- numeric(n_genes)
+names(raw_sum_by_gene) <- genes_df$feature_id
 
 # iterate through in-memory shards of query results
 tables <- query$X("raw")$tables()
