@@ -12,21 +12,13 @@ Census data can be fetched in an iterative fashion for bigger-than-memory slices
 
 ## Installation
 
-From an R session, first install `tiledb` from R-Universe, the latest release in CRAN is not yet available.
+If installing from **Ubuntu**, you may need to install the following libraries via `apt install`,  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`. In addition you must have `cmake` v3.21 or greater.
 
-If installing from Ubuntu, you may need to install the following libraries via `apt install`:  `libxml2-dev` `libssl-dev` `libcurl4-openssl-dev`.
+If installing from **MacOS**, you will need to install the [developer tools `Xcode`](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
 
-If installing from MacOS, you will need to install the [developer tools `Xcode`](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
+**Windows** is not supported.
 
-```r
-install.packages(
-  "tiledb",
-  version = "0.20.3", 
-  repos=c('https://tiledb-inc.r-universe.dev','https://cloud.r-project.org') 
-)
-```
-
-Then install `cellxgene.census` from R-Universe.
+Then in an R session install `cellxgene.census` from R-Universe.
 
 ```r
 install.packages(
@@ -34,6 +26,20 @@ install.packages(
   repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
 )
 ```
+
+To be able to export Census data to `Seurat` or `SingleCellExperiment` you also need to install their respective packages.
+
+```r
+# Seurat
+install.packages("Seurat")
+
+# SingleCellExperiment
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+    
+BiocManager::install("SingleCellExperiment")
+```
+
 
 ## Usage
 
