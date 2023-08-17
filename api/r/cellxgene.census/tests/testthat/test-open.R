@@ -51,7 +51,7 @@ test_that("resolve_census_locator paths", {
   expect_equal(locator$mirror_info$region, "us-west-2")
 
   # non-default mirror
-  locator <- resolve_census_locator(KNOWN_CENSUS_VERSION, NULL, "us-west-2")
+  locator <- resolve_census_locator(KNOWN_CENSUS_VERSION, NULL, "AWS-S3-us-west-2")
   expect_equal(locator$uri, KNOWN_CENSUS_URI)
   expect_false("alias" %in% locator$mirror_info)
   expect_equal(locator$mirror_info$provider, "S3")

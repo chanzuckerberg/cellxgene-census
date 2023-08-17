@@ -56,14 +56,7 @@ get_census_version_directory <- function() {
 #' @examples
 #' get_census_mirrors()
 get_census_mirrors <- function() {
-  ### FIXME: remove stub once CELL_CENSUS_RELEASE_DIRECTORY_URL is live
-  return(resolve_aliases(jsonlite::fromJSON('{
-    "default": "us-west-2",
-    "us-west-2": {"provider": "S3", "base_uri": "s3://cellxgene-data-public/", "region": "us-west-2"}
-}')))
-  ###
-
-  return(resolve_aliases(jsonlite::fromJSON(CELL_CENSUS_RELEASE_DIRECTORY_URL)))
+  return(resolve_aliases(jsonlite::fromJSON(CELL_CENSUS_MIRRORS_DIRECTORY_URL)))
 }
 
 #' Get locator information about a Census mirror
