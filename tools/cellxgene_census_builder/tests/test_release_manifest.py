@@ -22,7 +22,6 @@ TEST_CENSUS_BASE_URL = "s3://bucket/path/"
 TEST_CENSUS_BASE_PREFIX = "/path/"
 
 
-@pytest.mark.xfail(reason="Waiting on PR #552 (mirrors)")
 @pytest.mark.live_corpus
 def test_get_release_manifest() -> None:
     census_base_url = CensusBuildConfig().cellxgene_census_S3_path
@@ -58,7 +57,6 @@ def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
     }
 
 
-@pytest.mark.xfail(reason="Waiting on PR #552 (mirrors)")
 @pytest.mark.parametrize(
     "release_manifest",
     [
@@ -147,7 +145,6 @@ def test_validate_release_manifest_errors(
         validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)
 
 
-@pytest.mark.xfail(reason="Waiting on PR #552 (mirrors)")
 @pytest.mark.parametrize(
     "release_manifest,rls_tag,rls_info,make_latest,expected_new_manifest",
     [
