@@ -58,11 +58,13 @@
     <a class="dropdown-item" href="articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
     <a class="dropdown-item" href="articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <a class="dropdown-item" href="articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
     <a class="dropdown-item" href="articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
+    <a class="dropdown-item" href="articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
   </div>
 </li>
       </ul>
@@ -87,7 +89,9 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="r-package-of-cz-cellxgene-discover-census">R package of CZ CELLxGENE Discover Census<a class="anchor" aria-label="anchor" href="#r-package-of-cz-cellxgene-discover-census"></a>
 </h1></div>
-<!-- badges: start --><!-- badges: end --><p>This is the documentation for the R package <code>cellxgene.census</code> which is part of CZ CELLxGENE Discover Census. For full details on Census data and capabilities please go to the <a href="https://chanzuckerberg.github.io/cellxgene-census/" class="external-link">main Census site</a>.</p>
+<!-- badges: start -->
+<!-- badges: end -->
+<p>This is the documentation for the R package <code>cellxgene.census</code> which is part of CZ CELLxGENE Discover Census. For full details on Census data and capabilities please go to the <a href="https://chanzuckerberg.github.io/cellxgene-census/" class="external-link">main Census site</a>.</p>
 <p><code>cellxgene.census</code> provides an API to efficiently access the cloud-hosted Census single-cell data from R. In just a few seconds users can access any slice of Census data using cell or gene filters across hundreds of single-cell datasets.</p>
 <p>Census data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, as well as <code>Seurat</code> or <code>SingleCellExperiment</code> objects for downstream analysis.</p>
 <div class="section level2">
@@ -111,7 +115,7 @@
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.github.io/BiocManager/" class="external-link">"BiocManager"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span>    </span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>

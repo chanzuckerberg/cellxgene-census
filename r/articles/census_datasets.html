@@ -54,11 +54,13 @@
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
     <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
+    <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
   </div>
 </li>
       </ul>
@@ -98,7 +100,10 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_datasets.ipynb
 -->
-<p>This tutorial demonstrates basic use of the <code>census_datasets</code> data frame that contains metadata of the Census source datasets. This metadata can be joined to the cell metadata data frame (<code>obs</code>) via the column dataset_id.</p>
+<p>This tutorial demonstrates basic use of the
+<code>census_datasets</code> data frame that contains metadata of the
+Census source datasets. This metadata can be joined to the cell metadata
+data frame (<code>obs</code>) via the column dataset_id.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Fetching the datasets table.</li>
@@ -108,11 +113,13 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="fetching-the-datasets-table">Fetching the datasets table<a class="anchor" aria-label="anchor" href="#fetching-the-datasets-table"></a>
 </h2>
-<p>Each Census contains a top-level data frame itemizing the datasets contained therein. You can read this <code>SOMADataFrame</code> into an <a href="https://arrow.apache.org/docs/r/reference/Table.html" class="external-link">Arrow Table</a>:</p>
+<p>Each Census contains a top-level data frame itemizing the datasets
+contained therein. You can read this <code>SOMADataFrame</code> into an
+<a href="https://arrow.apache.org/docs/r/reference/Table.html" class="external-link">Arrow
+Table</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
 <span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span>
 <span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Table</span></span>
@@ -148,7 +155,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> d8732da6-8d1d-42d9-b625-f2416c30054b Tabula Sapiens - Trachea                    <span style="text-decoration: underline;">9</span>522</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 583 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​dataset_total_cell_count</span></span></span></code></pre></div>
-<p>The sum of cell counts across all datasets should match the number of cells across all SOMA experiments (human, mouse).</p>
+<p>The sum of cell counts across all datasets should match the number of
+cells across all SOMA experiments (human, mouse).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_data</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span></span>
 <span><span class="va">all_experiments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">census_data</span><span class="op">$</span><span class="fu">to_list</span><span class="op">(</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">census_data</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span>
@@ -180,7 +188,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="fetching-the-expression-data-from-a-single-dataset">Fetching the expression data from a single dataset<a class="anchor" aria-label="anchor" href="#fetching-the-expression-data-from-a-single-dataset"></a>
 </h2>
-<p>Let’s pick one dataset to slice out of the census, and turn into a Seurat in-memory object. (This requires the <code>Seurat</code> package to have been installed beforehand.)</p>
+<p>Let’s pick one dataset to slice out of the census, and turn into a
+Seurat in-memory object. (This requires the <code>Seurat</code> package
+to have been installed beforehand.)</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_datasets</span><span class="op">[</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
@@ -188,10 +198,10 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         522 0b9d8a04-bb9d-44d… Tabula Muris S… 10.1038/s4158… 0bd1a1de-… Bone marrow …</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: dataset_h5ad_path &lt;chr&gt;, dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
-<p>Create a query on the mouse experiment, “RNA” measurement, for the <code>dataset_id</code>.</p>
+<p>Create a query on the mouse experiment, “RNA” measurement, for the
+<code>dataset_id</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">"tiledbsoma"</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: package 'tiledbsoma' was built under R version 4.3.1</span></span>
 <span><span class="va">obs_query</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"</span></span>
 <span><span class="op">)</span></span>
@@ -216,8 +226,13 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="downloading-the-original-source-h5ad-file-of-a-dataset">Downloading the original source H5AD file of a dataset<a class="anchor" aria-label="anchor" href="#downloading-the-original-source-h5ad-file-of-a-dataset"></a>
 </h2>
-<p>You can use the <code><a href="../reference/get_source_h5ad_uri.html">cellxgene.census::get_source_h5ad_uri()</a></code> API to fetch a URI pointing to the H5AD associated with this <code>dataset_id</code>. This is the same H5AD you can download from <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_datasets.ipynb" class="external-link">CZ CELLxGENE Discover</a>, and may contain additional data-submitter provided information which was not included in the Census.</p>
-<p>To do this you can fetch the location in the cloud or directly download to your system.</p>
+<p>You can use the <code><a href="../reference/get_source_h5ad_uri.html">cellxgene.census::get_source_h5ad_uri()</a></code>
+API to fetch a URI pointing to the H5AD associated with this
+<code>dataset_id</code>. This is the same H5AD you can download from <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_datasets.ipynb" class="external-link">CZ
+CELLxGENE Discover</a>, and may contain additional data-submitter
+provided information which was not included in the Census.</p>
+<p>To do this you can fetch the location in the cloud or directly
+download to your system.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Option 1: Direct download</span></span>
 <span><span class="fu"><a href="../reference/download_source_h5ad.html">download_source_h5ad</a></span><span class="op">(</span></span>
@@ -233,14 +248,19 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $s3_region</span></span>
 <span><span class="co">#&gt; [1] "us-west-2"</span></span></code></pre></div>
-<p>The local H5AD file can be used in R using <a href="https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html" class="external-link">SeuratDisk’s anndata converter</a>.</p>
+<p>The local H5AD file can be used in R using <a href="https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html" class="external-link">SeuratDisk’s
+anndata converter</a>.</p>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
-<p>After use, the census object should be closed to release memory and other resources.</p>
+<p>After use, the census object should be closed to release memory and
+other resources.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
+<p>This also closes all SOMA objects accessed via the top-level
+<code>census</code>. Closing can be automated using
+<code>on.exit(census$close(), add = TRUE)</code> immediately after
+<code>census &lt;- open_soma()</code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
