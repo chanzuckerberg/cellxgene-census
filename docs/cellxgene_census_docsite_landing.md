@@ -1,4 +1,4 @@
- <span style="color: Coral; font-size: 18px"> 🎉 🎉 **The R API stable version has launched. Find out more about it [here.](articles/2023/20230808-r_api_release.md)** <span>
+ <span style="color: Coral; font-size: 18px"> 🎉 🎉 **The R API stable version has launched. Find out more about it [here.](articles/2023/20230808-r_api_release.md)** </span>
 
 # CZ CELLxGENE Discover Census
 
@@ -9,7 +9,7 @@ Get started:
 - [Quick start (Python and R)](cellxgene_census_docsite_quick_start.md)
 - [Census data and schema](cellxgene_census_docsite_schema.md)
 - [Python tutorials](examples.rst)
-- *Coming soon: R tutorials.*
+- [R tutorials](https://chanzuckerberg.github.io/cellxgene-census/r/articles/)
 - [Github repository](https://github.com/chanzuckerberg/cellxgene-census)
 
 

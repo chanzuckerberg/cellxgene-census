@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import anndata as ad
@@ -41,13 +42,19 @@ def test_open_anndata_filters_out_datasets_with_mixed_feature_reference(
 
 
 def test_open_anndata_filters_out_wrong_schema_version_datasets(
+    caplog: pytest.LogCaptureFixture,
     datasets_with_incorrect_schema_version: List[Dataset],
 ) -> None:
     """
     Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`
     """
-    with pytest.raises(RuntimeError, match="unsupported schema version"):
-        _ = list(open_anndata(".", datasets_with_incorrect_schema_version))
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(RuntimeError, match="unsupported schema version"):
+            _ = list(open_anndata(".", datasets_with_incorrect_schema_version))
+
+        for record in caplog.records:
+            assert record.levelname == "ERROR"
+            assert "unsupported schema version" in record.msg
 
 
 def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_layer: List[Dataset]) -> None:

@@ -391,7 +391,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                 continue
 
             assert _validate_X_obs_axis_stats(eb, dataset, obs_df, ad)
-            obs_df = obs_df[["soma_joinid"]]  # save some memory
+            obs_df = obs_df[["soma_joinid", "raw_sum"]]  # save some memory
 
             # get the joinids for the var axis
             var_df = (
@@ -418,8 +418,16 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
 
                 # positionally re-index
                 cols_by_position = var_index.get_indexer(X_raw_var_joinids)
-                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)  # type: ignore[no-untyped-call]
+                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)
                 del X_raw_obs_joinids
+
+                # Check that raw_sum stat matches raw layer
+                raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
+                np.add.at(raw_sum, rows_by_position, X_raw_data)
+                raw_sum = raw_sum.astype(
+                    CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()
+                )  # back to the storage type
+                assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
 
                 # Assertion 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
                 assert (
@@ -539,7 +547,9 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
-            assert np.all(norm["soma_data"].to_numpy() >= 0.0)
+            # If we wrote a value, it MUST be larger than zero (i.e., represents a raw count value of 1 or greater)
+            assert np.all(raw["soma_data"].to_numpy() > 0.0), "Found zero value in raw layer"
+            assert np.all(norm["soma_data"].to_numpy() > 0.0), "Found zero value in normalized layer"
 
             dim0 = norm["soma_dim_0"].to_numpy()
             dim1 = norm["soma_dim_1"].to_numpy()

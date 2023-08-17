@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,9 +98,19 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_dataset_presence.ipynb
 -->
-<p>The Census is a compilation of cells from multiple datasets that may differ by the sets of genes they measure. This notebook describes the way to identify the genes measured per dataset.</p>
-<p>The presence matrix is a sparse boolean array, indicating which features (var) were present in each dataset. The array has dimensions [n_datasets, n_var], and is stored in the SOMA Measurement <code>varp</code> collection. The first dimension is indexed by the <code>soma_joinid</code> in the <code>census_datasets</code> dataframe. The second is indexed by the <code>soma_joinid</code> in the <code>var</code> dataframe of the measurement.</p>
-<p>As a reminder the <code>obs</code> data frame has a column <code>dataset_id</code> that can be used to link any cell in the Census to the presence matrix.</p>
+<p>The Census is a compilation of cells from multiple datasets that may
+differ by the sets of genes they measure. This notebook describes the
+way to identify the genes measured per dataset.</p>
+<p>The presence matrix is a sparse boolean array, indicating which
+features (var) were present in each dataset. The array has dimensions
+[n_datasets, n_var], and is stored in the SOMA Measurement
+<code>varp</code> collection. The first dimension is indexed by the
+<code>soma_joinid</code> in the <code>census_datasets</code> dataframe.
+The second is indexed by the <code>soma_joinid</code> in the
+<code>var</code> dataframe of the measurement.</p>
+<p>As a reminder the <code>obs</code> data frame has a column
+<code>dataset_id</code> that can be used to link any cell in the Census
+to the presence matrix.</p>
 <p>Contents</p>
 <ol style="list-style-type: decimal">
 <li>Opening the Census.</li>
@@ -113,16 +123,18 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="opening-the-census">Opening the Census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
 </h2>
-<p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
+<p>The <code>cellxgene.census</code> R package contains a convenient API
+to open any version of the Census (by default, the newest stable
+version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
-<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fetching-the-ids-of-the-census-datasets">Fetching the IDs of the Census datasets<a class="anchor" aria-label="anchor" href="#fetching-the-ids-of-the-census-datasets"></a>
 </h2>
-<p>Let’s grab a table of all the datasets included in the Census and use this table in combination with the presence matrix below.</p>
+<p>Let’s grab a table of all the datasets included in the Census and use
+this table in combination with the presence matrix below.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Grab the experiment containing human data, and the measurement therein with RNA</span></span>
 <span><span class="va">human</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span></span>
@@ -151,12 +163,15 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <h2 id="fetching-the-dataset-presence-matrix">Fetching the dataset presence matrix<a class="anchor" aria-label="anchor" href="#fetching-the-dataset-presence-matrix"></a>
 </h2>
 <p>Now let’s fetch the dataset presence matrix.</p>
-<p>For convenience, read the entire presence matrix (for Homo sapiens) into a sparse matrix. There is a convenience function providing this capability:</p>
+<p>For convenience, read the entire presence matrix (for Homo sapiens)
+into a sparse matrix. There is a convenience function providing this
+capability:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">presence_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_presence_matrix.html">get_presence_matrix</a></span><span class="op">(</span><span class="va">census</span>, <span class="st">"Homo sapiens"</span>, <span class="st">"RNA"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">presence_matrix</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
-<p>We also need the <code>var</code> dataframe, which is read into an R data frame for convenient manipulation:</p>
+<p>We also need the <code>var</code> dataframe, which is read into an R
+data frame for convenient manipulation:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human_rna</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">)</span></span>
@@ -178,14 +193,28 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="identifying-genes-measured-in-a-specific-dataset">Identifying genes measured in a specific dataset<a class="anchor" aria-label="anchor" href="#identifying-genes-measured-in-a-specific-dataset"></a>
 </h2>
-<p>Now that we have the dataset table, the genes metadata table, and the dataset presence matrix, we can check if a gene or set of genes were measured in a specific dataset.</p>
-<p><strong>Important:</strong> the presence matrix is indexed by <code>soma_joinid</code>, and is <em>NOT</em> positionally indexed. In other words:</p>
+<p>Now that we have the dataset table, the genes metadata table, and the
+dataset presence matrix, we can check if a gene or set of genes were
+measured in a specific dataset.</p>
+<p><strong>Important:</strong> the presence matrix is indexed by
+<code>soma_joinid</code>, and is <em>NOT</em> positionally indexed. In
+other words:</p>
 <ul>
-<li>the first dimension of the presence matrix is the dataset’s <code>soma_joinid</code>, as stored in the <code>census_datasets</code> dataframe.</li>
-<li>the second dimension of the presence matrix is the feature’s <code>soma_joinid</code>, as stored in the <code>var</code> dataframe.</li>
+<li>the first dimension of the presence matrix is the dataset’s
+<code>soma_joinid</code>, as stored in the <code>census_datasets</code>
+dataframe.</li>
+<li>the second dimension of the presence matrix is the feature’s
+<code>soma_joinid</code>, as stored in the <code>var</code>
+dataframe.</li>
 </ul>
-<p>The presence matrix has a method <code>$take()</code> that lets you slice it by <code>soma_joinid</code>s from <code>census_datasets</code> and <code>var</code>. And the full presence matrix, or slices of it, can then be exported to a regular matrix with the method <code>$get_one_based_matrix()</code></p>
-<p>Let’s find out if the the gene <code>"ENSG00000286096"</code> was measured in the dataset with id <code>"97a17473-e2b1-4f31-a544-44a60773e2dd"</code>.</p>
+<p>The presence matrix has a method <code>$take()</code> that lets you
+slice it by <code>soma_joinid</code>s from <code>census_datasets</code>
+and <code>var</code>. And the full presence matrix, or slices of it, can
+then be exported to a regular matrix with the method
+<code>$get_one_based_matrix()</code></p>
+<p>Let’s find out if the the gene <code>"ENSG00000286096"</code> was
+measured in the dataset with id
+<code>"97a17473-e2b1-4f31-a544-44a60773e2dd"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get soma_joinid for datasets and genes of interest</span></span>
 <span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
@@ -205,7 +234,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="identifying-datasets-that-measured-specific-genes">Identifying datasets that measured specific genes<a class="anchor" aria-label="anchor" href="#identifying-datasets-that-measured-specific-genes"></a>
 </h2>
-<p>Similarly, we can determine the datasets that measured a specific gene or set of genes.</p>
+<p>Similarly, we can determine the datasets that measured a specific
+gene or set of genes.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Grab the feature's soma_joinid from the var dataframe</span></span>
 <span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
@@ -237,7 +267,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="identifying-all-genes-measured-in-a-dataset">Identifying all genes measured in a dataset<a class="anchor" aria-label="anchor" href="#identifying-all-genes-measured-in-a-dataset"></a>
 </h2>
-<p>Finally, we can find the set of genes that were measured in the cells of a given dataset.</p>
+<p>Finally, we can find the set of genes that were measured in the cells
+of a given dataset.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Slice the dataset(s) of interest, and get the joinid(s)</span></span>
 <span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">datasets_df</span><span class="op">$</span><span class="va">collection_id</span> <span class="op">==</span> <span class="st">"17481d16-ee44-49e5-bcf0-28c0780d8c4a"</span><span class="op">]</span></span>
@@ -265,10 +296,14 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
-<p>After use, the census object should be closed to release memory and other resources.</p>
+<p>After use, the census object should be closed to release memory and
+other resources.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
+<p>This also closes all SOMA objects accessed via the top-level
+<code>census</code>. Closing can be automated using
+<code>on.exit(census$close(), add = TRUE)</code> immediately after
+<code>census &lt;- open_soma()</code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
