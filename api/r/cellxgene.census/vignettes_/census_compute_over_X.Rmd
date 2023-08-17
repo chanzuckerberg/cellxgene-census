@@ -1,0 +1,166 @@
+---
+title: "Computing on X using online (incremental) algorithms"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Computing on X using online (incremental) algorithms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 88, max.print=100)
+```
+
+<!--
+THIS VIGNETTE IS BASED ON:
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_compute_over_X.ipynb
+-->
+
+This tutorial showcases computing per-gene and per-cell statistics for a user-defined query using out-of-core operations, where incremental (online) algorithms are needed.
+
+*NOTE:* when query results are small enough to fit in memory, it's usually easier to use `get_seurat()` or `get_single_cell_experiment()`.
+
+**Contents**
+
+* Incremental mean calculation
+* Counting cells grouped by dataset and gene
+
+## Incremental mean calculation
+
+Many statistics, such as marginal means, are easy to calculate incrementally. Let's begin with a query on the `X$raw` sparse matrix of unnormalized read counts, which will return results in shards incrementally accumulate the read count for each gene, then divide by the cell count to get the mean reads per cell for each gene.
+
+First define a query - in this case a slice over the obs axis for cells with a specific tissue & sex value, and all genes on the var axis. The `query$X()` method returns an iterator of results, each as an Arrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:
+
+* `soma_data` - the X values (float32)
+* `soma_dim_0` - the obs coordinate (int64)
+* `soma_dim_1` - the var coordinate (int64)
+
+**Important:** the X matrices are joined to var/obs axis DataFrames by an integer join "id" (aka `soma_joinid`). They are NOT positionally indexed, and any given cell or gene may have a `soma_joinid` of any value (e.g., a large integer). In other words, for any given X value, the `soma_dim_0` corresponds to the soma_joinid in the `obs` dataframe, and the `soma_dim_1` coordinate corresponds to the `soma_joinid` in the `var` dataframe.
+
+For convenience, the query class includes a utility to simplify operations on query slices. `query$indexer` is an indexer used to wrap the output of `query$X()`, converting from `soma_joinid`s to positional indexing in the query results. Positions are `[0, N)`, where N are the number of results on the query for any given axis.
+
+Key points:
+
+* it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations.
+* by default, data in the census is indexed by `soma_joinid` and not positionally.
+
+```{r,warning=FALSE,message=FALSE}
+library("tiledbsoma")
+library("cellxgene.census")
+census <- open_soma()
+
+query <- census$get("census_data")$get("mus_musculus")$axis_query(
+  measurement_name = "RNA",
+  obs_query = SOMAAxisQuery$new(value_filter = "tissue=='brain' && sex=='male'")
+)
+
+genes_df <- query$var(column_names = c("feature_id", "feature_name"))$concat()
+genes_df <- as.data.frame(genes_df)
+n_genes <- nrow(genes_df)
+
+# accumulator vector (for each gene) for the total count over all cells in X("raw")
+raw_sum_by_gene <- numeric(n_genes)
+names(raw_sum_by_gene) <- genes_df$feature_id
+
+# iterate through in-memory shards of query results
+tables <- query$X("raw")$tables()
+while (!tables$read_complete()) {
+  table_part <- tables$read_next()
+  # table_part is an Arrow table with the columns mentioned above. The result
+  # order is not guaranteed!
+
+  # table_part$soma_dim_1 is the var/gene soma_joinid. But note that these are
+  # arbitrary int64 id's, and moreover each table_part may exhibit only a subset
+  # of the values we'll see over all query results. query$indexer helps us map
+  # any given soma_dim_1 values onto positions in query$var() (genes_df), that is
+  # the union of all values we'll see.
+  gene_indexes <- query$indexer$by_var(table_part$soma_dim_1)$as_vector()
+  stopifnot(sum(gene_indexes >= n_genes) == 0)
+  # sum(table_part) group by gene, yielding a numeric vector with the gene_index
+  # in its names
+  sum_part <- tapply(as.vector(table_part$soma_data), gene_indexes, sum)
+  # update the accumulator vector
+  which_genes <- as.integer(names(sum_part)) + 1  # nb: gene_indexes is zero-based
+  stopifnot(sum(which_genes > n_genes) == 0)
+  raw_sum_by_gene[which_genes] <- raw_sum_by_gene[which_genes] + sum_part
+}
+
+# Divide each sum by cell count to get mean reads per cell (for each gene),
+# implicitly averaging in all zero entries in X even though they weren't included
+# in the sparse query results.
+genes_df$raw_mean <- raw_sum_by_gene / query$n_obs
+genes_df
+```
+
+## Counting cells grouped by dataset and gene
+
+The goal of this example is to count the number of cells with nonzero reads, grouped by gene and Census `dataset_id`. The result is a data frame with dataset, gene, and the number of cells with nonzero reads for that dataset and gene.
+
+For this multi-factor aggregation, we'll take advantage of `dplyr` routines instead of the lower-level vector indexer shown above. And for presentation purposes, we'll limit the query to four genes, but this can be expanded to all genes easily.
+
+```{r,warning=FALSE,message=FALSE}
+library("dplyr")
+
+query <- census$get("census_data")$get("mus_musculus")$axis_query(
+  measurement_name = "RNA",
+  obs_query = SOMAAxisQuery$new(value_filter = "tissue=='brain'"),
+  var_query = SOMAAxisQuery$new(value_filter = "feature_name %in% c('Malat1', 'Ptprd', 'Dlg2', 'Pcdh9')")
+)
+
+obs_tbl <- query$obs(column_names=c("soma_joinid", "dataset_id"))$concat()
+obs_df <- data.frame(
+  # materialize soma_joinid as character to avoid overflowing R 32-bit integer
+  cell_id = as.character(obs_tbl$soma_joinid),
+  dataset_id = obs_tbl$dataset_id$as_vector()
+)
+var_tbl <- query$var(column_names=c("soma_joinid", "feature_name"))$concat()
+var_df <- data.frame(
+  gene_id = as.character(var_tbl$soma_joinid),
+  feature_name = var_tbl$feature_name$as_vector()
+)
+
+# accumulator for # cells by dataset & gene
+n_cells_grouped <- data.frame(
+  "dataset_id" = character(0),
+  "gene_id" = character(0),
+  "n_cells" = numeric(0)
+)
+
+# iterate through in-memory shards of query results
+tables <- query$X("raw")$tables()
+while (!tables$read_complete()) {
+  table_part <- tables$read_next()
+
+  # prepare a (dataset,gene,1) tuple for each entry in table_part
+  n_cells_part <- data.frame(
+    "cell_id" = as.character(table_part$soma_dim_0),
+    "gene_id" = as.character(table_part$soma_dim_1),
+    "n_cells" = 1
+  )
+  n_cells_part <- left_join(n_cells_part, obs_df, by = "cell_id")
+  stopifnot(sum(is.null(n_cells_part$dataset_id)) == 0)
+
+  # fold those into n_cells_grouped
+  n_cells_grouped <- n_cells_part %>%
+                     select(-cell_id) %>%
+                     bind_rows(n_cells_grouped) %>%
+                      group_by(dataset_id, gene_id) %>%
+                      summarise(n_cells = sum(n_cells)) %>%
+                      ungroup()
+}
+
+# add gene names for display
+n_cells_grouped <- left_join(n_cells_grouped, var_df, by = "gene_id")
+stopifnot(sum(is.null(n_cells_grouped$feature_name)) == 0)
+n_cells_grouped[c("dataset_id", "feature_name", "n_cells")]
+```
+
+Don't forget to close the census.
+
+```{r}
+census$close()
+```
