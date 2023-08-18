@@ -37,7 +37,7 @@ open_soma <- function(
   return(tiledbsoma::SOMACollectionOpen(uri, tiledbsoma_ctx = tiledbsoma_ctx))
 }
 
-SUPPORTED_PROVIDERS <- c("S3", "file")
+SUPPORTED_PROVIDERS <- c("S3", "file", "unknown")
 
 # helps open_soma resolve uri & mirror information
 resolve_census_locator <- function(census_version, uri, mirror) {
@@ -92,18 +92,23 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #' census <- open_soma("stable", tiledbsoma_ctx = ctx)
 #' census$close()
 new_SOMATileDBContext_for_census <- function(census_version_description, mirror = "default", ...) {
-  # NOTE: census_version_description is unused, vestigial from before mirror support.
+  # NOTE: census_version_description is currently unused, vestigial from before
+  # mirror support. But, it might become useful again if provider-specific config
+  # needs info from it.
 
   # start with default configuration
   cfg <- DEFAULT_TILEDB_CONFIGURATION
 
-  if (is.character(mirror)) {
-    mirror <- get_census_mirrors()[[mirror]]
-  }
-  if (is.list(mirror) && mirror$provider == "S3") {
-    # set S3-specific config
-    cfg <- c(cfg, c("vfs.s3.region" = mirror$region))
-    cfg <- c(cfg, c("vfs.s3.no_sign_request" = "true"))
+  # set provider-specific config based on the mirror info
+  if (!is.null(mirror)) {
+    if (is.character(mirror)) {
+      mirror <- get_census_mirrors()[[mirror]]
+    }
+    stopifnot("mirror argument to new_SOMATileDBContext_for_census should be a mirror name or get_census_mirrors()[[name]]" = is.list(mirror))
+    if (mirror$provider == "S3") {
+      cfg <- c(cfg, c("vfs.s3.region" = mirror$region))
+      cfg <- c(cfg, c("vfs.s3.no_sign_request" = "true"))
+    }
   }
 
   # merge any additional config from args
