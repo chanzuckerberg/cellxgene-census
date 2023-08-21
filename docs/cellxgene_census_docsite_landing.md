@@ -2,7 +2,7 @@
 
 # CZ CELLxGENE Discover Census
 
-The Census provides efficient computational tooling to **access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover**. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus accelerating your research by significantly minimizing data harmonization.
+The Census provides efficient computational tooling to **access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover**. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData, Seurat, or SingleCellExperiment objects, thus accelerating your research by significantly minimizing data harmonization.
 
 Get started:
 
@@ -33,6 +33,8 @@ The Census is a data object publicly hosted online and an API to open it. The ob
 
 - Load and create [AnnData](https://anndata.readthedocs.io/en/latest/) objects.
 - Load and create [Seurat](https://satijalab.org/seurat/) objects.
+- Load and create [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) objects.
+
 
 **Interoperability with existing Python or R data structures**
 
