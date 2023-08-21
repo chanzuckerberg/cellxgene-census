@@ -35,7 +35,6 @@ The Census is a data object publicly hosted online and an API to open it. The ob
 - Load and create [Seurat](https://satijalab.org/seurat/) objects.
 - Load and create [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) objects.
 
-
 **Interoperability with existing Python or R data structures**
 
 - From Python create [PyArrow](https://arrow.apache.org/docs/python/index.html) objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.
