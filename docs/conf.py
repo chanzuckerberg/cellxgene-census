@@ -12,7 +12,8 @@ author = 'Chan Zuckerberg Initiative'
 
 import git
 repo = git.Repo(search_parent_directories=True)
-tags = sorted(repo.tags, key=lambda t: t.tag.tagged_date)
+tags = [t for t in repo.tags if t.tag is not None]
+tags = sorted(tags, key=lambda t: t.tag.tagged_date)
 latest_tag = tags[-1]
 
 version = str(latest_tag)
