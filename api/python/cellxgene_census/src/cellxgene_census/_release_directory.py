@@ -6,6 +6,7 @@
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
+from collections import OrderedDict
 from typing import Dict, Optional, Union, cast
 
 import requests
@@ -75,7 +76,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
+def get_census_version_directory() -> OrderedDict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of Census releases currently available.
 
@@ -111,6 +112,7 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
     """
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()
+
     directory: CensusDirectory = cast(CensusDirectory, response.json())
 
     # Resolve all aliases for easier use
@@ -132,4 +134,14 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
             cast(CensusVersionDescription, directory[census_version])["alias"] = alias
 
     # Cast is safe, as we have removed all aliases
-    return cast(Dict[CensusVersionName, CensusVersionDescription], directory)
+    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory)
+
+    # Sort by aliases and release date, descending
+
+    aliases = [(k, v) for k, v in unordered_directory.items() if v.get("alias") is not None]
+    releases = [(k, v) for k, v in unordered_directory.items() if v.get("alias") is None]
+    ordered_directory = OrderedDict()
+    for k, v in aliases + sorted(releases, key=lambda k: k[0], reverse=True):
+        ordered_directory[k] = v
+
+    return ordered_directory
