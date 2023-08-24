@@ -7,7 +7,7 @@
 #' @param tiledbsoma_ctx A `tiledbsoma::SOMATileDBContext` built using
 #'        `new_SOMATileDBContext_for_census()`. Optional (created automatically)
 #'        if using `census_version` and the context does not need to be reused.
-#' @param mirror The Census mirror to access; one of `names(get_census_mirrors())`.
+#' @param mirror The Census mirror to access; one of `names(get_census_mirror_directory())`.
 #'
 #' @return Top-level `tiledbsoma::SOMACollection` object. After use, the census
 #'         should be closed to release memory and other resources, usually with
@@ -79,7 +79,7 @@ DEFAULT_TILEDB_CONFIGURATION <- c(
 #'
 #' @param census_version_description The result of `get_census_version_description()`
 #'        for the desired Census version.
-#' @param mirror The name of the intended census mirror (or `get_census_mirrors()[[name]]`
+#' @param mirror The name of the intended census mirror (or `get_census_mirror_directory()[[name]]`
 #'        to save the lookup), or NULL to configure for local file access.
 #' @param ... Custom configuration options.
 #'
@@ -102,9 +102,9 @@ new_SOMATileDBContext_for_census <- function(census_version_description, mirror 
   # set provider-specific config based on the mirror info
   if (!is.null(mirror)) {
     if (is.character(mirror)) {
-      mirror <- get_census_mirrors()[[mirror]]
+      mirror <- get_census_mirror_directory()[[mirror]]
     }
-    stopifnot("mirror argument to new_SOMATileDBContext_for_census should be a mirror name or get_census_mirrors()[[name]]" = is.list(mirror))
+    stopifnot("mirror argument to new_SOMATileDBContext_for_census should be a mirror name or get_census_mirror_directory()[[name]]" = is.list(mirror))
     if (mirror$provider == "S3") {
       cfg <- c(cfg, c("vfs.s3.region" = mirror$region))
       cfg <- c(cfg, c("vfs.s3.no_sign_request" = "true"))

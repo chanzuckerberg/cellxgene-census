@@ -54,8 +54,8 @@ get_census_version_directory <- function() {
 #' @export
 #'
 #' @examples
-#' get_census_mirrors()
-get_census_mirrors <- function() {
+#' get_census_mirror_directory()
+get_census_mirror_directory <- function() {
   return(resolve_aliases(jsonlite::fromJSON(CELL_CENSUS_MIRRORS_DIRECTORY_URL)))
 }
 
@@ -71,8 +71,8 @@ get_census_mirror <- function(mirror) {
   if (is.null(mirror)) {
     mirror <- "default"
   }
-  mirrors <- get_census_mirrors()
-  stopifnot("Unknown Census mirror; use get_census_mirrors() to retrieve available mirrors." = (mirror %in% names(mirrors)))
+  mirrors <- get_census_mirror_directory()
+  stopifnot("Unknown Census mirror; use get_census_mirror_directory() to retrieve available mirrors." = (mirror %in% names(mirrors)))
   return(mirrors[[mirror]])
 }
 
