@@ -124,7 +124,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-def get_census_version_directory() -> OrderedDict[CensusVersionName, CensusVersionDescription]:
+def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of Census releases currently available.
 
