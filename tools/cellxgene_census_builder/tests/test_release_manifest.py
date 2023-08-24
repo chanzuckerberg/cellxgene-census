@@ -3,7 +3,7 @@ from typing import Type, cast
 from unittest import mock
 
 import pytest
-from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
+from cellxgene_census_builder.build_state import CensusBuildConfig
 from cellxgene_census_builder.release_manifest import (
     CENSUS_AWS_REGION,
     CensusLocator,
@@ -19,12 +19,12 @@ from .conftest import has_aws_credentials
 
 # Should not be a real URL
 TEST_CENSUS_BASE_URL = "s3://bucket/path/"
+TEST_CENSUS_BASE_PREFIX = "/path/"
 
 
-@pytest.mark.xfail(reason="Waiting on PR #552 (mirrors)")
 @pytest.mark.live_corpus
 def test_get_release_manifest() -> None:
-    census_base_url = CENSUS_CONFIG_DEFAULTS["cellxgene_census_S3_path"]
+    census_base_url = CensusBuildConfig().cellxgene_census_S3_path
     release_manifest = get_release_manifest(census_base_url, s3_anon=True)
     assert len(release_manifest) > 0
     assert "latest" in release_manifest
@@ -42,14 +42,21 @@ def test_get_release_manifest_path() -> None:
 
 
 def soma_locator(tag: CensusVersionName) -> CensusLocator:
-    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/soma/", "s3_region": CENSUS_AWS_REGION}
+    return {
+        "uri": f"{TEST_CENSUS_BASE_URL}{tag}/soma/",
+        "relative_uri": f"{TEST_CENSUS_BASE_PREFIX}{tag}/soma/",
+        "s3_region": CENSUS_AWS_REGION,
+    }
 
 
 def h5ads_locator(tag: CensusVersionName) -> CensusLocator:
-    return {"uri": f"{TEST_CENSUS_BASE_URL}{tag}/h5ads/", "s3_region": CENSUS_AWS_REGION}
+    return {
+        "uri": f"{TEST_CENSUS_BASE_URL}{tag}/h5ads/",
+        "relative_uri": f"{TEST_CENSUS_BASE_PREFIX}{tag}/h5ads/",
+        "s3_region": CENSUS_AWS_REGION,
+    }
 
 
-@pytest.mark.xfail(reason="Waiting on PR #552 (mirrors)")
 @pytest.mark.parametrize(
     "release_manifest",
     [
@@ -138,7 +145,6 @@ def test_validate_release_manifest_errors(
         validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)
 
 
-@pytest.mark.xfail(reason="Waiting on PR #552 (mirrors)")
 @pytest.mark.parametrize(
     "release_manifest,rls_tag,rls_info,make_latest,expected_new_manifest",
     [
