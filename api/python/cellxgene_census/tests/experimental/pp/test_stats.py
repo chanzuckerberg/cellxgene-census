@@ -90,7 +90,7 @@ def test_mean_variance(
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("axis", [0, 1])
-@pytest.mark.parametrize("calc_mean,calc_variance", [(False, True)])
+@pytest.mark.parametrize("calc_mean,calc_variance", [(True, False)])
 @pytest.mark.parametrize(
     "experiment_name,obs_value_filter",
     [
