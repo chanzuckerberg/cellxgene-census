@@ -5,7 +5,7 @@ import requests_mock as rm
 import s3fs
 
 import cellxgene_census
-from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
+from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 DIRECTORY_JSON = {
     "2022-10-01": {
@@ -39,10 +39,20 @@ DIRECTORY_JSON = {
     "_dangling": "no-such-tag",
 }
 
+MIRRORS_JSON = {
+    "default": "AWS-S3-us-west-2",
+    "AWS-S3-us-west-2": {"provider": "S3", "base_uri": "s3://cellxgene-data-public/", "region": "us-west-2"},
+}
+
 
 @pytest.fixture
 def directory_mock(requests_mock: rm.Mocker) -> Any:
     return requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=DIRECTORY_JSON)
+
+
+@pytest.fixture
+def mirrors_mock(requests_mock: rm.Mocker) -> Any:
+    return requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=MIRRORS_JSON)
 
 
 def test_get_census_version_directory(directory_mock: Any) -> None:
@@ -75,8 +85,15 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
 
 def test_get_census_version_description_errors() -> None:
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         cellxgene_census.get_census_version_description(census_version="no/such/version/exists")
+
+
+def test_get_census_mirrors_directory(mirrors_mock: Any) -> None:
+    directory = cellxgene_census.get_census_mirror_directory()
+    assert "default" not in directory
+    assert "AWS-S3-us-west-2" in directory
+    assert directory["AWS-S3-us-west-2"] == MIRRORS_JSON["AWS-S3-us-west-2"]
 
 
 @pytest.mark.live_corpus

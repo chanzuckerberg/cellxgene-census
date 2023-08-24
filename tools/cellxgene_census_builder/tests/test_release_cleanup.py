@@ -17,35 +17,76 @@ TAG_100D_OLD = tag_days_old(100)
 TAG_LTS_CURRENT_STABLE = tag_days_old(1000)
 TAG_LTS_PREVIOUS_STABLE = tag_days_old(1001)
 
-S3_PREFIX = "s3://bucket/path/"
+S3_PREFIX = "/path/"
+S3_URI = f"s3://bucket{S3_PREFIX}"
 
 RELEASE_MANIFEST: CensusReleaseManifest = {
     "latest": TAG_NOW,
     TAG_NOW: {
         "release_build": TAG_NOW,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_NOW}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_NOW}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_NOW}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_NOW}/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_NOW}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_NOW}/h5ads/",
+            "s3_region": "us-west-2",
+        },
     },
     TAG_10D_OLD: {
         "release_build": TAG_10D_OLD,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_10D_OLD}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_10D_OLD}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_10D_OLD}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_10D_OLD}/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_10D_OLD}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_10D_OLD}/h5ads/",
+            "s3_region": "us-west-2",
+        },
     },
     TAG_100D_OLD: {
         "release_build": TAG_100D_OLD,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_100D_OLD}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_100D_OLD}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_100D_OLD}/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_100D_OLD}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_100D_OLD}/h5ads/",
+            "s3_region": "us-west-2",
+        },
     },
     "stable": TAG_LTS_CURRENT_STABLE,
     TAG_LTS_CURRENT_STABLE: {  # mock LTS release with an alias, but without a do_not_delete flag
         "release_build": TAG_LTS_CURRENT_STABLE,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_LTS_CURRENT_STABLE}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_LTS_CURRENT_STABLE}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_CURRENT_STABLE}/h5ads/",
+            "s3_region": "us-west-2",
+        },
     },
     TAG_LTS_PREVIOUS_STABLE: {  # mock LTS release lacking an alias, but with a do_not_delete flag
         "release_build": TAG_LTS_PREVIOUS_STABLE,
-        "soma": {"uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{S3_URI}{TAG_LTS_PREVIOUS_STABLE}/soma/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{S3_URI}{TAG_LTS_PREVIOUS_STABLE}/h5ads/",
+            "relative_uri": f"{S3_PREFIX}{TAG_LTS_PREVIOUS_STABLE}/h5ads/",
+            "s3_region": "us-west-2",
+        },
         "do_not_delete": True,
     },
 }
@@ -55,17 +96,17 @@ RELEASE_MANIFEST: CensusReleaseManifest = {
 @pytest.mark.parametrize(
     "release_manifest,remove_kwargs,expected_delete_tags",
     [
-        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_PREFIX), (TAG_10D_OLD, TAG_100D_OLD)),
-        (RELEASE_MANIFEST, dict(days=9, census_base_url=S3_PREFIX), (TAG_10D_OLD, TAG_100D_OLD)),
-        (RELEASE_MANIFEST, dict(days=99, census_base_url=S3_PREFIX), (TAG_100D_OLD,)),
-        (RELEASE_MANIFEST, dict(days=999, census_base_url=S3_PREFIX), ()),
-        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_PREFIX), (TAG_10D_OLD, TAG_100D_OLD)),
+        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),
+        (RELEASE_MANIFEST, dict(days=9, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),
+        (RELEASE_MANIFEST, dict(days=99, census_base_url=S3_URI), (TAG_100D_OLD,)),
+        (RELEASE_MANIFEST, dict(days=999, census_base_url=S3_URI), ()),
+        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),
         (
             {**RELEASE_MANIFEST, "latest": TAG_10D_OLD},
-            dict(days=0, census_base_url=S3_PREFIX),
+            dict(days=0, census_base_url=S3_URI),
             (TAG_NOW, TAG_100D_OLD),
         ),
-        ({**RELEASE_MANIFEST, "latest": TAG_10D_OLD}, dict(days=9, census_base_url=S3_PREFIX), (TAG_100D_OLD,)),
+        ({**RELEASE_MANIFEST, "latest": TAG_10D_OLD}, dict(days=9, census_base_url=S3_URI), (TAG_100D_OLD,)),
     ],
 )
 def test_remove_releases_older_than(
@@ -76,7 +117,7 @@ def test_remove_releases_older_than(
 ) -> None:
     """Test the expected happy paths."""
 
-    expected_delete_calls = [mock.call(f"{S3_PREFIX}{tag}/", recursive=True) for tag in expected_delete_tags]
+    expected_delete_calls = [mock.call(f"{S3_URI}{tag}/", recursive=True) for tag in expected_delete_tags]
     expected_new_manifest = release_manifest.copy()
     for tag in expected_delete_tags:
         del expected_new_manifest[tag]
@@ -101,7 +142,7 @@ def test_remove_releases_older_than(
             assert commit_release_manifest_patch.call_count == 1 or len(expected_delete_tags) == 0
             if len(expected_delete_tags) > 0:
                 assert commit_release_manifest_patch.call_count == 1
-                assert commit_release_manifest_patch.call_args == ((S3_PREFIX, expected_new_manifest),)
+                assert commit_release_manifest_patch.call_args == ((S3_URI, expected_new_manifest),)
 
                 # Confirm that we did not delete anythign that is which has do_not_delete set
                 # print(commit_release_manifest_patch.call_args[0][1])
@@ -125,11 +166,11 @@ def test_remove_releases_older_than(
                 "latest": TAG_NOW,
                 TAG_NOW: {
                     "release_build": TAG_NOW,
-                    "soma": {"uri": f"{S3_PREFIX}{TAG_NOW}/soma/"},
-                    "h5ads": {"uri": f"{S3_PREFIX}{TAG_NOW}/h5ads/oops/"},
+                    "soma": {"uri": f"{S3_URI}{TAG_NOW}/soma/"},
+                    "h5ads": {"uri": f"{S3_URI}{TAG_NOW}/h5ads/oops/"},
                 },
             },
-            dict(days=0, census_base_url=S3_PREFIX, dryrun=False),
+            dict(days=0, census_base_url=S3_URI, dryrun=False),
             ValueError,
         ),
     ],
