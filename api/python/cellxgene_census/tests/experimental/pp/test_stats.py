@@ -87,6 +87,57 @@ def test_mean_variance(
                 assert np.allclose(variance, mean_variance["variance"], atol=1e-5, rtol=1e-2)
 
 
+@pytest.mark.experimental
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("axis", [0, 1])
+@pytest.mark.parametrize("calc_mean,calc_variance", [(False, True)])
+@pytest.mark.parametrize(
+    "experiment_name,obs_value_filter",
+    [
+        ("mus_musculus", 'tissue_general == "liver" and is_primary_data == True'),
+        ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"'),
+        pytest.param("mus_musculus", "is_primary_data == True", marks=pytest.mark.expensive),
+        pytest.param("homo_sapiens", "is_primary_data == True", marks=pytest.mark.expensive),
+    ],
+)
+def test_mean_variance_exclude_zeros(
+    experiment_name: str,
+    obs_value_filter: str,
+    axis: int,
+    calc_mean: bool,
+    calc_variance: bool,
+    small_mem_context: soma.SOMATileDBContext,
+) -> None:
+    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+        with census["census_data"][experiment_name].axis_query(
+            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
+        ) as query:
+            mean_variance = pp.mean_variance(
+                query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, exclude_zeros=True
+            )
+
+            table = query.X("raw").tables().concat()
+            data = table["soma_data"].to_numpy()
+
+            dim_0 = query.indexer.by_obs(table["soma_dim_0"])
+            dim_1 = query.indexer.by_var(table["soma_dim_1"])
+            coo = sparse.coo_matrix((data, (dim_0, dim_1)), shape=(query.n_obs, query.n_vars))
+
+            coo = coo.toarray()
+            # Set zeros to nan, so we can use np.nanmean and np.nanvar later
+            coo[coo == 0] = np.nan
+
+            if calc_mean:
+                mean = np.nanmean(coo, axis=axis)
+                if axis == 1:
+                    mean = mean.T
+                assert np.allclose(mean, mean_variance["mean"], atol=1e-5, rtol=1e-2, equal_nan=True)
+
+            if calc_variance:
+                variance = np.nanvar(coo, axis=axis)
+                assert np.allclose(variance, mean_variance["variance"], atol=1e-5, rtol=1e-2, equal_nan=True)
+
+
 def test_mean_variance_no_flags() -> None:
     with pytest.raises(ValueError):
         pp.mean_variance(soma.AxisQuery(), calculate_mean=False, calculate_variance=False)

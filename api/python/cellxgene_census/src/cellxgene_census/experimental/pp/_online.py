@@ -65,21 +65,29 @@ class MeanVarianceAccumulator:
 
 
 class MeanAccumulator:
-    def __init__(self, n_samples: int, n_variables: int):
-        if n_samples <= 0:
-            raise ValueError("No samples provided - can't calculate mean.")
+    def __init__(self, n_samples: int, n_variables: int, exclude_zeros: bool = False):
+        # if n_samples <= 0:
+        #     raise ValueError("No samples provided - can't calculate mean.")
 
         if n_variables <= 0:
             raise ValueError("No variables provided - can't calculate mean.")
 
         self.u = np.zeros(n_variables, dtype=np.float64)
         self.n_samples = n_samples
+        # If we want to exclude zeros, we need to keep track of the denominator
+        self.exclude_zeros = exclude_zeros
+        self.denominator = np.zeros(n_variables)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
         _update_mean_vector(self.u, var_vec, val_vec)
+        if self.exclude_zeros:
+            _update_denominator_vector(self.denominator, var_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
-        return self.u / self.n_samples
+        if self.exclude_zeros:
+            return self.u / self.denominator
+        else:
+            return self.u / self.n_samples
 
 
 class CountsAccumulator:
@@ -364,3 +372,25 @@ def _update_mean_vector(
 ) -> None:
     for col, val in zip(var_vec, val_vec):
         u[col] = u[col] + val
+
+
+@numba.jit(
+    [
+        numba.void(
+            numba.float64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+        ),
+        numba.void(
+            numba.float64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+        ),
+    ],
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _update_denominator_vector(
+    u: npt.NDArray[np.float64],
+    var_vec: npt.NDArray[np.int64],
+) -> None:
+    for col in var_vec:
+        u[col] = u[col] + 1

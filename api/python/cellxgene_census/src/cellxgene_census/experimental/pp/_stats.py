@@ -19,6 +19,7 @@ def mean_variance(
     calculate_mean: bool = False,
     calculate_variance: bool = False,
     ddof: int = 1,
+    exclude_zeros: bool = False,
 ) -> pd.DataFrame:
     """
     Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations
@@ -82,7 +83,7 @@ def mean_variance(
     )
 
     if calculate_variance:
-        mvn = MeanVarianceAccumulator(n_batches, n_samples, n_dim_0, ddof=ddof)
+        mvn = MeanVarianceAccumulator(n_batches, n_samples, n_dim_0, ddof=ddof, exclude_zeros=exclude_zeros)
         for dim, data in iterate():
             mvn.update(dim, data)
         _, _, all_u, all_var = mvn.finalize()
@@ -90,7 +91,7 @@ def mean_variance(
             result["mean"] = all_u
         result["variance"] = all_var
     else:
-        mn = MeanAccumulator(n_dim_1, n_dim_0)
+        mn = MeanAccumulator(n_dim_1, n_dim_0, exclude_zeros=exclude_zeros)
         for dim, data in iterate():
             mn.update(dim, data)
         all_u = mn.finalize()
