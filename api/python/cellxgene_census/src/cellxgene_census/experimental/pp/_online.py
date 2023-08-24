@@ -66,8 +66,8 @@ class MeanVarianceAccumulator:
 
 class MeanAccumulator:
     def __init__(self, n_samples: int, n_variables: int, exclude_zeros: bool = False):
-        # if n_samples <= 0:
-        #     raise ValueError("No samples provided - can't calculate mean.")
+        if n_samples <= 0:
+            raise ValueError("No samples provided - can't calculate mean.")
 
         if n_variables <= 0:
             raise ValueError("No variables provided - can't calculate mean.")
