@@ -8,20 +8,6 @@ import cellxgene_census
 from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 DIRECTORY_JSON = {
-    "stable": "2022-10-01",
-    "latest": "2022-11-01",
-    "2022-11-01": {
-        "release_date": "2022-11-30",
-        "release_build": "2022-11-01",
-        "soma": {
-            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
-            "s3_region": "us-west-2",
-        },
-        "h5ads": {
-            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
-            "s3_region": "us-west-2",
-        },
-    },
     "2022-10-01": {
         "release_date": "2022-10-30",
         "release_build": "2022-10-01",
@@ -34,6 +20,20 @@ DIRECTORY_JSON = {
             "s3_region": "us-west-2",
         },
     },
+    "2022-11-01": {
+        "release_date": "2022-11-30",
+        "release_build": "2022-11-01",
+        "soma": {
+            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
+            "s3_region": "us-west-2",
+        },
+    },
+    "stable": "2022-10-01",
+    "latest": "2022-11-01",
     # An explicitly dangling tag, to confirm we handle correct
     # Underscore indicates expected failure to test below
     "_dangling": "no-such-tag",
@@ -73,6 +73,15 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     for tag in directory:
         assert directory[tag] == cellxgene_census.get_census_version_description(tag)
+
+    # Verify that the directory is sorted according to this criteria:
+    # 1. Aliases first
+    # 2. Non aliases after, in reverse order
+    dir_list = list(directory)
+    assert dir_list[0] == "stable"
+    assert dir_list[1] == "latest"
+    assert dir_list[2] == "2022-11-01"
+    assert dir_list[3] == "2022-10-01"
 
 
 def test_get_census_version_description_errors() -> None:
