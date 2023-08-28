@@ -1,6 +1,6 @@
 # Census API notebook/vignette editorial guidelines
 
-API demonstration code that is part of the documentation should be deposited here: 
+API demonstration code that is part of the documentation should be deposited here:
 
 - Python notebooks [`cellxgene-census/api/python/notebooks`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/python/notebooks)
 - R vignettes [`cellxgene-census/api/r/CellCensus/vignettes`](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes)
@@ -13,9 +13,9 @@ These assets are user-facing and are automatically rendered to the doc-sites and
 
 ### Title
 
-* It must use the highest-level markdown header `#`.
-* Unless needed, it should not contain any direct mentions of "Census".
-* It should be concise, self-explanatory, and if possible indicate an action.
+- It must use the highest-level markdown header `#`.
+- Unless needed, it should not contain any direct mentions of "Census".
+- It should be concise, self-explanatory, and if possible indicate an action.
 
 Examples:
 
@@ -31,10 +31,10 @@ Examples:
 
 Introductory text must be included right underneath the title.
 
-* It must provide a one paragraph summary of the notebook's goals.
-* It must not contain an explanation of the Census.
+- It must provide a one paragraph summary of the notebook's goals.
+- It must not contain an explanation of the Census.
 
-Examples: 
+Examples:
 
 :white_check_mark:
 
@@ -46,20 +46,20 @@ Examples:
 >
 >This notebook shows you how to learn about the Census contents and how to query it.
 
-### Table of Contents 
+### Table of Contents
 
 Immediately after the introduction a table of contents must be provided:
 
-* It must be placed under the bolded word "**Contents**" . 
-* It must contain an ordered list of the second-level headers (`##`) used for [Sections](#sections).
-* If necessary it may contain sub-lists corresponding to lower-level headers (`###`, etc)
+- It must be placed under the bolded word "**Contents**" .
+- It must contain an ordered list of the second-level headers (`##`) used for [Sections](#sections).
+- If necessary it may contain sub-lists corresponding to lower-level headers (`###`, etc)
 
 Example:
 
 :white_check_mark:
 
 > **Contents**
-> 
+>
 > 1. Learning about the lung data.
 > 2. Fetching all human lung data from the Census.
 > 3. Obtaining QC metrics for this data slice.
@@ -68,20 +68,19 @@ Example:
 
 The rest of the notebook/vignette content must be organized within sections:
 
-* The section title must use the second-level markdown header `##`. **This is important as the python doc-site renders these in the sidebar and in the full view of all notebooks.**
-* The section title should be concise, self-explanatory, and if possible indicate an action.
-* The section's contents and presence or absence of sub-headers are left to the discretion of the writer.
-* The section's non-code content should be kept as succinct as possible.
+- The section title must use the second-level markdown header `##`. **This is important as the python doc-site renders these in the sidebar and in the full view of all notebooks.**
+- The section title should be concise, self-explanatory, and if possible indicate an action.
+- The section's contents and presence or absence of sub-headers are left to the discretion of the writer.
+- The section's non-code content should be kept as succinct as possible.
 
+## Example notebook/vignette
 
-## Example notebook/vignette 
-
-```
+```markdown
 # Integrating data with SCVI.
 
-This notebook provides a demonstration for integrating two 
-Census datasets using `scvi-tools`. The goal is not to 
-provide an exhaustive guide on proper integration, but to showcase 
+This notebook provides a demonstration for integrating two
+Census datasets using `scvi-tools`. The goal is not to
+provide an exhaustive guide on proper integration, but to showcase
 what information in the Census can inform data integration.
 
 **Contents**
@@ -104,20 +103,20 @@ Let's load all modules needed for this notebook.
   import numpy as np
   import scvi
   from scipy.sparse import csr_matrix
-\code 
+\code
 
-Now we can open the Census 
+Now we can open the Census
 
-\code 
+\code
   census = cellxgene_census.open_soma(census_version="latest")
 \code
 
-In this notebook we will use Tabula Muris Senis data 
-from the liver as it contains cells from both 10X 
+In this notebook we will use Tabula Muris Senis data
+from the liver as it contains cells from both 10X
 Genomics and Smart-Seq2 technologies.
 
-Let's query the datasets table of the Census by 
-filtering on collection_name for "Tabula Muris Senis" 
+Let's query the datasets table of the Census by
+filtering on collection_name for "Tabula Muris Senis"
 and dataset_title for "liver".
 
 [...]
