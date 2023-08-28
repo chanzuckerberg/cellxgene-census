@@ -20,9 +20,29 @@ DIRECTORY_JSON = {
             "s3_region": "us-west-2",
         },
     },
+    "2022-09-01": {
+        "release_date": "2022-09-30",
+        "release_build": "2022-09-01",
+        "is_lts": True,
+        "do_not_delete": True,
+        "retraction": {
+            "date": "2022-11-15",
+            "reason": "mistakes happen",
+            "info_link": "http://cellxgene.com/census/apologies",
+        },
+        "soma": {
+            "uri": "s3://cellxgene-data-public/cell-census/2022-09-01/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {"uri": "s3://cellxgene-data-public/cell-census/2022-09-01/h5ads/", "s3_region": "us-west-2"},
+    },
+    # Ordered the latest release to be last, to verify it is explicitly sorted
+    # TODO: use a different test fixture to test sorting order
     "2022-11-01": {
         "release_date": "2022-11-30",
         "release_build": "2022-11-01",
+        "is_lts": True,
+        "do_not_delete": True,
         "soma": {
             "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
             "s3_region": "us-west-2",
@@ -32,11 +52,15 @@ DIRECTORY_JSON = {
             "s3_region": "us-west-2",
         },
     },
-    "stable": "2022-10-01",
-    "latest": "2022-11-01",
     # An explicitly dangling tag, to confirm we handle correct
     # Underscore indicates expected failure to test below
     "_dangling": "no-such-tag",
+    # Aliases placed at bottom, to verify these are explicitly sorted to the top
+    # TODO: use a different test fixture to test sorting order
+    "stable": "LTS-2",
+    "latest": "2022-11-01",
+    "LTS-2": "2022-10-01",
+    "LTS-1": "2022-09-01",
 }
 
 MIRRORS_JSON = {
@@ -67,9 +91,12 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     assert directory["2022-11-01"] == {**DIRECTORY_JSON["2022-11-01"], "alias": None}  # type: ignore
     assert directory["2022-10-01"] == {**DIRECTORY_JSON["2022-10-01"], "alias": None}  # type: ignore
+    assert directory["2022-09-01"] == {**DIRECTORY_JSON["2022-09-01"], "alias": None}  # type: ignore
 
     assert directory["latest"] == {**DIRECTORY_JSON["2022-11-01"], "alias": "latest"}  # type: ignore
     assert directory["stable"] == {**DIRECTORY_JSON["2022-10-01"], "alias": "stable"}  # type: ignore
+    assert directory["LTS-1"] == {**DIRECTORY_JSON["2022-09-01"], "alias": "LTS-1"}  # type: ignore
+    assert directory["LTS-2"] == {**DIRECTORY_JSON["2022-10-01"], "alias": "LTS-2"}  # type: ignore
 
     for tag in directory:
         assert directory[tag] == cellxgene_census.get_census_version_description(tag)
@@ -82,6 +109,36 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     assert dir_list[1] == "latest"
     assert dir_list[2] == "2022-11-01"
     assert dir_list[3] == "2022-10-01"
+
+
+def test_get_census_version_directory__lts_only(directory_mock: Any) -> None:
+    directory = cellxgene_census.get_census_version_directory(lts_only=True)
+
+    assert all((v.get("is_lts", False) for v in directory.values()))
+
+
+def test_get_census_version_directory__exclude_retracted(directory_mock: Any) -> None:
+    directory = cellxgene_census.get_census_version_directory(exclude_retracted=True)
+
+    assert "LTS-1" not in directory
+    assert "2022-09-01" not in directory
+    assert not any((v.get("retraction", None) for v in directory.values()))
+
+
+def test_get_census_version_directory__retraction_info(directory_mock: Any) -> None:
+    directory = cellxgene_census.get_census_version_directory()
+
+    assert directory["2022-09-01"]["retraction"] == {
+        "date": "2022-11-15",
+        "reason": "mistakes happen",
+        "info_link": "http://cellxgene.com/census/apologies",
+    }
+
+    assert directory["LTS-1"]["retraction"] == {
+        "date": "2022-11-15",
+        "reason": "mistakes happen",
+        "info_link": "http://cellxgene.com/census/apologies",
+    }
 
 
 def test_get_census_version_description_errors() -> None:

@@ -203,9 +203,20 @@ def open_soma(
                 f"available versions."
             ) from None
 
-    if description["alias"]:
+    if description["retraction"]:
         api_logger.info(
-            f"The \"{description['alias']}\" release is currently {description['release_build']}. Specify "
+            f"The \"{census_version}\" Census version has been retracted!\n{description['retraction']}."
+            f'Suggest using "stable" or "latest". Or use get_census_version_directory(exclude_retracted=True) to '
+            f"retrieve valid versions."
+        )
+
+    if census_version in {
+        "stable",
+        "latest",
+    }:  # TODO: these are special-case aliases, since they are expected to be modified. If we allow this conditional, we no longer need to set the "alias" attribute in get_census_version_description()
+        # TODO: We should have different messaging for "latest" vs "stable", since "latest" is expected to go away, while "latest" can be accessed via a LTS alias
+        api_logger.info(
+            f"The \"{census_version}\" release is currently {description['release_build']}. Specify "
             f"'census_version=\"{description['release_build']}\"' in future calls to open_soma() to ensure data "
             "consistency."
         )

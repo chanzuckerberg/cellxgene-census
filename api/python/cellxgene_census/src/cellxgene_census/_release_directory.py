@@ -25,14 +25,25 @@ CensusLocator = TypedDict(
         "s3_region": Optional[str],  # [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
     },
 )
+CensusVersionRetraction = TypedDict(
+    "CensusVersionRetraction",
+    {
+        "date": str,  # the date of retraction
+        "reason": Optional[str],  # the reason for retraction
+        "info_link": Optional[str],  # a link to more information
+        "replaced_by": Optional[str],  # the census version that replaces this one
+    },
+)
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
     {
-        "release_date": Optional[str],  # date of release, optional
+        "release_date": Optional[str],  # date of release (deprecated)
         "release_build": str,  # date of build
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
         "alias": Optional[str],  # the alias of this entry
+        "is_lts": Optional[bool],  # whether this is a long-term support release
+        "retraction": Optional[CensusVersionRetraction],  # if retracted, details of the retraction
     },
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
@@ -124,7 +135,9 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
+def get_census_version_directory(
+    lts_only: bool = False, exclude_retracted: bool = True
+) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of Census releases currently available.
 
@@ -162,27 +175,39 @@ def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescr
     response.raise_for_status()
 
     directory: CensusDirectory = cast(CensusDirectory, response.json())
+    directory_out: CensusDirectory = {}
 
     # Resolve all aliases for easier use
     for census_version in list(directory.keys()):
         # Strings are aliases for other census_version
-        points_at = directory[census_version]
-        alias = census_version if isinstance(points_at, str) else None
-        while isinstance(points_at, str):
+        concrete_version = directory[census_version]
+        alias = census_version if isinstance(concrete_version, str) else None
+        while isinstance(concrete_version, str):
             # resolve aliases
-            if points_at not in directory:
+            if concrete_version not in directory:
                 # oops, dangling pointer -- drop original census_version
                 directory.pop(census_version)
                 break
 
-            points_at = directory[points_at]
+            concrete_version = directory[concrete_version]
 
-        if isinstance(points_at, dict):
-            directory[census_version] = points_at.copy()
-            cast(CensusVersionDescription, directory[census_version])["alias"] = alias
+        # exclude aliases
+        if not isinstance(concrete_version, dict):
+            continue
+
+        # exclude non-LTS releases, if requested
+        if lts_only and not concrete_version.get("is_lts", False):
+            continue
+
+        # exclude retracted releases, if requested
+        if exclude_retracted and concrete_version.get("retraction", False):
+            continue
+
+        directory_out[census_version] = concrete_version.copy()
+        cast(CensusVersionDescription, directory_out[census_version])["alias"] = alias
 
     # Cast is safe, as we have removed all aliases
-    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory)
+    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory_out)
 
     # Sort by aliases and release date, descending
 
