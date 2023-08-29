@@ -58,7 +58,7 @@ Any pre-built asset on Github can be installed and tested from the Github URL. F
    ```shell
    gh run list
    ```
-   
+
    Alternatively, you can use the "Actions" tag in the GitHub web UI.
 2. Download the build artifact.zip from GitHub, using the GH Action run ID associated with the `build` action for your commit OR utilizing the web UI:
 
@@ -72,7 +72,7 @@ Any pre-built asset on Github can be installed and tested from the Github URL. F
    unzip artifact.zip -d ./artifact/
    ```
 
-3. Install and test the downloaded build, e.g.
+3. Install and test the downloaded build, e.g.,
 
    ```shell
    pip uninstall cellxgene-census
@@ -134,13 +134,13 @@ To create a release, perform the following:
    git tag -a <SEMVER> -m 'Release <SEMVER>'
    git push origin <SEMVER>
    ```
-   
+
 3. Trigger a build for this tag by manually triggering the `py-build.yml` workflow. For example:
 
    ```shell
    gh workflow run py-build.yml --ref <SEMVER>
    ```
-   
+
 4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
 5. Optional, _but recommended_: download the asset from the build workflow and validate it.
 6. Create and publish a GitHub Release [here](https://github.com/chanzuckerberg/cellxgene-census/releases/new). Set the release title to the `<SEMVER>`. Select `Set as the latest release` ‼️ **important, even if performing a release candidate (RC) you must use this option instead of `Set as a pre-release` because R-universe builds from the latest release**. Use the `Generate Release Notes` button to auto-populate the summary with a changelog. It is reasonable to remove any R-specific or builder-specific entries. Add a prelude to the summary, noting any major new features or API changes. 
@@ -155,7 +155,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    ```shell
    $ gh run download <ID>
    ```
-   
+
 3. Optional: upload to TestPyPi (this assumes the downloaded assets are in ./artifact/).
 
    ```shell
@@ -169,7 +169,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    pip install --no-cache-dir -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple cellxgene-census
    python -c "import cellxgene_census; print(cellxgene_census.__version__)"
    ```
-   
+
    Note that the `--extra-index-url` option ensures that any transitive package dependencies that are _not_ available on
    `test.pypi.org` can be satisfied by installing them from the production `pypi.org`.  You can find more information
    [here](https://packaging.python.org/en/latest/guides/using-testpypi/).
@@ -178,7 +178,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    ```shell
    pipx run twine upload ./artifact/*
    ```
-   
+
 6. Test the installation from PyPi, as a final sanity check. Note that it may take a minute for the new release to be visible on pypi.org:
    
    ```shell
