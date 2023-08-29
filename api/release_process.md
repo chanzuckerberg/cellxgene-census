@@ -187,4 +187,4 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
 
 ## Step 5: Publish assets to R-universe
 
-This is done automatically and it usually takes less than 3 hours upon the publishing of the release. If after 3 hours the build has not been reflected in [https://chanzuckerberg.r-universe.dev/](https://chanzuckerberg.r-universe.dev/) then raised the issue to the team for further investigation.
+This is done automatically and it usually takes less than 3 hours upon the publishing of the release. If after 3 hours the build has not been reflected in [https://chanzuckerberg.r-universe.dev/](https://chanzuckerberg.r-universe.dev/) then raise the issue to the team for further investigation.
