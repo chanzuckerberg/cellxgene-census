@@ -5,13 +5,13 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-CENSUS_SCHEMA_VERSION = "1.1.0"
+CENSUS_SCHEMA_VERSION = "1.2.0"
 
-CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
+CXG_SCHEMA_VERSION = "3.1.0"  # the CELLxGENE schema version supported
+
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
 # hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
-CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2022-08-19/uberon.owl"
-CXG_SCHEMA_VERSION_IMPORT = [CXG_SCHEMA_VERSION]  # versions we can ingest
+CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_COLUMNS = [
