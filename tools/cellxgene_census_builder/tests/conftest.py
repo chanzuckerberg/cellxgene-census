@@ -27,18 +27,18 @@ GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
 NUM_DATASET = 2
 
 
-def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None) -> anndata.AnnData:
+def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
     n_genes = len(gene_ids)
     rng = np.random.default_rng()
-    X = rng.integers(5, size=(n_cells, n_genes)).astype(np.float32)
+    min_X_val = 1 if no_zero_counts else 0
+    X = rng.integers(min_X_val, min_X_val + 5, size=(n_cells, n_genes)).astype(np.float32)
 
     # Builder code currently assumes (and enforces) that ALL cells (rows) contain at least
     # one non-zero value in their count matrix. Enforce this assumption, as the rng will
     # occasionally generate row that sums to zero.
-    zero_sum_rows = X.sum(axis=1) == 0
-    X[zero_sum_rows, :][:, rng.integers(X.shape[1])] = 1.0
+    X[X.sum(axis=1) == 0, rng.integers(X.shape[1])] = 6.0
     assert np.all(X.sum(axis=1) > 0.0)
 
     # The builder only supports sparse matrices
