@@ -1,29 +1,55 @@
-# cellxgene_census Python package release process
+# CELLxGENE Census Python and R package release process
 
-The following approach is used to manage releases of the Python cellxgene_census package:
+The following approach is used to manage releases of the Python `cellxgene_census` and R `cellxgene.census` packages:
 
-1. The cellxgene_census package is automatically built (sdist and wheels) in a GitHub action, and build artifacts are uploaded to GitHub.
+Python:
+
+1. The `cellxgene_census` package is automatically built (sdist and wheels) in a GitHub action, and build artifacts are uploaded to GitHub.
 2. Release candidate testing is done by installing built assets from Github.
 3. Build versions are managed via [`setuptools_scm`](https://github.com/pypa/setuptools_scm) and the version is automatically determined from git tags.
 4. Releases are created and managed via GitHub Releases, leaving a tag in place from which future branches (eg, emergency fixes) can be created.
 5. Built packages are published to PyPi _from_ the GitHub assets, i.e. are never hand-created, to reduce errors.
+
+R:
+
+1. The version number of `cellxgene.census` needs to be manually updated in the `DESCRIPTION` file of the package, and merged to main to match the desired release version.
+1. The R doc-site needs to be created locally with the new version number and then merged to main prior to the release.
+1. Upon the GitHub release, a package build is automatically triggered at [https://chanzuckerberg.r-universe.dev/builds](https://chanzuckerberg.r-universe.dev/builds). A build will only be triggered if the version number in `DESCRIPTION` file has changed.
 
 ## Prerequisites
 
 While not strictly required, this process assumes you have met the following prerequisites:
 
 - You have write access to the `chanzuckerberg/cellxgene-census` repo
-- You have an account on pypi.org and test.pypi.org, both with access to the cellxgene_census project. You will need to have created an API token on each account so that you can authenticate to test.pypi.org and pypi.org accounts when using `twine`. Usually this means adding these tokens to your `~/.pypirc` file. See <https://pypi.org/help/#apitoken> for more information.
+- You have an account on pypi.org and test.pypi.org, both with access to the cellxgene_census project. You will need to have created an API token on each account so that you can authenticate to test.pypi.org and pypi.org accounts when using `twine`. Usually this means adding these tokens to your `~/.pypirc` file. See [https://pypi.org/help/#apitoken](https://pypi.org/help/#apitoken)  for more information.
 - You have the Github CLI tool (`gh`) installed. See [documentation](https://cli.github.com/).
 - You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/).
 
 ## Step 1: Building the package assets
 
+### Python
+
 A build will occur automatically upon each commit to main, upon each commit to a PR, or when the build workflow is manually invoked. The build workflow is defined by the GH `py-build.yml` workflow. Build artifacts are the Python setuptools-created `sdist` and `wheel`, and are retained for a limited period of time (currently the GH default of 90 days).
 
 Unless you are revising and testing the build process itself, there is no need to manually perform a build.
 
-## Step 2: Release candidate testing
+### R
+
+R builds occur automatically at R-universe ([https://chanzuckerberg.r-universe.dev/builds](https://chanzuckerberg.r-universe.dev/builds)) upon publishing a Github release. These builds are done from the tag commit of the latest release.
+
+**However, the version number needs to be manually updated for the R package.** This needs to be done prior to the release by doing the following.
+
+1. Create a new branch to bump version number.
+2. Update the version number in the file `api/r/cellxgene.census/DESCRIPTION`. R only allows numerical versions, therefore:
+   - If this is a release candidate, bump the dot-dot-dot-dot version number. For example the R version number for v2.0.0-rc1 would be `2.0.0.1`
+   - If this is the final release, bump the version number to its final state. For example the R version number for v2.0.0 would be `2.0.0`
+3. Regenerate the doc-site to reflect the version bump in the doc-site pages. Follow [these instructions](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_).
+4. Check that the doc-site was rendered correctly by opening `api/r/cellxgene.census/docs/index.html`.
+5. Submit PR and merge to main.
+
+## Step 2: Creating and testing the package builds
+
+### Python
 
 Any pre-built asset on Github can be installed and tested from the Github URL. For example:
 
@@ -43,10 +69,7 @@ Any pre-built asset on Github can be installed and tested from the Github URL. F
    If you download using the browser, unzip into a temp directory, e.g.,
 
    ```shell
-   $ unzip artifact.zip -d ./artifact/
-   Archive:  artifact.zip
-     inflating: ./artifact/cellxgene_census-0.0.1.dev0-py3-none-any.whl
-     inflating: ./artifact/cellxgene_census-0.0.1.dev0.tar.gz
+   unzip artifact.zip -d ./artifact/
    ```
 
 3. Install and test the downloaded build, e.g.,
@@ -63,6 +86,37 @@ To test a release candidate:
 3. If acceptable, proceed to Step 3 - create a release.
 
 If testing exposes problems, fix and commit a solution as you would any other change.
+
+### R
+
+To test the R package do the following from an R session.
+
+- Remove previous installations of TileDB dependencies and `cellxgene.census`.
+
+```r
+remove.packages(c("tiledb", "tiledbsoma", "cellxgene.census"))
+```
+
+- Build and test the R package directly from the main GitHub branch.
+
+```r
+if(!require("remotes"))
+  install.packages("remotes")
+
+remotes::install_github("chanzuckerberg/cellxgene-census/api/r/cellxgene.census")
+```
+
+- Verify `cellxgene.census` and TileDB dependencies version numbers.
+
+```r
+library("cellxgene.census")
+library("tiledb")
+library("tiledbsoma")
+
+sessionInfo()
+```
+
+- Do basic tests, open census, read data, etc.
 
 ## Step 3: Create a release
 
@@ -88,7 +142,7 @@ To create a release, perform the following:
 
 4. When the workflow completes, make note of the run ID (e.g., using `gh run list`).
 5. Optional, _but recommended_: download the asset from the build workflow and validate it.
-6. Create and publish a GitHub Release [here](https://github.com/chanzuckerberg/cellxgene-census/releases/new). Set the release title to the `<SEMVER>`. Select `Set as the latest release`. Use the `Generate Release Notes` button to auto-populate the summary with a changelog. It is reasonable to remove any R-specific or builder-specific entries. Add a prelude to the summary, noting any major new features or API changes.
+6. Create and publish a GitHub Release [here](https://github.com/chanzuckerberg/cellxgene-census/releases/new). Set the release title to the `<SEMVER>`. Select `Set as the latest release` ‼️ **important, even if performing a release candidate (RC) you must use this option instead of `Set as a pre-release` because R-universe builds from the latest release**. Use the `Generate Release Notes` button to auto-populate the summary with a changelog. It is reasonable to remove any R-specific or builder-specific entries. Add a prelude to the summary, noting any major new features or API changes.
 
 ## Step 4: Publish assets to PyPi
 
@@ -130,3 +184,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    pip install --no-cache-dir cellxgene-census
    python -c "import cellxgene_census; print(cellxgene_census.__version__)"
    ```
+
+## Step 5: Publish assets to R-universe
+
+This is done automatically and it usually takes less than 3 hours upon the publishing of the release. If after 3 hours the build has not been reflected in [https://chanzuckerberg.r-universe.dev/](https://chanzuckerberg.r-universe.dev/) then raise the issue to the team for further investigation.
