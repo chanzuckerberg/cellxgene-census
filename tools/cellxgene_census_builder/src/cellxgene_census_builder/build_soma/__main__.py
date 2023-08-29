@@ -91,9 +91,9 @@ def create_args_parser() -> argparse.ArgumentParser:
         default=default_config.dataset_id_blocklist_uri,
     )
     # hidden option for testing by devs. Will process only the first 'n' datasets
-    build_parser.add_argument("--test-first-n", type=int)
+    build_parser.add_argument("--test-first-n", type=int, default=0)
     # hidden option for testing by devs. Allow for WIP testing by devs.
-    build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
+    build_parser.add_argument("--disable-dirty-git-check", action=argparse.BooleanOptionalAction, default=False)
 
     # VALIDATE
     subparsers.add_parser("validate", help="Validate an existing Census build")
