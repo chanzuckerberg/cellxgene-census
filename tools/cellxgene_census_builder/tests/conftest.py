@@ -33,6 +33,14 @@ def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None) -> anndat
     n_genes = len(gene_ids)
     rng = np.random.default_rng()
     X = rng.integers(5, size=(n_cells, n_genes)).astype(np.float32)
+
+    # Builder code currently assumes (and enforces) that ALL cells (rows) contain at least
+    # one non-zero value in their count matrix. Enforce this assumption, as the rng will
+    # occasionally generate row that sums to zero.
+    zero_sum_rows = X.sum(axis=1) == 0
+    X[zero_sum_rows, :][:, rng.integers(X.shape[1])] = 1.0
+    assert np.all(X.sum(axis=1) > 0.0)
+
     # The builder only supports sparse matrices
     X = sparse.csr_matrix(X)
 
