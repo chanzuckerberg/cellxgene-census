@@ -54,29 +54,28 @@ R builds occur automatically at R-universe (https://chanzuckerberg.r-universe.de
 Any pre-built asset on Github can be installed and tested from the Github URL. For example:
 
 1. Identify the GH workflow run ID that contains the asset you wish to test. A simple way to do this is:
+
    ```shell
-   $ gh run list
+   gh run list
    ```
    Alternatively, you can use the "Actions" tag in the GitHub web UI.
 2. Download the build artifact.zip from GitHub, using the GH Action run ID associated with the `build` action for your commit OR utilizing the web UI:
 
    ```shell
-   $ gh run download <ID>
+   gh run download <ID>
    ```
 
    If you download using the browser, unzip into a temp directory, e.g.,
 
    ```shell
-   $ unzip artifact.zip -d ./artifact/
-   Archive:  artifact.zip
-     inflating: ./artifact/cellxgene_census-0.0.1.dev0-py3-none-any.whl
-     inflating: ./artifact/cellxgene_census-0.0.1.dev0.tar.gz
+   unzip artifact.zip -d ./artifact/
    ```
 
-3. Install and test the downloaded build, e.g.,
+3. Install and test the downloaded build, e.g.
+
    ```shell
-   $ pip uninstall cellxgene-census
-   $ pip install ./artifact/cellxgene_census-*-any.whl
+   pip uninstall cellxgene-census
+   pip install ./artifact/cellxgene_census-*-any.whl
    ```
 
 To test a release candidate:
@@ -129,11 +128,13 @@ To create a release, perform the following:
 
 1. Identify both the (tested & validated) commit and semver for the release.
 2. Tag the commit with the release version (_including_ a `v` prefix) and push the tag to origin. **Important**: use an annotated tag, e.g., `git tag -a v1.9.4 -m 'Release 1.9.4`. For example (please replace <SEMVER> with your version, _including_ a `v`, e.g. `v1.9.4`:
+
    ```shell
    $ git tag -a <SEMVER> -m 'Release <SEMVER>'
    $ git push origin <SEMVER>
    ```
 3. Trigger a build for this tag by manually triggering the `py-build.yml` workflow. For example:
+
    ```shell
    $ gh workflow run py-build.yml --ref <SEMVER>
    ```
