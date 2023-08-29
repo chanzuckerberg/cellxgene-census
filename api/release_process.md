@@ -23,7 +23,7 @@ While not strictly required, this process assumes you have met the following pre
 - You have write access to the `chanzuckerberg/cellxgene-census` repo
 - You have an account on pypi.org and test.pypi.org, both with access to the cellxgene_census project. You will need to have created an API token on each account so that you can authenticate to test.pypi.org and pypi.org accounts when using `twine`. Usually this means adding these tokens to your `~/.pypirc` file. See [https://pypi.org/help/#apitoken](https://pypi.org/help/#apitoken)  for more information.
 - You have the Github CLI tool (`gh`) installed. See [documentation](https://cli.github.com/).
-- You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/). 
+- You have the `pipx` CLI tool installed. See [documentation](https://pypa.github.io/pipx/).
 
 ## Step 1: Building the package assets
 
@@ -35,11 +35,11 @@ Unless you are revising and testing the build process itself, there is no need t
 
 ### R
 
-R builds occur automatically at R-universe (https://chanzuckerberg.r-universe.dev/builds) upon publishing a Github release. These builds are done from the tag commit of the latest release.
+R builds occur automatically at R-universe ([https://chanzuckerberg.r-universe.dev/builds](https://chanzuckerberg.r-universe.dev/builds)) upon publishing a Github release. These builds are done from the tag commit of the latest release.
 
 **However, the version number needs to be manually updated for the R package.** This needs to be done prior to the release by doing the following.
 
-1. Create a new branch to bump version number. 
+1. Create a new branch to bump version number.
 2. Update the version number in the file `api/r/cellxgene.census/DESCRIPTION`. R only allows numerical versions, therefore:
    - If this is a release candidate, bump the dot-dot-dot-dot version number. For example the R version number for v2.0.0-rc1 would be `2.0.0.1`
    - If this is the final release, bump the version number to its final state. For example the R version number for v2.0.0 would be `2.0.0`
