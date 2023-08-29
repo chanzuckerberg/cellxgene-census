@@ -1,38 +1,66 @@
-## New Features in the CZ CELLxGENE Census API
+# Introducing Schema V1.1.0: Key Updates in Census API and Data Layer
 
-**Published September 2023**
+*Published: 25 August 2023*  
+*By: [Author Name](mailto:author1@chanzuckerberg.com), [Co-Author](mailto:author2@chanzuckerberg.com)*
 
-To our community of computational biologists, software engineers, and machine learning research scientists, we are pleased to announce the upcoming improvements to the CZ CELLxGENE Census API. The following details highlight the enhancements:
+The Census team is thrilled to announce the introduction of Census schema V1.1.0. This version offers enhanced data and API functionalities, tailored to empower your single-cell research. 
 
-### 1. **Numerical Stability in the X[normalized] Layer**
+These features are currently experimental and exclusive to the "latest" version of Census. We invite your feedback as you explore these novel functionalities.
 
-The X[normalized] layer has undergone precision refinement. Previously, minute fractional values in this layer were written as explicit zeros. In the updated version, a small sigma value is consistently added to each position in the layer. This assures that all explicitly documented coordinates possess values greater than zero, adhering to the principle that a normalized layer should never record a zero for a corresponding value of 1 in the raw layer. For further technical details, refer to issue [#706](https://github.com/chanzuckerberg/cellxgene-census/issues/706).
+## Schema Changes in V1.1.0
 
-### 2. **Data Type Upgradation for Enhanced Accuracy**
+### Adds `dataset_version_id` to Census Table
 
-To ensure optimal accuracy, the `obs.raw_sum`, `obs.raw_mean_nnz`, and `obs.raw_variance_nnz` fields have transitioned from `float32` to `float64` data type. This change primarily addresses the concern of insufficient precision offered by `float32` in recording axis statistics. For a comprehensive understanding, refer to the associated issue [#714](https://github.com/chanzuckerberg/cellxgene-census/issues/714).
+The new field `dataset_version_id` has been introduced in `census_obj["census_info"]["datasets"]` to facilitate dataset versioning and management.
 
-### 3. **Introduction of Summary Statistics**
+### Numerical Precision in X["normalized"] Layer
 
-Summary statistics have been incorporated to facilitate swift and precise data interpretation:
+The X["normalized"] layer now boasts improved numerical precision. A small sigma value has been consistently added to each position, ensuring that no explicit zeros are recorded.
 
-- For `census["census_data"][organism].obs`:
-  * `raw_sum` - Represents the count sum derived from X["raw"]
-  * `nnz` - Enumerates the number of non-zero (nnz) values
-  * `raw_mean` - Provides the average count of nnz values
-  * `raw_variance` - Indicates the count variance of nnz values
-  * `n_measured_vars` - Enumerates the "measured" genes, determined by the sum of the presence matrix
+### New Columns in `ms["RNA"].var` DataFrame
 
-It is noteworthy that the metric detailing the number of mitochondrial genes has been excluded due to inconsistencies in its biological accuracy across diverse datasets.
+The `ms["RNA"].var` dataframe has been enriched with two new columns: `nnz` and `n_measured_obs`, which provide a count of non-zero values and "measured" cells, respectively.
 
-- For `census["census_data"][organism].ms["RNA"].var`:
-  * `nnz` - Enumerates the number of nnz values
-  * `n_measured_obs` - Specifies the number of "measured" cells, as per the sum of the presence matrix
+### Enhanced `obs` DataFrame 
 
-For in-depth technical specifications, please review issues [#289](https://github.com/chanzuckerberg/cellxgene-census/issues/289) and [#563](https://github.com/chanzuckerberg/cellxgene-census/issues/563).
+The `obs` dataframe is now augmented with the following new columns, each serving a specific computational purpose:
 
-### **Significance**:
-- **Count Sum Functionality**: The count sum is a fundamental aspect of normalization processes.
-- **Mitochondrial Genes Metric**: It serves as a quality control metric to assess the likelihood of a cell undergoing apoptosis.
+- `raw_sum`: Represents the count sum derived from X["raw"]
+- `nnz`: Enumerates the number of non-zero (nnz) values
+- `raw_mean`: Provides the average count of nnz values
+- `raw_variance`: Indicates the count variance of nnz values
+- `n_measured_vars`: Enumerates the "measured" genes, determined by the sum of the presence matrix
 
-The incorporation of these advanced features substantially streamlines single cell analysis tasks. These enhancements signify our commitment to delivering optimal analytical tools for the research community. We encourage users to explore and familiarize themselves with these new additions for maximum utility in their scientific pursuits.
+## How to Use the New Features
+
+### Exporting Normalized Data
+
+Normalized data can be exported into AnnData and Seurat with the following code:
+
+```python
+# Example code
+```
+
+### Accessing Data via TileDB-SOMA 
+
+For a memory-efficient data retrieval, you can use TileDB-SOMA as outlined below:
+
+```python
+# Example code
+```
+
+### Utilizing Pre-Calculated Stats for Querying `obs` and `var`
+
+To filter based on pre-calculated statistics and export to AnnData, execute the following:
+
+```python
+# Example code to fetch all cell/genes with a count greater than 5
+```
+
+---
+
+We encourage you to engage with these advancements and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.
+
+For further information on numerical precision improvements, please consult with @pablo-gar or @bkmartinjr. To report issues or for additional feedback, refer to our Census GitHub repository.
+
+---
