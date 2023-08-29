@@ -118,7 +118,6 @@ sessionInfo()
 
 * Do basic tests, open census, read data, etc.
 
-
 ## Step 3: Create a release
 
 Prior to this process, determine the correct semver version number for the new release. Please consider if this is a major, minor or patch release, and if it should have a tag (e.g., an alpha build, with a `a#` suffix or a pre-release candidate, with a `-rc` suffix). If you are not sure, please review [PEP 440](https://peps.python.org/pep-0440/) for more information.
@@ -162,7 +161,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    pipx run twine upload --repository testpypi ./artifact/*
    ```
 
-   Following the upload, confirm correct presentation on the project page and ability to download install from TestPyPi. 
+   Following the upload, confirm correct presentation on the project page and ability to download install from TestPyPi.
 4. To test installation from TestPyPi:
 
    ```shell
@@ -180,7 +179,7 @@ To publish built release assets to PyPi (_note_: this will require your pypi/tes
    ```
 
 6. Test the installation from PyPi, as a final sanity check. Note that it may take a minute for the new release to be visible on pypi.org:
-   
+
    ```shell
    pip install --no-cache-dir cellxgene-census
    python -c "import cellxgene_census; print(cellxgene_census.__version__)"
