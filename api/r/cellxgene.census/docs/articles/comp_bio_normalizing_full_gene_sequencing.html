@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,8 +100,7 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.ipynb
 -->
-<p>This tutorial shows you how to fetch full-length gene sequencing data
-from the Census and normalize it to account for gene length.</p>
+<p>This tutorial shows you how to fetch full-length gene sequencing data from the Census and normalize it to account for gene length.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Opening the census</li>
@@ -116,27 +115,19 @@ from the Census and normalize it to account for gene length.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://satijalab.org/seurat" class="external-link">"Seurat"</a></span><span class="op">)</span></span>
 <span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>You can learn more about all of the <code>cellxgene.census</code>
-methods by accessing their corresponding documentation, for example
-<code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
+<p>You can learn more about all of the <code>cellxgene.census</code> methods by accessing their corresponding documentation, for example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="fetching-full-length-example-sequencing-data-smart-seq">Fetching full-length example sequencing data (Smart-Seq)<a class="anchor" aria-label="anchor" href="#fetching-full-length-example-sequencing-data-smart-seq"></a>
 </h2>
-<p>Let’s get some example data, in this case we’ll fetch all cells from
-a relatively small dataset derived from the Smart-Seq2 technology which
-performs full-length gene sequencing:</p>
+<p>Let’s get some example data, in this case we’ll fetch all cells from a relatively small dataset derived from the Smart-Seq2 technology which performs full-length gene sequencing:</p>
 <ul>
-<li>Collection: <a href="https://cellxgene.cziscience.com/collections/0b9d8a04-bb9d-44da-aa27-705bb65b54eb" class="external-link">Tabula
-Muris Senis</a>
+<li>Collection: <a href="https://cellxgene.cziscience.com/collections/0b9d8a04-bb9d-44da-aa27-705bb65b54eb" class="external-link">Tabula Muris Senis</a>
 </li>
-<li>Dataset: <a href="https://cellxgene.cziscience.com/e/524179b0-b406-4723-9c46-293ffa77ca81.cxg/" class="external-link">Liver
-- A single-cell transcriptomic atlas characterizes ageing tissues in the
-mouse - Smart-seq2</a>
+<li>Dataset: <a href="https://cellxgene.cziscience.com/e/524179b0-b406-4723-9c46-293ffa77ca81.cxg/" class="external-link">Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</a>
 </li>
 </ul>
-<p>Let’s first find this dataset’s id by using the dataset table of the
-Census.</p>
+<p>Let’s first find this dataset’s id by using the dataset table of the Census.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">liver_dataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span></span>
@@ -163,23 +154,13 @@ Census.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Smart-seq2 </span></span>
 <span><span class="co">#&gt;       2859</span></span></code></pre></div>
-<p>Great! As you can see this a small dataset only containing
-<strong>2,859</strong> cells. Now let’s proceed to normalize by gene
-lengths.</p>
+<p>Great! As you can see this a small dataset only containing <strong>2,859</strong> cells. Now let’s proceed to normalize by gene lengths.</p>
 </div>
 <div class="section level2">
 <h2 id="normalizing-expression-to-account-for-gene-length">Normalizing expression to account for gene length<a class="anchor" aria-label="anchor" href="#normalizing-expression-to-account-for-gene-length"></a>
 </h2>
-<p>By default <code>cellxgene_census::get_seurat()</code> fetches all
-genes in the Census. So let’s first identify the genes that were
-measured in this dataset and subset the Seurat obect to only include
-those.</p>
-<p>To this goal we can use the “Dataset Presence Matrix” in
-<code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$get("feature_dataset_presence_matrix")</code>.
-This is a boolean matrix <code>N x M</code> where <code>N</code> is the
-number of datasets, <code>M</code> is the number of genes in the Census,
-and a 1 entry indicates that a gene was measured in a dataset. (Note
-that Seurat objects have the transposed layout <code>M x N</code>.)</p>
+<p>By default <code>cellxgene_census::get_seurat()</code> fetches all genes in the Census. So let’s first identify the genes that were measured in this dataset and subset the Seurat obect to only include those.</p>
+<p>To this goal we can use the “Dataset Presence Matrix” in <code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$get("feature_dataset_presence_matrix")</code>. This is a boolean matrix <code>N x M</code> where <code>N</code> is the number of datasets, <code>M</code> is the number of genes in the Census, and a 1 entry indicates that a gene was measured in a dataset. (Note that Seurat objects have the transposed layout <code>M x N</code>.)</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">liver_seurat</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
@@ -197,11 +178,8 @@ that Seurat objects have the transposed layout <code>M x N</code>.)</p>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
 <span><span class="co">#&gt; 17992 features across 2859 samples within 1 assay </span></span>
 <span><span class="co">#&gt; Active assay: RNA (17992 features, 0 variable features)</span></span></code></pre></div>
-<p>We can see that out of all genes in the Census
-<strong>17,992</strong> were measured in this dataset.</p>
-<p>Now let’s normalize these genes by gene length. We can easily do this
-because the Census has gene lengths included in the gene metadata under
-<code>feature_length</code>.</p>
+<p>We can see that out of all genes in the Census <strong>17,992</strong> were measured in this dataset.</p>
+<p>Now let’s normalize these genes by gene length. We can easily do this because the Census has gene lengths included in the gene metadata under <code>feature_length</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">liver_seurat</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, slot <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 5 x 5 sparse Matrix of class "dgCMatrix"</span></span>
@@ -226,21 +204,18 @@ because the Census has gene lengths included in the gene metadata under
 <span><span class="co">#&gt; ENSMUSG00000033845           .  0.06586544   0.2320019 .             .         </span></span>
 <span><span class="co">#&gt; ENSMUSG00000025903           .  .            .         .             .         </span></span>
 <span><span class="co">#&gt; ENSMUSG00000033813           .  .            0.2744448 0.0003314551  0.01789857</span></span></code></pre></div>
-<p>All done! You can now see that we have real numbers instead of
-integers.</p>
+<p>All done! You can now see that we have real numbers instead of integers.</p>
 </div>
 <div class="section level2">
 <h2 id="validation-through-clustering-exploration">Validation through clustering exploration<a class="anchor" aria-label="anchor" href="#validation-through-clustering-exploration"></a>
 </h2>
-<p>Let’s perform some basic clustering analysis to see if cell types
-cluster as expected using the normalized counts.</p>
+<p>Let’s perform some basic clustering analysis to see if cell types cluster as expected using the normalized counts.</p>
 <p>First we do some basic filtering of cells and genes.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cells_per_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">liver_seurat</span>, slot <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">genes_per_cell</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">liver_seurat</span><span class="op">$</span><span class="va">RNA</span><span class="op">@</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">liver_seurat</span> <span class="op">&lt;-</span> <span class="va">liver_seurat</span><span class="op">[</span><span class="va">cells_per_gene</span> <span class="op">&gt;=</span> <span class="fl">5</span>, <span class="va">genes_per_cell</span> <span class="op">&gt;=</span> <span class="fl">500</span><span class="op">]</span></span></code></pre></div>
-<p>Then we normalize to account for sequencing depth and transform data
-to log scale.</p>
+<p>Then we normalize to account for sequencing depth and transform data to log scale.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">liver_seurat</span> <span class="op">&lt;-</span> <span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://satijalab.org/seurat/reference/NormalizeData.html" class="external-link">NormalizeData</a></span><span class="op">(</span></span>
 <span>  <span class="va">liver_seurat</span>,</span>
@@ -268,9 +243,7 @@ to log scale.</p>
 <span><span class="va">liver_seurat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">liver_seurat</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">liver_seurat</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"cell_type"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="comp_bio_normalizing_full_gene_sequencing_files/figure-html/unnamed-chunk-15-1.png" width="672"></p>
-<p>With a few exceptions we can see that all cells from the same cell
-type cluster near each other which serves as a sanity check for the
-gene-length normalization that we applied.</p>
+<p>With a few exceptions we can see that all cells from the same cell type cluster near each other which serves as a sanity check for the gene-length normalization that we applied.</p>
 <p>Don’t forget to close the census.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
