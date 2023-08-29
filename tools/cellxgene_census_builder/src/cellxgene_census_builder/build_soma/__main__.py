@@ -4,6 +4,8 @@ import pathlib
 import sys
 from datetime import datetime
 
+import attrs
+
 from ..build_state import CensusBuildArgs, CensusBuildConfig
 from ..util import log_process_resource_status, process_init
 from .build_soma import build
@@ -15,8 +17,14 @@ def main() -> int:
     cli_args = cli_parser.parse_args()
     assert cli_args.subcommand in ["build", "validate"]
 
-    default_config = CensusBuildConfig(**cli_args.__dict__)
-    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=default_config)
+    # Pass params from CLI arguments _only_ if they exist in the CensusBuildConfig namespace
+    default_config = CensusBuildConfig(
+        **{
+            k: cli_args.__dict__[k]
+            for k in cli_args.__dict__.keys() & {f.alias for f in attrs.fields(CensusBuildConfig)}
+        }
+    )
+    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.working_dir), config=default_config)
     process_init(args)
     logging.info(args)
 
@@ -34,7 +42,7 @@ def main() -> int:
 def create_args_parser() -> argparse.ArgumentParser:
     default_config = CensusBuildConfig()
     parser = argparse.ArgumentParser(prog="cellxgene_census_builder.build_soma")
-    parser.add_argument("uri", type=str, help="Census top-level URI")
+    parser.add_argument("working_dir", type=str, help="Census build working directory")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
     parser.add_argument(
         "-mp",
@@ -66,7 +74,10 @@ def create_args_parser() -> argparse.ArgumentParser:
         help="Manifest file",
     )
     build_parser.add_argument(
-        "--validate", action=argparse.BooleanOptionalAction, default=True, help="Validate immediately after build"
+        "--validate",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Validate immediately after build",
     )
     build_parser.add_argument(
         "--consolidate",
