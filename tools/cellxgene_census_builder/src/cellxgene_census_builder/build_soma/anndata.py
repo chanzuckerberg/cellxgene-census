@@ -156,6 +156,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
             X is None or isinstance(X, np.ndarray) or X.has_canonical_format
         ), "Found H5AD with non-canonical X matrix"
 
+        assert X is None or np.all(X.sum(axis=1) > 0), "H5AD contains a cell with no X values > 0"
         return ad
 
     return _filter
