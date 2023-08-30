@@ -1,8 +1,8 @@
 # CZ CELLxGENE Discover Census Schema
 
-**Version**: 1.1.0
+**Version**: 1.2.0
 
-**Last edited**: July, 2023.
+**Last edited**: Sept, 2023.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -10,14 +10,14 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 The CZ CELLxGENE Discover Census, hereafter referred as Census, is a versioned data object and API for most of the single-cell data hosted at [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/). To learn more about the Census visit the `chanzuckerberg/cellxgene-census` [github repository](https://github.com/chanzuckerberg/cellxgene-census)
 
-To better understand this document the reader should be familiar with the [CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md) and [SOMA](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md).
+To better understand this document the reader should be familiar with the [CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md) and [SOMA](https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md).
 
 ## Definitions
 
 The following terms are used throughout this document:
 
 * adata – generic variable name that refers to an [`AnnData`](https://anndata.readthedocs.io/) object.
-* CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: [CELLxGENE dataset schema version is 3.0.X](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md)
+* CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: [CELLxGENE dataset schema version is 3.1.X](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md)
 * census\_obj – the Census root object, a SOMACollection.
 * Census data release – a versioned Census object deposited in a public bucket and accessible by APIs.
 * tissue – original tissue annotation.
@@ -44,17 +44,17 @@ Census data releases are versioned separately from the schema.
 
 ### Data included
 
-All datasets included in the Census MUST be of [CELLxGENE dataset schema version 3.0.X](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md). The following data constraints are imposed on top of the CELLxGENE dataset schema.
+All datasets included in the Census MUST be of [CELLxGENE dataset schema version 3.1.X](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md). The following data constraints are imposed on top of the CELLxGENE dataset schema.
 
 #### Species
 
-The Census MUST only contain observations (cells) with an  [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id) value of either "NCBITaxon:10090" for *Mus musculus* or "NCBITaxon:9606" for *Homo sapiens* MUST be included.
+The Census MUST only contain observations (cells) with an  [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#organism_ontology_term_id) value of either "NCBITaxon:10090" for *Mus musculus* or "NCBITaxon:9606" for *Homo sapiens* MUST be included.
 
-The Census MUST only contain features (genes) with a [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference) value of either "NCBITaxon:10090" for *Mus musculus* or "NCBITaxon:9606" for *Homo sapiens* MUST be included
+The Census MUST only contain features (genes) with a [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#feature_reference) value of either "NCBITaxon:10090" for *Mus musculus* or "NCBITaxon:9606" for *Homo sapiens* MUST be included
 
 #### Multi-species data constraints
 
-Per the CELLxGENE dataset schema, [multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#general-requirements), as defined in [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id) and [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference) respectively.
+Per the CELLxGENE dataset schema, [multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#general-requirements), as defined in [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#organism_ontology_term_id) and [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#feature_reference) respectively.
 
 For a given multi-species dataset, the table below shows all possible combinations of organisms for both observations and features. For each combination, inclusion criteria for the Census is provided.
 
@@ -87,152 +87,187 @@ For a given multi-species dataset, the table below shows all possible combinatio
 
 #### Assays
 
-Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#assay_ontology_term_id). The Census MUST only contain cells with
-an `assay_ontology_term_id` value from the list below:
+Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#assay_ontology_term_id).
+
+The Census MUST *include* all cells with the following `assay_ontology_term_id` terms:
 
 <table>
 <thead>
   <tr>
     <th>ID</th>
     <th>Label</th>
-    <th>Notes</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td>EFO:0008720</td>
-    <td>DroNc-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008722</td>
-    <td>Drop-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008780</td>
-    <td>inDrop</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008913</td>
-    <td>single-cell RNA sequencing</td>
-    <td>Refers to "TruDrop" from this <a href="https://cellxgene.cziscience.com/collections/a48f5033-3438-4550-8574-cdff3263fdfd">collection</a> which is not included in EFO at the moment.</td>
-  </tr>
-  <tr>
-    <td>EFO:0008919</td>
-    <td>Seq-Well</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008930</td>
-    <td>Smart-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008931</td>
-    <td>Smart-seq2</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008953</td>
-    <td>STRT-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008995</td>
-    <td>10x technology</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0009899</td>
-    <td>10x 3' v2</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0009900</td>
-    <td>10x 5' v2</td>
-    <td></td>
+    <td>EFO:0030003</td>
+    <td>10x 3' transcription profiling</td>
   </tr>
   <tr>
     <td>EFO:0009901</td>
     <td>10x 3' v1</td>
-    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0009899</td>
+    <td>10x 3' v2</td>
   </tr>
   <tr>
     <td>EFO:0009922</td>
     <td>10x 3' v3</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0010010</td>
-    <td>CEL-seq2</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0010183</td>
-    <td>single cell library construction</td>
-    <td>Refers to "GEXSCOPE" from this <a href="https://cellxgene.cziscience.com/collections/edb893ee-4066-4128-9aec-5eb2b03f8287">collection</a> which is not included in EFO at the moment.</td>
-  </tr>
-  <tr>
-    <td>EFO:0010550</td>
-    <td>sci-RNA-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0011025</td>
-    <td>10x 5' v1</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0030002</td>
-    <td>microwell-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0030003</td>
-    <td>10x 3' transcription profiling</td>
-    <td></td>
   </tr>
   <tr>
     <td>EFO:0030004</td>
     <td>10x 5' transcription profiling</td>
-    <td></td>
   </tr>
   <tr>
-    <td>EFO:0030019</td>
-    <td>Seq-Well S3</td>
-    <td></td>
+    <td>EFO:0011025</td>
+    <td>10x 5' v1</td>
   </tr>
   <tr>
-    <td>EFO:0700003</td>
-    <td>BD Rhapsody Whole Transcriptome Analysis</td>
-    <td></td>
+    <td>EFO:0009900</td>
+    <td>10x 5' v2</td>
   </tr>
   <tr>
     <td>EFO:0700004</td>
     <td>BD Rhapsody Targeted mRNA</td>
-    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0700003</td>
+    <td>BD Rhapsody Whole Transcriptome Analysis</td>
+  </tr>
+  <tr>
+    <td>EFO:0010010</td>
+    <td>CEL-seq2</td>
+  </tr>
+  <tr>
+    <td>EFO:0008720</td>
+    <td>DroNc-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0008722</td>
+    <td>Drop-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0700011</td>
+    <td>GEXSCOPE technology</td>
+  </tr>
+  <tr>
+    <td>EFO:0008780</td>
+    <td>inDrop</td>
+  </tr>
+  <tr>
+    <td>EFO:0008796</td>
+    <td>MARS-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0030002</td>
+    <td>microwell-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0010550</td>
+    <td>sci-RNA-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0008919</td>
+    <td>Seq-Well</td>
+  </tr>
+  <tr>
+    <td>EFO:0030019</td>
+    <td>Seq-Well S3</td>
+  </tr>
+  <tr>
+    <td>EFO:0008930</td>
+    <td>Smart-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0700016</td>
+    <td>Smart-seq v4</td>
+  </tr>
+  <tr>
+    <td>EFO:0008931</td>
+    <td>Smart-seq2</td>
+  </tr>
+  <tr>
+    <td>EFO:0008953</td>
+    <td>STRT-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0700010</td>
+    <td>TruDrop</td>
   </tr>
 </tbody>
 </table>
 
-Additional Notes:
+The Census MUST *exclude* cells with any `assay_ontology_term_id` value not present in the above list. The rational for excluding assays includes:
 
-* EFO:0030026 "sci-Plex" is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include.
-* EFO:0009920 and EFO:0030062 "Slide-seq" and "Slide-seqV2", respectively, are not included as coverage is low compared to other assays and data lacks context without spatial metadata not included in CELLxGENE dataset schema.
+<table>
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Label</th>
+    <th>Reason for exclusion</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>EFO:0030059</td>
+    <td>10x multiome</td>
+    <td>Non-RNA data is not supported, as it cannot be determined if data from this assay represents ATAC or RNA measurements.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030007</td>
+    <td>10x scATAC-seq</td>
+    <td>Non-RNA data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0008992</td>
+    <td>MERFISH</td>
+    <td>Spatial data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0008853</td>
+    <td>Patch-seq</td>
+    <td>Non-RNA data is not supported, as it cannot be determined with certainty if data from this assay only represents RNA measurements.</td>
+  </tr>
+  <tr>
+    <td>EFO:0010891</td>
+    <td>scATAC-seq</td>
+    <td>Non-RNA data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030026</td>
+    <td>sci-Plex</td>
+    <td>It has cell metadata not present in the CELLxGENE dataset schema. Without these metadata the RNA data lacks proper context.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030062</td>
+    <td>Slide-seqV2</td>
+    <td>Spatial data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030027</td>
+    <td>snmC-Seq2</td>
+    <td>Non-RNA data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0010961</td>
+    <td>Visium Spatial Gene Expression</td>
+    <td>Spatial data is not supported.</td>
+  </tr>
+</tbody>
+</table>
 
 #### Data matrix types
 
-Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). Author-normalized data layers [as defined in the CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers) MUST NOT be included in the Census.
+Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#x-matrix-layers). Author-normalized data layers [as defined in the CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#x-matrix-layers) MUST NOT be included in the Census.
 
 #### Sample types
 
-Only observations (cells) from primary tissue MUST be included in the Census. Thus observations with a [`tissue_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#tissue_ontology_term_id) value of  "ontology\_term\_id (organoid)" or "ontology\_term\_id (cell line)" MUST NOT be included.
+Only observations (cells) from primary tissue MUST be included in the Census. Thus observations with a [`tissue_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#tissue_ontology_term_id) value of  "ontology\_term\_id (organoid)" or "ontology\_term\_id (cell line)" MUST NOT be included.
 
 #### Repeated data
 
-When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data). This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.
+When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under [`is_primary_data`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#is_primary_data). This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.
 
 ### Data encoding and organization
 
@@ -304,7 +339,7 @@ An example of this `SOMADataFrame` is shown below:
 <tbody>
   <tr>
     <td>census_schema_version</td>
-    <td>0.0.1</td>
+    <td>1.2.0</td>
   </tr>
   <tr>
     <td>census_build_date</td>
@@ -312,7 +347,7 @@ An example of this `SOMADataFrame` is shown below:
   </tr>
   <tr>
     <td>dataset_schema_version </td>
-    <td>3.0.0</td>
+    <td>3.1.0</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -380,7 +415,7 @@ All datasets used to build the Census MUST be included in a table modeled as a `
   <tr>
     <td>dataset_version_id</td>
     <td>string</td>
-    <td>As defined in CELLxGENE Discover [data schema](https://api.cellxgene.cziscience.com/curation/ui/) (see "Schemas" section for field definitions)".</td>
+    <td>As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
   </tr>
 </tbody>
 </table>
@@ -437,7 +472,7 @@ Summary cell counts grouped by organism and relevant cell metadata MUST be model
   <tr>
     <td>unique_cell_count</td>
     <td>int</td>
-    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
+    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
   </tr>
 </tbody>
 </table>
@@ -677,7 +712,7 @@ For each organism the `SOMAExperiment` MUST contain the following:
 
 #### Matrix Data, count (raw) matrix – `census_obj["census_data"][organism].ms["RNA"].X["raw"]` – `SOMASparseNDArray`
 
-Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNDArray` with a fill value of zero (0), and no explicitly stored zero values.
+Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#x-matrix-layers). These counts MUST be encoded as `float32` in this `SOMASparseNDArray` with a fill value of zero (0), and no explicitly stored zero values.
 
 #### Matrix Data, normalized count matrix – `census_obj["census_data"][organism].ms["RNA"].X["normalized"]` – `SOMASparseNDArray`
 
@@ -689,9 +724,9 @@ as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
 
 #### Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMADataFrame`
 
-The Census MUST only contain features with a [`feature_biotype`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_biotype) value of "gene".
+The Census MUST only contain features with a [`feature_biotype`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#feature_biotype) value of "gene".
 
-The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema.
+The [gene references are pinned](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#required-gene-annotations) as defined in the CELLxGENE dataset schema.
 
 The following columns MUST be included:
 
@@ -717,7 +752,7 @@ The following columns MUST be included:
   <tr>
     <td>feature_length</td>
     <td>int</td>
-    <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+    <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
   </tr>
   <tr>
     <td>nnz</td>
@@ -882,6 +917,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </table>
 
 ## Changelog
+
+### Version 1.2.0
+
+* Update to require [CELLxGENE schema version 3.1.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md)
 
 ### Version 1.1.0
 
