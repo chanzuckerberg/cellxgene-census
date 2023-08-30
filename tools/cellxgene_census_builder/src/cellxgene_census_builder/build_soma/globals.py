@@ -293,23 +293,23 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
     },
 }
 
-# list of EFO terms that correspond to RNA seq modality/measurement
+# list of EFO terms that correspond to RNA seq modality/measurement. These terms
+# define the inclusive filter applied to obs.assay_ontology_term_id. All other
+# terms are excluded from the Census.
 RNA_SEQ = [
     "EFO:0008720",  # DroNc-seq
     "EFO:0008722",  # Drop-seq
     "EFO:0008780",  # inDrop
-    "EFO:0008913",  # single-cell RNA sequencing
+    "EFO:0008796",  # MARS-seq
     "EFO:0008919",  # Seq-Well
     "EFO:0008930",  # Smart-seq
     "EFO:0008931",  # Smart-seq2
     "EFO:0008953",  # STRT-seq
-    "EFO:0008995",  # 10x technology
     "EFO:0009899",  # 10x 3' v2
     "EFO:0009900",  # 10x 5' v2
     "EFO:0009901",  # 10x 3' v1
     "EFO:0009922",  # 10x 3' v3
     "EFO:0010010",  # CEL-seq2
-    "EFO:0010183",  # single cell library construction
     "EFO:0010550",  # sci-RNA-seq
     "EFO:0011025",  # 10x 5' v1
     "EFO:0030002",  # microwell-seq
@@ -318,6 +318,9 @@ RNA_SEQ = [
     "EFO:0030019",  # Seq-Well S3
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
+    "EFO:0700010",  # TruDrop
+    "EFO:0700011",  # GEXSCOPE technology
+    "EFO:0700016",  # Smart-seq v4
 ]
 
 DONOR_ID_IGNORE = ["pooled", "unknown"]
