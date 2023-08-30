@@ -198,7 +198,7 @@ The Census MUST *include* all cells with the following `assay_ontology_term_id` 
 </tbody>
 </table>
 
-The Census MUST *exclude* cells with anny `assay_ontology_term_id` value not present in the above list. The rational for excluding assays includes:
+The Census MUST *exclude* cells with any `assay_ontology_term_id` value not present in the above list. The rational for excluding assays includes:
 
 <table>
 <thead>
@@ -212,27 +212,27 @@ The Census MUST *exclude* cells with anny `assay_ontology_term_id` value not pre
   <tr>
     <td>EFO:0030059</td>
     <td>10x multiome</td>
-    <td>Non-RNA data is not supported</td>
+    <td>Non-RNA data is not supported, as it cannot be determined if data from this assay represents ATAC or RNA measurements.</td>
   </tr>
   <tr>
     <td>EFO:0030007</td>
     <td>10x scATAC-seq</td>
-    <td>Non-RNA data is not supported</td>
+    <td>Non-RNA data is not supported.</td>
   </tr>
   <tr>
     <td>EFO:0008992</td>
     <td>MERFISH</td>
-    <td>Spatial data is not supported</td>
+    <td>Spatial data is not supported.</td>
   </tr>
   <tr>
     <td>EFO:0008853</td>
     <td>Patch-seq</td>
-    <td>Non-RNA data is not supported</td>
+    <td>Non-RNA data is not supported, as it cannot be determined with certainty if data from this assay only represents RNA measurements.</td>
   </tr>
   <tr>
     <td>EFO:0010891</td>
     <td>scATAC-seq</td>
-    <td>Non-RNA data is not supported</td>
+    <td>Non-RNA data is not supported.</td>
   </tr>
   <tr>
     <td>EFO:0030026</td>
@@ -242,25 +242,20 @@ The Census MUST *exclude* cells with anny `assay_ontology_term_id` value not pre
   <tr>
     <td>EFO:0030062</td>
     <td>Slide-seqV2</td>
-    <td>Spatial data is not supported</td>
+    <td>Spatial data is not supported.</td>
   </tr>
   <tr>
     <td>EFO:0030027</td>
     <td>snmC-Seq2</td>
-    <td>Non-RNA data is not supported</td>
+    <td>Non-RNA data is not supported.</td>
   </tr>
   <tr>
     <td>EFO:0010961</td>
     <td>Visium Spatial Gene Expression</td>
-    <td>Spatial data is not supported</td>
+    <td>Spatial data is not supported.</td>
   </tr>
 </tbody>
 </table>
-
-Additional Notes:
-
-* EFO:0030026 "sci-Plex" is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include.
-* EFO:0009920 and EFO:0030062 "Slide-seq" and "Slide-seqV2", respectively, are not included as coverage is low compared to other assays and data lacks context without spatial metadata not included in CELLxGENE dataset schema.
 
 #### Data matrix types
 
