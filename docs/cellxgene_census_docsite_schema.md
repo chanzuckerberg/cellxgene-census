@@ -25,7 +25,7 @@ A `SOMAcollection` with tables providing information of the census as a whole, i
 
 - `"summary"`: high-level information of this Census, e.g. build date, total cell count, etc.
 - `"datasets"`: A table with all datasets from CELLxGENE Discover used to create the Census.
-- `"summary_cell_counts"`: Cell counts stratified by relevant cell metadata
+- `"summary_cell_counts"`: Cell counts stratified by relevant cell metadata.
 
 ### Census single-cell data `"census_data"`
 
@@ -33,9 +33,9 @@ Data for each organism is stored in independent `SOMAExperiment` objects which a
 
 This is how the data is organized for one organism – *Homo sapiens*:
 
-- `["homo_sapiens"].obs`: Cell metadata
-- `["homo_sapiens"].ms["RNA"].X`: Data matrices, currently only raw counts exist `X["raw"]`
-- `["homo_sapiens"].ms["RNA"].var`: Gene Metadata
+- `["homo_sapiens"].obs`: Cell metadata.
+- `["homo_sapiens"].ms["RNA"].X`: Data matrices: raw counts in `X["raw"]`, and library-size normalized counts in `X["normalized"]` (only avialble in Census schema V1.1.0 and above).
+- `["homo_sapiens"].ms["RNA"].var`: Gene Metadata.
 - `["homo_sapiens"].ms["RNA"]["feature_dataset_presence_matrix"]`: a sparse boolean array indicating which genes were measured in each dataset.
 
 ## Data included in the Census
