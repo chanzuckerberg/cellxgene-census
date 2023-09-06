@@ -1,4 +1,4 @@
-# Introducing Schema V1.1.0: Key Updates in Census API and Data Layer
+# Introducing a normalized layer and pre-calculated cell and gene statistics in Census.
 
 *Published: 25 August 2023*  
 *By: [Author Name](mailto:author1@chanzuckerberg.com), [Co-Author](mailto:author2@chanzuckerberg.com)*
