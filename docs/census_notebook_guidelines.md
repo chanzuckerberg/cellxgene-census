@@ -64,13 +64,11 @@ Example:
 > 2. Fetching all human lung data from the Census.
 > 3. Obtaining QC metrics for this data slice.
 
-
 ### `is_primary_data` knowledge reinforcement
 
-Immediately after the Table of Contents the following text must be included. This helps any reader get an understanding of the important cell metadata variable `is_primary_data`. In addition, as much as possible examples querying the census should be done selecting cells where `is_primary_data` equals `True` 
+Immediately after the Table of Contents the following text must be included. This helps any reader get an understanding of the important cell metadata variable `is_primary_data`. In addition, as much as possible examples querying the census should be done selecting cells where `is_primary_data` equals `True`.
 
-> ⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets, these can be filtered in or out using the cell metadata variable `is_primary_data`. 
-
+> ⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets, these can be filtered in or out using the cell metadata variable `is_primary_data`.
 
 ### Sections
 
