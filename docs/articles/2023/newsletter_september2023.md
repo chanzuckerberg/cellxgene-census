@@ -33,7 +33,7 @@ The `obs` data frame for both the human and mouse experiments is now augmented w
 
 ## How to use the new features
 
-### Exporting Normalized Data
+### Exporting normalized data
 
 Normalized data can be exported into AnnData with the following code:
 
