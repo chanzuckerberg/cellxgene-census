@@ -232,6 +232,13 @@
 </ol>
 </div></blockquote>
 </section>
+<section id="is-primary-data-knowledge-reinforcement">
+<h3><code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> knowledge reinforcement<a class="headerlink" href="#is-primary-data-knowledge-reinforcement" title="Permalink to this heading">¶</a></h3>
+<p>Immediately after the Table of Contents the following text must be included. This helps any reader get an understanding of the importance of the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>. In addition, as much as possible, examples querying the Census should be provided that select cells where <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> equals <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<blockquote>
+<div><p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
+</div></blockquote>
+</section>
 <section id="sections">
 <h3>Sections<a class="headerlink" href="#sections" title="Permalink to this heading">¶</a></h3>
 <p>The rest of the notebook/vignette content must be organized within sections:</p>
@@ -261,6 +268,8 @@ what information in the Census can inform data integration.
 <span class="w">   </span><span class="k">2.</span> Integration with batch defined as dataset_id.
 <span class="w">   </span><span class="k">3.</span> Integration with batch defined as dataset_id + donor_id.
 <span class="w">   </span><span class="k">4.</span> Integration with batch defined as dataset_id + donor_id + assay_ontology_term_id + suspension_type.
+
+⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <span class="sb">`is_primary_data`</span> which is described in the [<span class="nt">Census schema</span>](<span class="na">https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data</span>).
 
 <span class="gu">## Finding and fetching data from mouse liver</span>
 

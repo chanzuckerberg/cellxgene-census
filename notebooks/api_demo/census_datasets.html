@@ -205,6 +205,7 @@
 <li><p>Fetching the expression data from a single dataset.</p></li>
 <li><p>Downloading the original source H5AD file of a dataset.</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Fetching-the-datasets-table">
 <h2>Fetching the datasets table<a class="headerlink" href="#Fetching-the-datasets-table" title="Permalink to this heading">¶</a></h2>
 <p>Each Census contains a top-level dataframe itemizing the datasets contained therein. You can read this into a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p>

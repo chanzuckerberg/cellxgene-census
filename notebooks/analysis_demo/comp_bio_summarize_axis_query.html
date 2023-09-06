@@ -209,6 +209,7 @@
 </li>
 <li><p>Full Census metadata stats</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Opening-the-Census">
 <h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census. If you open the Census, you should close it. <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> returns a context, so you can open/close it in several ways, like a Python file handle. The context manager is preferred, as it will automatically close upon an error raise.</p>
@@ -366,7 +367,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># You can also do more complex queries, such as testing for inclusion in a list of values</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># You can also do more complex queries, such as testing for inclusion in a list of values and &quot;and&quot; operations</span>
 <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
 
 <span class="n">VENTRICLES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;UBERON:0002082&quot;</span><span class="p">,</span> <span class="s2">&quot;UBERON:OOO2084&quot;</span><span class="p">,</span> <span class="s2">&quot;UBERON:0002080&quot;</span><span class="p">]</span>
@@ -374,7 +375,7 @@ Name: count, dtype: int64
 <span class="n">obs_df</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">human</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
         <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tissue_ontology_term_id in </span><span class="si">{</span><span class="n">VENTRICLES</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tissue_ontology_term_id in </span><span class="si">{</span><span class="n">VENTRICLES</span><span class="si">}</span><span class="s2"> and is_primary_data == True&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
     <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
@@ -392,16 +393,16 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 cell_type_ontology_term_id
-CL:0000746    159096
-CL:0008034     84750
-CL:0002548     79618
-CL:0000115     64190
-CL:0002131     61830
-CL:0000763     32088
-CL:0000669     27515
-CL:0000003     22707
-CL:0000057     20117
-CL:0002144     18593
+CL:0000746    49929
+CL:0008034    33361
+CL:0002548    33180
+CL:0002131    30915
+CL:0000115    30054
+CL:0000003    18391
+CL:0000763    14408
+CL:0000669    13552
+CL:0000057     9690
+CL:0002144     9025
 Name: count, dtype: int64
 </pre></div></div>
 </div>

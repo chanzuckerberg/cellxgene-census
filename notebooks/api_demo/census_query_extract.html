@@ -207,6 +207,7 @@
 <li><p>Querying gene metadata (var).</p></li>
 <li><p>Querying expression data.</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Opening-the-census">
 <h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census.</p>
@@ -672,7 +673,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <p>3251334 rows × 21 columns</p>
 </div></div>
 </div>
-<p>You can use both <code class="docutils literal notranslate"><span class="pre">column_names</span></code> and <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> to perform specific queries. For example let’s fetch the <code class="docutils literal notranslate"><span class="pre">disease</span></code> columns for the <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cell&quot;</span></code> in the <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code>.</p>
+<p>You can use both <code class="docutils literal notranslate"><span class="pre">column_names</span></code> and <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> to perform specific queries. For example let’s fetch the <code class="docutils literal notranslate"><span class="pre">disease</span></code> columns for the <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cell&quot;</span></code> in the <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code> and from non-duplicated cells.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -680,7 +681,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_b_cell</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
     <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39;&quot;</span><span class="p">,</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and is_primary_data==True&quot;</span><span class="p">,</span>
         <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disease&quot;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
@@ -697,24 +698,21 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-disease                                cell_type  tissue_general
-lung adenocarcinoma                    B cell     lung              62351
-normal                                 B cell     lung              25461
-non-small cell lung carcinoma          B cell     lung              17484
-squamous cell lung carcinoma           B cell     lung              11920
-pulmonary fibrosis                     B cell     lung               6798
-chronic obstructive pulmonary disease  B cell     lung               6369
-COVID-19                               B cell     lung               2729
-lung large cell carcinoma              B cell     lung               1534
-pulmonary emphysema                    B cell     lung               1512
-pleomorphic carcinoma                  B cell     lung               1210
-small cell lung carcinoma              B cell     lung                583
-interstitial lung disease              B cell     lung                376
-non-specific interstitial pneumonia    B cell     lung                231
-lymphangioleiomyomatosis               B cell     lung                133
-hypersensitivity pneumonitis           B cell     lung                 52
-pneumonia                              B cell     lung                 50
-pulmonary sarcoidosis                  B cell     lung                  6
+disease                                cell_type  tissue_general  is_primary_data
+lung adenocarcinoma                    B cell     lung            True               42720
+squamous cell lung carcinoma           B cell     lung            True               10631
+non-small cell lung carcinoma          B cell     lung            True                8742
+normal                                 B cell     lung            True                8187
+COVID-19                               B cell     lung            True                2313
+chronic obstructive pulmonary disease  B cell     lung            True                2083
+lung large cell carcinoma              B cell     lung            True                1534
+pulmonary emphysema                    B cell     lung            True                1512
+pulmonary fibrosis                     B cell     lung            True                1474
+pleomorphic carcinoma                  B cell     lung            True                1210
+interstitial lung disease              B cell     lung            True                 332
+small cell lung carcinoma              B cell     lung            True                 204
+lymphangioleiomyomatosis               B cell     lung            True                 133
+pneumonia                              B cell     lung            True                  50
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -822,7 +820,7 @@ Name: count, dtype: int64
 <p>For example if we want to fetch the expression data for:</p>
 <ul class="simple">
 <li><p>Genes <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000161798&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;ENSG00000188229&quot;</span></code>.</p></li>
-<li><p>All <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cells&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">&quot;COVID-19&quot;</span></code>.</p></li>
+<li><p>All <code class="docutils literal notranslate"><span class="pre">&quot;B</span> <span class="pre">cells&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">&quot;lung&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">&quot;COVID-19&quot;</span></code> from non-duplicated cells.</p></li>
 <li><p>With all gene metadata and adding <code class="docutils literal notranslate"><span class="pre">sex</span></code> cell metadata.</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
@@ -833,7 +831,7 @@ Name: count, dtype: int64
     <span class="n">census</span><span class="o">=</span><span class="n">census</span><span class="p">,</span>
     <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
     <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
-    <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and disease == &#39;COVID-19&#39;&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and disease == &#39;COVID-19&#39; and is_primary_data == True&quot;</span><span class="p">,</span>
     <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">]},</span>
 <span class="p">)</span>
 </pre></div>
@@ -854,8 +852,8 @@ Name: count, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-AnnData object with n_obs × n_vars = 2729 × 2
-    obs: &#39;sex&#39;, &#39;cell_type&#39;, &#39;tissue_general&#39;, &#39;disease&#39;
+AnnData object with n_obs × n_vars = 2313 × 2
+    obs: &#39;sex&#39;, &#39;cell_type&#39;, &#39;tissue_general&#39;, &#39;disease&#39;, &#39;is_primary_data&#39;
     var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
 </pre></div></div>
 </div>
@@ -894,6 +892,7 @@ AnnData object with n_obs × n_vars = 2729 × 2
       <th>cell_type</th>
       <th>tissue_general</th>
       <th>disease</th>
+      <th>is_primary_data</th>
     </tr>
   </thead>
   <tbody>
@@ -903,34 +902,39 @@ AnnData object with n_obs × n_vars = 2729 × 2
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>unknown</td>
+      <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>male</td>
-      <td>B cell</td>
-      <td>lung</td>
-      <td>COVID-19</td>
-    </tr>
-    <tr>
-      <th>3</th>
       <td>unknown</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>3</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>unknown</td>
+      <td>B cell</td>
+      <td>lung</td>
+      <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>...</th>
@@ -938,45 +942,51 @@ AnnData object with n_obs × n_vars = 2729 × 2
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
     </tr>
     <tr>
-      <th>2724</th>
+      <th>2308</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
-      <th>2725</th>
+      <th>2309</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
-      <th>2726</th>
+      <th>2310</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
-      <th>2727</th>
+      <th>2311</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
     <tr>
-      <th>2728</th>
+      <th>2312</th>
       <td>male</td>
       <td>B cell</td>
       <td>lung</td>
       <td>COVID-19</td>
+      <td>True</td>
     </tr>
   </tbody>
 </table>
-<p>2729 rows × 4 columns</p>
+<p>2313 rows × 5 columns</p>
 </div></div>
 </div>
 <div class="nbinput docutils container">

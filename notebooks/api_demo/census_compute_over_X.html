@@ -206,6 +206,7 @@
 <li><p>Incremental variance calculation.</p></li>
 <li><p>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -243,7 +244,7 @@
     <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
     <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
         <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
-        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;</span><span class="p">),</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39; and is_primary_data==True&quot;</span><span class="p">),</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
         <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
         <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
@@ -322,8 +323,8 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <td>ENSMUSG00000051951</td>
       <td>Xkr4</td>
       <td>6094</td>
-      <td>398</td>
-      <td>1.283861</td>
+      <td>202</td>
+      <td>1.032743</td>
     </tr>
     <tr>
       <th>1</th>
@@ -346,16 +347,16 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <td>ENSMUSG00000025900</td>
       <td>Rp1</td>
       <td>12311</td>
-      <td>144</td>
-      <td>0.291416</td>
+      <td>106</td>
+      <td>0.236265</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ENSMUSG00000025902</td>
       <td>Sox17</td>
       <td>4772</td>
-      <td>4213</td>
-      <td>60.741540</td>
+      <td>3259</td>
+      <td>48.991975</td>
     </tr>
     <tr>
       <th>...</th>
@@ -496,7 +497,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
     <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
     <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
         <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
-        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;</span><span class="p">),</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39; and is_primary_data==True&quot;</span><span class="p">),</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
         <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
         <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
@@ -568,8 +569,8 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <td>ENSMUSG00000051951</td>
       <td>Xkr4</td>
       <td>6094</td>
-      <td>1.283861</td>
-      <td>1054.385124</td>
+      <td>1.032743</td>
+      <td>848.312801</td>
     </tr>
     <tr>
       <th>1</th>
@@ -592,16 +593,16 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
       <td>ENSMUSG00000025900</td>
       <td>Rp1</td>
       <td>12311</td>
-      <td>0.291416</td>
-      <td>210.326410</td>
+      <td>0.236265</td>
+      <td>169.182975</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ENSMUSG00000025902</td>
       <td>Sox17</td>
       <td>4772</td>
-      <td>60.741540</td>
-      <td>346890.414437</td>
+      <td>48.991975</td>
+      <td>279575.656207</td>
     </tr>
     <tr>
       <th>...</th>

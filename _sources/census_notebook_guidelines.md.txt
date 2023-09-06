@@ -64,6 +64,12 @@ Example:
 > 2. Fetching all human lung data from the Census.
 > 3. Obtaining QC metrics for this data slice.
 
+### `is_primary_data` knowledge reinforcement
+
+Immediately after the Table of Contents the following text must be included. This helps any reader get an understanding of the importance of the cell metadata variable `is_primary_data`. In addition, as much as possible, examples querying the Census should be provided that select cells where `is_primary_data` equals `True`.
+
+> ⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable `is_primary_data` which is described in the [Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data).
+
 ### Sections
 
 The rest of the notebook/vignette content must be organized within sections:
@@ -92,6 +98,8 @@ what information in the Census can inform data integration.
    2. Integration with batch defined as dataset_id.
    3. Integration with batch defined as dataset_id + donor_id.
    4. Integration with batch defined as dataset_id + donor_id + assay_ontology_term_id + suspension_type.
+
+⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable `is_primary_data` which is described in the [Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data).
 
 ## Finding and fetching data from mouse liver
 

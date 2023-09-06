@@ -205,6 +205,7 @@
 <li><p>Normalizing expression to account for gene length</p></li>
 <li><p>Validation through clustering exploration</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>. For this notebook we will focus on individual datasets, therefore we can ignore this variable.</p>
 <section id="Opening-the-census">
 <h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
 <p>First we open the Census, if you are not familiar with the basics of the Census API you should take a look at notebook <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></p>
