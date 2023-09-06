@@ -21,7 +21,7 @@ We've introduced a library-size normalized layer for the RNA measurements of bot
 
 The `ms["RNA"].var` data frame for both the human and mouse experiments, has been enriched with two new metadata fields: `nnz` and `n_measured_obs`, which provide a count of non-zero values and "measured" cells, respectively.
 
-### Enhanced Metadata Fields in `ms["RNA"].obs` DataFrame
+### Enhanced cell metadata
 
 The `obs` DataFrame is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing:
 
