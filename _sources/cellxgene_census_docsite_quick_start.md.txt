@@ -2,14 +2,13 @@
 
 This page provides details to start using the Census. Click [here](examples.rst) for more detailed Python tutorials (R vignettes coming soon).
 
-**Contents**
+**Contents:**
 
 1. [Installation](#installation).
 2. [Python quick start](python-quick-start).
 3. [R quick start](r-quick-start).
 
 ## Installation
-
 
 Install the Census API by following [these instructions.](cellxgene_census_docsite_installation.md)
 
@@ -25,7 +24,7 @@ help(cellxgene_census.get_anndata)
 # etc
 ```
 
-### Querying a slice of cell metadata.
+### Querying a slice of cell metadata
 
 The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type`, `tissue`, `tissue_general`, `suspension_type`, and `disease`.
 
@@ -33,19 +32,19 @@ The following reads the cell metadata and filters `female` cells of cell type `m
 import cellxgene_census
 
 with cellxgene_census.open_soma() as census:
-    
+
     # Reads SOMADataFrame as a slice
     cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
         value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
         column_names = ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]
     )
-    
+
     # Concatenates results to pyarrow.Table
     cell_metadata = cell_metadata.concat()
-    
+
     # Converts to pandas.DataFrame
     cell_metadata = cell_metadata.to_pandas()
-    
+
     print(cell_metadata)
 ```
 
@@ -69,7 +68,7 @@ The "stable" release is currently 2023-07-25. Specify 'census_version="2023-07-2
 [379224 rows x 7 columns]
 ```
 
-### Obtaining a slice as AnnData 
+### Obtaining a slice as AnnData
 
 The following creates an `anndata.AnnData` object on-demand with the same cell filtering criteria as above and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
 
@@ -84,7 +83,7 @@ with cellxgene_census.open_soma() as census:
         obs_value_filter = "sex == 'female' and cell_type in ['microglial cell', 'neuron']",
         column_names = {"obs": ["assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease"]},
     )
-    
+
     print(adata)
 ```
 
@@ -98,7 +97,7 @@ AnnData object with n_obs × n_vars = 379224 × 2
 
 ### Memory-efficient queries
 
-This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
+This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations.
 
 First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query.close()` — or called in a context manager — `with ...`.
 
@@ -107,7 +106,7 @@ import cellxgene_census
 import tiledbsoma
 
 with cellxgene_census.open_soma() as census:
-    
+
     human = census["census_data"]["homo_sapiens"]
     query = human.axis_query(
        measurement_name = "RNA",
@@ -115,7 +114,7 @@ with cellxgene_census.open_soma() as census:
            value_filter = "tissue == 'brain' and sex == 'male'"
        )
     )
-    
+
     # Continued below
 
 ```
@@ -123,12 +122,12 @@ with cellxgene_census.open_soma() as census:
 Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
 
 ```python
-    # Continued from above 
-    
+    # Continued from above
+
     iterator = query.X("raw").tables()
-    
+
     # Get an iterative slice as pyarrow.Table
-    raw_slice = next (iterator) 
+    raw_slice = next (iterator)
     ...
 ```
 
@@ -136,7 +135,7 @@ And you can now perform operations on each iteration slice. As with any any Pyth
 
 And you must close the query.
 
-```
+```python
     # Continued from above
     query.close()
 ```
@@ -151,11 +150,11 @@ library("cellxgene.census")
 ?cellxgene.census::get_seurat
 ```
 
-### Querying a slice of cell metadata.
+### Querying a slice of cell metadata
 
 The following reads the cell metadata and filters `female` cells of cell type `microglial cell` or `neuron`, and selects the columns `assay`, `cell_type`, `tissue`, `tissue_general`, `suspension_type`, and `disease`.
 
-The `cellxgene.census` package uses [R6](https://r6.r-lib.org/articles/Introduction.html) classes and we recommend you to get familiar with their usage. 
+The `cellxgene.census` package uses [R6](https://r6.r-lib.org/articles/Introduction.html) classes and we recommend you to get familiar with their usage.
 
 ```r
 library("cellxgene.census")
@@ -187,22 +186,22 @@ The output is a `tibble` with over 300K cells meeting our query criteria and the
 ```bash
 # A tibble: 379,224 × 7
    assay     cell_type       sex   tissue tissue_general suspension_type disease
-   <chr>     <chr>           <chr> <chr>  <chr>          <chr>           <chr>  
- 1 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 2 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 3 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 4 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 5 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 6 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 7 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 8 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
- 9 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
-10 10x 3' v3 microglial cell fema… eye    eye            cell            normal 
+   <chr>     <chr>           <chr> <chr>  <chr>          <chr>           <chr>
+ 1 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 2 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 3 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 4 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 5 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 6 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 7 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 8 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+ 9 10x 3' v3 microglial cell fema… eye    eye            cell            normal
+10 10x 3' v3 microglial cell fema… eye    eye            cell            normal
 # ℹ 379,214 more rows
 # ℹ Use `print(n = ...)` to see more rows
 ```
 
-### Obtaining a slice as a `Seurat` or `SingleCellExperiment` object 
+### Obtaining a slice as a `Seurat` or `SingleCellExperiment` object
 
 The following creates a Seurat object on-demand with a smaller set of cells and filtering only the genes `ENSG00000161798`, `ENSG00000188229`.
 
@@ -230,9 +229,9 @@ print(seurat_obj)
 
 The output with over 4K cells and 2 genes can be now used for downstream analysis using [Seurat](https://satijalab.org/seurat/).
 
-``` shell
-An object of class Seurat 
-2 features across 4744 samples within 1 assay 
+```shell
+An object of class Seurat
+2 features across 4744 samples within 1 assay
 Active assay: RNA (2 features, 0 variable features)
 ```
 
@@ -254,9 +253,9 @@ print(sce_obj)
 
 The output with over 4K cells and 2 genes can be now used for downstream analysis using the [Bioconductor ecosystem](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html).
 
-``` shell
-class: SingleCellExperiment 
-dim: 2 4744 
+```shell
+class: SingleCellExperiment
+dim: 2 4744
 metadata(0):
 assays(1): counts
 rownames(2): ENSG00000106034 ENSG00000107317
@@ -268,17 +267,16 @@ mainExpName: RNA
 altExpNames(0):
 ```
 
-
 ### Memory-efficient queries
 
-This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations. 
+This example provides a demonstration to access the data for larger-than-memory operations using **TileDB-SOMA** operations.
 
 First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — `query$close()`.
 
 ```r
 library("cellxgene.census")
 library("tiledbsoma")
-    
+
 human <-  census$get("census_data")$get("homo_sapiens")
 query <-  human$axis_query(
   measurement_name = "RNA",
@@ -286,33 +284,31 @@ query <-  human$axis_query(
     value_filter = "tissue == 'brain' & sex == 'male'"
   )
 )
-   
-# Continued below
 
+# Continued below
 
 ```
 
 Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.
 
 ```r
-# Continued from above 
+# Continued from above
 
 iterator <-  query$X("raw")$tables()
 # For sparse matrices use query$X("raw")$sparse_matrix()
 
 # Get an iterative slice as an Arrow Table
-raw_slice <-  iterator$read_next() 
+raw_slice <-  iterator$read_next()
 
 #...
 ```
 
-And you can now perform operations on each iteration slice. This logic can be wrapped around a `while()` loop and checking the iteration state by monitoring the logical output of `iterator$read_complete()`  
+And you can now perform operations on each iteration slice. This logic can be wrapped around a `while()` loop and checking the iteration state by monitoring the logical output of `iterator$read_complete()`
 
 And you must close the query and census.
 
-```
+```r
 # Continued from above
 query.close()
 census.close()
 ```
-

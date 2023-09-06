@@ -195,7 +195,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">./cell-census/[tag]/</span></code></p>
 <p>The Census <strong>release</strong> MUST be deposited in a folder named <code class="docutils literal notranslate"><span class="pre">soma</span></code>:</p>
 <p><code class="docutils literal notranslate"><span class="pre">./cell-census/[tag]/soma/</span></code></p>
-<p>All Census <strong>source h5ads</strong> used to create a specific Census <strong>release</strong> MUST be copied into a folder named <code class="docutils literal notranslate"><span class="pre">h5ads</span></code>:	
+<p>All Census <strong>source h5ads</strong> used to create a specific Census <strong>release</strong> MUST be copied into a folder named <code class="docutils literal notranslate"><span class="pre">h5ads</span></code>:
 <code class="docutils literal notranslate"><span class="pre">./cell-census/[tag]/h5ads/</span></code></p>
 </section>
 <section id="census-release-information-json">
@@ -207,9 +207,9 @@
 <li><p>The alias <code class="docutils literal notranslate"><span class="pre">latest</span></code> MUST be present and MUST point to the <strong>Weekly Census release</strong>.</p></li>
 <li><p>The prefix <code class="docutils literal notranslate"><span class="pre">V</span></code> MUST be used followed by an integer counter to label long-term supported Census releases, e.g. <code class="docutils literal notranslate"><span class="pre">V1</span></code>.</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>{
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
    [release_alias]: [release_name|release_alias],
-   [release_name]: {	#defines a given release
+   [release_name]: { #defines a given release
       “release_date”: [yyyy-mm-dd]  #optional, ISO 8601 date, may be null
       “release_build”: [yyyy-mm-dd] #required, ISO 8601 date, date of Census build
       “soma”: {
@@ -226,25 +226,25 @@
 </pre></div>
 </div>
 <p>An example of this file is shown below:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-   <span class="s2">&quot;latest&quot;</span><span class="p">:</span> <span class="s2">&quot;release-1&quot;</span>
-   <span class="s2">&quot;release-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;release_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-06-12”,</span>
-      <span class="s2">&quot;release_build&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-05-15”,</span>
-      <span class="s2">&quot;soma&quot;</span><span class="p">:</span> <span class="p">{</span>
-         <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;s3://cellxgene-data-public/cell-census/release-1/soma/&quot;</span><span class="p">,</span>
-         <span class="s2">&quot;s3_region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-west-2&quot;</span>
-      <span class="p">},</span>
-      <span class="s2">&quot;h5ads&quot;</span><span class="p">:</span> <span class="p">{</span>
-         <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;s3://cellxgene-data-public/cell-census/release-1/h5ads/&quot;</span><span class="p">,</span>
-         <span class="s2">&quot;s3_region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-west-2&quot;</span>
-      <span class="p">}</span>
-   <span class="p">},</span>
-   <span class="s2">&quot;pre-release-weekly-build-2023-07-15&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="o">...</span>
-   <span class="p">},</span>
-   <span class="o">...</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;latest&quot;: &quot;release-1&quot;
+   &quot;release-1&quot;: {
+      &quot;release_date&quot;: &quot;2023-06-12”,
+      &quot;release_build&quot;: &quot;2023-05-15”,
+      &quot;soma&quot;: {
+         &quot;uri&quot;: &quot;s3://cellxgene-data-public/cell-census/release-1/soma/&quot;,
+         &quot;s3_region&quot;: &quot;us-west-2&quot;
+      },
+      &quot;h5ads&quot;: {
+         &quot;uri&quot;: &quot;s3://cellxgene-data-public/cell-census/release-1/h5ads/&quot;,
+         &quot;s3_region&quot;: &quot;us-west-2&quot;
+      }
+   },
+   &quot;pre-release-weekly-build-2023-07-15&quot;: {
+      ...
+   },
+   ...
+}
 </pre></div>
 </div>
 </section>

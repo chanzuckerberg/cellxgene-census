@@ -131,13 +131,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-quick-start">Python quick start</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#querying-a-slice-of-cell-metadata">Querying a slice of cell metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#querying-a-slice-of-cell-metadata">Querying a slice of cell metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#obtaining-a-slice-as-anndata">Obtaining a slice as AnnData</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#memory-efficient-queries">Memory-efficient queries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#r-quick-start">R quick start</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Querying a slice of cell metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Querying a slice of cell metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#obtaining-a-slice-as-a-seurat-or-singlecellexperiment-object">Obtaining a slice as a <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> or <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Memory-efficient queries</a></li>
 </ul>
@@ -191,7 +191,7 @@
   <section id="quick-start">
 <h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
 <p>This page provides details to start using the Census. Click <a class="reference internal" href="examples.html"><span class="std std-doc">here</span></a> for more detailed Python tutorials (R vignettes coming soon).</p>
-<p><strong>Contents</strong></p>
+<p><strong>Contents:</strong></p>
 <ol class="arabic simple">
 <li><p><a class="reference internal" href="#installation"><span class="std std-ref">Installation</span></a>.</p></li>
 <li><p><a class="reference internal" href="#python-quick-start"><span class="xref myst">Python quick start</span></a>.</p></li>
@@ -212,24 +212,24 @@
 </pre></div>
 </div>
 <section id="querying-a-slice-of-cell-metadata">
-<h3>Querying a slice of cell metadata.<a class="headerlink" href="#querying-a-slice-of-cell-metadata" title="Permalink to this heading">¶</a></h3>
+<h3>Querying a slice of cell metadata<a class="headerlink" href="#querying-a-slice-of-cell-metadata" title="Permalink to this heading">¶</a></h3>
 <p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    
+
     <span class="c1"># Reads SOMADataFrame as a slice</span>
     <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
         <span class="n">value_filter</span> <span class="o">=</span> <span class="s2">&quot;sex == &#39;female&#39; and cell_type in [&#39;microglial cell&#39;, &#39;neuron&#39;]&quot;</span><span class="p">,</span>
         <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">]</span>
     <span class="p">)</span>
-    
+
     <span class="c1"># Concatenates results to pyarrow.Table</span>
     <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    
+
     <span class="c1"># Converts to pandas.DataFrame</span>
     <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="n">cell_metadata</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -265,7 +265,7 @@
         <span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;sex == &#39;female&#39; and cell_type in [&#39;microglial cell&#39;, &#39;neuron&#39;]&quot;</span><span class="p">,</span>
         <span class="n">column_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">]},</span>
     <span class="p">)</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -284,7 +284,7 @@
 <span class="kn">import</span> <span class="nn">tiledbsoma</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    
+
     <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
        <span class="n">measurement_name</span> <span class="o">=</span> <span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
@@ -292,24 +292,24 @@
            <span class="n">value_filter</span> <span class="o">=</span> <span class="s2">&quot;tissue == &#39;brain&#39; and sex == &#39;male&#39;&quot;</span>
        <span class="p">)</span>
     <span class="p">)</span>
-    
+
     <span class="c1"># Continued below</span>
 
 </pre></div>
 </div>
 <p>Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Continued from above </span>
-    
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Continued from above</span>
+
     <span class="n">iterator</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">()</span>
-    
+
     <span class="c1"># Get an iterative slice as pyarrow.Table</span>
-    <span class="n">raw_slice</span> <span class="o">=</span> <span class="nb">next</span> <span class="p">(</span><span class="n">iterator</span><span class="p">)</span> 
+    <span class="n">raw_slice</span> <span class="o">=</span> <span class="nb">next</span> <span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
     <span class="o">...</span>
 </pre></div>
 </div>
 <p>And you can now perform operations on each iteration slice. As with any any Python iterator this logic can be wrapped around a <code class="docutils literal notranslate"><span class="pre">for</span></code> loop.</p>
 <p>And you must close the query.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Continued from above</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Continued from above</span>
     <span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -324,7 +324,7 @@
 </pre></div>
 </div>
 <section id="id1">
-<h3>Querying a slice of cell metadata.<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>Querying a slice of cell metadata<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> package uses <a class="reference external" href="https://r6.r-lib.org/articles/Introduction.html">R6</a> classes and we recommend you to get familiar with their usage.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
@@ -354,17 +354,17 @@
 <p>The output is a <code class="docutils literal notranslate"><span class="pre">tibble</span></code> with over 300K cells meeting our query criteria and the selected columns.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># A tibble: 379,224 × 7</span>
 <span class="w">   </span>assay<span class="w">     </span>cell_type<span class="w">       </span>sex<span class="w">   </span>tissue<span class="w"> </span>tissue_general<span class="w"> </span>suspension_type<span class="w"> </span>disease
-<span class="w">   </span>&lt;chr&gt;<span class="w">     </span>&lt;chr&gt;<span class="w">           </span>&lt;chr&gt;<span class="w"> </span>&lt;chr&gt;<span class="w">  </span>&lt;chr&gt;<span class="w">          </span>&lt;chr&gt;<span class="w">           </span>&lt;chr&gt;<span class="w">  </span>
-<span class="w"> </span><span class="m">1</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal </span>
-<span class="s1"> 2 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal<span class="w"> </span>
-<span class="w"> </span><span class="m">3</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal </span>
-<span class="s1"> 4 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal<span class="w"> </span>
-<span class="w"> </span><span class="m">5</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal </span>
-<span class="s1"> 6 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal<span class="w"> </span>
-<span class="w"> </span><span class="m">7</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal </span>
-<span class="s1"> 8 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal<span class="w"> </span>
-<span class="w"> </span><span class="m">9</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal </span>
-<span class="s1">10 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal<span class="w"> </span>
+<span class="w">   </span>&lt;chr&gt;<span class="w">     </span>&lt;chr&gt;<span class="w">           </span>&lt;chr&gt;<span class="w"> </span>&lt;chr&gt;<span class="w">  </span>&lt;chr&gt;<span class="w">          </span>&lt;chr&gt;<span class="w">           </span>&lt;chr&gt;
+<span class="w"> </span><span class="m">1</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal</span>
+<span class="s1"> 2 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal
+<span class="w"> </span><span class="m">3</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal</span>
+<span class="s1"> 4 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal
+<span class="w"> </span><span class="m">5</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal</span>
+<span class="s1"> 6 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal
+<span class="w"> </span><span class="m">7</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal</span>
+<span class="s1"> 8 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal
+<span class="w"> </span><span class="m">9</span><span class="w"> </span>10x<span class="w"> </span><span class="m">3</span><span class="s1">&#39; v3 microglial cell fema… eye    eye            cell            normal</span>
+<span class="s1">10 10x 3&#39;</span><span class="w"> </span>v3<span class="w"> </span>microglial<span class="w"> </span>cell<span class="w"> </span>fema…<span class="w"> </span>eye<span class="w">    </span>eye<span class="w">            </span>cell<span class="w">            </span>normal
 <span class="c1"># ℹ 379,214 more rows</span>
 <span class="c1"># ℹ Use `print(n = ...)` to see more rows</span>
 </pre></div>
@@ -395,8 +395,8 @@
 </pre></div>
 </div>
 <p>The output with over 4K cells and 2 genes can be now used for downstream analysis using <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a>.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>An<span class="w"> </span>object<span class="w"> </span>of<span class="w"> </span>class<span class="w"> </span>Seurat<span class="w"> </span>
-<span class="m">2</span><span class="w"> </span>features<span class="w"> </span>across<span class="w"> </span><span class="m">4744</span><span class="w"> </span>samples<span class="w"> </span>within<span class="w"> </span><span class="m">1</span><span class="w"> </span>assay<span class="w"> </span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>An<span class="w"> </span>object<span class="w"> </span>of<span class="w"> </span>class<span class="w"> </span>Seurat
+<span class="m">2</span><span class="w"> </span>features<span class="w"> </span>across<span class="w"> </span><span class="m">4744</span><span class="w"> </span>samples<span class="w"> </span>within<span class="w"> </span><span class="m">1</span><span class="w"> </span>assay
 Active<span class="w"> </span>assay:<span class="w"> </span>RNA<span class="w"> </span><span class="o">(</span><span class="m">2</span><span class="w"> </span>features,<span class="w"> </span><span class="m">0</span><span class="w"> </span>variable<span class="w"> </span>features<span class="o">)</span>
 </pre></div>
 </div>
@@ -415,8 +415,8 @@ Active<span class="w"> </span>assay:<span class="w"> </span>RNA<span class="w"> 
 </pre></div>
 </div>
 <p>The output with over 4K cells and 2 genes can be now used for downstream analysis using the <a class="reference external" href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html">Bioconductor ecosystem</a>.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>class:<span class="w"> </span>SingleCellExperiment<span class="w"> </span>
-dim:<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">4744</span><span class="w"> </span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>class:<span class="w"> </span>SingleCellExperiment
+dim:<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">4744</span>
 metadata<span class="o">(</span><span class="m">0</span><span class="o">)</span>:
 assays<span class="o">(</span><span class="m">1</span><span class="o">)</span>:<span class="w"> </span>counts
 rownames<span class="o">(</span><span class="m">2</span><span class="o">)</span>:<span class="w"> </span>ENSG00000106034<span class="w"> </span>ENSG00000107317
@@ -435,7 +435,7 @@ altExpNames<span class="o">(</span><span class="m">0</span><span class="o">)</sp
 <p>First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — <code class="docutils literal notranslate"><span class="pre">query$close()</span></code>.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="s">&quot;tiledbsoma&quot;</span><span class="p">)</span>
-<span class="w">    </span>
+
 <span class="n">human</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">census</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;census_data&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;homo_sapiens&quot;</span><span class="p">)</span>
 <span class="n">query</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">human</span><span class="o">$</span><span class="nf">axis_query</span><span class="p">(</span>
 <span class="w">  </span><span class="n">measurement_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;RNA&quot;</span><span class="p">,</span>
@@ -443,27 +443,27 @@ altExpNames<span class="o">(</span><span class="m">0</span><span class="o">)</sp
 <span class="w">    </span><span class="n">value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;tissue == &#39;brain&#39; &amp; sex == &#39;male&#39;&quot;</span>
 <span class="w">  </span><span class="p">)</span>
 <span class="p">)</span>
-<span class="w">   </span>
+
 <span class="c1"># Continued below</span>
 </pre></div>
 </div>
 <p>Now we can iterate over the matrix count, as well as the cell and gene metadata. For example, to iterate over the matrix count, we can get an iterator and perform operations for each iteration.</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Continued from above </span>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Continued from above</span>
 
 <span class="n">iterator</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">query</span><span class="o">$</span><span class="nf">X</span><span class="p">(</span><span class="s">&quot;raw&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">tables</span><span class="p">()</span>
 <span class="c1"># For sparse matrices use query$X(&quot;raw&quot;)$sparse_matrix()</span>
 
 <span class="c1"># Get an iterative slice as an Arrow Table</span>
-<span class="n">raw_slice</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">iterator</span><span class="o">$</span><span class="nf">read_next</span><span class="p">()</span><span class="w"> </span>
+<span class="n">raw_slice</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">iterator</span><span class="o">$</span><span class="nf">read_next</span><span class="p">()</span>
 
 <span class="c1">#...</span>
 </pre></div>
 </div>
 <p>And you can now perform operations on each iteration slice. This logic can be wrapped around a <code class="docutils literal notranslate"><span class="pre">while()</span></code> loop and checking the iteration state by monitoring the logical output of <code class="docutils literal notranslate"><span class="pre">iterator$read_complete()</span></code></p>
 <p>And you must close the query and census.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Continued from above</span>
-<span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Continued from above</span>
+<span class="nf">query.close</span><span class="p">()</span>
+<span class="nf">census.close</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>

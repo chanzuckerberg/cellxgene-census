@@ -173,18 +173,18 @@
                 
   <section id="api-documentation">
 <h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this heading">¶</a></h1>
-<p>The documentation website is currently hosted on https://chanzuckerberg.github.io/cellxgene-census/.</p>
+<p>The documentation website is currently hosted on <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">https://chanzuckerberg.github.io/cellxgene-census/</a>.</p>
 <p>The documentation site is rebuilt each time a tag is created on the repo, which happens on release, including regenerating the Sphinx Python API docs. The R <code class="docutils literal notranslate"><span class="pre">pkgdown</span></code> website is checked into git and simply copied in during the doc site rebuild; see <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_"><code class="docutils literal notranslate"><span class="pre">api/r/cellxgene.census/vignettes_/</span></code></a> for further explanation.</p>
 <p>A docsite rebuild can be <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/actions/workflows/docsite-build-deploy.yml">triggered manually through <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></a> (Run workflow). This should be done if a bug in the documentation is found and a release is not necessary.</p>
 <p>In order to test docsite changes locally, first install the necessary requirements:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">docs</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
-<span class="n">brew</span> <span class="n">install</span> <span class="n">pandoc</span> <span class="c1"># Mac OS</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>docs/requirements.txt
+brew<span class="w"> </span>install<span class="w"> </span>pandoc<span class="w"> </span><span class="c1"># Mac OS</span>
 </pre></div>
 </div>
 <p>Then,</p>
 <p>And then run the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docs</span>
-<span class="n">make</span> <span class="n">html</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>docs
+make<span class="w"> </span>html
 </pre></div>
 </div>
 <p>The generated docsite will then be found at <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code>.</p>

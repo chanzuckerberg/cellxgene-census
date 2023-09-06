@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; cellxgene-census  documentation</title>
+  <title>CELLxGENE Census Mirroring &mdash; cellxgene-census  documentation</title>
   
 
   
@@ -45,9 +45,7 @@
 
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Quick start" href="cellxgene_census_docsite_quick_start.html" />
-    <link rel="prev" title="CZ CELLxGENE Discover Census" href="index.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -126,13 +124,8 @@
                 
                 
                 
-                <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#python">Python</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#r">R</a></li>
-</ul>
-</li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="articles.html">What’s new?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
@@ -168,9 +161,9 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Installation</li>
+      <li class="breadcrumb-item active">CELLxGENE Census Mirroring</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/cellxgene_census_docsite_installation.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/cellxgene_census_mirroring.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -178,65 +171,51 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
-<section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
-<p>The Census API requires a Linux or MacOS system with:</p>
+  <section id="cellxgene-census-mirroring">
+<h1>CELLxGENE Census Mirroring<a class="headerlink" href="#cellxgene-census-mirroring" title="Permalink to this heading">¶</a></h1>
+<p>The Census supports geographical mirroring. A list of mirrors is available in the <code class="docutils literal notranslate"><span class="pre">mirrors.json</span></code> file, which can be accessed at <a class="reference external" href="https://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json">https://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json</a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">mirrors.json</span></code> file will look like this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AWS-S3-us-west-2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;AWS-S3-us-west-2&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;base_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://cellxgene-data-public/&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-west-2&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Each mirror is a dictionary entry that contains three fields:</p>
 <ul class="simple">
-<li><p>Python 3.8 to Python 3.11. Or R, supported versions TBD.</p></li>
-<li><p>Recommended: &gt;16 GB of memory.</p></li>
-<li><p>Recommended: &gt;5 Mbps internet connection.</p></li>
-<li><p>Recommended: for increased performance use the API through a AWS-EC2 instance from the region <code class="docutils literal notranslate"><span class="pre">us-west-2</span></code>. The Census data builds are hosted in a AWS-S3 bucket in that region.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">provider</span></code>: A string that identifies a cloud provider for the hosting service, e.g. <code class="docutils literal notranslate"><span class="pre">S3</span></code> or <code class="docutils literal notranslate"><span class="pre">GCS</span></code>. Currently only <code class="docutils literal notranslate"><span class="pre">S3</span></code> is supported.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">base_uri</span></code>: URI that identifies the resource hosting the census content.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">region</span></code>: Geographical region where the resource is located.</p></li>
 </ul>
-</section>
-<section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h2>
-<p>(Optional) In your working directory, make and activate a virtual environment or conda environment. For example:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>./venv
-<span class="nb">source</span><span class="w"> </span>./venv/bin/activate
+<p>When calling <code class="docutils literal notranslate"><span class="pre">open_soma</span></code>, the Census API will use the mirroring information to locate the SOMA artifacts. Remember that SOMA artifacts are defined in <code class="docutils literal notranslate"><span class="pre">release.json</span></code> and each entry looks like this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;soma&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://cellxgene-data-public/cell-census/2023-07-25/soma/&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;relative_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/cell-census/2023-07-25/soma/&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;s3_region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-west-2&quot;</span>
+<span class="p">},</span>
 </pre></div>
 </div>
-<p>Install the <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code> package via pip:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>cellxgene-census
-</pre></div>
-</div>
-<p>If installing in a Databricks notebook environment, use <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span></code>. Do not use <code class="docutils literal notranslate"><span class="pre">%sh</span> <span class="pre">pip</span> <span class="pre">install</span></code>. See the <a class="reference internal" href="cellxgene_census_docsite_FAQ.html#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks"><span class="std std-ref">FAQ</span></a>.</p>
-</section>
-<section id="r">
-<h2>R<a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h2>
-<p>If installing from <strong>Ubuntu</strong>, you may need to install the following libraries via <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span></code>,  <code class="docutils literal notranslate"><span class="pre">libxml2-dev</span></code> <code class="docutils literal notranslate"><span class="pre">libssl-dev</span></code> <code class="docutils literal notranslate"><span class="pre">libcurl4-openssl-dev</span></code>. In addition you must have <code class="docutils literal notranslate"><span class="pre">cmake</span></code> v3.21 or greater.</p>
-<p>If installing from <strong>MacOS</strong>, you will need to install the <a class="reference external" href="https://apps.apple.com/us/app/xcode/id497799835?mt=12">developer tools <code class="docutils literal notranslate"><span class="pre">Xcode</span></code></a>.</p>
-<p><strong>Windows</strong> is not supported.</p>
-<p>From an R session, first install <code class="docutils literal notranslate"><span class="pre">tiledb</span></code> from R-Universe, the latest release in CRAN is not yet available.</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="n">repos</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">&#39;https://chanzuckerberg.r-universe.dev&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;https://cloud.r-project.org&#39;</span><span class="p">)</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>To be able to export Census data to <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> or <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> you also need to install their respective packages.</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Seurat</span>
-<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;Seurat&quot;</span><span class="p">)</span>
-
-<span class="c1"># SingleCellExperiment</span>
-<span class="nf">if </span><span class="p">(</span><span class="o">!</span><span class="nf">require</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">quietly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">))</span>
-<span class="w">    </span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">)</span>
-
-<span class="n">BiocManager</span><span class="o">::</span><span class="nf">install</span><span class="p">(</span><span class="s">&quot;SingleCellExperiment&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
+<p>This is what happens under the hood:</p>
+<ul class="simple">
+<li><p>The content of <code class="docutils literal notranslate"><span class="pre">mirrors.json</span></code> is retrieved from Cloudfront.</p></li>
+<li><p>If the user specifies a mirror (via <code class="docutils literal notranslate"><span class="pre">open_soma(mirror=...)</span></code>), we check if the mirror exists in the registry.</p></li>
+<li><p>If the user does not specify a mirror, the default mirror is selected.</p></li>
+<li><p>The census release directory is retrieved</p></li>
+<li><p>For the chosen version, the <code class="docutils literal notranslate"><span class="pre">relative_uri</span></code> field in the locator is resolved against the <code class="docutils literal notranslate"><span class="pre">base_uri</span></code> of the chosen mirror.</p></li>
+<li><p>This resolved URI is used to access the SOMA artifacts.</p></li>
+</ul>
+<p>Note that Census mirroring is only supported from version 1.6.0 onwards. Previous versions will only be able to access the data from a single location: the one specified in the <code class="docutils literal notranslate"><span class="pre">uri</span></code> field of the locator (together with <code class="docutils literal notranslate"><span class="pre">s3_region</span></code>). These fields could be deprecated in a future release of the Census.</p>
 </section>
 
 
             </div>
             
             </div>
-            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="CZ CELLxGENE Discover Census" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cellxgene_census_docsite_quick_start.html" class="btn btn-neutral float-right" title="Quick start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+            <footer>
 
   <hr/>
 

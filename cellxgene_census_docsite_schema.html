@@ -185,7 +185,7 @@
   <section id="census-data-and-schema">
 <h1>Census data and schema<a class="headerlink" href="#census-data-and-schema" title="Permalink to this heading">¶</a></h1>
 <p>This page provides a user-friendly overview of the Census contents and its schema, in case you are interested you can find the full schema specification <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md">here</a>.</p>
-<p><strong>Contents</strong></p>
+<p><strong>Contents:</strong></p>
 <ol class="arabic simple">
 <li><p><a class="reference internal" href="#schema"><span class="std std-ref">Schema</span></a></p></li>
 <li><p><a class="reference internal" href="#data-included-in-the-census"><span class="std std-ref">Data included in the Census</span></a></p></li>
@@ -205,8 +205,8 @@
 <p>A <code class="docutils literal notranslate"><span class="pre">SOMAcollection</span></code> with tables providing information of the census as a whole, it has the following items:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary&quot;</span></code>: high-level information of this Census, e.g. build date, total cell count, etc.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;datasets&quot;</span></code>: A table with all datasets from CELLxGENE Discover used to create the Census.
--<code class="docutils literal notranslate"><span class="pre">&quot;summary_cell_counts&quot;</span></code>: Cell counts stratified by relevant cell metadata</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;datasets&quot;</span></code>: A table with all datasets from CELLxGENE Discover used to create the Census.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary_cell_counts&quot;</span></code>: Cell counts stratified by relevant cell metadata.</p></li>
 </ul>
 </section>
 <section id="census-single-cell-data-census-data">
@@ -214,9 +214,9 @@
 <p>Data for each organism is stored in independent <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> objects which are a specialized form of a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. Each of these store a data matrix (cell by genes), cell metadata, gene metadata, and feature presence matrix:</p>
 <p>This is how the data is organized for one organism – <em>Homo sapiens</em>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].obs</span></code>: Cell metadata</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].X</span></code>: Data matrices, currently only raw counts exist <code class="docutils literal notranslate"><span class="pre">X[&quot;raw&quot;]</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var</span></code>: Gene Metadata</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].obs</span></code>: Cell metadata.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].X</span></code>: Data matrices: raw counts in <code class="docutils literal notranslate"><span class="pre">X[&quot;raw&quot;]</span></code>, and library-size normalized counts in <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code> (only avialble in Census schema V1.1.0 and above).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var</span></code>: Gene Metadata.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">[&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code>: a sparse boolean array indicating which genes were measured in each dataset.</p></li>
 </ul>
 </section>

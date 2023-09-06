@@ -245,24 +245,24 @@
 </section>
 <section id="example-notebook-vignette">
 <h2>Example notebook/vignette<a class="headerlink" href="#example-notebook-vignette" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Integrating data with SCVI.
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Integrating data with SCVI.</span>
 
-This notebook provides a demonstration for integrating two 
-Census datasets using `scvi-tools`. The goal is not to 
-provide an exhaustive guide on proper integration, but to showcase 
+This notebook provides a demonstration for integrating two
+Census datasets using <span class="sb">`scvi-tools`</span>. The goal is not to
+provide an exhaustive guide on proper integration, but to showcase
 what information in the Census can inform data integration.
 
-**Contents**
+<span class="gs">**Contents**</span>
 
-1. Finding and fetching data from mouse liver.
-2. Gene-length normalization of Smart-Seq2 data.
-3. Integration with scvi-tools.
-   1. Inspecting data prior to integration.
-   2. Integration with batch defined as dataset_id.
-   3. Integration with batch defined as dataset_id + donor_id.
-   4. Integration with batch defined as dataset_id + donor_id + assay_ontology_term_id + suspension_type.
+<span class="k">1.</span> Finding and fetching data from mouse liver.
+<span class="k">2.</span> Gene-length normalization of Smart-Seq2 data.
+<span class="k">3.</span> Integration with scvi-tools.
+<span class="w">   </span><span class="k">1.</span> Inspecting data prior to integration.
+<span class="w">   </span><span class="k">2.</span> Integration with batch defined as dataset_id.
+<span class="w">   </span><span class="k">3.</span> Integration with batch defined as dataset_id + donor_id.
+<span class="w">   </span><span class="k">4.</span> Integration with batch defined as dataset_id + donor_id + assay_ontology_term_id + suspension_type.
 
-## Finding and fetching data from mouse liver
+<span class="gu">## Finding and fetching data from mouse liver</span>
 
 Let&#39;s load all modules needed for this notebook.
 
@@ -272,20 +272,20 @@ Let&#39;s load all modules needed for this notebook.
   import numpy as np
   import scvi
   from scipy.sparse import csr_matrix
-\code 
+\code
 
-Now we can open the Census 
+Now we can open the Census
 
-\code 
+\code
   census = cellxgene_census.open_soma(census_version=&quot;latest&quot;)
 \code
 
-In this notebook we will use Tabula Muris Senis data 
-from the liver as it contains cells from both 10X 
+In this notebook we will use Tabula Muris Senis data
+from the liver as it contains cells from both 10X
 Genomics and Smart-Seq2 technologies.
 
-Let&#39;s query the datasets table of the Census by 
-filtering on collection_name for &quot;Tabula Muris Senis&quot; 
+Let&#39;s query the datasets table of the Census by
+filtering on collection_name for &quot;Tabula Muris Senis&quot;
 and dataset_title for &quot;liver&quot;.
 
 [...]
