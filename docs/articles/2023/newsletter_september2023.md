@@ -35,7 +35,7 @@ The `obs` data frame for both the human and mouse experiments is now augmented w
 
 ### Exporting normalized data
 
-Normalized data can be exported into AnnData with the following code:
+Normalized data can be exported into AnnData specifying the `X_name = "normalized"` argument of the `cellxgene.get_anndata()` method:
 
 ```python
 import cellxgene_census
