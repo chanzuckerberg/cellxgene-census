@@ -13,7 +13,7 @@ These features are currently experimental and exclusive to the "latest" version 
 
 The new field `dataset_version_id` has been introduced in `census_obj["census_info"]["datasets"]` to facilitate dataset versioning and management.
 
-### Added New Library-Size Normalized Layer in X["normalized"]
+### Added new library-size normalized layer
 
 We've introduced a library-size normalized layer for the RNA measurements of both the human and mouse experiments under `X["normalized"]`. The normalized layer divides each value in the count matrix by its corresponding row sum (i.e. size normalization), leading to potential numerical precision issues and slight deviations from the expected row sum of 1.0. A small sigma value has been added during the calculation of the normalized layer to ensure that all non-zero values from the count matrix are also non-zero values in the normalized layer.
 
