@@ -3,7 +3,7 @@
 *Published: 25 August 2023*  
 *By: [Author Name](mailto:author1@chanzuckerberg.com), [Co-Author](mailto:author2@chanzuckerberg.com)*
 
-The Census team is thrilled to announce the introduction of Census schema V1.1.0. This version offers enhanced metadata and API functionalities, tailored to empower your single-cell research.
+The Census team is thrilled to announce the introduction of Census schema V1.1.0. This version offers enhanced cell and gene metadata along with a normalized expression layer, tailored to empower your single-cell research.
 
 These features are currently experimental and exclusive to the "latest" version of Census. We invite your feedback as you explore these novel functionalities.
 
