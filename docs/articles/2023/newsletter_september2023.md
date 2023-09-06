@@ -114,7 +114,7 @@ with cellxgene_census.open_soma() as census:
 #adata with filtered cells
 ```
 
----
+## Help us improve these data additions
 
 We encourage you to engage with these new features in the Census API and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.
 
