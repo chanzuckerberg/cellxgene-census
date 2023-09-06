@@ -31,7 +31,7 @@ The `obs` data frame for both the human and mouse experiments is now augmented w
 - `raw_variance`: Indicates the count variance of nnz values
 - `n_measured_vars`: Enumerates the "measured" genes, determined by the sum of the presence matrix
 
-## How to Use the New Features
+## How to use the new features
 
 ### Exporting Normalized Data
 
