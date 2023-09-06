@@ -9,7 +9,7 @@ These features are currently experimental and exclusive to the "latest" version 
 
 ## Schema Changes in V1.1.0
 
-### Added `dataset_version_id` to Census Table
+### Added `dataset_version_id` to the datasets data frame
 
 The new field `dataset_version_id` has been introduced in `census_obj["census_info"]["datasets"]` to facilitate dataset versioning and management.
 
