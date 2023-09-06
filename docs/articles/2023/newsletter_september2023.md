@@ -23,7 +23,7 @@ The `ms["RNA"].var` data frame for both the human and mouse experiments, has bee
 
 ### Enhanced cell metadata
 
-The `obs` DataFrame is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing:
+The `obs` data frame for both the human and mouse experiments is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing. For each cell:
 
 - `raw_sum`: Represents the count sum derived from X["raw"]
 - `nnz`: Enumerates the number of non-zero (nnz) values
