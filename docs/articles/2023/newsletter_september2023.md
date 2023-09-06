@@ -120,4 +120,3 @@ We encourage you to engage with these new features in the Census API and share y
 
 For further information on the new library-size normalized layer, please reach out to us at [cellxgene@chanzuckerberg.com](cellxgene@chanzuckerberg.com). To report issues or for additional feedback, refer to our [Census GitHub repository](https://github.com/chanzuckerberg/cellxgene-census/issues).
 
----
