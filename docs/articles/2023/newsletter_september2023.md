@@ -40,7 +40,7 @@ Normalized data can be exported into AnnData specifying the `X_name = "normalize
 ```python
 import cellxgene_census
 
-with cellxgene_census.open_soma() as census:
+with cellxgene_census.open_soma(census_version = "latest") as census:
     adata = cellxgene_census.get_anndata(
         census = census,
         organism = "Homo sapiens",
