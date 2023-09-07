@@ -195,7 +195,7 @@ def open_soma(
         ) from None
 
     if description.get("flags", {}).get("retracted", False):
-        api_logger.info(
+        api_logger.warning(
             f"The \"{census_version}\" Census version has been retracted!\n{description['retraction']}."
             f'Use "stable" or "latest", or use get_census_version_directory() to retrieve valid versions.'
         )

@@ -6,8 +6,9 @@
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
+import typing
 from collections import OrderedDict
-from typing import Dict, List, Literal, Optional, Union, cast
+from typing import Dict, Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import TypedDict
@@ -34,8 +35,8 @@ CensusVersionRetraction = TypedDict(
         "replaced_by": Optional[str],  # the census version that replaces this one
     },
 )
-RELEASE_FLAGS = {"lts", "retracted"}
 ReleaseFlag = Literal["lts", "retracted"]
+RELEASE_FLAGS = set(typing.get_args(ReleaseFlag))
 ReleaseFlags = Dict[ReleaseFlag, bool]
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
@@ -208,7 +209,7 @@ def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVer
 
     directory: CensusDirectory = cast(CensusDirectory, response.json())
     directory_out: CensusDirectory = {}
-    aliases: Dict[CensusVersionName, List[CensusVersionName]] = {}
+    aliases: typing.Set[CensusVersionName] = set()
 
     # Resolve all aliases for easier use
     for census_version_name in list(directory.keys()):
@@ -224,6 +225,9 @@ def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVer
                 break
 
             directory_value = directory[alias]
+
+        if alias:
+            aliases.add(census_version_name)
 
         # exclude aliases
         if not isinstance(directory_value, dict):
@@ -242,9 +246,6 @@ def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVer
             continue
 
         directory_out[census_version_name] = census_version_description.copy()
-
-        if alias:
-            aliases.setdefault(census_version_name, []).append(alias)
 
     # Cast is safe, as we have removed all aliases
     unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory_out)
