@@ -30,8 +30,8 @@ CensusVersionDescription = TypedDict(
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
         "do_not_delete": Optional[bool],  # if set, prevents automated deletion
-        "flags": Optional[Dict[str, bool]],  # flags for the release
-        "retraction": Optional[Dict[str, str]],  # if retracted, details of the retraction
+        "flags": Dict[str, bool],  # flags for the release
+        "retraction": Dict[str, str],  # if retracted, details of the retraction
     },
 )
 CensusReleaseManifest = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
