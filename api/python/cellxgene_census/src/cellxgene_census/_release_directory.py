@@ -229,9 +229,9 @@ def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVer
         if not isinstance(directory_value, dict):
             continue
 
+        # filter by release flags
         census_version_description = cast(CensusVersionDescription, directory_value)
         release_flags = cast(ReleaseFlags, release_flags_kwargs)
-
         admitted = all(
             [
                 census_version_description.get("flags", {}).get(flag, False) == release_flags[flag]
