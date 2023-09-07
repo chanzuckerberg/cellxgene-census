@@ -24,6 +24,6 @@ _e.g. I found and ad-hoc solution but incorporating it into the code base adds s
 
 Provide any alternate or temporary solutions you have considered or used.
 
-## Ideal behavior 
+## Ideal behavior
 
 Provide a brief description of the behavior you'd expect.

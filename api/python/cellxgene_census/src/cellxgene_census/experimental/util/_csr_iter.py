@@ -100,7 +100,7 @@ def X_sparse_iter(
             (obs_coords_chunk, var_coords),
             (
                 tbl["soma_data"].to_numpy(),
-                pd.Index(obs_coords_chunk).get_indexer(tbl["soma_dim_0"].to_numpy()),  # type: ignore[no-untyped-call]
+                pd.Index(obs_coords_chunk).get_indexer(tbl["soma_dim_0"].to_numpy()),
                 query.indexer.by_var(tbl["soma_dim_1"].to_numpy()),
             ),
         )

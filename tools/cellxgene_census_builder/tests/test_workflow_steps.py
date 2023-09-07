@@ -8,6 +8,7 @@ from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildCon
 from cellxgene_census_builder.release_manifest import CensusVersionDescription
 
 TEST_BUCKET_PATH = "s3://bucket/path"
+TEST_BUCKET_PREFIX = "/path"
 
 
 @pytest.mark.parametrize("dryrun", [True, False])
@@ -85,8 +86,16 @@ def test_do_the_release(tmp_path: pathlib.Path, dryrun: bool) -> None:
     expected_rls_description: CensusVersionDescription = {
         "release_build": build_tag,
         "release_date": None,
-        "soma": {"uri": f"{TEST_BUCKET_PATH}/{build_tag}/soma/", "s3_region": "us-west-2"},
-        "h5ads": {"uri": f"{TEST_BUCKET_PATH}/{build_tag}/h5ads/", "s3_region": "us-west-2"},
+        "soma": {
+            "uri": f"{TEST_BUCKET_PATH}/{build_tag}/soma/",
+            "relative_uri": f"{TEST_BUCKET_PREFIX}/{build_tag}/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": f"{TEST_BUCKET_PATH}/{build_tag}/h5ads/",
+            "relative_uri": f"{TEST_BUCKET_PREFIX}/{build_tag}/h5ads/",
+            "s3_region": "us-west-2",
+        },
         "do_not_delete": False,
     }
     assert make_a_release_patch.call_count == 1

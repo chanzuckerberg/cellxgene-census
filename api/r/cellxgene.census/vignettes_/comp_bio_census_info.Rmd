@@ -30,7 +30,7 @@ This notebook showcases the Census contents and how to obtain high-level informa
 
 The `cellxgene.census` R package  contains a convenient `open_soma()` API to open any version of the Census (`stable` by default).
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 library("cellxgene.census")
 census <- open_soma()
 ```

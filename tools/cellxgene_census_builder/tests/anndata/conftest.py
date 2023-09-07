@@ -97,7 +97,7 @@ def h5ad_simple() -> ad.AnnData:
 
 @pytest.fixture
 def h5ad_with_organoids_and_cell_culture() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad = get_h5ad(ORGANISMS[0], no_zero_counts=True)
     h5ad.obs.at["1", "tissue_ontology_term_id"] = "CL:0000192 (organoid)"
     h5ad.obs.at["2", "tissue_ontology_term_id"] = "CL:0000192 (cell culture)"
     return h5ad
@@ -105,21 +105,21 @@ def h5ad_with_organoids_and_cell_culture() -> ad.AnnData:
 
 @pytest.fixture
 def h5ad_with_organism() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad = get_h5ad(ORGANISMS[0], no_zero_counts=True)
     h5ad.obs.at["1", "organism_ontology_term_id"] = ORGANISMS[1].organism_ontology_term_id
     return h5ad
 
 
 @pytest.fixture
 def h5ad_with_feature_biotype() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad = get_h5ad(ORGANISMS[0], no_zero_counts=True)
     h5ad.var.at["homo_sapiens_c", "feature_biotype"] = "non-gene"
     return h5ad
 
 
 @pytest.fixture
 def h5ad_with_assays() -> ad.AnnData:
-    h5ad = get_h5ad(ORGANISMS[0])
+    h5ad = get_h5ad(ORGANISMS[0], no_zero_counts=True)
     h5ad.obs.at["1", "assay_ontology_term_id"] = "EFO:1234"
     h5ad.obs.at["3", "assay_ontology_term_id"] = "EFO:1235"
     return h5ad

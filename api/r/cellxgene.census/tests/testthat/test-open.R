@@ -41,3 +41,29 @@ test_that("open_soma does not sign AWS S3 requests", {
   # anonymous access and a bogus key will cause the test to fail
   Sys.setenv(AWS_ACCESS_KEY_ID = "", AWS_SECRET_ACCESS_KEY = "")
 })
+
+test_that("resolve_census_locator paths", {
+  # typical path
+  locator <- resolve_census_locator(KNOWN_CENSUS_VERSION, NULL, NULL)
+  expect_equal(locator$uri, KNOWN_CENSUS_URI)
+  expect_equal(locator$mirror_info$alias, "default")
+  expect_equal(locator$mirror_info$provider, "S3")
+  expect_equal(locator$mirror_info$region, "us-west-2")
+
+  # non-default mirror
+  locator <- resolve_census_locator(KNOWN_CENSUS_VERSION, NULL, "AWS-S3-us-west-2")
+  expect_equal(locator$uri, KNOWN_CENSUS_URI)
+  expect_false("alias" %in% locator$mirror_info)
+  expect_equal(locator$mirror_info$provider, "S3")
+  expect_equal(locator$mirror_info$region, "us-west-2")
+
+  # explicit URI: file provider assumed (but that assumption could be overridden
+  # by supplying a preconfigured tiledbsoma_ctx to open_soma())
+  locator <- resolve_census_locator(KNOWN_CENSUS_VERSION, "file://tmp/soma", NULL)
+  expect_equal(locator$uri, "file://tmp/soma")
+  expect_null(locator$mirror_info)
+
+  # error paths...
+  expect_error(resolve_census_locator("bogus", NULL, NULL), "Census version is not valid")
+  expect_error(resolve_census_locator(KNOWN_CENSUS_VERSION, NULL, "bogus"), "Unknown Census mirror")
+})

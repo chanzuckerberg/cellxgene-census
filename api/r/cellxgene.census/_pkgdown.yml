@@ -3,11 +3,18 @@ template:
   bootstrap: 5
   includes:
     in_header: <script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
-
+      
+repo:
+  url:
+    home: https://github.com/chanzuckerberg/cellxgene-census/
+    source: https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/
+    issue: https://github.com/chanzuckerberg/cellxgene-census/issues
+    user: https://github.com/
+      
 home:
   sidebar:
     structure: [links, license, community, authors]
-      
+
 navbar:
   structure:
     left: [docsite, reference, articles]
@@ -15,7 +22,7 @@ navbar:
     docsite:
       text: Main Census Site
       href: https://chanzuckerberg.github.io/cellxgene-census/
-        
+
 reference:
 - title: Open/retrieve Census data
   contents:
@@ -42,9 +49,11 @@ articles:
     - comp_bio_census_info
     - comp_bio_summarize_axis_query
     - comp_bio_data_integration
+    - comp_bio_normalizing_full_gene_sequencing
 - title: API
   navbar: "cellxgene.census capabilities"
   contents:
     - census_query_extract
     - census_datasets
     - census_dataset_presence
+    - census_compute_over_X

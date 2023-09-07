@@ -5,23 +5,9 @@ import requests_mock as rm
 import s3fs
 
 import cellxgene_census
-from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
+from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 DIRECTORY_JSON = {
-    "stable": "2022-10-01",
-    "latest": "2022-11-01",
-    "2022-11-01": {
-        "release_date": "2022-11-30",
-        "release_build": "2022-11-01",
-        "soma": {
-            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
-            "s3_region": "us-west-2",
-        },
-        "h5ads": {
-            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
-            "s3_region": "us-west-2",
-        },
-    },
     "2022-10-01": {
         "release_date": "2022-10-30",
         "release_build": "2022-10-01",
@@ -34,15 +20,39 @@ DIRECTORY_JSON = {
             "s3_region": "us-west-2",
         },
     },
+    "2022-11-01": {
+        "release_date": "2022-11-30",
+        "release_build": "2022-11-01",
+        "soma": {
+            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
+            "s3_region": "us-west-2",
+        },
+        "h5ads": {
+            "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
+            "s3_region": "us-west-2",
+        },
+    },
+    "stable": "2022-10-01",
+    "latest": "2022-11-01",
     # An explicitly dangling tag, to confirm we handle correct
     # Underscore indicates expected failure to test below
     "_dangling": "no-such-tag",
+}
+
+MIRRORS_JSON = {
+    "default": "AWS-S3-us-west-2",
+    "AWS-S3-us-west-2": {"provider": "S3", "base_uri": "s3://cellxgene-data-public/", "region": "us-west-2"},
 }
 
 
 @pytest.fixture
 def directory_mock(requests_mock: rm.Mocker) -> Any:
     return requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=DIRECTORY_JSON)
+
+
+@pytest.fixture
+def mirrors_mock(requests_mock: rm.Mocker) -> Any:
+    return requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=MIRRORS_JSON)
 
 
 def test_get_census_version_directory(directory_mock: Any) -> None:
@@ -64,10 +74,26 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     for tag in directory:
         assert directory[tag] == cellxgene_census.get_census_version_description(tag)
 
+    # Verify that the directory is sorted according to this criteria:
+    # 1. Aliases first
+    # 2. Non aliases after, in reverse order
+    dir_list = list(directory)
+    assert dir_list[0] == "stable"
+    assert dir_list[1] == "latest"
+    assert dir_list[2] == "2022-11-01"
+    assert dir_list[3] == "2022-10-01"
+
 
 def test_get_census_version_description_errors() -> None:
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         cellxgene_census.get_census_version_description(census_version="no/such/version/exists")
+
+
+def test_get_census_mirrors_directory(mirrors_mock: Any) -> None:
+    directory = cellxgene_census.get_census_mirror_directory()
+    assert "default" not in directory
+    assert "AWS-S3-us-west-2" in directory
+    assert directory["AWS-S3-us-west-2"] == MIRRORS_JSON["AWS-S3-us-west-2"]
 
 
 @pytest.mark.live_corpus

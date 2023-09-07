@@ -17,3 +17,12 @@ open_soma_latest_for_test <- function(...) {
   }
   open_soma("latest", tiledbsoma_ctx = tiledbsoma_ctx_latest_for_test)
 }
+
+# A known-good Cell Census version. This may need updating if the version used
+# is withdrawn for any reason.
+KNOWN_CENSUS_VERSION <- "2023-05-15" # an LTS version
+KNOWN_CENSUS_URI <- paste0(
+  "s3://cellxgene-data-public/cell-census/",
+  KNOWN_CENSUS_VERSION,
+  "/soma/"
+)

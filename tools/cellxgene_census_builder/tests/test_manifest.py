@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import uuid
 from unittest.mock import patch
@@ -5,7 +6,7 @@ from unittest.mock import patch
 import fsspec
 import pytest
 from cellxgene_census_builder.build_soma.manifest import load_manifest
-from cellxgene_census_builder.build_state import CENSUS_CONFIG_DEFAULTS
+from cellxgene_census_builder.build_state import CensusBuildConfig
 
 
 def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
@@ -67,7 +68,7 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "collection_name": "1",
                 "collection_doi": None,
                 "title": "dataset #1",
-                "schema_version": "3.0.0",
+                "schema_version": "3.1.0",
                 "assets": [
                     {
                         "filesize": 123,
@@ -88,7 +89,7 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "collection_name": "1",
                 "collection_doi": None,
                 "title": "dataset #2",
-                "schema_version": "3.0.0",
+                "schema_version": "3.1.0",
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
                 "dataset_version_id": "dataset_id_2",
             },
@@ -104,7 +105,9 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
         assert manifest[1].asset_h5ad_filesize == 456
 
 
-def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(empty_blocklist: str) -> None:
+def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
+    caplog: pytest.LogCaptureFixture, empty_blocklist: str
+) -> None:
     """
     `load_manifest` should exclude datasets that do not have a current schema version.
     """
@@ -116,7 +119,7 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(empty_blockli
                 "collection_name": "1",
                 "collection_doi": None,
                 "title": "dataset #1",
-                "schema_version": "3.0.0",
+                "schema_version": "3.1.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
             },
@@ -132,11 +135,18 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(empty_blockli
             },
         ]
 
-        with pytest.raises(RuntimeError, match=r"unsupported schema version"):
-            load_manifest(None, empty_blocklist)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(RuntimeError, match=r"unsupported schema version"):
+                load_manifest(None, empty_blocklist)
+
+            for record in caplog.records:
+                assert record.levelname == "ERROR"
+                assert "unsupported schema version" in record.msg
 
 
-def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist: str) -> None:
+def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
+    caplog: pytest.LogCaptureFixture, empty_blocklist: str
+) -> None:
     """
     `load_manifest` should raise error if it finds datasets without assets
     """
@@ -148,7 +158,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist
                 "collection_name": "1",
                 "collection_doi": None,
                 "title": "dataset #1",
-                "schema_version": "3.0.0",
+                "schema_version": "3.1.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
             },
@@ -158,14 +168,19 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(empty_blocklist
                 "collection_name": "1",
                 "collection_doi": None,
                 "title": "dataset #2",
-                "schema_version": "3.0.0",
+                "schema_version": "3.1.0",
                 "assets": [],
                 "dataset_version_id": "dataset_id_2",
             },
         ]
 
-        with pytest.raises(RuntimeError):
-            load_manifest(None, empty_blocklist)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(RuntimeError, match=r"unable to find H5AD asset"):
+                load_manifest(None, empty_blocklist)
+
+            for record in caplog.records:
+                assert record.levelname == "ERROR"
+                assert "unable to find H5AD asset" in record.msg
 
 
 def test_blocklist_alive_and_well() -> None:
@@ -176,9 +191,11 @@ def test_blocklist_alive_and_well() -> None:
     3. The file "looks like" a block list
     """
 
-    assert CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
+    config = CensusBuildConfig()
 
-    dataset_id_blocklist_uri = CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"]
+    assert config.dataset_id_blocklist_uri
+
+    dataset_id_blocklist_uri = config.dataset_id_blocklist_uri
 
     # test for existance by reading it. NOTE: if the file moves, this test will fail until
     # the new file location is merged to main.

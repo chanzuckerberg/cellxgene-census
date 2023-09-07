@@ -2,11 +2,13 @@ pandoc: 2.11.3.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  census_compute_over_X: census_compute_over_X.html
   census_dataset_presence: census_dataset_presence.html
   census_datasets: census_datasets.html
   census_query_extract: census_query_extract.html
   comp_bio_census_info: comp_bio_census_info.html
   comp_bio_data_integration: comp_bio_data_integration.html
+  comp_bio_normalizing_full_gene_sequencing: comp_bio_normalizing_full_gene_sequencing.html
   comp_bio_summarize_axis_query: comp_bio_summarize_axis_query.html
-last_built: 2023-08-06T17:02Z
+last_built: 2023-09-06T20:04Z
 

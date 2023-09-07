@@ -13,7 +13,7 @@ import tiledbsoma as soma
 
 import cellxgene_census
 from cellxgene_census._open import DEFAULT_TILEDB_CONFIGURATION
-from cellxgene_census._release_directory import CELL_CENSUS_RELEASE_DIRECTORY_URL
+from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
 
 
 @pytest.mark.live_corpus
@@ -28,13 +28,6 @@ def test_open_soma_stable() -> None:
         assert default_census.uri == census.uri
         for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
             assert census.context.tiledb_ctx.config()[k] == str(v)
-
-    # TODO: After the first "stable" build is available, this commented-out code can be replace this above block
-    # and it should always be the default
-    # with cellxgene_census.open_soma() as default_census:
-    #     assert default_census.uri == census.uri
-    #     for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
-    #         assert census.context.tiledb_ctx.config()[k] == str(v)
 
 
 @pytest.mark.live_corpus
@@ -83,6 +76,7 @@ def test_open_soma_invalid_args() -> None:
 
 def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
     requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json={})
+    requests_mock.real_http = True
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -92,7 +86,112 @@ def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
         cellxgene_census.open_soma(census_version="does-not-exist")
 
 
+def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
+    mock_mirrors = {
+        "default": "test-mirror",
+        "test-mirror": {"provider": "S3", "base_uri": "s3://mirror-bucket-1/", "region": "region-1"},
+        "test-mirror-2": {"provider": "S3", "base_uri": "s3://mirror-bucket-2/", "region": "region-2"},
+    }
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
+
+    dir = {
+        "latest": "2022-11-01",
+        "2022-11-01": {
+            "release_date": "2022-11-30",
+            "release_build": "2022-11-01",
+            "soma": {
+                "uri": "s3://ignored-bucket/cell-census/2022-11-01/soma/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
+                "s3_region": "ignored",
+            },
+            "h5ads": {
+                "uri": "s3://ignored-bucket/cell-census/2022-11-01/h5ads/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
+                "s3_region": "ignored",
+            },
+        },
+    }
+
+    requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
+
+    # Verify that the default mirror is used if no mirror is specified
+    with patch("cellxgene_census._open._open_soma") as m:
+        cellxgene_census.open_soma()
+        m.assert_called_once_with(
+            {"uri": "s3://mirror-bucket-1/cell-census/2022-11-01/soma/", "region": "region-1", "provider": "S3"}, None
+        )
+
+    # Verify that the correct mirror is used if a mirror parameter is specified
+    with patch("cellxgene_census._open._open_soma") as m:
+        cellxgene_census.open_soma(mirror="test-mirror-2")
+        m.assert_called_once_with(
+            {"uri": "s3://mirror-bucket-2/cell-census/2022-11-01/soma/", "region": "region-2", "provider": "S3"}, None
+        )
+
+    # Verify that an error is raised if a non existing mirror is specified
+    with patch("cellxgene_census._open._open_soma") as m:
+        with pytest.raises(
+            ValueError,
+            match=re.escape("Mirror not found."),
+        ):
+            cellxgene_census.open_soma(mirror="bogus-mirror")
+
+
+def test_open_soma_rejects_non_s3_mirror(requests_mock: rm.Mocker) -> None:
+    mock_mirrors = {
+        "default": "test-mirror",
+        "test-mirror": {"provider": "GCS", "base_uri": "gcs://mirror-bucket-1/"},
+    }
+    requests_mock.real_http = True
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Unsupported mirror provider: GCS. Try upgrading the cellxgene-census package to the latest version."
+        ),
+    ):
+        cellxgene_census.open_soma(census_version="latest")
+
+
+def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
+    """
+    This test ensures that the Census works even if the relative_uri is not specified in the directory.
+    This ensures backwards compatibility with the v1 route.
+    """
+
+    dir = {
+        "latest": "2022-11-01",
+        "2022-11-01": {
+            "release_date": "2022-11-30",
+            "release_build": "2022-11-01",
+            "soma": {
+                "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/",
+                "s3_region": "us-west-2",
+            },
+            "h5ads": {
+                "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/h5ads/",
+                "s3_region": "us-west-2",
+            },
+        },
+    }
+
+    requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
+    with patch("cellxgene_census._open._open_soma") as m:
+        cellxgene_census.open_soma(census_version="stable")
+        m.assert_called_once_with(
+            {
+                "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/",
+                "region": "us-west-2",
+                "provider": "S3",
+            },
+            None,
+        )
+
+
 def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
     dir_missing_stable = {
         "latest": "2022-11-01",
         "2022-11-01": {
@@ -100,10 +199,12 @@ def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker
             "release_build": "2022-11-01",
             "soma": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
                 "s3_region": "us-west-2",
             },
             "h5ads": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
+                "relative_uri": "/cell-census/2022-11-01/soma/",
                 "s3_region": "us-west-2",
             },
         },
@@ -113,11 +214,13 @@ def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma(census_version="stable")
         m.assert_called_once_with(
-            {"uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/", "s3_region": "us-west-2"}, None
+            {"uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/", "region": "us-west-2", "provider": "S3"},
+            None,
         )
 
 
 def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
+    requests_mock.real_http = True
     directory_with_stable = {
         "stable": "2022-10-01",
         "2022-10-01": {
@@ -125,10 +228,12 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
             "release_build": "2022-10-01",
             "soma": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/",
+                "relative_uri": "/cell-census/2022-10-01/soma/",
                 "s3_region": "us-west-2",
             },
             "h5ads": {
                 "uri": "s3://cellxgene-data-public/cell-census/2022-10-01/h5ads/",
+                "relative_uri": "/cell-census/2022-10-01/soma/",
                 "s3_region": "us-west-2",
             },
         },
@@ -138,7 +243,8 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma()
         m.assert_called_once_with(
-            {"uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/", "s3_region": "us-west-2"}, None
+            {"uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/", "region": "us-west-2", "provider": "S3"},
+            None,
         )
 
 

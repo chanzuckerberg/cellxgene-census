@@ -329,11 +329,15 @@ def _validate_X_obs_axis_stats(
 
     # obs.nnz
     nnz = expected_X.getnnz(axis=1)
+    assert np.all(census_obs.nnz.to_numpy() > 0.0)  # All cells must contain at least one count value > 0
     assert np.array_equal(census_obs.nnz.to_numpy(), nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
     # obs.raw_mean_nnz - mean of the explicitly stored values (zeros are _ignored_)
+    with np.errstate(divide="ignore"):
+        expected_raw_mean_nnz = raw_sum / nnz
+    expected_raw_mean_nnz[~np.isfinite(expected_raw_mean_nnz)] = 0.0
     assert np.allclose(
-        census_obs.raw_mean_nnz.to_numpy(), raw_sum / nnz
+        census_obs.raw_mean_nnz.to_numpy(), expected_raw_mean_nnz
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_mean_nnz incorrect."
 
     # obs.raw_variance_nnz
@@ -391,7 +395,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                 continue
 
             assert _validate_X_obs_axis_stats(eb, dataset, obs_df, ad)
-            obs_df = obs_df[["soma_joinid"]]  # save some memory
+            obs_df = obs_df[["soma_joinid", "raw_sum"]]  # save some memory
 
             # get the joinids for the var axis
             var_df = (
@@ -418,8 +422,16 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
 
                 # positionally re-index
                 cols_by_position = var_index.get_indexer(X_raw_var_joinids)
-                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)  # type: ignore[no-untyped-call]
+                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)
                 del X_raw_obs_joinids
+
+                # Check that raw_sum stat matches raw layer
+                raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
+                np.add.at(raw_sum, rows_by_position, X_raw_data)
+                raw_sum = raw_sum.astype(
+                    CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()
+                )  # back to the storage type
+                assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
 
                 # Assertion 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
                 assert (
@@ -539,7 +551,9 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
-            assert np.all(norm["soma_data"].to_numpy() >= 0.0)
+            # If we wrote a value, it MUST be larger than zero (i.e., represents a raw count value of 1 or greater)
+            assert np.all(raw["soma_data"].to_numpy() > 0.0), "Found zero value in raw layer"
+            assert np.all(norm["soma_data"].to_numpy() > 0.0), "Found zero value in normalized layer"
 
             dim0 = norm["soma_dim_0"].to_numpy()
             dim1 = norm["soma_dim_1"].to_numpy()

@@ -31,15 +31,13 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma==1.2.7",
+    "tiledbsoma~=1.4.3",
     "anndata",
     "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
     "scipy<1.11",  # work around incompatibility between scipy and pyarrow
-    # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
-    "certifi",
 ]
 
 [project.optional-dependencies]

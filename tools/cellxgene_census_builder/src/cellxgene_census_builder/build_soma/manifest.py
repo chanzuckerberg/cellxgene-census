@@ -7,7 +7,7 @@ from typing import List, Set
 import fsspec
 
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT
+from .globals import CXG_SCHEMA_VERSION
 from .util import fetch_json
 
 CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
@@ -63,7 +63,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
         dataset_id = dataset["dataset_id"]
         schema_version = dataset["schema_version"]
 
-        if schema_version not in CXG_SCHEMA_VERSION_IMPORT:
+        if schema_version != CXG_SCHEMA_VERSION:
             msg = f"Manifest fetch: dataset {dataset_id} contains unsupported schema version {schema_version}."
             logging.error(msg)
             raise RuntimeError(msg)

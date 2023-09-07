@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,11 +54,13 @@
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
     <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
+    <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
   </div>
 </li>
       </ul>
@@ -88,7 +90,7 @@
       <img src="" class="logo" alt=""><h1>Genes measured in each cell (dataset presence matrix)</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/HEAD/vignettes/census_dataset_presence.Rmd" class="external-link"><code>vignettes/census_dataset_presence.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_/census_dataset_presence.Rmd" class="external-link"><code>vignettes/census_dataset_presence.Rmd</code></a></small>
       <div class="d-none name"><code>census_dataset_presence.Rmd</code></div>
     </div>
 
@@ -116,8 +118,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
-<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span></span></code></pre></div>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fetching-the-ids-of-the-census-datasets">Fetching the IDs of the Census datasets<a class="anchor" aria-label="anchor" href="#fetching-the-ids-of-the-census-datasets"></a>
