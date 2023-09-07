@@ -4,9 +4,9 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-This is the documentation for the R package `cellxgene.census` which is part of CZ CELLxGENE Discover Census. For full details on Census data and capabilities please go to the [main Census site](https://chanzuckerberg.github.io/cellxgene-census/).  
+This is the documentation for the R package `cellxgene.census` which is part of CZ CELLxGENE Discover Census. For full details on Census data and capabilities please go to the [main Census site](https://chanzuckerberg.github.io/cellxgene-census/).
 
-`cellxgene.census` provides an API to efficiently access the cloud-hosted Census single-cell data from R. In just a few seconds users can access any slice of Census data using cell or gene filters across hundreds of single-cell datasets. 
+`cellxgene.census` provides an API to efficiently access the cloud-hosted Census single-cell data from R. In just a few seconds users can access any slice of Census data using cell or gene filters across hundreds of single-cell datasets.
 
 Census data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, as well as `Seurat` or `SingleCellExperiment` objects for downstream analysis.
 
@@ -23,7 +23,7 @@ Then in an R session install `cellxgene.census` from R-Universe.
 ```r
 install.packages(
   "cellxgene.census",
-  repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
+  repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org')
 )
 ```
 
@@ -36,10 +36,9 @@ install.packages("Seurat")
 # SingleCellExperiment
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-    
+
 BiocManager::install("SingleCellExperiment")
 ```
-
 
 ## Usage
 
@@ -49,7 +48,6 @@ Check out the vignettes in the "Articles" section of the navigation bar on this 
 * [Learning about the CZ CELLxGENE Discover Census](./articles/comp_bio_census_info.html)
 
 You can also check out out the [quick start guide](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_quick_start.html) in the main Census site.
-
 
 ### Example `Seurat` and `SingleCellExperiment` query
 
@@ -91,6 +89,6 @@ sce_obj <- get_single_cell_experiment(
 
 ## For More Help
 
-For more help, please go visit the [main Census site](https://chanzuckerberg.github.io/cellxgene-census/). 
+For more help, please go visit the [main Census site](https://chanzuckerberg.github.io/cellxgene-census/).
 
 If you believe you have found a security issue, we would appreciate notification. Please send an email to <security@chanzuckerberg.com>.

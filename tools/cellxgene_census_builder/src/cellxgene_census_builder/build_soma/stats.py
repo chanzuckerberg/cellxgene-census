@@ -19,7 +19,9 @@ def get_obs_stats(
 
     raw_sum = raw_X.sum(axis=1, dtype=np.float64).A1
     nnz = raw_X.getnnz(axis=1)
-    raw_mean_nnz = raw_sum / nnz
+    with np.errstate(divide="ignore"):
+        raw_mean_nnz = raw_sum / nnz
+    raw_mean_nnz[~np.isfinite(raw_mean_nnz)] = 0.0
     raw_variance_nnz = _var(raw_X, axis=1, ddof=1)
     n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0, dtype=np.float64) > 0).sum(), dtype=np.int64)
 

@@ -1,0 +1,23 @@
+# Configuration for markdownlint-cli, used in pre-commit
+
+# Default state for all rules
+default: true
+
+# MD013/line-length - Line length increased to a large number
+MD013:
+  line_length: 1000
+
+# MD024/no-duplicate-heading/no-duplicate-header - Multiple headings with the same content
+MD024:
+  allow_different_nesting: true
+
+# MD026/no-trailing-punctuation - Trailing punctuation in heading
+MD026:
+  # Punctuation characters
+  punctuation: ".,;。，；：！"
+
+# MD033/no-inline-html - disable, allowing HTML
+MD033: false
+
+# MD041/first-line-heading/first-line-h1 - First line in a file should be a top-level heading
+MD041: false
