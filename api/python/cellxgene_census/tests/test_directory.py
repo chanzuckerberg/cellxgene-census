@@ -148,20 +148,6 @@ def test_get_census_version_directory__retraction_info(directory_mock: Any) -> N
     }
 
 
-def test_get_census_version_directory_lts_releases(directory_mock: Any) -> None:
-    directory = cellxgene_census.get_census_version_directory_of_lts_releases()
-
-    # Note: excludes retracted releases ("V"1, "2022-09-01"), by default
-    assert set(directory.keys()) == {"stable", "V2", "2022-10-01"}
-
-
-def test_get_census_version_directory_lts_releases__include_retracted(directory_mock: Any) -> None:
-    directory = cellxgene_census.get_census_version_directory_of_lts_releases(include_retracted=True)
-
-    # Note: excludes retracted releases (), by default
-    assert set(directory.keys()) == {"stable", "V1", "V2", "2022-10-01", "2022-09-01"}
-
-
 def test_get_census_version_description_errors() -> None:
     with pytest.raises(ValueError):
         cellxgene_census.get_census_version_description(census_version="no/such/version/exists")

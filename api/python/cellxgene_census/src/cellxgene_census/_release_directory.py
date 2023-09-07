@@ -36,7 +36,6 @@ CensusVersionRetraction = TypedDict(
     },
 )
 ReleaseFlag = Literal["lts", "retracted"]
-RELEASE_FLAGS = set(typing.get_args(ReleaseFlag))
 ReleaseFlags = Dict[ReleaseFlag, bool]
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
@@ -138,38 +137,18 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-def get_census_version_directory_of_lts_releases(
-    include_retracted: bool = False,
-) -> Dict[CensusVersionName, CensusVersionDescription]:
-    """
-    Get a view of the directory that only includes the long-term stable ("LTS") Census releases, optionally including
-    retracted releases.
-
-    Params:
-        include_retracted: Include retracted releases in the returned directory.
-
-    Returns:
-        A dictionary that contains release names and their corresponding release description, for LTS releases only.
-
-    Lifecycle:
-        maturing
-
-    See Also:
-        :func:`get_census_version_directory`: get directory of all Census releases currently available.
-        :func:`get_census_version_description`: get description by census_version.
-    """
-    release_flags = dict(lts=True) if include_retracted else dict(lts=True, retracted=False)
-    return get_census_version_directory(**release_flags)
-
-
 # TODO: Update example output and add example for use of release_flags
-def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVersionName, CensusVersionDescription]:
+def get_census_version_directory(
+    lts: Optional[bool] = None, retracted: Optional[bool] = None
+) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of Census releases currently available, optionally filtering by specified flags.
 
     Params:
-        release_flags_kwargs: An optional set of keyword arg-based flags to filter the releases by. If a flag is not
-        specified, it is not used to filter the releases.
+        lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no filtering is
+         performed based on this flag.
+        retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no filtering is
+         performed based on this flag.
 
     Returns:
         A dictionary that contains release names and their corresponding release description.
@@ -201,9 +180,6 @@ def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVer
         'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
         's3_region': 'us-west-2'}}}
     """
-    if invalid_release_flags := release_flags_kwargs.keys() - RELEASE_FLAGS:
-        raise ValueError(f"Unknown release flag(s): {invalid_release_flags}")
-
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()
 
@@ -235,11 +211,12 @@ def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVer
 
         # filter by release flags
         census_version_description = cast(CensusVersionDescription, directory_value)
-        release_flags = cast(ReleaseFlags, release_flags_kwargs)
+        release_flags = cast(ReleaseFlags, {"lts": lts, "retracted": retracted})
         admitted = all(
             [
-                census_version_description.get("flags", {}).get(flag, False) == release_flags[flag]
-                for flag in release_flags.keys()
+                census_version_description.get("flags", {}).get(flag_name, False) == release_flags[flag_name]
+                for flag_name, flag_value in release_flags.items()
+                if flag_value is not None
             ]
         )
         if not admitted:
