@@ -95,12 +95,12 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
 
     assert directory["2022-11-01"] == DIRECTORY_JSON["2022-11-01"]
     assert directory["2022-10-01"] == DIRECTORY_JSON["2022-10-01"]
-    assert directory["2022-09-01"] == DIRECTORY_JSON["2022-09-01"]
+    assert "2022-09-01" not in directory  # retracted excluded by default
 
     assert directory["latest"] == DIRECTORY_JSON["2022-11-01"]
     assert directory["stable"] == DIRECTORY_JSON["2022-10-01"]
-    assert directory["V1"] == DIRECTORY_JSON["2022-09-01"]
     assert directory["V2"] == DIRECTORY_JSON["2022-10-01"]
+    assert "V1" not in directory  # retracted excluded by default
 
     for tag in directory:
         assert directory[tag] == cellxgene_census.get_census_version_description(tag)
@@ -109,13 +109,13 @@ def test_get_census_version_directory(directory_mock: Any) -> None:
     # 1. Aliases first
     # 2. Non aliases after, in reverse order
     dir_list = list(directory)
-    assert dir_list == ["stable", "latest", "V2", "V1", "2022-11-01", "2022-10-01", "2022-09-01"]
+    assert dir_list == ["stable", "latest", "V2", "2022-11-01", "2022-10-01"]
 
 
 def test_get_census_version_directory__lts_only(directory_mock: Any) -> None:
     directory = cellxgene_census.get_census_version_directory(lts=True)
 
-    assert directory.keys() == {"stable", "V1", "V2", "2022-10-01", "2022-09-01"}
+    assert directory.keys() == {"stable", "V2", "2022-10-01"}
 
 
 def test_get_census_version_directory__exclude_lts(directory_mock: Any) -> None:
@@ -124,16 +124,15 @@ def test_get_census_version_directory__exclude_lts(directory_mock: Any) -> None:
     assert directory.keys() == {"latest", "2022-11-01"}
 
 
-def test_get_census_version_directory__exclude_retracted(directory_mock: Any) -> None:
-    directory = cellxgene_census.get_census_version_directory(retracted=False)
+def test_get_census_version_directory__include_retracted(directory_mock: Any) -> None:
+    directory = cellxgene_census.get_census_version_directory(retracted=None)
 
-    assert "V1" not in directory
-    assert "2022-09-01" not in directory
-    assert not any((v.get("retraction", None) for v in directory.values()))
+    assert "V1" in directory
+    assert "2022-09-01" in directory
 
 
 def test_get_census_version_directory__retraction_info(directory_mock: Any) -> None:
-    directory = cellxgene_census.get_census_version_directory()
+    directory = cellxgene_census.get_census_version_directory(retracted=True)
 
     assert directory["2022-09-01"]["retraction"] == {
         "date": "2022-11-15",

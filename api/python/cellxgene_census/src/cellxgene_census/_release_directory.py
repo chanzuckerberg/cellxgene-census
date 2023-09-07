@@ -11,7 +11,7 @@ from collections import OrderedDict
 from typing import Dict, Literal, Optional, Union, cast
 
 import requests
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 """
 The following types describe the expected directory of Census builds, used
@@ -44,8 +44,8 @@ CensusVersionDescription = TypedDict(
         "release_build": str,  # date of build
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
-        "flags": ReleaseFlags,  # flags for the release
-        "retraction": CensusVersionRetraction,  # if retracted, details of the retraction
+        "flags": NotRequired[ReleaseFlags],  # flags for the release
+        "retraction": NotRequired[CensusVersionRetraction],  # if retracted, details of the retraction
     },
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
@@ -139,7 +139,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
 # TODO: Update example output and add example for use of release_flags
 def get_census_version_directory(
-    lts: Optional[bool] = None, retracted: Optional[bool] = None
+    lts: Optional[bool] = None, retracted: Optional[bool] = False
 ) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
     Get the directory of Census releases currently available, optionally filtering by specified flags.
