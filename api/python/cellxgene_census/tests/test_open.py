@@ -95,7 +95,7 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
     dir = {
-        "latest": "2022-11-01",
+        "stable": "2022-11-01",
         "2022-11-01": {
             "release_date": "2022-11-30",
             "release_build": "2022-11-01",
@@ -151,7 +151,7 @@ def test_open_soma_rejects_non_s3_mirror(requests_mock: rm.Mocker) -> None:
             "Unsupported mirror provider: GCS. Try upgrading the cellxgene-census package to the latest version."
         ),
     ):
-        cellxgene_census.open_soma(census_version="latest")
+        cellxgene_census.open_soma()
 
 
 def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) -> None:
@@ -162,7 +162,7 @@ def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) 
     """
 
     dir = {
-        "latest": "2022-11-01",
+        "stable": "2022-11-01",
         "2022-11-01": {
             "release_date": "2022-11-30",
             "release_build": "2022-11-01",
@@ -179,42 +179,13 @@ def test_open_soma_works_if_no_relative_uri_specified(requests_mock: rm.Mocker) 
 
     requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
     with patch("cellxgene_census._open._open_soma") as m:
-        cellxgene_census.open_soma(census_version="stable")
+        cellxgene_census.open_soma()
         m.assert_called_once_with(
             {
                 "uri": "s3://bucket-from-absolute-uri/cell-census/2022-11-01/soma/",
                 "region": "us-west-2",
                 "provider": "S3",
             },
-            None,
-        )
-
-
-def test_open_soma_defaults_to_latest_if_missing_stable(requests_mock: rm.Mocker) -> None:
-    requests_mock.real_http = True
-    dir_missing_stable = {
-        "latest": "2022-11-01",
-        "2022-11-01": {
-            "release_date": "2022-11-30",
-            "release_build": "2022-11-01",
-            "soma": {
-                "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
-                "relative_uri": "/cell-census/2022-11-01/soma/",
-                "s3_region": "us-west-2",
-            },
-            "h5ads": {
-                "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/h5ads/",
-                "relative_uri": "/cell-census/2022-11-01/soma/",
-                "s3_region": "us-west-2",
-            },
-        },
-    }
-
-    requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir_missing_stable)
-    with patch("cellxgene_census._open._open_soma") as m:
-        cellxgene_census.open_soma(census_version="stable")
-        m.assert_called_once_with(
-            {"uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/", "region": "us-west-2", "provider": "S3"},
             None,
         )
 

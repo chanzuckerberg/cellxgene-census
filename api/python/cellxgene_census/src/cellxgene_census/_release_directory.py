@@ -7,7 +7,7 @@
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
 from collections import OrderedDict
-from typing import Dict, Literal, Optional, Union, cast
+from typing import Dict, List, Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import TypedDict
@@ -30,10 +30,13 @@ CensusVersionRetraction = TypedDict(
     {
         "date": str,  # the date of retraction
         "reason": Optional[str],  # the reason for retraction
-        "info_link": Optional[str],  # a link to more information
+        "info_url": Optional[str],  # a permalink to more information
         "replaced_by": Optional[str],  # the census version that replaces this one
     },
 )
+RELEASE_FLAGS = {"lts", "retracted"}
+ReleaseFlag = Literal["lts", "retracted"]
+ReleaseFlags = Dict[ReleaseFlag, bool]
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
     {
@@ -41,9 +44,8 @@ CensusVersionDescription = TypedDict(
         "release_build": str,  # date of build
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
-        "alias": Optional[str],  # the alias of this entry
-        "is_lts": Optional[bool],  # whether this is a long-term support release
-        "retraction": Optional[CensusVersionRetraction],  # if retracted, details of the retraction
+        "flags": ReleaseFlags,  # flags for the release
+        "retraction": CensusVersionRetraction,  # if retracted, details of the retraction
     },
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
@@ -135,11 +137,38 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-def get_census_version_directory(
-    lts_only: bool = False, exclude_retracted: bool = True
+def get_census_version_directory_of_lts_releases(
+    include_retracted: bool = False,
 ) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of Census releases currently available.
+    Get a view of the directory that only includes the long-term stable ("LTS") Census releases, optionally including
+    retracted releases.
+
+    Params:
+        include_retracted: Include retracted releases in the returned directory.
+
+    Returns:
+        A dictionary that contains release names and their corresponding release description, for LTS releases only.
+
+    Lifecycle:
+        maturing
+
+    See Also:
+        :func:`get_census_version_directory`: get directory of all Census releases currently available.
+        :func:`get_census_version_description`: get description by census_version.
+    """
+    release_flags = dict(lts=True) if include_retracted else dict(lts=True, retracted=False)
+    return get_census_version_directory(**release_flags)
+
+
+# TODO: Update example output and add example for use of release_flags
+def get_census_version_directory(**release_flags_kwargs: bool) -> Dict[CensusVersionName, CensusVersionDescription]:
+    """
+    Get the directory of Census releases currently available, optionally filtering by specified flags.
+
+    Params:
+        release_flags_kwargs: An optional set of keyword arg-based flags to filter the releases by. If a flag is not
+        specified, it is not used to filter the releases.
 
     Returns:
         A dictionary that contains release names and their corresponding release description.
@@ -148,7 +177,7 @@ def get_census_version_directory(
         maturing
 
     See Also:
-        :func:`get_census_version_description`: get description by census_version.
+        :func:`get_census_version_description`: get description by census_version_name.
 
     Examples:
         >>> cellxgene_census.get_census_version_directory()
@@ -171,50 +200,64 @@ def get_census_version_directory(
         'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
         's3_region': 'us-west-2'}}}
     """
+    if invalid_release_flags := release_flags_kwargs.keys() - RELEASE_FLAGS:
+        raise ValueError(f"Unknown release flag(s): {invalid_release_flags}")
+
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()
 
     directory: CensusDirectory = cast(CensusDirectory, response.json())
     directory_out: CensusDirectory = {}
+    aliases: Dict[CensusVersionName, List[CensusVersionName]] = {}
 
     # Resolve all aliases for easier use
-    for census_version in list(directory.keys()):
-        # Strings are aliases for other census_version
-        concrete_version = directory[census_version]
-        alias = census_version if isinstance(concrete_version, str) else None
-        while isinstance(concrete_version, str):
+    for census_version_name in list(directory.keys()):
+        # Strings are aliases for other census_version_name
+        directory_value = directory[census_version_name]
+        alias = None
+        while isinstance(directory_value, str):
+            alias = directory_value
             # resolve aliases
-            if concrete_version not in directory:
-                # oops, dangling pointer -- drop original census_version
-                directory.pop(census_version)
+            if alias not in directory:
+                # oops, dangling pointer -- drop original census_version_name
+                directory.pop(census_version_name)
                 break
 
-            concrete_version = directory[concrete_version]
+            directory_value = directory[alias]
 
         # exclude aliases
-        if not isinstance(concrete_version, dict):
+        if not isinstance(directory_value, dict):
             continue
 
-        # exclude non-LTS releases, if requested
-        if lts_only and not concrete_version.get("is_lts", False):
+        census_version_description = cast(CensusVersionDescription, directory_value)
+        release_flags = cast(ReleaseFlags, release_flags_kwargs)
+
+        admitted = all(
+            [
+                census_version_description.get("flags", {}).get(flag, False) == release_flags[flag]
+                for flag in release_flags.keys()
+            ]
+        )
+        if not admitted:
             continue
 
-        # exclude retracted releases, if requested
-        if exclude_retracted and concrete_version.get("retraction", False):
-            continue
+        directory_out[census_version_name] = census_version_description.copy()
 
-        directory_out[census_version] = concrete_version.copy()
-        cast(CensusVersionDescription, directory_out[census_version])["alias"] = alias
+        if alias:
+            aliases.setdefault(census_version_name, []).append(alias)
 
     # Cast is safe, as we have removed all aliases
     unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory_out)
 
     # Sort by aliases and release date, descending
-
-    aliases = [(k, v) for k, v in unordered_directory.items() if v.get("alias") is not None]
-    releases = [(k, v) for k, v in unordered_directory.items() if v.get("alias") is None]
+    aliased_releases = [(k, v) for k, v in unordered_directory.items() if k in aliases]
+    concrete_releases = [(k, v) for k, v in unordered_directory.items() if k not in aliases]
     ordered_directory = OrderedDict()
-    for k, v in aliases + sorted(releases, key=lambda k: k[0], reverse=True):
+    # Note: reverse sorting of aliases serendipitously orders the names we happen to use in a desirable manner:
+    # "stable", "latest", "V#"). This will require a more explicit ordering if we change alias naming conventions.
+    for k, v in sorted(aliased_releases, key=lambda k: k[0], reverse=True) + sorted(
+        concrete_releases, key=lambda k: k[0], reverse=True
+    ):
         ordered_directory[k] = v
 
     return ordered_directory

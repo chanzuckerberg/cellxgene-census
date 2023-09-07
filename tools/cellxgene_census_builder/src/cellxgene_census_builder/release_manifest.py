@@ -22,15 +22,6 @@ CensusLocator = TypedDict(
         "s3_region": Optional[str],  # if an S3 URI, has optional region
     },
 )
-CensusVersionRetraction = TypedDict(
-    "CensusVersionRetraction",
-    {
-        "date": str,  # the date of retraction
-        "reason": Optional[str],  # the reason for retraction
-        "info_link": Optional[str],  # a link to more information
-        "replaced_by": Optional[str],  # the census version that replaces this one
-    },
-)
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
     {
@@ -39,8 +30,8 @@ CensusVersionDescription = TypedDict(
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
         "do_not_delete": Optional[bool],  # if set, prevents automated deletion
-        "is_lts": Optional[bool],  # whether this is a long-term support release
-        "retraction": Optional[CensusVersionRetraction],  # if retracted, details of the retraction
+        "flags": Optional[Dict[str, bool]],  # flags for the release
+        "retraction": Optional[Dict[str, str]],  # if retracted, details of the retraction
     },
 )
 CensusReleaseManifest = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]

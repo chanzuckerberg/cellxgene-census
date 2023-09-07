@@ -187,34 +187,22 @@ def open_soma(
     else:
         selected_mirror = mirrors[mirrors["default"]]  # type: ignore
 
+    # TODO: Consider raising exceptions instead of issuing warnings, possibly introducing a "strict" mode to control the
+    #  behavior
     try:
         description = get_census_version_description(census_version)  # raises
     except ValueError:
-        # TODO: After the first "stable" is available, this conditional can be removed (keep the 'else' logic)
-        if census_version == "stable":
-            description = get_census_version_description("latest")
-            api_logger.warning(
-                f'The "{census_version}" Census version is not yet available. Using "latest" Census version '
-                f"instead."
-            )
-        else:
-            raise ValueError(
-                f'The "{census_version}" Census version is not valid. Use get_census_version_directory() to retrieve '
-                f"available versions."
-            ) from None
+        raise ValueError(
+            f'The "{census_version}" Census version is not valid. Use get_census_version_directory() to retrieve '
+            f"available versions."
+        ) from None
 
-    if description["retraction"]:
+    if description.get("flags", {}).get("retracted", False):
         api_logger.info(
             f"The \"{census_version}\" Census version has been retracted!\n{description['retraction']}."
-            f'Suggest using "stable" or "latest". Or use get_census_version_directory(exclude_retracted=True) to '
-            f"retrieve valid versions."
+            f'Use "stable" or "latest", or use get_census_version_directory() to retrieve valid versions.'
         )
-
-    if census_version in {
-        "stable",
-        "latest",
-    }:  # TODO: these are special-case aliases, since they are expected to be modified. If we allow this conditional, we no longer need to set the "alias" attribute in get_census_version_description()
-        # TODO: We should have different messaging for "latest" vs "stable", since "latest" is expected to go away, while "latest" can be accessed via a LTS alias
+    elif census_version == "stable":
         api_logger.info(
             f"The \"{census_version}\" release is currently {description['release_build']}. Specify "
             f"'census_version=\"{description['release_build']}\"' in future calls to open_soma() to ensure data "

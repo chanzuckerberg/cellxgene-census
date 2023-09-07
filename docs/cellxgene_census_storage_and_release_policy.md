@@ -44,7 +44,17 @@ The publication date along with the full URI paths for the `soma` folder and the
 
 * This file MUST be in `json` formats where the parent keys are release identifiers (alias or name). 
 * The alias `latest` MUST be present and MUST point to the **Weekly Census release**. 
-* The prefix `V` MUST be used followed by an integer counter to label long-term supported Census releases, e.g. `V1`.
+* For a long-term supported ("LTS") release:
+    * A `flags` key MUST be present with a dictionary-typed value, which MUST contain the key `lts` with the value `true`. 
+    * An alias MUST exist that points to the release, formatted as `V<#>`, where `<#>` is integer  to label long-term supported Census releases, e.g. `V1`.
+* If a long-term-supported release is no longer supported:
+    * The `flags` dictionary value MUST contain the key `retracted` with the value `true` and, 
+    * A `retraction` key MUST be present with a dictionary-typed value, which MUST contain the key `date` with a string value formatted as `<YYYY>-<MM>-<DD>` where `<YYYY>` is the year, `<MM>` is the month, and `<DD>` is the day of the retraction.
+    * The `retraction` dictionary value MAY contain:
+        * A `reason` key with a string value describing the reason for the retraction.
+        * A `info_permalink` key with a string value describing the reason for the retraction.
+        * A `replaced_by` key with a string value identifying the alias of a later LTS.
+    
 
 
 ```
@@ -60,7 +70,18 @@ The publication date along with the full URI paths for the `soma` folder and the
       “h5ads”: {
          “uri”: [uri] #base URI of H5AD location
          “s3_region”: [region] #optional, S3 region if uri is s3://…
+      },
+      “flags”: {
+         “lts”: {true|false} # optional, if false
+         “retracted”: {true|false} # optional, false
       }
+      “retraction”: { # required if "flags" contains "retracted": true, otherwise must not be present
+         “date”: [yyyy-mm-dd] # required, ISO 8601 date, date of retraction
+         “reason”: [text] # optional, text describing reason for retraction
+         “info_permalink”: [url] # optional, URL to more information about retraction
+         “replaced_by”: [release_alias] # optional, alias of release that replaces this one
+      }
+      
    },
    ...
 }

@@ -29,6 +29,7 @@ from ._release_directory import (
     get_census_mirror_directory,
     get_census_version_description,
     get_census_version_directory,
+    get_census_version_directory_of_lts_releases,
 )
 
 try:
@@ -42,6 +43,7 @@ __all__ = [
     "get_anndata",
     "get_census_version_description",
     "get_census_version_directory",
+    "get_census_version_directory_of_lts_releases",
     "get_census_mirror_directory",
     "get_presence_matrix",
     "get_source_h5ad_uri",
