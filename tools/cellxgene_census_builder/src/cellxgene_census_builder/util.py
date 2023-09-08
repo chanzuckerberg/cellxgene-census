@@ -82,6 +82,7 @@ def env_var_init() -> None:
         "VECLIB_MAXIMUM_THREADS",
     ]:
         if env_name not in os.environ:
+            logging.info(f'Setting {env_name} environment variable to "1"')
             os.environ[env_name] = "1"
 
 
