@@ -6,7 +6,7 @@
 
 Methods to retrieve slices of the census as AnnData objects.
 """
-from typing import Optional
+from typing import Optional, List
 
 import anndata
 import tiledbsoma as soma
@@ -20,6 +20,7 @@ def get_anndata(
     organism: str,
     measurement_name: str = "RNA",
     X_name: str = "raw",
+    X_layers: Optional[List[str]] = (),
     obs_value_filter: Optional[str] = None,
     obs_coords: Optional[SparseDFCoord] = None,
     var_value_filter: Optional[str] = None,
@@ -39,6 +40,8 @@ def get_anndata(
             The measurement object to query. Defaults to `RNA`.
         X_name:
             The ``X`` layer to query. Defaults to `raw`.
+        X_layers:
+            Additional layers to add to ``anndata.AnnData.layers``.
         obs_value_filter:
             Value filter for the ``obs`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
@@ -75,4 +78,4 @@ def get_anndata(
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
         var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
-        return query.to_anndata(X_name=X_name, column_names=column_names)
+        return query.to_anndata(X_name=X_name, column_names=column_names, X_layers=X_layers)
