@@ -137,21 +137,28 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-# TODO: Update example output and add example for use of release_flags
 def get_census_version_directory(
-    lts: Optional[bool] = None, retracted: Optional[bool] = False
+    *, lts: Optional[bool] = None, retracted: Optional[bool] = False
 ) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of Census releases currently available, optionally filtering by specified flags.
+    Get the directory of Census versions currently available, optionally filtering by specified flags. If a filtering
+    flag is not specified, Census versions will not be filtered by that flag. Defaults to including both "long-term
+    stable" (LTS) and weekly Census versions, and excluding retracted versions.
 
     Params:
-        lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no filtering is
-         performed based on this flag.
-        retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no filtering is
-         performed based on this flag.
+        lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no
+         filtering is performed based on this flag. Defaults to None, which includes both LTS and non-LTS (weekly)
+         versions.
+        retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no
+         filtering is performed based on this flag. Defaults to False, which excludes retracted releases in the result.
 
     Returns:
-        A dictionary that contains release names and their corresponding release description.
+        A dictionary that contains Census version names and their corresponding descriptions. Census versions are
+        always named by their release date (``YYYY-MM-DD``) but may also have aliases. If an alias is specified,
+        the Census version will appear multiple times in the dictionary, once under it's release date name,
+        and again for each alias. Aliases may be: "stable", "latest", or "V#". The "stable" alias is used for the
+        most recent LTS release, the "latest" alias is used for the most recent weekly release, and the "V#" aliases
+        are used to identify LTS releases by a sequentially incrementing version number.
 
     Lifecycle:
         maturing
@@ -160,25 +167,125 @@ def get_census_version_directory(
         :func:`get_census_version_description`: get description by census_version_name.
 
     Examples:
+        Get all LTS and weekly versions, but exclude retracted LTS versions:
+
         >>> cellxgene_census.get_census_version_directory()
-        {'latest': {'release_date': None,
-        'release_build': '2022-12-01',
-        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-        's3_region': 'us-west-2'},
-        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-        's3_region': 'us-west-2'}},
-        '2022-12-01': {'release_date': None,
-        'release_build': '2022-12-01',
-        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-        's3_region': 'us-west-2'},
-        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-        's3_region': 'us-west-2'}},
-        '2022-11-29': {'release_date': None,
-        'release_build': '2022-11-29',
-        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
-        's3_region': 'us-west-2'},
-        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
-        's3_region': 'us-west-2'}}}
+            {
+                'stable': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                'latest': {
+                    'release_date': None,
+                    'release_build': '2022-12-01',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                'V2': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                '2022-12-01': {
+                    'release_date': None,
+                    'release_build': '2022-12-01',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': False, 'retracted': False}
+                },
+                '2022-11-29': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                }
+            }
+
+        Get only LTS versions that are not retracted:
+
+        >>> cellxgene_census.get_census_version_directory(lts=True)
+            {
+                'stable': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                'V2': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                '2022-11-29': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                }
+            }
+
+        Get only retracted releases:
+
+        >>> cellxgene_census.get_census_version_directory(retracted=True)
+            {
+                'V1': {
+                    'release_date': None,
+                    'release_build': '2022-10-15',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': True},
+                    'retraction': {
+                        'date': '2022-10-30',
+                        'reason': 'mistakes happen',
+                        'info_url': 'http://cellxgene.com/census/errata/v1',
+                        'replaced_by': 'V2'
+                    },
+                },
+                '2022-10-15': {
+                    'release_date': None,
+                    'release_build': '2022-10-15',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': True},
+                    'retraction': {
+                        'date': '2022-10-30',
+                        'reason': 'mistakes happen',
+                        'info_url': 'http://cellxgene.com/census/errata/v1',
+                        'replaced_by': 'V2'
+                    }
+                }
+            }
     """
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()
