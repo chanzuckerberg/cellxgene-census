@@ -333,6 +333,7 @@ FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
 
 # The default configuration for TileDB contexts used in the builder.
+# Ref: https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
 DEFAULT_TILEDB_CONFIG = {
     "py.init_buffer_bytes": 1 * 1024**3,
     "py.deduplicate": "true",
