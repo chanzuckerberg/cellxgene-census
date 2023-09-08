@@ -73,7 +73,9 @@ def env_var_init() -> None:
     if "NUMEXPR_MAX_THREADS" not in os.environ:
         # ref: https://numexpr.readthedocs.io/en/latest/user_guide.html#threadpool-configuration
         # In particular, the docs state that >8 threads is not helpful except in extreme circumstances.
-        os.environ["NUMEXPR_MAX_THREADS"] = str(min(8, max(1, cpu_count() // 2)))
+        val = str(min(8, max(1, cpu_count() // 2)))
+        os.environ["NUMEXPR_MAX_THREADS"] = val
+        logging.info(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
 
     for env_name in [
         "OMP_NUM_THREADS",
