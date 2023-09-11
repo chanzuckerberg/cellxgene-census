@@ -29,7 +29,7 @@ jobs:
       - name: get latest release with tag
         id: latestrelease
         run: |
-          echo "::set-output name=releasetag::$(curl -s https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest | jq '.tag_name' | sed 's/\"//g')"
+          echo "releasetag=$(curl -s https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> "$GITHUB_OUTPUT"
 
       - name: confirm release tag
         run: |
@@ -39,6 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.latestrelease.outputs.releasetag }}
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
