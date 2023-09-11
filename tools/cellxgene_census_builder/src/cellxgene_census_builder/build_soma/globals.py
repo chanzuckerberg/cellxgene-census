@@ -5,6 +5,8 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
+from ..util import cpu_count
+
 CENSUS_SCHEMA_VERSION = "1.2.0"
 
 CXG_SCHEMA_VERSION = "3.1.0"  # the CELLxGENE schema version supported
@@ -331,11 +333,19 @@ FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
 
 # The default configuration for TileDB contexts used in the builder.
+# Ref: https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
 DEFAULT_TILEDB_CONFIG = {
     "py.init_buffer_bytes": 1 * 1024**3,
     "py.deduplicate": "true",
     "soma.init_buffer_bytes": 1 * 1024**3,
     "sm.consolidation.buffer_size": 3 * 1024**3,
+    "sm.mem.reader.sparse_global_order.ratio_array_data": 0.3,
+    #
+    # Concurrency levels are capped for high-CPU boxes. Left unchecked, some
+    # of the largest host configs can bump into Linux kernel thread limits,
+    # without any real benefit to overall performance.
+    "sm.compute_concurrency_level": min(cpu_count(), 64),
+    "sm.io_concurrency_level": min(cpu_count(), 64),
 }
 
 
