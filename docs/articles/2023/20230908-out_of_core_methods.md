@@ -1,10 +1,10 @@
-# Memory-efficient implementations of commonly used single-cell methods 
+# Memory-efficient implementations of commonly used single-cell methods
 
 *Published:* *September [DAY], 2023*
 
 *By:* *[Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
-The Census team is thrilled to officially announce the first roll out of memory-efficient implementations of some of the most widely used single-cell algorithms. 
+The Census team is thrilled to officially announce the first roll out of memory-efficient implementations of some of the most widely used single-cell algorithms.
 
 With just a few lines of code, using the Census Python API, users can now perform the following processing tasks in a regular laptop with 8GB of memory across dozens of millions of cells:
 
@@ -15,19 +15,19 @@ These implementations are interwoven with the way users query slices of Census d
 
 Continue reading for more implementation details and usage examples.
 
-## Efficient calculation of average and variance gene expression across millions of cells.
+## Efficient calculation of average and variance gene expression across millions of cells
 
 With `cellxgene_census.experimental.pp.mean_variance` users can now get gene expression average and variance for all genes or cells in a given Census query.
 
 ### How it works
 
-Calculations are done in an accumulative chunked fashion, meaning that only a small*ish* fraction of the total data is processed at any given time. 
+Calculations are done in an accumulative chunked fashion, meaning that only a small fraction of the total data is processed at any given time.
 
 The Census data is downloaded in chunks and average and variance accumulators are updated for each chunk. The implementation also takes advantage of CPU-based multiprocessing to speed up the process.
 
 Currently, the mean and variance calculations are done with N being the total number of cells or genes. We are working on enabling calculations where N is then number of non-zero elements.
 
-### Example: *KRAS* and *AQP4* average and variance expression in lung epithelial cells.
+### Example: *KRAS* and *AQP4* average and variance expression in lung epithelial cells
 
 The following calculates the average and variance values for the genes *KRAS* and *AQP4* in all epithelial cells of the human lung.
 
@@ -45,7 +45,7 @@ human_data = census["census_data"]["homo_sapiens"]
 # Set filters
 cell_filter = (
   "is_primary_data == True "
-  "and tissue_general == 'lung' " 
+  "and tissue_general == 'lung' "
   "and cell_type == 'epithelial cell'"
  )
 gene_filter = "feature_name in ['KRAS', 'AQP4']"
@@ -81,7 +81,7 @@ gene_df
 # 1        16437  ENSG00000133703         KRAS            6845
 ```
 
-## Efficient calculation of highly variable genes across million of cells.
+## Efficient calculation of highly variable genes across million of cells
 
 With `cellxgene_census.experimental.pp. get_highly_variable_genes` users can get the most highly variables of a Census query while accounting for batch effects.
 
