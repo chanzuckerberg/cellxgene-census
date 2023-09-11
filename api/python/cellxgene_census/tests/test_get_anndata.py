@@ -126,7 +126,7 @@ def test_get_anndata_two_layers(census: soma.Collection, layers: List[str]) -> N
 def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
     with census:
         with pytest.raises(ValueError) as raise_info:
-            ad = cellxgene_census.get_anndata(
+            cellxgene_census.get_anndata(
                 census,
                 organism="Homo sapiens",
                 X_name="this_layer_name_is_bad",
@@ -137,7 +137,7 @@ def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
             assert raise_info.value.args[0] == "Unknown X layer name"
 
         with pytest.raises(ValueError) as raise_info:
-            ad = cellxgene_census.get_anndata(
+            cellxgene_census.get_anndata(
                 census,
                 organism="Homo sapiens",
                 X_name="raw",
