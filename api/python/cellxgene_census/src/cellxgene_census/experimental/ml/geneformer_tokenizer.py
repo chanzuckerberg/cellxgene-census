@@ -12,8 +12,7 @@ try:
 except ImportError:
     # pyproject.toml can't express Geneformer git+https dependency
     raise ImportError(
-        "Please install Geneformer with: "
-        "pip install git+https://huggingface.co/ctheodoris/Geneformer"
+        "Please install Geneformer with: " "pip install git+https://huggingface.co/ctheodoris/Geneformer"
     ) from None
 
 GENEFORMER_MAX_INPUT_TOKENS = 2048
@@ -21,7 +20,13 @@ GENEFORMER_MAX_INPUT_TOKENS = 2048
 
 class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
     """
-    Generate Geneformer token sequences for each cell in CELLxGENE census query results
+    Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
+    cell in CELLxGENE census query results.
+
+    Dataset item contents:
+    - `input_ids`: Geneformer token sequence for the cell
+    - `length`: Length of the token sequence
+    - and specified `cell_attributes` (eg `soma_joinid`, `cell_type_ontology_term_id`)
     """
 
     cell_attributes: Set[str]
@@ -88,9 +93,7 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
         # a little north of 20K. (22,092 for Census 2023-07-25)
         assert len(self.known_gene_ids) >= 20_000
 
-    def cell_item(
-        self, cell_id: int, cell_Xrow: scipy.sparse.csr_matrix
-    ) -> Dict[str, Any]:
+    def cell_item(self, cell_id: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
         """
         Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
@@ -101,9 +104,7 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
         assert isinstance(known_counts, scipy.sparse.csr_matrix), type(known_counts)
         # normalize counts by Geneformer's medians. the 10K factor follows Geneformer's
         # tokenizer to "allocate bits to precision"
-        known_expr = known_counts.multiply(10_000).multiply(
-            1.0 / self.known_gene_medians
-        )
+        known_expr = known_counts.multiply(10_000).multiply(1.0 / self.known_gene_medians)
         assert isinstance(known_expr, scipy.sparse.coo_matrix), type(known_expr)
 
         # figure the resulting tokens in descending order of known_expr
