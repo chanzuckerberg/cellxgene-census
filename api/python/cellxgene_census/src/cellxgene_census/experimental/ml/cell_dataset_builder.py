@@ -1,6 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Dict, Generator, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -70,7 +70,7 @@ class CensusCellDatasetBuilder(ABC):
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
 
-        def gen():
+        def gen() -> Generator[Dict[str, Any], None, None]:
             for cell_id, cell_Xrow in self._paginate_Xrows():
                 yield self.cell_item(cell_id, cell_Xrow)
 
@@ -87,7 +87,7 @@ class CensusCellDatasetBuilder(ABC):
         """
         ...
 
-    def _paginate_Xrows(self):
+    def _paginate_Xrows(self) -> Generator[Tuple[int, scipy.sparse.csr_matrix], None, None]:
         """
         Helper for processing the query X matrix row-by-row, with pagination to limit
         peak memory usage for large result sets.
@@ -137,16 +137,16 @@ class _DatasetGeneratorPickleHack:
     SEE: https://github.com/huggingface/datasets/issues/6194
     """
 
-    def __init__(self, generator, generator_id=None):
+    def __init__(self, generator: Any, generator_id: Optional[str] = None) -> None:
         self.generator = generator
         self.generator_id = generator_id if generator_id is not None else str(uuid.uuid4())
 
-    def __call__(self, *args, **kwargs):
-        return self.generator(*kwargs, **kwargs)
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.generator(*args, **kwargs)
 
-    def __reduce__(self):
+    def __reduce__(self) -> Any:
         return (_DatasetGeneratorPickleHack_raise, (self.generator_id,))
 
 
-def _DatasetGeneratorPickleHack_raise(*args, **kwargs):
+def _DatasetGeneratorPickleHack_raise(*args: Any, **kwargs: Any) -> None:
     raise AssertionError("cannot actually unpickle _DatasetGeneratorPickleHack!")

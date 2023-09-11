@@ -2,6 +2,7 @@ import pickle
 from typing import Any, Dict, Optional, Sequence, Set
 
 import numpy as np
+import numpy.typing as npt
 import scipy
 import tiledbsoma
 
@@ -30,17 +31,16 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
     """
 
     cell_attributes: Set[str]
-    known_gene_ids: np.ndarray  # set of gene soma_joinids that are known to Geneformer
-    known_gene_tokens: np.ndarray  # known_gene_ids pos -> token int64
-    known_gene_medians: np.ndarray  # known_gene_ids pos -> float64
+    known_gene_ids: npt.NDArray[np.int64]  # set of gene soma_joinids that are known to Geneformer
+    known_gene_tokens: npt.NDArray[np.int64]  # known_gene_ids pos -> token
+    known_gene_medians: npt.NDArray[np.float64]  # known_gene_ids pos -> float
 
     def __init__(
         self,
         query: tiledbsoma.ExperimentAxisQuery,
-        *args,
         cell_attributes: Optional[Sequence[str]] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         - `query`: defines the Census slice to process
         - `cell_attributes`: cell (obs) column names to include in the Dataset
@@ -51,14 +51,13 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
             cells_column_names.append("soma_joinid")
         super().__init__(
             query,
-            *args,
             cells_column_names=cells_column_names,
             genes_column_names=["soma_joinid", "feature_id"],
             **kwargs,
         )
         self.load_geneformer_data()
 
-    def load_geneformer_data(self):
+    def load_geneformer_data(self) -> None:
         """
         Load Geneformer's static data files for gene tokens and median expression, then
         use them to compute self.known_gene_{ids,tokens,medians}

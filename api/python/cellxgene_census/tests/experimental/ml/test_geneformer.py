@@ -15,7 +15,7 @@ except ImportError:
     "cells_per_page",
     [4, 100_000],
 )
-def test_CensusGeneformerTokenizer(cells_per_page):
+def test_CensusGeneformerTokenizer(cells_per_page) -> None:
     # cell soma_joinid: (token sequence length, prefix of token sequence)
     expected_data = {
         4938268: (1611, [4913, 8981, 3414, 10509, 12175, 3287, 3190]),
