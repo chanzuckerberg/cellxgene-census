@@ -10,18 +10,16 @@ name: Python dependency checks
 # 4. Run tests from the repo
 
 on:
-  pull_request:
   schedule:
     - cron: "30 1 * * *"
 
 jobs:
-  python-depenency-check:
-    name: python-depenency-check
+  python-dependency-check:
+    name: python-dependency-check
 
     strategy:
       matrix:
-        # os: [ubuntu-latest, macos-latest]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: ${{matrix.os}}
@@ -61,7 +59,7 @@ jobs:
           LATEST_PYPI_RELEASE=$(pip freeze | grep cellxgene-census | sed 's/^.*\=\=//')
           echo LATEST_PYPI_RELEASE="$LATEST_PYPI_RELEASE"
           if [ "$LATEST_PYPI_RELEASE" != "$LATEST_RELEASE_TAG" ]; then
-            echo Release tags do not match.
+            echo Github and PyPi latest release tags do not match.
             echo Latest PyPi release: "$LATEST_PYPY_RELEASE"
             echo Latest GH release: "$LATEST_RELEASE_TAG"
             exit 1
