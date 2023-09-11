@@ -1,7 +1,8 @@
-import pytest
 from typing import List
-import tiledbsoma as soma
+
 import numpy as np
+import pytest
+import tiledbsoma as soma
 
 import cellxgene_census
 
