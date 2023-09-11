@@ -1,5 +1,7 @@
 import pytest
+from typing import List
 import tiledbsoma as soma
+import numpy as np
 
 import cellxgene_census
 
@@ -63,3 +65,84 @@ def test_get_anndata_allows_missing_obs_or_var_filter(census: soma.Collection) -
         )
         assert adata.n_obs == 10001
         assert adata.n_vars == 1
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("layer", ["raw", "normalized"])
+def test_get_anndata_x_layer(census: soma.Collection, layer: str) -> None:
+    with census:
+        ad = cellxgene_census.get_anndata(
+            census,
+            organism="Homo sapiens",
+            X_name=layer,
+            obs_coords=slice(100),
+            var_coords=slice(200),
+        )
+
+    assert ad.X.shape == (101, 201)
+    assert len(ad.layers) == 0
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("layers", [["raw", "normalized"], ["normalized", "raw"]])
+def test_get_anndata_two_layers(census: soma.Collection, layers: List[str]) -> None:
+    with census:
+        ad_primary_layer_in_X = cellxgene_census.get_anndata(
+            census,
+            organism="Homo sapiens",
+            X_name=layers[0],
+            obs_coords=slice(100),
+            var_coords=slice(200),
+        )
+
+        ad_secondary_layer_in_X = cellxgene_census.get_anndata(
+            census,
+            organism="Homo sapiens",
+            X_name=layers[1],
+            obs_coords=slice(100),
+            var_coords=slice(200),
+        )
+
+        ad_multiple_layers = cellxgene_census.get_anndata(
+            census,
+            organism="Homo sapiens",
+            X_name=layers[0],
+            X_layers=[layers[1]],
+            obs_coords=slice(100),
+            var_coords=slice(200),
+        )
+
+    assert layers[1] in ad_multiple_layers.layers
+    assert ad_multiple_layers.X.shape == (101, 201)
+    assert ad_multiple_layers.layers[layers[1]].shape == (101, 201)
+
+    # Assert that matrices of multilayer anndata are equal to one-layer-at-time anndatas
+    assert np.array_equal(ad_multiple_layers.X.data, ad_primary_layer_in_X.X.data)
+    assert np.array_equal(ad_multiple_layers.layers[layers[1]].data, ad_secondary_layer_in_X.X.data)
+
+
+@pytest.mark.live_corpus
+def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
+    with census:
+        with pytest.raises(ValueError) as raise_info:
+            ad = cellxgene_census.get_anndata(
+                census,
+                organism="Homo sapiens",
+                X_name="this_layer_name_is_bad",
+                obs_coords=slice(100),
+                var_coords=slice(200),
+            )
+
+            assert raise_info.value.args[0] == "Unknown X layer name"
+
+        with pytest.raises(ValueError) as raise_info:
+            ad = cellxgene_census.get_anndata(
+                census,
+                organism="Homo sapiens",
+                X_name="raw",
+                X_layers=["this_layer_name_is_bad"],
+                obs_coords=slice(100),
+                var_coords=slice(200),
+            )
+
+            assert raise_info.value.args[0] == "Unknown X layer name"
