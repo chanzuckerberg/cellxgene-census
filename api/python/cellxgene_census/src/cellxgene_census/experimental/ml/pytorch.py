@@ -1,7 +1,6 @@
 import gc
 import logging
 import os
-import sys
 from contextlib import contextmanager
 from datetime import timedelta
 from time import time
@@ -30,9 +29,6 @@ from ..._open import _build_soma_tiledb_context
 from ..util._eager_iter import _EagerIterator
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
-if not pytorch_logger.hasHandlers():
-    pytorch_logger.addHandler(logging.StreamHandler(sys.stderr))
-    pytorch_logger.setLevel(logging.DEBUG)
 
 # TODO: Rename to reflect the correct order of the Tensors within the tuple: (X, obs)
 ObsAndXDatum = Tuple[Tensor, Tensor]
