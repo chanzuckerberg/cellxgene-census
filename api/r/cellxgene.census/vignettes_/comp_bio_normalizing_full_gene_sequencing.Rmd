@@ -1,0 +1,183 @@
+---
+title: "Normalizing full-length gene sequencing data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Normalizing full-length gene sequencing data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 88, max.print=100)
+```
+
+<!--
+THIS VIGNETTE IS BASED ON:
+https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.ipynb
+-->
+
+This tutorial shows you how to fetch full-length gene sequencing data from the Census and normalize it to account for gene length.
+
+**Contents**
+
+1. Opening the census
+2. Fetching example full-length sequencing data (Smart-Seq2)
+3. Normalizing expression to account for gene length
+4. Validation through clustering exploration
+
+## Opening the census
+
+First we open the Census:
+
+```{r,warning=FALSE,message=FALSE}
+library("Seurat")
+census <- cellxgene.census::open_soma()
+```
+
+You can learn more about all of the `cellxgene.census` methods by accessing their corresponding documentation, for example `?cellxgene.census::open_soma`.
+
+## Fetching full-length example sequencing data (Smart-Seq)
+
+Let's get some example data, in this case we'll fetch all cells from a relatively small dataset derived from the Smart-Seq2 technology which performs full-length gene sequencing:
+
+* Collection: [Tabula Muris Senis](https://cellxgene.cziscience.com/collections/0b9d8a04-bb9d-44da-aa27-705bb65b54eb)
+* Dataset: [Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2](https://cellxgene.cziscience.com/e/524179b0-b406-4723-9c46-293ffa77ca81.cxg/)
+
+Let's first find this dataset's id by using the dataset table of the Census.
+
+```{r}
+liver_dataset <- as.data.frame(
+  census$get("census_info")$get("datasets")
+        $read(value_filter="dataset_title == 'Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2'")
+        $concat()
+)
+liver_dataset
+```
+
+
+Now we can use this id to fetch the data.
+
+```{r,warning=FALSE,message=FALSE}
+liver_dataset_id <- liver_dataset[1,"dataset_id"]
+liver_seurat <- cellxgene.census::get_seurat(
+  census,
+  organism = "Mus musculus",
+  obs_value_filter = paste0("dataset_id == '", liver_dataset_id, "'")
+)
+```
+
+Let's make sure this data only contains Smart-Seq2 cells.
+
+```{r}
+table(liver_seurat$assay)
+```
+
+
+Great! As you can see this a small dataset only containing **2,859** cells. Now let's proceed to normalize by gene lengths.
+
+## Normalizing expression to account for gene length
+
+By default `cellxgene_census::get_seurat()` fetches all genes in the Census. So let's first identify the genes that were measured in this dataset and subset the Seurat obect to only include those.
+
+To this goal we can use the "Dataset Presence Matrix" in `census$get("census_data")$get("mus_musculus")$ms$get("RNA")$get("feature_dataset_presence_matrix")`. This is a boolean matrix `N x M` where `N` is the number of datasets, `M` is the number of genes in the Census, and a 1 entry indicates that a gene was measured in a dataset. (Note that Seurat objects have the transposed layout `M x N`.)
+
+```{r}
+liver_seurat
+```
+
+Let's get the genes measured in this dataset.
+
+```{r}
+liver_dataset_joinid <- liver_dataset$soma_joinid[1]
+presence_matrix <- cellxgene.census::get_presence_matrix(census, "Mus musculus", "RNA")
+presence_matrix <- presence_matrix$take(liver_dataset_joinid)
+gene_presence <- as.vector(presence_matrix$get_one_based_matrix())
+
+liver_seurat <- liver_seurat[gene_presence, ]
+liver_seurat
+```
+
+We can see that out of all genes in the Census **17,992** were measured in this dataset.
+
+Now let's normalize these genes by gene length. We can easily do this because the Census has gene lengths included in the gene metadata under `feature_length`.
+
+```{r}
+GetAssayData(liver_seurat[1:5, 1:5], slot = "data")
+```
+
+```{r}
+gene_lengths <- liver_seurat$RNA@meta.features$feature_length
+liver_seurat <- SetAssayData(
+  liver_seurat, 
+  new.data = sweep(GetAssayData(liver_seurat, slot = "data"), 1, gene_lengths, "/")
+)
+```
+
+```{r}
+GetAssayData(liver_seurat[1:5, 1:5], slot = "data")
+```
+
+All done! You can now see that we have real numbers instead of integers.
+
+## Validation through clustering exploration
+
+Let's perform some basic clustering analysis to see if cell types cluster as expected using the normalized counts.
+
+First we do some basic filtering of cells and genes.
+
+```{r}
+cells_per_gene <- rowSums(GetAssayData(liver_seurat, slot = "counts") > 0)
+genes_per_cell <- Matrix::colSums(liver_seurat$RNA@counts > 0)
+liver_seurat <- liver_seurat[cells_per_gene >= 5, genes_per_cell >= 500]
+```
+
+Then we normalize to account for sequencing depth and transform data to log scale.
+
+```{r}
+liver_seurat <- Seurat::NormalizeData(
+  liver_seurat,
+  normalization.method = "LogNormalize",
+  scale.factor = 10000
+)
+```
+
+Then we subset to highly variable genes.
+
+```{r}
+liver_seurat <- Seurat::FindVariableFeatures(
+  liver_seurat,
+  selection.method = "vst",
+  nfeatures = 1000
+)
+```
+
+And finally we scale values across the gene axis.
+
+```{r,message=FALSE}
+all.genes <- rownames(liver_seurat)
+liver_seurat <- Seurat::ScaleData(liver_seurat, features = all.genes)
+```
+
+Now we can proceed to do clustering analysis.
+
+```{r,warning=FALSE,message=FALSE,fig.width=7,fig.height=5}
+liver_seurat <- RunPCA(
+  liver_seurat,
+  features = VariableFeatures(object = liver_seurat)
+)
+liver_seurat <- FindNeighbors(liver_seurat, dims = 1:40)
+liver_seurat <- RunUMAP(liver_seurat, dims = 1:40)
+DimPlot(liver_seurat, reduction = "umap", group.by = "cell_type")
+```
+
+With a few exceptions we can see that all cells from the same cell type cluster near each other which serves as a sanity check for the gene-length normalization that we applied.
+
+Don't forget to close the census.
+
+```{r}
+census$close()
+```

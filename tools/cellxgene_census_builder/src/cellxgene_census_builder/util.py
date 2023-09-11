@@ -20,7 +20,14 @@ def urljoin(base: str, url: str) -> str:
 
     p_base = urllib.parse.urlparse(base)
     path = urllib.parse.urljoin(p_base.path, p_url.path)
-    parts = [p_base.scheme, p_base.netloc, path, p_url.params, p_url.query, p_url.fragment]
+    parts = [
+        p_base.scheme,
+        p_base.netloc,
+        path,
+        p_url.params,
+        p_url.query,
+        p_url.fragment,
+    ]
     return urllib.parse.urlunparse(parts)
 
 
@@ -41,12 +48,44 @@ def urlcat(base: str, *paths: str) -> str:
     return url
 
 
-def env_var_init(args: CensusBuildArgs) -> None:
+def env_var_init() -> None:
     """
     Set environment variables as needed by dependencies, etc.
+
+    This controls thread allocation for worker (child) processes. It is executed too
+    late to influence __init__ time thread pool allocations for the main process.
     """
+
+    # Each of these control thread-pool allocation for commonly used packages that
+    # may be pulled into our environment, and which have import-time pool allocation.
+    # Most do import time thread pool allocation equal to host CPU count, which can
+    # result in excessive unused thread pools on high CPU machines.
+    #
+    # Where we are confident we have no performance dependency related to their concurrency,
+    # set their pool size to "1". Otherwise set to something useful.
+    #
+    # OMP_NUM_THREADS: OpenMp,
+    # OPENBLAS_NUM_THREADS: OpenBLAS,
+    # MKL_NUM_THREADS: Intel MKL,
+    # VECLIB_MAXIMUM_THREADS: Accelerate,
+    # NUMEXPR_NUM_THREADS: NumExpr
+
     if "NUMEXPR_MAX_THREADS" not in os.environ:
-        os.environ["NUMEXPR_MAX_THREADS"] = str(min(1, cpu_count() // 2))
+        # ref: https://numexpr.readthedocs.io/en/latest/user_guide.html#threadpool-configuration
+        # In particular, the docs state that >8 threads is not helpful except in extreme circumstances.
+        val = str(min(8, max(1, cpu_count() // 2)))
+        os.environ["NUMEXPR_MAX_THREADS"] = val
+        logging.info(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
+
+    for env_name in [
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+    ]:
+        if env_name not in os.environ:
+            logging.info(f'Setting {env_name} environment variable to "1"')
+            os.environ[env_name] = "1"
 
 
 def process_init(args: CensusBuildArgs) -> None:
@@ -58,7 +97,7 @@ def process_init(args: CensusBuildArgs) -> None:
     if multiprocessing.get_start_method(True) != "spawn":
         multiprocessing.set_start_method("spawn", True)
 
-    env_var_init(args)
+    env_var_init()
 
     # these are super noisy!
     numba_logger = logging.getLogger("numba")

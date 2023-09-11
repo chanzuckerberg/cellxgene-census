@@ -4,10 +4,11 @@ from typing import Any, Iterator, List, Optional, Protocol, Tuple, TypedDict, Un
 import anndata
 import numpy as np
 import pandas as pd
+import scipy.sparse as sparse
 
 from ..util import urlcat
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT, FEATURE_REFERENCE_IGNORE
+from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
 
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
@@ -38,10 +39,14 @@ def open_anndata(
         logging.debug(f"open_anndata: {path}")
         ad = anndata.read_h5ad(path, *args, **kwargs)
 
-        assert CXG_SCHEMA_VERSION == "3.0.0"
+        # These are schema versions this code is known to work with. This is a
+        # sanity check, which would be better implemented via a unit test at
+        # some point in the future.
+        assert CXG_SCHEMA_VERSION in ["3.1.0", "3.0.0"]
+
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
-        if h5ad.schema_version not in CXG_SCHEMA_VERSION_IMPORT:
+        if h5ad.schema_version != CXG_SCHEMA_VERSION:
             msg = f"H5AD {h5ad.dataset_h5ad_path} has unsupported schema version {h5ad.schema_version}, expected {CXG_SCHEMA_VERSION}"
             logging.error(msg)
             raise RuntimeError(msg)
@@ -83,9 +88,17 @@ def open_anndata(
             X = ad.X
             var = ad.var
 
-        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns, dtype=np.float32)
+        if need_X and isinstance(X, (sparse.csr_matrix, sparse.csc_matrix)) and not X.has_canonical_format:
+            logging.warning(f"H5AD with non-canonical X matrix at {path}")
+            X.sum_duplicates()
 
+        assert (
+            not isinstance(X, (sparse.csr_matrix, sparse.csc_matrix)) or X.has_canonical_format
+        ), f"Found H5AD with non-canonical X matrix in {path}"
+
+        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns, dtype=np.float32)
         assert not need_X or ad.X.shape == (len(ad.obs), len(ad.var))
+
         # TODO: In principle, we could look up missing feature_name, but for now, just assert they exist
         assert ((ad.var.feature_name != "") & (ad.var.feature_name != None)).all()  # noqa: E711
 
@@ -141,11 +154,13 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         assert ad.raw is None
 
         # This discards all other ancillary state, eg, obsm/varm/....
-        if not need_X:
-            ad = anndata.AnnData(X=None, obs=obs, var=var, dtype=np.float32)
-        else:
-            ad = anndata.AnnData(X=X, obs=obs, var=var, dtype=np.float32)
+        ad = anndata.AnnData(X=X, obs=obs, var=var, dtype=np.float32)
 
+        assert (
+            X is None or isinstance(X, np.ndarray) or X.has_canonical_format
+        ), "Found H5AD with non-canonical X matrix"
+
+        assert X is None or np.all(X.sum(axis=1) > 0), "H5AD contains a cell with only zero valued counts"
         return ad
 
     return _filter

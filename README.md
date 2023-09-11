@@ -2,14 +2,13 @@
 
 # CZ CELLxGENE Discover Census
 
-
 The Census of [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is a free-to-use service (API + Data) that allows for querying its single-cell data corpus at low-latency directly into Python or R.
 
 To learn more and start using the Census please go to the main [**Census site**](https://chanzuckerberg.github.io/cellxgene-census/).
 
 ## Issues
 
-- Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues). 
+- Bugs: please submit a [github issue](https://github.com/chanzuckerberg/cellxgene-census/issues).
 - Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <security@chanzuckerberg.com>.
 
 ## Reuse
@@ -19,4 +18,3 @@ The contents of this Github repository are freely available for reuse under the 
 ## Code of Conduct
 
 This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to <opensource@chanzuckerberg.com>.
-
