@@ -17,7 +17,7 @@ from torch.utils.data._utils.worker import WorkerInfo
 
 # conditionally import torch, as it will not be available in all test environments
 try:
-    from torch import Tensor
+    from torch import Tensor, float32
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
@@ -493,6 +493,28 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
     batch = torch_data[0]
     assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
     assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_experiment_dataloader__X_tensor_dtype_matches_X_matrix(
+    soma_experiment: Experiment, use_eager_fetch: bool
+) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        use_eager_fetch=use_eager_fetch,
+    )
+    torch_data = next(iter(dp))
+
+    assert torch_data[0].dtype == float32
 
 
 @pytest.mark.experimental
