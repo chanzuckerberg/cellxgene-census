@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Sequence, Set
 import numpy as np
 import scipy
 import tiledbsoma
+
 from .cell_dataset_builder import CensusCellDatasetBuilder
 
 try:
@@ -13,7 +14,7 @@ except ImportError:
     raise ImportError(
         "Please install Geneformer with: "
         "pip install git+https://huggingface.co/ctheodoris/Geneformer"
-    )
+    ) from None
 
 GENEFORMER_MAX_INPUT_TOKENS = 2048
 
@@ -53,7 +54,10 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
         self.load_geneformer_data()
 
     def load_geneformer_data(self):
-        # load Geneformer's static data files for gene tokens and median expression
+        """
+        Load Geneformer's static data files for gene tokens and median expression, then
+        use them to compute self.known_gene_{ids,tokens,medians}
+        """
         with open(geneformer.tokenizer.TOKEN_DICTIONARY_FILE, "rb") as f:
             gene_token_dict = pickle.load(f)
         with open(geneformer.tokenizer.GENE_MEDIAN_FILE, "rb") as f:
@@ -80,10 +84,17 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
         assert len(np.unique(self.known_gene_ids)) == len(self.known_gene_ids)
         assert len(np.unique(self.known_gene_tokens)) == len(self.known_gene_tokens)
         assert np.all(self.known_gene_medians > 0)
+        # Geneformer models protein-coding and miRNA genes, so the intersection should be somewhere
+        # a little north of 20K. (22,092 for Census 2023-07-25)
+        assert len(self.known_gene_ids) >= 20_000
 
     def cell_item(
         self, cell_id: int, cell_Xrow: scipy.sparse.csr_matrix
     ) -> Dict[str, Any]:
+        """
+        Given the expression vector for one cell, compute the Dataset item providing
+        the Geneformer inputs (token sequence and metadata).
+        """
         assert cell_Xrow.shape == (1, self.genes_df.shape[0])
         # project cell_Xrow onto the space of known_gene_ids
         known_counts = cell_Xrow[:, self.known_gene_ids]

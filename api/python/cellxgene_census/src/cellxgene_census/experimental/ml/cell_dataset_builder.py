@@ -33,12 +33,15 @@ class CensusCellDatasetBuilder(ABC):
     subclasses following base class initialization.
     """
 
+    _cells_per_page: int  # see _paginate_Xrows() method below
+
     def __init__(
         self,
         query: tiledbsoma.ExperimentAxisQuery,
         layer_name: str = "raw",
         cells_column_names: Optional[Sequence[str]] = None,
         genes_column_names: Optional[Sequence[str]] = None,
+        _cells_per_page: int = 100_000,
     ):
         """
         Initialize the CensusCellDatasetBuilder to process the results of the given
@@ -68,32 +71,22 @@ class CensusCellDatasetBuilder(ABC):
             .to_pandas()
             .set_index("soma_joinid")
         )
+        self._cells_per_page = _cells_per_page
 
-    def build(self) -> Dataset:
-        """Build the dataset from query results"""
+    def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
+        """
+        Build the dataset from query results
 
-        # We're using a generator approach to anticipate processing a large X slice
-        # without loading it all into memory at once. While we do in fact load it all
-        # right now, that's an implementation detail of this ABC which can be improved
-        # without breaking subclasses.
+        - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
+        """
+
         def gen():
-            X_tbl = self.query.X(self.layer_name).tables().concat()
-            (count, cell_ids, gene_ids) = (
-                np.array(X_tbl.column(col))
-                for col in ("soma_data", "soma_dim_0", "soma_dim_1")
-            )
-            X_csr = scipy.sparse.coo_matrix(
-                (count, (cell_ids, gene_ids)),
-                shape=(
-                    self.cells_df.index.max() + 1,
-                    self.genes_df.index.max() + 1,
-                ),
-            ).tocsr()
+            for cell_id, cell_Xrow in self._paginate_Xrows():
+                yield self.cell_item(cell_id, cell_Xrow)
 
-            for cell_id in np.unique(cell_ids):
-                yield self.cell_item(cell_id, X_csr.getrow(cell_id))
-
-        return Dataset.from_generator(_DatasetGeneratorPickleHack(gen))
+        return Dataset.from_generator(
+            _DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {})
+        )
 
     @abstractmethod
     def cell_item(
@@ -107,6 +100,55 @@ class CensusCellDatasetBuilder(ABC):
           equal to the `cell_id` row of the full `X` matrix.
         """
         ...
+
+    def _paginate_Xrows(self):
+        """
+        Helper for processing the query X matrix row-by-row, with pagination to limit
+        peak memory usage for large result sets.
+
+        Ideally ExperimentAxisQuery should handle this for us, see:
+            https://github.com/single-cell-data/TileDB-SOMA/issues/1528
+
+        Absent that, our workaround is to paginate the cell soma_joinids found in
+        self.cells_df, then execute a sub-query for each page. For each sub-query, we
+        load its full X results and then iterate its rows.
+        """
+
+        # paginate cell ids and iterate pages
+        pages = self.cells_df[["soma_joinid"]].copy()
+        pages["page"] = np.arrange(len(pages)) // self._cells_per_page
+        for _, page_ids in pages.groupby("page"):
+            page_ids = page_ids["soma_joinid"]
+            # open sub-query for these page_ids
+            with tiledbsoma.ExperimentAxisQuery(
+                self.query.experiment,
+                self.query.measurement_name,
+                obs_query=tiledbsoma.AxisQuery(coords=page_ids),
+                var_query=self.query._matrix_axis_query.var,
+            ) as page_query:
+                # load full X results for this sub-query, then yield each row
+                page_Xcsr = self._load_Xcsr(page_query)
+                for cell_id in page_ids:
+                    yield (cell_id, page_Xcsr.getrow(cell_id))
+
+    def _load_Xcsr(
+        self, query: tiledbsoma.ExperimentAxisQuery
+    ) -> scipy.sparse.csr_matrix:
+        """
+        Load the full X(layer_name) results of the given query
+        """
+        Xtbl = query.X(self.layer_name).tables().concat()
+        (count, cell_ids, gene_ids) = (
+            np.array(Xtbl.column(col))
+            for col in ("soma_data", "soma_dim_0", "soma_dim_1")
+        )
+        return scipy.sparse.coo_matrix(
+            (count, (cell_ids, gene_ids)),
+            shape=(
+                self.cells_df.index.max() + 1,
+                self.genes_df.index.max() + 1,
+            ),
+        ).tocsr()
 
 
 class _DatasetGeneratorPickleHack:
