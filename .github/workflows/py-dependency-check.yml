@@ -60,11 +60,13 @@ jobs:
           echo LATEST_RELEASE_TAG="$LATEST_RELEASE_TAG"
           LATEST_PYPI_RELEASE=$(pip freeze | grep cellxgene-census | sed 's/^.*\=\=//')
           echo LATEST_PYPI_RELEASE="$LATEST_PYPI_RELEASE"
-          if [ $LATEST_PYPY_RELEASE != $LATEST_RELEASE_TAG]; then
+          if [ "$LATEST_PYPI_RELEASE" != "$LATEST_RELEASE_TAG" ]; then
             echo Release tags do not match.
-            echo Latest PyPi release: $LATEST_PYPY_RELEASE"
-            echo Latest GH release: $LATEST_RELEASE_TAG
+            echo Latest PyPi release: "$LATEST_PYPY_RELEASE"
+            echo Latest GH release: "$LATEST_RELEASE_TAG"
             exit 1
+          else
+            echo Release tags match
           fi
 
       - name: Test with pytest (API, main tests)
