@@ -213,12 +213,13 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.encoders = encoders
         self.stats = stats
         self.max_process_mem_usage_bytes = 0
+        self.X_dtype = X.schema[2].type.to_pandas_dtype()
 
     def __next__(self) -> ObsAndXDatum:
         """Read the next torch batch, possibly across multiple soma batches"""
 
         obs: pd.DataFrame = pd.DataFrame()
-        X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)))
+        X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)), dtype=self.X_dtype)
 
         while len(obs) < self.batch_size:
             try:
