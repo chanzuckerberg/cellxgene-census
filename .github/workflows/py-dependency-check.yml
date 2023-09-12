@@ -12,6 +12,7 @@ name: Python dependency checks
 on:
   schedule:
     - cron: "30 1 * * *"
+  workflow_dispatch: # Used for testing
 
 jobs:
   python-dependency-check:
@@ -38,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.latestrelease.outputs.releasetag }}
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -67,10 +68,6 @@ jobs:
             echo Release tags match
           fi
 
-      - name: Test with pytest (API, main tests)
+      - name: Test with pytest
         run: |
-          PYTHONPATH=. pytest -v -rP ./api/python/cellxgene_census/tests/
-
-      - name: Test with pytest (API, experimental)
-        run: |
-          PYTHONPATH=. pytest -v -rP --experimental ./api/python/cellxgene_census/tests/experimental
+          PYTHONPATH=. pytest -v -rP --experimental ./api/python/cellxgene_census/tests/
