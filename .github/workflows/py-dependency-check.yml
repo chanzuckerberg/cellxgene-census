@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.latestrelease.outputs.releasetag }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
