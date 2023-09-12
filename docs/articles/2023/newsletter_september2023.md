@@ -7,7 +7,7 @@ The Census team is thrilled to announce the introduction of Census schema V1.1.0
 
 These features are currently experimental and exclusive to the "latest" version of Census. We invite your feedback as you explore these novel functionalities.
 
-## Schema Changes in V1.1.0
+## Schema changes in V1.1.0
 
 ### Added `dataset_version_id` to the datasets data frame
 
@@ -56,7 +56,44 @@ with cellxgene_census.open_soma(census_version = "latest") as census:
 #Adata with normalized layer
 ```
 
-### Accessing Library-Size Normalized Data Layer via TileDB-SOMA 
+```R
+#Seurat
+library("cellxgene.census")
+library("Seurat")
+
+census <- open_soma(census_version = "latest")
+
+organism <- "Homo sapiens"
+gene_filter <- "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+cell_filter <-  "cell_type == 'sympathetic neuron'"
+cell_columns <- c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
+layers <- c(normalized")
+
+seurat_obj <- get_seurat(
+   census = census,
+   organism = organism,
+   var_value_filter = gene_filter,
+   obs_value_filter = cell_filter,
+   obs_column_names = cell_columns,
+   x_name = layers
+)
+
+#Single Cell Experiment
+
+library("SingleCellExperiment")
+
+sce_obj <- get_single_cell_experiment(
+   census = census,
+   organism = organism,
+   var_value_filter = gene_filter,
+   obs_value_filter = cell_filter,
+   obs_column_names = cell_columns,
+   x_name = layers
+)
+
+```
+
+### Accessing library-size normalized data layer via TileDB-SOMA 
 
 For memory-efficient data retrieval, you can use TileDB-SOMA as outlined below:
 
@@ -67,7 +104,7 @@ import cellxgene_census
 import tiledbsoma
 
 # Open context manager
-with cellxgene_census.open_soma() as census:
+with cellxgene_census.open_soma(census_version = "latest") as census:
 
     # Access human SOMA object
     human = census["census_data"]["homo_sapiens"]
@@ -87,11 +124,13 @@ with cellxgene_census.open_soma() as census:
 
     # close the query
     query.close()
+```
 
+```R
 
 ```
 
-### Utilizing Pre-Calculated Stats for Querying `obs` and `var`
+### Utilizing pre-calculated stats for querying `obs` and `var`
 
 To filter based on pre-calculated statistics and export to AnnData, execute the following:
 
@@ -100,7 +139,7 @@ To filter based on pre-calculated statistics and export to AnnData, execute the 
 
 import cellxgene_census
 
-with cellxgene_census.open_soma() as census:
+with cellxgene_census.open_soma(census_version = "latest") as census:
     adata = cellxgene_census.get_anndata(
         census = census,
         organism = "Homo sapiens",
@@ -112,6 +151,41 @@ with cellxgene_census.open_soma() as census:
     print(adata)
 
 #adata with filtered cells
+```
+
+
+```R
+#Seurat
+library("cellxgene.census")
+library("Seurat")
+
+census <- open_soma(census_version = "latest")
+
+organism <- "Homo sapiens"
+gene_filter <- "feature_id %in% c('ENSG00000107317', 'ENSG00000106034')"
+cell_filter <-  "nnz > '5' and sex == 'female' and cell_type == 'sympathetic neuron'"
+cell_columns <- c("assay", "cell_type", "tissue", "tissue_general", "suspension_type", "disease")
+
+seurat_obj <- get_seurat(
+   census = census,
+   organism = organism,
+   var_value_filter = gene_filter,
+   obs_value_filter = cell_filter,
+   obs_column_names = cell_columns
+)
+
+#Single Cell Experiment
+
+library("SingleCellExperiment")
+
+sce_obj <- get_single_cell_experiment(
+   census = census,
+   organism = organism,
+   var_value_filter = gene_filter,
+   obs_value_filter = cell_filter,
+   obs_column_names = cell_columns
+)
+
 ```
 
 ## Help us improve these data additions
