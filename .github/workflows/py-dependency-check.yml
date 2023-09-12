@@ -33,13 +33,16 @@ jobs:
 
       - name: confirm release tag
         run: |
+          if [ -z "${{ steps.latestrelease.outputs.releasetag }}"]; then
+            echo Unable to fetch latest release tag!
+            exit 1
+          fi
           echo Latest GH release tag ${{ steps.latestrelease.outputs.releasetag }}
 
       - name: checkout latest release of repo
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.latestrelease.outputs.releasetag }}
-          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
