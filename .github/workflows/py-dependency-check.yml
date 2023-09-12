@@ -12,7 +12,7 @@ name: Python dependency checks
 on:
   schedule:
     - cron: "30 1 * * *"
-  workflow_dispatch: # Used for testing
+  pull_request: # Used for testing
 
 jobs:
   python-dependency-check:
@@ -33,7 +33,8 @@ jobs:
 
       - name: confirm release tag
         run: |
-          if [ -z "${{ steps.latestrelease.outputs.releasetag }}"]; then
+          # REST api sometimes returns a release tag of "null"
+          if [ -z "${{ steps.latestrelease.outputs.releasetag }}" ] || [ "${{ steps.latestrelease.outputs.releasetag }}" = "null" ]; then
             echo Unable to fetch latest release tag!
             exit 1
           fi
