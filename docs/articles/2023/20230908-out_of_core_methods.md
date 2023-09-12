@@ -4,9 +4,9 @@
 
 *By:* *[Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
-The Census team is thrilled to officially announce the first roll out of memory-efficient implementations of some of the most widely used single-cell algorithms.
+The Census team is thrilled to officially announce memory-efficient implementations of some of the most widely used single-cell algorithms.
 
-With just a few lines of code, using the Census Python API, users can now perform the following processing tasks in a regular laptop with 8GB of memory across dozens of millions of cells:
+With just a few lines of code, using the Census Python API, users can now perform the following computational tasks across tens of millions of cells using a conventional laptop with 8GB of memory:
 
 * Calculating average and variance gene expression for cells or genes. See this [tutorial](../../notebooks/experimental/mean_variance.ipynb).
 * Obtaining batch-corrected highly variable genes. See this [tutorial](../../notebooks/experimental/highly_variable_genes).
@@ -31,7 +31,7 @@ Currently, the mean and variance calculations are done with N being the total nu
 
 The following calculates the average and variance values for the genes *KRAS* and *AQP4* in all epithelial cells of the human lung.
 
-Users can easily calculate switch the calculation, and obtain average and variance for each cell across the genes in the query. This is controlled by the `axis` argument of `mean_variance`.
+Users can easily switch the calculation, and obtain average and variance for each cell across the genes in the query. This is controlled by the `axis` argument of `mean_variance`.
 
 ```python
 import cellxgene_census
@@ -81,15 +81,15 @@ gene_df
 # 1        16437  ENSG00000133703         KRAS            6845
 ```
 
-## Efficient calculation of highly variable genes across million of cells
+## Efficient calculation of highly variable genes across millions of cells
 
-With `cellxgene_census.experimental.pp. get_highly_variable_genes` users can get the most highly variables of a Census query while accounting for batch effects.
+With `cellxgene_census.experimental.pp. get_highly_variable_genes` users can get the most highly variable genes of a Census query while accounting for batch effects.
 
 This is usually the first pre-processing step necessary for other downstream tasks, for example data integration.
 
 ### How it works
 
-The Census algorithm is modeled based on scanpy method `scanpy.pp.highly_variable_genes`, and in particular the Seurat V3 method which is designed for raw counts and can account for batch effects.
+The Census algorithm is based on the scanpy method `scanpy.pp.highly_variable_genes`, and in particular the Seurat V3 method, which is designed for raw counts and can account for batch effects.
 
 The Census implementation utilizes the same incremental paradigm used in  `cellxgene_census.experimental.pp.mean_variance` (see above), calculating chunk-based mean and variance accumulators with some tweaks to comply to the Seurat V3 method.
 
@@ -116,7 +116,7 @@ census.close()
 
 Which results in:
 
-```ptyhon
+```python
 hvg
 # soma_joinid    means  variances  ...  variances_norm  highly_variable
 # 0            0.003692   0.004627  ...        0.748221            False
