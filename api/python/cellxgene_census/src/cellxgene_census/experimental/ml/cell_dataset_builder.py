@@ -1,12 +1,13 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generator, Optional, Sequence, Tuple
+from typing import Any, Dict, Generator, Optional, Sequence
 
-import numpy as np
 import pandas as pd
 import scipy.sparse
 import tiledbsoma
 from datasets import Dataset
+
+from cellxgene_census.experimental.util import X_sparse_iter
 
 
 class CensusCellDatasetBuilder(ABC):
@@ -71,13 +72,17 @@ class CensusCellDatasetBuilder(ABC):
         """
 
         def gen() -> Generator[Dict[str, Any], None, None]:
-            for cell_id, cell_Xrow in self._paginate_Xrows():
-                yield self.cell_item(cell_id, cell_Xrow)
+            for (page_cell_ids, _), Xpage in X_sparse_iter(
+                self.query, self.layer_name, stride=self._cells_per_page, reindex_var=False
+            ):
+                assert isinstance(Xpage, scipy.sparse.csr_matrix)
+                for i, cell_id in enumerate(page_cell_ids):
+                    yield self.cell_item(cell_id, Xpage.getrow(i))
 
         return Dataset.from_generator(_DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {}))
 
     @abstractmethod
-    def cell_item(self, cell_id: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
+    def cell_item(self, cell_id: int, Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
         """
         Abstract method to process the X row for one cell into a Dataset item.
 
@@ -86,50 +91,6 @@ class CensusCellDatasetBuilder(ABC):
           equal to the `cell_id` row of the full `X` matrix.
         """
         ...
-
-    def _paginate_Xrows(self) -> Generator[Tuple[int, scipy.sparse.csr_matrix], None, None]:
-        """
-        Helper for processing the query X matrix row-by-row, with pagination to limit
-        peak memory usage for large result sets.
-
-        Ideally ExperimentAxisQuery should handle this for us, see:
-            https://github.com/single-cell-data/TileDB-SOMA/issues/1528
-
-        Absent that, our workaround is to paginate the cell soma_joinids found in
-        self.cells_df, then execute a sub-query for each page. For each sub-query, we
-        load its full X results and then iterate its rows. Repeatedly opening all these
-        sub-queries is presumably less efficient than the main query handling the row
-        pagination internally.
-        """
-        # paginate cell ids and iterate pages
-        cell_ids = self.cells_df.index.to_numpy()
-        cell_ids_pages = np.array_split(cell_ids, np.ceil(len(cell_ids) / self._cells_per_page))
-        for cell_ids_page in cell_ids_pages:
-            # open sub-query for these cell_ids
-            with tiledbsoma.ExperimentAxisQuery(
-                self.query.experiment,
-                self.query.measurement_name,
-                obs_query=tiledbsoma.AxisQuery(coords=(cell_ids_page,)),
-                var_query=self.query._matrix_axis_query.var,
-            ) as page_query:
-                # load full X results for this sub-query, then yield each row
-                page_Xcsr = self._load_Xcsr(page_query)
-                for cell_id in cell_ids_page:
-                    yield (cell_id, page_Xcsr.getrow(cell_id))
-
-    def _load_Xcsr(self, query: tiledbsoma.ExperimentAxisQuery) -> scipy.sparse.csr_matrix:
-        """
-        Load the full X(layer_name) results of the given query
-        """
-        Xtbl = query.X(self.layer_name).tables().concat()
-        (count, cell_ids, gene_ids) = (np.array(Xtbl.column(col)) for col in ("soma_data", "soma_dim_0", "soma_dim_1"))
-        return scipy.sparse.coo_matrix(
-            (count, (cell_ids, gene_ids)),
-            shape=(
-                self.cells_df.index.max() + 1,
-                self.genes_df.index.max() + 1,
-            ),
-        ).tocsr()
 
 
 class _DatasetGeneratorPickleHack:

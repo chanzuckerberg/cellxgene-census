@@ -3,6 +3,7 @@ from typing import Generator, Iterator, Tuple
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import pyarrow as pa
 import scipy.sparse as sparse
 import tiledbsoma as soma
 from typing_extensions import Literal
@@ -19,15 +20,27 @@ def X_sparse_iter(
     stride: int = 2**16,
     fmt: Literal["csr", "csc"] = "csr",
     use_eager_fetch: bool = True,
+    reindex_obs: bool = True,
+    reindex_var: bool = True,
 ) -> Iterator[_RT]:
     """
-    Return an iterator over an X SparseNdMatrix, returning for each iteration step:
-        * obs coords (coordinates)
+    Iterate over rows (or columns) of the query results X matrix, with pagination to
+    control peak memory usage for large result sets. Each iteration step yields:
+        * obs_coords (coordinates)
         * var_coords (coordinates)
-        * X contents as a SciPy csr_matrix or csc_matrix
-    The coordinates and X matrix chunks are indexed positionally, i.e. for any
-    given value in the matrix, X[i, j], the original soma_joinid (aka soma_dim_0
-    and soma_dim_1) are present in obs_coords[i] and var_coords[j].
+        * a page of X contents as a SciPy csr_matrix or csc_matrix
+
+    If reindex_obs (default), the rows of each X page are indexed positionally to
+    obs_coords, i.e. the original soma_joinid (soma_dim_0) of page row i is given by
+    obs_coords[i]. If not reindex_obs, the X page rows are indexed by soma_dim_0
+    directly.
+
+    Similarly, the columns of each X page may be indexed positionally by var_coords
+    (default) or by soma_dim_1 directly (reindex_var=False).
+
+    Reindexing an axis tends to streamline downstream processing except when:
+    1. the query returns nearly all rows/columns on that axis, *or*
+    2. the application needs to reindex it in some other way, regardless.
 
     Args:
         query:
@@ -39,13 +52,17 @@ def X_sparse_iter(
             The axis to iterate over, where zero (0) is obs axis and one (1)
             is the var axis. Currently only axis 0 (obs axis) is supported.
         stride:
-            The chunk size to return in each step.
+            The page size to return in each step (number of obs rows or var columns).
         fmt:
             The SciPy sparse array layout. Supported: 'csc' and 'csr' (default).
         use_eager_fetch:
             If true, will use multiple threads to parallelize reading
             and processing. This will improve speed, but at the cost
             of some additional memory use.
+        reindex_obs:
+            (see above)
+        reindex_var:
+            (see above)
 
     Returns:
         An iterator which iterates over a tuple of:
@@ -66,6 +83,8 @@ def X_sparse_iter(
 
     Lifecycle:
         experimental
+
+    See also: https://github.com/single-cell-data/TileDB-SOMA/issues/1528
     """
     if fmt == "csr":
         fmt_ctor = sparse.csr_matrix
@@ -81,42 +100,51 @@ def X_sparse_iter(
     obs_coords = query.obs_joinids().to_numpy()
     obs_coord_chunker = (obs_coords[i : i + stride] for i in range(0, len(obs_coords), stride))
 
-    # Lazy read into Arrow Table. Yields (coords, Arrow.Table)
     X = query._ms.X[X_name]
     var_coords = query.var_joinids().to_numpy()
+
+    # Lazy read of X chunk. Yields ((obs_coords, var_coords), (soma_data, soma_dim_0, soma_dim_1))
+    def soma_tbl_vectors(tbl: pa.Table) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int64], npt.NDArray[np.int64]]:
+        return tuple(tbl[col].to_numpy() for col in ("soma_data", "soma_dim_0", "soma_dim_1"))  # type: ignore
+
     table_reader = (
         (
             (obs_coords_chunk, var_coords),
-            X.read(coords=(obs_coords_chunk, var_coords)).tables().concat(),
+            soma_tbl_vectors(X.read(coords=(obs_coords_chunk, var_coords)).tables().concat()),
         )
         for obs_coords_chunk in obs_coord_chunker
     )
     if use_eager_fetch:
         table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
 
-    # lazy reindex of obs coordinates. Yields coords and (data, i, j) as numpy ndarrays
-    coo_reindexer = (
-        (
-            (obs_coords_chunk, var_coords),
+    coo_reindexer = table_reader
+    if reindex_obs or reindex_var:
+        # lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords positions
+        coo_reindexer = (
             (
-                tbl["soma_data"].to_numpy(),
-                pd.Index(obs_coords_chunk).get_indexer(tbl["soma_dim_0"].to_numpy()),
-                query.indexer.by_var(tbl["soma_dim_1"].to_numpy()),
-            ),
+                (obs_coords_chunk, var_coords),
+                (
+                    soma_data,
+                    pd.Index(obs_coords_chunk).get_indexer(soma_dim_0) if reindex_obs else soma_dim_0,
+                    query.indexer.by_var(soma_dim_1) if reindex_var else soma_dim_1,
+                ),
+            )
+            for (obs_coords_chunk, var_coords), (soma_data, soma_dim_0, soma_dim_1) in table_reader
         )
-        for (obs_coords_chunk, var_coords), tbl in table_reader
-    )
-    if use_eager_fetch:
-        coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
+        if use_eager_fetch:
+            coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
 
-    # lazy convert Arrow table to Scipy sparse.csr_matrix
+    # lazy convert to Scipy sparse.csr_matrix
     csr_reader: Generator[_RT, None, None] = (
         (
             (obs_coords_chunk, var_coords),
             fmt_ctor(
                 sparse.coo_matrix(
                     (data, (i, j)),
-                    shape=(len(obs_coords_chunk), query.n_vars),
+                    shape=(
+                        (len(obs_coords_chunk) if reindex_obs else X.shape[0]),
+                        (query.n_vars if reindex_var else X.shape[1]),
+                    ),
                 )
             ),
         )
