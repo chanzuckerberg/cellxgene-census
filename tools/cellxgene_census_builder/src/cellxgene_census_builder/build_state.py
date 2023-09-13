@@ -4,10 +4,11 @@ Manage the configuration and dynamic build state for the Census build.
 """
 import functools
 import io
+import json
 import os
 import pathlib
 from datetime import datetime
-from typing import Any, Iterator, Mapping, Union
+from typing import Any, Dict, Iterator, Mapping, Union
 
 import psutil
 import yaml
@@ -27,6 +28,8 @@ class CensusBuildConfig:
     verbose: int = field(converter=int, default=1)
     log_dir: str = field(default="logs")
     log_file: str = field(default="build.log")
+    # Overrides for TileDB config defaults (globals.py.DEFAULT_TILEDB_CONFIG)
+    tiledb_config: Dict[str, Any] = field(converter=json.loads, default={})
     reports_dir: str = field(default="reports")
     consolidate = field(converter=bool, default=True)
     disable_dirty_git_check = field(converter=bool, default=True)

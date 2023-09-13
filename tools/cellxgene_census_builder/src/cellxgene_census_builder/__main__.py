@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 
 import s3fs
 
+from tools.cellxgene_census_builder.src.cellxgene_census_builder.build_soma.globals import DEFAULT_TILEDB_CONFIG
+
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
 from .util import log_process_resource_status, process_init, urlcat
 
@@ -35,6 +37,9 @@ def main() -> int:
         build_state = CensusBuildState.load(working_dir / CENSUS_BUILD_STATE)
 
     build_args = CensusBuildArgs(working_dir=working_dir, config=build_config, state=build_state)
+
+    # Update TileDB config defaults
+    DEFAULT_TILEDB_CONFIG.update(build_config.tiledb_config)
 
     # Process initialization/setup must be done early. NOTE: do NOT log before this line!
     process_init(build_args)
