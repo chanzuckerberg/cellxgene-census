@@ -1,0 +1,76 @@
+name: Python dependency checks
+
+# This workflow is intended to check that the latest release of the `cellxgene-census` package
+# continues to function correctly using the latest upstream dependencies.
+#
+# Method:
+# 1. Check out the repo at the latest release tag
+# 2. Install latest cellxgene-census package from pypi
+# 3. Verify versions match
+# 4. Run tests from the repo
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+
+jobs:
+  python-dependency-check:
+    name: python-dependency-check
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - name: get latest release with tag
+        id: latestrelease
+        run: |
+          echo "releasetag=$(curl -s https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> "$GITHUB_OUTPUT"
+
+      - name: confirm release tag
+        run: |
+          # REST api sometimes returns a release tag of "null"
+          if [ -z "${{ steps.latestrelease.outputs.releasetag }}" ] || [ "${{ steps.latestrelease.outputs.releasetag }}" = "null" ]; then
+            echo Unable to fetch latest release tag!
+            exit 1
+          fi
+          echo Latest GH release tag ${{ steps.latestrelease.outputs.releasetag }}
+
+      - name: checkout latest release of repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.latestrelease.outputs.releasetag }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies (including experimental)
+        run: |
+          python -m pip install -U pip setuptools wheel
+          pip install -U -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          pip install -U cellxgene-census[experimental]
+
+          # dump pip config for logs
+          pip freeze
+
+          LATEST_RELEASE_TAG=$(echo "${{ steps.latestrelease.outputs.releasetag }}" | sed 's/^.//')
+          echo LATEST_RELEASE_TAG="$LATEST_RELEASE_TAG"
+          LATEST_PYPI_RELEASE=$(pip freeze | grep cellxgene-census | sed 's/^.*\=\=//')
+          echo LATEST_PYPI_RELEASE="$LATEST_PYPI_RELEASE"
+          if [ "$LATEST_PYPI_RELEASE" != "$LATEST_RELEASE_TAG" ]; then
+            echo Github and PyPi latest release tags do not match.
+            echo Latest PyPi release: "$LATEST_PYPY_RELEASE"
+            echo Latest GH release: "$LATEST_RELEASE_TAG"
+            exit 1
+          else
+            echo Release tags match
+          fi
+
+      - name: Test with pytest
+        run: |
+          PYTHONPATH=. pytest -v -rP --experimental ./api/python/cellxgene_census/tests/
