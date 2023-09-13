@@ -29,12 +29,6 @@ jobs:
       - name: get latest release with tag
         id: latestrelease
         run: |
-          which curl
-          which jq
-          jq --version
-          echo '----------'
-          curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --silent https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest
-          echo '----------'
           echo "releasetag=$(curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --silent https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> "$GITHUB_OUTPUT"
 
       - name: confirm release tag
