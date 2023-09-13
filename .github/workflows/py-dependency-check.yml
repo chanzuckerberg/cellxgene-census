@@ -12,6 +12,7 @@ name: Python dependency checks
 on:
   schedule:
     - cron: "30 1 * * *"
+  workflow_dispatch: # used for debugging or manual validation
 
 jobs:
   python-dependency-check:
@@ -28,7 +29,7 @@ jobs:
       - name: get latest release with tag
         id: latestrelease
         run: |
-          echo "releasetag=$(curl -s https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> "$GITHUB_OUTPUT"
+          echo "releasetag=$(curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --silent https://api.github.com/repos/chanzuckerberg/cellxgene-census/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> "$GITHUB_OUTPUT"
 
       - name: confirm release tag
         run: |
