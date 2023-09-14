@@ -25,10 +25,10 @@ jobs:
         # This should follow our user-facing instructions to install cellxgene.census.
         run: Rscript -e "install.packages(c('cellxgene.census', 'testthat'), repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org'), type='source')"
       - name: run unit tests
-        # cd to the cellxgene.census installed package directory, and run its tests
+        # fetch the cellxgene.census source package which includes the unit test code to run
         run: |
-            set -x
-            PKG_DIR="$(Rscript -e 'cat(system.file(package="cellxgene.census"))')"
-            ls -lR "$PKG_DIR"
-            cd "${PKG_DIR}/tests"
+            set -ex
+            Rscript -e "download.packages('cellxgene.census', destdir='.', repos='https://chanzuckerberg.r-universe.dev', type='source')"
+            tar zxf cellxgene.census_*.tar.gz
+            cd cellxgene.census/tests
             Rscript testthat.R
