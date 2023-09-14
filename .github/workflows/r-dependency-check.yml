@@ -27,5 +27,8 @@ jobs:
       - name: run unit tests
         # cd to the cellxgene.census installed package directory, and run its tests
         run: |
-            cd "$(Rscript -e 'cat(system.file(package="cellxgene.census"))')"/tests
+            set -x
+            PKG_DIR="$(Rscript -e 'cat(system.file(package="cellxgene.census"))')"
+            ls -lR "$PKG_DIR"
+            cd "${PKG_DIR}/tests"
             Rscript testthat.R
