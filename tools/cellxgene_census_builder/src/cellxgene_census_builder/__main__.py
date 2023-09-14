@@ -2,11 +2,14 @@ import argparse
 import logging
 import os
 import pathlib
+import subprocess
 import sys
 from typing import Callable, Sequence
 from urllib.parse import urlparse
 
 import s3fs
+
+from tools.cellxgene_census_builder.src.cellxgene_census_builder.build_soma.globals import DEFAULT_TILEDB_CONFIG
 
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
 from .util import log_process_resource_status, process_init, urlcat
@@ -49,6 +52,7 @@ def main() -> int:
         "build": [
             do_prebuild_set_defaults,
             do_prebuild_checks,
+            do_log_environment,
             do_build_soma,
             do_validate_soma,
             do_create_reports,
@@ -66,6 +70,7 @@ def main() -> int:
         "full-build": [
             do_prebuild_set_defaults,
             do_prebuild_checks,
+            do_log_environment,
             do_build_soma,
             do_validate_soma,
             do_create_reports,
@@ -150,11 +155,30 @@ def do_prebuild_checks(args: CensusBuildArgs) -> bool:
     return True
 
 
+def do_log_environment(args: CensusBuildArgs) -> bool:
+    # Log pip freeze output
+    import pkg_resources
+
+    deps = ""
+    for dep in pkg_resources.working_set:
+        deps += f"{dep.as_requirement()}\n"
+    logging.info(f"Pip freeze:\n{deps}")
+
+    # Log TileDB Config
+    logging.info(f"TileDB Config:\n{DEFAULT_TILEDB_CONFIG}")
+
+    return True
+
+
 def do_build_soma(args: CensusBuildArgs) -> bool:
     from .build_soma import build as build_a_soma
 
     if (cc := build_a_soma(args)) != 0:
         logging.critical(f"Build of census failed with code {cc}.")
+
+        # Log the output of df if a build fails
+        df = subprocess.run(["df"], capture_output=True, text=True)
+        logging.info(f"Disk space: {df.stdout}")
         return False
 
     return True
