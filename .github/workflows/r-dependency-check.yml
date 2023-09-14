@@ -1,0 +1,30 @@
+name: R dependency checks
+
+# This workflow is intended to check that the latest release of the cellxgene.census R package
+# continues to function correctly using the latest upstream dependencies.
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch: # used for debugging or manual validation
+  pull_request: # Used for testing
+
+jobs:
+  r-dependency-check:
+    name: r-dependency-check
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: r-lib/actions/setup-r@v2
+      - name: install cellxgene.census and dependencies
+        run: Rscript -e "install.packages(c('cellxgene.census', 'testthat'), repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org'))""
+      - name: run unit tests
+        run: |
+            # cd to the cellxgene.census installed package directory, and run its tests
+            cd "$(Rscript -e 'cat(system.file(package="cellxgene.census"))')"/tests
+            Rscript testthat.R
