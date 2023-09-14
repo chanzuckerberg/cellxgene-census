@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Log tiledbsoma package versions
-python -c 'import tiledbsoma; print(tiledbsoma.show_package_versions())'
+python3 -c 'import tiledbsoma; print(tiledbsoma.show_package_versions())'
 
 # Log pip freeze 
 pip freeze
