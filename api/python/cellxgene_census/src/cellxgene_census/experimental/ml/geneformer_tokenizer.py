@@ -13,7 +13,7 @@ try:
 except ImportError:
     # pyproject.toml can't express Geneformer git+https dependency
     raise ImportError(
-        "Please install Geneformer with: " "pip install git+https://huggingface.co/ctheodoris/Geneformer@72c65013"
+        "Please install Geneformer with: " "pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e"
     ) from None
 
 GENEFORMER_MAX_INPUT_TOKENS = 2048
