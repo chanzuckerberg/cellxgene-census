@@ -1,6 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generator, Optional, Sequence
+from contextlib import AbstractContextManager
+from typing import Any, Dict, Generator, Optional, Sequence, Type
 
 import pandas as pd
 import scipy.sparse
@@ -10,62 +11,78 @@ from datasets import Dataset
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
-class CensusCellDatasetBuilder(ABC):
+class CensusCellDatasetBuilder(AbstractContextManager["CensusCellDatasetBuilder"], ABC):
     """
     Abstract base class for methods to process CELLxGENE Census query results into a
-    Hugging Face Dataset in which each item represents one cell.
-
-    Concrete subclasses should implement `__init__()` and `cell_item()` as discussed
-    below.
-    """
-
-    query: tiledbsoma.ExperimentAxisQuery
-    """
-    The Census query whose results will be processed. This attribute is available to
-    subclasses following base class initialization.
+    Hugging Face Dataset in which each item represents one cell. Subclasses implement
+    the `cell_item()` method to process the expression vector for a cell into a Dataset
+    item, and may optionally override `__init__()` and `__enter__()` to perform any
+    necessary preprocessing.
     """
 
     cells_df: pd.DataFrame
     """
     Cell metadata, indexed by cell `soma_joinid`. This attribute is available to
-    subclasses following base class initialization.
+    subclasses after the context has been entered.
     """
 
     genes_df: pd.DataFrame
     """
     Gene metadata, indexed by gene `soma_joinid`. This attribute is available to
-    subclasses following base class initialization.
+    subclasses after the context has been entered.
     """
-
-    _cells_per_page: int  # see _paginate_Xrows() method below
 
     def __init__(
         self,
-        query: tiledbsoma.ExperimentAxisQuery,
+        experiment: tiledbsoma.Experiment,
+        *,
+        measurement_name: str = "RNA",
         layer_name: str = "raw",
+        cells_query: Optional[tiledbsoma.AxisQuery] = None,
         cells_column_names: Optional[Sequence[str]] = None,
+        genes_query: Optional[tiledbsoma.AxisQuery] = None,
         genes_column_names: Optional[Sequence[str]] = None,
         _cells_per_page: int = 100_000,
     ):
         """
-        Initialize the CensusCellDatasetBuilder to process the results of the given
-        Census query.
+        Initialize the CensusCellDatasetBuilder to process the results of a Census
+        ExperimentAxisQuery.
 
-        After invoking `super().__init__(...)`, subclass initializers should perform
-        any preprocessing of `self.cells_df` and `self.genes_df` that may be needed to
-        then process the individual cells efficiently.
-
+        - `experiment`: Census Experiment to be queried.
+        - `measurement_name`: Measurement in the experiment, default "RNA".
         - `layer_name`: Name of the X layer to process, default "raw".
-        - `cells_column_names`: Columns to include in `self.cells_df`; all columns by
-          default.
-        - `genes_column_names`: Columns to include in `self.genes_df`; all columns by
-          default.
+        - `cells_query`: obs AxisQuery defining the set of cells to process (default all).
+        - `cells_column_names`: Columns to include in `self.cells_df` (default all).
+        - `genes_query`: var AxisQuery defining the set of genes to process (default all).
+        - `genes_column_names`: Columns to include in `self.genes_df` (default all).
         """
-        self.query = query
+        self.experiment = experiment
+        self.measurement_name = measurement_name
         self.layer_name = layer_name
-        self.cells_df = self.query.obs(column_names=cells_column_names).concat().to_pandas().set_index("soma_joinid")
-        self.genes_df = self.query.var(column_names=genes_column_names).concat().to_pandas().set_index("soma_joinid")
+        self.cells_query = cells_query
+        self.cells_column_names = cells_column_names
+        self.genes_query = genes_query
+        self.genes_column_names = genes_column_names
         self._cells_per_page = _cells_per_page
+
+    def __enter__(self) -> "CensusCellDatasetBuilder":
+        # On context entry, start the query and load cells_df and genes_df
+        self.query = self.experiment.axis_query(
+            self.measurement_name, obs_query=self.cells_query, var_query=self.genes_query
+        )
+        self.query.__enter__()
+
+        self.cells_df = (
+            self.query.obs(column_names=self.cells_column_names).concat().to_pandas().set_index("soma_joinid")
+        )
+        self.genes_df = (
+            self.query.var(column_names=self.genes_column_names).concat().to_pandas().set_index("soma_joinid")
+        )
+
+        return self
+
+    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_val: Optional[BaseException], exc_tb: Any) -> None:
+        self.query.__exit__(exc_type, exc_val, exc_tb)
 
     def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
         """
@@ -73,6 +90,9 @@ class CensusCellDatasetBuilder(ABC):
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
+        assert isinstance(
+            self.query, tiledbsoma.ExperimentAxisQuery
+        ), "CensusCellDatasetBuilder.build(): context must be entered"
 
         def gen() -> Generator[Dict[str, Any], None, None]:
             for (page_cell_ids, _), Xpage in X_sparse_iter(
