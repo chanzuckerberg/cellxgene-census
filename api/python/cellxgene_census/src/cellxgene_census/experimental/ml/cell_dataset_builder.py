@@ -11,7 +11,7 @@ from datasets import Dataset
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
-class CensusCellDatasetBuilder(AbstractContextManager["CensusCellDatasetBuilder"], ABC):
+class CellDatasetBuilder(AbstractContextManager["CellDatasetBuilder"], ABC):
     """
     Abstract base class for methods to process CELLxGENE Census query results into a
     Hugging Face Dataset in which each item represents one cell. Subclasses implement
@@ -45,7 +45,7 @@ class CensusCellDatasetBuilder(AbstractContextManager["CensusCellDatasetBuilder"
         _cells_per_page: int = 100_000,
     ):
         """
-        Initialize the CensusCellDatasetBuilder to process the results of a Census
+        Initialize the CellDatasetBuilder to process the results of a Census
         ExperimentAxisQuery.
 
         - `experiment`: Census Experiment to be queried.
@@ -65,7 +65,7 @@ class CensusCellDatasetBuilder(AbstractContextManager["CensusCellDatasetBuilder"
         self.genes_column_names = genes_column_names
         self._cells_per_page = _cells_per_page
 
-    def __enter__(self) -> "CensusCellDatasetBuilder":
+    def __enter__(self) -> "CellDatasetBuilder":
         # On context entry, start the query and load cells_df and genes_df
         self.query = self.experiment.axis_query(
             self.measurement_name, obs_query=self.cells_query, var_query=self.genes_query
@@ -92,7 +92,7 @@ class CensusCellDatasetBuilder(AbstractContextManager["CensusCellDatasetBuilder"
         """
         assert isinstance(
             self.query, tiledbsoma.ExperimentAxisQuery
-        ), "CensusCellDatasetBuilder.build(): context must be entered"
+        ), "CellDatasetBuilder.build(): context must be entered"
 
         def gen() -> Generator[Dict[str, Any], None, None]:
             for (page_cell_ids, _), Xpage in X_sparse_iter(

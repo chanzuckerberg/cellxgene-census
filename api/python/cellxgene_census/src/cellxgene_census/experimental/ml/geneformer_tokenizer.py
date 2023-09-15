@@ -6,7 +6,7 @@ import numpy.typing as npt
 import scipy
 import tiledbsoma
 
-from .cell_dataset_builder import CensusCellDatasetBuilder
+from .cell_dataset_builder import CellDatasetBuilder
 
 try:
     import geneformer
@@ -19,7 +19,7 @@ except ImportError:
 GENEFORMER_MAX_INPUT_TOKENS = 2048
 
 
-class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
+class GeneformerTokenizer(CellDatasetBuilder):
     """
     Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
     cell in CELLxGENE census query results.
@@ -28,10 +28,10 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
 
     ```
     import cellxgene_census
-    from cellxgene_census.experimental.ml import CensusGeneformerTokenizer
+    from cellxgene_census.experimental.ml import GeneformerTokenizer
 
     with cellxgene_census.open_soma() as census:
-        with CensusGeneformerTokenizer(
+        with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             cells_query=...,  # define some subset of Census cells
             cells_attributes=(

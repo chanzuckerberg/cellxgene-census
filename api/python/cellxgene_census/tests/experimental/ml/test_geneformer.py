@@ -4,7 +4,7 @@ import tiledbsoma
 import cellxgene_census
 
 try:
-    from cellxgene_census.experimental.ml import CensusGeneformerTokenizer
+    from cellxgene_census.experimental.ml import GeneformerTokenizer
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
     pass
@@ -15,7 +15,7 @@ except ImportError:
     "cells_per_page",
     [4, 100_000],
 )
-def test_CensusGeneformerTokenizer(cells_per_page: int) -> None:
+def test_GeneformerTokenizer(cells_per_page: int) -> None:
     # cell soma_joinid: (token sequence length, prefix of token sequence)
     expected_data = {
         1234567: (2048, [15947, 7062, 621, 9291, 9939, 16985, 4113]),
@@ -37,7 +37,7 @@ def test_CensusGeneformerTokenizer(cells_per_page: int) -> None:
     }
 
     with cellxgene_census.open_soma(census_version="2023-09-04") as census:
-        with CensusGeneformerTokenizer(
+        with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             cells_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
             cells_attributes=(
