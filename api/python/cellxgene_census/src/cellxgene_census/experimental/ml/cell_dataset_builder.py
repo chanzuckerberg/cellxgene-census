@@ -14,6 +14,9 @@ class CensusCellDatasetBuilder(ABC):
     """
     Abstract base class for methods to process CELLxGENE Census query results into a
     Hugging Face Dataset in which each item represents one cell.
+
+    Concrete subclasses should implement `__init__()` and `cell_item()` as discussed
+    below.
     """
 
     query: tiledbsoma.ExperimentAxisQuery

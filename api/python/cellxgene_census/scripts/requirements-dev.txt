@@ -4,4 +4,4 @@ requests-mock
 twine
 coverage
 nbqa
-git+https://huggingface.co/ctheodoris/Geneformer
+git+https://huggingface.co/ctheodoris/Geneformer@72c65013

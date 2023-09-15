@@ -13,7 +13,7 @@ try:
 except ImportError:
     # pyproject.toml can't express Geneformer git+https dependency
     raise ImportError(
-        "Please install Geneformer with: " "pip install git+https://huggingface.co/ctheodoris/Geneformer"
+        "Please install Geneformer with: " "pip install git+https://huggingface.co/ctheodoris/Geneformer@72c65013"
     ) from None
 
 GENEFORMER_MAX_INPUT_TOKENS = 2048
@@ -23,6 +23,29 @@ class CensusGeneformerTokenizer(CensusCellDatasetBuilder):
     """
     Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
     cell in CELLxGENE census query results.
+
+    Example usage:
+
+    ```
+    import cellxgene_census
+    from cellxgene_census.experimental.ml import CensusGeneformerTokenizer
+
+    with cellxgene_census.open_soma() as census:
+        with census["census_data"]["homo_sapiens"].axis_query(
+            measurement_name="RNA",
+            # query some subset of Census cells
+            obs_query= ...
+            # For this purpose var_query should NOT be used (all genes should be queried).
+        ) as query:
+            tokenizer = CensusGeneformerTokenizer(
+                query,
+                cell_attributes=(
+                    "soma_joinid",
+                    "cell_type_ontology_term_id",
+                ),
+            )
+            dataset = tokenizer.build()
+    ```
 
     Dataset item contents:
     - `input_ids`: Geneformer token sequence for the cell
