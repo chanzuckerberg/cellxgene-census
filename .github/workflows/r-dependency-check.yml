@@ -30,7 +30,7 @@ jobs:
         # [re-]fetch the cellxgene.census source package which includes the unit test code to run
         run: |
             set -ex
-            Rscript -e 'download.packages("cellxgene.census" destdir=".", repos="https://chanzuckerberg.r-universe.dev", type="source")'
+            Rscript -e 'download.packages("cellxgene.census", destdir=".", repos="https://chanzuckerberg.r-universe.dev", type="source")'
             tar zxf cellxgene.census_*.tar.gz
             cd cellxgene.census/tests
             Rscript testthat.R
