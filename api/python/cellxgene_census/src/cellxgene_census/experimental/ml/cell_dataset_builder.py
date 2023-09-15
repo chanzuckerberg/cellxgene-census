@@ -1,7 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
-from contextlib import AbstractContextManager
-from typing import Any, Dict, Generator, Optional, Sequence, Type
+from typing import Any, ContextManager, Dict, Generator, Optional, Sequence, Type
 
 import pandas as pd
 import scipy.sparse
@@ -11,7 +10,7 @@ from datasets import Dataset
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
-class CellDatasetBuilder(AbstractContextManager["CellDatasetBuilder"], ABC):
+class CellDatasetBuilder(ContextManager["CellDatasetBuilder"], ABC):
     """
     Abstract base class for methods to process CELLxGENE Census query results into a
     Hugging Face Dataset in which each item represents one cell. Subclasses implement
