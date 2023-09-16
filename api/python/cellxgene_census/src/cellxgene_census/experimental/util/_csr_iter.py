@@ -26,7 +26,7 @@ def X_sparse_iter(
     control peak memory usage for large result sets. Each iteration step yields:
         * obs_coords (coordinates)
         * var_coords (coordinates)
-        * a page of X contents as a SciPy csr_matrix or csc_matrix
+        * a chunk of X contents as a SciPy csr_matrix or csc_matrix
 
     The coordinates and X matrix chunks are indexed positionally, i.e. for any
     given value in the matrix, X[i, j], the original soma_joinid (aka soma_dim_0
@@ -42,7 +42,7 @@ def X_sparse_iter(
             The axis to iterate over, where zero (0) is obs axis and one (1)
             is the var axis. Currently only axis 0 (obs axis) is supported.
         stride:
-            The page size to return in each step (number of obs rows or var columns).
+            The chunk size to return in each step (number of obs rows or var columns).
         fmt:
             The SciPy sparse array layout. Supported: 'csc' and 'csr' (default).
         use_eager_fetch:
@@ -114,7 +114,9 @@ def X_sparse_iter(
     if use_eager_fetch:
         table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
 
-    # lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords positions
+    # Lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords
+    # positions (except one or the other if reindex_sparse_axis).
+    # Yields coords and COO (data, i, j) as numpy ndarrays
     coo_reindexer = (
         (
             (obs_coords_chunk, var_coords),
@@ -133,7 +135,7 @@ def X_sparse_iter(
     if use_eager_fetch:
         coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
 
-    # lazy convert to Scipy sparse.csr_matrix/sparse.csc_matrix (according to fmt)
+    # Lazy convert COO to Scipy sparse matrix (csr or csc according to fmt)
     fmt_reader: Generator[_RT, None, None] = (
         (
             (obs_coords_chunk, var_coords),
