@@ -8,21 +8,16 @@ import tiledbsoma
 
 from .cell_dataset_builder import CellDatasetBuilder
 
-try:
-    import geneformer
-except ImportError:
-    # pyproject.toml can't express Geneformer git+https dependency
-    raise ImportError(
-        "Please install Geneformer with: " "pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e"
-    ) from None
-
 GENEFORMER_MAX_INPUT_TOKENS = 2048
 
 
 class GeneformerTokenizer(CellDatasetBuilder):
     """
     Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
-    cell in CELLxGENE Census ExperimentAxisQuery results.
+    cell in CELLxGENE Census ExperimentAxisQuery results (human).
+
+    This class requires the Geneformer package to be installed separately with:
+    `pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e`
 
     Example usage:
 
@@ -88,6 +83,14 @@ class GeneformerTokenizer(CellDatasetBuilder):
         """
         genes_df = experiment.ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
 
+        try:
+            import geneformer
+        except ImportError:
+            # pyproject.toml can't express Geneformer git+https dependency
+            raise ImportError(
+                "Please install Geneformer with: "
+                "pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e"
+            ) from None
         with open(geneformer.tokenizer.TOKEN_DICTIONARY_FILE, "rb") as f:
             gene_token_dict = pickle.load(f)
         with open(geneformer.tokenizer.GENE_MEDIAN_FILE, "rb") as f:
