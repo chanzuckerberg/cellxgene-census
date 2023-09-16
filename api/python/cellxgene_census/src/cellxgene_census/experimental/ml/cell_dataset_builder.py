@@ -9,7 +9,7 @@ from tiledbsoma import Experiment, ExperimentAxisQuery
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
-class CellDatasetBuilder(ExperimentAxisQuery, ABC):
+class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
     """
     Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery
     results into a Hugging Face Dataset in which each item represents one cell.
