@@ -4,13 +4,12 @@ from typing import Any, Dict, Generator, Optional
 
 import scipy.sparse
 from datasets import Dataset
-from somacore import ExperimentAxisQuery
-from tiledbsoma import Experiment
+from tiledbsoma import Experiment, ExperimentAxisQuery
 
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
-class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):
+class CellDatasetBuilder(ExperimentAxisQuery, ABC):
     """
     Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery
     results into a Hugging Face Dataset in which each item represents one cell.
