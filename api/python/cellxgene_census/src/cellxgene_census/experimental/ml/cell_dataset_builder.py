@@ -81,8 +81,8 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):
         Abstract method to process the X row for one cell into a Dataset item.
 
         - `cell_joinid`: The cell `soma_joinid`.
-        - `cell_Xrow`: The `X` row for this cell. This csr_matrix has a single row 0,
-          equal to the `cell_joinid` row of the full `X` layer matrix.
+        - `Xrow`: The `X` row for this cell. This csr_matrix has a single row 0, equal
+          to the `cell_joinid` row of the full `X` layer matrix.
         """
         ...
 

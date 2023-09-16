@@ -11,11 +11,14 @@ except ImportError:
 
 
 @pytest.mark.experimental
+@pytest.mark.live_corpus
 @pytest.mark.parametrize(
     "cells_per_chunk",
     [4, 100_000],
 )
 def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
+    # TODO: change to the next LTS release (with "normalized" X layer) when available
+    census_version = "2023-09-04"
     # cell soma_joinid: (token sequence length, prefix of token sequence)
     expected_data = {
         1234567: (2048, [15947, 7062, 621, 9291, 9939, 16985, 4113]),
@@ -36,7 +39,7 @@ def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
         32098742: (2048, [4067, 948, 1324, 5261, 16985, 1511, 10268]),
     }
 
-    with cellxgene_census.open_soma(census_version="2023-09-04") as census:
+    with cellxgene_census.open_soma(census_version=census_version) as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             obs_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
