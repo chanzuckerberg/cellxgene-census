@@ -26,9 +26,7 @@ def test_X_sparse_iter(small_mem_context: soma.SOMATileDBContext) -> None:
         obs_filter = """is_primary_data == True and tissue_general == 'tongue'"""
         expt = census["census_data"]["mus_musculus"]
         Xraw = expt.ms["RNA"].X["raw"]
-        with expt.axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_filter)
-        ) as query:
+        with expt.axis_query(measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_filter)) as query:
             for (obs_ids, var_ids), X_chunk in X_sparse_iter(query, fmt="csr"):
                 assert X_chunk.shape[0] == len(obs_ids)
                 assert X_chunk.shape[1] == len(var_ids)
