@@ -95,7 +95,7 @@ class CellDatasetBuilder(ContextManager["CellDatasetBuilder"], ABC):
 
         def gen() -> Generator[Dict[str, Any], None, None]:
             for (page_cell_ids, _), Xpage in X_sparse_iter(
-                self.query, self.layer_name, stride=self._cells_per_page, reindex_var=False
+                self.query, self.layer_name, stride=self._cells_per_page, reindex_sparse_axis=False
             ):
                 assert isinstance(Xpage, scipy.sparse.csr_matrix)
                 for i, cell_id in enumerate(page_cell_ids):

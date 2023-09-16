@@ -3,7 +3,6 @@ from typing import Generator, Iterator, Tuple
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import pyarrow as pa
 import scipy.sparse as sparse
 import tiledbsoma as soma
 from typing_extensions import Literal
@@ -20,8 +19,7 @@ def X_sparse_iter(
     stride: int = 2**16,
     fmt: Literal["csr", "csc"] = "csr",
     use_eager_fetch: bool = True,
-    reindex_obs: bool = True,
-    reindex_var: bool = True,
+    reindex_sparse_axis: bool = True,
 ) -> Iterator[_RT]:
     """
     Iterate over rows (or columns) of the query results X matrix, with pagination to
@@ -30,17 +28,9 @@ def X_sparse_iter(
         * var_coords (coordinates)
         * a page of X contents as a SciPy csr_matrix or csc_matrix
 
-    If reindex_obs (default), the rows of each X page are indexed positionally to
-    obs_coords, i.e. the original soma_joinid (soma_dim_0) of page row i is given by
-    obs_coords[i]. If not reindex_obs, the X page rows are indexed by soma_dim_0
-    directly.
-
-    Similarly, the columns of each X page may be indexed positionally by var_coords
-    (default) or by soma_dim_1 directly (reindex_var=False).
-
-    Reindexing an axis tends to streamline downstream processing except when:
-    1. the query returns nearly all rows/columns on that axis, *or*
-    2. the application needs to reindex it in some other way, regardless.
+    The coordinates and X matrix chunks are indexed positionally, i.e. for any
+    given value in the matrix, X[i, j], the original soma_joinid (aka soma_dim_0
+    and soma_dim_1) are present in obs_coords[i] and var_coords[j].
 
     Args:
         query:
@@ -59,10 +49,16 @@ def X_sparse_iter(
             If true, will use multiple threads to parallelize reading
             and processing. This will improve speed, but at the cost
             of some additional memory use.
-        reindex_obs:
-            (see above)
-        reindex_var:
-            (see above)
+        reindex_sparse_axis:
+            If false, then the sparse axis of each X chunk (var for csr, obs for csc)
+            will be indexed by soma_joinid, instead of reindexed by var_coords or
+            obs_coords position, respectively. Skipping the reindexing streamlines the
+            operation slightly if the application prefers to address the axis by
+            soma_joinid directly, or if it needs to reindex the axis in some other way
+            regardless.
+            The other axis (obs for csr, var for csc) is always reindexed in order to
+            control memory usage, as scipy.sparse stores the underlying indptr array
+            densely.
 
     Returns:
         An iterator which iterates over a tuple of:
@@ -86,10 +82,14 @@ def X_sparse_iter(
 
     See also: https://github.com/single-cell-data/TileDB-SOMA/issues/1528
     """
+    reindex_obs = True
+    reindex_var = True
     if fmt == "csr":
         fmt_ctor = sparse.csr_matrix
+        reindex_var = reindex_sparse_axis
     elif fmt == "csc":
         fmt_ctor = sparse.csc_matrix
+        reindex_obs = reindex_sparse_axis
     else:
         raise ValueError("fmt must be 'csr' or 'csc'")
 
@@ -103,39 +103,38 @@ def X_sparse_iter(
     X = query._ms.X[X_name]
     var_coords = query.var_joinids().to_numpy()
 
-    # Lazy read of X chunk. Yields ((obs_coords, var_coords), (soma_data, soma_dim_0, soma_dim_1))
-    def soma_tbl_vectors(tbl: pa.Table) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int64], npt.NDArray[np.int64]]:
-        return tuple(tbl[col].to_numpy() for col in ("soma_data", "soma_dim_0", "soma_dim_1"))  # type: ignore
-
+    # Lazy read into Arrow Table. Yields (coords, Arrow.Table)
     table_reader = (
         (
             (obs_coords_chunk, var_coords),
-            soma_tbl_vectors(X.read(coords=(obs_coords_chunk, var_coords)).tables().concat()),
+            X.read(coords=(obs_coords_chunk, var_coords)).tables().concat(),
         )
         for obs_coords_chunk in obs_coord_chunker
     )
     if use_eager_fetch:
         table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
 
-    coo_reindexer = table_reader
-    if reindex_obs or reindex_var:
-        # lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords positions
-        coo_reindexer = (
+    # lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords positions
+    coo_reindexer = (
+        (
+            (obs_coords_chunk, var_coords),
             (
-                (obs_coords_chunk, var_coords),
+                tbl["soma_data"].to_numpy(),
                 (
-                    soma_data,
-                    pd.Index(obs_coords_chunk).get_indexer(soma_dim_0) if reindex_obs else soma_dim_0,
-                    query.indexer.by_var(soma_dim_1) if reindex_var else soma_dim_1,
+                    pd.Index(obs_coords_chunk).get_indexer(tbl["soma_dim_0"].to_numpy())
+                    if reindex_obs
+                    else tbl["soma_dim_0"].to_numpy()
                 ),
-            )
-            for (obs_coords_chunk, var_coords), (soma_data, soma_dim_0, soma_dim_1) in table_reader
+                (query.indexer.by_var(tbl["soma_dim_1"].to_numpy()) if reindex_var else tbl["soma_dim_1"].to_numpy()),
+            ),
         )
-        if use_eager_fetch:
-            coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
+        for (obs_coords_chunk, var_coords), tbl in table_reader
+    )
+    if use_eager_fetch:
+        coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
 
-    # lazy convert to Scipy sparse.csr_matrix
-    csr_reader: Generator[_RT, None, None] = (
+    # lazy convert to Scipy sparse.csr_matrix/sparse.csc_matrix (according to fmt)
+    fmt_reader: Generator[_RT, None, None] = (
         (
             (obs_coords_chunk, var_coords),
             fmt_ctor(
@@ -151,6 +150,6 @@ def X_sparse_iter(
         for (obs_coords_chunk, var_coords), (data, i, j) in coo_reindexer
     )
     if use_eager_fetch:
-        csr_reader = (t for t in _EagerIterator(csr_reader, query._threadpool))
+        fmt_reader = (t for t in _EagerIterator(fmt_reader, query._threadpool))
 
-    yield from csr_reader
+    yield from fmt_reader
