@@ -1,47 +1,48 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, ContextManager, Dict, Generator, Optional, Sequence, Type
+from typing import Any, Dict, Generator, Optional
 
-import pandas as pd
 import scipy.sparse
-import tiledbsoma
 from datasets import Dataset
+from somacore import ExperimentAxisQuery
+from tiledbsoma import Experiment
 
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
-class CellDatasetBuilder(ContextManager["CellDatasetBuilder"], ABC):
+class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):
     """
-    Abstract base class for methods to process CELLxGENE Census query results into a
-    Hugging Face Dataset in which each item represents one cell. Subclasses implement
-    the `cell_item()` method to process the expression vector for a cell into a Dataset
-    item, and may optionally override `__init__()` and `__enter__()` to perform any
-    necessary preprocessing.
-    """
+    Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery
+    results into a Hugging Face Dataset in which each item represents one cell.
+    Subclasses implement the `cell_item()` method to process each row of an X layer
+    into a Dataset item, and may also override `__init__()` and context `__enter__()`
+    to perform any necessary preprocessing.
 
-    cells_df: pd.DataFrame
-    """
-    Cell metadata, indexed by cell `soma_joinid`. This attribute is available to
-    subclasses after the context has been entered.
-    """
+    The base class inherits ExperimentAxisQuery, so typical usage would be:
 
-    genes_df: pd.DataFrame
-    """
-    Gene metadata, indexed by gene `soma_joinid`. This attribute is available to
-    subclasses after the context has been entered.
+    ```
+    import cellxgene_census
+    import tiledbsoma
+    from cellxgene_census.experimental.ml import GeneformerTokenizer
+
+    with cellxgene_census.open_soma() as census:
+        with SubclassOfCellDatasetBuilder(
+            census["census_data"]["homo_sapiens"],
+            obs_query=tilebsoma.AxisQuery(...),  # define some subset of Census cells
+            ... # other ExperimentAxisQuery parameters e.g. var_query
+        ) as builder:
+            dataset = builder.build()
+    ```
     """
 
     def __init__(
         self,
-        experiment: tiledbsoma.Experiment,
-        *,
+        experiment: Experiment,
         measurement_name: str = "RNA",
         layer_name: str = "raw",
-        cells_query: Optional[tiledbsoma.AxisQuery] = None,
-        cells_column_names: Optional[Sequence[str]] = None,
-        genes_query: Optional[tiledbsoma.AxisQuery] = None,
-        genes_column_names: Optional[Sequence[str]] = None,
-        _cells_per_page: int = 100_000,
+        *,
+        _cells_per_chunk: int = 100_000,
+        **kwargs: Any,
     ):
         """
         Initialize the CellDatasetBuilder to process the results of a Census
@@ -50,38 +51,12 @@ class CellDatasetBuilder(ContextManager["CellDatasetBuilder"], ABC):
         - `experiment`: Census Experiment to be queried.
         - `measurement_name`: Measurement in the experiment, default "RNA".
         - `layer_name`: Name of the X layer to process, default "raw".
-        - `cells_query`: obs AxisQuery defining the set of cells to process (default all).
-        - `cells_column_names`: Columns to include in `self.cells_df` (default all).
-        - `genes_query`: var AxisQuery defining the set of genes to process (default all).
-        - `genes_column_names`: Columns to include in `self.genes_df` (default all).
+        - `kwargs`: passed through to `ExperimentAxisQuery()`, especially `obs_query`
+           and `var_query`.
         """
-        self.experiment = experiment
-        self.measurement_name = measurement_name
+        super().__init__(experiment, measurement_name, **kwargs)
         self.layer_name = layer_name
-        self.cells_query = cells_query
-        self.cells_column_names = cells_column_names
-        self.genes_query = genes_query
-        self.genes_column_names = genes_column_names
-        self._cells_per_page = _cells_per_page
-
-    def __enter__(self) -> "CellDatasetBuilder":
-        # On context entry, start the query and load cells_df and genes_df
-        self.query = self.experiment.axis_query(
-            self.measurement_name, obs_query=self.cells_query, var_query=self.genes_query
-        )
-        self.query.__enter__()
-
-        self.cells_df = (
-            self.query.obs(column_names=self.cells_column_names).concat().to_pandas().set_index("soma_joinid")
-        )
-        self.genes_df = (
-            self.query.var(column_names=self.genes_column_names).concat().to_pandas().set_index("soma_joinid")
-        )
-
-        return self
-
-    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_val: Optional[BaseException], exc_tb: Any) -> None:
-        self.query.__exit__(exc_type, exc_val, exc_tb)
+        self._cells_per_chunk = _cells_per_chunk
 
     def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
         """
@@ -89,28 +64,25 @@ class CellDatasetBuilder(ContextManager["CellDatasetBuilder"], ABC):
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
-        assert isinstance(
-            self.query, tiledbsoma.ExperimentAxisQuery
-        ), "CellDatasetBuilder.build(): context must be entered"
 
         def gen() -> Generator[Dict[str, Any], None, None]:
-            for (page_cell_ids, _), Xpage in X_sparse_iter(
-                self.query, self.layer_name, stride=self._cells_per_page, reindex_sparse_axis=False
+            for (page_cell_joinids, _), Xpage in X_sparse_iter(
+                self, self.layer_name, stride=self._cells_per_chunk, reindex_sparse_axis=False
             ):
                 assert isinstance(Xpage, scipy.sparse.csr_matrix)
-                for i, cell_id in enumerate(page_cell_ids):
-                    yield self.cell_item(cell_id, Xpage.getrow(i))
+                for i, cell_joinid in enumerate(page_cell_joinids):
+                    yield self.cell_item(cell_joinid, Xpage.getrow(i))
 
         return Dataset.from_generator(_DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {}))
 
     @abstractmethod
-    def cell_item(self, cell_id: int, Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
+    def cell_item(self, cell_joinid: int, Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
         """
         Abstract method to process the X row for one cell into a Dataset item.
 
-        - `cell_id`: The cell `soma_joinid`.
+        - `cell_joinid`: The cell `soma_joinid`.
         - `cell_Xrow`: The `X` row for this cell. This csr_matrix has a single row 0,
-          equal to the `cell_id` row of the full `X` matrix.
+          equal to the `cell_joinid` row of the full `X` layer matrix.
         """
         ...
 

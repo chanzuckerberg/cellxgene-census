@@ -115,7 +115,7 @@ def X_sparse_iter(
         table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
 
     # Lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords
-    # positions (except one or the other if reindex_sparse_axis).
+    # positions (except one or the other if not reindex_sparse_axis).
     # Yields coords and COO (data, i, j) as numpy ndarrays
     coo_reindexer = (
         (

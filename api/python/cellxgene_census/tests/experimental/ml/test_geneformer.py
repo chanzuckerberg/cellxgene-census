@@ -12,10 +12,10 @@ except ImportError:
 
 @pytest.mark.experimental
 @pytest.mark.parametrize(
-    "cells_per_page",
+    "cells_per_chunk",
     [4, 100_000],
 )
-def test_GeneformerTokenizer(cells_per_page: int) -> None:
+def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
     # cell soma_joinid: (token sequence length, prefix of token sequence)
     expected_data = {
         1234567: (2048, [15947, 7062, 621, 9291, 9939, 16985, 4113]),
@@ -39,13 +39,13 @@ def test_GeneformerTokenizer(cells_per_page: int) -> None:
     with cellxgene_census.open_soma(census_version="2023-09-04") as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
-            cells_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
-            cells_attributes=(
+            obs_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
+            obs_attributes=(
                 "soma_joinid",
                 "cell_type_ontology_term_id",
                 "tissue_ontology_term_id",
             ),
-            _cells_per_page=cells_per_page,  # test with & without pagination
+            _cells_per_chunk=cells_per_chunk,  # test with & without pagination
         ) as tokenizer:
             df = tokenizer.build().to_pandas()
             assert len(df) == len(expected_data)
@@ -53,3 +53,5 @@ def test_GeneformerTokenizer(cells_per_page: int) -> None:
                 assert row.length == expected_data[row.soma_joinid][0]
                 top_tokens = expected_data[row.soma_joinid][1]
                 assert row.input_ids.tolist()[: len(top_tokens)] == top_tokens
+                assert row.cell_type_ontology_term_id
+                assert row.tissue_ontology_term_id
