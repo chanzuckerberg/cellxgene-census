@@ -25,7 +25,7 @@ Calculations are done in an accumulative incremental fashion, meaning that only 
 
 The Census data is downloaded in increments and average and variance accumulators are updated at each incremental step. The implementation also takes advantage of CPU-based multiprocessing to speed up the process.
 
-Currently, the mean and variance are calculated using the full population of cells/genes, including those with a zero valued measurement. In the future, we will enable calculation of mean including the population of non-zero cells/genes.
+Currently, the mean and variance are calculated using the full population of cells/genes, including those with a zero valued measurement. In the future, we will enable calculation of mean including only the population of non-zero cells/genes.
 
 ### Example: *KRAS* and *AQP4* average and variance expression in lung epithelial cells
 
@@ -83,7 +83,7 @@ gene_df
 
 ## Efficient calculation of highly variable genes across millions of cells
 
-With `cellxgene_census.experimental.pp. get_highly_variable_genes` users can get the most highly variable genes of a Census query while accounting for batch effects.
+With `cellxgene_census.experimental.pp.get_highly_variable_genes` users can get the most highly variable genes of a Census query while accounting for batch effects.
 
 This is usually the first pre-processing step necessary for other downstream tasks, for example data integration.
 
@@ -91,7 +91,7 @@ This is usually the first pre-processing step necessary for other downstream tas
 
 The Census algorithm is based on the scanpy method `scanpy.pp.highly_variable_genes`, and in particular the Seurat V3 method, which is designed for raw counts and can account for batch effects.
 
-The Census implementation utilizes the same incremental paradigm used in  `cellxgene_census.experimental.pp.mean_variance` (see above), calculating chunk-based mean and variance accumulators with some tweaks to comply to the Seurat V3 method.
+The Census implementation utilizes the same incremental paradigm used in  `cellxgene_census.experimental.pp.mean_variance` (see above), calculating incremaental-based mean and variance accumulators with some tweaks to comply to the Seurat V3 method.
 
 ### Example: Finding highly variable genes for all cells of the human esophagus
 
