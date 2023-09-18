@@ -1,4 +1,4 @@
- <span style="color: Coral; font-size: 18px"> 🎉 🎉 **The R API stable version has launched. Find out more about it [here.](articles/2023/20230808-r_api_release.md)** </span>
+🚀 <span style="background-color: PaleGoldenRod; color; font-size: 18px">  New memory-efficient features to get **gene expression average & variance**, and **highly variable genes.** Find out more [here.](articles/2023/20230919-out_of_core_methods.md)</span>
 
 # CZ CELLxGENE Discover Census
 
