@@ -92,6 +92,7 @@ def X_sparse_iter(
         reindex_obs = reindex_sparse_axis
     else:
         raise ValueError("fmt must be 'csr' or 'csc'")
+    assert reindex_obs != reindex_var  # xor
 
     if axis != 0:
         raise ValueError("axis must be zero (obs)")
@@ -116,7 +117,7 @@ def X_sparse_iter(
 
     # Lazy reindexing of soma_dim_0 and soma_dim_1 to obs_coords and var_coords
     # positions (except one or the other if not reindex_sparse_axis).
-    # Yields coords and COO (data, i, j) as numpy ndarrays
+    # Yields (obs_coords, var_coords) and COO (data, i, j) as numpy ndarrays
     coo_reindexer = (
         (
             (obs_coords_chunk, var_coords),
