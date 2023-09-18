@@ -1,6 +1,6 @@
 # Memory-efficient implementations of commonly used single-cell methods
 
-*Published:* *September [DAY], 2023*
+*Published:* *September 18, 2023*
 
 *By:* *[Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
@@ -8,8 +8,8 @@ The Census team is thrilled to officially announce memory-efficient implementati
 
 With just a few lines of code, using the Census Python API, users can now perform the following computational tasks across tens of millions of cells using a conventional laptop with 8GB of memory:
 
-* Calculating average and variance gene expression for cells or genes. See this [tutorial](../../notebooks/experimental/mean_variance.ipynb).
-* Obtaining batch-corrected highly variable genes. See this [tutorial](../../notebooks/experimental/highly_variable_genes).
+* Calculating average and variance gene expression for cells or genes. See example below or the full [tutorial here](../../notebooks/experimental/mean_variance.ipynb).
+* Obtaining batch-corrected highly variable genes.  See example below or the full [tutorial here](../../notebooks/experimental/highly_variable_genes).
 
 These implementations are interwoven with the way users query slices of Census data, which means that these tasks can be seamlessly applied to any slice of the 33M+ cells available in Census.
 
@@ -21,11 +21,11 @@ With `cellxgene_census.experimental.pp.mean_variance` users can now get gene exp
 
 ### How it works
 
-Calculations are done in an accumulative chunked fashion, meaning that only a small fraction of the total data is processed at any given time.
+Calculations are done in an accumulative incremental fashion, meaning that only a small fraction of the total data is processed at any given time.
 
 The Census data is downloaded in chunks and average and variance accumulators are updated for each chunk. The implementation also takes advantage of CPU-based multiprocessing to speed up the process.
 
-Currently, the mean and variance calculations are done with N being the total number of cells or genes. We are working on enabling calculations where N is then number of non-zero elements.
+Currently, the mean and variance calculation are calculated using the full population of cells/genes, including those with a zero valued measurement. In the future, we will enable calculation of mean including the population of non-zero cells/genes.
 
 ### Example: *KRAS* and *AQP4* average and variance expression in lung epithelial cells
 
