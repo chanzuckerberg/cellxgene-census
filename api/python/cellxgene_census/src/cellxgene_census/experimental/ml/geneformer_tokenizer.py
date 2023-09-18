@@ -8,8 +8,6 @@ import tiledbsoma
 
 from .cell_dataset_builder import CellDatasetBuilder
 
-GENEFORMER_MAX_INPUT_TOKENS = 2048
-
 
 class GeneformerTokenizer(CellDatasetBuilder):
     """
@@ -41,10 +39,12 @@ class GeneformerTokenizer(CellDatasetBuilder):
     Dataset item contents:
     - `input_ids`: Geneformer token sequence for the cell
     - `length`: Length of the token sequence
-    - and the specified `obs_attributes`
+    - and the specified `obs_attributes` (cell metadata from the experiment obs dataframe)
     """
 
     obs_attributes: Set[str]
+    max_input_tokens: int
+
     # set of gene soma_joinids corresponding to genes modeled by Geneformer:
     model_gene_ids: npt.NDArray[np.int64]
     model_gene_tokens: npt.NDArray[np.int64]  # token for each model_gene_id
@@ -55,15 +55,24 @@ class GeneformerTokenizer(CellDatasetBuilder):
         experiment: tiledbsoma.Experiment,
         *,
         obs_attributes: Optional[Sequence[str]] = None,
+        max_input_tokens: int = 2048,
+        token_dictionary_file: str = "",
+        gene_median_file: str = "",
         **kwargs: Any,
     ) -> None:
         """
         - `experiment`: Census Experiment to query
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
-        - `obs_attributes`: names of obs (cell) attributes to propagate into each Dataset item
+        - `obs_attributes`: names of attributes to propagate from the experiment obs dataframe
+           (cell metadata) into each Dataset item
+        - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
+        - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
+          Ensembl human gene IDs onto Geneformer token numbers and median expression values.
+          By default, these will be loaded from the Geneformer package.
         """
-        self.load_geneformer_data(experiment)
+        self.max_input_tokens = max_input_tokens
         self.obs_attributes = set(obs_attributes) if obs_attributes else set()
+        self.load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
         super().__init__(
             experiment,
             measurement_name="RNA",
@@ -73,27 +82,34 @@ class GeneformerTokenizer(CellDatasetBuilder):
             **kwargs,
         )
 
-    def load_geneformer_data(self, experiment: tiledbsoma.Experiment) -> None:
+    def load_geneformer_data(
+        self, experiment: tiledbsoma.Experiment, token_dictionary_file: str, gene_median_file: str
+    ) -> None:
         """
         Load (1) the experiment's genes dataframe and (2) Geneformer's static data
         files for gene tokens and median expression; then, intersect them to compute
         self.model_gene_{ids,tokens,medians}
-
-        TODO: this could be reused by multiple GeneformerTokenizer instances
         """
+        # TODO: this work could be reused for all queries on this experiment
+
         genes_df = experiment.ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
 
-        try:
-            import geneformer
-        except ImportError:
-            # pyproject.toml can't express Geneformer git+https dependency
-            raise ImportError(
-                "Please install Geneformer with: "
-                "pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e"
-            ) from None
-        with open(geneformer.tokenizer.TOKEN_DICTIONARY_FILE, "rb") as f:
+        if not (token_dictionary_file and gene_median_file):
+            try:
+                import geneformer
+            except ImportError:
+                # pyproject.toml can't express Geneformer git+https dependency
+                raise ImportError(
+                    "Please install Geneformer with: "
+                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e"
+                ) from None
+            if not token_dictionary_file:
+                token_dictionary_file = geneformer.tokenizer.TOKEN_DICTIONARY_FILE
+            if not gene_median_file:
+                gene_median_file = geneformer.tokenizer.GENE_MEDIAN_FILE
+        with open(token_dictionary_file, "rb") as f:
             gene_token_dict = pickle.load(f)
-        with open(geneformer.tokenizer.GENE_MEDIAN_FILE, "rb") as f:
+        with open(gene_median_file, "rb") as f:
             gene_median_dict = pickle.load(f)
 
         # compute model_gene_{ids,tokens,medians} by joining genes_df with Geneformer's
@@ -116,7 +132,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         assert np.all(self.model_gene_medians > 0)
         # Geneformer models protein-coding and miRNA genes, so the intersection should
         # be somewhere a little north of 20K.
-        assert len(self.model_gene_ids) >= 20_000
+        assert len(self.model_gene_ids) > 20_000
 
     def __enter__(self) -> "GeneformerTokenizer":
         super().__enter__()
@@ -143,7 +159,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         # figure the resulting tokens in descending order of model_expr
         # (use sparse model_expr.{col,data} to naturally exclude undetected genes)
         token_order = model_expr.col[np.argsort(-model_expr.data)]
-        input_ids = self.model_gene_tokens[token_order][:GENEFORMER_MAX_INPUT_TOKENS]
+        input_ids = self.model_gene_tokens[token_order][: self.max_input_tokens]
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
         for attr in self.obs_attributes:
