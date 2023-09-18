@@ -65,7 +65,19 @@ def consolidate_tiledb_object(uri: str) -> str:
     import tiledb
 
     logging.info(f"Consolidate: start uri {uri}")
-    tiledb.consolidate(uri, config=tiledb.Config(DEFAULT_TILEDB_CONFIG))
-    tiledb.vacuum(uri)
+
+    for mode in ["fragment_meta", "array_meta", "fragments", "commits"]:
+        ctx = tiledb.Ctx(
+            tiledb.Config(
+                {
+                    **DEFAULT_TILEDB_CONFIG,
+                    "sm.consolidation.mode": mode,
+                    "sm.vacuum.mode": mode,
+                }
+            )
+        )
+        tiledb.consolidate(uri, ctx=ctx)
+        tiledb.vacuum(uri, ctx=ctx)
+
     logging.info(f"Consolidate: end uri {uri}")
     return uri
