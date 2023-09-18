@@ -9,6 +9,9 @@ except ImportError:
     # this should only occur when not running `experimental`-marked tests
     pass
 
+# FIXME: change to the next LTS release (with "normalized" X layer) when available
+GENEFORMER_TESTS_CENSUS_VERSION = "2023-09-04"
+
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
@@ -17,8 +20,6 @@ except ImportError:
     [4, 100_000],
 )
 def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
-    # TODO: change to the next LTS release (with "normalized" X layer) when available
-    census_version = "2023-09-04"
     # cell soma_joinid: (token sequence length, prefix of token sequence)
     expected_data = {
         1234567: (2048, [15947, 7062, 621, 9291, 9939, 16985, 4113]),
@@ -39,7 +40,7 @@ def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
         32098742: (2048, [4067, 948, 1324, 5261, 16985, 1511, 10268]),
     }
 
-    with cellxgene_census.open_soma(census_version=census_version) as census:
+    with cellxgene_census.open_soma(census_version=GENEFORMER_TESTS_CENSUS_VERSION) as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             obs_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
@@ -58,3 +59,21 @@ def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
                 assert row.input_ids.tolist()[: len(top_tokens)] == top_tokens
                 assert row.cell_type_ontology_term_id
                 assert row.tissue_ontology_term_id
+
+
+@pytest.mark.experimental
+@pytest.mark.live_corpus
+def test_GeneformerTokenizer_docstring_example() -> None:
+    with cellxgene_census.open_soma(census_version=GENEFORMER_TESTS_CENSUS_VERSION) as census:
+        with GeneformerTokenizer(
+            census["census_data"]["homo_sapiens"],
+            # set obs_query to define some subset of Census cells:
+            obs_query=tiledbsoma.AxisQuery(value_filter="is_primary_data == True and tissue_general == 'tongue'"),
+            obs_attributes=(
+                "soma_joinid",
+                "cell_type_ontology_term_id",
+            ),
+        ) as tokenizer:
+            dataset = tokenizer.build()
+            assert len(dataset) == 15020
+            assert sum(it.length for it in dataset.to_pandas().itertuples()) == 27798388

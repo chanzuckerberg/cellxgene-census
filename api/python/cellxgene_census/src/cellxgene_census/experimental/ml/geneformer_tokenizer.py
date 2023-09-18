@@ -27,7 +27,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
     with cellxgene_census.open_soma() as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
-            obs_query=tiledbsoma.AxisQuery(...),  # define some subset of Census cells
+            # set obs_query to define some subset of Census cells:
+            obs_query=tiledbsoma.AxisQuery(value_filter="is_primary_data == True and tissue_general == 'tongue'"),
             obs_attributes=(
                 "soma_joinid",
                 "cell_type_ontology_term_id",
@@ -70,6 +71,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
         """
+        assert (
+            "normalized" in experiment.ms["RNA"].X
+        ), "Experiment RNA measurement lacks 'normalized' layer; try 'latest' Census version (2023-08-01 or newer)"
+
         self.max_input_tokens = max_input_tokens
         self.obs_attributes = set(obs_attributes) if obs_attributes else set()
         self.load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
@@ -77,7 +82,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
             experiment,
             measurement_name="RNA",
             layer_name="normalized",
-            # set up the query to fetch the relevant genes only
+            # configure query to fetch the relevant genes only
             var_query=tiledbsoma.AxisQuery(coords=(self.model_gene_ids,)),
             **kwargs,
         )
