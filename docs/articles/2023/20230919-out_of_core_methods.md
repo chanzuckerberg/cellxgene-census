@@ -23,9 +23,9 @@ With `cellxgene_census.experimental.pp.mean_variance` users can now get gene exp
 
 Calculations are done in an accumulative incremental fashion, meaning that only a small fraction of the total data is processed at any given time.
 
-The Census data is downloaded in chunks and average and variance accumulators are updated for each chunk. The implementation also takes advantage of CPU-based multiprocessing to speed up the process.
+The Census data is downloaded in increments and average and variance accumulators are updated at each incremental step. The implementation also takes advantage of CPU-based multiprocessing to speed up the process.
 
-Currently, the mean and variance calculation are calculated using the full population of cells/genes, including those with a zero valued measurement. In the future, we will enable calculation of mean including the population of non-zero cells/genes.
+Currently, the mean and variance are calculated using the full population of cells/genes, including those with a zero valued measurement. In the future, we will enable calculation of mean including the population of non-zero cells/genes.
 
 ### Example: *KRAS* and *AQP4* average and variance expression in lung epithelial cells
 
