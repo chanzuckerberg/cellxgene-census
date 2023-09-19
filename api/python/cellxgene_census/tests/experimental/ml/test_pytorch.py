@@ -532,7 +532,7 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
+def test__splitting(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
     dl = experiment_dataloader(dp_train)
@@ -544,13 +544,11 @@ def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
-    dp = dp.shuffle()
-    dl = experiment_dataloader(dp)
+def test__shuffling(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"]).shuffle()
 
-    data1 = list(iter(dl))
-    data2 = list(iter(dl))
+    data1 = list(dp)
+    data2 = list(dp)
 
     data1_soma_joinids = [row[1][0].item() for row in data1]
     data2_soma_joinids = [row[1][0].item() for row in data2]
@@ -561,8 +559,6 @@ def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
 def test__shuffle__global_mode(soma_experiment: Experiment) -> None:
-    np.random.seed(1)
-    np.random.seed(1)
     dp = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle_mode="global"
     )
@@ -586,8 +582,6 @@ def test__shuffle__global_mode(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
 def test__shuffle__soma_batch__mode(soma_experiment: Experiment) -> None:
-    np.random.seed(1)
-    np.random.seed(1)
     dp = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",

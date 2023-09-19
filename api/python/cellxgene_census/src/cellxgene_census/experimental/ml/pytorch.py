@@ -130,13 +130,24 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         obs_joinids: npt.NDArray[np.int64],
         var_joinids: npt.NDArray[np.int64],
         soma_batch_read_size: int,
+        shuffle: bool = False,
     ):
         self.obs = obs
         self.X = X
         self.obs_column_names = obs_column_names
-        num_chunks = max(1, ceil(len(obs_joinids) / soma_batch_read_size))
-        self.obs_joinids_chunks_iter = iter(np.array_split(obs_joinids, num_chunks))
+        self.obs_joinids_chunks_iter = self.chunk_obs_joinids(obs_joinids, soma_batch_read_size, shuffle)
         self.var_joinids = var_joinids
+
+    @staticmethod
+    def chunk_obs_joinids(
+        obs_joinids: npt.NDArray[np.int64], soma_batch_read_size: int, shuffle: bool
+    ) -> Iterator[npt.NDArray[np.int64]]:
+        num_chunks = max(1, ceil(len(obs_joinids) / soma_batch_read_size))
+        obs_joinid_chunks = np.array_split(obs_joinids, num_chunks)
+        rng = np.random.default_rng()
+        return (
+            rng.permutation(obs_joinid_chunk) if shuffle else obs_joinid_chunk for obs_joinid_chunk in obs_joinid_chunks
+        )
 
     def __next__(self) -> _ObsAndXSOMABatch:
         pytorch_logger.debug("Retrieving next SOMA batch...")
@@ -156,13 +167,13 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         )
         assert obs_batch.shape[0] == obs_joinids_chunk.shape[0]
 
-        # reorder rows by obs_joinids_chunk ordering, which may be shuffled
-        obs_batch = obs_batch.reindex(obs_joinids_chunk, copy=False)
-        obs_batch.reset_index(inplace=True)
-
         # handle case of empty result (first batch has 0 rows)
         if len(obs_batch) == 0:
             raise StopIteration
+
+        # reorder obs rows to match obs_joinids_chunk ordering, which may be shuffled
+        obs_batch = obs_batch.reindex(obs_joinids_chunk, copy=False)
+        obs_batch.reset_index(inplace=True)
 
         # note: order of rows in returned CSR matches the order of the requested obs_joinids (no need to reindex)
         X_batch = _fast_csr.read_scipy_csr(self.X, pa.array(obs_joinids_chunk), pa.array(self.var_joinids))
@@ -224,12 +235,13 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         return_sparse_X: bool,
         use_eager_fetch: bool,
         soma_batch_read_size: Optional[int] = None,
+        shuffle_mode: ShuffleMode = None,
     ) -> None:
         if soma_batch_read_size is None:
             # TODO: Set this to a reasonable default
             soma_batch_read_size = 1_000_000
         self.soma_batch_iter = _ObsAndXSOMAIterator(
-            obs, X, obs_column_names, obs_joinids, var_joinids, soma_batch_read_size
+            obs, X, obs_column_names, obs_joinids, var_joinids, soma_batch_read_size, shuffle_mode == "soma_batch"
         )
         if use_eager_fetch:
             self.soma_batch_iter = _EagerIterator(self.soma_batch_iter)
@@ -553,6 +565,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
                 soma_batch_read_size=self.soma_batch_read_size,
+                shuffle_mode=self.shuffle_mode,
             )
 
             for datum_ in obs_and_x_iter:
