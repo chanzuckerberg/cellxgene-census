@@ -10,7 +10,7 @@ except ImportError:
     pass
 
 
-def select_census_version_for_geneformer_tests():
+def select_census_version_for_geneformer_tests() -> str:
     # GeneformerTokenizer needs the "normalized" X layer which wasn't yet available in
     # "stable" at the time this was written. This should provide a graceful transition
     # once we next advance "stable" (after which it could be eliminated).
