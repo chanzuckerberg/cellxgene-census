@@ -91,7 +91,7 @@ This is usually the first pre-processing step necessary for other downstream tas
 
 The Census algorithm is based on the scanpy method `scanpy.pp.highly_variable_genes`, and in particular the Seurat V3 method, which is designed for raw counts and can account for batch effects.
 
-The Census implementation utilizes the same incremental paradigm used in  `cellxgene_census.experimental.pp.mean_variance` (see above), calculating incremaental-based mean and variance accumulators with some tweaks to comply to the Seurat V3 method.
+The Census implementation utilizes the same incremental paradigm used in `cellxgene_census.experimental.pp.mean_variance` (see above), calculating incremental-based mean and variance accumulators with some tweaks to comply to the Seurat V3 method.
 
 ### Example: Finding highly variable genes for all cells of the human esophagus
 
