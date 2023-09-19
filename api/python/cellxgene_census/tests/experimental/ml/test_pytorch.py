@@ -4,7 +4,6 @@ from typing import Callable, List, Optional, Sequence, Union
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pyarrow as pa
 import pytest
 import tiledbsoma as soma
@@ -21,8 +20,6 @@ try:
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
-        Stats,
-        _ObsAndXSOMABatch,
         experiment_dataloader,
     )
 except ImportError:
@@ -36,6 +33,15 @@ def pytorch_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
     checkerboard_of_ones.row += obs_range.start
     checkerboard_of_ones.col += var_range.start
     return checkerboard_of_ones
+
+
+def pytorch_seq_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
+    """A sparse matrix where the values of each col are the obs_range values. Useful for checking the
+    X values are being returned in the correct order."""
+    data = np.vstack([list(obs_range)] * len(var_range)).flatten()
+    rows = np.vstack([list(obs_range)] * len(var_range)).flatten()
+    cols = np.column_stack([list(var_range)] * len(obs_range)).flatten()
+    return coo_matrix((data, (rows, cols)))
 
 
 @pytest.fixture
@@ -315,26 +321,20 @@ def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bo
     [(10, 1, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
 def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
-    with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXSOMAIterator.__next__") as mock_soma_iterator_next:
-        # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
-        mock_soma_iterator_next.side_effect = [
-            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
-        ]
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=[],
+        batch_size=3,
+        # set SOMA batch read size such that PyTorch batches will span the tail and head of two SOMA batches
+        soma_batch_read_size=4,
+        use_eager_fetch=use_eager_fetch,
+    )
 
-        exp_data_pipe = ExperimentDataPipe(
-            soma_experiment,
-            measurement_name="RNA",
-            X_name="raw",
-            obs_column_names=[],
-            batch_size=3,
-            use_eager_fetch=use_eager_fetch,
-        )
+    full_result = list(exp_data_pipe)
 
-        full_result = list(exp_data_pipe)
-
-        assert [len(batch[1]) for batch in full_result] == [3, 3, 3, 1]
+    assert [len(batch[1]) for batch in full_result] == [3, 3, 3, 1]
 
 
 @pytest.mark.experimental
@@ -555,6 +555,103 @@ def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
     data1_soma_joinids = [row[1][0].item() for row in data1]
     data2_soma_joinids = [row[1][0].item() for row in data2]
     assert data1_soma_joinids != data2_soma_joinids
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
+def test__shuffle__global_mode(soma_experiment: Experiment) -> None:
+    np.random.seed(1)
+    np.random.seed(1)
+    dp = ExperimentDataPipe(
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle_mode="global"
+    )
+    dl = experiment_dataloader(dp)
+
+    all_rows = list(iter(dl))
+
+    soma_joinids = [row[1][0].item() for row in all_rows]
+    X_values = [row[0][0].item() for row in all_rows]
+
+    # same elements
+    assert set(soma_joinids) == set(range(16))
+    # not ordered! (...with a `1/16!` probability of being ordered)
+    assert soma_joinids != list(range(16))
+    # randomizes X in same order as obs
+    # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
+    assert X_values == soma_joinids
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
+def test__shuffle__soma_batch__mode(soma_experiment: Experiment) -> None:
+    np.random.seed(1)
+    np.random.seed(1)
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        shuffle_mode="soma_batch",
+        soma_batch_read_size=4,
+    )
+
+    all_rows = list(iter(dp))
+
+    soma_joinids = [row[1][0].item() for row in all_rows]
+    X_values = [row[0][0].item() for row in all_rows]
+
+    # verify same elements
+    assert set(soma_joinids) == set(range(16))
+    # verify each soma batch still contains the next sequential set of obs_joinids, although they will be shuffled
+    # within the soma batch
+    assert set(soma_joinids[0:4]) == set(range(0, 4))
+    assert set(soma_joinids[4:8]) == set(range(4, 8))
+    assert set(soma_joinids[8:12]) == set(range(8, 12))
+    assert set(soma_joinids[12:16]) == set(range(12, 16))
+    # verify not ordered! (...with a `1/16!` probability of being ordered)
+    assert soma_joinids != list(range(16))
+    # verify randomizes X in same order as obs
+    # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
+    assert X_values == soma_joinids
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16 * 4, 1, pytorch_seq_x_value_gen)])
+def test__shuffle__partition_mode(soma_experiment: Experiment) -> None:
+    """Tests "partition" shuffle mode behavior in a simulated PyTorch distributed processing mode,
+    using mocks to avoid having to do real PyTorch distributed setup."""
+
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        shuffle_mode="partition",
+    )
+    with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
+    ) as mock_dist_get_rank, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
+    ) as mock_dist_get_world_size:
+        mock_dist_is_initialized.return_value = True
+        mock_dist_get_rank.return_value = 1
+        mock_dist_get_world_size.return_value = 4
+
+        all_rows = list(iter(dp))
+
+        soma_joinids = [row[1][0].item() for row in all_rows]
+        X_values = [row[0][0].item() for row in all_rows]
+
+        # verify same elements
+        assert set(soma_joinids) == set(range(16, 32))
+        # verify not ordered! (...with a `1/16!` probability of being ordered)
+        assert soma_joinids != list(range(16, 32))
+        # verify randomizes X in same order as obs
+        # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
+        assert X_values == soma_joinids
 
 
 @pytest.mark.experimental

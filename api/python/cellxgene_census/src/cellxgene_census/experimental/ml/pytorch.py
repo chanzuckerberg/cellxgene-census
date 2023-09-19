@@ -3,8 +3,9 @@ import logging
 import os
 from contextlib import contextmanager
 from datetime import timedelta
+from math import ceil
 from time import time
-from typing import Any, Dict, Iterator, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple
 
 import numpy as np
 import numpy.typing as npt
@@ -12,7 +13,6 @@ import pandas as pd
 import psutil
 import pyarrow as pa
 import scipy
-import somacore
 import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
@@ -34,6 +34,9 @@ pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 ObsAndXDatum = Tuple[Tensor, Tensor]
 """Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s). 
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
+
+ShuffleMode = Optional[Literal["global", "partition", "soma_batch"]]
+"""The  shuffle mode for ``ExperimentDataPipe``. """
 
 
 @define
@@ -96,38 +99,43 @@ class Stats:
 
 @contextmanager
 def _open_experiment(
-    uri: str, aws_region: Optional[str] = None, soma_buffer_bytes: Optional[int] = None
+    uri: str,
+    aws_region: Optional[str] = None,
 ) -> soma.Experiment:
     """Internal method for opening a SOMA ``Experiment`` as a context manager."""
 
     context = _build_soma_tiledb_context(aws_region)
-
-    if soma_buffer_bytes is not None:
-        context = context.replace(
-            tiledb_config={
-                "py.init_buffer_bytes": soma_buffer_bytes,
-                "soma.init_buffer_bytes": soma_buffer_bytes,
-            }
-        )
 
     with soma.Experiment.open(uri, context=context) as exp:
         yield exp
 
 
 class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
-    obs_tables_iter: somacore.ReadIter[pa.Table]
-    """Iterates the SOMA batches (tables) of corresponding ``obs`` and ``X`` data. This is an internal class, 
+    """Iterates the SOMA batches of corresponding ``obs`` and ``X`` data. This is an internal class,
     not intended for public use."""
 
     X: soma.SparseNDArray
     """A handle to the full X data of the SOMA ``Experiment``"""
 
-    var_joinids: pa.Array
+    obs_joinids_chunks_iter: Iterator[npt.NDArray[np.int64]]
+
+    var_joinids: npt.NDArray[np.int64]
     """The ``var`` joinids to be retrieved from the SOMA ``Experiment``"""
 
-    def __init__(self, X: soma.SparseNDArray, obs_tables_iter: somacore.ReadIter[pa.Table], var_joinids: pa.Array):
-        self.obs_tables_iter = obs_tables_iter
+    def __init__(
+        self,
+        obs: soma.DataFrame,
+        X: soma.SparseNDArray,
+        obs_column_names: Sequence[str],
+        obs_joinids: npt.NDArray[np.int64],
+        var_joinids: npt.NDArray[np.int64],
+        soma_batch_read_size: int,
+    ):
+        self.obs = obs
         self.X = X
+        self.obs_column_names = obs_column_names
+        num_chunks = max(1, ceil(len(obs_joinids) / soma_batch_read_size))
+        self.obs_joinids_chunks_iter = iter(np.array_split(obs_joinids, num_chunks))
         self.var_joinids = var_joinids
 
     def __next__(self) -> _ObsAndXSOMABatch:
@@ -135,14 +143,29 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         start_time = time()
 
         # If no more batches to iterate through, raise StopIteration, as all iterators do when at end
-        obs_table = next(self.obs_tables_iter)
-        obs_batch = obs_table.to_pandas()
+        obs_joinids_chunk = next(self.obs_joinids_chunks_iter)
+
+        obs_batch = (
+            self.obs.read(
+                coords=(obs_joinids_chunk,),
+                column_names=self.obs_column_names,
+            )
+            .concat()
+            .to_pandas()
+            .set_index("soma_joinid")
+        )
+        assert obs_batch.shape[0] == obs_joinids_chunk.shape[0]
+
+        # reorder rows by obs_joinids_chunk ordering, which may be shuffled
+        obs_batch = obs_batch.reindex(obs_joinids_chunk, copy=False)
+        obs_batch.reset_index(inplace=True)
 
         # handle case of empty result (first batch has 0 rows)
         if len(obs_batch) == 0:
             raise StopIteration
 
-        X_batch = _fast_csr.read_scipy_csr(self.X, obs_table["soma_joinid"].combine_chunks(), self.var_joinids)
+        # note: order of rows in returned CSR matches the order of the requested obs_joinids (no need to reindex)
+        X_batch = _fast_csr.read_scipy_csr(self.X, pa.array(obs_joinids_chunk), pa.array(self.var_joinids))
         assert obs_batch.shape[0] == X_batch.shape[0]
 
         stats = Stats()
@@ -190,16 +213,24 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
     def __init__(
         self,
+        obs: soma.DataFrame,
         X: soma.SparseNDArray,
-        obs_tables_iter: somacore.ReadIter[pa.Table],
+        obs_column_names: Sequence[str],
+        obs_joinids: npt.NDArray[np.int64],
         var_joinids: npt.NDArray[np.int64],
         batch_size: int,
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
         return_sparse_X: bool,
         use_eager_fetch: bool,
+        soma_batch_read_size: Optional[int] = None,
     ) -> None:
-        self.soma_batch_iter = _ObsAndXSOMAIterator(X, obs_tables_iter, pa.array(var_joinids))
+        if soma_batch_read_size is None:
+            # TODO: Set this to a reasonable default
+            soma_batch_read_size = 1_000_000
+        self.soma_batch_iter = _ObsAndXSOMAIterator(
+            obs, X, obs_column_names, obs_joinids, var_joinids, soma_batch_read_size
+        )
         if use_eager_fetch:
             self.soma_batch_iter = _EagerIterator(self.soma_batch_iter)
         self.soma_batch = None
@@ -281,9 +312,10 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         assert slice_.stop <= obs_batch.shape[0]
 
         obs_rows = obs_batch.iloc[slice_]
-        assert obs_rows["soma_joinid"].is_unique
-        X_csr_scipy = X_batch[slice_]
+        assert obs_rows.index.is_unique
         assert safe_batch_size == obs_rows.shape[0]
+
+        X_csr_scipy = X_batch[slice_]
         assert obs_rows.shape[0] == X_csr_scipy.shape[0]
 
         self.i += safe_batch_size
@@ -352,8 +384,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
+        shuffle_mode: ShuffleMode = None,
         return_sparse_X: bool = False,
-        soma_buffer_bytes: Optional[int] = None,
+        soma_batch_read_size: Optional[int] = None,
         use_eager_fetch: bool = True,
     ) -> None:
         """
@@ -379,14 +412,27 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to 1. A value of 1
                 will result in Tensors of rank 1 being returns (a single row); larger values will result in Tensors of
                 rank 2 (multiple rows).
+            shuffle_mode:
+                Controls whether and how the SOMA ``obs`` and ``X`` data are shuffled before being returned. Valid
+                modes are ``"global"``, ``"partition"", ``"soma_batch"``, and ``None`` (no shuffling, the default). The
+                "global" mode shuffles the data across its entirety. This provides the best level of randomness,
+                but potentially the worst performance (reads do not benefit from spatial locality of stored data).
+                The "partition" mode is only useful in distributed training mode (i.e., when used with
+                ``DistributedDataParallel``). This mode shuffles each partition of distributed training data
+                independently, while the data partition assigned to each distributed training process remains
+                constant. This mode provides the less randomness than ``global`` mode, with decreasing randomness
+                with increasing number of distributed training processes. Performance is similar to the ``global``
+                mode. The "soma_batch" mode shuffles each of the SOMA-retrieved batches, while the ordering of the
+                SOMA batches themselves remain constant. This mode provides the least randomness, but the best
+                performance (reads do not benefit from spatial locality of stored data).
             return_sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
                 setting this to ``True`` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
                 to ``False``, since sparse Tensors are still experimental in PyTorch.
-            soma_buffer_bytes:
-                The number of bytes to use for reading data from SOMA. If not specified, will use the default SOMA
-                value. Maximum memory utilization is controlled by this parameter, with larger values providing better
-                read performance.
+            soma_batch_read_size:
+                The number of obs/X rows to retrieve when reading data from SOMA. If not specified, TBD.
+                Maximum memory utilization is controlled by this parameter, with larger values providing better
+                read performance, but also requiring more memory.
             use_eager_fetch:
                 Fetch the next SOMA batch of ``obs`` and ``X`` data immediately after a previously fetched SOMA batch is made
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
@@ -407,10 +453,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.var_query = var_query
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
+        self.shuffle_mode = shuffle_mode
         self.return_sparse_X = return_sparse_X
-        # TODO: This will control the SOMA batch sizes, and could be replaced with a row count once TileDB-SOMA
-        #  supports `batch_size` param. It affects both the obs and X read operations.
-        self.soma_buffer_bytes = soma_buffer_bytes
+        self.soma_batch_read_size = soma_batch_read_size
         self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
         self._encoders = None
@@ -427,7 +472,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         pytorch_logger.debug("Initializing ExperimentDataPipe")
 
-        with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
+        with _open_experiment(self.exp_uri, self.aws_region) as exp:
             query = exp.axis_query(
                 measurement_name=self.measurement_name,
                 obs_query=self.obs_query,
@@ -461,7 +506,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         total_partitions = dist_partitions * loader_partitions
         partition = dist_partition * loader_partitions + loader_partition
 
-        partitioned_ids = np.array_split(ids, total_partitions)
+        partitioned_ids: List[npt.NDArray[np.int64]] = np.array_split(ids, total_partitions)
         ids = partitioned_ids[partition]
 
         if pytorch_logger.isEnabledFor(logging.DEBUG) and len(ids) > 0:
@@ -495,25 +540,19 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
             )
 
-        with _open_experiment(self.exp_uri, self.aws_region, soma_buffer_bytes=self.soma_buffer_bytes) as exp:
-            X: soma.SparseNDArray = exp.ms[self.measurement_name].X[self.layer_name]
-
-            # TODO: Get all IDs, close experiment. Iterate through obs IDs using custom stride, not based upon soma_buffer_bytes
-            obs_tables_iter = exp.obs.read(
-                coords=(self._partition_obs_joinids(self._obs_joinids),),
-                batch_size=somacore.BatchSize(),
-                column_names=self.obs_column_names,
-            )
-
+        with _open_experiment(self.exp_uri, self.aws_region) as exp:
             obs_and_x_iter = _ObsAndXIterator(
-                X,
-                obs_tables_iter,
+                obs=exp.obs,
+                X=exp.ms[self.measurement_name].X[self.layer_name],
+                obs_column_names=self.obs_column_names,
+                obs_joinids=self._maybe_partitioned_and_shuffled_obs_joinids(),
                 var_joinids=self._var_joinids,
                 batch_size=self.batch_size,
                 encoders=self.obs_encoders,
                 stats=self._stats,
                 return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
+                soma_batch_read_size=self.soma_batch_read_size,
             )
 
             for datum_ in obs_and_x_iter:
@@ -522,6 +561,28 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             pytorch_logger.debug(
                 "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
             )
+
+    def _maybe_partitioned_and_shuffled_obs_joinids(self) -> npt.NDArray[np.int64]:
+        assert self._obs_joinids is not None
+        obs_joinids = self._obs_joinids
+
+        # Perform a global shuffle of the obs joinids.
+        rng = np.random.default_rng()
+
+        if self.shuffle_mode == "global":
+            obs_joinids = rng.permutation(obs_joinids)
+
+        obs_joinids = self._partition_obs_joinids(obs_joinids)
+
+        if self.shuffle_mode == "partition":
+            if not dist.is_initialized():
+                logging.warning(
+                    'The "partition" shuffle mode was specified, but distributed training is not in use. Shuffling '
+                    'mode is effectively "global".'
+                )
+            obs_joinids = rng.permutation(obs_joinids)
+
+        return obs_joinids
 
     def __len__(self) -> int:
         self._init()
@@ -612,7 +673,8 @@ def experiment_dataloader(
     """
     Factory method for PyTorch ``DataLoader``. This method can be used to safely instantiate a
     ``DataLoader`` that works with the ``ExperimentDataPipe``, since some of the ``DataLoader`` constructor params
-    are not applicable when using a ``IterDataPipe`` (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
+    are not applicable when using a ``IterDataPipe`` (``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``,
+    ``collate_fn``).
 
     Args:
         datapipe:
@@ -622,21 +684,23 @@ def experiment_dataloader(
             Number of worker processes to use for data loading. If 0, data will be loaded in the main process.
         **dataloader_kwargs:
             Additional keyword arguments to pass to the ``torch.utils.data.DataLoader`` constructor,
-            except for ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not supported when using ``ExperimentDataPipe``.
+            except for ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not
+            supported when using ``ExperimentDataPipe``.
             See https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader.
 
     Returns:
         A ``torch.utils.data.DataLoader``.
 
     Raises:
-        ValueError: if any of the ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params are passed as keyword arguments.
+        ValueError: if any of the ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params
+        are passed as keyword arguments.
 
 
     Lifecycle:
         experimental
     """
 
-    unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
+    unsupported_dataloader_args = ["shuffle", "batch_size", "sampler", "batch_sampler", "collate_fn"]
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
@@ -649,6 +713,8 @@ def experiment_dataloader(
         num_workers=num_workers,
         # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
         collate_fn=_collate_noop,
+        # shuffling is handled by our ExperimentDataPipe
+        shuffle=False,
         **dataloader_kwargs,
     )
 
