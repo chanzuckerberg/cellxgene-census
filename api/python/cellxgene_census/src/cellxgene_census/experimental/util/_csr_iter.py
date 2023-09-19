@@ -92,7 +92,7 @@ def X_sparse_iter(
         reindex_obs = reindex_sparse_axis
     else:
         raise ValueError("fmt must be 'csr' or 'csc'")
-    assert reindex_obs != reindex_var  # xor
+    assert reindex_obs or reindex_var
 
     if axis != 0:
         raise ValueError("axis must be zero (obs)")

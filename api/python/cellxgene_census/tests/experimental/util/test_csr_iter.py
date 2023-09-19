@@ -34,6 +34,7 @@ def test_X_sparse_iter(small_mem_context: soma.SOMATileDBContext) -> None:
                 assert var_ids.dtype == np.int64
                 assert sparse.isspmatrix_csr(X_chunk)
 
+            # test reindex_sparse_axis=False
             for (obs_ids, _), X_chunk in X_sparse_iter(query, fmt="csr", reindex_sparse_axis=False):
                 assert X_chunk.shape[0] == len(obs_ids)
                 assert X_chunk.shape[1] == Xraw.shape[1]
