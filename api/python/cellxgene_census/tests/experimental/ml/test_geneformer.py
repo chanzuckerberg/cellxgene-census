@@ -9,8 +9,15 @@ except ImportError:
     # this should only occur when not running `experimental`-marked tests
     pass
 
-# FIXME: change to the next LTS release (with "normalized" X layer) when available
-GENEFORMER_TESTS_CENSUS_VERSION = "2023-09-04"
+
+def select_census_version_for_geneformer_tests():
+    # GeneformerTokenizer needs the "normalized" X layer which wasn't yet available in
+    # "stable" at the time this was written. This should provide a graceful transition
+    # once we next advance "stable" (after which it could be eliminated).
+    with cellxgene_census.open_soma(census_version="stable") as stable:
+        if "normalized" in stable["census_data"]["homo_sapiens"].ms["RNA"].X:
+            return "stable"
+    return "2023-09-04"
 
 
 @pytest.mark.experimental
@@ -40,7 +47,7 @@ def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
         32098742: (2048, [4067, 948, 1324, 5261, 16985, 1511, 10268]),
     }
 
-    with cellxgene_census.open_soma(census_version=GENEFORMER_TESTS_CENSUS_VERSION) as census:
+    with cellxgene_census.open_soma(census_version=select_census_version_for_geneformer_tests()) as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             obs_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
@@ -64,7 +71,7 @@ def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:
-    with cellxgene_census.open_soma(census_version=GENEFORMER_TESTS_CENSUS_VERSION) as census:
+    with cellxgene_census.open_soma(census_version=select_census_version_for_geneformer_tests()) as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             # set obs_query to define some subset of Census cells:
