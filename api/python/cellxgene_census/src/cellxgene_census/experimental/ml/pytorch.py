@@ -237,8 +237,13 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         shuffle_mode: ShuffleMode = None,
     ) -> None:
         if soma_batch_read_size is None:
-            # TODO: Set this to a reasonable default
-            soma_batch_read_size = 1_000_000
+            # assume 95% X data sparsity, 8 bytes for the X value and 8 bytes for the sparse matrix indices, and
+            # assumes a 100% working memory overhead (2x).
+            X_row_memory_size = 0.05 * len(var_joinids) * 8 * 3 * 2
+            # set soma_batch_read_size to utilize ~1 GiB of RAM per SOMA batch
+            soma_batch_read_size = int((1 * 1024**3) / X_row_memory_size)
+            pytorch_logger.debug(f"Using {soma_batch_read_size=}")
+
         self.soma_batch_iter = _ObsAndXSOMAIterator(
             obs, X, obs_column_names, obs_joinids, var_joinids, soma_batch_read_size, shuffle_mode == "soma_batch"
         )
@@ -425,25 +430,29 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 rank 2 (multiple rows).
             shuffle_mode:
                 Controls whether and how the SOMA ``obs`` and ``X`` data are shuffled before being returned. Valid
-                modes are ``"global"``, ``"partition"", ``"soma_batch"``, and ``None`` (no shuffling, the default). The
-                "global" mode shuffles the data across its entirety. This provides the best level of randomness,
+                modes are ``"global"``, ``"partition"``, ``"soma_batch"``, and ``None`` (no shuffling, the default).
+                The "global" mode shuffles the data across its entirety. This provides the best level of randomness,
                 but potentially the worst performance (reads do not benefit from spatial locality of stored data).
                 The "partition" mode is only useful in distributed training mode (i.e., when used with
                 ``DistributedDataParallel``). This mode shuffles each partition of distributed training data
                 independently, while the data partition assigned to each distributed training process remains
-                constant. This mode provides the less randomness than ``global`` mode, with decreasing randomness
-                with increasing number of distributed training processes. Performance is similar to the ``global``
-                mode. The "soma_batch" mode shuffles each of the SOMA-retrieved batches, while the ordering of the
-                SOMA batches themselves remain constant. This mode provides the least randomness, but the best
-                performance (reads do not benefit from spatial locality of stored data).
+                constant. This mode provides less randomness than ``global`` mode, where randomness decreases for
+                increasing counts of distributed training processes. Performance is similar to the ``global`` mode.
+                The "soma_batch" mode shuffles each of the SOMA-retrieved batches independently, while the ordering
+                of the SOMA batches themselves remain constant. The SOMA batch sizes are controlled via the
+                ``soma_batch_read_size`` param. This mode provides the least randomness, but the best performance (
+                reads benefit from spatial locality of stored data).
             return_sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
                 setting this to ``True`` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
                 to ``False``, since sparse Tensors are still experimental in PyTorch.
             soma_batch_read_size:
-                The number of obs/X rows to retrieve when reading data from SOMA. If not specified, TBD.
-                Maximum memory utilization is controlled by this parameter, with larger values providing better
-                read performance, but also requiring more memory.
+                The number of obs/X rows to retrieve when reading data from SOMA. This impacts two aspects of
+                ``ExperimentDataPipe`` behavior: 1) The maximum memory utilization is controlled by this
+                parameter, with larger values providing better read performance, but also requiring more memory. If
+                not specified, the value is set to utilize ~1 GiB of RAM per SOMA batch read, based upon the number
+                of ``var`` columns (cells/features) being requested and assuming X data sparsity of 95%. 2) It
+                defines the "window" of data that is shuffled when``shuffle_mode="soma_batch"`` is specified.
             use_eager_fetch:
                 Fetch the next SOMA batch of ``obs`` and ``X`` data immediately after a previously fetched SOMA batch is made
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
