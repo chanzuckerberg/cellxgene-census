@@ -658,3 +658,10 @@ def test_experiment_dataloader__unsupported_params__fails(dummy_exp_data_pipe: E
         experiment_dataloader(dummy_exp_data_pipe, sampler=[])
     with pytest.raises(ValueError):
         experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
+
+
+@pytest.mark.experimental
+@patch("tiledbsoma.Experiment")
+def test__shuffle_mode_validated(dummy_exp: soma.Experiment) -> None:
+    with pytest.raises(ValueError):
+        ExperimentDataPipe(dummy_exp, shuffle_mode="globalx")  # type: ignore

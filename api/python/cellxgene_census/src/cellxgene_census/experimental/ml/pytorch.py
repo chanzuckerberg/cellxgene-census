@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple, get_args
 
 import numpy as np
 import numpy.typing as npt
@@ -464,6 +464,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         Lifecycle:
             experimental
         """
+        if shuffle_mode is not None and shuffle_mode not in get_args(ShuffleMode):
+            raise ValueError(f"Invalid shuffle_mode: {shuffle_mode}")
 
         self.exp_uri = experiment.uri
         self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
@@ -591,14 +593,16 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         # Optionally, perform a global shuffle of the obs joinids.
         if self.shuffle_mode == "global":
+            pytorch_logger.debug(f"Shuffling {obs_joinids} obs joinids")
             obs_joinids = rng.permutation(obs_joinids)
+            pytorch_logger.debug("Done shuffling obs joinids")
 
         obs_joinids = self._maybe_partition_obs_joinids(obs_joinids)
 
         # Optionally, perform a partition-scoped shuffle of the obs joinids.
         if self.shuffle_mode == "partition":
             if not dist.is_initialized():
-                logging.warning(
+                pytorch_logger.warning(
                     'The "partition" shuffle mode was specified, but distributed training is not in use. Shuffling '
                     'mode is effectively "global".'
                 )
