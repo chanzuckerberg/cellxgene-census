@@ -173,7 +173,6 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
 
         # reorder obs rows to match obs_joinids_chunk ordering, which may be shuffled
         obs_batch = obs_batch.reindex(obs_joinids_chunk, copy=False)
-        obs_batch.reset_index(inplace=True)
 
         # note: order of rows in returned CSR matches the order of the requested obs_joinids (no need to reindex)
         X_batch = _fast_csr.read_scipy_csr(self.X, pa.array(obs_joinids_chunk), pa.array(self.var_joinids))
@@ -272,7 +271,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
             raise StopIteration
 
         obs_encoded = pd.DataFrame(
-            data={"soma_joinid": obs.soma_joinid}, columns=obs.columns, dtype=np.int64, index=obs.index
+            data={"soma_joinid": obs.index}, columns=["soma_joinid"] + obs.columns.tolist(), dtype=np.int64
         )
         # TODO: Encode the entire SOMA batch at once in _read_partial_torch_batch()
         for col, enc in self.encoders.items():
