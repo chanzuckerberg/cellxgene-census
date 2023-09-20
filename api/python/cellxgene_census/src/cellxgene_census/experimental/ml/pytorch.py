@@ -174,7 +174,7 @@ class _ObsAndXSOMAIterator(Iterator[_ObsAndXSOMABatch]):
         # reorder obs rows to match obs_joinids_chunk ordering, which may be shuffled
         obs_batch = obs_batch.reindex(obs_joinids_chunk, copy=False)
 
-        # note: order of rows in returned CSR matches the order of the requested obs_joinids (no need to reindex)
+        # note: order of rows in returned CSR matches the order of the requested obs_joinids, so no need to reindex
         X_batch = _fast_csr.read_scipy_csr(self.X, pa.array(obs_joinids_chunk), pa.array(self.var_joinids))
         assert obs_batch.shape[0] == X_batch.shape[0]
 
@@ -509,7 +509,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._initialized = True
 
     @staticmethod
-    def _partition_obs_joinids(ids: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
+    def _maybe_partition_obs_joinids(ids: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
         dist_partition = loader_partition = 0
         dist_partitions = loader_partitions = 1
 
@@ -565,7 +565,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 obs=exp.obs,
                 X=exp.ms[self.measurement_name].X[self.layer_name],
                 obs_column_names=self.obs_column_names,
-                obs_joinids=self._maybe_partitioned_and_shuffled_obs_joinids(),
+                obs_joinids=self._maybe_partition_and_shuffle_obs_joinids(),
                 var_joinids=self._var_joinids,
                 batch_size=self.batch_size,
                 encoders=self.obs_encoders,
@@ -583,18 +583,19 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
             )
 
-    def _maybe_partitioned_and_shuffled_obs_joinids(self) -> npt.NDArray[np.int64]:
+    def _maybe_partition_and_shuffle_obs_joinids(self) -> npt.NDArray[np.int64]:
         assert self._obs_joinids is not None
         obs_joinids = self._obs_joinids
 
-        # Perform a global shuffle of the obs joinids.
         rng = np.random.default_rng()
 
+        # Optionally, perform a global shuffle of the obs joinids.
         if self.shuffle_mode == "global":
             obs_joinids = rng.permutation(obs_joinids)
 
-        obs_joinids = self._partition_obs_joinids(obs_joinids)
+        obs_joinids = self._maybe_partition_obs_joinids(obs_joinids)
 
+        # Optionally, perform a partition-scoped shuffle of the obs joinids.
         if self.shuffle_mode == "partition":
             if not dist.is_initialized():
                 logging.warning(
