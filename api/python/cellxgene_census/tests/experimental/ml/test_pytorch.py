@@ -501,9 +501,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
     "obs_range,var_range,X_value_gen,use_eager_fetch",
     [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
-def test_experiment_dataloader__X_tensor_dtype_matches_X_matrix(
-    soma_experiment: Experiment, use_eager_fetch: bool
-) -> None:
+def test__X_tensor_dtype_matches_X_matrix(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     dp = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
@@ -515,18 +513,6 @@ def test_experiment_dataloader__X_tensor_dtype_matches_X_matrix(
     torch_data = next(iter(dp))
 
     assert torch_data[0].dtype == float32
-
-
-@pytest.mark.experimental
-@pytest.mark.skip(reason="Not implemented")
-def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
-    pass
-
-
-@pytest.mark.experimental
-@pytest.mark.skip(reason="Not implemented")
-def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
-    pass
 
 
 @pytest.mark.experimental
@@ -562,9 +548,8 @@ def test__shuffle__global_mode(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(
         soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle_mode="global"
     )
-    dl = experiment_dataloader(dp)
 
-    all_rows = list(iter(dl))
+    all_rows = list(iter(dp))
 
     soma_joinids = [row[1][0].item() for row in all_rows]
     X_values = [row[0][0].item() for row in all_rows]
@@ -649,6 +634,27 @@ def test__shuffle__partition_mode(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
-@pytest.mark.skip(reason="TODO")
-def test_experiment_data_loader__unsupported_params__fails() -> None:
+@pytest.mark.skip(reason="Not implemented")
+def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
     pass
+
+
+@pytest.mark.experimental
+@pytest.mark.skip(reason="Not implemented")
+def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
+    pass
+
+
+@pytest.mark.experimental
+@patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe")
+def test_experiment_dataloader__unsupported_params__fails(dummy_exp_data_pipe: ExperimentDataPipe) -> None:
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, sampler=[])
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
