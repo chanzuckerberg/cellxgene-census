@@ -328,7 +328,7 @@ def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experi
         obs_column_names=[],
         batch_size=3,
         # set SOMA batch read size such that PyTorch batches will span the tail and head of two SOMA batches
-        soma_batch_read_size=4,
+        soma_chunk_size=4,
         use_eager_fetch=use_eager_fetch,
     )
 
@@ -373,6 +373,7 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        soma_chunk_size=3,  # two chunks, one per worker
     )
     # Note we're testing the ExperimentDataPipe via a DataLoader, since this is what sets up the multiprocessing
     dl = experiment_dataloader(dp, num_workers=2)
@@ -390,12 +391,6 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
     using mocks to avoid having to do real PyTorch distributed setup."""
 
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-    )
     with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
         "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
     ) as mock_dist_get_rank, patch(
@@ -405,6 +400,9 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
         mock_dist_get_rank.return_value = 1
         mock_dist_get_world_size.return_value = 3
 
+        dp = ExperimentDataPipe(
+            soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], soma_chunk_size=2
+        )
         full_result = list(iter(dp))
 
         soma_joinids = [t[1][0].item() for t in full_result]
@@ -422,12 +420,6 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_e
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
     setup or real DataLoader multiprocessing."""
 
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-    )
     with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
         "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
     ) as mock_dist_is_initialized, patch(
@@ -439,6 +431,10 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_e
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1
         mock_dist_get_world_size.return_value = 3
+
+        dp = ExperimentDataPipe(
+            soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], soma_chunk_size=2
+        )
 
         full_result = list(iter(dp))
 
@@ -518,7 +514,7 @@ def test__X_tensor_dtype_matches_X_matrix(soma_experiment: Experiment, use_eager
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test__splitting(soma_experiment: Experiment) -> None:
+def test__pytorch_splitting(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
     dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
     dl = experiment_dataloader(dp_train)
@@ -529,24 +525,10 @@ def test__splitting(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test__shuffling(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"]).shuffle()
-
-    data1 = list(dp)
-    data2 = list(dp)
-
-    data1_soma_joinids = [row[1][0].item() for row in data1]
-    data2_soma_joinids = [row[1][0].item() for row in data2]
-    assert data1_soma_joinids != data2_soma_joinids
-
-
-@pytest.mark.experimental
-# noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
-def test__shuffle__global_mode(soma_experiment: Experiment) -> None:
+def test__shuffle(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle_mode="global"
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle=True
     )
 
     all_rows = list(iter(dp))
@@ -561,76 +543,6 @@ def test__shuffle__global_mode(soma_experiment: Experiment) -> None:
     # randomizes X in same order as obs
     # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
     assert X_values == soma_joinids
-
-
-@pytest.mark.experimental
-# noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
-def test__shuffle__soma_batch__mode(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-        shuffle_mode="soma_batch",
-        soma_batch_read_size=4,
-    )
-
-    all_rows = list(iter(dp))
-
-    soma_joinids = [row[1][0].item() for row in all_rows]
-    X_values = [row[0][0].item() for row in all_rows]
-
-    # verify same elements
-    assert set(soma_joinids) == set(range(16))
-    # verify each soma batch still contains the next sequential set of obs_joinids, although they will be shuffled
-    # within the soma batch
-    assert set(soma_joinids[0:4]) == set(range(0, 4))
-    assert set(soma_joinids[4:8]) == set(range(4, 8))
-    assert set(soma_joinids[8:12]) == set(range(8, 12))
-    assert set(soma_joinids[12:16]) == set(range(12, 16))
-    # verify not ordered! (...with a `1/16!` probability of being ordered)
-    assert soma_joinids != list(range(16))
-    # verify randomizes X in same order as obs
-    # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
-    assert X_values == soma_joinids
-
-
-@pytest.mark.experimental
-# noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16 * 4, 1, pytorch_seq_x_value_gen)])
-def test__shuffle__partition_mode(soma_experiment: Experiment) -> None:
-    """Tests "partition" shuffle mode behavior in a simulated PyTorch distributed processing mode,
-    using mocks to avoid having to do real PyTorch distributed setup."""
-
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-        shuffle_mode="partition",
-    )
-    with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
-    ) as mock_dist_get_rank, patch(
-        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
-    ) as mock_dist_get_world_size:
-        mock_dist_is_initialized.return_value = True
-        mock_dist_get_rank.return_value = 1
-        mock_dist_get_world_size.return_value = 4
-
-        all_rows = list(iter(dp))
-
-        soma_joinids = [row[1][0].item() for row in all_rows]
-        X_values = [row[0][0].item() for row in all_rows]
-
-        # verify same elements
-        assert set(soma_joinids) == set(range(16, 32))
-        # verify not ordered! (...with a `1/16!` probability of being ordered)
-        assert soma_joinids != list(range(16, 32))
-        # verify randomizes X in same order as obs
-        # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
-        assert X_values == soma_joinids
 
 
 @pytest.mark.experimental
@@ -658,10 +570,3 @@ def test_experiment_dataloader__unsupported_params__fails(dummy_exp_data_pipe: E
         experiment_dataloader(dummy_exp_data_pipe, sampler=[])
     with pytest.raises(ValueError):
         experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
-
-
-@pytest.mark.experimental
-@patch("tiledbsoma.Experiment")
-def test__shuffle_mode_validated(dummy_exp: soma.Experiment) -> None:
-    with pytest.raises(ValueError):
-        ExperimentDataPipe(dummy_exp, shuffle_mode="globalx")  # type: ignore
