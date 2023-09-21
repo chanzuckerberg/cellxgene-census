@@ -79,9 +79,10 @@ class MeanAccumulator:
         self.denominator = np.zeros(n_variables)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        _update_mean_vector(self.u, var_vec, val_vec)
         if self.exclude_zeros:
-            _update_denominator_vector(self.denominator, var_vec)
+            _update_mean_and_denominator_vectors(self.u, self.denominator, var_vec, val_vec)
+        else:
+            _update_mean_vector(self.u, var_vec, val_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
         if self.exclude_zeros:
@@ -378,19 +379,26 @@ def _update_mean_vector(
     [
         numba.void(
             numba.float64[:],
+            numba.float64[:],
             numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
         ),
         numba.void(
             numba.float64[:],
+            numba.float64[:],
             numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
         ),
     ],
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
-def _update_denominator_vector(
+def _update_mean_and_denominator_vectors(
     u: npt.NDArray[np.float64],
+    d: npt.NDArray[np.float64],
     var_vec: npt.NDArray[np.int64],
+    val_vec: npt.NDArray[np.float32],
 ) -> None:
-    for col in var_vec:
-        u[col] = u[col] + 1
+    for col, val in zip(var_vec, val_vec):
+        u[col] = u[col] + val
+        d[col] = d[col] + 1
