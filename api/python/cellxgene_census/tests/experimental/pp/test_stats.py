@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ def test_mean_variance(
     calc_mean: bool,
     calc_variance: bool,
     small_mem_context: soma.SOMATileDBContext,
-    obs_coords: tuple[None, slice],
+    obs_coords: Tuple[None, slice],
 ) -> None:
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
