@@ -677,13 +677,13 @@ def _collate_noop(x: Any) -> Any:
 def experiment_dataloader(
     datapipe: pipes.IterDataPipe,
     num_workers: int = 0,
+    shuffle: bool = False,
     **dataloader_kwargs: Any,
 ) -> DataLoader:
     """
     Factory method for PyTorch ``DataLoader``. This method can be used to safely instantiate a
     ``DataLoader`` that works with the ``ExperimentDataPipe``, since some of the ``DataLoader`` constructor params
-    are not applicable when using a ``IterDataPipe`` (``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``,
-    ``collate_fn``).
+    are not applicable when using a ``IterDataPipe`` (``batch_size``, ``sampler``, ``batch_sampler``, ``collate_fn``).
 
     Args:
         datapipe:
@@ -691,9 +691,12 @@ def experiment_dataloader(
             been chained to the ``ExperimentDataPipe``.
         num_workers:
             Number of worker processes to use for data loading. If 0, data will be loaded in the main process.
+        shuffle:
+            Whether to shuffle the result. ExperimentDataPipe implements its own shuffling strategy; see ``shuffle``
+            param description for details.
         **dataloader_kwargs:
             Additional keyword arguments to pass to the ``torch.utils.data.DataLoader`` constructor,
-            except for ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not
+            except for ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not
             supported when using ``ExperimentDataPipe``.
             See https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader.
 
@@ -701,7 +704,7 @@ def experiment_dataloader(
         A ``torch.utils.data.DataLoader``.
 
     Raises:
-        ValueError: if any of the ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params
+        ValueError: if any of the ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params
         are passed as keyword arguments.
 
 
@@ -722,8 +725,7 @@ def experiment_dataloader(
         num_workers=num_workers,
         # avoid use of default collator, which adds an extra (3rd) dimension to the tensor batches
         collate_fn=_collate_noop,
-        # shuffling is handled by our ExperimentDataPipe
-        shuffle=False,
+        shuffle=shuffle,
         **dataloader_kwargs,
     )
 
