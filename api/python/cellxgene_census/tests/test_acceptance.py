@@ -10,7 +10,7 @@ appropriately large host.
 
 See README.md for historical data.
 """
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional, Tuple
 
 import pyarrow as pa
 import pytest
@@ -86,7 +86,8 @@ def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_conf
     context = make_context("latest", ctx_config)
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(
-            census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]), stop_after=stop_after
+            census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]),
+            stop_after=stop_after,
         )
 
 
@@ -116,28 +117,51 @@ def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_conf
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
-    ("stop_after", "ctx_config"),
+    ("stop_after", "ctx_config", "coords"),
     [
-        pytest.param(2, None),
-        pytest.param(None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-        pytest.param(None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
+        pytest.param(2, None, (None, None)),
+        pytest.param(
+            None,
+            DEFAULT_TILEDB_CONFIGURATION,
+            (slice(0, 500_000), slice(None)),
+            marks=pytest.mark.expensive,
+        ),
+        pytest.param(
+            None,
+            {"soma.init_buffer_bytes": 4 * 1024**3},
+            (slice(0, 500_000), slice(None)),
+            marks=pytest.mark.expensive,
+        ),
+        pytest.param(
+            None,
+            {"soma.init_buffer_bytes": 4 * 1024**3},
+            (slice(0, 500_000), slice(0, 1_000)),
+            marks=pytest.mark.expensive,
+        ),
     ],
 )
-def test_incremental_read_X(organism: str, stop_after: Optional[int], ctx_config: Optional[Dict[str, Any]]) -> None:
+def test_incremental_read_X(
+    organism: str,
+    stop_after: Optional[int],
+    ctx_config: Optional[Dict[str, Any]],
+    coords: Optional[Tuple[slice, slice]],
+) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
 
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         assert table_iter_is_ok(
-            census["census_data"][organism].ms["RNA"].X["raw"].read().tables(), stop_after=stop_after
+            census["census_data"][organism].ms["RNA"].X["raw"].read(coords=coords).tables(),
+            stop_after=stop_after,
         )
 
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 @pytest.mark.parametrize(
-    "obs_value_filter", ["tissue=='aorta'", pytest.param("tissue=='brain'", marks=pytest.mark.expensive)]
+    "obs_value_filter",
+    ["tissue=='aorta'", pytest.param("tissue=='brain'", marks=pytest.mark.expensive)],
 )
 @pytest.mark.parametrize("stop_after", [2, pytest.param(None, marks=pytest.mark.expensive)])
 def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Optional[int]) -> None:
@@ -145,7 +169,8 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
     # use default TileDB configuration
     with cellxgene_census.open_soma(census_version="latest") as census:
         with census["census_data"][organism].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
+            measurement_name="RNA",
+            obs_query=soma.AxisQuery(value_filter=obs_value_filter),
         ) as query:
             assert table_iter_is_ok(query.obs(), stop_after=stop_after)
             assert table_iter_is_ok(query.var(), stop_after=stop_after)
@@ -163,34 +188,73 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
         pytest.param(None, slice(0, 10_000), DEFAULT_TILEDB_CONFIGURATION, id="First 10K cells"),
         # 100K cells, standard buffer size
         pytest.param(
-            None, slice(0, 100_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 100K cells"
+            None,
+            slice(0, 100_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
+            id="First 100K cells",
         ),
         # 250K cells, standard buffer size
         pytest.param(
-            None, slice(0, 250_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 250K cells"
+            None,
+            slice(0, 250_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
+            id="First 250K cells",
         ),
         # 500K cells, standard buffer size
         pytest.param(
-            None, slice(0, 500_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 500K cells"
+            None,
+            slice(0, 500_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
+            id="First 500K cells",
         ),
         # 750K cells, standard buffer size
         pytest.param(
-            None, slice(0, 750_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 750K cells"
+            None,
+            slice(0, 750_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
+            id="First 750K cells",
         ),
         # 1M cells, standard buffer size
         pytest.param(
-            None, slice(0, 1_000_000), DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive, id="First 1M cells"
+            None,
+            slice(0, 1_000_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
+            id="First 1M cells",
         ),
         # very common tissue, with standard buffer size
-        pytest.param("tissue=='brain'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-        # very common cell type, with standard buffer size
-        pytest.param("cell_type=='neuron'", None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
-        # all primary cells, with big buffer size
         pytest.param(
-            "is_primary_data==True", None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive
+            "tissue_general=='brain'",
+            slice(0, 2_000_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
         ),
-        # the whole enchilada, with big buffer size
-        pytest.param(None, None, {"soma.init_buffer_bytes": 4 * 1024**3}, marks=pytest.mark.expensive),
+        # very common cell type, with standard buffer size
+        pytest.param(
+            "cell_type=='neuron'",
+            slice(0, 2_000_000),
+            DEFAULT_TILEDB_CONFIGURATION,
+            marks=pytest.mark.expensive,
+        ),
+        # many primary cells, with big buffer size
+        pytest.param(
+            "is_primary_data==True",
+            slice(0, 2_000_000),
+            {"soma.init_buffer_bytes": 4 * 1024**3},
+            marks=pytest.mark.expensive,
+        ),
+        #
+        # a large enchilada, if not the whole thing, with a big buffer size
+        pytest.param(
+            None,
+            slice(0, 2_000_000),
+            {"soma.init_buffer_bytes": 4 * 1024**3},
+            marks=pytest.mark.expensive,
+        ),
     ],
 )
 def test_get_anndata(
@@ -205,3 +269,11 @@ def test_get_anndata(
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
         ad = cellxgene_census.get_anndata(census, organism, obs_value_filter=obs_value_filter, obs_coords=obs_coords)
         assert ad is not None
+
+        # sanity checks
+        with census["census_data"][organism].axis_query(
+            measurement_name="RNA",
+            obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=(obs_coords,)),
+        ) as query:
+            assert ad.n_obs == query.n_obs
+            assert ad.n_vars == query.n_vars

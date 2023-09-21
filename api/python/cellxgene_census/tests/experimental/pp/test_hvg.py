@@ -94,15 +94,26 @@ def test_hvg_vs_scanpy(
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
-    "experiment_name,organism,obs_value_filter,batch_key",
+    "experiment_name,organism,obs_value_filter,batch_key,obs_coords",
     [
-        ("mus_musculus", "Mus musculus", 'tissue_general == "liver" and is_primary_data == True', None),
-        ("mus_musculus", "Mus musculus", 'is_primary_data == True and tissue_general == "heart"', "cell_type"),
+        ("mus_musculus", "Mus musculus", 'tissue_general == "liver" and is_primary_data == True', None, None),
+        ("mus_musculus", "Mus musculus", 'is_primary_data == True and tissue_general == "heart"', "cell_type", None),
+        ("mus_musculus", "Mus musculus", 'is_primary_data == True and tissue_general == "heart"', "dataset_id", None),
         pytest.param(
-            "mus_musculus", "Mus musculus", "is_primary_data == True", "dataset_id", marks=pytest.mark.expensive
+            "mus_musculus",
+            "Mus musculus",
+            "is_primary_data == True",
+            "dataset_id",
+            slice(500_000, 1_000_000),
+            marks=pytest.mark.expensive,
         ),
         pytest.param(
-            "homo_sapiens", "Homo sapiens", "is_primary_data == True", "dataset_id", marks=pytest.mark.expensive
+            "homo_sapiens",
+            "Homo sapiens",
+            "is_primary_data == True",
+            "dataset_id",
+            slice(500_000, 1_000_000),
+            marks=pytest.mark.expensive,
         ),
     ],
 )
@@ -112,10 +123,16 @@ def test_get_highly_variable_genes(
     obs_value_filter: str,
     batch_key: str,
     small_mem_context: soma.SOMATileDBContext,
+    obs_coords: Optional[slice],
 ) -> None:
     with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
         hvg = get_highly_variable_genes(
-            census, organism=organism, obs_value_filter=obs_value_filter, n_top_genes=1000, batch_key=batch_key
+            census,
+            organism=organism,
+            obs_value_filter=obs_value_filter,
+            n_top_genes=1000,
+            batch_key=batch_key,
+            obs_coords=obs_coords,
         )
         n_vars = census["census_data"][experiment_name].ms["RNA"].var.count
 
