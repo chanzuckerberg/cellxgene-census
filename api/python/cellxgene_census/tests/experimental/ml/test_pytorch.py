@@ -561,8 +561,6 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 @patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe")
 def test_experiment_dataloader__unsupported_params__fails(dummy_exp_data_pipe: ExperimentDataPipe) -> None:
     with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
-    with pytest.raises(ValueError):
         experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
     with pytest.raises(ValueError):
         experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])

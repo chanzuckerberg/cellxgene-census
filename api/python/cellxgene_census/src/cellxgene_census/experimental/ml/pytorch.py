@@ -498,7 +498,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         if pytorch_logger.isEnabledFor(logging.DEBUG) and len(partition) > 0:
             pytorch_logger.debug(
                 f"Process {os.getpid()} handling partition {partition_index + 1} of {num_partitions}, "
-                f"partition_size={len(partition)}"
+                f"partition_size={sum([len(chunk) for chunk in partition])}"
             )
 
         return partition
@@ -586,7 +586,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         ids_chunked: List[npt.NDArray[np.int64]],
     ) -> List[npt.NDArray[np.int64]]:
         rng = np.random.default_rng()
-        pytorch_logger.debug("numpy random seed: {np.random.get_state()[1][0]}")
+        pytorch_logger.debug(f"numpy random seed: {np.random.get_state()[1][0]}")  # type: ignore
 
         rng.shuffle(ids_chunked)
         pytorch_logger.debug("Done shuffling obs joinids")
@@ -712,7 +712,7 @@ def experiment_dataloader(
         experimental
     """
 
-    unsupported_dataloader_args = ["shuffle", "batch_size", "sampler", "batch_sampler", "collate_fn"]
+    unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
