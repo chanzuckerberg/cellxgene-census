@@ -17,6 +17,7 @@ import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
 from attr import define
+from numpy.random import Generator
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
 from somacore.query import _fast_csr
@@ -123,21 +124,20 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         obs_column_names: Sequence[str],
         obs_joinids_chunked: npt.NDArray[np.int64],  # 2D
         var_joinids: npt.NDArray[np.int64],
-        shuffle: bool = False,
+        shuffle_rng: Optional[Generator] = None,
     ):
         self.obs = obs
         self.X = X
         self.obs_column_names = obs_column_names
-        self.obs_joinids_chunks_iter = self._maybe_local_shuffle_obs_joinids(obs_joinids_chunked, shuffle)
+        self.obs_joinids_chunks_iter = self._maybe_local_shuffle_obs_joinids(obs_joinids_chunked, shuffle_rng)
         self.var_joinids = var_joinids
 
     @staticmethod
     def _maybe_local_shuffle_obs_joinids(
-        obs_joinids_chunked: npt.NDArray[np.int64], shuffle: bool  # 2D
+        obs_joinids_chunked: npt.NDArray[np.int64], shuffle_rng: Optional[Generator] = None
     ) -> Iterator[npt.NDArray[np.int64]]:
-        rng = np.random.default_rng()
         return (
-            rng.permutation(obs_joinid_chunk) if shuffle else obs_joinid_chunk
+            shuffle_rng.permutation(obs_joinid_chunk) if shuffle_rng else obs_joinid_chunk
             for obs_joinid_chunk in obs_joinids_chunked
         )
 
@@ -225,9 +225,11 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         stats: Stats,
         return_sparse_X: bool,
         use_eager_fetch: bool,
-        shuffle: bool = False,
+        shuffle_rng: Optional[Generator] = None,
     ) -> None:
-        self.soma_chunk_iter = _ObsAndXSOMAIterator(obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle)
+        self.soma_chunk_iter = _ObsAndXSOMAIterator(
+            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_rng
+        )
         if use_eager_fetch:
             self.soma_chunk_iter = _EagerIterator(self.soma_chunk_iter)
         self.soma_chunk = None
@@ -370,6 +372,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     _stats: Stats
 
+    _shuffle_rng: Optional[Generator]
+
     # TODO: Consider adding another convenience method wrapper to construct this object whose signature is more closely
     #  aligned with get_anndata() params (i.e. "exploded" AxisQuery params).
     def __init__(
@@ -382,6 +386,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
         shuffle: bool = False,
+        seed: Optional[int] = None,
         return_sparse_X: bool = False,
         soma_chunk_size: Optional[int] = None,
         use_eager_fetch: bool = True,
@@ -418,6 +423,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 axis, while also reducing the number of SOMA read operations by leveraging the spatial locality of
                 contiguously stored data. The local shuffling ensures the data is shuffled at the row-level within each
                 chunk.
+            seed:
+                The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
+                ``DistributedDataParallel`` to ensure data partitions are disjoint across worker processes.
             return_sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
                 setting this to ``True`` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
@@ -448,7 +456,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.var_query = var_query
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
-        self.shuffle = shuffle
         self.return_sparse_X = return_sparse_X
         self.soma_chunk_size = soma_chunk_size
         self.use_eager_fetch = use_eager_fetch
@@ -456,6 +463,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._encoders = None
         self._obs_joinids = None
         self._var_joinids = None
+        self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
 
         if "soma_joinid" not in self.obs_column_names:
@@ -538,8 +546,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         obs_joinids_chunked = self._chunk_ids(self._obs_joinids, self.soma_chunk_size)
 
         # globally shuffle the chunks, if requested
-        if self.shuffle:
-            self._global_shuffle_obs_joinids(obs_joinids_chunked)
+        if self._shuffle_rng:
+            self._shuffle_rng.shuffle(obs_joinids_chunked)
 
         # subset to a single partition, as needed for distributed training and multi-processing datat loading
         worker_info = torch.utils.data.get_worker_info()
@@ -565,7 +573,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 stats=self._stats,
                 return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
-                shuffle=self.shuffle,
+                shuffle_rng=self._shuffle_rng,
             )
 
             for datum_ in obs_and_x_iter:
@@ -578,20 +586,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     @staticmethod
     def _chunk_ids(ids: npt.NDArray[np.int64], chunk_size: int) -> List[npt.NDArray[np.int64]]:
         num_chunks = max(1, ceil(len(ids) / chunk_size))
-        pytorch_logger.debug(f"Shuffling {len(ids)} obs joinids" f" into {num_chunks} chunks of {chunk_size}")
+        pytorch_logger.debug(f"Shuffling {len(ids)} obs joinids into {num_chunks} chunks of {chunk_size}")
         return np.array_split(ids, num_chunks)
-
-    @staticmethod
-    def _global_shuffle_obs_joinids(
-        ids_chunked: List[npt.NDArray[np.int64]],
-    ) -> List[npt.NDArray[np.int64]]:
-        rng = np.random.default_rng()
-        pytorch_logger.debug(f"numpy random seed: {np.random.get_state()[1][0]}")  # type: ignore
-
-        rng.shuffle(ids_chunked)
-        pytorch_logger.debug("Done shuffling obs joinids")
-
-        return ids_chunked
 
     def __len__(self) -> int:
         self._init()
