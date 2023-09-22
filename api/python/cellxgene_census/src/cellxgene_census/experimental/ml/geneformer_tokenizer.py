@@ -77,7 +77,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
 
         self.max_input_tokens = max_input_tokens
         self.obs_attributes = set(obs_attributes) if obs_attributes else set()
-        self.load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
+        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
         super().__init__(
             experiment,
             measurement_name="RNA",
@@ -87,7 +87,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
             **kwargs,
         )
 
-    def load_geneformer_data(
+    def _load_geneformer_data(
         self, experiment: tiledbsoma.Experiment, token_dictionary_file: str, gene_median_file: str
     ) -> None:
         """
@@ -156,10 +156,13 @@ class GeneformerTokenizer(CellDatasetBuilder):
         # project cell_Xrow onto model_gene_ids
         model_counts = cell_Xrow[:, self.model_gene_ids]
         assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
+        # assert len(model_counts.data) == np.count_nonzero(model_counts.data)
+
         # normalize counts by Geneformer's medians. the 10K factor follows Geneformer's
         # tokenizer to "allocate bits to precision"
         model_expr = model_counts.multiply(10_000).multiply(1.0 / self.model_gene_medians)
         assert isinstance(model_expr, scipy.sparse.coo_matrix), type(model_expr)
+        # assert len(model_expr.data) == np.count_nonzero(model_expr.data)
 
         # figure the resulting tokens in descending order of model_expr
         # (use sparse model_expr.{col,data} to naturally exclude undetected genes)
@@ -167,6 +170,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         input_ids = self.model_gene_tokens[token_order][: self.max_input_tokens]
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
+        # add the requested obs_attributes
         for attr in self.obs_attributes:
             if attr != "soma_joinid":
                 ans[attr] = self.obs_df.at[cell_joinid, attr]
