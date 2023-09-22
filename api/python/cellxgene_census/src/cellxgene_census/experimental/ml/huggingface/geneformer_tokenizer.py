@@ -59,6 +59,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         max_input_tokens: int = 2048,
         token_dictionary_file: str = "",
         gene_median_file: str = "",
+        verbose: bool = False,
         **kwargs: Any,
     ) -> None:
         """
@@ -68,6 +69,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
            (cell metadata) into each Dataset item
         - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
+        - `verbose`: If True prints progress information.
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
         """
@@ -77,13 +79,17 @@ class GeneformerTokenizer(CellDatasetBuilder):
 
         self.max_input_tokens = max_input_tokens
         self.obs_attributes = set(obs_attributes) if obs_attributes else set()
+        if verbose:
+            print("Loading Geneformer IDs and gene median expression data")
         self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
+        self.verbose = verbose
         super().__init__(
             experiment,
             measurement_name="RNA",
             layer_name="normalized",
             # configure query to fetch the relevant genes only
             var_query=tiledbsoma.AxisQuery(coords=(self.model_gene_ids,)),
+            verbose=verbose,
             **kwargs,
         )
 

@@ -41,6 +41,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         layer_name: str = "raw",
         *,
         _cells_per_chunk: int = 100_000,
+        verbose: bool = False,
         **kwargs: Any,
     ):
         """
@@ -50,12 +51,18 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         - `experiment`: Census Experiment to be queried.
         - `measurement_name`: Measurement in the experiment, default "RNA".
         - `layer_name`: Name of the X layer to process, default "raw".
+        - `verbose`: If True prints progress information.
         - `kwargs`: passed through to `ExperimentAxisQuery()`, especially `obs_query`
            and `var_query`.
         """
+        if verbose:
+            print("Performing lazy SOMA axis query")
         super().__init__(experiment, measurement_name, **kwargs)
+        if verbose:
+            print("Lazy query complete")
         self.layer_name = layer_name
         self._cells_per_chunk = _cells_per_chunk
+        self.verbose = verbose
 
     def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
         """
@@ -63,14 +70,30 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
+        
+        if self.verbose:
+            print(f"Initializing Dataset generator")
 
         def gen() -> Generator[Dict[str, Any], None, None]:
+            n_iteration = 1
+            total_cells = 0
+            if self.verbose:
+                print(f"Stepping into Dataset generator. Starting to retrieve data.")
             for (page_cell_joinids, _), Xpage in X_sparse_iter(
                 self, self.layer_name, stride=self._cells_per_chunk, reindex_sparse_axis=False
             ):
                 assert isinstance(Xpage, scipy.sparse.csr_matrix)
+                these_cells = Xpage.shape[0]
+                total_cells = total_cells + these_cells
+                if self.verbose:
+                    print(
+                        f"Generating dataset iteration: {n_iteration}. Size: {total_cells} cells. Total: {total_cells}/{self.n_obs}"
+                    )
                 for i, cell_joinid in enumerate(page_cell_joinids):
                     yield self.cell_item(cell_joinid, Xpage.getrow(i))
+                n_iteration += 1
+                
+            print(f"Data download complete")
 
         return Dataset.from_generator(_DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {}))
 
