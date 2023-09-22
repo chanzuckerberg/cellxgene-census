@@ -705,7 +705,7 @@ def experiment_dataloader(
         experimental
     """
 
-    unsupported_dataloader_args = ["batch_size", "sampler", "batch_sampler", "collate_fn"]
+    unsupported_dataloader_args = ["shuffle", "batch_size", "sampler", "batch_sampler", "collate_fn"]
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
