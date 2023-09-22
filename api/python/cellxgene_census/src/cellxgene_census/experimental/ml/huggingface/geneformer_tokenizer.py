@@ -22,7 +22,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     ```
     import cellxgene_census
     import tiledbsoma
-    from cellxgene_census.experimental.ml import GeneformerTokenizer
+    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 
     with cellxgene_census.open_soma() as census:
         with GeneformerTokenizer(
