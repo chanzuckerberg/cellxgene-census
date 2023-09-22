@@ -65,51 +65,6 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
 
 
 @pytest.mark.experimental
-@pytest.mark.parametrize("stride", [101])
-@pytest.mark.parametrize("n_batches", [1])
-@pytest.mark.parametrize("m,n", [(1200, 511)])
-@pytest.mark.parametrize("ddof", [0])
-def test_meanvar_exclude_zeros(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int) -> None:
-    rng = np.random.default_rng()
-    batches_prob = rng.random(n_batches)
-    batches_prob /= batches_prob.sum()
-    batches = rng.choice(n_batches, matrix.shape[0], p=batches_prob)
-    batches.flags.writeable = False
-
-    batch_id, batch_count = np.unique(batches, return_counts=True)
-    n_samples = np.zeros((n_batches,), dtype=np.int64)
-    n_samples[batch_id] = batch_count
-    assert n_samples.sum() == matrix.shape[0]
-    assert len(n_samples) == n_batches
-
-    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof)
-    for i in range(0, matrix.nnz, stride):
-        batch_vec = batches[matrix.row[i : i + stride]] if n_batches > 1 else None
-        olmv.update(matrix.col[i : i + stride], matrix.data[i : i + stride], batch_vec)
-    batches_u, batches_var, all_u, all_var = olmv.finalize()
-
-    assert isinstance(all_u, np.ndarray)
-    assert isinstance(all_var, np.ndarray)
-    assert isinstance(batches_u, np.ndarray)
-    assert isinstance(batches_var, np.ndarray)
-
-    assert all_u.shape == (matrix.shape[1],)
-    assert all_var.shape == (matrix.shape[1],)
-    assert batches_u.shape == (n_batches, matrix.shape[1])
-    assert batches_var.shape == (n_batches, matrix.shape[1])
-
-    dense = matrix.toarray()
-    assert allclose(all_u, dense.mean(axis=0))
-    assert allclose(all_var, dense.var(axis=0, ddof=ddof, dtype=np.float64))
-
-    matrix = matrix.tocsr()  # COO not conveniently indexable
-    for batch in range(n_batches):
-        dense = matrix[batches == batch, :].toarray()
-        assert allclose(batches_u[batch], dense.mean(axis=0))
-        assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
-
-
-@pytest.mark.experimental
 @pytest.mark.parametrize("stride", [101, 53])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
 def test_mean(matrix: sparse.coo_matrix, stride: int) -> None:
