@@ -78,7 +78,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
             n_iteration = 1
             total_cells = 0
             if self.verbose:
-                print(f"Stepping into Dataset generator. Starting to retrieve data.")
+                print(f"Stepping into Dataset generator. Starting to retrieve data. Total cells to process: {self.n_obs}")
             for (page_cell_joinids, _), Xpage in X_sparse_iter(
                 self, self.layer_name, stride=self._cells_per_chunk, reindex_sparse_axis=False
             ):
