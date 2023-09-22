@@ -24,6 +24,12 @@ Install the `cellxgene-census` package via pip:
 pip install -U cellxgene-census
 ```
 
+There are also "experimental" add-on modules that are less stable than the main API, and may have more complex dependencies. To install these,
+
+```shell
+pip install -U cellxgene-census[experimental]
+```
+
 If installing in a Databricks notebook environment, use `%pip install`. Do not use `%sh pip install`. See the [FAQ](cellxgene_census_docsite_FAQ.md#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks).
 
 ## R
