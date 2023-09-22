@@ -4,7 +4,7 @@ import tiledbsoma
 import cellxgene_census
 
 try:
-    from cellxgene_census.experimental.ml import GeneformerTokenizer
+    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
     pass
