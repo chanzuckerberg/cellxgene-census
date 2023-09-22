@@ -18,10 +18,18 @@ class MeanVarianceAccumulator:
         Knuth, Art of Computer Programming, volume II
     """
 
-    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int, ddof: int = 1):
+    def __init__(
+        self,
+        n_batches: int,
+        n_samples: npt.NDArray[np.int64],
+        n_variables: int,
+        ddof: int = 1,
+        exclude_zeros: bool = False,
+    ):
         if n_samples.sum() <= 0:
             raise ValueError("No samples provided - can't calculate mean or variance.")
 
+        self.exclude_zeros = exclude_zeros
         self.ddof = ddof
         self.n_batches = n_batches
         self.n_samples = n_samples
@@ -45,8 +53,10 @@ class MeanVarianceAccumulator:
     def finalize(
         self,
     ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        # correct each batch to account for sparsity
-        _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
+        # correct each batch to account for sparsity.
+        # if exclude_zeros, the correction is not needed as we only do mean/average over nonzero values
+        if not self.exclude_zeros:
+            _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
 
         # compute u, var for each batch
         batches_u = self.u
@@ -58,8 +68,13 @@ class MeanVarianceAccumulator:
 
         # accum all batches using Chan's
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
+
         with np.errstate(divide="ignore"):
-            all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
+            if self.exclude_zeros:
+                all_var = all_M2 / np.maximum(0, self.n - self.ddof)
+                all_var = all_var.T
+            else:
+                all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
 
         return batches_u, batches_var, all_u, all_var
 
