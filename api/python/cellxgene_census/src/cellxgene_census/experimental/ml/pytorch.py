@@ -500,7 +500,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         # subset to a single partition
         # typing does not reflect that is actually a List of 2D NDArrays
-        partitions: List[npt.NDArray[np.int64]] = np.array_split(ids_chunked, num_partitions)
+        partitions: List[npt.NDArray[np.int64]] = np.array_split(np.array(ids_chunked, dtype=object), num_partitions)
         partition = partitions[partition_index]
 
         if pytorch_logger.isEnabledFor(logging.DEBUG) and len(partition) > 0:
