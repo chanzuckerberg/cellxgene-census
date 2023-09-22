@@ -70,7 +70,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
-        
+
         if self.verbose:
             print(f"Initializing Dataset generator")
 
@@ -92,7 +92,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
                 for i, cell_joinid in enumerate(page_cell_joinids):
                     yield self.cell_item(cell_joinid, Xpage.getrow(i))
                 n_iteration += 1
-                
+
             print(f"Data download complete")
 
         return Dataset.from_generator(_DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {}))
