@@ -8,6 +8,7 @@ Demonstration notebooks for the CZ CELLxGENE Discover Census. There are two kind
 ## Dependencies
 
 You must be on a Linux or MacOS system, with the following installed:
+
 * Python 3.8 to 3.11
 * Jupyter or some other means of running notebooks (e.g., vscode)
 
@@ -19,25 +20,32 @@ not been tested).
 I also recommend you use a `d` instance type, and mount all of the NVME drives as swap,
 as it will keep you from running out of RAM.
 
-
 ## Set up Python environment
+
 1. (optional, but highly recommended) In your working directory, make and activate a virtual environment. For example:
-```shell
-  $ python -m venv ./venv
-  $ source ./venv/bin/activate
-```
+
+    ```shell
+      python -m venv ./venv
+      source ./venv/bin/activate
+    ```
+
 2. Install the required dependencies:
-```shell
-  $ pip install -U -r cellxgene-census/api/python/notebooks/requirements.txt
-```
+
+    ```shell
+      pip install -U -r cellxgene-census/api/python/notebooks/requirements.txt
+    ```
+
 ## Verify your installation
+
 Check that your installation works - this make take a few seconds, as it loads metadata from S3:
+
 ```shell
 $ python -c 'import cellxgene_census; print(cellxgene_census.open_soma().soma_type)'
 SOMACollection
 ```
 
 ## Run notebooks
+
 Run notebooks, which you can find in the `cellxgene-census/api/python/notebooks` directory.
 
 ## For more help

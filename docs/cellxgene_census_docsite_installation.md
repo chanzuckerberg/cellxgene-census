@@ -1,4 +1,4 @@
-# Installation 
+# Installation
 
 ## Requirements
 
@@ -6,9 +6,8 @@ The Census API requires a Linux or MacOS system with:
 
 - Python 3.8 to Python 3.11. Or R, supported versions TBD.
 - Recommended: >16 GB of memory.
-- Recommended: >5 Mbps internet connection. 
+- Recommended: >5 Mbps internet connection.
 - Recommended: for increased performance use the API through a AWS-EC2 instance from the region `us-west-2`. The Census data builds are hosted in a AWS-S3 bucket in that region.
-
 
 ## Python
 
@@ -23,6 +22,12 @@ Install the `cellxgene-census` package via pip:
 
 ```shell
 pip install -U cellxgene-census
+```
+
+There are also "experimental" add-on modules that are less stable than the main API, and may have more complex dependencies. To install these,
+
+```shell
+pip install -U cellxgene-census[experimental]
 ```
 
 If installing in a Databricks notebook environment, use `%pip install`. Do not use `%sh pip install`. See the [FAQ](cellxgene_census_docsite_FAQ.md#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks).
@@ -40,7 +45,7 @@ From an R session, first install `tiledb` from R-Universe, the latest release in
 ```r
 install.packages(
   "cellxgene.census",
-  repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org') 
+  repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org')
 )
 ```
 
@@ -53,6 +58,6 @@ install.packages("Seurat")
 # SingleCellExperiment
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-    
+
 BiocManager::install("SingleCellExperiment")
 ```

@@ -16,7 +16,7 @@ Last updated: May, 2023.
 - [How can I ask for new features?](#how-can-i-ask-for-new-features)
 - [How can I contribute my data to the Census?](#how-can-i-contribute-my-data-to-the-census)
 - [Why do I get an `ArraySchema` error when opening the Census?](#why-do-i-get-an-arrayschema-error-when-opening-the-census)
-- [Why do I get an error when running `import cellxgene_census` on Databricks?](#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks)
+- [Why do I get an error when running `import cellxgene_census` on Databricks?](#why-do-i-get-an-error-when-running-import-cellxgene_census-on-databricks)
 
 ## Why should I use the Census?
 
@@ -27,27 +27,24 @@ The Census provides efficient low-latency access via Python and R APIs to most s
 - Easily load multi-dataset slices into Scanpy or Seurat.
 - Implement out-of-core (a.k.a online) operations for larger-than-memory processes.
 
-
-For example, a user can easily get “*all T-cells from Lung with COVID-19*” into [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/). 
-
+For example, a user can easily get “*all T-cells from Lung with COVID-19*” into [AnnData](https://anndata.readthedocs.io/en/latest/), [Seurat](https://satijalab.org/seurat/), or into memory-sufficient data chunks via [PyArrow](https://arrow.apache.org/docs/python/index.html) or [R Arrow](https://arrow.apache.org/docs/r/).
 
 The Census is not suited for:
 
 - Access to non-standardized cell metadata and gene metadata available in the original [datasets](https://cellxgene.cziscience.com/datasets).
-- Access to the author-contributed normalized expression values or embeddings. 
+- Access to the author-contributed normalized expression values or embeddings.
 - Access to all data from just one dataset.
-- Access to non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census. 
+- Access to non-RNA or spatial data present in CZ CELLxGENE Discover as it is not yet supported in the Census.
 
-If you’d like to perform any of the above tasks, you can access web downloads directly from the [CZ CELLxGENE Discover Datasets](https://cellxgene.cziscience.com/datasets) feature. [Click here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data) for more information about downloading published data on CELLxGENE Discover. 
+If you’d like to perform any of the above tasks, you can access web downloads directly from the [CZ CELLxGENE Discover Datasets](https://cellxgene.cziscience.com/datasets) feature. [Click here](https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data) for more information about downloading published data on CELLxGENE Discover.
 
 ## What data is contained in the Census?
 
-Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and their organization in the [schema description](cellxgene_census_docsite_schema.md) or you can use the APIs to explore the data as indicated in this [tutorial](notebooks/analysis_demo/comp_bio_census_info.ipynb). 
+Most RNA non-spatial data from [CZ CELLxGENE Discover](https://cellxgene.cziscience.com/) is included. You can see a general description of these data and their organization in the [schema description](cellxgene_census_docsite_schema.md) or you can use the APIs to explore the data as indicated in this [tutorial](notebooks/analysis_demo/comp_bio_census_info.ipynb).
 
 ## How do I cite the use of the Census for a publication?
 
 Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
-
 
 ## Why does the Census not have a normalized layer or embeddings?
 
@@ -62,13 +59,12 @@ If you have any suggestions for methods that our team should explore, please sha
 
 The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data from CZ CELLxGENE Discover via [TileDB-SOMA](https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose).  Thus, single-cell data from about 33M unique cells (50M total) across >60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:
 
-* Opening and reading data at low latency from the cloud.
-* Querying and accessing data using metadata filters.
-* Loading and creating AnnData objects.
-* Loading and creating Seurat objects.
-* From Python, creating PyArrow objects, SciPy sparse matrices, NumPy arrays, and Pandas data frames.
-* From R, creating R Arrow objects, sparse matrices (via the Matrix package), and standard data frames and (dense) matrices.
-
+- Opening and reading data at low latency from the cloud.
+- Querying and accessing data using metadata filters.
+- Loading and creating AnnData objects.
+- Loading and creating Seurat objects.
+- From Python, creating PyArrow objects, SciPy sparse matrices, NumPy arrays, and Pandas data frames.
+- From R, creating R Arrow objects, sparse matrices (via the Matrix package), and standard data frames and (dense) matrices.
 
 ## Can I query human and mouse data in a single query?
 
@@ -125,7 +121,7 @@ You can submit a [feature request in the github repository](https://github.com/c
 
 ## How can I contribute my data to the Census?
 
-To inquire about submitting your data to CZ CELLxGENE Discover, [click here](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). If your data request is accepted, the data will automatically be included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included). 
+To inquire about submitting your data to CZ CELLxGENE Discover, [click here](https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data). If your data request is accepted, the data will automatically be included in the Census if it meets the [biological criteria defined in the Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included).
 
 ## Why do I get an `ArraySchema` error when opening the Census?
 
@@ -135,20 +131,25 @@ If the error persists please file a [github issue](https://github.com/chanzucker
 
 ## Why do I get an error when running `import cellxgene_census` on Databricks?
 
-This can occur if the `cellxgene_census` Python package is installed in a Databricks notebook using `%sh pip install cellxgene_census`. This command does _not_ restart the Python process after installing `cellxgene_census` and any pip package dependencies that were pre-installed by the Databricks Runtime environment but upgraded for `cellxgene_census` will not be reloaded with their new version. You may see `numba` or `pyarrow` related errors, for example.
+This can occur if the `cellxgene_census` Python package is installed in a Databricks notebook using `%sh pip install cellxgene_census`. This command does *not* restart the Python process after installing `cellxgene_census` and any pip package dependencies that were pre-installed by the Databricks Runtime environment but upgraded for `cellxgene_census` will not be reloaded with their new version. You may see `numba` or `pyarrow` related errors, for example.
 
 To fix, simply install using one of the following Databricks notebook "magic" commands:
-```
+
+```shell
 pip install -U cellxgene-census
 ```
+
 or
-```
+
+```shell
 %pip install -U cellxgene-census
 ```
-These commands restart the Python process after installing the `cellxgene-census` package, similar to using `dbutils.library.restartPython()`. Additionally, these magic commands also ensure that the package is installed on all nodes of a multi-node cluster. 
+
+These commands restart the Python process after installing the `cellxgene-census` package, similar to using `dbutils.library.restartPython()`. Additionally, these magic commands also ensure that the package is installed on all nodes of a multi-node cluster.
 
 See also:
-* https://docs.databricks.com/libraries/notebooks-python-libraries.html#can-i-use-sh-pip-pip-or-pip-what-is-the-difference
-* https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip
+
+- <https://docs.databricks.com/libraries/notebooks-python-libraries.html#can-i-use-sh-pip-pip-or-pip-what-is-the-difference>
+- <https://community.databricks.com/s/question/0D53f00001GHVP3CAP/whats-the-difference-between-magic-commands-pip-and-sh-pip>
 
 Alternately, you can configure your cluster to install the `cellxgene-census` package each time it is started by adding this package to the "Libraries" tab on the cluster configuration page per these [instructions](https://docs.databricks.com/libraries/cluster-libraries.html).

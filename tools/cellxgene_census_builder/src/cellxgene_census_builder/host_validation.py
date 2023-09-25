@@ -5,7 +5,7 @@ from typing import Union
 
 import psutil
 
-from .build_state import CensusBuildArgs
+from .build_state import CensusBuildArgs, CensusBuildConfig
 from .logging import hr_binary_unit, hr_decimal_unit
 
 
@@ -70,13 +70,9 @@ def check_host(args: CensusBuildArgs) -> bool:
 
     return (
         check_os()
-        and check_physical_memory(
-            args.config.get("min_physical_memory", args.config.host_validation_min_physical_memory)
-        )
-        and check_swap_memory(args.config.get("min_swap_memory", args.config.host_validation_min_swap_memory))
-        and check_free_disk(
-            args.working_dir, args.config.get("min_free_disk_space", args.config.host_validation_min_free_disk_space)
-        )
+        and check_physical_memory(args.config.host_validation_min_physical_memory)
+        and check_swap_memory(args.config.host_validation_min_swap_memory)
+        and check_free_disk(args.working_dir, args.config.host_validation_min_free_disk_space)
     )
 
 
@@ -84,14 +80,15 @@ def check_host(args: CensusBuildArgs) -> bool:
 # host which does not validate.
 if __name__ == "__main__":
     """For CLI testing"""
-    from .build_state import CENSUS_CONFIG_DEFAULTS
+
+    config = CensusBuildConfig()
 
     def main() -> int:
         if not (
             check_os()
-            and check_physical_memory(CENSUS_CONFIG_DEFAULTS["host_validation_min_physical_memory"])  # type: ignore[arg-type]
-            and check_swap_memory(CENSUS_CONFIG_DEFAULTS["host_validation_min_swap_memory"])  # type: ignore[arg-type]
-            and check_free_disk(os.getcwd(), CENSUS_CONFIG_DEFAULTS["host_validation_min_free_disk_space"])  # type: ignore[arg-type]
+            and check_physical_memory(config.host_validation_min_physical_memory)
+            and check_swap_memory(config.host_validation_min_swap_memory)
+            and check_free_disk(os.getcwd(), config.host_validation_min_free_disk_space)
         ):  # assumed working directory is CWD
             print("Host validation FAILURE")
             return 1

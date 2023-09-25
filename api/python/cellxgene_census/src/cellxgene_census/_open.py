@@ -9,13 +9,19 @@ Contains methods to open publicly hosted versions of Census object and access it
 import logging
 import os.path
 import urllib.parse
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, get_args
 
-import certifi
 import s3fs
 import tiledbsoma as soma
 
-from ._release_directory import CensusLocator, get_census_version_description
+from ._release_directory import (
+    CensusLocator,
+    CensusMirror,
+    Provider,
+    ResolvedCensusLocator,
+    _get_census_mirrors,
+    get_census_version_description,
+)
 from ._util import _uri_join
 
 DEFAULT_CENSUS_VERSION = "stable"
@@ -24,8 +30,6 @@ DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
-    # Temporary fix for Mac OSX, to be removed by https://github.com/chanzuckerberg/cellxgene-census/issues/415
-    "vfs.s3.ca_file": certifi.where(),
 }
 
 api_logger = logging.getLogger("cellxgene_census")
@@ -33,9 +37,42 @@ api_logger.setLevel(logging.INFO)
 api_logger.addHandler(logging.StreamHandler())
 
 
-def _open_soma(locator: CensusLocator, context: Optional[soma.options.SOMATileDBContext] = None) -> soma.Collection:
-    """Private. Merge config defaults and return open census as a soma Collection/context."""
-    context = _build_soma_tiledb_context(locator.get("s3_region"), context)
+def _assert_mirror_supported(mirror: CensusMirror) -> None:
+    """
+    Verifies if the mirror is supported by this version of the census API.
+    This method provides a proper error message in case an old version of the census
+    tries to connect to an unsupported mirror.
+    """
+    if mirror["provider"] not in get_args(Provider):
+        raise ValueError(
+            f"Unsupported mirror provider: {mirror['provider']}. Try upgrading the cellxgene-census package to the latest version."
+        )
+
+
+def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> ResolvedCensusLocator:
+    _assert_mirror_supported(mirror)
+
+    if locator.get("relative_uri"):
+        uri = _uri_join(mirror["base_uri"], locator["relative_uri"])
+        region = mirror["region"]
+    else:
+        uri = locator["uri"]
+        region = locator.get("s3_region")
+    return ResolvedCensusLocator(uri=uri, region=region, provider=mirror["provider"])
+
+
+def _open_soma(
+    locator: ResolvedCensusLocator, context: Optional[soma.options.SOMATileDBContext] = None
+) -> soma.Collection:
+    """
+    Private. Merge config defaults and return open census as a soma Collection/context.
+    """
+
+    if locator["provider"] == "S3":
+        context = _build_soma_tiledb_context(locator.get("region"), context)
+    else:  # If no provider is specified, build a default context (don't pass region)
+        context = _build_soma_tiledb_context(None, context)
+
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
@@ -68,6 +105,7 @@ def _build_soma_tiledb_context(
 def open_soma(
     *,
     census_version: Optional[str] = DEFAULT_CENSUS_VERSION,
+    mirror: Optional[str] = None,
     uri: Optional[str] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
@@ -76,19 +114,23 @@ def open_soma(
     Args:
         census_version:
             The version of the Census, e.g. "latest" or "stable". Defaults to "stable".
+        mirror:
+            The mirror used to retrieve the Census. If not specified, a suitable mirror
+            will be chosen automatically.
         uri:
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
         context:
-            A custom :class:`SOMATileDBContext`.
+            A custom :class:`SOMATileDBContext` which will be used to open the SOMA object.
+            Optional, defaults to None.
 
     Returns:
         A SOMA Collection object containing the top-level census.
         It can be used as a context manager, which will automatically close upon exit.
 
     Raises:
-        ValueError: if the census cannot be found, the URI cannot be opened, or neither a URI
-            or a version are specified.
+        ValueError: if the census cannot be found, the URI cannot be opened, neither a URI
+            or a version are specified, or an invalid mirror is provided.
 
     Lifecycle:
         maturing
@@ -120,17 +162,31 @@ def open_soma(
 
         >>> with cellxgene_census.open_soma(uri="/tmp/census") as census:
                 ...
+
+        Open a Census using a mirror.
+
+        >>> with cellxgene_census.open_soma(mirror="s3-us-west-2") as census:
+                ...
     """
 
     if uri is not None:
-        return _open_soma({"uri": uri, "s3_region": None}, context)
+        return _open_soma({"uri": uri, "region": None, "provider": "unknown"}, context)
 
     if census_version is None:
         raise ValueError("Must specify either a census version or an explicit URI.")
 
+    mirrors = _get_census_mirrors()
+    selected_mirror: CensusMirror
+    if mirror is not None:
+        if mirror not in mirrors:
+            raise ValueError("Mirror not found.")
+        selected_mirror = mirrors[mirror]  # type: ignore
+    else:
+        selected_mirror = mirrors[mirrors["default"]]  # type: ignore
+
     try:
         description = get_census_version_description(census_version)  # raises
-    except KeyError:
+    except ValueError:
         # TODO: After the first "stable" is available, this conditional can be removed (keep the 'else' logic)
         if census_version == "stable":
             description = get_census_version_description("latest")
@@ -151,7 +207,9 @@ def open_soma(
             "consistency."
         )
 
-    return _open_soma(description["soma"], context)
+    locator = _resolve_census_locator(description["soma"], selected_mirror)
+
+    return _open_soma(locator, context)
 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> CensusLocator:
@@ -179,7 +237,13 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS
         's3_region': 'us-west-2'}
     """
     description = get_census_version_description(census_version)  # raises
-    census = _open_soma(description["soma"])
+
+    # For h5ads, it makes sense to use the default mirror, since the artifacts themselves won't be mirrored
+    mirrors = _get_census_mirrors()
+    selected_mirror: CensusMirror = mirrors[mirrors["default"]]  # type: ignore
+    census_locator = _resolve_census_locator(description["soma"], selected_mirror)
+
+    census = _open_soma(census_locator)
     dataset = census["census_info"]["datasets"].read(value_filter=f"dataset_id == '{dataset_id}'").concat().to_pandas()
     if len(dataset) == 0:
         raise KeyError("Unknown dataset_id")

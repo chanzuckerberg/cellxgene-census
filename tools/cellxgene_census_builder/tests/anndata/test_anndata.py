@@ -125,4 +125,4 @@ def test_make_anndata_cell_filter_assay(h5ad_with_assays: ad.AnnData) -> None:
 
 def test_get_cellxgene_schema_version(h5ad_simple: ad.AnnData) -> None:
     version = get_cellxgene_schema_version(h5ad_simple)
-    assert version == "3.0.0"
+    assert version == "3.1.0"

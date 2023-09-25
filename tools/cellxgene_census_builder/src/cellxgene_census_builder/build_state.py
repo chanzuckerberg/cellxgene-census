@@ -9,9 +9,9 @@ import pathlib
 from datetime import datetime
 from typing import Any, Iterator, Mapping, Union
 
-import attrs
 import psutil
 import yaml
+from attrs import define, field, fields, validators
 from typing_extensions import Self
 
 """
@@ -20,27 +20,34 @@ Defaults for Census configuration.
 
 CENSUS_BUILD_CONFIG = "config.yaml"
 CENSUS_BUILD_STATE = "state.yaml"
-CENSUS_CONFIG_DEFAULTS = {
-    # General config
-    "verbose": 1,
-    "log_dir": "logs",
-    "log_file": "build.log",
-    "reports_dir": "reports",
-    "consolidate": True,
-    "disable_dirty_git_check": True,
-    "dryrun": False,  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
+
+
+@define
+class CensusBuildConfig:
+    verbose: int = field(converter=int, default=1)
+    log_dir: str = field(default="logs")
+    log_file: str = field(default="build.log")
+    reports_dir: str = field(default="reports")
+    consolidate = field(converter=bool, default=True)
+    disable_dirty_git_check = field(converter=bool, default=True)
+    dryrun: bool = field(
+        converter=bool, default=False
+    )  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
     #
-    # Paths and census version name determined by spec.
-    "cellxgene_census_S3_path": "s3://cellxgene-data-public/cell-census",
-    "logs_S3_path": "s3://cellxgene-data-public-logs/builder",
-    "build_tag": datetime.now().astimezone().date().isoformat(),
+    # Primary bucket location
+    cellxgene_census_S3_path: str = field(default="s3://cellxgene-data-public/cell-census")
     #
-    # Default mode is multi-process.
-    "multi_process": True,
+    # Replica bucket location
+    cellxgene_census_S3_replica_path: str = field(default=None)
+    logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
+    build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
+    #
+    # Default multi-process. Memory scaling based on empirical tests.
+    multi_process: bool = field(converter=bool, default=True)
     #
     # The memory budget used to determine appropriate parallelism in many steps of build.
     # Only set to a smaller number if you want to not use all available RAM.
-    "memory_budget": int(psutil.virtual_memory().total),
+    memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
     #
     # 'max_worker_processes' sets a limit on the number of worker processes. On high-CPU boxes,
     # this limit is needed to avoid exceeding the VM map kernel limit (vm.max_map_count). On Ubuntu 22.04,
@@ -50,24 +57,54 @@ CENSUS_CONFIG_DEFAULTS = {
     # utilized by the Census builder. This hard-cap can be increased when this issue is resolved, but
     # should not be removed (with sufficient number of worker processes, it will always be possible to
     # trip over this limit). The default of 96 was chosen as:  (96+1) * 650 == 63050, which is < 65536.
-    "max_worker_processes": 96,
+    max_worker_processes: int = field(converter=int, default=96)
     #
     # Host minimum resource validation
-    "host_validation_disable": False,  # if True, host validation checks will be skipped
-    "host_validation_min_physical_memory": 512 * 1024**3,  # 512GiB
-    "host_validation_min_swap_memory": 2 * 1024**4,  # 2TiB
-    "host_validation_min_free_disk_space": 1.8 * 1024**4,  # 1.8TiB
+    host_validation_disable: int = field(
+        converter=bool, default=False
+    )  # if True, host validation checks will be skipped
+    host_validation_min_physical_memory: int = field(converter=int, default=512 * 1024**3)  # 512GiB
+    host_validation_min_swap_memory: int = field(converter=int, default=2 * 1024**4)  # 2TiB
+    host_validation_min_free_disk_space: int = field(converter=int, default=int(1.8 * 1024**4))  # 1.8 TiB
     #
     # Release clean up
-    "release_cleanup_days": 32,  # Census builds older than this are deleted
+    release_cleanup_days: int = field(converter=int, default=32)  # Census builds older than this are deleted
     #
     # Block list of dataset IDs
-    "dataset_id_blocklist_uri": "https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt",
+    dataset_id_blocklist_uri: str = field(
+        default="https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt"
+    )
     #
     # For testing convenience only
-    "manifest": None,
-    "test_first_n": None,
-}
+    manifest: str = field(default=None)
+    test_first_n: int = field(converter=int, default=0)
+
+    @classmethod
+    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
+        if isinstance(file, (str, os.PathLike)):
+            with open(file) as f:
+                user_config = yaml.safe_load(f)
+        else:
+            user_config = yaml.safe_load(file)
+
+        # Empty YAML config file is legal
+        if user_config is None:
+            user_config = {}
+
+        # But we only understand a top-level dictionary (e.g., no lists, etc.)
+        if not isinstance(user_config, dict):
+            raise TypeError("YAML config file malformed - expected top-level dictionary")
+
+        return cls(**user_config)
+
+    @classmethod
+    def load_from_env_vars(cls) -> Self:
+        config = cls()
+        for fld in fields(CensusBuildConfig):
+            fld_env_var = f"CENSUS_BUILD_{fld.name.upper()}"
+            if fld_env_var in os.environ:
+                setattr(config, fld.name, os.environ[fld_env_var])
+        return config
 
 
 class Namespace(Mapping[str, Any]):
@@ -119,33 +156,6 @@ class MutableNamespace(Namespace):
     # semantics can't be supported until that is implemented.
 
 
-class CensusBuildConfig(Namespace):
-    defaults = CENSUS_CONFIG_DEFAULTS
-
-    def __init__(self, **kwargs: Any):
-        config = self.defaults.copy()
-        config.update(kwargs)
-        super().__init__(**config)
-
-    @classmethod
-    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
-        if isinstance(file, (str, os.PathLike)):
-            with open(file) as f:
-                user_config = yaml.safe_load(f)
-        else:
-            user_config = yaml.safe_load(file)
-
-        # Empty YAML config file is legal
-        if user_config is None:
-            user_config = {}
-
-        # But we only understand a top-level dictionary (e.g., no lists, etc.)
-        if not isinstance(user_config, dict):
-            raise TypeError("YAML config file malformed - expected top-level dictionary")
-
-        return cls(**user_config)
-
-
 class CensusBuildState(MutableNamespace):
     def __init__(self, **kwargs: Any):
         self.__dirty_keys = set(kwargs)
@@ -179,12 +189,12 @@ class CensusBuildState(MutableNamespace):
                 state_log.write(record)
 
 
-@attrs.define(frozen=True)
+@define(frozen=True)
 class CensusBuildArgs:
-    working_dir: pathlib.PosixPath = attrs.field(validator=attrs.validators.instance_of(pathlib.PosixPath))
-    config: CensusBuildConfig = attrs.field(validator=attrs.validators.instance_of(CensusBuildConfig))
-    state: CensusBuildState = attrs.field(
-        factory=CensusBuildState, validator=attrs.validators.instance_of(CensusBuildState)  # default: empty state
+    working_dir: pathlib.PosixPath = field(validator=validators.instance_of(pathlib.PosixPath))
+    config: CensusBuildConfig = field(validator=validators.instance_of(CensusBuildConfig))
+    state: CensusBuildState = field(
+        factory=CensusBuildState, validator=validators.instance_of(CensusBuildState)  # default: empty state
     )
 
     @property

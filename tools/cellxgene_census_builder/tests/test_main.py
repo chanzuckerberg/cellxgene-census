@@ -7,7 +7,7 @@ def test_create_args_parser_default_build() -> None:
 
     args = parser.parse_args(args=args_list)
 
-    assert args.uri == "."
+    assert args.working_dir == "."
     assert args.verbose == 0
     assert args.multi_process is False
     assert isinstance(args.build_tag, str)
@@ -22,7 +22,7 @@ def test_create_args_parser_default_validate() -> None:
 
     args = parser.parse_args(args=args_list)
 
-    assert args.uri == "."
+    assert args.working_dir == "."
     assert args.verbose == 0
     assert args.multi_process is False
     assert isinstance(args.build_tag, str)

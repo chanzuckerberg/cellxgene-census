@@ -4,7 +4,9 @@ import pathlib
 import sys
 from datetime import datetime
 
-from ..build_state import CENSUS_CONFIG_DEFAULTS, CensusBuildArgs, CensusBuildConfig
+import attrs
+
+from ..build_state import CensusBuildArgs, CensusBuildConfig
 from ..util import log_process_resource_status, process_init
 from .build_soma import build
 from .validate_soma import validate
@@ -15,8 +17,14 @@ def main() -> int:
     cli_args = cli_parser.parse_args()
     assert cli_args.subcommand in ["build", "validate"]
 
-    config = CensusBuildConfig(**cli_args.__dict__)
-    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.uri), config=config)
+    # Pass params from CLI arguments _only_ if they exist in the CensusBuildConfig namespace
+    default_config = CensusBuildConfig(
+        **{
+            k: cli_args.__dict__[k]
+            for k in cli_args.__dict__.keys() & {f.alias for f in attrs.fields(CensusBuildConfig)}
+        }
+    )
+    args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.working_dir), config=default_config)
     process_init(args)
     logging.info(args)
 
@@ -32,8 +40,9 @@ def main() -> int:
 
 
 def create_args_parser() -> argparse.ArgumentParser:
+    default_config = CensusBuildConfig()
     parser = argparse.ArgumentParser(prog="cellxgene_census_builder.build_soma")
-    parser.add_argument("uri", type=str, help="Census top-level URI")
+    parser.add_argument("working_dir", type=str, help="Census build working directory")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
     parser.add_argument(
         "-mp",
@@ -45,7 +54,7 @@ def create_args_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max_worker_processes",
         type=int,
-        default=CENSUS_CONFIG_DEFAULTS["max_worker_processes"],
+        default=default_config.max_worker_processes,
         help="Limit on number of worker processes",
     )
     parser.add_argument(
@@ -65,7 +74,10 @@ def create_args_parser() -> argparse.ArgumentParser:
         help="Manifest file",
     )
     build_parser.add_argument(
-        "--validate", action=argparse.BooleanOptionalAction, default=True, help="Validate immediately after build"
+        "--validate",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Validate immediately after build",
     )
     build_parser.add_argument(
         "--consolidate",
@@ -76,12 +88,12 @@ def create_args_parser() -> argparse.ArgumentParser:
     build_parser.add_argument(
         "--dataset_id_blocklist_uri",
         help="Dataset blocklist URI",
-        default=CENSUS_CONFIG_DEFAULTS["dataset_id_blocklist_uri"],
+        default=default_config.dataset_id_blocklist_uri,
     )
     # hidden option for testing by devs. Will process only the first 'n' datasets
-    build_parser.add_argument("--test-first-n", type=int)
+    build_parser.add_argument("--test-first-n", type=int, default=0)
     # hidden option for testing by devs. Allow for WIP testing by devs.
-    build_parser.add_argument("--test-disable-dirty-git-check", action=argparse.BooleanOptionalAction)
+    build_parser.add_argument("--disable-dirty-git-check", action=argparse.BooleanOptionalAction, default=False)
 
     # VALIDATE
     subparsers.add_parser("validate", help="Validate an existing Census build")

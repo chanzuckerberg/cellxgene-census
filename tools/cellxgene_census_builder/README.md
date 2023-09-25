@@ -31,7 +31,7 @@ This will perform four steps (more will be added the future):
 
 This will result in the following file tree:
 
-```
+```text
 working_dir:
     |
     +-- config.yaml        # build config (user provided, read-only)
@@ -90,7 +90,7 @@ This is primarily for the use of package developers. The defaults are suitable f
 
 If you need to override a default, create `config.yaml` in the build working directory and specify the overrides. An example `config.yaml` might look like:
 
-```
+```yaml
 verbose: 2  # debug level logging
 consolidate: false  # disable TileDB consolidation
 ```
@@ -154,11 +154,13 @@ If you run out of memory, reduce `--max-workers`. You can also try a higher numb
 #### Mode (b) - creating a Census from a user-provided list of H5AD files:
 
 - Create a manifest file, in CSV format, containing two columns: dataset_id, h5ad_uri. Example:
+
   ```csv
   53d208b0-2cfd-4366-9866-c3c6114081bc, /files/53d208b0-2cfd-4366-9866-c3c6114081bc.h5ad
   559ed814-a9c9-4b77-a0e6-7da7b907fe3a, /files/559ed814-a9c9-4b77-a0e6-7da7b907fe3a.h5ad
   5b93b8fc-7c9a-45bd-ad3f-dc883137de30, /files/5b93b8fc-7c9a-45bd-ad3f-dc883137de30.h5ad
   ```
+
   You can specify a file system path or a URI in the second field
 - To create a Census at `<census_path>`, execute:
   > $ python -m cellxgene_census_builder <census_path> build --manifest <the_manifest_file.csv>

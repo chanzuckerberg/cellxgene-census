@@ -8,7 +8,7 @@ import scipy.sparse as sparse
 
 from ..util import urlcat
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION, CXG_SCHEMA_VERSION_IMPORT, FEATURE_REFERENCE_IGNORE
+from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
 
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
@@ -39,10 +39,14 @@ def open_anndata(
         logging.debug(f"open_anndata: {path}")
         ad = anndata.read_h5ad(path, *args, **kwargs)
 
-        assert CXG_SCHEMA_VERSION == "3.0.0"
+        # These are schema versions this code is known to work with. This is a
+        # sanity check, which would be better implemented via a unit test at
+        # some point in the future.
+        assert CXG_SCHEMA_VERSION in ["3.1.0", "3.0.0"]
+
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
-        if h5ad.schema_version not in CXG_SCHEMA_VERSION_IMPORT:
+        if h5ad.schema_version != CXG_SCHEMA_VERSION:
             msg = f"H5AD {h5ad.dataset_h5ad_path} has unsupported schema version {h5ad.schema_version}, expected {CXG_SCHEMA_VERSION}"
             logging.error(msg)
             raise RuntimeError(msg)
@@ -156,6 +160,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
             X is None or isinstance(X, np.ndarray) or X.has_canonical_format
         ), "Found H5AD with non-canonical X matrix"
 
+        assert X is None or np.all(X.sum(axis=1) > 0), "H5AD contains a cell with only zero valued counts"
         return ad
 
     return _filter

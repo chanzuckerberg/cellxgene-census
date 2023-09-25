@@ -8,7 +8,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Definitions
 
-* **Census build**: a SOMA collection with the Census data [as specified in the Census schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md#data-encoding-and-organization). 
+* **Census build**: a SOMA collection with the Census data [as specified in the Census schema](https://github.com/chanzuckerberg/cell-census/blob/main/docs/cell_census_schema.md#data-encoding-and-organization).
 * **Census source H5AD files**: the set of H5AD files used to create a Census build.
 * **Census release**: a Census build that is publicly hosted online.
 * **Census release `tag`**:  a label for a Census release, it MUST be a string of printable ASCII characters.
@@ -20,9 +20,9 @@ The following S3 bucket MUST be used as the root to store Census data:
 `s3://cellxgene-data-public/`
 
 Census data MUST be deposited under a folder named `cell-census` of the root S3 bucket:
- 
+
  `./cell-census`
- 
+
 All data related to a Census **release** MUST be deposited in a folder named with the **tag** of the release:
 
  `./cell-census/[tag]/`
@@ -31,26 +31,23 @@ The Census **release** MUST be deposited in a folder named `soma`:
 
 `./cell-census/[tag]/soma/`
 
-All Census **source h5ads** used to create a specific Census **release** MUST be copied into a folder named `h5ads`:	
+All Census **source h5ads** used to create a specific Census **release** MUST be copied into a folder named `h5ads`:
 `./cell-census/[tag]/h5ads/`
 
 ## Census release information `json`
 
-
 The publication date along with the full URI paths for the `soma` folder and the `h5ads` folder for all Census releases MUST be recorded in a `json` file with the following naming convention and structure, which will be used as a machine- and human-readable directory of available Census builds:
-
 
 `./cell-census/releases.json`
 
-* This file MUST be in `json` formats where the parent keys are release identifiers (alias or name). 
-* The alias `latest` MUST be present and MUST point to the **Weekly Census release**. 
+* This file MUST be in `json` formats where the parent keys are release identifiers (alias or name).
+* The alias `latest` MUST be present and MUST point to the **Weekly Census release**.
 * The prefix `V` MUST be used followed by an integer counter to label long-term supported Census releases, e.g. `V1`.
 
-
-```
+```json
 {
    [release_alias]: [release_name|release_alias],
-   [release_name]: {	#defines a given release
+   [release_name]: { #defines a given release
       “release_date”: [yyyy-mm-dd]  #optional, ISO 8601 date, may be null
       “release_build”: [yyyy-mm-dd] #required, ISO 8601 date, date of Census build
       “soma”: {
@@ -68,7 +65,7 @@ The publication date along with the full URI paths for the `soma` folder and the
 
 An example of this file is shown below:
 
-```
+```json
 {
    "latest": "release-1"
    "release-1": {
@@ -89,4 +86,3 @@ An example of this file is shown below:
    ...
 }
 ```
-

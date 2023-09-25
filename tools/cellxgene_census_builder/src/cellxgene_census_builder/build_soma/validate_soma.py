@@ -329,11 +329,15 @@ def _validate_X_obs_axis_stats(
 
     # obs.nnz
     nnz = expected_X.getnnz(axis=1)
+    assert np.all(census_obs.nnz.to_numpy() > 0.0)  # All cells must contain at least one count value > 0
     assert np.array_equal(census_obs.nnz.to_numpy(), nnz), f"{eb.name}:{dataset.dataset_id} obs.nnz incorrect."
 
     # obs.raw_mean_nnz - mean of the explicitly stored values (zeros are _ignored_)
+    with np.errstate(divide="ignore"):
+        expected_raw_mean_nnz = raw_sum / nnz
+    expected_raw_mean_nnz[~np.isfinite(expected_raw_mean_nnz)] = 0.0
     assert np.allclose(
-        census_obs.raw_mean_nnz.to_numpy(), raw_sum / nnz
+        census_obs.raw_mean_nnz.to_numpy(), expected_raw_mean_nnz
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_mean_nnz incorrect."
 
     # obs.raw_variance_nnz
@@ -707,7 +711,7 @@ def validate_consolidation(soma_path: str) -> bool:
             return A.nonempty_domain() is None
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        consolidated_uris = list_uris_to_consolidate(census)
+        consolidated_uris = [obj.uri for obj in list_uris_to_consolidate(census) if obj.is_array()]
         for uri in consolidated_uris:
             # If an empty array, must have fragment count of zero. If a non-empty array,
             # must have fragment count of one.

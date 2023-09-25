@@ -5,13 +5,15 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 
-CENSUS_SCHEMA_VERSION = "1.1.0"
+from ..util import cpu_count
 
-CXG_SCHEMA_VERSION = "3.0.0"  # version we write to the census
+CENSUS_SCHEMA_VERSION = "1.2.0"
+
+CXG_SCHEMA_VERSION = "3.1.0"  # the CELLxGENE schema version supported
+
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
 # hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
-CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2022-08-19/uberon.owl"
-CXG_SCHEMA_VERSION_IMPORT = [CXG_SCHEMA_VERSION]  # versions we can ingest
+CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_COLUMNS = [
@@ -293,23 +295,23 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
     },
 }
 
-# list of EFO terms that correspond to RNA seq modality/measurement
+# list of EFO terms that correspond to RNA seq modality/measurement. These terms
+# define the inclusive filter applied to obs.assay_ontology_term_id. All other
+# terms are excluded from the Census.
 RNA_SEQ = [
     "EFO:0008720",  # DroNc-seq
     "EFO:0008722",  # Drop-seq
     "EFO:0008780",  # inDrop
-    "EFO:0008913",  # single-cell RNA sequencing
+    "EFO:0008796",  # MARS-seq
     "EFO:0008919",  # Seq-Well
     "EFO:0008930",  # Smart-seq
     "EFO:0008931",  # Smart-seq2
     "EFO:0008953",  # STRT-seq
-    "EFO:0008995",  # 10x technology
     "EFO:0009899",  # 10x 3' v2
     "EFO:0009900",  # 10x 5' v2
     "EFO:0009901",  # 10x 3' v1
     "EFO:0009922",  # 10x 3' v3
     "EFO:0010010",  # CEL-seq2
-    "EFO:0010183",  # single cell library construction
     "EFO:0010550",  # sci-RNA-seq
     "EFO:0011025",  # 10x 5' v1
     "EFO:0030002",  # microwell-seq
@@ -318,6 +320,9 @@ RNA_SEQ = [
     "EFO:0030019",  # Seq-Well S3
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
+    "EFO:0700010",  # TruDrop
+    "EFO:0700011",  # GEXSCOPE technology
+    "EFO:0700016",  # Smart-seq v4
 ]
 
 DONOR_ID_IGNORE = ["pooled", "unknown"]
@@ -328,11 +333,18 @@ FEATURE_REFERENCE_IGNORE: Set[str] = set()
 
 
 # The default configuration for TileDB contexts used in the builder.
+# Ref: https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
 DEFAULT_TILEDB_CONFIG = {
     "py.init_buffer_bytes": 1 * 1024**3,
     "py.deduplicate": "true",
     "soma.init_buffer_bytes": 1 * 1024**3,
-    "sm.consolidation.buffer_size": 3 * 1024**3,
+    "sm.mem.reader.sparse_global_order.ratio_array_data": 0.3,
+    #
+    # Concurrency levels are capped for high-CPU boxes. Left unchecked, some
+    # of the largest host configs can bump into Linux kernel thread limits,
+    # without any real benefit to overall performance.
+    "sm.compute_concurrency_level": min(cpu_count(), 64),
+    "sm.io_concurrency_level": min(cpu_count(), 64),
 }
 
 

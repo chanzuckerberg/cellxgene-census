@@ -143,7 +143,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [dict(manifest=True, test_first_n=None, verbose=2, build_tag="build_tag", multi_process=True, max_workers=2)],
+    [dict(manifest=True, verbose=2, build_tag="build_tag", multi_process=True, max_worker_processes=2)],
     indirect=True,
 )
 def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:
