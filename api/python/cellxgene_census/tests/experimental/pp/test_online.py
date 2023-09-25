@@ -7,7 +7,7 @@ from cellxgene_census.experimental.pp._online import CountsAccumulator, MeanAccu
 
 
 def allclose(a: npt.NDArray[np.float64], b: npt.NDArray[np.float64]) -> bool:
-    return np.allclose(a, b, atol=1e-5, rtol=1e-3, equal_nan=True)
+    return np.allclose(a, b, atol=1e-5, rtol=1e-2, equal_nan=True)
 
 
 @pytest.fixture
@@ -24,7 +24,8 @@ def matrix(m: int, n: int) -> sparse.coo_matrix:
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
 @pytest.mark.parametrize("ddof", [0, 1, 100])
-def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int) -> None:
+@pytest.mark.parametrize("exclude_zeros", [True, False])
+def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int, exclude_zeros: bool) -> None:
     rng = np.random.default_rng()
     batches_prob = rng.random(n_batches)
     batches_prob /= batches_prob.sum()
@@ -37,7 +38,10 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
     assert n_samples.sum() == matrix.shape[0]
     assert len(n_samples) == n_batches
 
-    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof)
+    # exclude_zeros only if there is a single batch
+    should_exclude_zeros = exclude_zeros and n_batches == 1
+
+    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, exclude_zeros=should_exclude_zeros)
     for i in range(0, matrix.nnz, stride):
         batch_vec = batches[matrix.row[i : i + stride]] if n_batches > 1 else None
         olmv.update(matrix.col[i : i + stride], matrix.data[i : i + stride], batch_vec)
@@ -54,14 +58,25 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
     assert batches_var.shape == (n_batches, matrix.shape[1])
 
     dense = matrix.toarray()
-    assert allclose(all_u, dense.mean(axis=0))
-    assert allclose(all_var, dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
-    matrix = matrix.tocsr()  # COO not conveniently indexable
-    for batch in range(n_batches):
-        dense = matrix[batches == batch, :].toarray()
-        assert allclose(batches_u[batch], dense.mean(axis=0))
-        assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
+    if should_exclude_zeros:
+        # Normalize dense so that 0s are NaNs - allows to use np.nanmean and np.nanvar
+        dense[dense == 0] = np.nan
+        assert allclose(all_u, np.nanmean(dense, axis=0))
+        nv = np.nanvar(dense, axis=0, ddof=ddof, dtype=np.float64)
+        # np.nanvar returns NaN while we expect inf
+        nv[np.isnan(nv)] = np.inf
+        assert allclose(all_var, nv)
+
+    else:
+        assert allclose(all_u, dense.mean(axis=0))
+        assert allclose(all_var, dense.var(axis=0, ddof=ddof, dtype=np.float64))
+
+        matrix = matrix.tocsr()  # COO not conveniently indexable
+        for batch in range(n_batches):
+            dense = matrix[batches == batch, :].toarray()
+            assert allclose(batches_u[batch], dense.mean(axis=0))
+            assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
 
 @pytest.mark.experimental

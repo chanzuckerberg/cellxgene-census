@@ -37,6 +37,9 @@ class MeanVarianceAccumulator:
         self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
         self.M2 = np.zeros((n_batches, n_variables), dtype=np.float64)
 
+        if self.exclude_zeros and self.n_batches > 1:
+            raise ValueError("exclude_zeros not implemented for n_batches > 1")
+
     def update(
         self,
         var_vec: npt.NDArray[np.int64],
@@ -72,9 +75,10 @@ class MeanVarianceAccumulator:
         with np.errstate(divide="ignore"):
             if self.exclude_zeros:
                 all_var = all_M2 / np.maximum(0, self.n - self.ddof)
-                all_var = all_var.T
+                all_var = all_var[0]
             else:
                 all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
+                print(all_var, all_var.shape)
 
         return batches_u, batches_var, all_u, all_var
 
