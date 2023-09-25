@@ -44,7 +44,7 @@ dependencies= [
 experimental = [
     "torch==2.0.1",
     "torchdata==0.6.1",
-    "scikit-learn==1.2.2",
+    "scikit-learn==1.3.1",
     "scikit-misc==0.2.0",
     "psutil==5.9.5",
 ]
