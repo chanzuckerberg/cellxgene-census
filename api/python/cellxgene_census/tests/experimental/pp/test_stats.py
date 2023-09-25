@@ -108,10 +108,11 @@ def test_mean_variance_exclude_zeros(
     calc_mean: bool,
     calc_variance: bool,
     small_mem_context: soma.SOMATileDBContext,
+    obs_coords: Tuple[None, slice],
 ) -> None:
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
+            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords)
         ) as query:
             mean_variance = pp.mean_variance(
                 query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, exclude_zeros=True, ddof=0
