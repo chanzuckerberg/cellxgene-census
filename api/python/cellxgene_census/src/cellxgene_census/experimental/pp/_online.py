@@ -78,7 +78,6 @@ class MeanVarianceAccumulator:
                 all_var = all_var[0]
             else:
                 all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
-                print(all_var, all_var.shape)
 
         return batches_u, batches_var, all_u, all_var
 
