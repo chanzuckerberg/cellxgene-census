@@ -1,0 +1,16 @@
+
+hvg:
+  top_n_hvg: 
+    3000
+  hvg_batch: 
+    dataset_id
+  min_genes:
+    299
+model:
+  n_hidden: 128
+  n_latent: 10
+  n_layers: 2
+  dropout_rate: 0.1
+train:
+  max_epochs: 5
+  batch_size: 128
