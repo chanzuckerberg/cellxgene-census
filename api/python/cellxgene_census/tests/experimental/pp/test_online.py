@@ -83,6 +83,16 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
             assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
 
+@pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
+def test_meanvar_exclude_zeros_batches_fails(matrix: sparse.coo_matrix) -> None:
+    n_batches = 10
+    exclude_zeros = True
+    n_samples = np.zeros((n_batches,), dtype=np.int64)
+    ddof = 1
+    with pytest.raises(ValueError):
+        MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, exclude_zeros=exclude_zeros)
+
+
 @pytest.mark.experimental
 @pytest.mark.parametrize("stride", [101, 53])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])

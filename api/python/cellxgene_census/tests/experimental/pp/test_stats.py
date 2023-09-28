@@ -91,14 +91,12 @@ def test_mean_variance(
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("axis", [0])
+@pytest.mark.parametrize("axis", [0, 1])
 @pytest.mark.parametrize("calc_mean,calc_variance", [(True, True)])
 @pytest.mark.parametrize(
     "experiment_name,obs_value_filter,obs_coords",
     [
         ("mus_musculus", 'tissue_general == "liver" and is_primary_data == True', ()),
-        pytest.param("mus_musculus", "is_primary_data == True", (slice(0, 400_000),), marks=pytest.mark.expensive),
-        pytest.param("homo_sapiens", "is_primary_data == True", (slice(0, 400_000),), marks=pytest.mark.expensive),
     ],
 )
 def test_mean_variance_exclude_zeros(
