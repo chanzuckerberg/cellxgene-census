@@ -22,9 +22,9 @@ class GeneformerTokenizer(CellDatasetBuilder):
     ```
     import cellxgene_census
     import tiledbsoma
-    from cellxgene_census.experimental.ml import GeneformerTokenizer
+    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 
-    with cellxgene_census.open_soma() as census:
+    with cellxgene_census.open_soma(census_version="latest") as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             # set obs_query to define some subset of Census cells:
