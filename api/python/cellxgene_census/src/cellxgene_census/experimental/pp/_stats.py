@@ -47,6 +47,10 @@ def mean_variance(
         ddof:
             "Delta Degrees of Freedom": the divisor used in the calculation for variance is ``N - ddof``, where ``N`` represents the number of elements.
 
+        exclude_zeros:
+            If ``True`` mean and variance will only be calculated over explicitly stored values in the sparse matrix.
+            This could potentially include explicit zeros, but note that Census doesn't intentionally write zero values.
+
     Returns:
         Pandas DataFrame indexed by the ``soma_joinid`` and with columns ``mean`` (if ``calculate_mean = True``), and ``variance`` (if ``calculate_variance = True``)
 
