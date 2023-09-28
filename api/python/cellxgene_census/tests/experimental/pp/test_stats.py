@@ -1,6 +1,7 @@
 from typing import Any, Tuple, Union
 
 import numpy as np
+import numpy.ma as ma
 import pandas as pd
 import pytest
 import tiledbsoma as soma
@@ -124,22 +125,20 @@ def test_mean_variance_exclude_zeros(
             dim_1 = query.indexer.by_var(table["soma_dim_1"])
             coo = sparse.coo_matrix((data, (dim_0, dim_1)), shape=(query.n_obs, query.n_vars))
 
-            coo = coo.toarray()
-            # Set zeros to nan, so we can use np.nanmean and np.nanvar later
-            coo[coo == 0] = np.nan
+            dense = coo.toarray()
+
+            mask = np.ones(coo.shape)
+            r, c = coo.tolil().nonzero()
+            for x, y in zip(r, c):
+                mask[x, y] = 0
+            masked = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call, var-annotated]
 
             if calc_mean:
-                mean = np.nanmean(coo, axis=axis)
-                if axis == 1:
-                    mean = mean.T
-                ma = mean_variance["mean"].to_numpy()
-
-                # Ignore all the nan values
-                mask = ~(np.isnan(mean) | np.isnan(ma))
-                assert np.allclose(mean[mask], ma[mask], atol=1e-5, rtol=1e-1, equal_nan=True)
+                mean = masked.mean(axis=axis)  # type: ignore[no-untyped-call]
+                assert np.allclose(mean, mean_variance["mean"], atol=1e-5, rtol=1e-1, equal_nan=True)
 
             if calc_variance:
-                variance = np.nanvar(coo, axis=axis, ddof=0)
+                variance = masked.var(axis=axis, ddof=0)  # type: ignore[no-untyped-call]
                 va = mean_variance["variance"].to_numpy()
                 assert np.allclose(variance, va, atol=1e-5, rtol=1e-2, equal_nan=True)
 

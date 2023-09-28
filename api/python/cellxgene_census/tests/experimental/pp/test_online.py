@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.ma as ma
 import numpy.typing as npt
 import pytest
 from scipy import sparse
@@ -60,12 +61,15 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
     dense = matrix.toarray()
 
     if should_exclude_zeros:
-        # Normalize dense so that 0s are NaNs - allows to use np.nanmean and np.nanvar
-        dense[dense == 0] = np.nan
-        assert allclose(all_u, np.nanmean(dense, axis=0))
-        nv = np.nanvar(dense, axis=0, ddof=ddof, dtype=np.float64)
-        # np.nanvar returns NaN while we expect inf
-        nv[np.isnan(nv)] = np.inf
+        mask = np.ones(matrix.shape)
+        r, c = matrix.tolil().nonzero()
+        for x, y in zip(r, c):
+            mask[x, y] = 0
+        masked = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call, var-annotated]
+        mean = masked.mean(axis=0)  # type: ignore[no-untyped-call]
+        assert allclose(all_u, mean)
+
+        nv = masked.var(axis=0, ddof=ddof)  # type: ignore[no-untyped-call]
         assert allclose(all_var, nv)
 
     else:
