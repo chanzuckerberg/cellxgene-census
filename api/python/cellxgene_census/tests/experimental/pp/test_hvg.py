@@ -44,7 +44,7 @@ from cellxgene_census.experimental.pp import (
         "dataset_id",
         ["suspension_type", "assay_ontology_term_id"],
         ("suspension_type", "assay_ontology_term_id", "dataset_id"),
-        ["dataset_id", "assay_ontology_term_id", "suspension_type", "sample_id"],
+        ["dataset_id", "assay_ontology_term_id", "suspension_type", "donor_id"],
     ),
 )
 @pytest.mark.parametrize("span", (None, 0.5))
