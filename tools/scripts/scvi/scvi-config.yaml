@@ -19,6 +19,7 @@ train:
   max_epochs: 10
   batch_size: 1048
   plan_kwargs: 
-    {"lr": 1e-4}
   num_workers: 4
   devices: [0, 1, 2, 3]
+training_plan:
+  lr: 1e-4

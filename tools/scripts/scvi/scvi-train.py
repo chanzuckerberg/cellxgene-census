@@ -12,8 +12,9 @@ with open(file) as f:
 
 census = cellxgene_census.open_soma()
 
-experiment_name = "mus_musculus"
-obs_value_filter = 'tissue_general == "heart" and is_primary_data == True'
+census_config = config["census"]
+experiment_name = census_config["organism"]
+obs_value_filter = census_config["obs_query"]
 
 query = census["census_data"][experiment_name].axis_query(
     measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
@@ -57,8 +58,16 @@ max_epochs = train_config["max_epochs"]
 batch_size = train_config["batch_size"]
 devices = train_config["devices"]
 
+training_plan_config = config["training_plan"]
+
 scvi.settings.dl_num_workers = train_config["num_workers"]
 
-model.train(max_epochs=max_epochs, batch_size=batch_size, strategy="ddp_find_unused_parameters_true", devices=devices)
+model.train(
+    max_epochs=max_epochs, 
+    batch_size=batch_size, 
+    plan_kwargs=training_plan_config,
+    strategy="ddp_find_unused_parameters_true", 
+    devices=devices
+    )
 
 model.save("scvi_model")
