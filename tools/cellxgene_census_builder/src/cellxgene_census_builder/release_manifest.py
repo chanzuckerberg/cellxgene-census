@@ -5,7 +5,7 @@ import json
 from typing import Dict, Optional, Union, cast
 
 import s3fs
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from .util import urlcat
 
@@ -25,11 +25,13 @@ CensusLocator = TypedDict(
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
     {
-        "release_date": Optional[str],  # date of release, optional
+        "release_date": Optional[str],  # date of release (deprecated)
         "release_build": str,  # date of build
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
         "do_not_delete": Optional[bool],  # if set, prevents automated deletion
+        "flags": NotRequired[Dict[str, bool]],  # flags for the release
+        "retraction": NotRequired[Dict[str, str]],  # if retracted, details of the retraction
     },
 )
 CensusReleaseManifest = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
