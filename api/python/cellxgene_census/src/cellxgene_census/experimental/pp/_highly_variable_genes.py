@@ -63,7 +63,6 @@ def _get_batch_index(
         obs = obs.astype(str)
         batch_series = obs[cast(str, batch_key[0])]
         batch_series = batch_series.str.cat(obs[batch_key[1:]])
-        # batch_series = obs.astype(str)[batch_key[0]].str.cat(obs[batch_key[1:]])
     else:
         # if a single key, just use it
         batch_series = obs[cast(str, batch_key[0])]
