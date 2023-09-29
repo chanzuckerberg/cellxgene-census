@@ -1,18 +1,20 @@
 
 hvg:
   top_n_hvg: 
-    3000
+    8000
   hvg_batch: 
     dataset_id
   min_genes:
-    299
+    300
 model:
-  n_hidden: 128
-  n_latent: 10
-  n_layers: 2
+  n_hidden: 512
+  n_latent: 200
+  n_layers: 1
   dropout_rate: 0.1
 train:
-  max_epochs: 5
-  batch_size: 128
+  max_epochs: 10
+  batch_size: 1048
+  plan_kwargs: 
+    {"lr": 1e-4}
   num_workers: 4
   devices: [0, 1, 2, 3]
