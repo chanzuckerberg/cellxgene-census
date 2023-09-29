@@ -22,7 +22,6 @@ def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int
     return ((X_squared.sum(axis=axis).A1 / n) - np.square(X.sum(axis=axis).A1 / n)) * (n / (n - ddof))
 
 
-@pytest.mark.skip(reason="TMP")
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("axis", [0, 1])
@@ -95,23 +94,24 @@ def test_mean_variance(
 @pytest.mark.parametrize("axis", [0, 1])
 @pytest.mark.parametrize("calc_mean,calc_variance", [(True, True)])
 @pytest.mark.parametrize(
-    "experiment_name,obs_value_filter,obs_coords",
+    "experiment_name,obs_coords",
     [
-        ("mus_musculus", 'tissue_general == "liver" and is_primary_data == True', ()),
+        ("mus_musculus", (slice(0, 1_000),)),
     ],
 )
 def test_mean_variance_exclude_zeros(
     experiment_name: str,
-    obs_value_filter: str,
     axis: int,
     calc_mean: bool,
     calc_variance: bool,
     small_mem_context: soma.SOMATileDBContext,
     obs_coords: Tuple[None, slice],
 ) -> None:
+    # Note: since this test requires materializing the matrix in memory to compute the mean/variance,
+    # we're going to use a coord slice based approach. This will ensure the matrix can fit in memory.
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords)
+            measurement_name="RNA", obs_query=soma.AxisQuery(coords=obs_coords)
         ) as query:
             mean_variance = pp.mean_variance(
                 query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, exclude_zeros=True, ddof=0
@@ -127,7 +127,7 @@ def test_mean_variance_exclude_zeros(
             dense = coo.toarray()
 
             mask = np.ones(coo.shape)
-            r, c = coo.tolil().nonzero()
+            r, c = coo.nonzero()
             for x, y in zip(r, c):
                 mask[x, y] = 0
             masked = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call, var-annotated]
