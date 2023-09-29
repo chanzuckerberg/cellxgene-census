@@ -6,11 +6,12 @@
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
+import typing
 from collections import OrderedDict
 from typing import Dict, Literal, Optional, Union, cast
 
 import requests
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 """
 The following types describe the expected directory of Census builds, used
@@ -25,14 +26,26 @@ CensusLocator = TypedDict(
         "s3_region": Optional[str],  # [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
     },
 )
+CensusVersionRetraction = TypedDict(
+    "CensusVersionRetraction",
+    {
+        "date": str,  # the date of retraction
+        "reason": Optional[str],  # the reason for retraction
+        "info_url": Optional[str],  # a permalink to more information
+        "replaced_by": Optional[str],  # the census version that replaces this one
+    },
+)
+ReleaseFlag = Literal["lts", "retracted"]
+ReleaseFlags = Dict[ReleaseFlag, bool]
 CensusVersionDescription = TypedDict(
     "CensusVersionDescription",
     {
-        "release_date": Optional[str],  # date of release, optional
+        "release_date": Optional[str],  # date of release (deprecated)
         "release_build": str,  # date of build
         "soma": CensusLocator,  # SOMA objects locator
         "h5ads": CensusLocator,  # source H5ADs locator
-        "alias": Optional[str],  # the alias of this entry
+        "flags": NotRequired[ReleaseFlags],  # flags for the release
+        "retraction": NotRequired[CensusVersionRetraction],  # if retracted, details of the retraction
     },
 )
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
@@ -124,72 +137,212 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
     return description
 
 
-def get_census_version_directory() -> Dict[CensusVersionName, CensusVersionDescription]:
+def get_census_version_directory(
+    *, lts: Optional[bool] = None, retracted: Optional[bool] = False
+) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of Census releases currently available.
+    Get the directory of Census versions currently available, optionally filtering by specified flags. If a filtering
+    flag is not specified, Census versions will not be filtered by that flag. Defaults to including both "long-term
+    stable" (LTS) and weekly Census versions, and excluding retracted versions.
+
+    Params:
+        lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no
+         filtering is performed based on this flag. Defaults to None, which includes both LTS and non-LTS (weekly)
+         versions.
+        retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no
+         filtering is performed based on this flag. Defaults to False, which excludes retracted releases in the result.
 
     Returns:
-        A dictionary that contains release names and their corresponding release description.
+        A dictionary that contains Census version names and their corresponding descriptions. Census versions are
+        always named by their release date (``YYYY-MM-DD``) but may also have aliases. If an alias is specified,
+        the Census version will appear multiple times in the dictionary, once under it's release date name,
+        and again for each alias. Aliases may be: "stable", "latest", or "V#". The "stable" alias is used for the
+        most recent LTS release, the "latest" alias is used for the most recent weekly release, and the "V#" aliases
+        are used to identify LTS releases by a sequentially incrementing version number.
 
     Lifecycle:
         maturing
 
     See Also:
-        :func:`get_census_version_description`: get description by census_version.
+        :func:`get_census_version_description`: get description by census_version_name.
 
     Examples:
+        Get all LTS and weekly versions, but exclude retracted LTS versions:
+
         >>> cellxgene_census.get_census_version_directory()
-        {'latest': {'release_date': None,
-        'release_build': '2022-12-01',
-        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-        's3_region': 'us-west-2'},
-        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-        's3_region': 'us-west-2'}},
-        '2022-12-01': {'release_date': None,
-        'release_build': '2022-12-01',
-        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
-        's3_region': 'us-west-2'},
-        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
-        's3_region': 'us-west-2'}},
-        '2022-11-29': {'release_date': None,
-        'release_build': '2022-11-29',
-        'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
-        's3_region': 'us-west-2'},
-        'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
-        's3_region': 'us-west-2'}}}
+            {
+                'stable': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                'latest': {
+                    'release_date': None,
+                    'release_build': '2022-12-01',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                'V2': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                '2022-12-01': {
+                    'release_date': None,
+                    'release_build': '2022-12-01',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-12-01/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': False, 'retracted': False}
+                },
+                '2022-11-29': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                }
+            }
+
+        Get only LTS versions that are not retracted:
+
+        >>> cellxgene_census.get_census_version_directory(lts=True)
+            {
+                'stable': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                'V2': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                },
+                '2022-11-29': {
+                    'release_date': None,
+                    'release_build': '2022-11-29',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-11-29/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': False}
+                }
+            }
+
+        Get only retracted releases:
+
+        >>> cellxgene_census.get_census_version_directory(retracted=True)
+            {
+                'V1': {
+                    'release_date': None,
+                    'release_build': '2022-10-15',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': True},
+                    'retraction': {
+                        'date': '2022-10-30',
+                        'reason': 'mistakes happen',
+                        'info_url': 'http://cellxgene.com/census/errata/v1',
+                        'replaced_by': 'V2'
+                    },
+                },
+                '2022-10-15': {
+                    'release_date': None,
+                    'release_build': '2022-10-15',
+                    'soma': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/soma/',
+                             's3_region': 'us-west-2'},
+                    'h5ads': {'uri': 's3://cellxgene-data-public/cell-census/2022-10-15/h5ads/',
+                              's3_region': 'us-west-2'},
+                    'flags': {'lts': True, 'retracted': True},
+                    'retraction': {
+                        'date': '2022-10-30',
+                        'reason': 'mistakes happen',
+                        'info_url': 'http://cellxgene.com/census/errata/v1',
+                        'replaced_by': 'V2'
+                    }
+                }
+            }
     """
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()
 
     directory: CensusDirectory = cast(CensusDirectory, response.json())
+    directory_out: CensusDirectory = {}
+    aliases: typing.Set[CensusVersionName] = set()
 
     # Resolve all aliases for easier use
-    for census_version in list(directory.keys()):
-        # Strings are aliases for other census_version
-        points_at = directory[census_version]
-        alias = census_version if isinstance(points_at, str) else None
-        while isinstance(points_at, str):
+    for census_version_name in list(directory.keys()):
+        # Strings are aliases for other census_version_name
+        directory_value = directory[census_version_name]
+        alias = None
+        while isinstance(directory_value, str):
+            alias = directory_value
             # resolve aliases
-            if points_at not in directory:
-                # oops, dangling pointer -- drop original census_version
-                directory.pop(census_version)
+            if alias not in directory:
+                # oops, dangling pointer -- drop original census_version_name
+                directory.pop(census_version_name)
                 break
 
-            points_at = directory[points_at]
+            directory_value = directory[alias]
 
-        if isinstance(points_at, dict):
-            directory[census_version] = points_at.copy()
-            cast(CensusVersionDescription, directory[census_version])["alias"] = alias
+        if alias:
+            aliases.add(census_version_name)
+
+        # exclude aliases
+        if not isinstance(directory_value, dict):
+            continue
+
+        # filter by release flags
+        census_version_description = cast(CensusVersionDescription, directory_value)
+        release_flags = cast(ReleaseFlags, {"lts": lts, "retracted": retracted})
+        admitted = all(
+            [
+                census_version_description.get("flags", {}).get(flag_name, False) == release_flags[flag_name]
+                for flag_name, flag_value in release_flags.items()
+                if flag_value is not None
+            ]
+        )
+        if not admitted:
+            continue
+
+        directory_out[census_version_name] = census_version_description.copy()
 
     # Cast is safe, as we have removed all aliases
-    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory)
+    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory_out)
 
     # Sort by aliases and release date, descending
-
-    aliases = [(k, v) for k, v in unordered_directory.items() if v.get("alias") is not None]
-    releases = [(k, v) for k, v in unordered_directory.items() if v.get("alias") is None]
+    aliased_releases = [(k, v) for k, v in unordered_directory.items() if k in aliases]
+    concrete_releases = [(k, v) for k, v in unordered_directory.items() if k not in aliases]
     ordered_directory = OrderedDict()
-    for k, v in aliases + sorted(releases, key=lambda k: k[0], reverse=True):
+    # Note: reverse sorting of aliases serendipitously orders the names we happen to use in a desirable manner:
+    # "stable", "latest", "V#"). This will require a more explicit ordering if we change alias naming conventions.
+    for k, v in sorted(aliased_releases, key=lambda k: k[0], reverse=True) + sorted(
+        concrete_releases, key=lambda k: k[0], reverse=True
+    ):
         ordered_directory[k] = v
 
     return ordered_directory

@@ -22,9 +22,9 @@ class GeneformerTokenizer(CellDatasetBuilder):
     ```
     import cellxgene_census
     import tiledbsoma
-    from cellxgene_census.experimental.ml import GeneformerTokenizer
+    from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 
-    with cellxgene_census.open_soma() as census:
+    with cellxgene_census.open_soma(census_version="latest") as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             # set obs_query to define some subset of Census cells:
@@ -83,7 +83,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
             measurement_name="RNA",
             layer_name="normalized",
             # configure query to fetch the relevant genes only
-            var_query=tiledbsoma.AxisQuery(coords=(self.model_gene_ids,)),
+            # FIXME: commented out because (as of this writing) it actually slows down the query!
+            # var_query=tiledbsoma.AxisQuery(coords=(self.model_gene_ids,)),
             **kwargs,
         )
 
@@ -139,6 +140,12 @@ class GeneformerTokenizer(CellDatasetBuilder):
         # be somewhere a little north of 20K.
         assert len(self.model_gene_ids) > 20_000
 
+        # Precompute a vector by which we'll multiply each cell's expression vector.
+        # The denominator normalizes by Geneformer's median expression values.
+        # The numerator 10K factor follows Geneformer's tokenizer; theoretically it doesn't affect
+        # affect the rank order, but is probably intended to help with numerical precision.
+        self.model_gene_medians_factor = 10_000.0 / self.model_gene_medians
+
     def __enter__(self) -> "GeneformerTokenizer":
         super().__enter__()
         # On context entry, load the necessary cell metadata (obs_df)
@@ -153,21 +160,18 @@ class GeneformerTokenizer(CellDatasetBuilder):
         Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
-        # project cell_Xrow onto model_gene_ids
+        # project cell_Xrow onto model_gene_ids and normalize
         model_counts = cell_Xrow[:, self.model_gene_ids]
         assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
         # assert len(model_counts.data) == np.count_nonzero(model_counts.data)
-
-        # normalize counts by Geneformer's medians. the 10K factor follows Geneformer's
-        # tokenizer to "allocate bits to precision"
-        model_expr = model_counts.multiply(10_000).multiply(1.0 / self.model_gene_medians)
+        model_expr = model_counts.multiply(self.model_gene_medians_factor)
         assert isinstance(model_expr, scipy.sparse.coo_matrix), type(model_expr)
         # assert len(model_expr.data) == np.count_nonzero(model_expr.data)
 
         # figure the resulting tokens in descending order of model_expr
         # (use sparse model_expr.{col,data} to naturally exclude undetected genes)
-        token_order = model_expr.col[np.argsort(-model_expr.data)]
-        input_ids = self.model_gene_tokens[token_order][: self.max_input_tokens]
+        token_order = model_expr.col[np.argsort(-model_expr.data)[: self.max_input_tokens]]
+        input_ids = self.model_gene_tokens[token_order]
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
         # add the requested obs_attributes
