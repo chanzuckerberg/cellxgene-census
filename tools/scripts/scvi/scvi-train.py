@@ -27,7 +27,7 @@ min_genes = hvg_config["min_genes"]
 hvgs_df = highly_variable_genes(query, n_top_genes=top_n_hvg, batch_key=hvg_batch)
 
 hv = hvgs_df.highly_variable
-hv_idx = hv[hv == True].index
+hv_idx = hv[hv is True].index
 
 query = census["census_data"][experiment_name].axis_query(
     measurement_name="RNA",
@@ -55,7 +55,10 @@ model = scvi.model.SCVI(ad, n_layers=n_layers, n_latent=n_latent, gene_likelihoo
 train_config = config["train"]
 max_epochs = train_config["max_epochs"]
 batch_size = train_config["batch_size"]
+devices = train_config["devices"]
 
-model.train(max_epochs=max_epochs, batch_size=batch_size)
+scvi.settings.dl_num_workers = train_config["num_workers"]
+
+model.train(max_epochs=max_epochs, batch_size=batch_size, strategy="ddp", devices=devices)
 
 model.save("scvi_model")
