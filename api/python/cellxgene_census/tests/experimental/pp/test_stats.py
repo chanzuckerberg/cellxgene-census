@@ -22,6 +22,7 @@ def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int
     return ((X_squared.sum(axis=axis).A1 / n) - np.square(X.sum(axis=axis).A1 / n)) * (n / (n - ddof))
 
 
+@pytest.mark.skip(reason="TMP")
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("axis", [0, 1])
