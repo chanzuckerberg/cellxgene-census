@@ -1,4 +1,8 @@
-
+census:
+  organism: 
+    "mus_musculus"
+  obs_query:
+    'tissue_general == "heart" and is_primary_data == True'
 hvg:
   top_n_hvg: 
     8000
