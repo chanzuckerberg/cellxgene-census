@@ -29,7 +29,7 @@ min_genes = hvg_config["min_genes"]
 hvgs_df = highly_variable_genes(query, n_top_genes=top_n_hvg, batch_key=hvg_batch)
 
 hv = hvgs_df.highly_variable
-hv_idx = hv[hv is True].index  # fmt: skip
+hv_idx = hv[hv == True].index  # fmt: skip
 
 query = census["census_data"][experiment_name].axis_query(
     measurement_name="RNA",
