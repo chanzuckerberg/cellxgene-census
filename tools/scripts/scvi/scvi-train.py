@@ -1,5 +1,6 @@
 import cellxgene_census
 import tiledbsoma as soma
+import torch
 import yaml
 from cellxgene_census.experimental.pp import highly_variable_genes
 
@@ -28,7 +29,7 @@ min_genes = hvg_config["min_genes"]
 hvgs_df = highly_variable_genes(query, n_top_genes=top_n_hvg, batch_key=hvg_batch)
 
 hv = hvgs_df.highly_variable
-hv_idx = hv[hv == True].index  # fmt: skip
+hv_idx = hv[hv is True].index  # fmt: skip
 
 query = census["census_data"][experiment_name].axis_query(
     measurement_name="RNA",
@@ -56,18 +57,25 @@ model = scvi.model.SCVI(ad, n_layers=n_layers, n_latent=n_latent, gene_likelihoo
 train_config = config["train"]
 max_epochs = train_config["max_epochs"]
 batch_size = train_config["batch_size"]
+train_size = train_config["train_size"]
+early_stopping = train_config["early_stopping"]
 devices = train_config["devices"]
+
+trainer_config = train_config["trainer"]
 
 training_plan_config = config["training_plan"]
 
 scvi.settings.dl_num_workers = train_config["num_workers"]
 
 model.train(
-    max_epochs=max_epochs, 
-    batch_size=batch_size, 
+    max_epochs=max_epochs,
+    batch_size=batch_size,
+    train_size=train_size,
+    early_stopping=early_stopping,
     plan_kwargs=training_plan_config,
-    strategy="ddp_find_unused_parameters_true", 
-    devices=devices
-    )
+    trainer_kwargs=trainer_config,
+    strategy="ddp_find_unused_parameters_true",
+    devices=devices,
+)
 
-model.save("scvi_model")
+torch.save(model.module.state_dict(), "scvi.model")
