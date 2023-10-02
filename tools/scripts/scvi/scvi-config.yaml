@@ -7,7 +7,7 @@ hvg:
   top_n_hvg: 
     8000
   hvg_batch: 
-    dataset_id
+    [suspension_type, assay]
 model:
   n_hidden: 512
   n_latent: 200

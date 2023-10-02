@@ -73,9 +73,9 @@ model.train(
     train_size=train_size,
     early_stopping=early_stopping,
     plan_kwargs=training_plan_config,
-    trainer_kwargs=trainer_config,
     strategy="ddp_find_unused_parameters_true", # Required for Multi-GPU training.
     devices=devices,
+    **trainer_config,
 )
 
 torch.save(model.module.state_dict(), "scvi.model")
