@@ -24,12 +24,12 @@ class MeanVarianceAccumulator:
         n_samples: npt.NDArray[np.int64],
         n_variables: int,
         ddof: int = 1,
-        exclude_zeros: bool = False,
+        nnz_only: bool = False,
     ):
         if n_samples.sum() <= 0:
             raise ValueError("No samples provided - can't calculate mean or variance.")
 
-        self.exclude_zeros = exclude_zeros
+        self.nnz_only = nnz_only
         self.ddof = ddof
         self.n_batches = n_batches
         self.n_samples = n_samples
@@ -37,8 +37,8 @@ class MeanVarianceAccumulator:
         self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
         self.M2 = np.zeros((n_batches, n_variables), dtype=np.float64)
 
-        if self.exclude_zeros and self.n_batches > 1:
-            raise ValueError("exclude_zeros not implemented for n_batches > 1")
+        if self.nnz_only and self.n_batches > 1:
+            raise ValueError("nnz_only not implemented for n_batches > 1")
 
     def update(
         self,
@@ -57,8 +57,8 @@ class MeanVarianceAccumulator:
         self,
     ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         # correct each batch to account for sparsity.
-        # if exclude_zeros, the correction is not needed as we only do mean/average over nonzero values
-        if not self.exclude_zeros:
+        # if nnz_only, the correction is not needed as we only do mean/average over nonzero values
+        if not self.nnz_only:
             _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
 
         # compute u, var for each batch
@@ -73,7 +73,7 @@ class MeanVarianceAccumulator:
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
 
         with np.errstate(divide="ignore"):
-            if self.exclude_zeros:
+            if self.nnz_only:
                 all_var = all_M2 / np.maximum(0, self.n - self.ddof)
                 all_var = all_var[0]
             else:
@@ -83,7 +83,7 @@ class MeanVarianceAccumulator:
 
 
 class MeanAccumulator:
-    def __init__(self, n_samples: int, n_variables: int, exclude_zeros: bool = False):
+    def __init__(self, n_samples: int, n_variables: int, nnz_only: bool = False):
         if n_samples <= 0:
             raise ValueError("No samples provided - can't calculate mean.")
 
@@ -93,17 +93,17 @@ class MeanAccumulator:
         self.u = np.zeros(n_variables, dtype=np.float64)
         self.n_samples = n_samples
         # If we want to exclude zeros, we need to keep track of the denominator
-        self.exclude_zeros = exclude_zeros
+        self.nnz_only = nnz_only
         self.denominator = np.zeros(n_variables)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        if self.exclude_zeros:
+        if self.nnz_only:
             _update_mean_and_denominator_vectors(self.u, self.denominator, var_vec, val_vec)
         else:
             _update_mean_vector(self.u, var_vec, val_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
-        if self.exclude_zeros:
+        if self.nnz_only:
             return self.u / self.denominator
         else:
             return self.u / self.n_samples

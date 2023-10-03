@@ -99,7 +99,7 @@ def test_mean_variance(
         ("mus_musculus", (slice(0, 1_000),)),
     ],
 )
-def test_mean_variance_exclude_zeros(
+def test_mean_variance_nnz_only(
     experiment_name: str,
     axis: int,
     calc_mean: bool,
@@ -114,7 +114,7 @@ def test_mean_variance_exclude_zeros(
             measurement_name="RNA", obs_query=soma.AxisQuery(coords=obs_coords)
         ) as query:
             mean_variance = pp.mean_variance(
-                query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, exclude_zeros=True, ddof=0
+                query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, nnz_only=True, ddof=0
             )
 
             table = query.X("raw").tables().concat()

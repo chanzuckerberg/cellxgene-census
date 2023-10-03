@@ -25,8 +25,8 @@ def matrix(m: int, n: int) -> sparse.coo_matrix:
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
 @pytest.mark.parametrize("ddof", [0, 1, 100])
-@pytest.mark.parametrize("exclude_zeros", [True, False])
-def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int, exclude_zeros: bool) -> None:
+@pytest.mark.parametrize("nnz_only", [True, False])
+def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int, nnz_only: bool) -> None:
     rng = np.random.default_rng()
     batches_prob = rng.random(n_batches)
     batches_prob /= batches_prob.sum()
@@ -39,10 +39,10 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
     assert n_samples.sum() == matrix.shape[0]
     assert len(n_samples) == n_batches
 
-    # exclude_zeros only if there is a single batch
-    should_exclude_zeros = exclude_zeros and n_batches == 1
+    # nnz_only only if there is a single batch
+    should_nnz_only = nnz_only and n_batches == 1
 
-    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, exclude_zeros=should_exclude_zeros)
+    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, nnz_only=should_nnz_only)
     for i in range(0, matrix.nnz, stride):
         batch_vec = batches[matrix.row[i : i + stride]] if n_batches > 1 else None
         olmv.update(matrix.col[i : i + stride], matrix.data[i : i + stride], batch_vec)
@@ -60,7 +60,7 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
 
     dense = matrix.toarray()
 
-    if should_exclude_zeros:
+    if should_nnz_only:
         mask = np.ones(matrix.shape)
         r, c = matrix.tolil().nonzero()
         for x, y in zip(r, c):
@@ -84,13 +84,13 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
 
 
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
-def test_meanvar_exclude_zeros_batches_fails(matrix: sparse.coo_matrix) -> None:
+def test_meanvar_nnz_only_batches_fails(matrix: sparse.coo_matrix) -> None:
     n_batches = 10
-    exclude_zeros = True
+    nnz_only = True
     n_samples = np.zeros((n_batches,), dtype=np.int64)
     ddof = 1
     with pytest.raises(ValueError):
-        MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, exclude_zeros=exclude_zeros)
+        MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, nnz_only=nnz_only)
 
 
 @pytest.mark.experimental
