@@ -94,17 +94,17 @@ class MeanAccumulator:
         self.n_samples = n_samples
         # If we want to exclude zeros, we need to keep track of the denominator
         self.nnz_only = nnz_only
-        self.denominator = np.zeros(n_variables)
+        self.n = np.zeros(n_variables)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
         if self.nnz_only:
-            _update_mean_and_denominator_vectors(self.u, self.denominator, var_vec, val_vec)
+            _update_mean_and_denominator_vectors(self.u, self.n, var_vec, val_vec)
         else:
             _update_mean_vector(self.u, var_vec, val_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
         if self.nnz_only:
-            return self.u / self.denominator
+            return self.u / self.n
         else:
             return self.u / self.n_samples
 
@@ -413,10 +413,10 @@ def _update_mean_vector(
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _update_mean_and_denominator_vectors(
     u: npt.NDArray[np.float64],
-    d: npt.NDArray[np.float64],
+    n: npt.NDArray[np.float64],
     var_vec: npt.NDArray[np.int64],
     val_vec: npt.NDArray[np.float32],
 ) -> None:
     for col, val in zip(var_vec, val_vec):
         u[col] = u[col] + val
-        d[col] = d[col] + 1
+        n[col] = n[col] + 1
