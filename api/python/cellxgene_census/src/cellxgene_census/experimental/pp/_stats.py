@@ -93,7 +93,6 @@ def mean_variance(
             mvn.update(dim, data)
             print("update")
         _, _, all_u, all_var = mvn.finalize()
-        print("finalized")
         if calculate_mean:
             result["mean"] = all_u
         result["variance"] = all_var
