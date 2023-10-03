@@ -40,6 +40,8 @@ ad = query.to_anndata(X_name="raw")
 
 ad.obs["batch"] = ad.obs["dataset_id"] + ad.obs["assay"] + ad.obs["suspension_type"] + ad.obs["donor_id"]
 
+ad.write_h5ad("anndata.h5ad", compression="gzip")
+
 # scvi settings
 scvi.settings.seed = 0
 print("Last run with scvi-tools version:", scvi.__version__)
@@ -73,7 +75,7 @@ model.train(
     train_size=train_size,
     early_stopping=early_stopping,
     plan_kwargs=training_plan_config,
-    strategy="ddp_find_unused_parameters_true", # Required for Multi-GPU training.
+    strategy="ddp_find_unused_parameters_true",  # Required for Multi-GPU training.
     devices=devices,
     **trainer_config,
 )
