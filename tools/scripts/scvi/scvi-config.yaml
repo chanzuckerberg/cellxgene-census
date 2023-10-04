@@ -2,7 +2,10 @@ census:
   organism: 
     "mus_musculus"
   obs_query:
-    'tissue_general == "heart" and is_primary_data == True and nnz >= 300'
+    #'tissue_general == "heart" and is_primary_data == True and nnz >= 300'
+    'nnz >= 300'
+  use_anndata:
+    anndata.h5ad
 hvg:
   top_n_hvg: 
     8000

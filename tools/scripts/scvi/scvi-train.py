@@ -3,6 +3,8 @@ import tiledbsoma as soma
 import torch
 import yaml
 from cellxgene_census.experimental.pp import highly_variable_genes
+import gc
+import anndata
 
 import scvi
 
@@ -11,36 +13,50 @@ file = "scvi-config.yaml"
 with open(file) as f:
     config = yaml.safe_load(f)
 
-census = cellxgene_census.open_soma(census_version="latest")
+if config["census"].get("use_anndata"):
+    ad = anndata.read_h5ad(config["census"]["use_anndata"])
+else:
+    census = cellxgene_census.open_soma(census_version="latest")
 
-census_config = config.get("census")
-experiment_name = census_config.get("organism")
-obs_value_filter = census_config.get("obs_query")
+    census_config = config.get("census")
+    experiment_name = census_config.get("organism")
+    obs_value_filter = census_config.get("obs_query")
 
-query = census["census_data"][experiment_name].axis_query(
-    measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
-)
+    query = census["census_data"][experiment_name].axis_query(
+        measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter)
+    )
 
-hvg_config = config.get("hvg")
-top_n_hvg = hvg_config.get("top_n_hvg")
-hvg_batch = hvg_config.get("hvg_batch")
-min_genes = hvg_config.get("min_genes")
+    hvg_config = config.get("hvg")
+    top_n_hvg = hvg_config.get("top_n_hvg")
+    hvg_batch = hvg_config.get("hvg_batch")
+    min_genes = hvg_config.get("min_genes")
 
-hvgs_df = highly_variable_genes(query, n_top_genes=top_n_hvg, batch_key=hvg_batch)
+    print("Starting hvg selection")
 
-hv = hvgs_df.highly_variable
-hv_idx = hv[hv == True].index  # fmt: skip
+    hvgs_df = highly_variable_genes(query, n_top_genes=top_n_hvg, batch_key=hvg_batch)
 
-query = census["census_data"][experiment_name].axis_query(
-    measurement_name="RNA",
-    obs_query=soma.AxisQuery(value_filter=obs_value_filter),
-    var_query=soma.AxisQuery(coords=(list(hv_idx),)),
-)
-ad = query.to_anndata(X_name="raw")
+    hv = hvgs_df.highly_variable
+    hv_idx = hv[hv == True].index  # fmt: skip
 
-ad.obs["batch"] = ad.obs["dataset_id"] + ad.obs["assay"] + ad.obs["suspension_type"] + ad.obs["donor_id"]
+    query = census["census_data"][experiment_name].axis_query(
+        measurement_name="RNA",
+        obs_query=soma.AxisQuery(value_filter=obs_value_filter),
+        var_query=soma.AxisQuery(coords=(list(hv_idx),)),
+    )
 
-ad.write_h5ad("anndata.h5ad", compression="gzip")
+    print("Converting to AnnData")
+    ad = query.to_anndata(X_name="raw")
+
+    ad.obs["batch"] = ad.obs["dataset_id"] + ad.obs["assay"] + ad.obs["suspension_type"] + ad.obs["donor_id"]
+
+    print("AnnData conversion completed. Saving...")
+    ad.write_h5ad("anndata.h5ad", compression="gzip")
+    print("AnnData saved")
+
+    del census, query, hvgs_df, hv, hv_idx
+    gc.collect()
+
+print("Start SCVI run")
 
 # scvi settings
 scvi.settings.seed = 0
@@ -53,6 +69,8 @@ n_hidden = model_config.get("n_hidden")
 n_latent = model_config.get("n_latent")
 n_layers = model_config.get("n_layers")
 dropout_rate = model_config.get("dropout_rate")
+
+print("Configure model")
 
 model = scvi.model.SCVI(ad, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb")
 
@@ -68,6 +86,8 @@ trainer_config = train_config.get("trainer")
 training_plan_config = config.get("training_plan")
 
 scvi.settings.dl_num_workers = train_config.get("num_workers")
+
+print("Start training model")
 
 model.train(
     max_epochs=max_epochs,
