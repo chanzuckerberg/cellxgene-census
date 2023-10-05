@@ -1,11 +1,10 @@
 census:
   organism: 
     "mus_musculus"
-  obs_query:
-    #'tissue_general == "heart" and is_primary_data == True and nnz >= 300'
-    'nnz >= 300'
-  use_anndata:
-    anndata.h5ad
+  obs_query: # Use if you want to train on a subset of the model
+    null
+  obs_query_model: # Required when loading data for model training. Do not change.
+    'is_primary_data == True and nnz >= 300'
 hvg:
   top_n_hvg: 
     8000
