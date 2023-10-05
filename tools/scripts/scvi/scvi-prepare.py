@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     hv = hvgs_df.highly_variable
 
-    hv.to_hdf("hv_genes.h5", key="hvg", mode="w")
+    hv.to_pickle("hv_genes.pkl", key="hvg", mode="w")
     # fmt: off
     hv_idx = hv[hv is True].index
     # fmt: on

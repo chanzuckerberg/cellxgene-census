@@ -21,7 +21,7 @@ if __name__ == "__main__":
     experiment_name = census_config.get("organism")
     obs_value_filter = census_config.get("obs_query")
 
-    hv = pd.read_hdf("hv_genes.h5", key="hvg")
+    hv = pd.read_pickle("hv_genes.pkl")
     # fmt: off
     hv_idx = hv[hv is True].index
     # fmt: on
