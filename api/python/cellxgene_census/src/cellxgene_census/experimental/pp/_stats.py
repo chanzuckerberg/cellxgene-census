@@ -27,7 +27,8 @@ def mean_variance(
     the total number of elements (N) is, by default, the corresponding dimension size:
     for column-wise calculations (``axis = 0``) N is number of rows,
     for row-wise calculations (``axis = 1``) N is number of columns.
-    For metrics calculated only on nnz values of the sparse matrix, specify ``nnz_only=True``.
+    For metrics calculated only on nnz (explicitly stored)values of the sparse matrix,
+    specify ``nnz_only=True``.
 
     Args:
         query:
