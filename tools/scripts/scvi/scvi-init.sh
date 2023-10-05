@@ -22,8 +22,13 @@ sudo cp /usr/lib/python3/dist-packages/apt_pkg.cpython-38-x86_64-linux-gnu.so /u
 
 sudo apt -y install libnvidia-gl-535 libnvidia-common-535 libnvidia-compute-535 libnvidia-encode-535 libnvidia-decode-535 nvidia-compute-utils-535  libnvidia-fbc1-535 nvidia-driver-535
 
-pip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+ipip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 pip install pathlib torch click ray hyperopt
 pip install git+https://github.com/scverse/scvi-tools.git
 
-pip install cellxgene-census
+
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# pip install nvidia-cusolver-cu11
+
+pip install scikit-misc
+pip install git+https://github.com/chanzuckerberg/cellxgene-census#subdirectory=api/python/cellxgene_census
