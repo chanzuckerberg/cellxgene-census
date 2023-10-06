@@ -18,9 +18,9 @@ if __name__ == "__main__":
     adata_config = config["anndata"]
     filename = adata_config.get("model_filename")
 
-    ad.read_h5ad(filename)
+    adata = ad.read_h5ad(filename)
 
-    scvi.model.SCVI.setup_anndata(ad, batch_key="batch")
+    scvi.model.SCVI.setup_anndata(adata, batch_key="batch")
 
     model_config = config.get("model")
     n_hidden = model_config.get("n_hidden")

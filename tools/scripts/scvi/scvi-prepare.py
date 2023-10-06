@@ -58,7 +58,7 @@ if __name__ == "__main__":
     filename = adata_config.get("model_filename")
 
     ad.obs["batch"] = functools.reduce(lambda a, b: a+b, [ad.obs[c].astype(str) for c in batch_key])
-    ad.var = ad.var.set_index("feature_id", inplace=True)
+    ad.var.set_index("feature_id", inplace=True)
 
     print("AnnData conversion completed. Saving...")
     ad.write_h5ad(filename, compression="gzip")
