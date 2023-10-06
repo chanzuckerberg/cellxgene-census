@@ -12,10 +12,22 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]  # [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         python-version: ["3.11"]
-        census-build-version: ["latest", "stable", "2023-07-25", "2023-05-15"]
-        py-pkg-version: ["~=1.6.0", "head-of-main"]  # ["==1.0.0", "~=1.0.0", "~=1.1.0", "~=1.2.0", "~=1.3.0", "~=1.4.0", "~=1.5.0", "~=1.6.0", "head-of-main"]
+        census-build-version:
+          - "latest"
+          - "stable"
+          - "2023-07-25"
+          - "2023-05-15"
+        py-pkg-version:
+          - "~=1.0.0"
+          - "~=1.1.0"
+          - "~=1.2.0"
+          - "~=1.3.0"
+          - "~=1.4.0"
+          - "~=1.5.0"
+          - "~=1.6.0"
+          - "head-of-main"
 
     runs-on: ${{matrix.os}}
 
