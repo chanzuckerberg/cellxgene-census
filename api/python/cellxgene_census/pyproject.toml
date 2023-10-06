@@ -82,6 +82,7 @@ markers = [
     "live_corpus: runs on the live CELLxGENE Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
     "experimental: tests for the `experimental` package",
+    "lts_compat_check: check for compatibility with an LTS build",
 ]
 
 [tool.ruff]
