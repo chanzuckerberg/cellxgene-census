@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     print("Configure model")
 
-    model = scvi.model.SCVI(ad, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb")
+    model = scvi.model.SCVI(adata, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb")
 
     train_config = config.get("train")
     max_epochs = train_config.get("max_epochs")

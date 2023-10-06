@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import tiledbsoma as soma
 import yaml
+import functools
 
 import scvi
 
@@ -26,15 +27,24 @@ if __name__ == "__main__":
     hv_idx = hv[hv is True].index
     # fmt: on
 
+    if obs_value_filter is not None:
+        obs_query = soma.AxisQuery(value_filter=obs_value_filter)
+    else:
+        obs_query = None
+
     query = census["census_data"][experiment_name].axis_query(
         measurement_name="RNA",
+        obs_query=obs_query,
         var_query=soma.AxisQuery(coords=(list(hv_idx),)),
     )
 
+    adata_config = config["anndata"]
+    batch_key = adata_config.get("batch_key")
+    filename = adata_config.get("model_filename")
+
     print("Converting to AnnData")
     ad = query.to_anndata(X_name="raw")
-
-    ad.obs["batch"] = ad.obs["dataset_id"] + ad.obs["assay"] + ad.obs["suspension_type"] + ad.obs["donor_id"]
+    ad.obs["batch"] = functools.reduce(lambda a, b: a+b, [ad.obs[c].astype(str) for c in batch_key])
 
     del census, query, hv, hv_idx
     gc.collect()
