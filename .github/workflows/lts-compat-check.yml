@@ -2,9 +2,9 @@ name: Compat test between Census package and LTS builds
 
 on:
   pull_request:  # TODO: remove befor landing
-  # schedule:
-  #   - cron: "30 1 * * *"
-  # workflow_dispatch: # used for debugging or manual validation
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch: # used for debugging or manual validation
   
 jobs:
   python-compat-check:
@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.11"]
-        census-build-version:
+        census-build-version:  # Add additional LTS releases as they occur
           - "latest"
           - "stable"
           - "2023-07-25"

@@ -2,7 +2,8 @@
 Compatibility tests between the installed verison of cellxgene-census and
 a named LTS release. Primarilly intended to be driven by a periodic GHA.
 
-Where there are known and accepted incompatibilities, use `pytest.skipif`
+Where there are known and accepted incompatibilities, use `pytest.skip`
+to codify them.
 """
 from __future__ import annotations
 
