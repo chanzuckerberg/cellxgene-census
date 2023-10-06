@@ -15,7 +15,10 @@ if __name__ == "__main__":
     scvi.settings.seed = 0
     print("Last run with scvi-tools version:", scvi.__version__)
 
-    ad.read_h5ad("anndata.h5ad")
+    adata_config = config["anndata"]
+    filename = adata_config.get("model_filename")
+
+    ad.read_h5ad(filename)
 
     scvi.model.SCVI.setup_anndata(ad, batch_key="batch")
 
@@ -24,6 +27,7 @@ if __name__ == "__main__":
     n_latent = model_config.get("n_latent")
     n_layers = model_config.get("n_layers")
     dropout_rate = model_config.get("dropout_rate")
+    filename = model_config.get("filename")
 
     print("Configure model")
 
@@ -35,12 +39,19 @@ if __name__ == "__main__":
     train_size = train_config.get("train_size")
     early_stopping = train_config.get("early_stopping")
     devices = train_config.get("devices")
+    multi_gpu = train_config.get("multi_gpu", False)
 
     trainer_config = train_config.get("trainer")
 
     training_plan_config = config.get("training_plan")
 
-    scvi.settings.dl_num_workers = train_config.get("num_workers")
+    if multi_gpu:
+        scvi.settings.dl_num_workers = train_config.get("num_workers")
+        strategy = "ddp_find_unused_parameters_true"
+        devices = devices
+    else:
+        strategy = None
+        devices = None
 
     print("Start training model")
 
@@ -55,6 +66,4 @@ if __name__ == "__main__":
         **trainer_config,
     )
 
-    model.save("scvi.model")
-
-    # torch.save(model.module.state_dict(), "scvi.model")
+    model.save(filename)

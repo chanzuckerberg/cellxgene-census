@@ -2,6 +2,9 @@ import cellxgene_census
 import tiledbsoma as soma
 import yaml
 from cellxgene_census.experimental.pp import highly_variable_genes
+import functools 
+
+
 
 file = "scvi-config.yaml"
 
@@ -36,9 +39,9 @@ if __name__ == "__main__":
 
     hv = hvgs_df.highly_variable
 
-    hv.to_pickle("hv_genes.pkl", key="hvg", mode="w")
+    hv.to_pickle("hv_genes.pkl")
     # fmt: off
-    hv_idx = hv[hv is True].index
+    hv_idx = hv[hv == True].index
     # fmt: on
 
     query = census["census_data"][experiment_name].axis_query(
@@ -50,9 +53,13 @@ if __name__ == "__main__":
     print("Converting to AnnData")
     ad = query.to_anndata(X_name="raw")
 
-    ad.obs["batch"] = ad.obs["dataset_id"] + ad.obs["assay"] + ad.obs["suspension_type"] + ad.obs["donor_id"]
-    ad.var = ad.var.set_index("gene_id", inplace=True)
+    adata_config = config["anndata"]
+    batch_key = adata_config.get("batch_key")
+    filename = adata_config.get("model_filename")
+
+    ad.obs["batch"] = functools.reduce(lambda a, b: a+b, [ad.obs[c].astype(str) for c in batch_key])
+    ad.var = ad.var.set_index("feature_id", inplace=True)
 
     print("AnnData conversion completed. Saving...")
-    ad.write_h5ad("anndata.h5ad", compression="gzip")
+    ad.write_h5ad(filename, compression="gzip")
     print("AnnData saved")
