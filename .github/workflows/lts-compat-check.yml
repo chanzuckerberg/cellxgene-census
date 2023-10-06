@@ -1,7 +1,6 @@
 name: Compat test between Census package and LTS builds
 
 on:
-  pull_request:  # TODO: remove befor landing
   schedule:
     - cron: "30 1 * * *"
   workflow_dispatch: # used for debugging or manual validation
