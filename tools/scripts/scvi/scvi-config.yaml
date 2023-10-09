@@ -12,7 +12,8 @@ hvg:
     [suspension_type, assay]
 anndata:
   batch_key:
-    [dataset_id, assay, suspension_type, donor_id]
+    [suspension_type, assay]
+    # [dataset_id, assay, suspension_type, donor_id]
   model_filename:
     anndata_model.h5ad
 model:    

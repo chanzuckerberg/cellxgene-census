@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     hv = pd.read_pickle("hv_genes.pkl")
     # fmt: off
-    hv_idx = hv[hv is True].index
+    hv_idx = hv[hv == True].index
     # fmt: on
 
     if obs_value_filter is not None:
@@ -46,12 +46,17 @@ if __name__ == "__main__":
     ad = query.to_anndata(X_name="raw")
     ad.obs["batch"] = functools.reduce(lambda a, b: a+b, [ad.obs[c].astype(str) for c in batch_key])
 
+    print(ad.var)
+
     del census, query, hv, hv_idx
     gc.collect()
 
     # TODO: ensure that the anndata we're loading doesn't have obs filtering
 
-    model = scvi.model.SCVI.load("scvi.model.test", adata=ad)
+    model_config = config.get("model")
+    model_filename = model_config.get("filename")
+
+    model = scvi.model.SCVI.load(model_filename, adata=ad)
 
     latent = model.get_latent_representation(ad)
 

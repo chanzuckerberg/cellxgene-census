@@ -51,7 +51,7 @@ if __name__ == "__main__":
         devices = devices
     else:
         strategy = None
-        devices = None
+        devices = 1
 
     print("Start training model")
 
