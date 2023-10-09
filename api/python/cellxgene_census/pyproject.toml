@@ -37,7 +37,6 @@ dependencies= [
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
-    "scipy<1.11",  # work around incompatibility between scipy and pyarrow
 ]
 
 [project.optional-dependencies]
