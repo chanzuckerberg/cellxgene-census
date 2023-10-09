@@ -416,13 +416,17 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 rank 2 (multiple rows).
             shuffle:
                 Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``False`` (no shuffling).
-                For performance reasons, shuffling is performed in two steps: 1) a global shuffling of contiguous
-                ranges of data, where the rows are grouped into chunks and
-                the chunks themselves are shuffled, and 2) a local shuffling, where each chunk is shuffled internally.
-                The global shuffling ensures that the ordering of result data will be randomized across the entire obs
-                axis, while also reducing the number of SOMA read operations by leveraging the spatial locality of
-                contiguously stored data. The local shuffling ensures the data is shuffled at the row-level within each
-                chunk.
+                For performance reasons, shuffling is performed in two steps: 1) a global shuffling, where contiguous
+                rows are grouped into chunks and the order of the chunks is randomized, and then 2) a local
+                shuffling, where the rows within each chunk are shuffled. Since ExperimentDataPipe must retrieve data
+                in chunks (to keep memory requirements to a fixed size), global shuffling ensures that a given row in
+                the shuffled result can originate from any position in the non-shuffled result ordering. If shuffling
+                only occurred within each chunk (i.e. "local" shuffling), the first chunk's rows would always be
+                returned first, the second chunk's rows would always be returned second, and so on. The chunk size is
+                determined by the ``soma_chunk_size`` parameter. Note that rows within a chunk will maintain
+                proximity, even after shuffling, so some experimentation may be required to ensure the shuffling is
+                sufficient for the model training process. To this end, the ``soma_chunk_size`` can be treated as a
+                hyperparameter that can be tuned.
             seed:
                 The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
                 ``DistributedDataParallel`` to ensure data partitions are disjoint across worker processes.
@@ -432,11 +436,12 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 to ``False``, since sparse Tensors are still experimental in PyTorch.
             soma_chunk_size:
                 The number of obs/X rows to retrieve when reading data from SOMA. This impacts two aspects of
-                ``ExperimentDataPipe`` behavior: 1) The maximum memory utilization is controlled by this
-                parameter, with larger values providing better read performance, but also requiring more memory. If
-                not specified, the value is set to utilize ~1 GiB of RAM per SOMA chunk read, based upon the number
-                of ``var`` columns (cells/features) being requested and assuming X data sparsity of 95%.
-                2) The granularity of the global shuffling step (see ``shuffle`` parameter).
+                ``ExperimentDataPipe`` behavior: 1) The maximum memory utilization, with larger values providing
+                better read performance, but also requiring more memory; 2) The granularity of the global shuffling
+                step (see ``shuffle`` parameter for details). If not specified, the value is set to utilize ~1 GiB of
+                RAM per SOMA chunk read, based upon the number of ``var`` columns (cells/features) being requested
+                and assuming X data sparsity of 95%; the number of rows per chunk will depend on the number of
+                ``var`` columns being read.
             use_eager_fetch:
                 Fetch the next SOMA chunk of ``obs`` and ``X`` data immediately after a previously fetched SOMA chunk is made
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
