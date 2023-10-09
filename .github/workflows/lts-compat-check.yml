@@ -1,4 +1,4 @@
-name: Compat test between Census package and LTS builds
+name: Census LTS Compatibility  # Compat test between Census package and LTS builds
 
 on:
   schedule:
