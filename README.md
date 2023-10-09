@@ -1,5 +1,6 @@
 [![codecov](https://codecov.io/gh/chanzuckerberg/cellxgene-census/branch/main/graph/badge.svg?token=byX1pyDlc9)](https://codecov.io/gh/chanzuckerberg/cellxgene-census)
 [![Python dependency checks](https://github.com/chanzuckerberg/cellxgene-census/actions/workflows/py-dependency-check.yml/badge.svg)](https://github.com/chanzuckerberg/cellxgene-census/actions/workflows/py-dependency-check.yml)
+[![LTS compat checks](https://github.com/chanzuckerberg/cellxgene-census/actions/workflows/lts-compat-check.yml/badge.svg)](https://github.com/chanzuckerberg/cellxgene-census/actions/workflows/lts-compat-check.yml)
 
 # CZ CELLxGENE Discover Census
 
