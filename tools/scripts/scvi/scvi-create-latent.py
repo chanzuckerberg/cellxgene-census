@@ -48,11 +48,6 @@ if __name__ == "__main__":
 
     ad.var.set_index("feature_id", inplace=True)
 
-
-    old_adata = anndata.read_h5ad(ad_filename)
-    print(old_adata.var.index)
-    print(ad.var.index)
-
     del census, query, hv, hv_idx
     gc.collect()
 
