@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import subprocess
 import sys
 
 import numpy as np
@@ -41,7 +42,7 @@ def main(argv):
         logger.info("writing Dataset to " + args.output_dir)
         dataset.save_to_disk(args.output_dir)
 
-    logger.info("done")
+    logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())
 
 
 def parse_arguments(argv):
@@ -68,7 +69,7 @@ def parse_arguments(argv):
     )
     parser.add_argument("output_dir", type=str, help="output directory (must not already exist)")
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(argv[1:])
 
     if args.obs_columns:
         args.obs_columns = args.obs_columns.split(",")
@@ -88,4 +89,4 @@ def select_cells(census_human: tiledbsoma.Experiment, value_filter: str, percent
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main(sys.argv))
