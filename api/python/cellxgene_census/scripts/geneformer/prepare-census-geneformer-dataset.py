@@ -11,8 +11,8 @@ import tiledbsoma
 import cellxgene_census
 from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 def main(argv):
@@ -33,11 +33,12 @@ def main(argv):
         with GeneformerTokenizer(
             census_human, obs_query=tiledbsoma.AxisQuery(coords=(coords,)), obs_attributes=args.obs_columns
         ) as tokenizer:
+            logger.info("tokenizing...")
             dataset = tokenizer.build()
 
         # write them to output_dir (note: the Dataset tools will have spooled to disk already, so
         # this should just be copying it to the desired location)
-        logger.info("writing dataset to " + args.output_dir)
+        logger.info("writing Dataset to " + args.output_dir)
         dataset.save_to_disk(args.output_dir)
 
     logger.info("done")
@@ -79,10 +80,10 @@ def parse_arguments(argv):
 def select_cells(census_human: tiledbsoma.Experiment, value_filter: str, percentage_data: int) -> np.ndarray:
     assert 1 <= percentage_data and percentage_data <= 100
     obs_df = census_human["obs"].read(value_filter=value_filter, column_names=["soma_joinid"]).concat().to_pandas()
-    logger.info(f"total cells matching value_filter: {len(obs_df)}")
+    logger.info(f"total cells matching value_filter: {format(len(obs_df), ',')}")
     if percentage_data < 100:
         obs_df = obs_df.sample(n=int(len(obs_df) * (percentage_data / 100.0)))
-    logger.info(f"sampling cells: {len(obs_df)}")
+    logger.info(f"sampled cells: {format(len(obs_df), ',')}")
     return obs_df["soma_joinid"].values
 
 
