@@ -15,7 +15,7 @@ These features are currently exclusive to the "latest" versions of Census data r
 
 Keep on reading to find out more about these features!
 
-## Description of data added to Census
+## Description of new data added to Census
 
 All of the following changes were introduced in the Census schema V1.1.0
 
