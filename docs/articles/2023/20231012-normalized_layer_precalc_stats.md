@@ -6,15 +6,15 @@
 *By: [Maximilian Lombardo](mlombardo@chanzuckerberg.com) and [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 <!-- markdownlint-enable MD036 -->
 
-The Census team is thrilled to announce the introduction of a library-size normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in the Census schema V1.1.0 tailored to empower your single-cell research.
+The Census team is happy to announce the introduction of a library-size normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the [Census schema V1.1.0](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md) tailored to empower your single-cell research.
 
 With these additions users can easily:
 
-- Expand their Census query filters to select genes or cells based on the new metadata included, for example selecting only cells with N number of genes expressed.
+- Expand their Census query filters to select genes or cells based on the new metadata, for example selecting only cells with N number of genes expressed.
 - Export the expanded cell and gene metadata for downstream analysis.
 - Export a normalized expression data matrix for downstream analysis.
 
-These features are currently exclusive to the "latest" versions of the Census data release. We invite your feedback as you explore these novel functionalities.
+These features are currently exclusive to the "latest" versions of the Census data release and they will be available in the next LTS data release. We invite your feedback as you explore these novel functionalities.
 
 Keep on reading to find out more about these features!
 
@@ -24,28 +24,26 @@ All of the following changes were introduced in the Census schema V1.1.0
 
 ### Added a new library-size normalized layer
 
-We have introduced a library-size normalized X layer for the RNA measurements of both the human and mouse experiments under `X["normalized"]`.  The normalized layer is built by dividing each value in the raw count matrix by its corresponding row sum (i.e. size normalization).
+We have introduced a library-size normalized X layer for the RNA measurements of both the human and mouse experiments available as `X["normalized"]`.  The normalized layer is built by dividing each value in the raw count matrix by its corresponding row sum (i.e. size normalization).
 
-It is important to note that in order to preserve high precision for the result of a division we would need to encode data with many decimal point values. This can lead to a representation of data that is very large on disk and on memory. As means to compress this matrix we introduced changes that lead to reduced numerical precision and slight deviations from the expected row sum of 1.0.
-
-In addition, to avoid that non-zero values become zero values during the normalization due to the reduced numerical precision, a small sigma value is added during the calculation of the normalized layer.
+To reduce data size and improve performance, normalized values are stored with a reduced floating point precision. In addition, to ensure that small count values do not round to zero, a small sigma has been added. You will see the effect of these artifacts in row (per-cell) values not summing to precisely 1.0.
 
 ### Enhanced gene metadata
 
 The `ms["RNA"].var` data frame for both the human and mouse experiments has been enriched with two new metadata fields:
 
-- `nnz` the number of non-zero (nnz) values, effectively the number of cells expressing this gene.
-- `n_measured_obs` the "measured" cells for this gene, effectively the number of cells for which this gene was measured in their respective dataset.
+- `nnz` — the number of explicitly stored values, effectively the number of cells expressing this gene.
+- `n_measured_obs` — the "measured" cells for this gene, effectively the number of cells for which this gene was measured in their respective dataset.
 
 ### Enhanced cell metadata
 
 The `obs` data frame for both the human and mouse experiments is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing. For each cell:
 
-- `raw_sum` the count sum derived from `X["raw"]`.
-- `nnz`: the number of non-zero (nnz) values, effectively the number of genes expressed on this cell.
-- `raw_mean` the average counts.
-- `raw_variance` the variance of the counts.
-- `n_measured_vars` the "measured" genes, effectively the number of genes measured in the dataset from which the cell was originated from, thus all cells from the same dataset have the same value for this variable.
+- `raw_sum` — the count sum derived from `X["raw"]`.
+- `nnz` — the number of explicitly stored values, effectively the number of genes expressed on this cell.
+- `raw_mean_nnz` — the average counts from explicitly stored values.
+- `raw_variance_nnz` — the variance of the counts from explicitly stored values.
+- `n_measured_vars` — the "measured" genes, effectively the number of genes measured in the dataset from which the cell was originated from, thus all cells from the same dataset have the same value for this variable.
 
 ## How to use the new features
 
@@ -224,4 +222,4 @@ sce_obj <- get_single_cell_experiment(
 
 We encourage you to engage with these new features in the Census API and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.
 
-For further information on the new library-size normalized layer, please reach out to us at [soma@chanzuckerberg.com](soma@chanzuckerberg.com). To report issues or for additional feedback, refer to our [Census GitHub repository](https://github.com/chanzuckerberg/cellxgene-census/issues).
+For further information on any new feature, please reach out to us at [soma@chanzuckerberg.com](soma@chanzuckerberg.com). To report issues or for additional feedback, refer to our [Census GitHub repository](https://github.com/chanzuckerberg/cellxgene-census/issues).
