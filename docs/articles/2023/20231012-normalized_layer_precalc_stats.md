@@ -12,7 +12,7 @@ With these additions users can easily:
 - Export the expanded cell and gene metadata for downstream analysis.
 - Export a normalized expression data matrix for downstream analysis.
 
-These features are currently exclusive to the "latest" versions of Census data release. We invite your feedback as you explore these novel functionalities.
+These features are currently exclusive to the "latest" versions of the Census data release. We invite your feedback as you explore these novel functionalities.
 
 Keep on reading to find out more about these features!
 
@@ -20,7 +20,7 @@ Keep on reading to find out more about these features!
 
 All of the following changes were introduced in the Census schema V1.1.0
 
-### Added new library-size normalized layer
+### Added a new library-size normalized layer
 
 We have introduced a library-size normalized X layer for the RNA measurements of both the human and mouse experiments under `X["normalized"]`.  The normalized layer is built by dividing each value in the raw count matrix by its corresponding row sum (i.e. size normalization).
 
@@ -30,7 +30,7 @@ In addition, to avoid that non-zero values become zero values during the normali
 
 ### Enhanced gene metadata
 
-The `ms["RNA"].var` data frame for both the human and mouse experiments, has been enriched with two new metadata fields:
+The `ms["RNA"].var` data frame for both the human and mouse experiments has been enriched with two new metadata fields:
 
 - `nnz` the number of non-zero (nnz) values, effectively the number of cells expressing this gene.
 - `n_measured_obs` the "measured" cells for this gene, effectively the number of cells for which this gene was measured in their respective dataset.
@@ -65,7 +65,7 @@ with cellxgene_census.open_soma(census_version = "latest") as census
     )
 ```
 
-Similarly in R we can export the data to Seurat or SingleCellExperiment objects with the argument `X_layers` of the functions `get_seurat` and `get_singel_cell_experiment`.
+Similarly, in R we can export the data to Seurat or SingleCellExperiment objects with the argument `X_layers` of the functions `get_seurat()` and `get_singel_cell_experiment()`.
 
 ```r
 library("cellxgene.census")
@@ -105,7 +105,7 @@ sce_obj <- get_single_cell_experiment(
 
 ### Accessing library-size normalized data layer via TileDB-SOMA
 
-For memory-efficient data retrieval, you can use TileDB-SOMA as outlined below. For Pythons this looks like
+For memory-efficient data retrieval, you can use TileDB-SOMA as outlined below. In Python this looks like the following.
 
 ```python
 
@@ -164,9 +164,9 @@ raw_slice <-  iterator$read_next()
 
 ### Utilizing pre-calculated stats for querying `obs` and `var`
 
-To filter based on pre-calculated statistics and export to AnnData, you can use the new metadata variables as value filters.
+To filter cells or genes based on pre-calculated statistics and export to AnnData, you can use the new metadata variables as value filters.
 
-For example you can you can add a filter to query to select cells with more than 500 genes expressed. In Python this looks like the following:
+For example you can you can add a filter to query cells with more than 500 genes expressed in addition to other filters. In Python this looks like the following.
 
 ```python
 import cellxgene_census
@@ -181,11 +181,9 @@ with cellxgene_census.open_soma(census_version = "latest") as census:
     )
 
     print(adata)
-
-#adata with filtered cells
 ```
 
-In R:
+In R, the equivalent code looks as follows.
 
 ```r
 #Seurat
@@ -218,11 +216,10 @@ sce_obj <- get_single_cell_experiment(
    obs_value_filter = cell_filter,
    obs_column_names = cell_columns
 )
-
 ```
 
 ## Help us improve these data additions
 
 We encourage you to engage with these new features in the Census API and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.
 
-For further information on the new library-size normalized layer, please reach out to us at [cellxgene@chanzuckerberg.com](cellxgene@chanzuckerberg.com). To report issues or for additional feedback, refer to our [Census GitHub repository](https://github.com/chanzuckerberg/cellxgene-census/issues).
+For further information on the new library-size normalized layer, please reach out to us at [soma@chanzuckerberg.com](soma@chanzuckerberg.com). To report issues or for additional feedback, refer to our [Census GitHub repository](https://github.com/chanzuckerberg/cellxgene-census/issues).
