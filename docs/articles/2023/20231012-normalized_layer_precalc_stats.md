@@ -1,6 +1,7 @@
 # Introducing a normalized layer and pre-calculated cell and gene statistics in Census
 
-*Published: 25 August 2023*
+*Published: October 12, 2023*
+
 *By: [Maximilian Lombardo](mailto:mlombardo@chanzuckerberg.com) and [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 
 The Census team is thrilled to announce the introduction of a library-size normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in the Census schema V1.1.0 tailored to empower your single-cell research.
@@ -225,4 +226,3 @@ sce_obj <- get_single_cell_experiment(
 We encourage you to engage with these new features in the Census API and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.
 
 For further information on the new library-size normalized layer, please reach out to us at [cellxgene@chanzuckerberg.com](cellxgene@chanzuckerberg.com). To report issues or for additional feedback, refer to our [Census GitHub repository](https://github.com/chanzuckerberg/cellxgene-census/issues).
-
