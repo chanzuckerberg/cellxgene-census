@@ -60,4 +60,13 @@ if __name__ == "__main__":
 
     latent = model.get_latent_representation(ad)
 
-    np.savetxt("latent.csv", latent, delimiter=",")
+    print(ad.shape)
+    print(latent.shape)
+
+    idx = ad.obs.index.to_numpy()
+    i, j = np.meshgrid(idx, range(200), indexing='ij')
+    triplets = np.column_stack(ar.ravel() for ar in (i, j, latent))
+    np.savetxt("latent_triplets.csv", triplets, delimiter=",", fmt='%i %i %.9f')
+
+    # np.savetxt("latent.csv", latent, delimiter=",")
+    # np.save("latent.npy", latent)
