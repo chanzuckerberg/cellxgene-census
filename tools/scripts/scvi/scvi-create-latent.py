@@ -64,6 +64,10 @@ if __name__ == "__main__":
     print(latent.shape)
 
     idx = ad.obs.index.to_numpy()
+
+    del model, ad
+    gc.collect()
+
     i, j = np.meshgrid(idx, range(200), indexing='ij')
     triplets = np.column_stack(ar.ravel() for ar in (i, j, latent))
     np.savetxt("latent_triplets.csv", triplets, delimiter=",", fmt='%i %i %.9f')
