@@ -48,6 +48,8 @@ if __name__ == "__main__":
 
     ad.var.set_index("feature_id", inplace=True)
 
+    idx = query.obs(column_names=["soma_joinid"]).concat().to_pandas().index.to_numpy()
+
     del census, query, hv, hv_idx
     gc.collect()
 
@@ -55,20 +57,16 @@ if __name__ == "__main__":
 
     model_config = config.get("model")
     model_filename = model_config.get("filename")
+    n_latent = model_config.get("n_latent")
 
     model = scvi.model.SCVI.load(model_filename, adata=ad)
 
     latent = model.get_latent_representation(ad)
 
-    print(ad.shape)
-    print(latent.shape)
-
-    idx = ad.obs.index.to_numpy()
-
     del model, ad
     gc.collect()
 
-    i, j = np.meshgrid(idx, range(200), indexing='ij')
+    i, j = np.meshgrid(idx, range(n_latent), indexing='ij')
     triplets = np.column_stack(ar.ravel() for ar in (i, j, latent))
     np.savetxt("latent_triplets.csv", triplets, delimiter=",", fmt='%i %i %.9f')
 
