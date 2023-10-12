@@ -205,7 +205,25 @@
 <ul class="simple">
 <li><p>This file MUST be in <code class="docutils literal notranslate"><span class="pre">json</span></code> formats where the parent keys are release identifiers (alias or name).</p></li>
 <li><p>The alias <code class="docutils literal notranslate"><span class="pre">latest</span></code> MUST be present and MUST point to the <strong>Weekly Census release</strong>.</p></li>
-<li><p>The prefix <code class="docutils literal notranslate"><span class="pre">V</span></code> MUST be used followed by an integer counter to label long-term supported Census releases, e.g. <code class="docutils literal notranslate"><span class="pre">V1</span></code>.</p></li>
+<li><p>For a long-term supported (“LTS”) release:</p>
+<ul>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">flags</span></code> key MUST be present with a dictionary-typed value, which MUST contain the key <code class="docutils literal notranslate"><span class="pre">lts</span></code> with the value <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
+<li><p>An alias MUST exist that points to the release, formatted as <code class="docutils literal notranslate"><span class="pre">V&lt;#&gt;</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;#&gt;</span></code> is integer  to label long-term supported Census releases, e.g. <code class="docutils literal notranslate"><span class="pre">V1</span></code>.</p></li>
+</ul>
+</li>
+<li><p>If a long-term-supported release is no longer supported:</p>
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">flags</span></code> dictionary value MUST contain the key <code class="docutils literal notranslate"><span class="pre">retracted</span></code> with the value <code class="docutils literal notranslate"><span class="pre">true</span></code> and,</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">retraction</span></code> key MUST be present with a dictionary-typed value, which MUST contain the key <code class="docutils literal notranslate"><span class="pre">date</span></code> with a string value formatted as <code class="docutils literal notranslate"><span class="pre">&lt;YYYY&gt;-&lt;MM&gt;-&lt;DD&gt;</span></code> where <code class="docutils literal notranslate"><span class="pre">&lt;YYYY&gt;</span></code> is the year, <code class="docutils literal notranslate"><span class="pre">&lt;MM&gt;</span></code> is the month, and <code class="docutils literal notranslate"><span class="pre">&lt;DD&gt;</span></code> is the day of the retraction.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">retraction</span></code> dictionary value MAY contain:</p>
+<ul>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">reason</span></code> key with a string value describing the reason for the retraction.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">info_permalink</span></code> key with a string value describing the reason for the retraction.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">replaced_by</span></code> key with a string value identifying the alias of a later LTS.</p></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
    [release_alias]: [release_name|release_alias],
@@ -219,7 +237,18 @@
       “h5ads”: {
          “uri”: [uri] #base URI of H5AD location
          “s3_region”: [region] #optional, S3 region if uri is s3://…
+      },
+      “flags”: {
+         “lts”: {true|false} # optional, if false
+         “retracted”: {true|false} # optional, false
       }
+      “retraction”: { # required if &quot;flags&quot; contains &quot;retracted&quot;: true, otherwise must not be present
+         “date”: [yyyy-mm-dd] # required, ISO 8601 date, date of retraction
+         “reason”: [text] # optional, text describing reason for retraction
+         “info_permalink”: [url] # optional, URL to more information about retraction
+         “replaced_by”: [release_alias] # optional, alias of release that replaces this one
+      }
+      
    },
    ...
 }

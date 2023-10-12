@@ -194,39 +194,155 @@
 <h1>cellxgene_census.get_census_version_directory<a class="headerlink" href="#cellxgene-census-get-census-version-directory" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="cellxgene_census.get_census_version_directory">
-<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_census_version_directory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CensusVersionDescription</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cellxgene_census.get_census_version_directory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the directory of Census releases currently available.</p>
+<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_census_version_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retracted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CensusVersionDescription</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cellxgene_census.get_census_version_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the directory of Census versions currently available, optionally filtering by specified flags. If a filtering
+flag is not specified, Census versions will not be filtered by that flag. Defaults to including both “long-term
+stable” (LTS) and weekly Census versions, and excluding retracted versions.</p>
+<dl class="simple">
+<dt>Params:</dt><dd><dl class="simple">
+<dt>lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no</dt><dd><p>filtering is performed based on this flag. Defaults to None, which includes both LTS and non-LTS (weekly)
+versions.</p>
+</dd>
+<dt>retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no</dt><dd><p>filtering is performed based on this flag. Defaults to False, which excludes retracted releases in the result.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary that contains release names and their corresponding release description.</p>
+<dd class="field-odd"><p>A dictionary that contains Census version names and their corresponding descriptions. Census versions are
+always named by their release date (<code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code>) but may also have aliases. If an alias is specified,
+the Census version will appear multiple times in the dictionary, once under it’s release date name,
+and again for each alias. Aliases may be: “stable”, “latest”, or “V#”. The “stable” alias is used for the
+most recent LTS release, the “latest” alias is used for the most recent weekly release, and the “V#” aliases
+are used to identify LTS releases by a sequentially incrementing version number.</p>
 </dd>
 </dl>
 <p class="rubric">Lifecycle</p>
 <p>maturing</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="cellxgene_census.get_census_version_description.html#cellxgene_census.get_census_version_description" title="cellxgene_census.get_census_version_description"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_census_version_description()</span></code></a>: get description by census_version.</p>
+<p><a class="reference internal" href="cellxgene_census.get_census_version_description.html#cellxgene_census.get_census_version_description" title="cellxgene_census.get_census_version_description"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_census_version_description()</span></code></a>: get description by census_version_name.</p>
 </div>
 <p class="rubric">Examples</p>
+<p>Get all LTS and weekly versions, but exclude retracted LTS versions:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_census_version_directory</span><span class="p">()</span>
-<span class="go">{&#39;latest&#39;: {&#39;release_date&#39;: None,</span>
-<span class="go">&#39;release_build&#39;: &#39;2022-12-01&#39;,</span>
-<span class="go">&#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/soma/&#39;,</span>
-<span class="go">&#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
-<span class="go">&#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/h5ads/&#39;,</span>
-<span class="go">&#39;s3_region&#39;: &#39;us-west-2&#39;}},</span>
-<span class="go">&#39;2022-12-01&#39;: {&#39;release_date&#39;: None,</span>
-<span class="go">&#39;release_build&#39;: &#39;2022-12-01&#39;,</span>
-<span class="go">&#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/soma/&#39;,</span>
-<span class="go">&#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
-<span class="go">&#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/h5ads/&#39;,</span>
-<span class="go">&#39;s3_region&#39;: &#39;us-west-2&#39;}},</span>
-<span class="go">&#39;2022-11-29&#39;: {&#39;release_date&#39;: None,</span>
-<span class="go">&#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
-<span class="go">&#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
-<span class="go">&#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
-<span class="go">&#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
-<span class="go">&#39;s3_region&#39;: &#39;us-west-2&#39;}}}</span>
+<span class="go">    {</span>
+<span class="go">        &#39;stable&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        },</span>
+<span class="go">        &#39;latest&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-12-01&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        },</span>
+<span class="go">        &#39;V2&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        },</span>
+<span class="go">        &#39;2022-12-01&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-12-01&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-12-01/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: False, &#39;retracted&#39;: False}</span>
+<span class="go">        },</span>
+<span class="go">        &#39;2022-11-29&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        }</span>
+<span class="go">    }</span>
+</pre></div>
+</div>
+<p>Get only LTS versions that are not retracted:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_census_version_directory</span><span class="p">(</span><span class="n">lts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">    {</span>
+<span class="go">        &#39;stable&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        },</span>
+<span class="go">        &#39;V2&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        },</span>
+<span class="go">        &#39;2022-11-29&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-11-29&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-11-29/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: False}</span>
+<span class="go">        }</span>
+<span class="go">    }</span>
+</pre></div>
+</div>
+<p>Get only retracted releases:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_census_version_directory</span><span class="p">(</span><span class="n">retracted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">    {</span>
+<span class="go">        &#39;V1&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-10-15&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-10-15/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-10-15/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: True},</span>
+<span class="go">            &#39;retraction&#39;: {</span>
+<span class="go">                &#39;date&#39;: &#39;2022-10-30&#39;,</span>
+<span class="go">                &#39;reason&#39;: &#39;mistakes happen&#39;,</span>
+<span class="go">                &#39;info_url&#39;: &#39;http://cellxgene.com/census/errata/v1&#39;,</span>
+<span class="go">                &#39;replaced_by&#39;: &#39;V2&#39;</span>
+<span class="go">            },</span>
+<span class="go">        },</span>
+<span class="go">        &#39;2022-10-15&#39;: {</span>
+<span class="go">            &#39;release_date&#39;: None,</span>
+<span class="go">            &#39;release_build&#39;: &#39;2022-10-15&#39;,</span>
+<span class="go">            &#39;soma&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-10-15/soma/&#39;,</span>
+<span class="go">                     &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;h5ads&#39;: {&#39;uri&#39;: &#39;s3://cellxgene-data-public/cell-census/2022-10-15/h5ads/&#39;,</span>
+<span class="go">                      &#39;s3_region&#39;: &#39;us-west-2&#39;},</span>
+<span class="go">            &#39;flags&#39;: {&#39;lts&#39;: True, &#39;retracted&#39;: True},</span>
+<span class="go">            &#39;retraction&#39;: {</span>
+<span class="go">                &#39;date&#39;: &#39;2022-10-30&#39;,</span>
+<span class="go">                &#39;reason&#39;: &#39;mistakes happen&#39;,</span>
+<span class="go">                &#39;info_url&#39;: &#39;http://cellxgene.com/census/errata/v1&#39;,</span>
+<span class="go">                &#39;replaced_by&#39;: &#39;V2&#39;</span>
+<span class="go">            }</span>
+<span class="go">        }</span>
+<span class="go">    }</span>
 </pre></div>
 </div>
 </dd></dl>
