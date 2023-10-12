@@ -1,5 +1,6 @@
 import anndata as ad
 import yaml
+from lightning.pytorch.loggers import TensorBoardLogger
 
 import scvi
 
@@ -55,6 +56,8 @@ if __name__ == "__main__":
 
     print("Start training model")
 
+    logger = TensorBoardLogger("tb_logs", name="my_model")
+
     model.train(
         max_epochs=max_epochs,
         batch_size=batch_size,
@@ -63,6 +66,7 @@ if __name__ == "__main__":
         plan_kwargs=training_plan_config,
         strategy="ddp_find_unused_parameters_true",  # Required for Multi-GPU training.
         devices=devices,
+        logger=logger,
         **trainer_config,
     )
 
