@@ -6,11 +6,11 @@
 *By: [Maximilian Lombardo](mlombardo@chanzuckerberg.com) and [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 <!-- markdownlint-enable MD036 -->
 
-The Census team is happy to announce the introduction of a library-size normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the [Census schema V1.1.0](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md) tailored to empower your single-cell research.
+The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the [Census schema V1.1.0](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md)```
 
 With these additions users can easily:
 
-- Expand their Census query filters to select genes or cells based on the new metadata, for example selecting only cells with N number of genes expressed.
+- Expand their Census query filters to select genes or cells based on the new metadata. For example, selecting only cells with N number of genes expressed.
 - Export the expanded cell and gene metadata for downstream analysis.
 - Export a normalized expression data matrix for downstream analysis.
 
@@ -30,20 +30,20 @@ To reduce data size and improve performance, normalized values are stored with a
 
 ### Enhanced gene metadata
 
-The `ms["RNA"].var` data frame for both the human and mouse experiments has been enriched with two new metadata fields:
+The `ms["RNA"].var` DataFrame for both the human and mouse experiments has been enriched with two new metadata fields:
 
 - `nnz` — the number of explicitly stored values, effectively the number of cells expressing this gene.
 - `n_measured_obs` — the "measured" cells for this gene, effectively the number of cells for which this gene was measured in their respective dataset.
 
 ### Enhanced cell metadata
 
-The `obs` data frame for both the human and mouse experiments is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing. For each cell:
+The `obs` DataFrame for both the human and mouse experiments is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing. For each cell:
 
-- `raw_sum` — the count sum derived from `X["raw"]`.
+- `raw_sum` — the sum of the raw counts, derived from `X["raw"]`.
 - `nnz` — the number of explicitly stored values, effectively the number of genes expressed on this cell.
 - `raw_mean_nnz` — the average counts from explicitly stored values.
 - `raw_variance_nnz` — the variance of the counts from explicitly stored values.
-- `n_measured_vars` — the "measured" genes, effectively the number of genes measured in the dataset from which the cell was originated from, thus all cells from the same dataset have the same value for this variable.
+- `n_measured_vars` — the "measured" genes, effectively the number of genes measured in the dataset from which the cell originated, thus all cells from the same dataset have the same value for this variable.
 
 ## How to use the new features
 
@@ -61,11 +61,11 @@ with cellxgene_census.open_soma(census_version = "latest") as census
         var_value_filter = "feature_id in ['ENSG00000161798', 'ENSG00000188229']",
         obs_value_filter = "cell_type == 'sympathetic neuron'",
         column_names = {"obs": ["tissue", "cell_type"]},
-        X_name = "normalized" # Specificy the normalized layer for this query
+        X_name = "normalized" # Specify the normalized layer for this query
     )
 ```
 
-Similarly, in R we can export the data to Seurat or SingleCellExperiment objects with the argument `X_layers` of the functions `get_seurat()` and `get_singel_cell_experiment()`.
+Similarly, in R we can export the data to Seurat or SingleCellExperiment objects with the argument `X_layers` of the functions `get_seurat()` and `get_single_cell_experiment()`.
 
 ```r
 library("cellxgene.census")
@@ -130,7 +130,7 @@ with cellxgene_census.open_soma(census_version = "latest") as census:
     
     # Iterate over the normalized matrix.
     # Get an iterative slice as pyarrow.Table
-    raw_slice = next (iterator)
+    raw_slice = next(iterator)
     
     # Perform analysis
     
@@ -166,7 +166,7 @@ raw_slice <-  iterator$read_next()
 
 To filter cells or genes based on pre-calculated statistics and export to AnnData, you can use the new metadata variables as value filters.
 
-For example you can you can add a filter to query cells with more than 500 genes expressed in addition to other filters. In Python this looks like the following.
+For example, you can add a filter to query cells with more than 500 genes expressed, along with other filters. In Python this looks like the following.
 
 ```python
 import cellxgene_census
