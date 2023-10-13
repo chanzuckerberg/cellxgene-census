@@ -193,7 +193,7 @@
 <p><em>Published: October 12, 2023</em></p>
 <p><em>By: <a class="reference internal" href="#mlombardo&#64;chanzuckerberg.com"><span class="xref myst">Maximilian Lombardo</span></a> and <a class="reference internal" href="#pgarcia-nieto&#64;chanzuckerberg.com"><span class="xref myst">Pablo Garcia-Nieto</span></a></em></p>
 <!-- markdownlint-enable MD036 -->
-<p>The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md">Census schema V1.1.0</a>```</p>
+<p>The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md">Census schema V1.1.0</a>.</p>
 <p>With these additions users can easily:</p>
 <ul class="simple">
 <li><p>Expand their Census query filters to select genes or cells based on the new metadata. For example, selecting only cells with N number of genes expressed.</p></li>
@@ -204,7 +204,7 @@
 <p>Keep on reading to find out more about these features!</p>
 <section id="description-of-new-data-added-to-census">
 <h2>Description of new data added to Census<a class="headerlink" href="#description-of-new-data-added-to-census" title="Permalink to this heading">¶</a></h2>
-<p>All of the following changes were introduced in the Census schema V1.1.0</p>
+<p>All of the following changes were introduced in the Census schema V1.1.0.</p>
 <section id="added-a-new-library-size-normalized-layer">
 <h3>Added a new library-size normalized layer<a class="headerlink" href="#added-a-new-library-size-normalized-layer" title="Permalink to this heading">¶</a></h3>
 <p>We have introduced a library-size normalized X layer for the RNA measurements of both the human and mouse experiments available as <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code>.  The normalized layer is built by dividing each value in the raw count matrix by its corresponding row sum (i.e. size normalization).</p>

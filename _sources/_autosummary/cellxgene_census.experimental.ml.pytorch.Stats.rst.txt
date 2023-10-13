@@ -26,6 +26,6 @@
       ~Stats.n_obs
       ~Stats.nnz
       ~Stats.elapsed
-      ~Stats.n_soma_batches
+      ~Stats.n_soma_chunks
    
    

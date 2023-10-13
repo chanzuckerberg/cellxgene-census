@@ -6,7 +6,7 @@
 *By: [Maximilian Lombardo](mlombardo@chanzuckerberg.com) and [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
 <!-- markdownlint-enable MD036 -->
 
-The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the [Census schema V1.1.0](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md)```
+The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the [Census schema V1.1.0](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md).
 
 With these additions users can easily:
 
@@ -20,7 +20,7 @@ Keep on reading to find out more about these features!
 
 ## Description of new data added to Census
 
-All of the following changes were introduced in the Census schema V1.1.0
+All of the following changes were introduced in the Census schema V1.1.0.
 
 ### Added a new library-size normalized layer
 
