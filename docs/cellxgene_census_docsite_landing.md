@@ -1,4 +1,4 @@
-<span style="background-color: #F6DDCC; color; font-size: 18px"> 🚨 A **normalized layer** and useful cell and gene **pre-calculated stats** are now available!  Find out more [here.](articles/2023/20231012-normalized_layer_precalc_stats.md)</span>
+<span style="background-color: #F6DDCC; color; font-size: 18px"> 🚨 A **normalized layer**, plus cell and gene **pre-calculated stats** are now available!  Find out more [here.](articles/2023/20231012-normalized_layer_precalc_stats.md)</span>
 
 # CZ CELLxGENE Discover Census
 
