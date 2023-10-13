@@ -4,7 +4,6 @@ from typing import Callable, List, Optional, Sequence, Union
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pyarrow as pa
 import pytest
 import tiledbsoma as soma
@@ -21,8 +20,6 @@ try:
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
-        Stats,
-        _ObsAndXSOMABatch,
         experiment_dataloader,
     )
 except ImportError:
@@ -36,6 +33,15 @@ def pytorch_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
     checkerboard_of_ones.row += obs_range.start
     checkerboard_of_ones.col += var_range.start
     return checkerboard_of_ones
+
+
+def pytorch_seq_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
+    """A sparse matrix where the values of each col are the obs_range values. Useful for checking the
+    X values are being returned in the correct order."""
+    data = np.vstack([list(obs_range)] * len(var_range)).flatten()
+    rows = np.vstack([list(obs_range)] * len(var_range)).flatten()
+    cols = np.column_stack([list(var_range)] * len(obs_range)).flatten()
+    return coo_matrix((data, (rows, cols)))
 
 
 @pytest.fixture
@@ -315,26 +321,20 @@ def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bo
     [(10, 1, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
 def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
-    with patch("cellxgene_census.experimental.ml.pytorch._ObsAndXSOMAIterator.__next__") as mock_soma_iterator_next:
-        # Mock the SOMA batch sizes such that PyTorch batches will span the tail and head of two SOMA batches
-        mock_soma_iterator_next.side_effect = [
-            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(0, 4))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(4, 8))}), sparse.csr_matrix([[1]] * 4), Stats()),
-            _ObsAndXSOMABatch(pd.DataFrame({"soma_joinid": list(range(8, 10))}), sparse.csr_matrix([[1]] * 2), Stats()),
-        ]
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=[],
+        batch_size=3,
+        # set SOMA batch read size such that PyTorch batches will span the tail and head of two SOMA batches
+        soma_chunk_size=4,
+        use_eager_fetch=use_eager_fetch,
+    )
 
-        exp_data_pipe = ExperimentDataPipe(
-            soma_experiment,
-            measurement_name="RNA",
-            X_name="raw",
-            obs_column_names=[],
-            batch_size=3,
-            use_eager_fetch=use_eager_fetch,
-        )
+    full_result = list(exp_data_pipe)
 
-        full_result = list(exp_data_pipe)
-
-        assert [len(batch[1]) for batch in full_result] == [3, 3, 3, 1]
+    assert [len(batch[1]) for batch in full_result] == [3, 3, 3, 1]
 
 
 @pytest.mark.experimental
@@ -373,6 +373,7 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        soma_chunk_size=3,  # two chunks, one per worker
     )
     # Note we're testing the ExperimentDataPipe via a DataLoader, since this is what sets up the multiprocessing
     dl = experiment_dataloader(dp, num_workers=2)
@@ -390,12 +391,6 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
     using mocks to avoid having to do real PyTorch distributed setup."""
 
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-    )
     with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
         "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
     ) as mock_dist_get_rank, patch(
@@ -405,6 +400,9 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
         mock_dist_get_rank.return_value = 1
         mock_dist_get_world_size.return_value = 3
 
+        dp = ExperimentDataPipe(
+            soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], soma_chunk_size=2
+        )
         full_result = list(iter(dp))
 
         soma_joinids = [t[1][0].item() for t in full_result]
@@ -422,12 +420,6 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_e
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
     setup or real DataLoader multiprocessing."""
 
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-    )
     with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
         "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
     ) as mock_dist_is_initialized, patch(
@@ -439,6 +431,10 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_e
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1
         mock_dist_get_world_size.return_value = 3
+
+        dp = ExperimentDataPipe(
+            soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], soma_chunk_size=2
+        )
 
         full_result = list(iter(dp))
 
@@ -501,9 +497,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
     "obs_range,var_range,X_value_gen,use_eager_fetch",
     [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
-def test_experiment_dataloader__X_tensor_dtype_matches_X_matrix(
-    soma_experiment: Experiment, use_eager_fetch: bool
-) -> None:
+def test__X_tensor_dtype_matches_X_matrix(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
     dp = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
@@ -515,6 +509,40 @@ def test_experiment_dataloader__X_tensor_dtype_matches_X_matrix(
     torch_data = next(iter(dp))
 
     assert torch_data[0].dtype == float32
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
+def test__pytorch_splitting(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
+    dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
+    dl = experiment_dataloader(dp_train)
+
+    all_rows = list(iter(dl))
+    assert len(all_rows) == 7
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
+def test__shuffle(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle=True
+    )
+
+    all_rows = list(iter(dp))
+
+    soma_joinids = [row[1][0].item() for row in all_rows]
+    X_values = [row[0][0].item() for row in all_rows]
+
+    # same elements
+    assert set(soma_joinids) == set(range(16))
+    # not ordered! (...with a `1/16!` probability of being ordered)
+    assert soma_joinids != list(range(16))
+    # randomizes X in same order as obs
+    # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
+    assert X_values == soma_joinids
 
 
 @pytest.mark.experimental
@@ -530,34 +558,15 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 
 
 @pytest.mark.experimental
-# noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test_experiment_dataloader__splitting(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
-    dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
-    dl = experiment_dataloader(dp_train)
-
-    all_rows = list(iter(dl))
-    assert len(all_rows) == 7
-
-
-@pytest.mark.experimental
-# noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
-def test_experiment_dataloader__shuffling(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
-    dp = dp.shuffle()
-    dl = experiment_dataloader(dp)
-
-    data1 = list(iter(dl))
-    data2 = list(iter(dl))
-
-    data1_soma_joinids = [row[1][0].item() for row in data1]
-    data2_soma_joinids = [row[1][0].item() for row in data2]
-    assert data1_soma_joinids != data2_soma_joinids
-
-
-@pytest.mark.experimental
-@pytest.mark.skip(reason="TODO")
-def test_experiment_data_loader__unsupported_params__fails() -> None:
-    pass
+@patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe")
+def test_experiment_dataloader__unsupported_params__fails(dummy_exp_data_pipe: ExperimentDataPipe) -> None:
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, sampler=[])
+    with pytest.raises(ValueError):
+        experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
