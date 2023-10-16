@@ -66,9 +66,15 @@ if __name__ == "__main__":
     del model, ad
     gc.collect()
 
-    i, j = np.meshgrid(idx, range(n_latent), indexing='ij')
-    triplets = np.column_stack(ar.ravel() for ar in (i, j, latent))
-    np.savetxt("latent_triplets.csv", triplets, delimiter=",", fmt='%i %i %.9f')
+    with open('latent-idx.npy', 'wb') as f:
+        np.save(f, idx)
+        
+    with open('latent.npy', 'wb') as f:
+        np.save(f, latent)
+
+    # i, j = np.meshgrid(idx, range(n_latent), indexing='ij')
+    # triplets = np.column_stack(ar.ravel() for ar in (i, j, latent))
+    # np.savetxt("latent_triplets.csv", triplets, delimiter=",", fmt='%i %i %.9f')
 
     # np.savetxt("latent.csv", latent, delimiter=",")
     # np.save("latent.npy", latent)
