@@ -1,4 +1,4 @@
- <span style="color: Coral; font-size: 18px"> 🎉 🎉 **The R API stable version has launched. Find out more about it [here.](articles/2023/20230808-r_api_release.md)** </span>
+<span style="background-color: #F6DDCC; color; font-size: 18px"> 🚨 A **normalized layer**, plus cell and gene **pre-calculated stats** are now available!  Find out more [here.](articles/2023/20231012-normalized_layer_precalc_stats.md)</span>
 
 # CZ CELLxGENE Discover Census
 

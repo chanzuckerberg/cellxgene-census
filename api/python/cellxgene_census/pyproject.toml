@@ -37,16 +37,20 @@ dependencies= [
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
-    "scipy<1.11",  # work around incompatibility between scipy and pyarrow
 ]
 
 [project.optional-dependencies]
 experimental = [
     "torch==2.0.1",
     "torchdata==0.6.1",
-    "scikit-learn==1.2.2",
+    "scikit-learn==1.3.1",
     "scikit-misc==0.2.0",
     "psutil==5.9.5",
+    "datasets~=2.14",
+    "tdigest~=0.5",
+    # Not expressible in pyproject.toml:
+    #"git+https://huggingface.co/ctheodoris/Geneformer",
+    # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
 ]
 
 [project.urls]
@@ -77,6 +81,7 @@ markers = [
     "live_corpus: runs on the live CELLxGENE Census data corpus and small enough to run in CI",
     "expensive: too expensive to run regularly or in CI",
     "experimental: tests for the `experimental` package",
+    "lts_compat_check: check for compatibility with an LTS build",
 ]
 
 [tool.ruff]

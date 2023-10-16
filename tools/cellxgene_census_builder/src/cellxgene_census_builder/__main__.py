@@ -299,8 +299,8 @@ def do_sync_artifact_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
     from .data_copy import sync_to_S3_remote
 
     sync_to_S3_remote(
-        urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "soma/"),
-        urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag, "soma/"),
+        urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
+        urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag),
         dryrun=args.config.dryrun,
     )
     return True

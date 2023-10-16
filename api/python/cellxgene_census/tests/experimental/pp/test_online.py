@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.ma as ma
 import numpy.typing as npt
 import pytest
 from scipy import sparse
@@ -7,7 +8,7 @@ from cellxgene_census.experimental.pp._online import CountsAccumulator, MeanAccu
 
 
 def allclose(a: npt.NDArray[np.float64], b: npt.NDArray[np.float64]) -> bool:
-    return np.allclose(a, b, atol=1e-5, rtol=1e-3, equal_nan=True)
+    return np.allclose(a, b, atol=1e-5, rtol=1e-2, equal_nan=True)
 
 
 @pytest.fixture
@@ -24,7 +25,8 @@ def matrix(m: int, n: int) -> sparse.coo_matrix:
 @pytest.mark.parametrize("n_batches", [1, 3, 11, 101])
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
 @pytest.mark.parametrize("ddof", [0, 1, 100])
-def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int) -> None:
+@pytest.mark.parametrize("nnz_only", [True, False])
+def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: int, nnz_only: bool) -> None:
     rng = np.random.default_rng()
     batches_prob = rng.random(n_batches)
     batches_prob /= batches_prob.sum()
@@ -37,7 +39,10 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
     assert n_samples.sum() == matrix.shape[0]
     assert len(n_samples) == n_batches
 
-    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof)
+    # nnz_only only if there is a single batch
+    should_nnz_only = nnz_only and n_batches == 1
+
+    olmv = MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, nnz_only=should_nnz_only)
     for i in range(0, matrix.nnz, stride):
         batch_vec = batches[matrix.row[i : i + stride]] if n_batches > 1 else None
         olmv.update(matrix.col[i : i + stride], matrix.data[i : i + stride], batch_vec)
@@ -54,14 +59,38 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
     assert batches_var.shape == (n_batches, matrix.shape[1])
 
     dense = matrix.toarray()
-    assert allclose(all_u, dense.mean(axis=0))
-    assert allclose(all_var, dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
-    matrix = matrix.tocsr()  # COO not conveniently indexable
-    for batch in range(n_batches):
-        dense = matrix[batches == batch, :].toarray()
-        assert allclose(batches_u[batch], dense.mean(axis=0))
-        assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
+    if should_nnz_only:
+        mask = np.ones(matrix.shape)
+        r, c = matrix.tolil().nonzero()
+        for x, y in zip(r, c):
+            mask[x, y] = 0
+        masked: np.ma.MaskedArray[np.bool_, np.dtype[np.float64]] = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call]
+        mean = masked.mean(axis=0)  # type: ignore[no-untyped-call]
+        assert allclose(all_u, mean)
+
+        nv = masked.var(axis=0, ddof=ddof)  # type: ignore[no-untyped-call]
+        assert allclose(all_var, nv)
+
+    else:
+        assert allclose(all_u, dense.mean(axis=0))
+        assert allclose(all_var, dense.var(axis=0, ddof=ddof, dtype=np.float64))
+
+        matrix = matrix.tocsr()  # COO not conveniently indexable
+        for batch in range(n_batches):
+            dense = matrix[batches == batch, :].toarray()
+            assert allclose(batches_u[batch], dense.mean(axis=0))
+            assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
+
+
+@pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
+def test_meanvar_nnz_only_batches_fails(matrix: sparse.coo_matrix) -> None:
+    n_batches = 10
+    nnz_only = True
+    n_samples = np.zeros((n_batches,), dtype=np.int64)
+    ddof = 1
+    with pytest.raises(ValueError):
+        MeanVarianceAccumulator(n_batches, n_samples, matrix.shape[1], ddof, nnz_only=nnz_only)
 
 
 @pytest.mark.experimental

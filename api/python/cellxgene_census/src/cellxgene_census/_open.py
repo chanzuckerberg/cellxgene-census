@@ -184,25 +184,24 @@ def open_soma(
     else:
         selected_mirror = mirrors[mirrors["default"]]  # type: ignore
 
+    # TODO: Consider raising exceptions instead of issuing warnings, possibly introducing a "strict" mode to control the
+    #  behavior
     try:
         description = get_census_version_description(census_version)  # raises
     except ValueError:
-        # TODO: After the first "stable" is available, this conditional can be removed (keep the 'else' logic)
-        if census_version == "stable":
-            description = get_census_version_description("latest")
-            api_logger.warning(
-                f'The "{census_version}" Census version is not yet available. Using "latest" Census version '
-                f"instead."
-            )
-        else:
-            raise ValueError(
-                f'The "{census_version}" Census version is not valid. Use get_census_version_directory() to retrieve '
-                f"available versions."
-            ) from None
+        raise ValueError(
+            f'The "{census_version}" Census version is not valid. Use get_census_version_directory() to retrieve '
+            f"available versions."
+        ) from None
 
-    if description["alias"]:
+    if description.get("flags", {}).get("retracted", False):
+        api_logger.warning(
+            f"The \"{census_version}\" Census version has been retracted!\n{description['retraction']}."
+            f'Use "stable" or "latest", or use get_census_version_directory() to retrieve valid versions.'
+        )
+    elif census_version == "stable":
         api_logger.info(
-            f"The \"{description['alias']}\" release is currently {description['release_build']}. Specify "
+            f"The \"{census_version}\" release is currently {description['release_build']}. Specify "
             f"'census_version=\"{description['release_build']}\"' in future calls to open_soma() to ensure data "
             "consistency."
         )

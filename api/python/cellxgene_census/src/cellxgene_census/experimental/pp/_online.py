@@ -18,16 +18,27 @@ class MeanVarianceAccumulator:
         Knuth, Art of Computer Programming, volume II
     """
 
-    def __init__(self, n_batches: int, n_samples: npt.NDArray[np.int64], n_variables: int, ddof: int = 1):
+    def __init__(
+        self,
+        n_batches: int,
+        n_samples: npt.NDArray[np.int64],
+        n_variables: int,
+        ddof: int = 1,
+        nnz_only: bool = False,
+    ):
         if n_samples.sum() <= 0:
             raise ValueError("No samples provided - can't calculate mean or variance.")
 
+        self.nnz_only = nnz_only
         self.ddof = ddof
         self.n_batches = n_batches
         self.n_samples = n_samples
         self.n = np.zeros((n_batches, n_variables), dtype=np.int32)
         self.u = np.zeros((n_batches, n_variables), dtype=np.float64)
         self.M2 = np.zeros((n_batches, n_variables), dtype=np.float64)
+
+        if self.nnz_only and self.n_batches > 1:
+            raise ValueError("nnz_only not implemented for n_batches > 1")
 
     def update(
         self,
@@ -45,8 +56,10 @@ class MeanVarianceAccumulator:
     def finalize(
         self,
     ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        # correct each batch to account for sparsity
-        _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
+        # correct each batch to account for sparsity.
+        # if nnz_only, the correction is not needed as we only do mean/average over nonzero values
+        if not self.nnz_only:
+            _mbomv_sparse_correct_batches(self.n_batches, self.n_samples, self.n, self.u, self.M2)
 
         # compute u, var for each batch
         batches_u = self.u
@@ -58,14 +71,19 @@ class MeanVarianceAccumulator:
 
         # accum all batches using Chan's
         all_u, all_M2 = _mbomv_combine_batches(self.n_batches, self.n_samples, self.u, self.M2)
+
         with np.errstate(divide="ignore"):
-            all_var = all_M2 / max(0, (self.n_samples.sum() - self.ddof))
+            if self.nnz_only:
+                all_var = all_M2 / np.maximum(0, self.n - self.ddof)
+                all_var = all_var[0]
+            else:
+                all_var = all_M2 / np.maximum(0, (self.n_samples.sum() - self.ddof))
 
         return batches_u, batches_var, all_u, all_var
 
 
 class MeanAccumulator:
-    def __init__(self, n_samples: int, n_variables: int):
+    def __init__(self, n_samples: int, n_variables: int, nnz_only: bool = False):
         if n_samples <= 0:
             raise ValueError("No samples provided - can't calculate mean.")
 
@@ -74,12 +92,21 @@ class MeanAccumulator:
 
         self.u = np.zeros(n_variables, dtype=np.float64)
         self.n_samples = n_samples
+        self.nnz_only = nnz_only
+        # If we want to exclude zeros, we need to keep track of the denominator
+        self.n = np.zeros(n_variables)
 
     def update(self, var_vec: npt.NDArray[np.int64], val_vec: npt.NDArray[np.float32]) -> None:
-        _update_mean_vector(self.u, var_vec, val_vec)
+        if self.nnz_only:
+            _update_mean_and_n_vectors(self.u, self.n, var_vec, val_vec)
+        else:
+            _update_mean_vector(self.u, var_vec, val_vec)
 
     def finalize(self) -> npt.NDArray[np.float64]:
-        return self.u / self.n_samples
+        if self.nnz_only:
+            return self.u / self.n
+        else:
+            return self.u / self.n_samples
 
 
 class CountsAccumulator:
@@ -364,3 +391,32 @@ def _update_mean_vector(
 ) -> None:
     for col, val in zip(var_vec, val_vec):
         u[col] = u[col] + val
+
+
+@numba.jit(
+    [
+        numba.void(
+            numba.float64[:],
+            numba.float64[:],
+            numba.types.Array(numba.int32, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+        ),
+        numba.void(
+            numba.float64[:],
+            numba.float64[:],
+            numba.types.Array(numba.int64, 1, "C", readonly=True),
+            numba.types.Array(numba.float32, 1, "C", readonly=True),
+        ),
+    ],
+    nopython=True,
+    nogil=True,
+)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _update_mean_and_n_vectors(
+    u: npt.NDArray[np.float64],
+    n: npt.NDArray[np.float64],
+    var_vec: npt.NDArray[np.int64],
+    val_vec: npt.NDArray[np.float32],
+) -> None:
+    for col, val in zip(var_vec, val_vec):
+        u[col] = u[col] + val
+        n[col] = n[col] + 1

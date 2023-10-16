@@ -711,7 +711,7 @@ def validate_consolidation(soma_path: str) -> bool:
             return A.nonempty_domain() is None
 
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        consolidated_uris = list_uris_to_consolidate(census)
+        consolidated_uris = [obj.uri for obj in list_uris_to_consolidate(census) if obj.is_array()]
         for uri in consolidated_uris:
             # If an empty array, must have fragment count of zero. If a non-empty array,
             # must have fragment count of one.
