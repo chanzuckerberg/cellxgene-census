@@ -61,8 +61,8 @@ def parse_arguments(argv):
         "-c",
         "--obs-columns",
         type=str,
-        default="cell_type",
-        help="cell attributes to include in dataset (comma-separated; default: cell_type)",
+        default="soma_joinid,cell_type",
+        help="cell attributes to include in dataset (comma-separated; default: soma_joinid,cell_type)",
     )
     parser.add_argument(
         "-v", "--census-version", type=str, default="latest", help='Census release to query (default: "latest")'
@@ -72,7 +72,7 @@ def parse_arguments(argv):
     args = parser.parse_args(argv[1:])
 
     if args.obs_columns:
-        args.obs_columns = args.obs_columns.split(",")
+        args.obs_columns = [s.strip() for s in args.obs_columns.split(",")]
 
     logger.info("arguments: " + str(vars(args)))
     return args
