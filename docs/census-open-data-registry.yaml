@@ -1,0 +1,37 @@
+Name: CZ CELLxGENE Discover Census
+Description: The Census provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover.
+Documentation: https://chanzuckerberg.github.io/cellxgene-census/
+Contact: cellxgene@chanzuckerberg.com
+ManagedBy: "[Chan Zuckerberg Initiative](http://www.chanzuckerberg.com/)"
+UpdateFrequency: New releases are published weekly. LTS releases are published every 6 months.
+Tags:
+  - single-cell
+  - genomics
+  - computational biology
+License: MIT License
+Resources:
+  - Description: CELLxGENE Census Data
+    ARN: arn:aws:s3:::cellxgene-census/cell-census
+    Region: us-west-2
+    Type: S3 Bucket
+DataAtWork:
+  Tutorials:
+    - Title: Computing on the cell by gene matrix using online (incremental) algorithms
+      URL: https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_compute_over_X.html
+      NotebookURL: https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_compute_over_X.ipynb
+      AuthorName: CZI
+      AuthorURL: https://github.com/chanzuckerberg/
+    - Title: Learning about the CZ CELLxGENE Census
+      URL: https://chanzuckerberg.github.io/cellxgene-census/notebooks/analysis_demo/comp_bio_census_info.html
+      NotebookURL: https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_census_info.ipynb
+      AuthorName: CZI
+      AuthorURL: https://github.com/chanzuckerberg/
+  Tools & Applications:
+    - Title: Census Python API
+      URL: https://chanzuckerberg.github.io/cellxgene-census/python-api.html
+      AuthorName: CZI
+      AuthorURL: https://github.com/chanzuckerberg/
+    - Title: Census R API
+      URL: https://chanzuckerberg.github.io/cellxgene-census/r/index.html
+      AuthorName: CZI
+      AuthorURL: https://github.com/chanzuckerberg/
