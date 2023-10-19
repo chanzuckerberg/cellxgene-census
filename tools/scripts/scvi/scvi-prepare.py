@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     hv.to_pickle("hv_genes.pkl")
     # fmt: off
-    hv_idx = hv[hv == True].index
+    hv_idx = hv[hv].index
     # fmt: on
 
     query = census["census_data"][experiment_name].axis_query(

@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     hv = pd.read_pickle("hv_genes.pkl")
     # fmt: off
-    hv_idx = hv[hv is True].index
+    hv_idx = hv[hv].index
     # fmt: on
 
     if obs_value_filter is not None:
