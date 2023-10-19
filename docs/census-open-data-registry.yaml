@@ -2,7 +2,7 @@ Name: CZ CELLxGENE Discover Census
 Description: The Census provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover.
 Documentation: https://chanzuckerberg.github.io/cellxgene-census/
 Contact: cellxgene@chanzuckerberg.com
-ManagedBy: "[Chan Zuckerberg Initiative](http://www.chanzuckerberg.com/)"
+ManagedBy: "[Chan Zuckerberg Initiative Foundation](http://www.chanzuckerberg.com/)"
 UpdateFrequency: New releases are published weekly. LTS releases are published every 6 months.
 Tags:
   - single-cell
