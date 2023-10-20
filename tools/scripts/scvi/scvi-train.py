@@ -51,7 +51,7 @@ if __name__ == "__main__":
         strategy = "ddp_find_unused_parameters_true"
         devices = devices
     else:
-        strategy = None
+        strategy = "auto"
         devices = 1
 
     print("Start training model")
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         train_size=train_size,
         early_stopping=early_stopping,
         plan_kwargs=training_plan_config,
-        strategy="ddp_find_unused_parameters_true",  # Required for Multi-GPU training.
+        strategy=strategy,  # Required for Multi-GPU training.
         devices=devices,
         logger=logger,
         **trainer_config,

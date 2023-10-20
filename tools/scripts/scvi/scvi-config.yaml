@@ -29,7 +29,7 @@ train:
   early_stopping: True
   trainer:
     early_stopping_patience: 2
-    early_stopping_monitor: elbo_train # should be validation_loss - see https://github.com/chanzuckerberg/cellxgene-census/issues/777#issuecomment-1743196837
+    early_stopping_monitor: validation_loss # should be validation_loss - see https://github.com/chanzuckerberg/cellxgene-census/issues/777#issuecomment-1743196837
     check_val_every_n_epoch: 1
   multi_gpu: False
   num_workers: 4
