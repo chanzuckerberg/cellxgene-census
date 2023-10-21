@@ -140,6 +140,11 @@ def _highly_variable_genes_seurat_v3(
         N = n_samples[batch]
 
         not_const = v > 0
+        if N == 1 or not not_const.any():
+            reg_std[batch].fill(1)
+            clip_val[batch, :] = u
+            continue
+
         y = np.log10(v[not_const])
         x = np.log10(u[not_const])
 
@@ -185,9 +190,11 @@ def _highly_variable_genes_seurat_v3(
                 acc.update(var_dim, data)
 
         counts_sum, squared_counts_sum = acc.finalize()
-        norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
-            (n_samples * np.square(batches_u.T)).T + squared_counts_sum - 2 * counts_sum * batches_u
-        )
+        with np.errstate(divide="ignore", invalid="ignore"):
+            norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
+                (n_samples * np.square(batches_u.T)).T + squared_counts_sum - 2 * counts_sum * batches_u
+            )
+            norm_gene_vars[np.isnan(norm_gene_vars)] = 0
         del acc, counts_sum, squared_counts_sum
 
     ranked_norm_gene_vars = np.argsort(np.argsort(-norm_gene_vars, axis=1), axis=1)
