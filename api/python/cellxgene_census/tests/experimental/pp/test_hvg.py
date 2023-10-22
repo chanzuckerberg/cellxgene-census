@@ -22,7 +22,12 @@ from cellxgene_census.experimental.pp import (
     [
         (
             "mus_musculus",
+            'is_primary_data == True and tissue_general == "tongue"',
+        ),
+        pytest.param(
+            "mus_musculus",
             'is_primary_data == True and tissue_general == "skin of body"',
+            marks=pytest.mark.expensive,
         ),
         pytest.param(
             "mus_musculus",
@@ -53,8 +58,20 @@ from cellxgene_census.experimental.pp import (
         ),
     ),
 )
-@pytest.mark.parametrize("span", (None, 0.5))
-@pytest.mark.parametrize("version", ("latest", "stable"))
+@pytest.mark.parametrize(
+    "span",
+    (
+        pytest.param(None, marks=pytest.mark.expensive),
+        0.5,
+    ),
+)
+@pytest.mark.parametrize(
+    "version",
+    (
+        "latest",
+        pytest.param("stable", marks=pytest.mark.expensive),
+    ),
+)
 def test_hvg_vs_scanpy(
     n_top_genes: int,
     obs_value_filter: str,
@@ -102,10 +119,26 @@ def test_hvg_vs_scanpy(
     assert all(scanpy_hvg.keys() == hvg.keys())
 
     assert (hvg.index == scanpy_hvg.index).all()
-    assert np.allclose(hvg.means.to_numpy(), scanpy_hvg.means.to_numpy(), atol=1e-5, rtol=1e-2, equal_nan=True)
-    assert np.allclose(hvg.variances.to_numpy(), scanpy_hvg.variances.to_numpy(), atol=1e-5, rtol=1e-2, equal_nan=True)
     assert np.allclose(
-        hvg.variances_norm.to_numpy(), scanpy_hvg.variances_norm.to_numpy(), atol=1e-5, rtol=1e-2, equal_nan=True
+        hvg.means.to_numpy(),
+        scanpy_hvg.means.to_numpy(),
+        atol=1e-5,
+        rtol=1e-2,
+        equal_nan=True,
+    )
+    assert np.allclose(
+        hvg.variances.to_numpy(),
+        scanpy_hvg.variances.to_numpy(),
+        atol=1e-5,
+        rtol=1e-2,
+        equal_nan=True,
+    )
+    assert np.allclose(
+        hvg.variances_norm.to_numpy(),
+        scanpy_hvg.variances_norm.to_numpy(),
+        atol=1e-5,
+        rtol=1e-2,
+        equal_nan=True,
     )
 
     # Online calculation of normalized variance  will differ slightly from ScanPy's calculation,
