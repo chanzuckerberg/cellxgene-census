@@ -6,3 +6,4 @@ coverage
 nbqa
 transformers[torch]
 git+https://huggingface.co/ctheodoris/Geneformer@39ab62e
+owlready2

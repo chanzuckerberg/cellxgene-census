@@ -6,9 +6,13 @@ import logging
 import os
 import subprocess
 import sys
+from collections import Counter
+
+sys.path.insert(0, os.path.dirname(__file__))  # to find ./helpers
 
 import numpy as np
 import tiledbsoma
+from helpers.ontology_mapper import CellSubclassMapper
 
 import cellxgene_census
 from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
@@ -38,10 +42,30 @@ def main(argv):
             logger.info("tokenizing...")
             dataset = tokenizer.build()
 
-        # write them to output_dir (note: the Dataset tools will have spooled to disk already, so
-        # this should just be copying it to the desired location)
-        logger.info("writing Dataset to " + args.output_dir)
-        dataset.save_to_disk(args.output_dir)
+    # add cell_subclass, if requested
+    if args.cell_subclass:
+        logger.info("adding cell_subclass...")
+        mapper = CellSubclassMapper(map_orphans_to_class=False)
+        dataset = dataset.map(
+            lambda it: {"cell_subclass": mapper.get_top_high_level_term(it["cell_type_ontology_term_id"])},
+            num_proc=1,  # because of mapper's internal cache
+        )
+        has_cell_subclass = dataset.filter(lambda it: it["cell_subclass"] is not None)
+        if len(has_cell_subclass) != len(dataset):
+            logger.warning(f"removing {len(dataset) - len(has_cell_subclass)} cell(s) with unknown cell_subclass")
+            dataset = has_cell_subclass
+        distinct_subclasses = {mapper.get_label_from_id(it): ct for it, ct in Counter(dataset["cell_subclass"]).items()}
+        logger.info(
+            f"cell subclasses ({len(distinct_subclasses)}): {distinct_subclasses}"
+            + f"(compare to {len(set(dataset['cell_type_ontology_term_id']))} cell_types)"
+        )
+
+    logger.info(str(dataset))
+
+    # write them to output_dir (note: the Dataset tools will have spooled to disk already, so
+    # this should just be copying it to the desired location)
+    logger.info("writing Dataset to " + args.output_dir)
+    dataset.save_to_disk(args.output_dir)
 
     logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())
 
@@ -56,7 +80,7 @@ def parse_arguments(argv):
         help="cell filter (default: is_primary_data==True)",
     )
     parser.add_argument(
-        "-p", "--percentage-data", type=int, default=10, help="percent of human primary cells (default: 10)"
+        "-p", "--percentage-data", type=int, default=10, help="percent of matching cells to include (default: 10)"
     )
     parser.add_argument(
         "-c",
@@ -64,6 +88,12 @@ def parse_arguments(argv):
         type=str,
         default="soma_joinid,cell_type",
         help="cell attributes to include in dataset (comma-separated; default: soma_joinid,cell_type)",
+    )
+    parser.add_argument(
+        "-s",
+        "--cell-subclass",
+        action="store_true",
+        help="add cell_subclass attribute (implies --obs-columns cell_type_ontology_term_id)",
     )
     parser.add_argument(
         "-v", "--census-version", type=str, default="latest", help='Census release to query (default: "latest")'
@@ -74,6 +104,11 @@ def parse_arguments(argv):
 
     if args.obs_columns:
         args.obs_columns = [s.strip() for s in args.obs_columns.split(",")]
+    else:
+        args.obs_columns = []
+
+    if args.cell_subclass and "cell_type_ontology_term_id" not in args.obs_columns:
+        args.obs_columns.append("cell_type_ontology_term_id")
 
     logger.info("arguments: " + str(vars(args)))
     return args
