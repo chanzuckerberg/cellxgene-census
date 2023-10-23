@@ -33,34 +33,36 @@ def main(argv):
         census_human = census["census_data"]["homo_sapiens"]
 
         # select the cell id's to include
-        coords = select_cells(census_human, args.value_filter, args.percentage_data)
+        obs_df = select_cells(census_human, args.value_filter, args.percentage_data, args.sampling_column, args.N)
+        coords = np.array(obs_df.index)
 
         # use GeneformerTokenizer to build dataset of those cells
         with GeneformerTokenizer(
-            census_human, obs_query=tiledbsoma.AxisQuery(coords=(coords,)), obs_attributes=args.obs_columns
+            census_human,
+            obs_query=tiledbsoma.AxisQuery(coords=(coords,)),
+            obs_attributes=list(
+                # cell_subclass isn't yet in Census (select_cells() added it to obs_df for us), so
+                # exclude from the experiment axis query
+                it
+                for it in args.obs_columns
+                if it not in ("cell_subclass", "cell_subclass_ontology_term_id")
+            ),
         ) as tokenizer:
-            logger.info("tokenizing...")
+            logger.info(f"tokenizing {len(coords)} cells...")
             dataset = tokenizer.build()
 
-    # add cell_subclass, if requested
-    if args.cell_subclass:
-        logger.info("adding cell_subclass...")
-        mapper = CellSubclassMapper(map_orphans_to_class=False)
+    # add back cell_subclass
+    if "cell_subclass_ontology_term_id" in args.obs_columns:
         dataset = dataset.map(
-            lambda it: {"cell_subclass": mapper.get_top_high_level_term(it["cell_type_ontology_term_id"])},
-            num_proc=1,  # because of mapper's internal cache
+            lambda it: {
+                "cell_subclass_ontology_term_id": obs_df.loc[it["soma_joinid"]]["cell_subclass_ontology_term_id"]
+            }
         )
-        has_cell_subclass = dataset.filter(lambda it: it["cell_subclass"] is not None)
-        if len(has_cell_subclass) != len(dataset):
-            logger.warning(f"removing {len(dataset) - len(has_cell_subclass)} cell(s) with unknown cell_subclass")
-            dataset = has_cell_subclass
-        distinct_subclasses = {mapper.get_label_from_id(it): ct for it, ct in Counter(dataset["cell_subclass"]).items()}
-        logger.info(
-            f"cell subclasses ({len(distinct_subclasses)}): {distinct_subclasses}"
-            + f"(compare to {len(set(dataset['cell_type_ontology_term_id']))} cell_types)"
-        )
-
+    if "cell_subclass" in args.obs_columns:
+        dataset = dataset.map(lambda it: {"cell_subclass": obs_df.loc[it["soma_joinid"]]["cell_subclass"]})
     logger.info(str(dataset))
+    if len(dataset):
+        logger.info(dataset[0])
 
     # write them to output_dir (note: the Dataset tools will have spooled to disk already, so
     # this should just be copying it to the desired location)
@@ -80,20 +82,27 @@ def parse_arguments(argv):
         help="cell filter (default: is_primary_data==True)",
     )
     parser.add_argument(
-        "-p", "--percentage-data", type=int, default=10, help="percent of matching cells to include (default: 10)"
+        "-p",
+        "--percentage-data",
+        type=int,
+        default=100,
+        help="percent of cells matching value_filter to include (default: 100)",
     )
     parser.add_argument(
         "-c",
         "--obs-columns",
         type=str,
-        default="soma_joinid,cell_type",
-        help="cell attributes to include in dataset (comma-separated; default: soma_joinid,cell_type)",
+        default="cell_type,cell_type_ontology_term_id,cell_subclass,cell_subclass_ontology_term_id",
+        help="cell attributes to include in dataset (comma-separated)",
     )
     parser.add_argument(
-        "-s",
-        "--cell-subclass",
-        action="store_true",
-        help="add cell_subclass attribute (implies --obs-columns cell_type_ontology_term_id)",
+        "--sampling-column",
+        type=str,
+        default="cell_subclass",
+        help="column name to use for downsampling (default: cell_subclass)",
+    )
+    parser.add_argument(
+        "-N", type=int, help="further downsample to no more than N examples per distinct value of sampling_column"
     )
     parser.add_argument(
         "-v", "--census-version", type=str, default="latest", help='Census release to query (default: "latest")'
@@ -107,21 +116,72 @@ def parse_arguments(argv):
     else:
         args.obs_columns = []
 
-    if args.cell_subclass and "cell_type_ontology_term_id" not in args.obs_columns:
-        args.obs_columns.append("cell_type_ontology_term_id")
+    if "soma_joinid" not in args.obs_columns:
+        args.obs_columns.append("soma_joinid")
 
     logger.info("arguments: " + str(vars(args)))
     return args
 
 
-def select_cells(census_human: tiledbsoma.Experiment, value_filter: str, percentage_data: int) -> np.ndarray:
+def select_cells(census_human, value_filter, percentage_data, sampling_column, N):
+    """
+    Select the desired cells from the human census experiment.
+
+    Return a pd.DataFrame indexed by soma_joinid with additional cell_subclass and cell_subclass_ontology_term_id
+    attributes. These aren't currently provided in obs, so we derive them on the fly. Cells without a known subclass
+    are filtered out (with warning).
+    """
     assert 1 <= percentage_data and percentage_data <= 100
-    obs_df = census_human["obs"].read(value_filter=value_filter, column_names=["soma_joinid"]).concat().to_pandas()
+    obs_df = (
+        census_human["obs"]
+        .read(value_filter=value_filter, column_names=["soma_joinid", "cell_type_ontology_term_id"])
+        .concat()
+        .to_pandas()
+    )
     logger.info(f"total cells matching value_filter: {format(len(obs_df), ',')}")
     if percentage_data < 100:
         obs_df = obs_df.sample(n=int(len(obs_df) * (percentage_data / 100.0)))
-    logger.info(f"sampled cells: {format(len(obs_df), ',')}")
-    return obs_df["soma_joinid"].values
+        logger.info(f"sampled cells: {format(len(obs_df), ',')}")
+
+    # annotate cell subclasses
+    logger.info("annotating cell subclasses...")
+    mapper = CellSubclassMapper(map_orphans_to_class=False)
+    obs_df["cell_subclass_ontology_term_id"] = obs_df["cell_type_ontology_term_id"].map(
+        lambda it: mapper.get_top_high_level_term(it) or "~~UNKNOWN~~"
+    )
+
+    # remove cells with no known subclass (with warning)
+    known_subclass = obs_df["cell_subclass_ontology_term_id"] != "~~UNKNOWN~~"
+    has_subclass = obs_df[known_subclass]
+    if len(has_subclass) != len(obs_df):
+        unknown_cell_types = [
+            mapper.get_label_from_id(it) for it in obs_df[~known_subclass]["cell_type_ontology_term_id"].unique()
+        ]
+        logger.warning(
+            f"removing {len(obs_df) - len(has_subclass)}"
+            + " cell(s) with no cell_subclass corresponding to the following cell_types: "
+            + ", ".join(unknown_cell_types)
+        )
+        obs_df = has_subclass
+    obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
+
+    distinct_subclasses = Counter(obs_df["cell_subclass"])
+    logger.info(
+        f"cell subclasses ({len(distinct_subclasses)}): {distinct_subclasses}"
+        + f" (compare to {len(obs_df['cell_type_ontology_term_id'].unique())} cell_types)"
+    )
+
+    # further downsample by sampling_column, if requested
+    if N:
+        sampling_values = Counter(obs_df[sampling_column])
+        if sampling_column != "cell_subclass":
+            logger.info(f"Initial counts of {sampling_column}: {sampling_values}")
+        obs_df = obs_df.groupby(sampling_column).apply(lambda x: x.sample(min(len(x), N)))
+        sampling_values = Counter(obs_df[sampling_column])
+        logger.info(f"After downsampling to at most {N} examples per {sampling_column}: {sampling_values}")
+
+    obs_df.set_index("soma_joinid", inplace=True)
+    return obs_df
 
 
 if __name__ == "__main__":
