@@ -22,7 +22,7 @@ from cellxgene_census.experimental.pp import (
     [
         (
             "mus_musculus",
-            'is_primary_data == True and tissue_general == "tongue"',
+            'is_primary_data == True and tissue_general == "liver"',
         ),
         pytest.param(
             "mus_musculus",
