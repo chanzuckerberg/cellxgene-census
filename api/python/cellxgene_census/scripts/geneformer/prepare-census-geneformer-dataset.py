@@ -2,6 +2,7 @@
 # mypy: ignore-errors
 
 import argparse
+import json
 import logging
 import os
 import subprocess
@@ -153,20 +154,20 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
     subclass_counts = Counter(obs_df["cell_subclass"])
     logger.info(
-        f"cell subclasses ({len(subclass_counts)}): {subclass_counts}"
+        f"cell subclasses ({len(subclass_counts)}): {json.dumps(subclass_counts)}"
         + f" (compare to {len(obs_df['cell_type_ontology_term_id'].unique())} cell_types)"
     )
 
     # further downsample by sampling_column, if requested
     if N:
-        sampling_values = Counter(obs_df[sampling_column])
+        sampling_counts = Counter(obs_df[sampling_column])
         if sampling_column != "cell_subclass":
-            logger.info(f"Initial counts of {sampling_column}: {sampling_values}")
+            logger.info(f"initial counts of {sampling_column}: {json.dumps(sampling_counts)}")
         obs_df = obs_df.groupby(sampling_column).apply(lambda x: x.sample(min(len(x), N)))
-        sampling_values = Counter(obs_df[sampling_column])
-        logger.info(f"After downsampling to at most {N} examples per {sampling_column}: {sampling_values}")
+        sampling_counts = Counter(obs_df[sampling_column])
+        logger.info(f"after downsampling to at most {N} examples per {sampling_column}: {json.dumps(sampling_counts)}")
         subclass_counts = Counter(obs_df["cell_subclass"])
-        logger.info(f"cell subclasses ({len(subclass_counts)}): {subclass_counts}")
+        logger.info(f"downsampled cell subclasses ({len(subclass_counts)}): {json.dumps(subclass_counts)}")
 
     obs_df.set_index("soma_joinid", inplace=True)
     return obs_df
