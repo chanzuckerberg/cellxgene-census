@@ -130,12 +130,11 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     Select the desired cells from the human census experiment.
 
     Return a pd.DataFrame indexed by soma_joinid with additional cell_subclass and cell_subclass_ontology_term_id
-    attributes. These aren't currently provided in obs, so we derive them on the fly. Cells without a known subclass
-    are filtered out (with warning).
+    attributes. These aren't currently provided in obs, so we derive them on the fly.
     """
     assert 1 <= percentage_data and percentage_data <= 100
     cols = ["soma_joinid", "cell_type_ontology_term_id"]
-    if sampling_column not in cols:
+    if sampling_column not in ("cell_subclass", "cell_subclass_ontology_term_id") and sampling_column not in cols:
         cols.append(sampling_column)
     obs_df = census_human["obs"].read(value_filter=value_filter, column_names=cols).concat().to_pandas()
     logger.info(f"total cells matching value_filter: {format(len(obs_df), ',')}")
@@ -145,29 +144,16 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
 
     # annotate cell subclasses
     logger.info("annotating cell subclasses...")
-    mapper = CellSubclassMapper(map_orphans_to_class=False)
+    mapper = CellSubclassMapper(map_orphans_to_class=True)
     obs_df["cell_subclass_ontology_term_id"] = obs_df["cell_type_ontology_term_id"].map(
-        lambda it: mapper.get_top_high_level_term(it) or "~~UNKNOWN~~"
+        # if CellSubclassMapper doesn't find a subclass, just use the cell type itself
+        lambda it: mapper.get_top_high_level_term(it)
+        or it
     )
-
-    # remove cells with no known subclass (with warning)
-    known_subclass = obs_df["cell_subclass_ontology_term_id"] != "~~UNKNOWN~~"
-    has_subclass = obs_df[known_subclass]
-    if len(has_subclass) != len(obs_df):
-        unknown_cell_types = [
-            mapper.get_label_from_id(it) for it in obs_df[~known_subclass]["cell_type_ontology_term_id"].unique()
-        ]
-        logger.warning(
-            f"removing {len(obs_df) - len(has_subclass)}"
-            + " cell(s) with no cell_subclass corresponding to the following cell_types: "
-            + ", ".join(unknown_cell_types)
-        )
-        obs_df = has_subclass
     obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
-
-    distinct_subclasses = Counter(obs_df["cell_subclass"])
+    subclass_counts = Counter(obs_df["cell_subclass"])
     logger.info(
-        f"cell subclasses ({len(distinct_subclasses)}): {distinct_subclasses}"
+        f"cell subclasses ({len(subclass_counts)}): {subclass_counts}"
         + f" (compare to {len(obs_df['cell_type_ontology_term_id'].unique())} cell_types)"
     )
 
@@ -179,6 +165,8 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
         obs_df = obs_df.groupby(sampling_column).apply(lambda x: x.sample(min(len(x), N)))
         sampling_values = Counter(obs_df[sampling_column])
         logger.info(f"After downsampling to at most {N} examples per {sampling_column}: {sampling_values}")
+        subclass_counts = Counter(obs_df["cell_subclass"])
+        logger.info(f"cell subclasses ({len(subclass_counts)}): {subclass_counts}")
 
     obs_df.set_index("soma_joinid", inplace=True)
     return obs_df
