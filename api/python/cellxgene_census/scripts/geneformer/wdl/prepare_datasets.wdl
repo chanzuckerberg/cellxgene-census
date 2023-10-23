@@ -4,8 +4,8 @@ task prepare_census_geneformer_dataset {
     input {
         String output_name
 
-        Array[String] obs_columns = ["soma_joinid", "cell_type", "cell_type_ontology_term_id"]
-        Int percentage_data = 10
+        Array[String] obs_columns = ["soma_joinid", "cell_type", "cell_type_ontology_term_id", "cell_subclass", "cell_subclass_ontology_term_id"]
+        Int N = 0
         String census_version = "latest"
 
         String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
@@ -18,7 +18,7 @@ task prepare_census_geneformer_dataset {
         export HF_HOME="$(pwd)/hf"
         python3 /census-geneformer/prepare-census-geneformer-dataset.py \
             -c '~{sep(",",obs_columns)}' \
-            -p ~{percentage_data} \
+            -N ~{N} \
             -v ~{census_version} \
             ~{output_name}
     >>>

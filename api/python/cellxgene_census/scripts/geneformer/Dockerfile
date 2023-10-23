@@ -10,8 +10,8 @@ RUN git lfs install
 RUN pip install \
         transformers[torch] \
         "cellxgene_census[experimental] @ git+https://github.com/chanzuckerberg/cellxgene-census.git#subdirectory=api/python/cellxgene_census" \
-        git+https://huggingface.co/ctheodoris/Geneformer \
-        owlready2
+        git+https://huggingface.co/ctheodoris/Geneformer
+RUN pip install owlready2
 
 # workaround for unknown problem blocking `import geneformer`:
 #   https://github.com/microsoft/TaskMatrix/issues/116#issuecomment-1565431850
@@ -26,4 +26,4 @@ RUN git clone --recursive https://huggingface.co/ctheodoris/Geneformer
 COPY prepare-census-geneformer-dataset.py .
 COPY finetune-geneformer.py .
 COPY finetune-geneformer.config.yml .
-COPY helpers .
+COPY helpers ./helpers
