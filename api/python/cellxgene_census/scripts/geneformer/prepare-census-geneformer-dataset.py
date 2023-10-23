@@ -132,12 +132,10 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     are filtered out (with warning).
     """
     assert 1 <= percentage_data and percentage_data <= 100
-    obs_df = (
-        census_human["obs"]
-        .read(value_filter=value_filter, column_names=["soma_joinid", "cell_type_ontology_term_id"])
-        .concat()
-        .to_pandas()
-    )
+    cols = ["soma_joinid", "cell_type_ontology_term_id"]
+    if sampling_column not in cols:
+        cols.append(sampling_column)
+    obs_df = census_human["obs"].read(value_filter=value_filter, column_names=cols).concat().to_pandas()
     logger.info(f"total cells matching value_filter: {format(len(obs_df), ',')}")
     if percentage_data < 100:
         obs_df = obs_df.sample(n=int(len(obs_df) * (percentage_data / 100.0)))
