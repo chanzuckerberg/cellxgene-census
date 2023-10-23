@@ -118,6 +118,8 @@ def parse_arguments(argv):
 
     if "soma_joinid" not in args.obs_columns:
         args.obs_columns.append("soma_joinid")
+    if args.sampling_column not in args.obs_columns:
+        args.obs_columns.append(args.sampling_column)
 
     logger.info("arguments: " + str(vars(args)))
     return args
