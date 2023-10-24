@@ -54,7 +54,7 @@ See the next section for a definition of `[tag]`.
 
 A data release is a Census build that is publicly hosted in AWS. A Census build is a TileDB-SOMA collection and its corresponding source H5AD files with the Census data from CZ CELLxGENE Discover.
 
-Any given Census build is named with a unique `[tag]`, normally the date of build, e.g., "2023-05-15".
+Any given Census build is named with a unique `[tag]`, normally the date of build, e.g. "2023-05-15".
 
 The are two types of data releases: 
 
@@ -110,7 +110,7 @@ with cellxgene_census.open_soma(uri="local/path/to/soma/") as census:
 
 ### TileDB-SOMA API (Python and R)
 
-The Census API provides convenience wrappers for TileDB-SOMA to access the Census Data in its AWS location. Users can interact direct with the Census TileDB data directly via the TileDB-SOMA APIs. Please refer to the [TileDb-SOMA documentation](https://tiledbsoma.readthedocs.io/en/latest/) for usage.
+The Census API provides convenience wrappers for TileDB-SOMA to access the Census Data hosted at AWS. Users can interact direct with the Census TileDB data directly via the TileDB-SOMA APIs. Please refer to the [TileDb-SOMA documentation](https://tiledbsoma.readthedocs.io/en/latest/) for full details on usage.
 
 For example, in Python users can create an iterator for the cell metadata Data Frame as follows:
 
