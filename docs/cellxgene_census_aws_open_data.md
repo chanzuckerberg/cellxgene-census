@@ -31,7 +31,7 @@ The single-cell data from CZ CELLxGENE Discover included in Census (see [inclusi
     <td rowspan="2"><a href="https://github.com/TileDB-Inc/TileDB">TileDB</a></td>
     <td><a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main">CELLxGENE-Census</a></td>
     <td rowspan="2"><a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md">CZ CELLxGENE Discover <b>Census</b> Schema</a></td>
-    <td rowspan="2">s3://cellxgene-data-public/cell-census/<code>[tag]</code>/soma/</td>
+    <td rowspan="2">s3://cellxgene-census-public/cell-census/<code>[tag]</code>/soma/</td>
     <td rowspan="3">us-west-2</td>
   </tr>
   <tr>
@@ -42,7 +42,7 @@ The single-cell data from CZ CELLxGENE Discover included in Census (see [inclusi
     <td rowspan"><a href="https://anndata.readthedocs.io/en/latest/fileformat-prose.html#elements">H5AD</a></td>
     <td><a href="https://anndata.readthedocs.io/en/latest/index.html">AnnData</a></td>
     <td rowspan><a href="https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema">CZ CELLxGENE Discover <b>Dataset</b> Schema</a></td>
-    <td rowspan>s3://cellxgene-data-public/cell-census/<code>[tag]</code>/h5ads/</td>
+    <td rowspan>s3://cellxgene-census-public/cell-census/<code>[tag]</code>/h5ads/</td>
   </tr>
 </tbody>
 </table>
@@ -71,13 +71,13 @@ Users can bulk-donwload Census data via the [AWS CLI](https://aws.amazon.com/cli
 For example, to download the H5ADs files of the Census LTS release `2023-07-25`, users can execute the following from a shell session:
 
 ```bash
-aws s3 sync --no-sign-request s3://cellxgene-data-public/cell-census/2023-07-25/h5ads/ ./h5ads/
+aws s3 sync --no-sign-request s3://cellxgene-census-public/cell-census/2023-07-25/h5ads/ ./h5ads/
 ```
 
 And to download the TileDB files:
 
 ```bash
-aws s3 sync --no-sign-request s3://cellxgene-data-public/cell-census/2023-07-25/soma/ ./soma/
+aws s3 sync --no-sign-request s3:/cellxgene-census-public/cell-census/2023-07-25/soma/ ./soma/
 ```
 
 ### CELLxGENE Census API (Python and R)
@@ -114,6 +114,7 @@ For example, in Python users can create an iterator for the cell metadata Data F
 ``` python
 config = {
     "vfs.s3.region": "us-west-2",
+    "vfs.s3.no_sign_request": "true",
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
 }
@@ -121,7 +122,7 @@ config = {
 ctx = tiledbsoma.options.SOMATileDBContext()
 ctx = ctx.replace(tiledb_config=config)
 
-uri = "s3://cellxgene-data-public/cell-census/2023-07-25/soma/"
+uri = "s3:/cellxgene-census-public/cell-census/2023-07-25/soma/"
 
 with tiledbsoma.open(uri, context=ctx) as census:
     cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
