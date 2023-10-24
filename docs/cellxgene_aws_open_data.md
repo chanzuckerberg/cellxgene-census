@@ -15,7 +15,7 @@ The single-cell data from CZ CELLxGENE Discover included in Census (see [inclusi
 
 ### Data specifications
 
-<table>
+<table class="custom-table">
 <thead>
     <th>Data</th>
     <th>Format</th>

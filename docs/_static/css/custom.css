@@ -299,3 +299,9 @@ html.writer-html4 .rst-content dl:not(.docutils)>dt:before,html.writer-html5 .rs
     letter-spacing: 1px;
     height: 16px!important;
 }
+
+table.custom-table, table.custom-table td, table.custom-table th {
+    vertical-align: middle;
+    border: 1px solid #ddd;
+    padding: 5px;
+}
