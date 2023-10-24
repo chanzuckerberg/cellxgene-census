@@ -62,6 +62,9 @@ where = ["src"]
 include = ["cellxgene_census*"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
 
+[tool.setuptools.package-data]
+"cellxgene_census" = ["py.typed"]
+
 [tool.setuptools_scm]
 root = "../../.."
 
