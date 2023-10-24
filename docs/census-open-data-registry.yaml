@@ -13,7 +13,12 @@ UpdateFrequency: New releases are published weekly. Long-term supported (LTS) re
 Tags:
   - single-cell
   - genomics
+  - transcriptomics
+  - epigenetics
+  - cell biology
   - computational biology
+  - cell modeling
+  - cell atlas
   - transciptomics
   - bioinformatics
 License: CC BY license
