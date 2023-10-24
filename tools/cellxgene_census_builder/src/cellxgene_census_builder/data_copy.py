@@ -21,7 +21,7 @@ def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: b
     if not to_path.startswith("s3://"):
         raise ValueError(f"S3_path argument does not appear to be an S3 path: {to_path}")
 
-    _sync_to_S3(from_path.as_posix(), to_path, dryrun)
+    _sync_to_S3(from_path.as_posix(), to_path, dryrun=dryrun)
 
 
 def sync_to_S3_remote(from_path: str, to_path: str, delete: bool = False, dryrun: bool = False) -> None:
@@ -34,7 +34,7 @@ def sync_to_S3_remote(from_path: str, to_path: str, delete: bool = False, dryrun
     if not from_path.startswith("s3://") or not to_path.startswith("s3://"):
         raise ValueError(f"S3_path argument does not appear to be an S3 path: {to_path}")
 
-    _sync_to_S3(from_path, to_path, delete, dryrun)
+    _sync_to_S3(from_path, to_path, delete=delete, dryrun=dryrun)
 
 
 def _sync_to_S3(from_path: str, to_path: str, delete: bool = False, dryrun: bool = False) -> None:
@@ -91,7 +91,7 @@ def main() -> int:
     # Configure the logger.
     logging_init_params(args.verbose)
 
-    sync_to_S3(args.from_path, args.to_path, args.dryrun)
+    sync_to_S3(args.from_path, args.to_path, dryrun=args.dryrun)
     return 0
 
 
