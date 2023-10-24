@@ -1,16 +1,24 @@
-import cellxgene_census
-import numpy as np
-import tiledbsoma as soma
 
-from sklearn.decomposition import PCA, IncrementalPCA
-import matplotlib.pyplot as plt
 import anndata
 import yaml
-import scanpy
+from sklearn.decomposition import IncrementalPCA
 
 n_components = 50
 
 file = "scvi-config.yaml"
+
+
+def _gen_batches(n, batch_size, min_batch_size=0):
+    start = 0
+    for _ in range(int(n // batch_size)):
+        end = start + batch_size
+        if end + min_batch_size > n:
+            continue
+        yield slice(start, end)
+        start = end
+    if start < n:
+        yield slice(start, n)
+
 
 if __name__ == "__main__":
     with open(file) as f:
@@ -22,13 +30,37 @@ if __name__ == "__main__":
 
     ad = anndata.read_h5ad(ad_filename)
 
-    print(ad)
+    X = ad.X
 
+    print("Shape: ", X.shape)
 
-    pca = scanpy.tl.pca(ad, n_comps=n_components)
+    print("Starting PCA")
 
-    with open('pca.npy', 'wb') as f:
-        np.save(f, ad.obsm["X_pca"])
+    n_samples, n_features = X.shape
+    batch_size = 1000  # 5 * n_features
+
+    transformer = IncrementalPCA(n_components=n_components, batch_size=200)
+
+    for i, batch in enumerate(_gen_batches(n_samples, batch_size, min_batch_size=n_components or 0)):
+        print(batch)
+        X_batch = X[batch]
+        print(f"Computing batch {i}, shape {X_batch.shape}")
+        X_batch = X_batch.toarray()
+        transformer.partial_fit(X_batch)
+
+    print(transformer)
+
+    # transformer.fit(ad.X)
+    # print(transformer)
+    # print(transformer.components_)
+
+    # with open('pca.npy', 'wb') as f:
+    # np.save(f, transformer.components_)
+
+    # pca = scanpy.tl.pca(ad, n_comps=n_components)
+
+    # with open('pca.npy', 'wb') as f:
+    #     np.save(f, ad.obsm["X_pca"])
 
     # print(ad.obsm["X_pca"].shape)
 

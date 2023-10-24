@@ -1,10 +1,9 @@
+import functools
+
 import cellxgene_census
 import tiledbsoma as soma
 import yaml
 from cellxgene_census.experimental.pp import highly_variable_genes
-import functools 
-
-
 
 file = "scvi-config.yaml"
 
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     batch_key = adata_config.get("batch_key")
     filename = adata_config.get("model_filename")
 
-    ad.obs["batch"] = functools.reduce(lambda a, b: a+b, [ad.obs[c].astype(str) for c in batch_key])
+    ad.obs["batch"] = functools.reduce(lambda a, b: a + b, [ad.obs[c].astype(str) for c in batch_key])
     ad.var.set_index("feature_id", inplace=True)
 
     print("AnnData conversion completed. Saving...")
