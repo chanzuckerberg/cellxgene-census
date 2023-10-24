@@ -111,7 +111,7 @@ def test_hvg_vs_scanpy(
     try:
         scanpy_hvg = sc.pp.highly_variable_genes(adata, inplace=False, **kwargs)
     except ZeroDivisionError:
-        # There are test cases where ScanPy will fail, rendering this "compare vs scanpy" 
+        # There are test cases where ScanPy will fail, rendering this "compare vs scanpy"
         # test moot. The known cases involve overly partitioned data that results in batches
         # with a very small number of samples (which manifest as a divide by zero error).
         # In these known cases, go ahead and perform the HVG (above), but skip the compare
