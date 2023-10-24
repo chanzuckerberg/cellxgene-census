@@ -107,7 +107,7 @@ with cellxgene_census.open_soma(uri="local/path/to/soma/") as census:
 
 ### TileDB-SOMA API (Python and R)
 
-The Census API provides convenience wrappers for TileDB-SOMA to access the Census Data hosted at AWS. Users can interact direct with the Census TileDB data directly via the TileDB-SOMA APIs. Please refer to the [TileDb-SOMA documentation](https://tiledbsoma.readthedocs.io/en/latest/) for full details on usage.
+The Census API provides convenience wrappers for TileDB-SOMA to access the Census Data hosted at AWS. Users can interact directly with the Census TileDB data directly via the TileDB-SOMA APIs. Please refer to the [TileDb-SOMA documentation](https://tiledbsoma.readthedocs.io/en/latest/) for full details on usage.
 
 For example, in Python users can create an iterator for the cell metadata Data Frame as follows:
 
