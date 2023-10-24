@@ -2,7 +2,7 @@
 
 The single-cell data from [CZ CELLxGENE Discover Census](cellxgene_census_docsite_landing.md) are available for public access via Amazon Web Services (AWS).
 
-This page describes what Census data is available in AWS and how to access them.
+This page describes what Census data are available in AWS and how to access them.
 
 Contents
 
@@ -122,7 +122,7 @@ config = {
 ctx = tiledbsoma.options.SOMATileDBContext()
 ctx = ctx.replace(tiledb_config=config)
 
-uri = "s3:/cellxgene-census-public/cell-census/2023-07-25/soma/"
+uri = "s3://cellxgene-census-public/cell-census/2023-07-25/soma/"
 
 with tiledbsoma.open(uri, context=ctx) as census:
     cell_metadata = census["census_data"]["homo_sapiens"].obs.read(
