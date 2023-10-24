@@ -190,7 +190,7 @@
   <section id="cz-cellxgene-discover-census-in-aws">
 <h1>CZ CELLxGENE Discover Census in AWS<a class="headerlink" href="#cz-cellxgene-discover-census-in-aws" title="Permalink to this heading">¶</a></h1>
 <p>The single-cell data from <a class="reference internal" href="cellxgene_census_docsite_landing.html"><span class="std std-doc">CZ CELLxGENE Discover Census</span></a> are available for public access via Amazon Web Services (AWS).</p>
-<p>This page describes what Census data is available in AWS and how to access them.</p>
+<p>This page describes what Census data are available in AWS and how to access them.</p>
 <p>Contents</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#census-data-available-in-aws"><span class="std std-ref">Census data available in AWS</span></a></p></li>
@@ -295,7 +295,7 @@
 <span class="n">ctx</span> <span class="o">=</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">SOMATileDBContext</span><span class="p">()</span>
 <span class="n">ctx</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tiledb_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 
-<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3:/cellxgene-census-public/cell-census/2023-07-25/soma/&quot;</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3://cellxgene-census-public/cell-census/2023-07-25/soma/&quot;</span>
 
 <span class="k">with</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
     <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
