@@ -190,6 +190,7 @@ def _highly_variable_genes_seurat_v3(
                 acc.update(var_dim, data)
 
         counts_sum, squared_counts_sum = acc.finalize()
+        # Don't raise python errors for 0/0, etc, just generate Inf/NaN
         with np.errstate(divide="ignore", invalid="ignore"):
             norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
                 (n_samples * np.square(batches_u.T)).T + squared_counts_sum - 2 * counts_sum * batches_u
