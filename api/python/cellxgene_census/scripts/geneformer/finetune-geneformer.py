@@ -62,6 +62,8 @@ def main(argv):
         json.dump(metrics, outfile, indent=2)
     error_df.to_csv(os.path.join(args.model_out, "test_errors.tsv"), sep="\t", index=False)
 
+    logger.info("SUCCESS")
+
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description="Fine-tune Geneformer model")
