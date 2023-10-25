@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,21 +134,265 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  <span class="st">"dataset_title"</span>,</span>
 <span>  <span class="st">"dataset_total_cell_count"</span></span>
 <span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 593 × 3</span></span></span>
-<span><span class="co">#&gt;    dataset_id                           dataset_title             dataset_total_cell_c…¹</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> f171db61-e57e-4535-a06a-35d8b6ef8f2b donor_p13_trophoblasts                     <span style="text-decoration: underline;">31</span>497</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ecf2e08e-2032-4a9e-b466-b65b395f4a02 All donors trophoblasts                    <span style="text-decoration: underline;">67</span>070</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 74cff64f-9da9-4b2a-9b3b-8a04a1598040 All donors all cell stat…                 <span style="text-decoration: underline;">286</span>326</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 5af90777-6760-4003-9dba-8f945fec6fdf Single-cell transcriptom…                 <span style="text-decoration: underline;">270</span>855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bd65a70f-b274-4133-b9dd-0d1431b6af34 Single-cell sequencing l…                 <span style="text-decoration: underline;">167</span>283</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ff45e623-7f5f-46e3-b47d-56be0341f66b Tabula Sapiens - Pancreas                  <span style="text-decoration: underline;">13</span>497</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> f01bdd17-4902-40f5-86e3-240d66dd2587 Tabula Sapiens - Salivar…                  <span style="text-decoration: underline;">27</span>199</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> e6a11140-2545-46bc-929e-da243eed2cae Tabula Sapiens - Heart                     <span style="text-decoration: underline;">11</span>505</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> e5c63d94-593c-4338-a489-e1048599e751 Tabula Sapiens - Bladder                   <span style="text-decoration: underline;">24</span>583</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> d8732da6-8d1d-42d9-b625-f2416c30054b Tabula Sapiens - Trachea                    <span style="text-decoration: underline;">9</span>522</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 583 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​dataset_total_cell_count</span></span></span></code></pre></div>
+<span><span class="co">#&gt;                              dataset_id</span></span>
+<span><span class="co">#&gt; 1  f171db61-e57e-4535-a06a-35d8b6ef8f2b</span></span>
+<span><span class="co">#&gt; 2  ecf2e08e-2032-4a9e-b466-b65b395f4a02</span></span>
+<span><span class="co">#&gt; 3  74cff64f-9da9-4b2a-9b3b-8a04a1598040</span></span>
+<span><span class="co">#&gt; 4  5af90777-6760-4003-9dba-8f945fec6fdf</span></span>
+<span><span class="co">#&gt; 5  bd65a70f-b274-4133-b9dd-0d1431b6af34</span></span>
+<span><span class="co">#&gt; 6  ff45e623-7f5f-46e3-b47d-56be0341f66b</span></span>
+<span><span class="co">#&gt; 7  f01bdd17-4902-40f5-86e3-240d66dd2587</span></span>
+<span><span class="co">#&gt; 8  e6a11140-2545-46bc-929e-da243eed2cae</span></span>
+<span><span class="co">#&gt; 9  e5c63d94-593c-4338-a489-e1048599e751</span></span>
+<span><span class="co">#&gt; 10 d8732da6-8d1d-42d9-b625-f2416c30054b</span></span>
+<span><span class="co">#&gt; 11 d77ec7d6-ef2e-49d6-9e79-05b7f8881484</span></span>
+<span><span class="co">#&gt; 12 cee11228-9f0b-4e57-afe2-cfe15ee56312</span></span>
+<span><span class="co">#&gt; 13 a357414d-2042-4eb5-95f0-c58604a18bdd</span></span>
+<span><span class="co">#&gt; 14 a2d4d33e-4c62-4361-b80a-9be53d2e50e8</span></span>
+<span><span class="co">#&gt; 15 a0754256-f44b-4c4a-962c-a552e47d3fdc</span></span>
+<span><span class="co">#&gt; 16 983d5ec9-40e8-4512-9e65-a572a9c486cb</span></span>
+<span><span class="co">#&gt; 17 7357cee7-9f7f-4ab0-8cec-90de8f047e38</span></span>
+<span><span class="co">#&gt; 18 6ec405bb-4727-4c6d-ab4e-01fe489af7ea</span></span>
+<span><span class="co">#&gt; 19 6d41668c-168c-4500-b06a-4674ccf3e19d</span></span>
+<span><span class="co">#&gt; 20 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c</span></span>
+<span><span class="co">#&gt; 21 55cf0ea3-9d2b-4294-871e-bb4b49a79fc7</span></span>
+<span><span class="co">#&gt; 22 4f1555bc-4664-46c3-a606-78d34dd10d92</span></span>
+<span><span class="co">#&gt; 23 2ba40233-8576-4dec-a5f1-2adfa115e2dc</span></span>
+<span><span class="co">#&gt; 24 2423ce2c-3149-4cca-a2ff-cf682ea29b5f</span></span>
+<span><span class="co">#&gt; 25 1c9eb291-6d31-47e1-96b2-129b5e1ae64f</span></span>
+<span><span class="co">#&gt; 26 18eb630b-a754-4111-8cd4-c24ec80aa5ec</span></span>
+<span><span class="co">#&gt; 27 0d2ee4ac-05ee-40b2-afb6-ebb584caa867</span></span>
+<span><span class="co">#&gt; 28 0ced5e76-6040-47ff-8a72-93847965afc0</span></span>
+<span><span class="co">#&gt; 29 0041b9c3-6a49-4bf7-8514-9bc7190067a7</span></span>
+<span><span class="co">#&gt; 30 c8f83821-a242-4ed7-86e9-7da077f5d348</span></span>
+<span><span class="co">#&gt; 31 c05e6940-729c-47bd-a2a6-6ce3730c4919</span></span>
+<span><span class="co">#&gt; 32 894573ad-498f-47ee-9bec-ad0880147eea</span></span>
+<span><span class="co">#&gt; 33 84242d25-f656-4ca6-8e8d-f3d2beeba11f</span></span>
+<span><span class="co">#&gt; 34 3d044b52-140a-4528-bf0d-a2dbef9e1f40</span></span>
+<span><span class="co">#&gt; 35 12194ced-8086-458e-84a8-e2ab935d8db1</span></span>
+<span><span class="co">#&gt; 36 965386e9-1e4f-466d-bf59-ebdca4b66b9b</span></span>
+<span><span class="co">#&gt; 37 e47c65a8-7d2f-48b8-908e-04ea6505fa26</span></span>
+<span><span class="co">#&gt; 38 c8d40d53-387b-48f2-9f89-72bfdb9c7c9f</span></span>
+<span><span class="co">#&gt; 39 a41202e6-173c-477c-8b4d-e0688ee1c4cb</span></span>
+<span><span class="co">#&gt; 40 7f08cbcc-5790-4576-8478-10e9a999b316</span></span>
+<span><span class="co">#&gt; 41 3d0d6923-a2c4-476f-a53e-3b7bfa010d90</span></span>
+<span><span class="co">#&gt; 42 2a7f90de-098a-4a6f-ac07-9e6462792412</span></span>
+<span><span class="co">#&gt; 43 d7291f04-fbbb-4d65-990a-f01fa44e915b</span></span>
+<span><span class="co">#&gt; 44 8e10f1c4-8e98-41e5-b65f-8cd89a887122</span></span>
+<span><span class="co">#&gt; 45 9d8e5dca-03a3-457d-b7fb-844c75735c83</span></span>
+<span><span class="co">#&gt; 46 a6388a6f-6076-401b-9b30-7d4306a20035</span></span>
+<span><span class="co">#&gt; 47 842c6f5d-4a94-4eef-8510-8c792d1124bc</span></span>
+<span><span class="co">#&gt; 48 74520626-b0ba-4ee9-86b5-714649554def</span></span>
+<span><span class="co">#&gt; 49 396a9124-fb20-4822-bf9c-e93fdf7c999a</span></span>
+<span><span class="co">#&gt; 50 e84f2780-51e8-4cfa-8aa0-13bbfef677c7</span></span>
+<span><span class="co">#&gt; 51 dfdf1ae2-d624-4004-9353-f18b902f6bca</span></span>
+<span><span class="co">#&gt; 52 d1cbed97-d88f-4954-8925-13302fe30b39</span></span>
+<span><span class="co">#&gt; 53 b03e4ef8-4e6b-47f4-84a7-e8ed033d08cd</span></span>
+<span><span class="co">#&gt; 54 f1f123cc-ca2c-460f-b7f1-88240efb1e82</span></span>
+<span><span class="co">#&gt; 55 de94c504-4b58-4f42-b68d-74a8e4892f0e</span></span>
+<span><span class="co">#&gt; 56 da684768-fb01-455b-9f0f-b63a3e2f844f</span></span>
+<span><span class="co">#&gt; 57 9f222629-9e39-47d0-b83f-e08d610c7479</span></span>
+<span><span class="co">#&gt; 58 b0e547f0-462b-4f81-b31b-5b0a5d96f537</span></span>
+<span><span class="co">#&gt; 59 d41f45c1-1b7b-4573-a998-ac5c5acb1647</span></span>
+<span><span class="co">#&gt; 60 f801b7a9-80a6-4d09-9161-71474deb58ae</span></span>
+<span><span class="co">#&gt; 61 be39785b-67cb-4177-be19-a40ee3747e45</span></span>
+<span><span class="co">#&gt; 62 4c6f9f26-5470-455b-8933-c408232fbf56</span></span>
+<span><span class="co">#&gt; 63 be35c935-ee4f-475c-9d3c-97630d59a735</span></span>
+<span><span class="co">#&gt; 64 975e13b6-bec1-4eed-b46a-9be1f1357373</span></span>
+<span><span class="co">#&gt; 65 24ec2dc5-3573-4d66-a9e1-25b7dcf43e27</span></span>
+<span><span class="co">#&gt; 66 0ba636a1-4754-4786-a8be-7ab3cf760fd6</span></span>
+<span><span class="co">#&gt; 67 c2876b1b-06d8-4d96-a56b-5304f815b99a</span></span>
+<span><span class="co">#&gt; 68 3f32121d-126b-4e8d-9f69-d86502d2a1b1</span></span>
+<span><span class="co">#&gt; 69 be46dfdc-0f99-4731-8957-64ca37364985</span></span>
+<span><span class="co">#&gt; 70 ac2fea99-ce08-4fca-8d03-a19f37bf21a3</span></span>
+<span><span class="co">#&gt; 71 a13bda79-9134-46c9-9ed1-a2858be9aafe</span></span>
+<span><span class="co">#&gt; 72 5695d556-974e-4d92-9e99-5f61b8695313</span></span>
+<span><span class="co">#&gt; 73 535e9336-2d8d-43c3-944d-bcbebe20df8a</span></span>
+<span><span class="co">#&gt; 74 4fb330ab-2d74-4649-b58f-7ffef457efdf</span></span>
+<span><span class="co">#&gt; 75 290d50c7-7158-4198-acf5-6d4b624fd3dc</span></span>
+<span><span class="co">#&gt; 76 18e2a8c5-33f7-455e-a58a-b2ba6921db27</span></span>
+<span><span class="co">#&gt; 77 12967895-3d58-4e93-be2c-4e1bcf4388d5</span></span>
+<span><span class="co">#&gt; 78 ee195b7d-184d-4dfa-9b1c-51a7e601ac11</span></span>
+<span><span class="co">#&gt; 79 9968be68-ab65-4a38-9e1a-c9b6abece194</span></span>
+<span><span class="co">#&gt; 80 b165f033-9dec-468a-9248-802fc6902a74</span></span>
+<span><span class="co">#&gt; 81 d8da613f-e681-4c69-b463-e94f5e66847f</span></span>
+<span><span class="co">#&gt; 82 fe4b89d5-461e-440c-a5a8-621b37b122c0</span></span>
+<span><span class="co">#&gt; 83 a37f857c-779f-464e-9310-3db43a1811e7</span></span>
+<span><span class="co">#&gt; 84 6cf3634d-e911-44ad-bf52-c747a9af3c01</span></span>
+<span><span class="co">#&gt; 85 5ce42b38-d867-487f-9b40-e8bb00b21d0b</span></span>
+<span><span class="co">#&gt;                                                                                                                                     dataset_title</span></span>
+<span><span class="co">#&gt; 1                                                                                                                          donor_p13_trophoblasts</span></span>
+<span><span class="co">#&gt; 2                                                                                                                         All donors trophoblasts</span></span>
+<span><span class="co">#&gt; 3                                                                                                            All donors all cell states (in vivo)</span></span>
+<span><span class="co">#&gt; 4                                                                            Single-cell transcriptomic datasets of Renal cell carcinoma patients</span></span>
+<span><span class="co">#&gt; 5        Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
+<span><span class="co">#&gt; 6                                                                                                                       Tabula Sapiens - Pancreas</span></span>
+<span><span class="co">#&gt; 7                                                                                                                 Tabula Sapiens - Salivary_Gland</span></span>
+<span><span class="co">#&gt; 8                                                                                                                          Tabula Sapiens - Heart</span></span>
+<span><span class="co">#&gt; 9                                                                                                                        Tabula Sapiens - Bladder</span></span>
+<span><span class="co">#&gt; 10                                                                                                                       Tabula Sapiens - Trachea</span></span>
+<span><span class="co">#&gt; 11                                                                                                                      Tabula Sapiens - Prostate</span></span>
+<span><span class="co">#&gt; 12                                                                                                                        Tabula Sapiens - Spleen</span></span>
+<span><span class="co">#&gt; 13                                                                                                               Tabula Sapiens - Small_Intestine</span></span>
+<span><span class="co">#&gt; 14                                                                                                                   Tabula Sapiens - Vasculature</span></span>
+<span><span class="co">#&gt; 15                                                                                                                           Tabula Sapiens - Eye</span></span>
+<span><span class="co">#&gt; 16                                                                                                                         Tabula Sapiens - Blood</span></span>
+<span><span class="co">#&gt; 17                                                                                                               Tabula Sapiens - Large_Intestine</span></span>
+<span><span class="co">#&gt; 18                                                                                                                        Tabula Sapiens - Uterus</span></span>
+<span><span class="co">#&gt; 19                                                                                                                         Tabula Sapiens - Liver</span></span>
+<span><span class="co">#&gt; 20                                                                                                                           Tabula Sapiens - Fat</span></span>
+<span><span class="co">#&gt; 21                                                                                                                        Tabula Sapiens - Tongue</span></span>
+<span><span class="co">#&gt; 22                                                                                                                   Tabula Sapiens - Bone_Marrow</span></span>
+<span><span class="co">#&gt; 23                                                                                                                       Tabula Sapiens - Mammary</span></span>
+<span><span class="co">#&gt; 24                                                                                                                        Tabula Sapiens - Kidney</span></span>
+<span><span class="co">#&gt; 25                                                                                                                        Tabula Sapiens - Muscle</span></span>
+<span><span class="co">#&gt; 26                                                                                                                    Tabula Sapiens - Lymph_Node</span></span>
+<span><span class="co">#&gt; 27                                                                                                                          Tabula Sapiens - Lung</span></span>
+<span><span class="co">#&gt; 28                                                                                                                        Tabula Sapiens - Thymus</span></span>
+<span><span class="co">#&gt; 29                                                                                                                          Tabula Sapiens - Skin</span></span>
+<span><span class="co">#&gt; 30                                                                                                                      white matter - astrocytes</span></span>
+<span><span class="co">#&gt; 31                                                                                                                       white matter - all cells</span></span>
+<span><span class="co">#&gt; 32                                                                                                                         white matter - neurons</span></span>
+<span><span class="co">#&gt; 33                                                                                                                       white matter - microglia</span></span>
+<span><span class="co">#&gt; 34                                                                                                                  white matter - vascular cells</span></span>
+<span><span class="co">#&gt; 35                                                                                                                 white matter - oligodendroglia</span></span>
+<span><span class="co">#&gt; 36 Single cell RNA sequencing of bone marrow mononuclear cells from healthy donors and B-cell lymphoma patients following CD19 CAR T-cell therapy</span></span>
+<span><span class="co">#&gt; 37                                                                                                                scRNA-seq data - vascular cells</span></span>
+<span><span class="co">#&gt; 38                                                                                                            scRNA-seq data - perivascular cells</span></span>
+<span><span class="co">#&gt; 39                                                                                                               scRNA-seq data - lymphatic cells</span></span>
+<span><span class="co">#&gt; 40                                                                                                                     snRNA-seq data - all cells</span></span>
+<span><span class="co">#&gt; 41                                                                                                                   scRNA-seq data - fibroblasts</span></span>
+<span><span class="co">#&gt; 42                                                                                                              scRNA-seq data - epithelial cells</span></span>
+<span><span class="co">#&gt; 43                                                                               Single-cell RNA-seq for all cortical &amp; hippocampal regions (10x)</span></span>
+<span><span class="co">#&gt; 44                                                                                                                                    All neurons</span></span>
+<span><span class="co">#&gt; 45                                                                                                                          22 integrated samples</span></span>
+<span><span class="co">#&gt; 46                                                                                                                 scRNA-seq data - myeloid cells</span></span>
+<span><span class="co">#&gt; 47                                                                                                                     scRNA-seq data - all cells</span></span>
+<span><span class="co">#&gt; 48                                                                                                                       scRNA-seq data - T cells</span></span>
+<span><span class="co">#&gt; 49                                                                                                                       scRNA-seq data - B cells</span></span>
+<span><span class="co">#&gt; 50                                                                                                             All cells from human liver dataset</span></span>
+<span><span class="co">#&gt; 51                                                                                                         Myeloid cells from human liver dataset</span></span>
+<span><span class="co">#&gt; 52                                                                                                   CD45 negative cells from human liver dataset</span></span>
+<span><span class="co">#&gt; 53                                                                                                        Lymphoid cells from human liver dataset</span></span>
+<span><span class="co">#&gt; 54                                                                                                 UMAP visualization of keratinocyte subclusters</span></span>
+<span><span class="co">#&gt; 55                                                                                                          UMAP visualization of all 12 datasets</span></span>
+<span><span class="co">#&gt; 56                                                                                                   UMAP visualization of fibroblast subclusters</span></span>
+<span><span class="co">#&gt; 57                                                                        An integrated cell atlas of the human lung in health and disease (full)</span></span>
+<span><span class="co">#&gt; 58                                         AIDA Phase 1: Chinese, Indian, Japanese, Korean, and Malay donors in Japan, Singapore, and South Korea</span></span>
+<span><span class="co">#&gt; 59           Transcriptional connectivity of regulatory T cells in the tumor microenvironment informs novel combination cancer therapy strategies</span></span>
+<span><span class="co">#&gt; 60          normal - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
+<span><span class="co">#&gt; 61           ccRCC - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
+<span><span class="co">#&gt; 62           chRCC - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
+<span><span class="co">#&gt; 63                                                                                                                                  HBCA - stroma</span></span>
+<span><span class="co">#&gt; 64                                                                                                                              HBCA - epithelial</span></span>
+<span><span class="co">#&gt; 65                                                                                                                                  HBCA - immune</span></span>
+<span><span class="co">#&gt; 66                                                                                                                                  HBCA - global</span></span>
+<span><span class="co">#&gt; 67                                                                               Whole Taxonomy - MTG: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
+<span><span class="co">#&gt; 68                                                                                                 fetal and neonatal human small intestine cells</span></span>
+<span><span class="co">#&gt; 69                                                                                                                     Mouse Somatic Cell Lineage</span></span>
+<span><span class="co">#&gt; 70                                                                                                                      Human Immune Cell Lineage</span></span>
+<span><span class="co">#&gt; 71                                                                                                                                     Mouse Male</span></span>
+<span><span class="co">#&gt; 72                                                                                                                               Mouse Germ Cells</span></span>
+<span><span class="co">#&gt; 73                                                                                                                                     Human Male</span></span>
+<span><span class="co">#&gt; 74                                                                                                                     Human Somatic Cell Lineage</span></span>
+<span><span class="co">#&gt; 75                                                                                                                               Human Germ Cells</span></span>
+<span><span class="co">#&gt; 76                                                                                                                                   Human Female</span></span>
+<span><span class="co">#&gt; 77                                                                                                                                   Mouse Female</span></span>
+<span><span class="co">#&gt; 78                                                                                                                                 Adult duodenum</span></span>
+<span><span class="co">#&gt; 79                                                                                                                         Developing Human Atlas</span></span>
+<span><span class="co">#&gt; 80                                                                                                                         All non-neuronal cells</span></span>
+<span><span class="co">#&gt; 81                                                                                          A molecular single-cell lung atlas of lethal COVID-19</span></span>
+<span><span class="co">#&gt; 82                                                                                                                                  TI epithelial</span></span>
+<span><span class="co">#&gt; 83                                                                                                                                      TI immune</span></span>
+<span><span class="co">#&gt; 84                                                                                                                                  colon stromal</span></span>
+<span><span class="co">#&gt; 85                                                                                                                               colon epithelial</span></span>
+<span><span class="co">#&gt;    dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 1                     31497</span></span>
+<span><span class="co">#&gt; 2                     67070</span></span>
+<span><span class="co">#&gt; 3                    286326</span></span>
+<span><span class="co">#&gt; 4                    270855</span></span>
+<span><span class="co">#&gt; 5                    167283</span></span>
+<span><span class="co">#&gt; 6                     13497</span></span>
+<span><span class="co">#&gt; 7                     27199</span></span>
+<span><span class="co">#&gt; 8                     11505</span></span>
+<span><span class="co">#&gt; 9                     24583</span></span>
+<span><span class="co">#&gt; 10                     9522</span></span>
+<span><span class="co">#&gt; 11                    16375</span></span>
+<span><span class="co">#&gt; 12                    34004</span></span>
+<span><span class="co">#&gt; 13                    12467</span></span>
+<span><span class="co">#&gt; 14                    16037</span></span>
+<span><span class="co">#&gt; 15                    10650</span></span>
+<span><span class="co">#&gt; 16                    50115</span></span>
+<span><span class="co">#&gt; 17                    13680</span></span>
+<span><span class="co">#&gt; 18                     7124</span></span>
+<span><span class="co">#&gt; 19                     5007</span></span>
+<span><span class="co">#&gt; 20                    20263</span></span>
+<span><span class="co">#&gt; 21                    15020</span></span>
+<span><span class="co">#&gt; 22                    12297</span></span>
+<span><span class="co">#&gt; 23                    11375</span></span>
+<span><span class="co">#&gt; 24                     9641</span></span>
+<span><span class="co">#&gt; 25                    30746</span></span>
+<span><span class="co">#&gt; 26                    53275</span></span>
+<span><span class="co">#&gt; 27                    35682</span></span>
+<span><span class="co">#&gt; 28                    33664</span></span>
+<span><span class="co">#&gt; 29                     9424</span></span>
+<span><span class="co">#&gt; 30                     3596</span></span>
+<span><span class="co">#&gt; 31                    45528</span></span>
+<span><span class="co">#&gt; 32                    10734</span></span>
+<span><span class="co">#&gt; 33                     3851</span></span>
+<span><span class="co">#&gt; 34                     4880</span></span>
+<span><span class="co">#&gt; 35                    21968</span></span>
+<span><span class="co">#&gt; 36                    92676</span></span>
+<span><span class="co">#&gt; 37                    83651</span></span>
+<span><span class="co">#&gt; 38                    52638</span></span>
+<span><span class="co">#&gt; 39                     8982</span></span>
+<span><span class="co">#&gt; 40                   117346</span></span>
+<span><span class="co">#&gt; 41                   208390</span></span>
+<span><span class="co">#&gt; 42                   240804</span></span>
+<span><span class="co">#&gt; 43                  1169213</span></span>
+<span><span class="co">#&gt; 44                  2480956</span></span>
+<span><span class="co">#&gt; 45                    72335</span></span>
+<span><span class="co">#&gt; 46                    30789</span></span>
+<span><span class="co">#&gt; 47                   714331</span></span>
+<span><span class="co">#&gt; 48                    76567</span></span>
+<span><span class="co">#&gt; 49                    12510</span></span>
+<span><span class="co">#&gt; 50                   167598</span></span>
+<span><span class="co">#&gt; 51                    40821</span></span>
+<span><span class="co">#&gt; 52                    15481</span></span>
+<span><span class="co">#&gt; 53                   105790</span></span>
+<span><span class="co">#&gt; 54                     9471</span></span>
+<span><span class="co">#&gt; 55                    15243</span></span>
+<span><span class="co">#&gt; 56                     2303</span></span>
+<span><span class="co">#&gt; 57                  2282447</span></span>
+<span><span class="co">#&gt; 58                  1058909</span></span>
+<span><span class="co">#&gt; 59                    82991</span></span>
+<span><span class="co">#&gt; 60                     6044</span></span>
+<span><span class="co">#&gt; 61                    20509</span></span>
+<span><span class="co">#&gt; 62                     2576</span></span>
+<span><span class="co">#&gt; 63                   413997</span></span>
+<span><span class="co">#&gt; 64                   353167</span></span>
+<span><span class="co">#&gt; 65                    23714</span></span>
+<span><span class="co">#&gt; 66                   800198</span></span>
+<span><span class="co">#&gt; 67                  1226855</span></span>
+<span><span class="co">#&gt; 68                    36359</span></span>
+<span><span class="co">#&gt; 69                    50933</span></span>
+<span><span class="co">#&gt; 70                    20556</span></span>
+<span><span class="co">#&gt; 71                    32889</span></span>
+<span><span class="co">#&gt; 72                    10411</span></span>
+<span><span class="co">#&gt; 73                   133811</span></span>
+<span><span class="co">#&gt; 74                   191230</span></span>
+<span><span class="co">#&gt; 75                    10993</span></span>
+<span><span class="co">#&gt; 76                   213898</span></span>
+<span><span class="co">#&gt; 77                    69709</span></span>
+<span><span class="co">#&gt; 78                     5200</span></span>
+<span><span class="co">#&gt; 79                   155232</span></span>
+<span><span class="co">#&gt; 80                   888263</span></span>
+<span><span class="co">#&gt; 81                   116313</span></span>
+<span><span class="co">#&gt; 82                   154136</span></span>
+<span><span class="co">#&gt; 83                   201072</span></span>
+<span><span class="co">#&gt; 84                    39433</span></span>
+<span><span class="co">#&gt; 85                    97788</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 508 rows ]</span></span></code></pre></div>
 <p>The sum of cell counts across all datasets should match the number of cells across all SOMA experiments (human, mouse).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_data</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span></span>
@@ -184,11 +428,14 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <p>Let’s pick one dataset to slice out of the census, and turn into a Seurat in-memory object. (This requires the <code>Seurat</code> package to have been installed beforehand.)</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_datasets</span><span class="op">[</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   soma_joinid collection_id      collection_name collection_doi dataset_id dataset_title</span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         522 0b9d8a04-bb9d-44d… Tabula Muris S… 10.1038/s4158… 0bd1a1de-… Bone marrow …</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: dataset_h5ad_path &lt;chr&gt;, dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt;     soma_joinid                        collection_id    collection_name</span></span>
+<span><span class="co">#&gt; 523         522 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt;                collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 523 10.1038/s41586-020-2496-1 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149</span></span>
+<span><span class="co">#&gt;                                                                                        dataset_title</span></span>
+<span><span class="co">#&gt; 523 Bone marrow - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
+<span><span class="co">#&gt;                             dataset_h5ad_path dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 523 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad                    40220</span></span></code></pre></div>
 <p>Create a query on the mouse experiment, “RNA” measurement, for the <code>dataset_id</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">"tiledbsoma"</a></span><span class="op">)</span></span>
