@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -173,20 +173,41 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co"># in the sparse query results.</span></span>
 <span><span class="va">genes_df</span><span class="op">$</span><span class="va">raw_mean</span> <span class="op">&lt;-</span> <span class="va">raw_sum_by_gene</span> <span class="op">/</span> <span class="va">query</span><span class="op">$</span><span class="va">n_obs</span></span>
 <span><span class="va">genes_df</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 52,392 × 3</span></span></span>
-<span><span class="co">#&gt;    feature_id         feature_name   raw_mean</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ENSMUSG00000051951 Xkr4          1.28     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ENSMUSG00000089699 Gm1992        0        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ENSMUSG00000102343 Gm37381       0        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> ENSMUSG00000025900 Rp1           0.291    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ENSMUSG00000025902 Sox17        60.7      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ENSMUSG00000104328 Gm37323       0.000<span style="text-decoration: underline;">057</span>0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> ENSMUSG00000033845 Mrpl15       36.2      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ENSMUSG00000025903 Lypla1       18.3      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ENSMUSG00000104217 Gm37988       0        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ENSMUSG00000033813 Tcea1        39.6      </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 52,382 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;            feature_id  feature_name     raw_mean</span></span>
+<span><span class="co">#&gt; 1  ENSMUSG00000051951          Xkr4 1.283861e+00</span></span>
+<span><span class="co">#&gt; 2  ENSMUSG00000089699        Gm1992 0.000000e+00</span></span>
+<span><span class="co">#&gt; 3  ENSMUSG00000102343       Gm37381 0.000000e+00</span></span>
+<span><span class="co">#&gt; 4  ENSMUSG00000025900           Rp1 2.914160e-01</span></span>
+<span><span class="co">#&gt; 5  ENSMUSG00000025902         Sox17 6.074154e+01</span></span>
+<span><span class="co">#&gt; 6  ENSMUSG00000104328       Gm37323 5.701742e-05</span></span>
+<span><span class="co">#&gt; 7  ENSMUSG00000033845        Mrpl15 3.621738e+01</span></span>
+<span><span class="co">#&gt; 8  ENSMUSG00000025903        Lypla1 1.827366e+01</span></span>
+<span><span class="co">#&gt; 9  ENSMUSG00000104217       Gm37988 0.000000e+00</span></span>
+<span><span class="co">#&gt; 10 ENSMUSG00000033813         Tcea1 3.960339e+01</span></span>
+<span><span class="co">#&gt; 11 ENSMUSG00000002459         Rgs20 3.212989e+00</span></span>
+<span><span class="co">#&gt; 12 ENSMUSG00000085623       Gm16041 5.701742e-05</span></span>
+<span><span class="co">#&gt; 13 ENSMUSG00000033793       Atp6v1h 6.866793e+01</span></span>
+<span><span class="co">#&gt; 14 ENSMUSG00000025905         Oprk1 4.198763e-01</span></span>
+<span><span class="co">#&gt; 15 ENSMUSG00000033774        Npbwr1 1.140348e-04</span></span>
+<span><span class="co">#&gt; 16 ENSMUSG00000025907        Rb1cc1 3.342227e+01</span></span>
+<span><span class="co">#&gt; 17 ENSMUSG00000090031 4732440D04Rik 1.317102e-02</span></span>
+<span><span class="co">#&gt; 18 ENSMUSG00000087247        Alkal1 5.701742e-05</span></span>
+<span><span class="co">#&gt; 19 ENSMUSG00000033740          St18 1.525501e+01</span></span>
+<span><span class="co">#&gt; 20 ENSMUSG00000051285        Pcmtd1 4.981224e+01</span></span>
+<span><span class="co">#&gt; 21 ENSMUSG00000097797       Gm26901 4.276306e-04</span></span>
+<span><span class="co">#&gt; 22 ENSMUSG00000103067       Gm30414 0.000000e+00</span></span>
+<span><span class="co">#&gt; 23 ENSMUSG00000025909         Sntg1 1.083131e+00</span></span>
+<span><span class="co">#&gt; 24 ENSMUSG00000061024          Rrs1 1.929504e+01</span></span>
+<span><span class="co">#&gt; 25 ENSMUSG00000025911        Adhfe1 1.163515e+01</span></span>
+<span><span class="co">#&gt; 26 ENSMUSG00000067879           Vxn 9.911623e+00</span></span>
+<span><span class="co">#&gt; 27 ENSMUSG00000099827       Gm29520 0.000000e+00</span></span>
+<span><span class="co">#&gt; 28 ENSMUSG00000025912         Mybl1 2.439775e-01</span></span>
+<span><span class="co">#&gt; 29 ENSMUSG00000045210        Vcpip1 3.177732e+01</span></span>
+<span><span class="co">#&gt; 30 ENSMUSG00000097893 1700034P13Rik 5.257291e-01</span></span>
+<span><span class="co">#&gt; 31 ENSMUSG00000025915          Sgk3 1.850455e+01</span></span>
+<span><span class="co">#&gt; 32 ENSMUSG00000046101        Mcmdc2 6.555578e-01</span></span>
+<span><span class="co">#&gt; 33 ENSMUSG00000098234         Snhg6 6.245488e+00</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 52359 rows ]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="counting-cells-grouped-by-dataset-and-gene">Counting cells grouped by dataset and gene<a class="anchor" aria-label="anchor" href="#counting-cells-grouped-by-dataset-and-gene"></a>

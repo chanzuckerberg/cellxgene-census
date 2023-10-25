@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,16 +103,14 @@ will also close all SOMA objects accessed through it.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">open_soma</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   soma_joinid label                      value     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>           0 census_schema_version      1.0.0     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>           1 census_build_date          2023-07-25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>           2 dataset_schema_version     3.0.0     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>           3 total_cell_count           61656118  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>           4 unique_cell_count          37447773  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>           5 number_donors_homo_sapiens 13035     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span>           6 number_donors_mus_musculus 1417      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   soma_joinid                      label      value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           0      census_schema_version      1.0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           1          census_build_date 2023-07-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           2     dataset_schema_version      3.0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4           3           total_cell_count   61656118</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           4          unique_cell_count   37447773</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6           5 number_donors_homo_sapiens      13035</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7           6 number_donors_mus_musculus       1417</span>
 <span class="r-in"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>

@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,11 +135,14 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>        <span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">liver_dataset</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   soma_joinid collection_id      collection_name collection_doi dataset_id dataset_title</span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         525 0b9d8a04-bb9d-44d… Tabula Muris S… 10.1038/s4158… 4546e757-… Liver - A si…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: dataset_h5ad_path &lt;chr&gt;, dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   soma_joinid                        collection_id    collection_name</span></span>
+<span><span class="co">#&gt; 1         525 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt;              collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 1 10.1038/s41586-020-2496-1 4546e757-34d0-4d17-be06-538318925fcd</span></span>
+<span><span class="co">#&gt;                                                                                       dataset_title</span></span>
+<span><span class="co">#&gt; 1 Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
+<span><span class="co">#&gt;                           dataset_h5ad_path dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 1 4546e757-34d0-4d17-be06-538318925fcd.h5ad                     2859</span></span></code></pre></div>
 <p>Now we can use this id to fetch the data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">liver_dataset_id</span> <span class="op">&lt;-</span> <span class="va">liver_dataset</span><span class="op">[</span><span class="fl">1</span>,<span class="st">"dataset_id"</span><span class="op">]</span></span>
