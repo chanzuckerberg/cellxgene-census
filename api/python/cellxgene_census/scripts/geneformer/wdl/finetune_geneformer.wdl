@@ -16,7 +16,7 @@ task finetune_geneformer {
             -e ~{epochs} ~{'-c ' + config} \
             ~{dataset} \
             /census-geneformer/Geneformer/geneformer-12L-30M \
-            ~{output_name} > Trainer.log
+            ~{output_name} | tee Trainer.log >&2
     >>>
 
     output {

@@ -6,6 +6,7 @@ task prepare_census_geneformer_dataset {
 
         Array[String] obs_columns = ["soma_joinid", "cell_type", "cell_type_ontology_term_id", "cell_subclass", "cell_subclass_ontology_term_id"]
         Int N = 0
+        String sampling_column = "cell_subclass"
         String census_version = "latest"
 
         String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
@@ -18,13 +19,14 @@ task prepare_census_geneformer_dataset {
         export HF_HOME="$(pwd)/hf"
         python3 /census-geneformer/prepare-census-geneformer-dataset.py \
             -c '~{sep(",",obs_columns)}' \
-            -N ~{N} \
+            -N ~{N} --sampling-column '~{sampling_column}' \
             -v ~{census_version} \
             ~{output_name}
     >>>
 
     output {
         Directory dataset = output_name
+        File stderr = stderr()
     }
 
     runtime {

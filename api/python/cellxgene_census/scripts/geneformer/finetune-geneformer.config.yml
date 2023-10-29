@@ -1,7 +1,8 @@
 # Name of a categorical column/feature in the Dataset to use as the classifier label
 label_feature: cell_subclass
 # Specific labels to exclude from training and evaluation
-label_blocklist: []
+label_blocklist:
+  - native cell
 # Also exclude labels with too few examples
 label_min_examples: 10
 # Fraction of the input Dataset to hold out for evaluation
