@@ -27,6 +27,9 @@ def main(argv):
         save_strategy="no",
         output_dir="/tmp/checkpoints",  # unused with save_strategy: no
         per_device_eval_batch_size=args.batch_size,
+        group_by_length=True,
+        length_column_name="length",
+        label_names=["label"],
     )
     trainer = Trainer(model=model, data_collator=DataCollatorForCellClassification(), args=training_args)
 
