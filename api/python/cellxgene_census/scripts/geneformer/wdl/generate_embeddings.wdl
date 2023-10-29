@@ -11,12 +11,14 @@ workflow scatter_generate_embeddings {
         String? docker
     }
 
-    scatter (which_part in range(parts)) {
+    scatter (part in range(parts)) {
         call generate_embeddings {
             input:
-            dataset, model, output_name, label_feature, which_part, parts, docker
+            dataset, model, output_name, label_feature, part, parts, docker
         }
     }
+
+    # TODO: gather, following scvi example
 
     output {
         Array[File] embeddings = generate_embeddings.embeddings
@@ -31,14 +33,14 @@ task generate_embeddings {
 
         String label_feature = "cell_subclass"
 
-        # if which_part is supplied, process only cells satisfying: soma_joinid % parts == which_part
-        Int? which_part
+        # if part is supplied, process only cells satisfying: soma_joinid % parts == part
+        Int? part
         Int parts = 1
 
         String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
     }
 
-    String outfile = if which_part == None then "~{output_name}.tsv" else "~{output_name}.~{which_part}.tsv"
+    String outfile = if part == None then "~{output_name}.tsv" else "~{output_name}.~{part}.tsv"
 
     command <<<
         set -euo pipefail
@@ -46,7 +48,7 @@ task generate_embeddings {
         mkdir hf
         export HF_HOME="$(pwd)/hf"
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            ~{"--part " + which_part} --parts ~{parts} --label-feature '~{label_feature}' \
+            ~{"--part " + part} --parts ~{parts} --label-feature '~{label_feature}' \
             '~{model}' '~{dataset}' '~{outfile}'
     >>>
 

@@ -23,7 +23,6 @@ RUN mkdir /census-geneformer
 WORKDIR /census-geneformer
 # clone Geneformer separately to get LFS files
 RUN git clone --recursive https://huggingface.co/ctheodoris/Geneformer
-COPY prepare-census-geneformer-dataset.py .
-COPY finetune-geneformer.py .
-COPY finetune-geneformer.config.yml .
+COPY *.py .
 COPY helpers ./helpers
+COPY finetune-geneformer.config.yml .
