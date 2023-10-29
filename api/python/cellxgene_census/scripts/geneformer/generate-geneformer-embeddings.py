@@ -63,7 +63,7 @@ def parse_arguments(argv):
         default="cell_subclass",
         help="feature the model was fine-tuned to predict (default: cell_subclass)",
     )
-    parser.add_argument("--part", type=int, help="process only cells with soma_joinid % parts == part")
+    parser.add_argument("--part", type=int, help="process only cells with soma_joinid %% parts == part")
     parser.add_argument("--parts", type=int, help="required with --part")
     parser.add_argument("--batch-size", type=int, default=16, help="prediction batch size")
 
