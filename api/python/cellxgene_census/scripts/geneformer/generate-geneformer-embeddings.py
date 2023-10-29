@@ -29,7 +29,6 @@ def main(argv):
         per_device_eval_batch_size=args.batch_size,
         group_by_length=True,
         length_column_name="length",
-        label_names=["label"],
     )
     trainer = Trainer(model=model, data_collator=DataCollatorForCellClassification(), args=training_args)
 
@@ -101,7 +100,7 @@ def load_dataset(dataset_dir, part, parts):
     dataset = Dataset.load_from_disk(dataset_dir)
     logger.info(f"dataset (full): {dataset}")
     if part is not None:
-        dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == parts, num_proc=NPROC)
+        dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part, num_proc=NPROC)
         logger.info(f"dataset part: {dataset}")
     return dataset
 
