@@ -46,7 +46,7 @@ def main(argv):
             header.append(args.label_feature)
         print("\t".join(header), file=outfile)
         for i, it in enumerate(dataset):
-            row = [it["soma_joinid"], label_names[str(pred_labels[i])]]
+            row = [str(it["soma_joinid"]), label_names[str(pred_labels[i])]]
             if true_labels:
                 row.append(true_labels[i])
             print("\t".join(row), file=outfile)
@@ -89,7 +89,7 @@ def load_model(model_dir, label_feature):
             label_names = json.load(infile)
     except FileNotFoundError:
         raise FileNotFoundError(f"expected to find {label_names_file}; check --label-feature") from None
-    logger.info("labels: " + " ".join(label_names.values()))
+    logger.info("labels: " + ", ".join(label_names.values()))
     model = BertForSequenceClassification.from_pretrained(
         model_dir, num_labels=len(label_names), output_attentions=False, output_hidden_states=False
     ).to("cuda")
