@@ -6,6 +6,7 @@ import json
 import logging
 import multiprocessing
 import os
+import sys
 
 from datasets import Dataset
 from geneformer import DataCollatorForCellClassification
@@ -95,6 +96,12 @@ def load_model(model_dir, label_feature):
 
 def load_dataset(dataset_dir, part, parts):
     dataset = Dataset.load_from_disk(dataset_dir)
+    logger.info(f"dataset (full): {dataset}")
     if part is not None:
         dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == parts, num_proc=NPROC)
+        logger.info(f"dataset part: {dataset}")
     return dataset
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
