@@ -97,7 +97,7 @@ def load_model(model_dir, label_feature):
 
 
 def load_dataset(dataset_dir, part, parts):
-    dataset = Dataset.load_from_disk(dataset_dir)
+    dataset = Dataset.load_from_disk(dataset_dir).map(lambda it: {"label": -1}, num_proc=NPROC)
     logger.info(f"dataset (full): {dataset}")
     if part is not None:
         dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part, num_proc=NPROC)
