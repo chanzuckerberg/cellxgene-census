@@ -8,14 +8,14 @@ import multiprocessing
 import os
 import sys
 
-from datasets import Dataset
+from datasets import Dataset, disable_progress_bar
 from geneformer import DataCollatorForCellClassification
 from transformers import BertForSequenceClassification, Trainer
 from transformers.training_args import TrainingArguments
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(os.path.basename(__file__))
-NPROC = multiprocessing.cpu_count()
+disable_progress_bar()
 
 
 def main(argv):
@@ -97,12 +97,12 @@ def load_model(model_dir, label_feature):
 
 
 def load_dataset(dataset_dir, part, parts):
-    dataset = Dataset.load_from_disk(dataset_dir).map(lambda it: {"label": 0}, num_proc=NPROC)
+    dataset = Dataset.load_from_disk(dataset_dir)
     logger.info(f"dataset (full): {dataset}")
     if part is not None:
-        dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part, num_proc=NPROC)
+        dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part)
         logger.info(f"dataset part: {dataset}")
-    return dataset
+    return dataset.map(lambda it: {"label": 0})  # needed just for trainer.predict() to work
 
 
 if __name__ == "__main__":
