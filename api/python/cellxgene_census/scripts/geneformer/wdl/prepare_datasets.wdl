@@ -31,7 +31,7 @@ task prepare_census_geneformer_dataset {
 
     runtime {
         cpu: 8
-        memory: "60G"
+        memory: "90G"
         docker: docker
     }
 }
