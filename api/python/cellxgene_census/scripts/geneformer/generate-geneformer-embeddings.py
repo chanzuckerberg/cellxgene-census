@@ -2,16 +2,14 @@
 # mypy: ignore-errors
 
 import argparse
-import json
 import logging
-import multiprocessing
 import os
 import sys
+import tempfile
 
+import geneformer
 from datasets import Dataset, disable_progress_bar
-from geneformer import DataCollatorForCellClassification
-from transformers import BertForSequenceClassification, Trainer
-from transformers.training_args import TrainingArguments
+from transformers import BertConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(os.path.basename(__file__))
@@ -20,54 +18,65 @@ disable_progress_bar()
 
 def main(argv):
     args = parse_arguments(argv)
-    label_names, model = load_model(args.model, args.label_feature)
-    dataset = load_dataset(args.dataset, args.part, args.parts)
 
-    training_args = TrainingArguments(
-        save_strategy="no",
-        output_dir="/tmp/checkpoints",  # unused with save_strategy: no
-        per_device_eval_batch_size=args.batch_size,
-        group_by_length=True,
-        length_column_name="length",
-    )
-    trainer = Trainer(model=model, data_collator=DataCollatorForCellClassification(), args=training_args)
+    num_classes = 0
+    if args.model_type != "Pretrained":
+        num_classes = BertConfig.from_pretrained(args.model).num_labels
+        logger.info(f"detected {num_classes} labels in {args.model_type} model {args.cell_classifier_model}")
 
-    logger.info("running inference...")
-    eval = trainer.predict(dataset)
-    pred_labels = eval.predictions.argmax(-1)
-    true_labels = dataset[args.label_feature] if args.label_feature in dataset.features else None
+    with tempfile.TemporaryDirectory() as scratch_dir:
+        dataset_path = prepare_dataset(args.dataset, args.part, args.parts, scratch_dir)
+        logger.info("Extracting embeddings...")
+        # NOTE: EmbExtractor only uses one GPU
+        #       see https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/emb_extractor.py
+        extractor = geneformer.EmbExtractor(
+            model_type=args.model_type,
+            num_classes=num_classes,
+            max_ncells=None,
+            emb_layer=args.emb_layer,
+            emb_label=args.features,
+            forward_batch_size=args.batch_size,
+        )
+        embs_df = extractor.extract_embs(
+            model_directory=args.model,
+            input_data_file=dataset_path,
+            # the method always writes out a .csv file which we discard (since it also returns the
+            # embeddings)
+            output_directory=scratch_dir,
+            output_prefix="embs",
+        )
 
-    # TODO: actually extract embeddings !
+        logger.info(f"writing {args.output}...")
+        # TODO: determine final output format
+        embs_df.to_csv(args.output, sep="\t", header=True)
 
-    logger.info(f"writing {args.outfile}...")
-    with open(args.outfile, "w") as outfile:
-        header = ["soma_joinid", f"predicted_{args.label_feature}"]
-        if true_labels:
-            header.append(args.label_feature)
-        print("\t".join(header), file=outfile)
-        for i, it in enumerate(dataset):
-            row = [str(it["soma_joinid"]), label_names[str(pred_labels[i])]]
-            if true_labels:
-                row.append(true_labels[i])
-            print("\t".join(row), file=outfile)
-
-    logger.info("SUCCESS")
+        logger.info("SUCCESS")
 
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description="Generate fine-tuned Geneformer embeddings for given cells dataset")
-    parser.add_argument("model", type=str, help="path to fine-tuned Geneformer model")
+    parser.add_argument("model", type=str, help="path to model")
     parser.add_argument("dataset", type=str, help="saved cell Dataset path")
     parser.add_argument("outfile", type=str, help="output filename")
     parser.add_argument(
-        "--label-feature",
+        "--model-type",
         type=str,
-        default="cell_subclass",
-        help="feature the model was fine-tuned to predict (default: cell_subclass)",
+        choices=("CellClassifier", "Pretrained"),
+        default="CellClassifier",
+        help="model type (Pretrained or default CellClassifier)",
     )
+    parser.add_argument(
+        "--emb-layer", type=int, choices=(-1, 0), default=-1, help="desired embedding layer (0 or default -1)"
+    )
+    parser.add_argument(
+        "--features",
+        type=str,
+        default="soma_joinid,cell_type,cell_type_ontology_term_id,cell_subclass,cell_subclass_ontology_term_id",
+        help="dataset features to copy into output dataframe (comma-separated)",
+    )
+    parser.add_argument("--batch-size", type=int, default=16, help="batch size")
     parser.add_argument("--part", type=int, help="process only cells with soma_joinid %% parts == part")
     parser.add_argument("--parts", type=int, help="required with --part")
-    parser.add_argument("--batch-size", type=int, default=16, help="prediction batch size")
 
     args = parser.parse_args(argv[1:])
 
@@ -79,30 +88,17 @@ def parse_arguments(argv):
     return args
 
 
-def load_model(model_dir, label_feature):
-    """
-    Load the model and the mapping from label number to cell_subclass (or whatever feature was used)
-    """
-    label_names_file = os.path.join(model_dir, f"label_to_{label_feature}.json")
-    try:
-        with open(label_names_file) as infile:
-            label_names = json.load(infile)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"expected to find {label_names_file}; check --label-feature") from None
-    logger.info("labels: " + ", ".join(label_names.values()))
-    model = BertForSequenceClassification.from_pretrained(
-        model_dir, num_labels=len(label_names), output_attentions=False, output_hidden_states=False
-    ).to("cuda")
-    return label_names, model
-
-
-def load_dataset(dataset_dir, part, parts):
+def prepare_dataset(dataset_dir, part, parts, spool_dir):
     dataset = Dataset.load_from_disk(dataset_dir)
     logger.info(f"dataset (full): {dataset}")
-    if part is not None:
-        dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part)
-        logger.info(f"dataset part: {dataset}")
-    return dataset.map(lambda it: {"label": 0})  # needed just for trainer.predict() to work
+    if part is None:
+        return dataset_dir
+    # spool the desired part of the dataset
+    dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part)
+    logger.info(f"dataset part: {dataset}")
+    part_dir = os.path.join(spool_dir, "dataset_part")
+    dataset.save_to_disk(part_dir)
+    return part_dir
 
 
 if __name__ == "__main__":
