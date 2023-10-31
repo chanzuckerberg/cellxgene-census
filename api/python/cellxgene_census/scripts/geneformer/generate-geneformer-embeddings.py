@@ -46,9 +46,9 @@ def main(argv):
             output_prefix="embs",
         )
 
-        logger.info(f"writing {args.output}...")
+        logger.info(f"writing {args.outfile}...")
         # TODO: determine final output format
-        embs_df.to_csv(args.output, sep="\t", header=True)
+        embs_df.to_csv(args.outfile, sep="\t", header=True)
 
         logger.info("SUCCESS")
 
