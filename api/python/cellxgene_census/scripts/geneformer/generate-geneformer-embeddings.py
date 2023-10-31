@@ -80,6 +80,9 @@ def parse_arguments(argv):
 
     args = parser.parse_args(argv[1:])
 
+    if args.features:
+        args.features = [s.strip() for s in args.features.split(",")]
+
     if args.part is not None:
         if not (args.part >= 0 and args.parts is not None and args.parts > args.part):
             parser.error("--part must be nonnegative and less than --parts")
