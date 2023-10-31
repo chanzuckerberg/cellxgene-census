@@ -80,7 +80,7 @@ task merge_embeddings {
         # Concatenate the parts (without header)
         while read -r part; do
             tail -n +2 "$part" >> /tmp/embeddings
-        done
+        done < '~{write_lines(embeddings_parts)}'
 
         # Sort by the first column (soma_joinid), prepending the header
         head -n 1 '~{embeddings_parts[0]}' > '~{output_name}.tsv'
