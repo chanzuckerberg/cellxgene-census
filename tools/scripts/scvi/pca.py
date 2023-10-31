@@ -1,12 +1,16 @@
+import cellxgene_census
+import numpy as np
+import tiledbsoma as soma
 
+from sklearn.decomposition import PCA, IncrementalPCA
+import matplotlib.pyplot as plt
 import anndata
 import yaml
-from sklearn.decomposition import IncrementalPCA
+import scanpy
 
 n_components = 50
 
 file = "scvi-config.yaml"
-
 
 def _gen_batches(n, batch_size, min_batch_size=0):
     start = 0
@@ -19,7 +23,6 @@ def _gen_batches(n, batch_size, min_batch_size=0):
     if start < n:
         yield slice(start, n)
 
-
 if __name__ == "__main__":
     with open(file) as f:
         config = yaml.safe_load(f)
@@ -29,6 +32,7 @@ if __name__ == "__main__":
     ad_filename = adata_config.get("model_filename")
 
     ad = anndata.read_h5ad(ad_filename)
+    ad = anndata.read_h5ad("anndata-full.h5ad")
 
     X = ad.X
 
@@ -37,25 +41,51 @@ if __name__ == "__main__":
     print("Starting PCA")
 
     n_samples, n_features = X.shape
-    batch_size = 1000  # 5 * n_features
+    batch_size = 5 * n_features
 
-    transformer = IncrementalPCA(n_components=n_components, batch_size=200)
+    transformer = IncrementalPCA(n_components=n_components)
 
-    for i, batch in enumerate(_gen_batches(n_samples, batch_size, min_batch_size=n_components or 0)):
+    for i, batch in enumerate(_gen_batches(
+        n_samples, batch_size, min_batch_size=n_components or 0
+    )):
         print(batch)
         X_batch = X[batch]
         print(f"Computing batch {i}, shape {X_batch.shape}")
         X_batch = X_batch.toarray()
         transformer.partial_fit(X_batch)
 
+    print(X.shape)
+
+    transformer.batch_size_ = 1000
+    X = transformer.transform(X)
+
+    
+
+
     print(transformer)
+    print(transformer.components_.shape)
+
+    print(X.shape)
+
+    with open('pca.npy', 'wb') as f:
+        np.save(f, X)
+
+        
+
+
+
 
     # transformer.fit(ad.X)
     # print(transformer)
     # print(transformer.components_)
 
     # with open('pca.npy', 'wb') as f:
-    # np.save(f, transformer.components_)
+        # np.save(f, transformer.components_)
+
+    
+
+
+
 
     # pca = scanpy.tl.pca(ad, n_comps=n_components)
 

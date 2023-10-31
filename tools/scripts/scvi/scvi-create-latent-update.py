@@ -67,6 +67,8 @@ if __name__ == "__main__":
     vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0))
     latent = vae_q.get_latent_representation()
 
+    ad.write_h5ad("anndata-full.h5ad", compression="gzip")
+
     del vae_q, ad
     gc.collect()
 
