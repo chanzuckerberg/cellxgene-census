@@ -21,7 +21,7 @@ def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: b
     if not to_path.startswith("s3://"):
         raise ValueError(f"S3_path argument does not appear to be an S3 path: {to_path}")
 
-    _sync_to_S3(from_path.as_posix(), to_path, dryrun=dryrun)
+    _sync_to_S3(from_path.as_posix(), to_path, delete=False, dryrun=dryrun)
 
 
 def sync_to_S3_remote(from_path: str, to_path: str, delete: bool = False, dryrun: bool = False) -> None:
