@@ -22,7 +22,7 @@ def main(argv):
     num_classes = 0
     if args.model_type != "Pretrained":
         num_classes = BertConfig.from_pretrained(args.model).num_labels
-        logger.info(f"detected {num_classes} labels in {args.model_type} model {args.cell_classifier_model}")
+        logger.info(f"detected {num_classes} labels in {args.model_type} model {args.model}")
 
     with tempfile.TemporaryDirectory() as scratch_dir:
         dataset_path = prepare_dataset(args.dataset, args.part, args.parts, scratch_dir)
