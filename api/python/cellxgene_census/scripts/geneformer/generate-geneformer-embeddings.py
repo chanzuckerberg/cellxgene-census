@@ -50,8 +50,8 @@ def main(argv):
         # reorder embs_df columns and write to TSV
         # TODO: determine final output format
         cols = embs_df.columns.tolist()
-        emb_cols = [col for col in cols if col.isdigit()]
-        anno_cols = [col for col in cols if not col.isdigit()]
+        emb_cols = [col for col in cols if isinstance(col, int)]
+        anno_cols = [col for col in cols if not isinstance(col, int)]
         embs_df = embs_df[anno_cols + emb_cols].set_index("soma_joinid")
         embs_df.to_csv(args.outfile, sep="\t", header=True, index=True, index_label="soma_joinid")
 
