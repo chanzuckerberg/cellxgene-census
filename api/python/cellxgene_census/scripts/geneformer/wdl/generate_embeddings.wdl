@@ -17,10 +17,13 @@ workflow scatter_generate_embeddings {
         }
     }
 
-    # TODO: gather, following scvi example
+    call merge_embeddings {
+        input:
+        embeddings_parts = generate_embeddings.embeddings, output_name
+    }
 
     output {
-        Array[File] embeddings = generate_embeddings.embeddings
+        File embeddings = merge_embeddings.embeddings
     }
 }
 
@@ -60,5 +63,37 @@ task generate_embeddings {
 
     output {
         File embeddings = outfile
+    }
+}
+
+task merge_embeddings {
+    input {
+        Array[File] embeddings_parts
+        String output_name
+
+        String docker = "ubuntu:22.04"
+    }
+
+    command <<<
+        set -euxo pipefail
+
+        # Concatenate the parts (without header)
+        while read -r part; do
+            tail -n +2 "$part" >> /tmp/embeddings
+        done
+
+        # Sort by the first column (soma_joinid), prepending the header
+        head -n 1 '~{embeddings_parts[0]}' > '~{output_name}.tsv'
+        sort -k1,1n /tmp/embeddings >> '~{output_name}.tsv'
+    >>>
+
+    runtime {
+        cpu: 4
+        memory: "8G"
+        docker: docker
+    }
+
+    output {
+        File embeddings = output_name + ".tsv"
     }
 }
