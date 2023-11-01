@@ -21,14 +21,15 @@ def main(argv):
 
     num_classes = 0
     if args.model_type != "Pretrained":
+        # classifier model: detect the number of classes from the model configuration (without
+        # having to load in the whole model redundantly with EmbExtractor below)
         num_classes = BertConfig.from_pretrained(args.model).num_labels
         logger.info(f"detected {num_classes} labels in {args.model_type} model {args.model}")
 
     with tempfile.TemporaryDirectory() as scratch_dir:
+        # prepare the dataset, taking only one shard of it if so instructed
         dataset_path = prepare_dataset(args.dataset, args.part, args.parts, scratch_dir)
         logger.info("Extracting embeddings...")
-        # NOTE: EmbExtractor only uses one GPU
-        #       see https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/emb_extractor.py
         extractor = geneformer.EmbExtractor(
             model_type=args.model_type,
             num_classes=num_classes,
@@ -37,11 +38,13 @@ def main(argv):
             emb_label=args.features,
             forward_batch_size=args.batch_size,
         )
+        # NOTE: EmbExtractor will use only one GPU
+        #       see https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/emb_extractor.py
         embs_df = extractor.extract_embs(
             model_directory=args.model,
             input_data_file=dataset_path,
             # the method always writes out a .csv file which we discard (since it also returns the
-            # embeddings)
+            # embeddings data frame)
             output_directory=scratch_dir,
             output_prefix="embs",
         )
@@ -80,7 +83,7 @@ def parse_arguments(argv):
         help="dataset features to copy into output dataframe (comma-separated)",
     )
     parser.add_argument("--batch-size", type=int, default=16, help="batch size")
-    parser.add_argument("--part", type=int, help="process only cells with soma_joinid %% parts == part")
+    parser.add_argument("--part", type=int, help="process only one shard of the data (zero-based index)")
     parser.add_argument("--parts", type=int, help="required with --part")
 
     args = parser.parse_args(argv[1:])
@@ -101,8 +104,8 @@ def prepare_dataset(dataset_dir, part, parts, spool_dir):
     logger.info(f"dataset (full): {dataset}")
     if part is None:
         return dataset_dir
-    # spool the desired part of the dataset
-    dataset = dataset.filter(lambda it: it["soma_joinid"] % parts == part)
+    dataset = dataset.shard(num_shards=parts, index=part, contiguous=True)
+    # spool the desired part of the dataset (since EmbExtractor takes a directory)
     logger.info(f"dataset part: {dataset}")
     part_dir = os.path.join(spool_dir, "dataset_part")
     dataset.save_to_disk(part_dir)
