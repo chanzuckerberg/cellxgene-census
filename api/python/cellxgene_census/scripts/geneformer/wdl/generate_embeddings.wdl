@@ -85,6 +85,7 @@ task merge_embeddings {
         # Sort by the first column (soma_joinid), prepending the header
         head -n 1 '~{embeddings_parts[0]}' > '~{output_name}.tsv'
         sort -k1,1n /tmp/embeddings >> '~{output_name}.tsv'
+        pigz '~{output_name}.tsv'
     >>>
 
     runtime {
@@ -94,6 +95,6 @@ task merge_embeddings {
     }
 
     output {
-        File embeddings = output_name + ".tsv"
+        File embeddings = output_name + ".tsv.gz"
     }
 }

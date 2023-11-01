@@ -3,9 +3,9 @@
 # - Geneformer
 # - cellxgene_census
 # - our Census-Geneformer training scripts
-FROM nvcr.io/nvidia/pytorch:23.09-py3
+FROM nvcr.io/nvidia/pytorch:23.10-py3
 
-RUN apt update && apt install -y git-lfs
+RUN apt update && apt install -y git-lfs pigz
 RUN git lfs install
 RUN pip install \
         transformers[torch] \
