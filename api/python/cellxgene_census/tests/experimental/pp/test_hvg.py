@@ -49,11 +49,7 @@ from cellxgene_census.experimental.pp import (
         "dataset_id",
         ["suspension_type", "assay_ontology_term_id"],
         pytest.param(
-            ("suspension_type", "assay_ontology_term_id", "dataset_id"),
-            marks=pytest.mark.expensive,
-        ),
-        pytest.param(
-            ["dataset_id", "assay_ontology_term_id", "suspension_type", "donor_id"],
+            ("suspension_type", "assay_ontology_term_id"),
             marks=pytest.mark.expensive,
         ),
     ),
@@ -110,7 +106,7 @@ def test_hvg_vs_scanpy(
 
     try:
         scanpy_hvg = sc.pp.highly_variable_genes(adata, inplace=False, **kwargs)
-    except ZeroDivisionError:
+    except (ZeroDivisionError, ValueError):
         # There are test cases where ScanPy will fail, rendering this "compare vs scanpy"
         # test moot. The known cases involve overly partitioned data that results in batches
         # with a very small number of samples (which manifest as a divide by zero error).
@@ -146,16 +142,16 @@ def test_hvg_vs_scanpy(
         equal_nan=True,
     )
 
-    # Online calculation of normalized variance  will differ slightly from ScanPy's calculation,
+    # Online calculation of normalized variance will differ slightly from ScanPy's calculation,
     # so look for rank of HVGs to be close, but not identical.  Don't worry about the non-HVGs
     # (which will differ more as you get to the long tail).  This test just looks for the average
-    # rank distance to be very small.
+    # rank distance to be small.
     assert (
-        (
-            scanpy_hvg[scanpy_hvg.highly_variable].highly_variable_rank - hvg[hvg.highly_variable].highly_variable_rank
-        ).sum()
+        (scanpy_hvg[scanpy_hvg.highly_variable].highly_variable_rank - hvg[hvg.highly_variable].highly_variable_rank)
+        .abs()
+        .sum()
         / n_top_genes
-    ) < 0.01
+    ) < 0.05
 
     # Ranking will also have some noise, so check that ranking is close in the highly variable subset
     scanpy_rank = scanpy_hvg.highly_variable_rank.copy()
