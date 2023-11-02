@@ -19,7 +19,7 @@ workflow scatter_generate_embeddings {
 
     call merge_embeddings {
         input:
-        embeddings_parts = generate_embeddings.embeddings, output_name
+        embeddings_parts = generate_embeddings.embeddings, output_name, docker
     }
 
     output {
@@ -49,7 +49,7 @@ task generate_embeddings {
         export HF_HOME="$(pwd)/hf"
         export TMPDIR="$HF_HOME"
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            ~{"--part " + part} --parts ~{parts} \
+            ~{"--part " + part} --parts ~{parts} --batch-size 10 \
             '~{model}' '~{dataset}' '~{outfile}'
     >>>
 
@@ -59,6 +59,9 @@ task generate_embeddings {
         memory: "30G"
         gpu: true
         docker: docker
+        # for robustness to sporadic errors e.g.
+        # https://github.com/pytorch/pytorch/issues/21819
+        maxRetries: 1
     }
 
     output {
@@ -71,26 +74,28 @@ task merge_embeddings {
         Array[File] embeddings_parts
         String output_name
 
-        String docker = "ubuntu:22.04"
+        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
     }
 
     command <<<
         set -euxo pipefail
 
+        mkdir tmp
+        : "${TMPDIR:=$(pwd)/tmp}"
+
         # Concatenate the parts (without header)
         while read -r part; do
-            tail -n +2 "$part" >> /tmp/embeddings
+            tail -n +2 "$part" >> "${TMPDIR}/embeddings"
         done < '~{write_lines(embeddings_parts)}'
 
         # Sort by the first column (soma_joinid), prepending the header
-        head -n 1 '~{embeddings_parts[0]}' > '~{output_name}.tsv'
-        sort -k1,1n /tmp/embeddings >> '~{output_name}.tsv'
-        pigz '~{output_name}.tsv'
+        head -n 1 '~{embeddings_parts[0]}' | pigz -c > '~{output_name}.tsv.gz'
+        sort -k1,1n "${TMPDIR}/embeddings" | pigz -c >> '~{output_name}.tsv.gz'
     >>>
 
     runtime {
-        cpu: 4
-        memory: "8G"
+        cpu: 8
+        memory: "15G"
         docker: docker
     }
 
