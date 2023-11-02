@@ -14,7 +14,7 @@ The `Dockerfile` provides the recipe for the docker image used by the WDLs, whic
 
 Using a [miniwdl-aws-terraform](https://github.com/miniwdl-ext/miniwdl-aws-terraform) deployment with suitable GPU instance types enabled, and assuming the docker image has been built and pushed to a suitable repository like ECR.
 
-```
+```bash
 # generating subsampled dataset
 miniwdl-aws-submit prepare_datasets.wdl \
     N=1250 sampling_column=cell_type output_name=1250_per_cell_type \
