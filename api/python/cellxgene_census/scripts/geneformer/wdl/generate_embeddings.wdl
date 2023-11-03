@@ -82,6 +82,7 @@ task merge_embeddings {
 
         mkdir tmp
         : "${TMPDIR:=$(pwd)/tmp}"
+        export TMPDIR
 
         # Concatenate the parts (without header)
         while read -r part; do
@@ -90,12 +91,12 @@ task merge_embeddings {
 
         # Sort by the first column (soma_joinid), prepending the header
         head -n 1 '~{embeddings_parts[0]}' | pigz -c > '~{output_name}.tsv.gz'
-        sort -k1,1n "${TMPDIR}/embeddings" | pigz -c >> '~{output_name}.tsv.gz'
+        sort -k1,1n --buffer-size=1G --parallel=8 -T "$TMPDIR" "${TMPDIR}/embeddings" | pigz -c >> '~{output_name}.tsv.gz'
     >>>
 
     runtime {
-        cpu: 8
-        memory: "15G"
+        cpu: 16
+        memory: "30G"
         docker: docker
     }
 
