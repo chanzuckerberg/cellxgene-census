@@ -1,0 +1,43 @@
+[project]
+name = "census_contrib"
+dynamic = ["version"]
+
+dependencies= [
+    "attrs",
+    "cellxgene_census",
+    "pyyaml",
+    "requests",
+    "typed-argument-parser",
+    "typing_extensions",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["census_contrib*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
+
+[tool.setuptools.package-data]
+"cellxgene_census" = ["py.typed"]
+
+[tool.setuptools_scm]
+root = "../.."
+
+[tool.black]
+line-length = 120
+target_version = ['py310']
+
+[tool.mypy]
+show_error_codes = true
+ignore_missing_imports = true
+warn_unreachable = true
+strict = true
+plugins = "numpy.typing.mypy_plugin"
+
+[tool.ruff]
+select = ["E", "F", "B", "I"]
+ignore = ["E501", "E402", "C408", ]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.isort]
+known-first-party =["census_contrib"]
