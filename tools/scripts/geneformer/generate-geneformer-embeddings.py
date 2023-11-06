@@ -29,7 +29,7 @@ def main(argv):
         aws_region = "us-west-2"
         try:
             aws_region = boto3.Session().region_name
-        except:
+        except Exception:
             pass
         tiledbsoma_context = tiledbsoma.options.SOMATileDBContext(
             tiledb_ctx=tiledb.Ctx(
@@ -76,11 +76,18 @@ def main(argv):
         )
 
         if args.tiledbsoma:
+            import numpy as np
+            import pyarrow as pa
+            from scipy.sparse import coo_matrix
+
             # NOTE: embs_df has columns -named- 0, 1, ..., 511 as well as the requested features.
             embedding_dim = embs_df.shape[1] - len(args.features)
             logger.info(f"writing to tiledbsoma.SparseNDArray at {args.outfile}, embedding_dim={embedding_dim}...")
             with tiledbsoma.SparseNDArray.open(args.outfile, "w", context=tiledbsoma_context) as array:
-                array[embs_df["soma_joinid"].values, range(embedding_dim)] = embs_df.loc[:, range(embedding_dim)].values
+                dim0 = np.repeat(embs_df["soma_joinid"].values, embedding_dim)
+                dim1 = np.tile(np.arange(embedding_dim), len(embs_df))
+                data = embs_df.loc[:, range(embedding_dim)].values.flatten()
+                array.write(pa.SparseCOOTensor.from_scipy(coo_matrix((data, (dim0, dim1)))))
         else:
             logger.info(f"writing {args.outfile}...")
             # reorder embs_df columns and write to TSV
