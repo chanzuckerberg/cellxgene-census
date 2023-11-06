@@ -4,43 +4,66 @@ workflow scatter_generate_embeddings {
     input {
         Directory dataset
         Directory model
-        String output_name
+        String output_uri
         Int parts = 10
 
-        String? docker
+        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
+    }
+
+    call init_embeddings_array {
+        input:
+        uri = output_uri, docker
     }
 
     scatter (part in range(parts)) {
         call generate_embeddings {
             input:
-            dataset, model, output_name, part, parts, docker
+            dataset, model, output_uri, part, parts, docker
         }
     }
 
-    call merge_embeddings {
-        input:
-        embeddings_parts = generate_embeddings.embeddings, output_name, docker
+    output {}
+}
+
+task init_embeddings_array {
+    input {
+        String uri
+        String docker
+
+        Int embedding_dim = 512 # TODO: avoid hard-coding this
     }
 
-    output {
-        File embeddings = merge_embeddings.embeddings
+    command <<<
+        python3 - <<'EOF'
+        import tiledbsoma
+        import pyarrow as pa
+        tiledbsoma.SparseNDArray.create(
+            '~{uri}',
+            type=pa.float32(),
+            shape=(2**31-2, ~{embedding_dim})
+        ).close()
+        EOF
+    >>>
+
+    runtime {
+        docker: docker
     }
+
+    output {}
 }
 
 task generate_embeddings {
     input {
         Directory dataset
         Directory model
-        String output_name
+        String output_uri
 
         # if part is supplied, process only cells satisfying: soma_joinid % parts == part
         Int? part
         Int parts = 1
 
-        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
+        String docker
     }
-
-    String outfile = if part == None then "~{output_name}.tsv" else "~{output_name}.~{part}.tsv"
 
     command <<<
         set -euo pipefail
@@ -49,8 +72,8 @@ task generate_embeddings {
         export HF_HOME="$(pwd)/hf"
         export TMPDIR="$HF_HOME"
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            ~{"--part " + part} --parts ~{parts} --batch-size 10 \
-            '~{model}' '~{dataset}' '~{outfile}'
+            ~{"--part " + part} --parts ~{parts} --batch-size 10 --tiledbsoma \
+            '~{model}' '~{dataset}' '~{output_uri}'
     >>>
 
     runtime {
@@ -64,43 +87,5 @@ task generate_embeddings {
         maxRetries: 1
     }
 
-    output {
-        File embeddings = outfile
-    }
-}
-
-task merge_embeddings {
-    input {
-        Array[File] embeddings_parts
-        String output_name
-
-        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
-    }
-
-    command <<<
-        set -euxo pipefail
-
-        mkdir tmp
-        : "${TMPDIR:=$(pwd)/tmp}"
-        export TMPDIR
-
-        # Concatenate the parts (without header)
-        while read -r part; do
-            tail -n +2 "$part" >> "${TMPDIR}/embeddings"
-        done < '~{write_lines(embeddings_parts)}'
-
-        # Sort by the first column (soma_joinid), prepending the header
-        head -n 1 '~{embeddings_parts[0]}' | pigz -c > '~{output_name}.tsv.gz'
-        sort -k1,1n --buffer-size=1G --parallel=8 -T "$TMPDIR" "${TMPDIR}/embeddings" | pigz -c >> '~{output_name}.tsv.gz'
-    >>>
-
-    runtime {
-        cpu: 16
-        memory: "30G"
-        docker: docker
-    }
-
-    output {
-        File embeddings = output_name + ".tsv.gz"
-    }
+    output {}
 }

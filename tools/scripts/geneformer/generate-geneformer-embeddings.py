@@ -19,6 +19,12 @@ disable_progress_bar()
 def main(argv):
     args = parse_arguments(argv)
 
+    if args.tiledbsoma:
+        import tiledbsoma
+
+        with tiledbsoma.SparseNDArray.open(args.outfile, "r"):  # fail fast
+            pass
+
     num_classes = 0
     if args.model_type != "Pretrained":
         # classifier model: detect the number of classes from the model configuration (without
@@ -49,14 +55,20 @@ def main(argv):
             output_prefix="embs",
         )
 
-        logger.info(f"writing {args.outfile}...")
-        # reorder embs_df columns and write to TSV
-        # TODO: determine final output format
-        cols = embs_df.columns.tolist()
-        emb_cols = [col for col in cols if isinstance(col, int)]
-        anno_cols = [col for col in cols if not isinstance(col, int)]
-        embs_df = embs_df[anno_cols + emb_cols].set_index("soma_joinid").sort_index()
-        embs_df.to_csv(args.outfile, sep="\t", header=True, index=True, index_label="soma_joinid")
+        if args.tiledbsoma:
+            # NOTE: embs_df has columns -named- 0, 1, ..., 511 as well as the requested features.
+            embedding_dim = embs_df.shape[1] - len(args.features)
+            logger.info(f"writing to tiledbsoma.SparseNDArray at {args.outfile}, embedding_dim={embedding_dim}...")
+            with tiledbsoma.SparseNDArray.open(args.outfile, "w") as array:
+                array[embs_df["soma_joinid"].values, range(embedding_dim)] = embs_df.loc[:, range(embedding_dim)].values
+        else:
+            logger.info(f"writing {args.outfile}...")
+            # reorder embs_df columns and write to TSV
+            cols = embs_df.columns.tolist()
+            emb_cols = [col for col in cols if isinstance(col, int)]
+            anno_cols = [col for col in cols if not isinstance(col, int)]
+            embs_df = embs_df[anno_cols + emb_cols].set_index("soma_joinid").sort_index()
+            embs_df.to_csv(args.outfile, sep="\t", header=True, index=True, index_label="soma_joinid")
 
         logger.info("SUCCESS")
 
@@ -85,11 +97,20 @@ def parse_arguments(argv):
     parser.add_argument("--batch-size", type=int, default=16, help="batch size")
     parser.add_argument("--part", type=int, help="process only one shard of the data (zero-based index)")
     parser.add_argument("--parts", type=int, help="required with --part")
+    parser.add_argument(
+        "--tiledbsoma",
+        action="store_true",
+        help="outfile is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
+    )
 
     args = parser.parse_args(argv[1:])
 
     if args.features:
         args.features = [s.strip() for s in args.features.split(",")]
+    else:
+        args.features = []
+    if "soma_joinid" not in args.features:
+        args.features.append("soma_joinid")
 
     if args.part is not None:
         if not (args.part >= 0 and args.parts is not None and args.parts > args.part):
