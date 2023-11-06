@@ -19,10 +19,30 @@ disable_progress_bar()
 def main(argv):
     args = parse_arguments(argv)
 
+    tiledbsoma_context = None
     if args.tiledbsoma:
+        # prep tiledbsoma (and fail fast if there's a problem)
+        import boto3
+        import tiledb
         import tiledbsoma
 
-        with tiledbsoma.SparseNDArray.open(args.outfile, "r"):  # fail fast
+        aws_region = "us-west-2"
+        try:
+            aws_region = boto3.Session().region_name
+        except:
+            pass
+        tiledbsoma_context = tiledbsoma.options.SOMATileDBContext(
+            tiledb_ctx=tiledb.Ctx(
+                {
+                    "py.init_buffer_bytes": 4 * 1024**3,
+                    "soma.init_buffer_bytes": 4 * 1024**3,
+                    "vfs.s3.region": aws_region,
+                }
+            )
+        )
+
+        with tiledbsoma.SparseNDArray.open(args.outfile, "r", context=tiledbsoma_context):
+            # TODO: verify schema compatibility
             pass
 
     num_classes = 0
@@ -59,7 +79,7 @@ def main(argv):
             # NOTE: embs_df has columns -named- 0, 1, ..., 511 as well as the requested features.
             embedding_dim = embs_df.shape[1] - len(args.features)
             logger.info(f"writing to tiledbsoma.SparseNDArray at {args.outfile}, embedding_dim={embedding_dim}...")
-            with tiledbsoma.SparseNDArray.open(args.outfile, "w") as array:
+            with tiledbsoma.SparseNDArray.open(args.outfile, "w", context=tiledbsoma_context) as array:
                 array[embs_df["soma_joinid"].values, range(embedding_dim)] = embs_df.loc[:, range(embedding_dim)].values
         else:
             logger.info(f"writing {args.outfile}...")

@@ -11,7 +11,7 @@ RUN pip install \
         transformers[torch] \
         "cellxgene_census[experimental] @ git+https://github.com/chanzuckerberg/cellxgene-census.git#subdirectory=api/python/cellxgene_census" \
         git+https://huggingface.co/ctheodoris/Geneformer
-RUN pip install owlready2
+RUN pip install owlready2 boto3
 
 # workaround for unknown problem blocking `import geneformer`:
 #   https://github.com/microsoft/TaskMatrix/issues/116#issuecomment-1565431850

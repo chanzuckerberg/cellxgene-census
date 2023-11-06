@@ -7,18 +7,19 @@ workflow scatter_generate_embeddings {
         String output_uri
         Int parts = 10
 
+        String s3_region = "us-west-2"
         String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
     }
 
     call init_embeddings_array {
         input:
-        uri = output_uri, docker
+        uri = output_uri, s3_region, docker
     }
 
     scatter (part in range(parts)) {
-        call generate_embeddings {
+        call generate_embeddings after init_embeddings_array {
             input:
-            dataset, model, output_uri, part, parts, docker
+            dataset, model, output_uri, s3_region, part, parts, docker
         }
     }
 
@@ -28,6 +29,7 @@ workflow scatter_generate_embeddings {
 task init_embeddings_array {
     input {
         String uri
+        String s3_region
         String docker
 
         Int embedding_dim = 512 # TODO: avoid hard-coding this
@@ -35,12 +37,16 @@ task init_embeddings_array {
 
     command <<<
         python3 - <<'EOF'
+        import tiledb
         import tiledbsoma
         import pyarrow as pa
         tiledbsoma.SparseNDArray.create(
             '~{uri}',
             type=pa.float32(),
-            shape=(2**31-2, ~{embedding_dim})
+            shape=(2**31-2, ~{embedding_dim}),
+            context = tiledbsoma.options.SOMATileDBContext(
+                tiledb_ctx=tiledb.Ctx({"vfs.s3.region": '~{s3_region}'})
+            )
         ).close()
         EOF
     >>>
@@ -57,6 +63,7 @@ task generate_embeddings {
         Directory dataset
         Directory model
         String output_uri
+        String s3_region
 
         # if part is supplied, process only cells satisfying: soma_joinid % parts == part
         Int? part
@@ -71,6 +78,8 @@ task generate_embeddings {
         mkdir hf
         export HF_HOME="$(pwd)/hf"
         export TMPDIR="$HF_HOME"
+        export AWS_DEFAULT_REGION='~{s3_region}'
+        export TQDM_MININTERVAL=10
         python3 /census-geneformer/generate-geneformer-embeddings.py \
             ~{"--part " + part} --parts ~{parts} --batch-size 10 --tiledbsoma \
             '~{model}' '~{dataset}' '~{output_uri}'
