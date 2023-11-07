@@ -19,7 +19,7 @@ from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_UR
 @pytest.mark.live_corpus
 def test_open_soma_stable() -> None:
     # There should _always_ be a 'stable'
-    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
+    with cellxgene_census.open_soma(census_version="stable") as census:
         assert census is not None
         assert isinstance(census, soma.Collection)
 
