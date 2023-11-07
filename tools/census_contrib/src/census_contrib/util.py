@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Iterator, Optional, ParamSpec, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator, Optional, ParamSpec, TypeVar
 
 import tiledbsoma as soma
 
@@ -66,4 +66,3 @@ class EagerIterator(Iterator[_T]):
         self._cleanup()
         super_del = getattr(super(), "__del__", lambda: None)
         super_del()
-
