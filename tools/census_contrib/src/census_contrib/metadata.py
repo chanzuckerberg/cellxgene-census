@@ -17,6 +17,10 @@ if TYPE_CHECKING:
 from .util import error
 
 
+def none_or_str(v) -> str:
+    return "" if v is None else v
+
+
 @attrs.define(kw_only=True)
 class ContribMetadata:
     title: str = field(validator=validators.instance_of(str))
@@ -24,9 +28,16 @@ class ContribMetadata:
     contact_name: str = field(validator=validators.instance_of(str))
     contact_email: str = field(validator=validators.instance_of(str))
     contact_affiliation: str = field(validator=validators.instance_of(str))
-    DOI: str = field(default="", validator=validators.instance_of(str))
-    additional_information: str = field(default="", validator=validators.instance_of(str))
-    model_link: str = field(default="", validator=validators.instance_of(str))
+    # DOI: str = field(default="", converter=str, validator=validators.instance_of(str))
+    DOI: str = field(
+        default="", converter=none_or_str, validator=validators.instance_of(str)
+    )
+    additional_information: str = field(
+        default="", converter=none_or_str, validator=validators.instance_of(str)
+    )
+    model_link: str = field(
+        default="", converter=none_or_str, validator=validators.instance_of(str)
+    )
     data_type: str = field(validator=validators.in_(("obs_embedding",)))
     census_version: str = field(validator=validators.instance_of(str))
     experiment_name: str = field(validator=validators.instance_of(str))
@@ -39,7 +50,9 @@ class ContribMetadata:
         try:
             datetime.date.fromisoformat(value)
         except ValueError as e:
-            raise ValueError(f"submission_date not ISO date: expected 'YYYY-MM-DD', got '{value}'") from e
+            raise ValueError(
+                f"submission_date not ISO date: expected 'YYYY-MM-DD', got '{value}'"
+            ) from e
 
     def as_json(self) -> str:
         return json.dumps(attrs.asdict(self))
@@ -151,17 +164,27 @@ def validate_census_info(args: "Arguments", metadata: ContribMetadata) -> None:
         if metadata.experiment_name not in census["census_data"]:
             error(args, "Metadata specifies non-existent experiment_name")
 
-        if metadata.measurement_name not in census["census_data"][metadata.experiment_name].ms:
+        if (
+            metadata.measurement_name
+            not in census["census_data"][metadata.experiment_name].ms
+        ):
             error(args, "Metadata specifies non-existent measurement_name")
 
         assert census["census_data"][metadata.experiment_name].obs.count > 0
-        assert census["census_data"][metadata.experiment_name].ms[metadata.measurement_name].var.count > 0
+        assert (
+            census["census_data"][metadata.experiment_name]
+            .ms[metadata.measurement_name]
+            .var.count
+            > 0
+        )
 
 
 def validate_doi(args: "Arguments", metadata: ContribMetadata) -> None:
     """Errors / exists upon failure"""
 
-    # 3. DOI must validate
+    # 3. DOI must validate if specified
+    if not metadata.DOI:
+        return
 
     # doi.org returns 302 redirect for existing DOIs, 404
     # Assume that a 302 means a legit DOI
@@ -176,11 +199,15 @@ def validate_doi(args: "Arguments", metadata: ContribMetadata) -> None:
 def validate_urls(args: "Arguments", metadata: ContribMetadata) -> None:
     """Errors / exits upon failure"""
 
-    # # 4. All supplied URLs must resolve
-    # for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("additional_information", "model_link")]:
-    #     if url:
-    #         r = requests.head(url, allow_redirects=True)
-    #         if r.status_code == 200:
-    #             continue
+    # 4. All supplied URLs must resolve
+    for fld_name, url in [
+        (f, getattr(metadata, f, "")) for f in ("additional_information", "model_link")
+    ]:
+        if not url:
+            continue
 
-    #     error(args, f"Metadata contains unresolvable URL {fld_name}={url}")
+        r = requests.head(url, allow_redirects=True)
+        if r.status_code == 200:
+            continue
+
+        error(args, f"Metadata contains unresolvable URL {fld_name}={url}")
