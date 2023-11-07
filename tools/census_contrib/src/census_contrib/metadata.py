@@ -4,7 +4,7 @@ import datetime
 import json
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import attrs
 import cellxgene_census
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 from .util import error
 
 
-def none_or_str(v) -> str:
+def none_or_str(v: Optional[str]) -> str:
     return "" if v is None else v
 
 
