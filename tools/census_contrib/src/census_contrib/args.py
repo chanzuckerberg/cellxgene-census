@@ -37,7 +37,7 @@ class SOMAEmbedding(CommonArgs):
 
 
 class CSVEmbedding(CommonArgs):
-    csv_uri: str  # Embedding encoded as a CSV file
+    csv_uri: str  # Embedding encoded as a CSV (or TSV) file
 
     def configure(self) -> None:
         super().configure()
