@@ -29,15 +29,9 @@ class ContribMetadata:
     contact_email: str = field(validator=validators.instance_of(str))
     contact_affiliation: str = field(validator=validators.instance_of(str))
     # DOI: str = field(default="", converter=str, validator=validators.instance_of(str))
-    DOI: str = field(
-        default="", converter=none_or_str, validator=validators.instance_of(str)
-    )
-    additional_information: str = field(
-        default="", converter=none_or_str, validator=validators.instance_of(str)
-    )
-    model_link: str = field(
-        default="", converter=none_or_str, validator=validators.instance_of(str)
-    )
+    DOI: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
+    additional_information: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
+    model_link: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     data_type: str = field(validator=validators.in_(("obs_embedding",)))
     census_version: str = field(validator=validators.instance_of(str))
     experiment_name: str = field(validator=validators.instance_of(str))
@@ -50,9 +44,7 @@ class ContribMetadata:
         try:
             datetime.date.fromisoformat(value)
         except ValueError as e:
-            raise ValueError(
-                f"submission_date not ISO date: expected 'YYYY-MM-DD', got '{value}'"
-            ) from e
+            raise ValueError(f"submission_date not ISO date: expected 'YYYY-MM-DD', got '{value}'") from e
 
     def as_json(self) -> str:
         return json.dumps(attrs.asdict(self))
@@ -164,19 +156,11 @@ def validate_census_info(args: "Arguments", metadata: ContribMetadata) -> None:
         if metadata.experiment_name not in census["census_data"]:
             error(args, "Metadata specifies non-existent experiment_name")
 
-        if (
-            metadata.measurement_name
-            not in census["census_data"][metadata.experiment_name].ms
-        ):
+        if metadata.measurement_name not in census["census_data"][metadata.experiment_name].ms:
             error(args, "Metadata specifies non-existent measurement_name")
 
         assert census["census_data"][metadata.experiment_name].obs.count > 0
-        assert (
-            census["census_data"][metadata.experiment_name]
-            .ms[metadata.measurement_name]
-            .var.count
-            > 0
-        )
+        assert census["census_data"][metadata.experiment_name].ms[metadata.measurement_name].var.count > 0
 
 
 def validate_doi(args: "Arguments", metadata: ContribMetadata) -> None:
@@ -200,9 +184,7 @@ def validate_urls(args: "Arguments", metadata: ContribMetadata) -> None:
     """Errors / exits upon failure"""
 
     # 4. All supplied URLs must resolve
-    for fld_name, url in [
-        (f, getattr(metadata, f, "")) for f in ("additional_information", "model_link")
-    ]:
+    for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("additional_information", "model_link")]:
         if not url:
             continue
 

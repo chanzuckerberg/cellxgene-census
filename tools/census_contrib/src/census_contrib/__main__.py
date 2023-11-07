@@ -40,8 +40,7 @@ def setup_logging(args: Arguments) -> None:
     args.logger = logger
 
     # turn down some other stuff
-    logging.getLogger('numba').setLevel(logging.WARNING)
-
+    logging.getLogger("numba").setLevel(logging.WARNING)
 
 
 if __name__ == "__main__":
