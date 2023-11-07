@@ -66,7 +66,7 @@ class MeanVarianceAccumulator:
 
         # Note: if N-ddof is less than or equal to 0, we will return Inf - this is consistent
         # with the numpy.var behavior.
-        with np.errstate(divide="ignore"):
+        with np.errstate(divide="ignore", invalid="ignore"):
             batches_var = (self.M2.T / np.maximum(0, (self.n_samples - self.ddof))).T
 
         # accum all batches using Chan's

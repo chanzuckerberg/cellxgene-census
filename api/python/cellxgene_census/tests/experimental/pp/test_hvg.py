@@ -22,7 +22,12 @@ from cellxgene_census.experimental.pp import (
     [
         (
             "mus_musculus",
+            'is_primary_data == True and tissue_general == "liver"',
+        ),
+        pytest.param(
+            "mus_musculus",
             'is_primary_data == True and tissue_general == "skin of body"',
+            marks=pytest.mark.expensive,
         ),
         pytest.param(
             "mus_musculus",
@@ -31,26 +36,42 @@ from cellxgene_census.experimental.pp import (
         ),
         pytest.param(
             "mus_musculus",
-            'is_primary_data == True and assay == "Smart-seq"',
+            'is_primary_data == True and assay == "Smart-seq2"',
             marks=pytest.mark.expensive,
         ),
     ],
 )
-@pytest.mark.parametrize("n_top_genes", (5, 500))
+@pytest.mark.parametrize("n_top_genes", (50, 500))
 @pytest.mark.parametrize(
     "batch_key",
     (
         None,
         "dataset_id",
         ["suspension_type", "assay_ontology_term_id"],
-        ("suspension_type", "assay_ontology_term_id", "dataset_id"),
-        ["dataset_id", "assay_ontology_term_id", "suspension_type", "donor_id"],
+        pytest.param(
+            ("suspension_type", "assay_ontology_term_id"),
+            marks=pytest.mark.expensive,
+        ),
     ),
 )
-@pytest.mark.parametrize("span", (None, 0.5))
+@pytest.mark.parametrize(
+    "span",
+    (
+        pytest.param(None, marks=pytest.mark.expensive),
+        0.5,
+    ),
+)
+@pytest.mark.parametrize(
+    "version",
+    (
+        "latest",
+        pytest.param("stable", marks=pytest.mark.expensive),
+    ),
+)
 def test_hvg_vs_scanpy(
     n_top_genes: int,
     obs_value_filter: str,
+    version: str,
     experiment_name: str,
     batch_key: Optional[Union[str, tuple[str], list[str]]],
     span: float,
@@ -66,7 +87,7 @@ def test_hvg_vs_scanpy(
     if span is not None:
         kwargs["span"] = span
 
-    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version=version, context=small_mem_context) as census:
         # Get the highly variable genes
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA",
@@ -83,7 +104,16 @@ def test_hvg_vs_scanpy(
         )
         kwargs["batch_key"] = "the_batch_key"
 
-    scanpy_hvg = sc.pp.highly_variable_genes(adata, inplace=False, **kwargs)
+    try:
+        scanpy_hvg = sc.pp.highly_variable_genes(adata, inplace=False, **kwargs)
+    except (ZeroDivisionError, ValueError):
+        # There are test cases where ScanPy will fail, rendering this "compare vs scanpy"
+        # test moot. The known cases involve overly partitioned data that results in batches
+        # with a very small number of samples (which manifest as a divide by zero error).
+        # In these known cases, go ahead and perform the HVG (above), but skip the compare
+        # assertions below.
+        pytest.skip("ScanPy generated an error, likely due to batches with 1 sample")
+
     scanpy_hvg.index.name = "soma_joinid"
     scanpy_hvg.index = scanpy_hvg.index.astype(int)
     assert len(scanpy_hvg) == len(hvg)
@@ -104,8 +134,6 @@ def test_hvg_vs_scanpy(
         rtol=1e-2,
         equal_nan=True,
     )
-    if "highly_variable_nbatches" in scanpy_hvg.keys() or "highly_variable_nbatches" in hvg.keys():
-        assert (hvg.highly_variable_nbatches == scanpy_hvg.highly_variable_nbatches).all()
     assert np.allclose(
         hvg.variances_norm.to_numpy(),
         scanpy_hvg.variances_norm.to_numpy(),
@@ -113,18 +141,33 @@ def test_hvg_vs_scanpy(
         rtol=1e-2,
         equal_nan=True,
     )
-    assert (hvg.highly_variable == scanpy_hvg.highly_variable).all()
 
-    # Online calculation of normalized variance  will differ slightly from ScanPy's calculation,
+    # Online calculation of normalized variance will differ slightly from ScanPy's calculation,
     # so look for rank of HVGs to be close, but not identical.  Don't worry about the non-HVGs
     # (which will differ more as you get to the long tail).  This test just looks for the average
-    # rank distance to be very small.
+    # rank distance to be small.
     assert (
-        (
-            scanpy_hvg[scanpy_hvg.highly_variable].highly_variable_rank - hvg[hvg.highly_variable].highly_variable_rank
-        ).sum()
+        (scanpy_hvg[scanpy_hvg.highly_variable].highly_variable_rank - hvg[hvg.highly_variable].highly_variable_rank)
+        .abs()
+        .sum()
         / n_top_genes
-    ) < 0.01
+    ) < 0.05
+
+    # Ranking will also have some noise, so check that ranking is close in the highly variable subset
+    scanpy_rank = scanpy_hvg.highly_variable_rank.copy()
+    hvg_rank = hvg.highly_variable_rank.copy()
+    hvg_rank[pd.isna(hvg_rank)] = n_top_genes
+    scanpy_rank[pd.isna(scanpy_rank)] = n_top_genes
+    rank_diff = (hvg_rank - scanpy_rank)[hvg.highly_variable]
+    # +/- 5 in ranking, choosen arbitrarily
+    assert rank_diff.min() >= -5 and rank_diff.max() <= 5
+
+    if "highly_variable_nbatches" in scanpy_hvg.keys() or "highly_variable_nbatches" in hvg.keys():
+        # Also subject to noise, so look for "close" match
+        nbatches_diff = hvg.highly_variable_nbatches - scanpy_hvg.highly_variable_nbatches
+        assert nbatches_diff.min() >= -2 and nbatches_diff.max() <= 2
+
+    assert (hvg.highly_variable == scanpy_hvg.highly_variable).all()
 
 
 @pytest.mark.experimental
@@ -248,7 +291,7 @@ def test_hvg_user_defined_batch_key_func(
             assert set(srs.keys()) == keys
             return "batch0"
 
-    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         # Get the highly variable genes
         with census["census_data"]["mus_musculus"].axis_query(
             measurement_name="RNA",

@@ -20,6 +20,9 @@ def select_census_version_for_geneformer_tests() -> str:
     return "2023-09-04"
 
 
+@pytest.mark.skip(
+    "FIXME: 2023-09-04 Census release was deleted and cell soma_joinids have changed in subsequent versions"
+)
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
@@ -68,6 +71,9 @@ def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
                 assert row.tissue_ontology_term_id
 
 
+@pytest.mark.skip(
+    "FIXME: 2023-09-04 Census release was deleted and cell soma_joinids have changed in subsequent versions"
+)
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:

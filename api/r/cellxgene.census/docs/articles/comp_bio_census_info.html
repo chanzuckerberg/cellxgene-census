@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -217,16 +217,14 @@
 <p>You can take a quick look at the high-level Census information by looking at <code>census$get("census_info")$get("summary")</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span></span>
-<span><span class="co">#&gt;   soma_joinid label                      value     </span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0 census_schema_version      1.0.0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1 census_build_date          2023-07-25</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2 dataset_schema_version     3.0.0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           3 total_cell_count           61656118  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           4 unique_cell_count          37447773  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           5 number_donors_homo_sapiens 13035     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>           6 number_donors_mus_musculus 1417</span></span></code></pre></div>
+<span><span class="co">#&gt;   soma_joinid                      label      value</span></span>
+<span><span class="co">#&gt; 1           0      census_schema_version      1.0.0</span></span>
+<span><span class="co">#&gt; 2           1          census_build_date 2023-07-25</span></span>
+<span><span class="co">#&gt; 3           2     dataset_schema_version      3.0.0</span></span>
+<span><span class="co">#&gt; 4           3           total_cell_count   61656118</span></span>
+<span><span class="co">#&gt; 5           4          unique_cell_count   37447773</span></span>
+<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      13035</span></span>
+<span><span class="co">#&gt; 7           6 number_donors_mus_musculus       1417</span></span></code></pre></div>
 <p>Of special interest are the label-value combinations for:</p>
 <ul>
 <li>
@@ -244,16 +242,20 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary_cell_counts"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">census_counts</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   soma_joinid organism     category ontology_term_id unique_cell_count total_cell_count</span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0 Homo sapiens all      na                        33<span style="text-decoration: underline;">364</span>242         56<span style="text-decoration: underline;">400</span>873</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1 Homo sapiens assay    EFO:0008722                 <span style="text-decoration: underline;">264</span>166           <span style="text-decoration: underline;">279</span>635</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2 Homo sapiens assay    EFO:0008780                  <span style="text-decoration: underline;">25</span>652            <span style="text-decoration: underline;">51</span>304</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           3 Homo sapiens assay    EFO:0008919                  <span style="text-decoration: underline;">89</span>477           <span style="text-decoration: underline;">206</span>754</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           4 Homo sapiens assay    EFO:0008931                  <span style="text-decoration: underline;">78</span>750           <span style="text-decoration: underline;">188</span>248</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           5 Homo sapiens assay    EFO:0008953                   <span style="text-decoration: underline;">4</span>693             <span style="text-decoration: underline;">9</span>386</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: label &lt;chr&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   soma_joinid     organism category ontology_term_id unique_cell_count total_cell_count</span></span>
+<span><span class="co">#&gt; 1           0 Homo sapiens      all               na          33364242         56400873</span></span>
+<span><span class="co">#&gt; 2           1 Homo sapiens    assay      EFO:0008722            264166           279635</span></span>
+<span><span class="co">#&gt; 3           2 Homo sapiens    assay      EFO:0008780             25652            51304</span></span>
+<span><span class="co">#&gt; 4           3 Homo sapiens    assay      EFO:0008919             89477           206754</span></span>
+<span><span class="co">#&gt; 5           4 Homo sapiens    assay      EFO:0008931             78750           188248</span></span>
+<span><span class="co">#&gt; 6           5 Homo sapiens    assay      EFO:0008953              4693             9386</span></span>
+<span><span class="co">#&gt;        label</span></span>
+<span><span class="co">#&gt; 1         na</span></span>
+<span><span class="co">#&gt; 2   Drop-seq</span></span>
+<span><span class="co">#&gt; 3     inDrop</span></span>
+<span><span class="co">#&gt; 4   Seq-Well</span></span>
+<span><span class="co">#&gt; 5 Smart-seq2</span></span>
+<span><span class="co">#&gt; 6   STRT-seq</span></span></code></pre></div>
 <p>For each combination of <code>organism</code> and values for each <code>category</code> of cell metadata you can take a look at <code>total_cell_count</code> and <code>unique_cell_count</code> for the cell counts of that combination.</p>
 <p>The values for each <code>category</code> are specified in <code>ontology_term_id</code> and <code>label</code>, which are the value’s IDs and labels, respectively.</p>
 <div class="section level4">
@@ -288,12 +290,12 @@
 <p>If you have a specific term from any of the categories shown above you can directly find out the number of cells for that term.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_counts</span><span class="op">[</span><span class="va">census_counts</span><span class="op">$</span><span class="va">label</span> <span class="op">==</span> <span class="st">"microglial cell"</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
-<span><span class="co">#&gt;   soma_joinid organism     category  ontology_term_id unique_cell_count total_cell_count</span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          69 Homo sapiens cell_type CL:0000129                  <span style="text-decoration: underline;">268</span>114           <span style="text-decoration: underline;">370</span>771</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        <span style="text-decoration: underline;">1</span>038 Mus musculus cell_type CL:0000129                   <span style="text-decoration: underline;">48</span>998            <span style="text-decoration: underline;">62</span>617</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: label &lt;chr&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt;      soma_joinid     organism  category ontology_term_id unique_cell_count</span></span>
+<span><span class="co">#&gt; 70            69 Homo sapiens cell_type       CL:0000129            268114</span></span>
+<span><span class="co">#&gt; 1039        1038 Mus musculus cell_type       CL:0000129             48998</span></span>
+<span><span class="co">#&gt;      total_cell_count           label</span></span>
+<span><span class="co">#&gt; 70             370771 microglial cell</span></span>
+<span><span class="co">#&gt; 1039            62617 microglial cell</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -316,20 +318,136 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_df</span> <span class="op">&lt;-</span>   <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"is_primary_data"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56,400,873 × 2</span></span></span>
-<span><span class="co">#&gt;    cell_type                     is_primary_data</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> syncytiotrophoblast cell      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> placental villous trophoblast FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> syncytiotrophoblast cell      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> syncytiotrophoblast cell      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> extravillous trophoblast      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> placental villous trophoblast FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> syncytiotrophoblast cell      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> extravillous trophoblast      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> placental villous trophoblast FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> syncytiotrophoblast cell      FALSE          </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 56,400,863 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;                         cell_type is_primary_data</span></span>
+<span><span class="co">#&gt; 1        syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 2   placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 3        syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 4        syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 5        extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 6   placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 7        syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 8        extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 9   placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 10       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 11       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 12       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 13  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 14  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 15       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 16       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 17       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 18       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 19       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 20       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 21       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 22       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 23  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 24       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 25       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 26       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 27       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 28       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 29       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 30       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 31  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 32         trophoblast giant cell           FALSE</span></span>
+<span><span class="co">#&gt; 33       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 34  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 35       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 36       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 37  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 38  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 39       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 40       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 41       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 42       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 43       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 44  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 45  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 46       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 47  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 48       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 49       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 50       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 51       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 52       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 53       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 54       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 55  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 56  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 57  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 58       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 59       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 60       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 61  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 62       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 63       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 64       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 65       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 66  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 67       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 68  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 69       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 70       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 71       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 72       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 73  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 74  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 75  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 76  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 77       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 78       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 79       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 80  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 81       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 82       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 83       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 84  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 85       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 86       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 87       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 88  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 89  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 90       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 91       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 92  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 93       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 94       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 95       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 96       extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 97       syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 98  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 99  placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 100      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 101 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 102      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 103      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 104      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 105 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 106 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 107 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 108 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 109      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 110 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 111 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 112      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 113      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 114      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 115 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 116      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 117 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 118 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 119      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 120      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 121      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 122      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 123      syncytiotrophoblast cell           FALSE</span></span>
+<span><span class="co">#&gt; 124 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 125 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 126 placental villous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 127      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt; 128      extravillous trophoblast           FALSE</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 56400745 rows ]</span></span></code></pre></div>
 <p>The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data frame.</p>
 <p>In addition, we will only focus on cells that are marked with <code>is_primary_data=TRUE</code> as this ensures we de-duplicate cells that appear more than once in CELLxGENE Discover.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">

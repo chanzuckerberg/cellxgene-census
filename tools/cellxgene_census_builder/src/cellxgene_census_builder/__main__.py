@@ -42,7 +42,7 @@ def main() -> int:
     # List of available commands for the builder
     commands = {
         "release": [do_the_release],
-        "replicate": [do_sync_artifact_to_replica_s3_bucket],
+        "replicate": [do_sync_to_replica_s3_bucket],
         "sync-release": [
             do_sync_release_file_to_replica_s3_bucket,
         ],
@@ -292,15 +292,17 @@ def do_sync_release_file_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
     return True
 
 
-def do_sync_artifact_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
+def do_sync_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
     """
-    Copy data to replica S3 bucket. Only copy the soma artifacts, not the h5ads.
+    Sync data to replica S3 bucket. Syncs everything and deletes anything
+    in the replica bucket that is not in the primary bucket.
     """
     from .data_copy import sync_to_S3_remote
 
     sync_to_S3_remote(
-        urlcat(args.config.cellxgene_census_S3_path, args.build_tag),
-        urlcat(args.config.cellxgene_census_S3_replica_path, args.build_tag),
+        urlcat(args.config.cellxgene_census_S3_path),
+        urlcat(args.config.cellxgene_census_S3_replica_path),
+        delete=True,
         dryrun=args.config.dryrun,
     )
     return True
