@@ -22,7 +22,7 @@ def small_mem_context() -> soma.SOMATileDBContext:
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_X_sparse_iter(small_mem_context: soma.SOMATileDBContext) -> None:
-    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         obs_filter = """is_primary_data == True and tissue_general == 'tongue'"""
         expt = census["census_data"]["mus_musculus"]
         Xraw = expt.ms["RNA"].X["raw"]
@@ -44,7 +44,7 @@ def test_X_sparse_iter(small_mem_context: soma.SOMATileDBContext) -> None:
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_X_sparse_iter_unsupported(small_mem_context: soma.SOMATileDBContext) -> None:
-    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
             with pytest.raises(ValueError):
                 next(X_sparse_iter(query, axis=1))

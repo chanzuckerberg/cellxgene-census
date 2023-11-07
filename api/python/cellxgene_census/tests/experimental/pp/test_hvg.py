@@ -222,7 +222,7 @@ def test_get_highly_variable_genes(
     small_mem_context: soma.SOMATileDBContext,
     obs_coords: Optional[slice],
 ) -> None:
-    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         hvg = get_highly_variable_genes(
             census,
             organism=organism,
@@ -240,7 +240,7 @@ def test_get_highly_variable_genes(
 
 @pytest.mark.experimental
 def test_hvg_error_cases(small_mem_context: soma.SOMATileDBContext) -> None:
-    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
             # Only flavor="seurat_v3" is supported
             with pytest.raises(ValueError):
@@ -250,7 +250,7 @@ def test_hvg_error_cases(small_mem_context: soma.SOMATileDBContext) -> None:
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_max_loess_jitter_error(small_mem_context: soma.SOMATileDBContext) -> None:
-    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         with pytest.raises(ValueError):
             get_highly_variable_genes(
                 census,
@@ -291,7 +291,7 @@ def test_hvg_user_defined_batch_key_func(
             assert set(srs.keys()) == keys
             return "batch0"
 
-    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         # Get the highly variable genes
         with census["census_data"]["mus_musculus"].axis_query(
             measurement_name="RNA",

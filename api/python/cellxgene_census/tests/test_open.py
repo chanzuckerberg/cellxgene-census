@@ -19,7 +19,7 @@ from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_UR
 @pytest.mark.live_corpus
 def test_open_soma_stable() -> None:
     # There should _always_ be a 'stable'
-    with cellxgene_census.open_soma(census_version="stable") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         assert census is not None
         assert isinstance(census, soma.Collection)
 
@@ -33,7 +33,7 @@ def test_open_soma_stable() -> None:
 @pytest.mark.live_corpus
 def test_open_soma_latest() -> None:
     # There should _always_ be a 'latest'
-    with cellxgene_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         assert census is not None
         assert isinstance(census, soma.Collection)
 
@@ -46,7 +46,7 @@ def test_open_soma_with_context() -> None:
     assert s3_region == "us-west-2"
 
     # Verify the default region is set correctly in the TileDB context object.
-    with cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext()) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=soma.SOMATileDBContext()) as census:
         assert census.context.tiledb_ctx.config()["vfs.s3.region"] == s3_region
 
     # Verify that config provided is passed through correctly
@@ -221,13 +221,13 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
 
 @pytest.mark.live_corpus
 def test_get_source_h5ad_uri() -> None:
-    with cellxgene_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
     rng = np.random.default_rng()
     for idx in rng.choice(np.arange(len(census_datasets)), size=3, replace=False):
         a_dataset = census_datasets.iloc[idx]
-        locator = cellxgene_census.get_source_h5ad_uri(a_dataset.dataset_id, census_version="latest")
+        locator = cellxgene_census.get_source_h5ad_uri(a_dataset.dataset_id, census_version="2023-10-23")
         assert isinstance(locator, dict)
         assert "uri" in locator
         assert locator["uri"].endswith(a_dataset.dataset_h5ad_path)
@@ -240,7 +240,7 @@ def test_get_source_h5ad_uri_errors() -> None:
 
 @pytest.fixture
 def small_dataset_id() -> str:
-    with cellxgene_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 
     small_dataset = census_datasets.nsmallest(1, "dataset_total_cell_count").iloc[0]
@@ -251,7 +251,7 @@ def small_dataset_id() -> str:
 @pytest.mark.live_corpus
 def test_download_source_h5ad(tmp_path: pathlib.Path, small_dataset_id: str) -> None:
     adata_path = tmp_path / "adata.h5ad"
-    cellxgene_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="latest")
+    cellxgene_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="2023-10-23")
     assert adata_path.exists() and adata_path.is_file()
     ad = anndata.read_h5ad(adata_path.as_posix())
     assert ad is not None
@@ -263,10 +263,10 @@ def test_download_source_h5ad_errors(tmp_path: pathlib.Path, small_dataset_id: s
     assert existing_file.exists()
 
     with pytest.raises(ValueError):
-        cellxgene_census.download_source_h5ad(small_dataset_id, existing_file.as_posix(), census_version="latest")
+        cellxgene_census.download_source_h5ad(small_dataset_id, existing_file.as_posix(), census_version="2023-10-23")
 
     with pytest.raises(ValueError):
-        cellxgene_census.download_source_h5ad(small_dataset_id, "/tmp/dirname/", census_version="latest")
+        cellxgene_census.download_source_h5ad(small_dataset_id, "/tmp/dirname/", census_version="2023-10-23")
 
 
 @pytest.mark.live_corpus
@@ -275,7 +275,7 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     # Passing an empty context
     with pytest.raises(tiledb.TileDBError, match=r"The AWS Access Key Id you provided does not exist in our records"):
-        cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
+        cellxgene_census.open_soma(census_version="2023-10-23", context=soma.SOMATileDBContext())
 
 
 @pytest.mark.live_corpus
@@ -285,6 +285,6 @@ def test_can_open_with_anonymous_access() -> None:
     """
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
-    with cellxgene_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         assert census is not None
         assert isinstance(census, soma.Collection)

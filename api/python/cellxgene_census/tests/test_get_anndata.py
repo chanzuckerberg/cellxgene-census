@@ -9,7 +9,7 @@ import cellxgene_census
 
 @pytest.fixture
 def census() -> soma.Collection:
-    return cellxgene_census.open_soma(census_version="latest")
+    return cellxgene_census.open_soma(census_version="2023-10-23")
 
 
 @pytest.mark.live_corpus

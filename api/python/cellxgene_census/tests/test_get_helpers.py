@@ -7,7 +7,7 @@ from cellxgene_census._experiment import _get_experiment
 
 @pytest.mark.live_corpus
 def test_get_experiment() -> None:
-    with cellxgene_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         mouse_uri = census["census_data"]["mus_musculus"].uri
         human_uri = census["census_data"]["homo_sapiens"].uri
 
@@ -26,7 +26,7 @@ def test_get_experiment() -> None:
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_get_presence_matrix(organism: str) -> None:
-    census = cellxgene_census.open_soma(census_version="latest")
+    census = cellxgene_census.open_soma(census_version="2023-10-23")
 
     census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 

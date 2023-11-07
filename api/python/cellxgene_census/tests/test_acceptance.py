@@ -33,7 +33,7 @@ def make_context(census_version: str, config: Optional[Dict[str, Any]] = None) -
 @pytest.mark.parametrize("organism", ["homo_sapiens", "mus_musculus"])
 def test_load_axes(organism: str) -> None:
     """Verify axes can be loaded into a Pandas DataFrame"""
-    census = cellxgene_census.open_soma(census_version="latest")
+    census = cellxgene_census.open_soma(census_version="2023-10-23")
 
     # use subset of columns for speed
     obs_df = (
@@ -84,7 +84,7 @@ def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_conf
     # memory use, and makes it feasible to run in a GHA.
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
-    with cellxgene_census.open_soma(census_version="latest", context=context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=context) as census:
         assert table_iter_is_ok(
             census["census_data"][organism].obs.read(column_names=["soma_joinid", "tissue"]),
             stop_after=stop_after,
@@ -107,7 +107,7 @@ def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_conf
     # memory use, and makes it feasible to run in a GHA.
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
-    with cellxgene_census.open_soma(census_version="latest", context=context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=context) as census:
         assert table_iter_is_ok(
             census["census_data"][organism].ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]),
             stop_after=stop_after,
@@ -150,7 +150,7 @@ def test_incremental_read_X(
 
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
-    with cellxgene_census.open_soma(census_version="latest", context=context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=context) as census:
         assert table_iter_is_ok(
             census["census_data"][organism].ms["RNA"].X["raw"].read(coords=coords).tables(),
             stop_after=stop_after,
@@ -167,7 +167,7 @@ def test_incremental_read_X(
 def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Optional[int]) -> None:
     """Verify incremental read of query result."""
     # use default TileDB configuration
-    with cellxgene_census.open_soma(census_version="latest") as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23") as census:
         with census["census_data"][organism].axis_query(
             measurement_name="RNA",
             obs_query=soma.AxisQuery(value_filter=obs_value_filter),
@@ -266,7 +266,7 @@ def test_get_anndata(
     """Verify query and read into AnnData"""
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
-    with cellxgene_census.open_soma(census_version="latest", context=context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=context) as census:
         ad = cellxgene_census.get_anndata(census, organism, obs_value_filter=obs_value_filter, obs_coords=obs_coords)
         assert ad is not None
 

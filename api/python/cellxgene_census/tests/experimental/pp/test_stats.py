@@ -44,7 +44,7 @@ def test_mean_variance(
     small_mem_context: soma.SOMATileDBContext,
     obs_coords: Tuple[None, slice],
 ) -> None:
-    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords)
         ) as query:
@@ -109,7 +109,7 @@ def test_mean_variance_nnz_only(
 ) -> None:
     # Note: since this test requires materializing the matrix in memory to compute the mean/variance,
     # we're going to use a coord slice based approach. This will ensure the matrix can fit in memory.
-    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(coords=obs_coords)
         ) as query:
@@ -149,7 +149,7 @@ def test_mean_variance_no_flags() -> None:
 
 @pytest.mark.parametrize("experiment_name", ["mus_musculus"])
 def test_mean_variance_empty_query(experiment_name: str, small_mem_context: soma.SOMATileDBContext) -> None:
-    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-10-23", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
             measurement_name="RNA", obs_query=soma.AxisQuery(value_filter='tissue_general == "foo"')
         ) as query:
