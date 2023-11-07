@@ -22,6 +22,9 @@ def X_sparse_iter(
     reindex_sparse_axis: bool = True,
 ) -> Iterator[_RT]:
     """
+    NOTE: this API is deprecated as of version 1.8, and will be removed in version
+    1.9. Please use the `blockwise` iterator support introduced in tiledbsoma version 1.5.
+
     Iterate over rows (or columns) of the query results X matrix, with pagination to
     control peak memory usage for large result sets. Each iteration step yields:
         * obs_coords (coordinates)
@@ -78,7 +81,7 @@ def X_sparse_iter(
         ...             ...
 
     Lifecycle:
-        experimental
+        deprecated
 
     See also: https://github.com/single-cell-data/TileDB-SOMA/issues/1528
     """
