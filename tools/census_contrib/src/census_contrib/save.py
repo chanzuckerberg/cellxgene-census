@@ -13,7 +13,7 @@ from .embedding import EmbeddingIJD
 from .metadata import ContribMetadata
 from .util import error, soma_context
 
-PLATFORM_CONFIG: PlatformConfig = {
+PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
@@ -73,6 +73,16 @@ def soma_data_filter(emb: EmbeddingIJD, sig_bits: int = 20) -> PlatformConfig:
     ]
 
 
+def make_platform_config(emb: EmbeddingIJD) -> PlatformConfig:
+    platform_config = copy.deepcopy(PLATFORM_CONFIG_TEMPLATE)
+
+    tdb_schema = platform_config["tiledb"]["create"]
+    tdb_schema["dims"]["soma_dim_1"]["tile"] = emb.shape[1]
+    tdb_schema["attrs"]["soma_data"]["filters"] = soma_data_filter(emb)
+
+    return platform_config
+
+
 def save_as_soma(args: Arguments, metadata: ContribMetadata, emb: EmbeddingIJD) -> None:
     save_to = pathlib.PosixPath(args.save_soma_to)
     if save_to.exists():
@@ -88,18 +98,13 @@ def save_as_soma(args: Arguments, metadata: ContribMetadata, emb: EmbeddingIJD) 
         }
     )
 
-    platform_config = copy.deepcopy(PLATFORM_CONFIG)
-    tdb_schema = platform_config["tiledb"]["create"]
-    tdb_schema["dims"]["soma_dim_1"]["tile"] = emb.shape[1]
-    tdb_schema["attrs"]["soma_data"]["filters"] = soma_data_filter(emb)
-
     args.logger.info("Creating SOMA array")
     with soma.SparseNDArray.create(
         save_to.as_posix(),
         type=pa.float32(),
         shape=emb.shape,
         context=soma_context(),
-        platform_config=platform_config,
+        platform_config=make_platform_config(emb),
     ) as A:
         args.logger.info("Writing SOMA array - starting")
         A.metadata["CxG_accession_id"] = args.accession
