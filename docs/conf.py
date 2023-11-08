@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'cellxgene-census'
-copyright = '2022-2023 Chan Zuckerberg Initiative'
-author = 'Chan Zuckerberg Initiative'
+copyright = '2022-2023 Chan Zuckerberg Initiative Foundation'
+author = 'Chan Zuckerberg Initiative Foundation'
 
 import git
 repo = git.Repo(search_parent_directories=True)
