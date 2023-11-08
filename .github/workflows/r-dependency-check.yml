@@ -7,7 +7,6 @@ on:
   schedule:
     - cron: "30 1 * * *"
   workflow_dispatch: # used for debugging or manual validation
-  pull_request: # Used for testing
 
 jobs:
   r-dependency-check:
