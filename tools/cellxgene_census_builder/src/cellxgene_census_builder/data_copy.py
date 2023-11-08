@@ -21,10 +21,10 @@ def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: b
     if not to_path.startswith("s3://"):
         raise ValueError(f"S3_path argument does not appear to be an S3 path: {to_path}")
 
-    _sync_to_S3(from_path.as_posix(), to_path, dryrun)
+    _sync_to_S3(from_path.as_posix(), to_path, delete=False, dryrun=dryrun)
 
 
-def sync_to_S3_remote(from_path: str, to_path: str, dryrun: bool = False) -> None:
+def sync_to_S3_remote(from_path: str, to_path: str, delete: bool = False, dryrun: bool = False) -> None:
     """Copy (sync) between two S3 locations.
 
     Equivalent of `aws s3 sync S3_path_source S3_path_dst`.
@@ -34,17 +34,19 @@ def sync_to_S3_remote(from_path: str, to_path: str, dryrun: bool = False) -> Non
     if not from_path.startswith("s3://") or not to_path.startswith("s3://"):
         raise ValueError(f"S3_path argument does not appear to be an S3 path: {to_path}")
 
-    _sync_to_S3(from_path, to_path, dryrun)
+    _sync_to_S3(from_path, to_path, delete=delete, dryrun=dryrun)
 
 
-def _sync_to_S3(from_path: str, to_path: str, dryrun: bool = False) -> None:
+def _sync_to_S3(from_path: str, to_path: str, delete: bool = False, dryrun: bool = False) -> None:
     cmd = ["aws", "s3", "sync", from_path, to_path, "--no-progress"]
     if dryrun:
         cmd += ["--dryrun"]
+    if delete:
+        cmd += ["--delete"]
 
     returncode = -1
     try:
-        _log_it(f"Starting sync {from_path} -> {to_path}", dryrun)
+        _log_it(f"Starting sync {from_path} -> {to_path}, delete: {delete}", dryrun)
         with subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True) as proc:
             print(proc.returncode)
             if proc.stdout is not None:
@@ -56,7 +58,7 @@ def _sync_to_S3(from_path: str, to_path: str, dryrun: bool = False) -> None:
             raise subprocess.CalledProcessError(returncode, proc.args)
 
     finally:
-        _log_it(f"Completed sync, return code {returncode}, {from_path} -> {to_path}", dryrun)
+        _log_it(f"Completed sync, return code {returncode}, {from_path} -> {to_path}, delete: {delete}", dryrun)
 
 
 def _log_it(msg: str, dryrun: bool) -> None:
@@ -89,7 +91,7 @@ def main() -> int:
     # Configure the logger.
     logging_init_params(args.verbose)
 
-    sync_to_S3(args.from_path, args.to_path, args.dryrun)
+    sync_to_S3(args.from_path, args.to_path, dryrun=args.dryrun)
     return 0
 
 
