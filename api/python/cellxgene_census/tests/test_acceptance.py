@@ -14,7 +14,6 @@ from typing import Any, Dict, Iterator, Optional, Tuple
 
 import pyarrow as pa
 import pytest
-import tiledb
 import tiledbsoma as soma
 
 import cellxgene_census
@@ -27,7 +26,7 @@ def make_context(census_version: str, config: Optional[Dict[str, Any]] = None) -
     s3_region = version["soma"].get("s3_region", "us-west-2")
     config.update({"vfs.s3.region": s3_region})
     config.update({"vfs.s3.no_sign_request": "true"})
-    return soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx(config))
+    return soma.options.SOMATileDBContext(tiledb_ctx=config)
 
 
 @pytest.mark.live_corpus
