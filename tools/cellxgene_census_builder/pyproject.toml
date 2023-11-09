@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies= [
     "typing_extensions==4.8.0",
-    "pyarrow==13.0.0",
+    "pyarrow==14.0.1",
     "pandas[performance]==2.0.3",
     "anndata==0.9",
     "numpy==1.23.5",
