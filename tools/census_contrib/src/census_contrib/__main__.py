@@ -9,7 +9,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .args import Arguments
-from .embedding import EmbeddingIJD
+from .load import EmbeddingIJD
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
 from .save import consolidate_array, create_obsm_like_array
 from .util import get_logger, soma_context

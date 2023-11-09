@@ -12,7 +12,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .census_util import get_obs_soma_joinids
-from .embedding import EmbeddingIJD
+from .load import EmbeddingIJD
 from .metadata import EmbeddingMetadata
 from .util import EagerIterator, get_logger, soma_context
 
@@ -121,6 +121,7 @@ def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None
         raise ValueError("Embedding and obs shape differ.")
 
     if shape[1] != metadata.n_features:
+        print(shape, metadata.n_features)
         raise ValueError(
             "Embedding and metadata specify a different number of embedding features.",
         )

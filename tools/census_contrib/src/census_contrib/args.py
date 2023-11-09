@@ -4,7 +4,7 @@ from typing import Callable
 
 from tap import Tap
 
-from .embedding import EmbeddingIJD, csv_ingest, npy_ingest, soma_ingest, test_embedding
+from .load import EmbeddingIJD, csv_ingest, npy_ingest, soma_ingest, test_embedding
 from .metadata import EmbeddingMetadata
 
 Ingestor = Callable[["Arguments", "EmbeddingMetadata"], "EmbeddingIJD"]
@@ -36,7 +36,7 @@ class SOMAEmbedding(IngestArgs):
     def configure(self) -> None:
         super().configure()
         self.add_argument("soma_uri")
-        self.set_defaults(ingestor=soma_ingest)
+        self.set_defaults(ingestor=lambda args, metadata: soma_ingest(args.soma_uri, metadata))
 
 
 class CSVEmbedding(IngestArgs):
@@ -45,7 +45,7 @@ class CSVEmbedding(IngestArgs):
     def configure(self) -> None:
         super().configure()
         self.add_argument("csv_uri")
-        self.set_defaults(ingestor=csv_ingest)
+        self.set_defaults(ingestor=lambda args, metadata: csv_ingest(args.csv_uri, metadata))
 
 
 class NPYEmbedding(IngestArgs):
@@ -54,7 +54,7 @@ class NPYEmbedding(IngestArgs):
 
     def configure(self) -> None:
         super().configure()
-        self.set_defaults(ingestor=npy_ingest)
+        self.set_defaults(ingestor=lambda args, metadata: npy_ingest(args.joinid_uri, args.embedding_uri, metadata))
 
 
 class TestEmbedding(IngestArgs):
@@ -63,7 +63,7 @@ class TestEmbedding(IngestArgs):
 
     def configure(self) -> None:
         super().configure()
-        self.set_defaults(ingestor=test_embedding)
+        self.set_defaults(ingestor=lambda args, metadata: test_embedding(args.n_obs, args.n_features, metadata))
 
 
 class ValidateEmbedding(CommonArgs):

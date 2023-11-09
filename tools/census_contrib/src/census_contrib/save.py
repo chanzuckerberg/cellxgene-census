@@ -87,6 +87,7 @@ def create_obsm_like_array(
     shape: Tuple[int, int],
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.SparseNDArray:
+    """Create and return opened array. Can be used as a context manager."""
     return soma.SparseNDArray.create(
         uri,
         type=pa.float32(),
