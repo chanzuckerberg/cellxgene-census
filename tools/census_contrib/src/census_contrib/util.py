@@ -1,26 +1,21 @@
 from __future__ import annotations
 
-import sys
+import logging
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import TYPE_CHECKING, Iterator, Optional, ParamSpec, TypeVar
+from typing import Iterator, Optional, ParamSpec, TypeVar
 
 import tiledbsoma as soma
 
-if TYPE_CHECKING:
-    from .args import Arguments
 
-
-def error(args: "Arguments", msg: str, status: int = 2) -> None:
-    """Hard error, print message and exit with status"""
-    print(f"{args.prog} - {msg}", file=sys.stderr)
-    sys.exit(status)
+def get_logger() -> logging.Logger:
+    return logging.getLogger("census_contrib")
 
 
 def soma_context() -> soma.options.SOMATileDBContext:
     return soma.options.SOMATileDBContext(
         tiledb_config={
-            "py.init_buffer_bytes": 4 * 1024**3,
-            "soma.init_buffer_bytes": 4 * 1024**3,
+            "py.init_buffer_bytes": 8 * 1024**3,
+            "soma.init_buffer_bytes": 8 * 1024**3,
         }
     )
 

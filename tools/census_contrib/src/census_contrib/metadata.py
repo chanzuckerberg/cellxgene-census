@@ -4,7 +4,7 @@ import datetime
 import json
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Dict, Optional
 
 import attrs
 import cellxgene_census
@@ -12,17 +12,13 @@ import requests
 import yaml
 from attrs import field, validators
 
-if TYPE_CHECKING:
-    from .args import Arguments
-from .util import error
-
 
 def none_or_str(v: Optional[str]) -> str:
     return "" if v is None else v
 
 
-@attrs.define(kw_only=True)
-class ContribMetadata:
+@attrs.define(kw_only=True, frozen=True)
+class EmbeddingMetadata:
     title: str = field(validator=validators.instance_of(str))
     description: str = field(validator=validators.instance_of(str))
     contact_name: str = field(validator=validators.instance_of(str))
@@ -49,11 +45,14 @@ class ContribMetadata:
     def as_json(self) -> str:
         return json.dumps(attrs.asdict(self))
 
+    def as_dict(self) -> Dict[str, Any]:
+        return attrs.asdict(self)
 
-def load_metadata(args: "Arguments") -> ContribMetadata:
-    metadata_path = pathlib.PosixPath(args.metadata)
+
+def load_metadata(path: str) -> EmbeddingMetadata:
+    metadata_path = pathlib.PosixPath(path)
     if not metadata_path.is_file():
-        error(args, "--metadata: file does not exist")
+        raise ValueError("--metadata: file does not exist")
 
     if metadata_path.suffix in [".yml", ".yaml"]:
         with open(metadata_path) as f:
@@ -64,11 +63,11 @@ def load_metadata(args: "Arguments") -> ContribMetadata:
             md = json.load(f)
 
     else:
-        error(args, "--metadata: unrecognized file format")
+        raise ValueError("--metadata: unrecognized file format")
 
     if not isinstance(md, dict):
-        error(args, "--metadata: file format did not contain a dictionary")
-    expected_fields = set(attrs.fields_dict(ContribMetadata).keys())
+        raise ValueError("--metadata: file format did not contain a dictionary")
+    expected_fields = set(attrs.fields_dict(EmbeddingMetadata).keys())
     found_fields = set(md.keys())
     if expected_fields ^ found_fields:
         print("metadata - unexpected fields.", file=sys.stderr)
@@ -76,12 +75,12 @@ def load_metadata(args: "Arguments") -> ContribMetadata:
             print(f"Extra: {found_fields - expected_fields}.", file=sys.stderr)
         if expected_fields - found_fields:
             print(f"Missing: {expected_fields - found_fields}", file=sys.stderr)
-        error(args, "--metadata: unexpected metadata file contents")
+        raise ValueError("--metadata: unexpected metadata file contents")
 
     try:
-        cmd = ContribMetadata(**md)
+        cmd = EmbeddingMetadata(**md)
     except (ValueError, TypeError) as e:
-        error(args, f"--metadata format error: {str(e)}")
+        raise ValueError(f"--metadata format error: {str(e)}") from e
 
     return cmd
 
@@ -111,7 +110,7 @@ class NoDatesSafeLoader(yaml.SafeLoader):
 NoDatesSafeLoader.remove_implicit_resolver("tag:yaml.org,2002:timestamp")
 
 
-def validate_metadata(args: "Arguments", metadata: ContribMetadata) -> None:
+def validate_metadata(metadata: EmbeddingMetadata) -> None:
     """
     Checks to perform on metadata:
     1. Census version must be an LTS version (implies existence)
@@ -122,48 +121,46 @@ def validate_metadata(args: "Arguments", metadata: ContribMetadata) -> None:
     6. Description must have length < 2048 characters
     """
 
-    validate_census_info(args, metadata)
-    validate_doi(args, metadata)
-    validate_urls(args, metadata)
+    validate_census_info(metadata)
+    validate_doi(metadata)
+    validate_urls(metadata)
 
     # 5. Title must have length < 96 characters
     MAX_TITLE_LENGTH = 96
     if not metadata.title or len(metadata.title) > MAX_TITLE_LENGTH:
-        error(
-            args,
+        raise ValueError(
             "Metadata: title must be string between 1 and {MAX_TITLE_LENGTH} characters in length",
         )
 
     # 6. Description must have length < 2048 characters
     MAX_DESCRIPTION_LENGTH = 2048
     if not metadata.description or len(metadata.description) > MAX_DESCRIPTION_LENGTH:
-        error(
-            args,
+        raise ValueError(
             "Metadata: description must be string between 1 and {MAX_DESCRIPTION_LENGTH} characters in length",
         )
 
 
-def validate_census_info(args: "Arguments", metadata: ContribMetadata) -> None:
+def validate_census_info(metadata: EmbeddingMetadata) -> None:
     """Errors / exists upon failure"""
     lts_releases = cellxgene_census.get_census_version_directory(lts=True)
 
     # 1. Census version must be an LTS version (implies existence)
     if metadata.census_version in lts_releases:
-        error(args, "Metadata specifies a census_version that is not an LTS release.")
+        raise ValueError("Metadata specifies a census_version that is not an LTS release.")
 
     # 2. Census version, experiment and measurement must exist
     with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
         if metadata.experiment_name not in census["census_data"]:
-            error(args, "Metadata specifies non-existent experiment_name")
+            raise ValueError("Metadata specifies non-existent experiment_name")
 
         if metadata.measurement_name not in census["census_data"][metadata.experiment_name].ms:
-            error(args, "Metadata specifies non-existent measurement_name")
+            raise ValueError("Metadata specifies non-existent measurement_name")
 
         assert census["census_data"][metadata.experiment_name].obs.count > 0
         assert census["census_data"][metadata.experiment_name].ms[metadata.measurement_name].var.count > 0
 
 
-def validate_doi(args: "Arguments", metadata: ContribMetadata) -> None:
+def validate_doi(metadata: EmbeddingMetadata) -> None:
     """Errors / exists upon failure"""
 
     # 3. DOI must validate if specified
@@ -177,10 +174,10 @@ def validate_doi(args: "Arguments", metadata: ContribMetadata) -> None:
     if r.status_code == 302 and "location" in r.headers:
         return
 
-    error(args, "Metadata contains a DOI that does not resolve")
+    raise ValueError("Metadata contains a DOI that does not resolve")
 
 
-def validate_urls(args: "Arguments", metadata: ContribMetadata) -> None:
+def validate_urls(metadata: EmbeddingMetadata) -> None:
     """Errors / exits upon failure"""
 
     # 4. All supplied URLs must resolve
@@ -192,4 +189,4 @@ def validate_urls(args: "Arguments", metadata: ContribMetadata) -> None:
         if r.status_code == 200:
             continue
 
-        error(args, f"Metadata contains unresolvable URL {fld_name}={url}")
+        raise ValueError(f"Metadata contains unresolvable URL {fld_name}={url}")

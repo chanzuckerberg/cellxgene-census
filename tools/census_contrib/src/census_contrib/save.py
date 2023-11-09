@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import copy
 import math
-import pathlib
+from typing import Optional, Tuple
 
 import pyarrow as pa
 import tiledbsoma as soma
 from somacore.options import PlatformConfig
 
-from .args import Arguments
-from .embedding import EmbeddingIJD
-from .metadata import ContribMetadata
-from .util import error, soma_context
+from .util import get_logger
+
+logger = get_logger()
+
 
 PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
     "tiledb": {
@@ -49,11 +49,9 @@ PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
 }
 
 
-def soma_data_filter(emb: EmbeddingIJD, sig_bits: int = 20) -> PlatformConfig:
-    """Given an embedding, generate appropriate filter pipeline for soma_data attribute"""
-    d = emb.d
-    dmin = d.min()
-    dmax = d.max()
+def soma_data_filter(value_range: Tuple[float, float], sig_bits: int = 20) -> PlatformConfig:
+    """Given an embedding's value range, generate appropriate filter pipeline for soma_data attribute"""
+    dmin, dmax = value_range
 
     offset = dmin
     bytewidth = 4
@@ -73,41 +71,53 @@ def soma_data_filter(emb: EmbeddingIJD, sig_bits: int = 20) -> PlatformConfig:
     ]
 
 
-def make_platform_config(emb: EmbeddingIJD) -> PlatformConfig:
+def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float]) -> PlatformConfig:
     platform_config = copy.deepcopy(PLATFORM_CONFIG_TEMPLATE)
 
     tdb_schema = platform_config["tiledb"]["create"]
-    tdb_schema["dims"]["soma_dim_1"]["tile"] = emb.shape[1]
-    tdb_schema["attrs"]["soma_data"]["filters"] = soma_data_filter(emb)
+    tdb_schema["dims"]["soma_dim_1"]["tile"] = shape[1]
+    tdb_schema["attrs"]["soma_data"]["filters"] = soma_data_filter(value_range)
 
     return platform_config
 
 
-def save_as_soma(args: Arguments, metadata: ContribMetadata, emb: EmbeddingIJD) -> None:
-    save_to = pathlib.PosixPath(args.save_soma_to)
-    if save_to.exists():
-        error(args, "SOMA output path already exists")
-
-    save_to.mkdir(parents=True, exist_ok=True)
-
-    emb_tbl = pa.Table.from_pydict(
-        {
-            "soma_dim_0": pa.array(emb.i),
-            "soma_dim_1": pa.array(emb.j),
-            "soma_data": pa.array(emb.d),
-        }
+def create_obsm_like_array(
+    uri: str,
+    value_range: Tuple[float, float],  # closed, i.e., inclusive [min, max]
+    shape: Tuple[int, int],
+    context: Optional[soma.options.SOMATileDBContext] = None,
+) -> soma.SparseNDArray:
+    return soma.SparseNDArray.create(
+        uri,
+        type=pa.float32(),
+        shape=shape,
+        context=context,
+        platform_config=make_platform_config(shape, value_range),
     )
 
-    args.logger.info("Creating SOMA array")
-    with soma.SparseNDArray.create(
-        save_to.as_posix(),
-        type=pa.float32(),
-        shape=emb.shape,
-        context=soma_context(),
-        platform_config=make_platform_config(emb),
-    ) as A:
-        args.logger.info("Writing SOMA array - starting")
-        A.metadata["CxG_accession_id"] = args.accession
-        A.metadata["CxG_contrib_metadata"] = metadata.as_json()
-        A.write(emb_tbl)
-        args.logger.info("Writing SOMA array - completed")
+
+def consolidate_array(uri: str) -> None:
+    import tiledb
+
+    for mode in ("fragment_meta", "array_meta", "fragments", "commits"):
+        try:
+            ctx = tiledb.Ctx(
+                tiledb.Config(
+                    {
+                        "py.init_buffer_bytes": 4 * 1024**3,
+                        "soma.init_buffer_bytes": 4 * 1024**3,
+                        "sm.consolidation.buffer_size": 4 * 1024**3,
+                        "sm.consolidation.mode": mode,
+                        "sm.vacuum.mode": mode,
+                    }
+                )
+            )
+            logger.info(f"Consolidate: start mode={mode}, uri={uri}")
+            tiledb.consolidate(uri, ctx=ctx)
+            logger.info(f"Vacuum: start mode={mode}, uri={uri}")
+            tiledb.vacuum(uri, ctx=ctx)
+        except tiledb.TileDBError as e:
+            logger.error(f"Consolidation error, uri={uri}: {str(e)}")
+            raise
+
+    logger.info(f"Consolidate/vacuum: end uri={uri}")
