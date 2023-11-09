@@ -110,7 +110,7 @@ class NoDatesSafeLoader(yaml.SafeLoader):
 NoDatesSafeLoader.remove_implicit_resolver("tag:yaml.org,2002:timestamp")
 
 
-def validate_metadata(metadata: EmbeddingMetadata) -> None:
+def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     """
     Checks to perform on metadata:
     1. Census version must be an LTS version (implies existence)
@@ -138,6 +138,8 @@ def validate_metadata(metadata: EmbeddingMetadata) -> None:
         raise ValueError(
             "Metadata: description must be string between 1 and {MAX_DESCRIPTION_LENGTH} characters in length",
         )
+
+    return metadata
 
 
 def validate_census_info(metadata: EmbeddingMetadata) -> None:

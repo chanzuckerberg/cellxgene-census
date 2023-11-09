@@ -9,11 +9,10 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .args import Arguments
-from .load import EmbeddingIJD
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
 from .save import consolidate_array, create_obsm_like_array
-from .util import get_logger, soma_context
-from .validate import validate_embedding, validate_embeddingIJD
+from .util import EagerIterator, get_logger, soma_context
+from .validate import validate_embedding
 
 logger = get_logger()
 
@@ -24,24 +23,15 @@ def main() -> int:
 
     try:
         if args.cmd == "validate":
-            expected_metadata = load_metadata(args.metadata)
+            expected_metadata = validate_metadata(load_metadata(args.metadata))
             validate_contrib_embedding(args.uri, args.accession, expected_metadata)
 
         else:  # ingestor
-            logger.info("Starting")
-            metadata = load_metadata(args.metadata)
+            logger.info("Load and validate metadata")
+            metadata = validate_metadata(load_metadata(args.metadata))
 
-            logger.info("Validate metadata")
-            validate_metadata(metadata)
-
-            logger.info("Loading embedding")
-            embedding = args.ingestor(args, metadata)
-
-            logger.info(f"Pre-validate embedding [shape={embedding.shape}]")
-            validate_embeddingIJD(embedding, metadata)
-
-            logger.info("Saving")
-            save_as_soma(args, metadata, embedding)
+            logger.info("Ingesting")
+            ingest(args, metadata)
 
             logger.info("Consolidating")
             consolidate_array(args.save_soma_to)
@@ -69,32 +59,30 @@ def setup_logging(args: Arguments) -> None:
     logging.getLogger("numba").setLevel(logging.WARNING)
 
 
-def save_as_soma(args: Arguments, metadata: EmbeddingMetadata, emb: EmbeddingIJD) -> None:
+def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
+    # TODO
+    # 1. validate pipe info (e.g., type, shape, etc) - see validate_embeddingIJD for ideas
+    # 2. validate each block
+
     save_to = pathlib.PosixPath(args.save_soma_to)
     if save_to.exists():
         args.error("SOMA output path already exists")
-
     save_to.mkdir(parents=True, exist_ok=True)
 
-    emb_tbl = pa.Table.from_pydict(
-        {
-            "soma_dim_0": pa.array(emb.i),
-            "soma_dim_1": pa.array(emb.j),
-            "soma_data": pa.array(emb.d),
-        }
-    )
+    with args.ingestor(args, metadata) as emb_pipe:
+        assert emb_pipe.type == pa.float32()
 
-    logger.info("Creating SOMA array")
-    uri = save_to.as_posix()
-    value_range = (emb.d.min(), emb.d.max())
-    with create_obsm_like_array(uri, value_range=value_range, shape=emb.shape, context=soma_context()) as A:
-        logger.info("Writing SOMA array - starting")
-        A.metadata["CxG_accession_id"] = args.accession
-        A.metadata["CxG_contrib_metadata"] = metadata.as_json()
-
-        logger.info("Start write")
-        A.write(emb_tbl)
-        logger.info("Writing SOMA array - completed")
+        # Create output object
+        value_range = emb_pipe.value_range
+        with create_obsm_like_array(
+            save_to.as_posix(), value_range=value_range, shape=emb_pipe.shape, context=soma_context()
+        ) as A:
+            logger.debug(f"Array created at {save_to.as_posix()}")
+            A.metadata["CxG_accession_id"] = args.accession
+            A.metadata["CxG_contrib_metadata"] = metadata.as_json()
+            for block in EagerIterator(emb_pipe):
+                logger.debug(f"Writing block length {len(block)}")
+                A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
 def validate_contrib_embedding(uri: str, expected_accession: str, expected_metadata: EmbeddingMetadata) -> None:

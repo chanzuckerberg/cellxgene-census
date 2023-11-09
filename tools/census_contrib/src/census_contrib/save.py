@@ -52,6 +52,8 @@ PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
 def soma_data_filter(value_range: Tuple[float, float], sig_bits: int = 20) -> PlatformConfig:
     """Given an embedding's value range, generate appropriate filter pipeline for soma_data attribute"""
     dmin, dmax = value_range
+    if dmin is None or dmax is None or dmin >= dmax:
+        raise ValueError("Value range malformed, expected [min,max]")
 
     offset = dmin
     bytewidth = 4

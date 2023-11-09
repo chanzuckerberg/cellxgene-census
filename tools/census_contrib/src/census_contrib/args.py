@@ -1,13 +1,8 @@
 from __future__ import annotations
 
-from typing import Callable
-
 from tap import Tap
 
-from .load import EmbeddingIJD, csv_ingest, npy_ingest, soma_ingest, test_embedding
-from .metadata import EmbeddingMetadata
-
-Ingestor = Callable[["Arguments", "EmbeddingMetadata"], "EmbeddingIJD"]
+from .load import csv_ingest, npy_ingest, soma_ingest, test_embedding
 
 
 # Common across all sub-commands
