@@ -66,7 +66,7 @@ For more information and for a list of all LTS Census data releases available pl
 
 ### AWS CLI for programatic downloads
 
-Users can bulk-donwload Census data via the [AWS CLI](https://aws.amazon.com/cli/).
+Users can bulk-download Census data via the [AWS CLI](https://aws.amazon.com/cli/).
 
 For example, to download the H5ADs files of the Census LTS release `2023-07-25`, users can execute the following from a shell session:
 
