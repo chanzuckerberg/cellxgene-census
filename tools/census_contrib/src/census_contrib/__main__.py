@@ -73,9 +73,12 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
         assert emb_pipe.type == pa.float32()
 
         # Create output object
-        value_range = emb_pipe.value_range
+        domains = emb_pipe.domains
+        if domains["i"][0] < 0 or domains["j"][0] < 0:
+            args.error("Coordinate values in embedding are negative")
+        shape = (domains["i"][1] + 1, domains["j"][1] + 1)
         with create_obsm_like_array(
-            save_to.as_posix(), value_range=value_range, shape=emb_pipe.shape, context=soma_context()
+            save_to.as_posix(), value_range=domains["d"], shape=shape, context=soma_context()
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
             A.metadata["CxG_accession_id"] = args.accession

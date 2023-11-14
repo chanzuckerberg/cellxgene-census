@@ -77,39 +77,6 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
                 raise ValueError("Embedding must not contain duplicate coordinates")
 
 
-# def validate_embeddingIJD(emb: EmbeddingIJD, metadata: EmbeddingMetadata) -> None:
-#     """
-#     Validate an in-memory EmbeddingIJD. Raises on invalid.
-#     """
-
-#     obs_joinids, _ = get_obs_soma_joinids(metadata)
-
-#     # Verify types
-#     if emb.i.dtype != np.int64 or emb.j.dtype != np.int64 or emb.d.dtype != np.float32:
-#         raise ValueError("Embedding data types not int64/int64/float32")
-
-#     # Embedding shape
-#     _validate_shape(emb.shape, metadata)
-#     if emb.i.shape != emb.j.shape or emb.i.shape != emb.d.shape:
-#         raise ValueError("Malformed embedding COO")
-
-#     # Must have at least one cell embedded
-#     if len(emb.i) < 1:
-#         raise ValueError("Embedding must have at least one cell embedded")
-
-#     # Verify I/dim0 values all exist as legit soma_joinids
-#     if not isin_all(emb.i, obs_joinids):
-#         raise ValueError("Embedding contains joinids not present in experiment obs")
-
-#     # Verify all J/dim1 values are in expected domain
-#     if not is_in_range_all(emb.j, 0, metadata.n_features - 1):
-#         raise ValueError("Embedding J values not in range [0, n_features)")
-
-#     # Embedding must be sorted with no dups (test assumes feature indices [0, N))
-#     if not is_sorted_unique(emb.i, emb.j, emb.shape[1]):
-#         raise ValueError("Embedding must not contain duplicate coordinates")
-
-
 def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None:
     _, obs_shape = get_obs_soma_joinids(metadata)
 
@@ -117,10 +84,9 @@ def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None
         raise ValueError("Embedding must be 2D")
 
     if shape[0] != obs_shape[0]:
-        raise ValueError("Embedding and obs shape differ.")
+        raise ValueError(f"Shapes differ: embedding {shape[0]},  obs shape {obs_shape[0]}.")
 
     if shape[1] != metadata.n_features:
-        print(shape, metadata.n_features)
         raise ValueError(
             "Embedding and metadata specify a different number of embedding features.",
         )

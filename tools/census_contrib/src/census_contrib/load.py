@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractproperty
 from contextlib import AbstractContextManager
-from typing import Any, Iterator, Tuple, Union, cast
+from typing import Any, Dict, Iterator, Literal, Tuple, Union
 
 import numpy as np
 import pyarrow as pa
@@ -18,11 +18,12 @@ logger = get_logger()
 
 
 EmbeddingTableIterator = Iterator[pa.Table]
+EmbeddingIJDDomains = Dict[Literal["i", "j", "d"], Union[Tuple[float, float], Tuple[None, None]]]
 
 
 class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["EmbeddingIJDPipe"], metaclass=ABCMeta):
     """
-    Returns pa.Table with I, J and D columns (i.e., COO), in row-major/C sorted order.
+    Returns pa.Table with i, j, and d columns (i.e., COO), in row-major/C sorted order.
     Must not have dups.
     """
 
@@ -30,17 +31,12 @@ class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["Embedding
         return self
 
     @abstractproperty
-    def shape(self) -> Tuple[int, ...]:
-        ...
-
-    @abstractproperty
     def type(self) -> pa.DataType:
         ...
 
     @abstractproperty
-    def value_range(self) -> Union[Tuple[float, float], Tuple[None, None]]:
-        """Return [min, max]"""
-        ...
+    def domains(self) -> EmbeddingIJDDomains:
+        """Return domains of i, j, and d"""
 
 
 class SOMAIJDPipe(EmbeddingIJDPipe):
@@ -67,30 +63,36 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
         return next(self._reader)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return cast(Tuple[int, ...], self._A.shape)
-
-    @property
     def type(self) -> pa.DataType:
         return self._A.schema.field("soma_data").type
 
     @property
-    def value_range(self) -> Union[Tuple[float, float], Tuple[None, None]]:
-        logger.debug("SOMAIJDPipe - scanning for value_range")
-        vrng: Union[Tuple[float, float], Tuple[None, None]] = (None, None)
+    def domains(self) -> EmbeddingIJDDomains:
+        """Return the domains of i, j and d"""
+        logger.debug("SOMAIJDPipe - scanning for domains")
+
+        _domains: EmbeddingIJDDomains = {"i": (None, None), "j": (None, None), "d": (None, None)}
+
+        def accum_min_max(tbl: pa.Table, col_name: str, col_alias: Literal["i", "j", "d"]) -> None:
+            min_max = pa.compute.min_max(tbl.column(col_name))
+            _min, _max = min_max["min"].as_py(), min_max["max"].as_py()
+            domain = _domains[col_alias]
+            domain = (
+                _min if domain[0] is None else min(_min, domain[0]),
+                _max if domain[1] is None else max(_max, domain[1]),
+            )
+            _domains[col_alias] = domain
 
         with soma.open(self.uri, context=soma_context()) as A:
             if A.nnz > 0:
                 for tbl in A.read().tables():
-                    min_max = pa.compute.min_max(tbl.column("soma_data"))
-                    _min, _max = min_max["min"].as_py(), min_max["max"].as_py()
-                    vrng = (
-                        _min if vrng[0] is None else min(_min, vrng[0]),
-                        _max if vrng[1] is None else min(_max, vrng[1]),
-                    )
+                    accum_min_max(tbl, "soma_data", "d")
+                    accum_min_max(tbl, "soma_dim_0", "i")
+                    accum_min_max(tbl, "soma_dim_1", "j")
 
-        logger.debug(f"SOMAIJDPipe - value_range is {vrng}")
-        return vrng
+        logger.debug(f"SOMAIJDPipe - found domains {_domains}")
+
+        return _domains
 
 
 class TestDataIJDPipe(EmbeddingIJDPipe):
@@ -112,6 +114,7 @@ class TestDataIJDPipe(EmbeddingIJDPipe):
         self.n_features = n_features
         self.obs_joinids = obs_joinids
         self.rng = rng
+        self.obs_shape = obs_shape
 
         # step through n_obs in blocks
         self.step_size = 2**20
@@ -138,18 +141,19 @@ class TestDataIJDPipe(EmbeddingIJDPipe):
         return pa.Table.from_pydict({"i": i, "j": j, "d": d})
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return (self.n_obs, self.n_features)
-
-    @property
     def type(self) -> pa.DataType:
         return pa.float32()
 
     @property
-    def value_range(self) -> Union[Tuple[float, float], Tuple[None, None]]:
+    def domains(self) -> EmbeddingIJDDomains:
         if self.n_obs == 0:
-            return (None, None)
-        return (self._offset, self._scale + self._offset)
+            return {"i": (None, None), "j": (None, None), "d": (None, None)}
+
+        return {
+            "i": (0, self.obs_shape[0] - 1),
+            "j": (0, self.n_features - 1),
+            "d": (self._offset, self._scale + self._offset),
+        }
 
 
 def test_embedding(n_obs: int, n_features: int, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
