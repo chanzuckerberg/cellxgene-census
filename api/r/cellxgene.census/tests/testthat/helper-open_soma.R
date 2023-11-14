@@ -11,7 +11,7 @@ open_soma_latest_for_test <- function(...) {
     # and saved, which leads to confusion with TileDB-R's internal caching of
     # the last-used context.
     tiledbsoma_ctx_latest_for_test <- new_SOMATileDBContext_for_census(
-      get_census_version_description("latest"),
+      get_census_version_description("2023-10-23"),
       ...
     )
   }
