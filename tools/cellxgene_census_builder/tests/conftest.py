@@ -125,7 +125,7 @@ def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
     datasets = []
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
-            h5ad = get_h5ad(organism, GENE_IDS[i])
+            h5ad = get_h5ad(organism, GENE_IDS[i], no_zero_counts=True)
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(
