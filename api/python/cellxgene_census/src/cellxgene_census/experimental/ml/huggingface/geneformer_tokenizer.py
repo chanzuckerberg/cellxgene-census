@@ -160,7 +160,9 @@ class GeneformerTokenizer(CellDatasetBuilder):
         Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
-        # project cell_Xrow onto model_gene_ids and normalize
+        # project cell_Xrow onto model_gene_ids and normalize by row sum.
+        # notice we divide by the total count of the complete row (not only of the projected
+        # values); this follows Geneformer's internal tokenizer.
         model_counts = cell_Xrow[:, self.model_gene_ids].multiply(1.0 / cell_Xrow.sum())
         assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
         # assert len(model_counts.data) == np.count_nonzero(model_counts.data)

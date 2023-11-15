@@ -2,6 +2,7 @@ import datasets
 import pytest
 import tiledbsoma
 from py.path import local as Path
+from scipy.stats import spearmanr
 
 import cellxgene_census
 
@@ -31,14 +32,11 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int) -> None:
         cell_ids = obs_df["soma_joinid"].sample(n=N).tolist()
 
         # run GeneformerTokenizer on them
-        checksum_test = 0
         with GeneformerTokenizer(
             human,
             obs_query=tiledbsoma.AxisQuery(coords=(cell_ids,)),
         ) as tokenizer:
-            for it in tokenizer.build():
-                lst1 = it["input_ids"]
-                checksum_test += hash(tuple(it["input_ids"]))
+            test_tokens = [it["input_ids"] for it in tokenizer.build()]
 
         # write h5ad for use with geneformer.TranscriptomeTokenizer
         ad = cellxgene_census.get_anndata(
@@ -56,15 +54,19 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int) -> None:
         # run geneformer.TranscriptomeTokenizer
         # see: https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/tokenizer.py
         TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, tmpdir, "tk", file_format="h5ad")
-        checksum_true = 0
-        for it in datasets.load_from_disk(tmpdir.join("tk.dataset")):
-            lst2 = it["input_ids"]
-            checksum_true += hash(tuple(it["input_ids"]))
+        true_tokens = [it["input_ids"] for it in datasets.load_from_disk(tmpdir.join("tk.dataset"))]
 
         # verify identical token sequences
-        if N == 1:
-            assert lst1 == lst2  # for viewing a full diff with pytest -vv
-        assert checksum_test == checksum_true
+        assert len(test_tokens) == len(cell_ids)
+        assert len(true_tokens) == len(cell_ids)
+
+        for i, cell_id in enumerate(cell_ids):
+            assert len(test_tokens[i]) == len(true_tokens[i])
+            # compute rank correlation between test_tokens[i] and true_tokens[i]:
+            rho, _ = spearmanr(test_tokens[i], true_tokens[i])
+            assert (
+                test_tokens[i] == true_tokens[i]
+            ), f"Discrepant token sequences for cell soma_joinid={cell_id}; Spearman rho={rho}"
 
 
 @pytest.mark.experimental
