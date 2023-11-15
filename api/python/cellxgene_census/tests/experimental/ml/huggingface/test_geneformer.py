@@ -19,13 +19,8 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-@pytest.mark.parametrize(
-    "N",
-    [100]
-    #    "cells_per_chunk",
-    #    [4, 100_000],
-)
-def test_GeneformerTokenizer(tmpdir: Path, N: int) -> None:
+@pytest.mark.parametrize("N", [100])
+def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int) -> None:
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
         # read obs dataframe to get soma_joinids of all primary cells
@@ -46,15 +41,10 @@ def test_GeneformerTokenizer(tmpdir: Path, N: int) -> None:
                 checksum_test += hash(tuple(it["input_ids"]))
 
         # write h5ad for use with geneformer.TranscriptomeTokenizer
-        # TODO: it should take X_name = 'raw' directly since it normalizes by row sums internally.
-        # But this seems to cause small changes to the rank order compared to feeding in
-        # X_name = 'normalized'. We should investigate whether the normalized layer is preserving
-        # the same rank order within each row. The reduced-precision storage of normalized could be
-        # a factor (considering also division by gene medians).
         ad = cellxgene_census.get_anndata(
             census,
             "homo_sapiens",
-            X_name="normalized",
+            X_name="raw",
             obs_coords=cell_ids,
             column_names=tiledbsoma.AxisColumnNames(var=["feature_id"]),
         )
