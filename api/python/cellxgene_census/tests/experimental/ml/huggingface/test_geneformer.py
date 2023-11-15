@@ -20,8 +20,8 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("N", [100])
-def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int) -> None:
+@pytest.mark.parametrize("N", [100], "rho_threshold", [0.995])
+def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: float) -> None:
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
         # read obs dataframe to get soma_joinids of all primary cells
@@ -60,13 +60,25 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int) -> None:
         assert len(test_tokens) == len(cell_ids)
         assert len(true_tokens) == len(cell_ids)
 
+        identical = 0
         for i, cell_id in enumerate(cell_ids):
             assert len(test_tokens[i]) == len(true_tokens[i])
-            # compute rank correlation between test_tokens[i] and true_tokens[i]:
+            # check rank correlation between test_tokens[i] and true_tokens[i]; this tolerates
+            # rare, slight differences in gene rankings which may arise from numerical precision
+            # in ranking lowly-expressed genes
             rho, _ = spearmanr(test_tokens[i], true_tokens[i])
-            assert (
-                test_tokens[i] == true_tokens[i]
-            ), f"Discrepant token sequences for cell soma_joinid={cell_id}; Spearman rho={rho}"
+            if rho < rho_threshold:
+                # token sequences are too dissimilar; assert exact identity so that pytest -vv will
+                # show the complete diff:
+                assert (
+                    test_tokens[i] == true_tokens[i]
+                ), f"Discrepant token sequences for cell soma_joinid={cell_id}; Spearman rho={rho}"
+            elif test_tokens[i] == true_tokens[i]:
+                identical += 1
+
+        # notwithstanding the rho_threshold tolerance, verify that almost all sequences are indeed
+        # exactly identical
+        assert identical / len(cell_ids) >= 0.95
 
 
 @pytest.mark.experimental
