@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import datasets
 import pytest
@@ -26,7 +26,7 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
     #    "cells_per_chunk",
     #    [4, 100_000],
 )
-def test_GeneformerTokenizer(tmpdir: os.PathLike, N: int) -> None:
+def test_GeneformerTokenizer(tmpdir: Path, N: int) -> None:
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
         # read obs dataframe to get soma_joinids of all primary cells
