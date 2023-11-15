@@ -1,8 +1,7 @@
-from pathlib import Path
-
 import datasets
 import pytest
 import tiledbsoma
+from py.path import local as Path
 
 import cellxgene_census
 
