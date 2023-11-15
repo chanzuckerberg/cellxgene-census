@@ -20,7 +20,8 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("N", [100], "rho_threshold", [0.995])
+@pytest.mark.parametrize("N", [100])
+@pytest.mark.parameterize("rho_threshold", [0.995])
 def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: float) -> None:
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
@@ -64,8 +65,8 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: fl
         for i, cell_id in enumerate(cell_ids):
             assert len(test_tokens[i]) == len(true_tokens[i])
             # check rank correlation between test_tokens[i] and true_tokens[i]; this tolerates
-            # rare, slight differences in gene rankings which may arise from numerical precision
-            # in ranking lowly-expressed genes
+            # rare, slight differences in the token sequences which may arise from numerical
+            # precision issues in ranking lowly-expressed genes
             rho, _ = spearmanr(test_tokens[i], true_tokens[i])
             if rho < rho_threshold:
                 # token sequences are too dissimilar; assert exact identity so that pytest -vv will
