@@ -21,7 +21,7 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("N", [100])
-@pytest.mark.parameterize("rho_threshold", [0.995])
+@pytest.mark.parametrize("rho_threshold", [0.995])
 def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: float) -> None:
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
