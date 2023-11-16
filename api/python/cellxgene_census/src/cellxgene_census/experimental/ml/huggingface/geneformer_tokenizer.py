@@ -72,7 +72,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
         """
-        if obs_attributes: # old name of obs_column_names
+        if obs_attributes:  # old name of obs_column_names
             obs_column_names = obs_attributes
 
         self.max_input_tokens = max_input_tokens
