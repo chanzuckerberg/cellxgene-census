@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import logging
+import math
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Iterator, Optional, ParamSpec, TypeVar
+from typing import Iterator, Optional, ParamSpec, TypeVar, cast
 
 import tiledbsoma as soma
 
@@ -11,11 +12,24 @@ def get_logger() -> logging.Logger:
     return logging.getLogger("census_contrib")
 
 
+DEFAULT_READ_BUFFER_SIZE = 8 * 1024**3
+MAX_NNZ_GOAL = DEFAULT_READ_BUFFER_SIZE // 8  # sizeof(int64) - worst case size
+
+
+def blocksize(n_features: int, nnz_goal: int = MAX_NNZ_GOAL) -> int:
+    """
+    Given an nnz goal, and n_features, return step size for a blockwise iterator.
+    """
+    nnz_goal = max(nnz_goal, MAX_NNZ_GOAL)
+    return cast(int, 2 ** round(math.log2((nnz_goal) / n_features)))
+
+
 def soma_context() -> soma.options.SOMATileDBContext:
+    """Return soma context with default config"""
     return soma.options.SOMATileDBContext(
         tiledb_config={
-            "py.init_buffer_bytes": 8 * 1024**3,
-            "soma.init_buffer_bytes": 8 * 1024**3,
+            "py.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
+            "soma.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
         }
     )
 

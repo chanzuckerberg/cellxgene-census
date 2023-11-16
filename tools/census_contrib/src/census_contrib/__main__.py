@@ -60,10 +60,6 @@ def setup_logging(args: Arguments) -> None:
 
 
 def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
-    # TODO
-    # 1. validate pipe info (e.g., type, shape, etc) - see validate_embeddingIJD for ideas
-    # 2. validate each block
-
     save_to = pathlib.PosixPath(args.save_soma_to)
     if save_to.exists():
         args.error("SOMA output path already exists")
@@ -84,8 +80,9 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
             A.metadata["CxG_accession_id"] = args.accession
             A.metadata["CxG_contrib_metadata"] = metadata.as_json()
             for block in EagerIterator(emb_pipe):
-                logger.debug(f"Writing block length {len(block)}")
-                A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
+                if len(block) > 0:
+                    logger.debug(f"Writing block length {len(block)}")
+                    A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
 def validate_contrib_embedding(uri: str, expected_accession: str, expected_metadata: EmbeddingMetadata) -> None:

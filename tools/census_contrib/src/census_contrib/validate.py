@@ -3,6 +3,7 @@ Validate an embedding
 """
 from __future__ import annotations
 
+import concurrent.futures
 from typing import Any, Generator, Tuple, TypeVar, Union, cast
 
 import numba as nb
@@ -13,7 +14,7 @@ import tiledbsoma as soma
 
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
-from .util import EagerIterator, get_logger, soma_context
+from .util import EagerIterator, blocksize, get_logger, soma_context
 
 _NPT = TypeVar("_NPT", bound=npt.NDArray[np.number[Any]])
 
@@ -56,25 +57,41 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
         check_dups = is_sorted_unique_gen(shape[1])
         next(check_dups)  # prime the generator
 
-        for tbl, _ in EagerIterator(
-            A.read(result_order="row-major").blockwise(axis=0, size=2**20, reindex_disable_on_axis=[0, 1]).tables()
-        ):
-            logger.debug(f"Read table, length {len(tbl)}")
-            i = tbl.column("soma_dim_0")
-            j = tbl.column("soma_dim_1")
+        size = blocksize(shape[1])
 
-            # verify all dim0 values are legit obs soma_joinid values
-            if not isin_all(i, obs_joinids):
-                raise ValueError("Embedding contains joinids not present in experiment obs")
+        with concurrent.futures.ThreadPoolExecutor() as tp:
+            for tbl, _ in EagerIterator(
+                # NOTE: TODO: size could be scaled based on size of second axis, e.g.,. more constant nnz per block
+                A.read(result_order="row-major").blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1]).tables(),
+                pool=tp,
+            ):
+                logger.debug(f"Read table, length {len(tbl)}")
+                i = tbl.column("soma_dim_0")
+                j = tbl.column("soma_dim_1")
 
-            # Verify all dim1 values are in expected domain
-            if not is_in_range_all(j, 0, metadata.n_features - 1):
-                raise ValueError("Embedding dim_1 values not in range [0, n_features)")
+                _in_all = tp.submit(isin_all, i, obs_joinids)
+                _in_range = tp.submit(is_in_range_all, j, 0, metadata.n_features - 1)
 
-            # Embedding must contain no dups
-            no_dups = check_dups.send(tbl)
-            if not no_dups:
-                raise ValueError("Embedding must not contain duplicate coordinates")
+                # # verify all dim0 values are legit obs soma_joinid values
+                # if not isin_all(i, obs_joinids):
+                #     raise ValueError("Embedding contains joinids not present in experiment obs")
+
+                # # Verify all dim1 values are in expected domain
+                # if not is_in_range_all(j, 0, metadata.n_features - 1):
+                #     raise ValueError("Embedding dim_1 values not in range [0, n_features)")
+
+                # Embedding must contain no dups
+                no_dups = check_dups.send(tbl)
+                if not no_dups:
+                    raise ValueError("Embedding must not contain duplicate coordinates")
+
+                # verify all dim0 values are legit obs soma_joinid values
+                if not _in_all.result():
+                    raise ValueError("Embedding contains joinids not present in experiment obs")
+
+                # Verify all dim1 values are in expected domain
+                if not _in_range.result():
+                    raise ValueError("Embedding dim_1 values not in range [0, n_features)")
 
 
 def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None:

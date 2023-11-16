@@ -44,7 +44,7 @@ class CSVEmbedding(IngestArgs):
 
 
 class NPYEmbedding(IngestArgs):
-    joinid_uri: str  # Embedding soma_joinids
+    joinid_uri: str  # Embedding soma_joinids, either .txt or .npy
     embedding_uri: str  # Embedding coordinates
 
     def configure(self) -> None:

@@ -5,6 +5,7 @@ from contextlib import AbstractContextManager
 from typing import Any, Dict, Iterator, Literal, Tuple, Union
 
 import numpy as np
+import numpy.typing as npt
 import pyarrow as pa
 import pyarrow.compute
 import tiledbsoma as soma
@@ -50,8 +51,8 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
         self._reader = (
             tbl.rename_columns(["i", "j", "d"])
             for tbl, _ in self._A.read(result_order="row-major")
-            .blockwise(axis=0, size=2**20, reindex_disable_on_axis=[0, 1])
-            .tables()
+            # NOTE: TODO: size could be scaled based on n_features
+            .blockwise(axis=0, size=2**20, reindex_disable_on_axis=[0, 1]).tables()
         )
         return self
 
@@ -93,6 +94,94 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
         logger.debug(f"SOMAIJDPipe - found domains {_domains}")
 
         return _domains
+
+
+class NPYIJDPipe(EmbeddingIJDPipe):
+    """
+    Basic approach:
+    1. load joinid 1d array as npy or txt
+    2. argsort joinid array as there is no requirement it is 0..n
+    3. mmap emb array r/o
+    4. yield chunks
+    """
+
+    def __init__(self, joinids_uri: str, embeddings_uri: str):
+        self.joinids_uri = joinids_uri
+        self.embeddings_uri = embeddings_uri
+
+    def __enter__(self) -> Self:
+        logger.info("NPYIJDPipe - loading")
+        self.joinids = self._load_joinids()
+        self.joinids_sort = np.argsort(self.joinids)
+        self.embeddings = np.load(self.embeddings_uri, mmap_mode="r")
+
+        self.n_obs = len(self.joinids)
+        self.n_features = self.embeddings.shape[1]
+        if self.n_obs != self.embeddings.shape[0]:
+            raise ValueError("Embedding NPY and joinid files do not have compatible shape")
+
+        if self.embeddings.dtype != np.float32:
+            raise ValueError("Embedding NPY must be float32")
+
+        # step through n_obs in blocks
+        # NOTE: TODO: size could be scaled based on n_features
+        self.step_size = 2**20
+        self._steps = (i for i in range(0, self.n_obs, self.step_size))
+
+        logger.info(f"NPYIJDPipe - found n_obs={self.n_obs}, embeddings shape {self.embeddings.shape}")
+        return self
+
+    def __exit__(self, *_: Any) -> None:
+        pass
+
+    def __next__(self) -> pa.Table:
+        next_step = next(self._steps)
+        pnts = self.joinids_sort[next_step : next_step + self.step_size]
+        n_obs = len(pnts)
+
+        i = np.empty((n_obs, self.n_features), dtype=np.int64)
+        i.T[:] = self.joinids[pnts]
+        i = i.ravel()
+
+        j = np.empty((n_obs, self.n_features), dtype=np.int64)
+        j[:] = np.arange(self.n_features)
+        j = j.ravel()
+
+        d = self.embeddings[pnts, :].ravel()
+
+        return pa.Table.from_pydict({"i": i, "j": j, "d": d})
+
+    @property
+    def type(self) -> pa.DataType:
+        return pa.from_numpy_dtype(self.embeddings.dtype)
+
+    @property
+    def domains(self) -> EmbeddingIJDDomains:
+        """Return the domains of i, j and d"""
+        logger.debug("NPYIJDPipe - scanning for domains")
+
+        min_max = pa.compute.min_max(pa.array(self.embeddings.ravel()))
+        _min, _max = min_max["min"].as_py(), min_max["max"].as_py()
+        _domains: EmbeddingIJDDomains = {
+            "i": (self.joinids[self.joinids_sort[0]], self.joinids[self.joinids_sort[-1]]),
+            "j": (0, self.n_features - 1),
+            "d": (_min, _max),
+        }
+        logger.debug(f"NPYIJDPipe - found domains {_domains}")
+        return _domains
+
+    def _load_joinids(self) -> npt.NDArray[np.int64]:
+        logger.info(f"Loading joinids from {self.joinids_uri}")
+        if self.joinids_uri.endswith(".txt"):
+            joinids = np.loadtxt(self.joinids_uri, dtype=np.int64)
+        else:
+            joinids = np.load(self.joinids_uri)
+
+        if joinids.dtype != np.int64:
+            raise ValueError("Joinids are not int64")
+
+        logger.info(f"Loaded {len(joinids)} joinids")
+        return joinids
 
 
 class TestDataIJDPipe(EmbeddingIJDPipe):
@@ -165,7 +254,7 @@ def soma_ingest(soma_uri: str, _: EmbeddingMetadata) -> EmbeddingIJDPipe:
 
 
 def npy_ingest(joinid_uri: str, embedding_uri: str, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
-    raise NotImplementedError()
+    return NPYIJDPipe(joinid_uri, embedding_uri)
 
 
 def csv_ingest(csv_uri: str, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
