@@ -20,26 +20,38 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("N", [100])
-@pytest.mark.parametrize("rho_threshold", [0.995])
-def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: float) -> None:
+def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
+    """
+    Test that GeneformerTokenizer produces the same token sequences as the original
+    geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
+    """
+    # causes deterministic selection of roughly 1,000 cells:
+    MODULUS = 32768
+    # minimum Spearman rank correlation to consider token sequences effectively identical; this
+    # allows for rare, slight differences in token sequences possibly arising from from numerical
+    # precision issues in ranking lowly-expressed genes.
+    RHO_THRESHOLD = 0.995
+    # notwithstanding RHO_THRESHOLD, we'll check that almost all token sequences are -exactly-
+    # identical.
+    EXACT_THRESHOLD = 0.98
+
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
         # read obs dataframe to get soma_joinids of all primary cells
         obs_df = (
             human.obs.read(column_names=["soma_joinid"], value_filter="is_primary_data == True").concat().to_pandas()
         )
-        # select N at random
-        cell_ids = obs_df["soma_joinid"].sample(n=N).tolist()
+        # select those with soma_joinid == 0 (mod MODULUS)
+        cell_ids = [it for it in obs_df["soma_joinid"].tolist() if it % MODULUS == 0]
 
-        # run GeneformerTokenizer on them
+        # run our GeneformerTokenizer on them
         with GeneformerTokenizer(
             human,
             obs_query=tiledbsoma.AxisQuery(coords=(cell_ids,)),
         ) as tokenizer:
             test_tokens = [it["input_ids"] for it in tokenizer.build()]
 
-        # write h5ad for use with geneformer.TranscriptomeTokenizer
+        # write h5ad for use with geneformer.TranscriptomeTokenizer to get "true" tokenizations
         ad = cellxgene_census.get_anndata(
             census,
             "homo_sapiens",
@@ -64,11 +76,8 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: fl
         identical = 0
         for i, cell_id in enumerate(cell_ids):
             assert len(test_tokens[i]) == len(true_tokens[i])
-            # check rank correlation between test_tokens[i] and true_tokens[i]; this tolerates
-            # rare, slight differences in the token sequences which may arise from numerical
-            # precision issues in ranking lowly-expressed genes
             rho, _ = spearmanr(test_tokens[i], true_tokens[i])
-            if rho < rho_threshold:
+            if rho < RHO_THRESHOLD:
                 # token sequences are too dissimilar; assert exact identity so that pytest -vv will
                 # show the complete diff:
                 assert (
@@ -77,9 +86,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path, N: int, rho_threshold: fl
             elif test_tokens[i] == true_tokens[i]:
                 identical += 1
 
-        # notwithstanding the rho_threshold tolerance, verify that almost all sequences are indeed
-        # exactly identical
-        assert identical / len(cell_ids) >= 0.95
+        assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
 @pytest.mark.experimental
