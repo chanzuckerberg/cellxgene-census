@@ -2,7 +2,7 @@ census:
   organism: 
     "mus_musculus"
   obs_query: # Use if you want to train on a subset of the model
-    'tissue_general == "heart"'
+    null
   obs_query_model: # Required when loading data for model training. Do not change.
     'is_primary_data == True and nnz >= 300'
 hvg:
@@ -12,8 +12,7 @@ hvg:
     [suspension_type, assay]
 anndata:
   batch_key:
-    [suspension_type, assay]
-    # [dataset_id, assay, suspension_type, donor_id]
+    [dataset_id, assay, suspension_type, donor_id]
   model_filename:
     anndata_model.h5ad
 model:    
