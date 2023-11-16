@@ -51,7 +51,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         ) as tokenizer:
             test_tokens = [it["input_ids"] for it in tokenizer.build()]
 
-        # write h5ad for use with geneformer.TranscriptomeTokenizer to get "true" tokenizations
+        # write h5ad for use with geneformer.TranscriptomeTokenizer
         ad = cellxgene_census.get_anndata(
             census,
             "homo_sapiens",
@@ -64,15 +64,14 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         h5ad_dir = tmpdir.join("h5ad")
         h5ad_dir.mkdir()
         ad.write_h5ad(h5ad_dir.join("tokenizeme.h5ad"))
-        # run geneformer.TranscriptomeTokenizer
+        # run geneformer.TranscriptomeTokenizer to get "true" tokenizations
         # see: https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/tokenizer.py
         TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, tmpdir, "tk", file_format="h5ad")
         true_tokens = [it["input_ids"] for it in datasets.load_from_disk(tmpdir.join("tk.dataset"))]
 
-        # verify identical token sequences
+        # check GeneformerTokenizer sequences against geneformer.TranscriptomeTokenizer's
         assert len(test_tokens) == len(cell_ids)
         assert len(true_tokens) == len(cell_ids)
-
         identical = 0
         for i, cell_id in enumerate(cell_ids):
             assert len(test_tokens[i]) == len(true_tokens[i])
@@ -85,7 +84,6 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
                 ), f"Discrepant token sequences for cell soma_joinid={cell_id}; Spearman rho={rho}"
             elif test_tokens[i] == true_tokens[i]:
                 identical += 1
-
         assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
