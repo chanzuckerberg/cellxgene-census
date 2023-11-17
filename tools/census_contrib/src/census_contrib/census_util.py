@@ -8,6 +8,9 @@ import numpy as np
 import numpy.typing as npt
 
 from .metadata import EmbeddingMetadata
+from .util import get_logger
+
+logger = get_logger()
 
 
 @functools.cache
@@ -18,6 +21,7 @@ def get_obs_soma_joinids(
     Return experiment obs soma_joind values and obs shape appropriate for the
     Census version specified in the metadata.
     """
+    logger.info(f"Loading obs joinids from census_version={metadata.census_version}")
     with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
         exp = census["census_data"][metadata.experiment_name]
         tbl = exp.obs.read(column_names=["soma_joinid"]).concat()

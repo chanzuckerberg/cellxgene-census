@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractproperty
 from contextlib import AbstractContextManager
+from pathlib import Path
 from typing import Any, Dict, Iterator, Literal, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 import pyarrow as pa
-import pyarrow.compute
 import tiledbsoma as soma
 from typing_extensions import Self
 
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
-from .util import get_logger, soma_context
+from .util import blocksize, get_logger, soma_context
 
 logger = get_logger()
 
@@ -41,18 +41,19 @@ class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["Embedding
 
 
 class SOMAIJDPipe(EmbeddingIJDPipe):
-    def __init__(self, uri: str):
+    def __init__(self, uri: Path):
         self.uri = uri
 
     def __enter__(self) -> Self:
-        self._A: soma.SparseNDArray = soma.open(self.uri, context=soma_context())
+        self._A: soma.SparseNDArray = soma.open(self.uri.as_posix(), context=soma_context())
         if self._A.soma_type != "SOMASparseNDArray" or self._A.ndim != 2:
             raise ValueError("Must be a 2D SOMA SparseNDArray")
+        size = blocksize(self._A.shape[1])
         self._reader = (
             tbl.rename_columns(["i", "j", "d"])
             for tbl, _ in self._A.read(result_order="row-major")
-            # NOTE: TODO: size could be scaled based on n_features
-            .blockwise(axis=0, size=2**20, reindex_disable_on_axis=[0, 1]).tables()
+            .blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1])
+            .tables()
         )
         return self
 
@@ -84,7 +85,7 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
             )
             _domains[col_alias] = domain
 
-        with soma.open(self.uri, context=soma_context()) as A:
+        with soma.open(self.uri.as_posix(), context=soma_context()) as A:
             if A.nnz > 0:
                 for tbl in A.read().tables():
                     accum_min_max(tbl, "soma_data", "d")
@@ -105,7 +106,7 @@ class NPYIJDPipe(EmbeddingIJDPipe):
     4. yield chunks
     """
 
-    def __init__(self, joinids_uri: str, embeddings_uri: str):
+    def __init__(self, joinids_uri: Path, embeddings_uri: Path):
         self.joinids_uri = joinids_uri
         self.embeddings_uri = embeddings_uri
 
@@ -124,8 +125,7 @@ class NPYIJDPipe(EmbeddingIJDPipe):
             raise ValueError("Embedding NPY must be float32")
 
         # step through n_obs in blocks
-        # NOTE: TODO: size could be scaled based on n_features
-        self.step_size = 2**20
+        self.step_size = blocksize(self.n_features)
         self._steps = (i for i in range(0, self.n_obs, self.step_size))
 
         logger.info(f"NPYIJDPipe - found n_obs={self.n_obs}, embeddings shape {self.embeddings.shape}")
@@ -172,10 +172,13 @@ class NPYIJDPipe(EmbeddingIJDPipe):
 
     def _load_joinids(self) -> npt.NDArray[np.int64]:
         logger.info(f"Loading joinids from {self.joinids_uri}")
-        if self.joinids_uri.endswith(".txt"):
+
+        if self.joinids_uri.suffix == ".txt":
             joinids = np.loadtxt(self.joinids_uri, dtype=np.int64)
-        else:
+        elif self.joinids_uri.suffix == ".npy":
             joinids = np.load(self.joinids_uri)
+        else:
+            raise ValueError("joinid file has unrecoginized format (extension) - expect .txt or .npy")
 
         if joinids.dtype != np.int64:
             raise ValueError("Joinids are not int64")
@@ -249,15 +252,15 @@ def test_embedding(n_obs: int, n_features: int, metadata: EmbeddingMetadata) -> 
     return TestDataIJDPipe(n_obs, n_features, metadata)
 
 
-def soma_ingest(soma_uri: str, _: EmbeddingMetadata) -> EmbeddingIJDPipe:
+def soma_ingest(soma_uri: Path, _: EmbeddingMetadata) -> EmbeddingIJDPipe:
     return SOMAIJDPipe(soma_uri)
 
 
-def npy_ingest(joinid_uri: str, embedding_uri: str, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
+def npy_ingest(joinid_uri: Path, embedding_uri: Path, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
     return NPYIJDPipe(joinid_uri, embedding_uri)
 
 
-def csv_ingest(csv_uri: str, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
+def csv_ingest(csv_uri: Path, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
     # only partially implemented
     raise NotImplementedError()
 

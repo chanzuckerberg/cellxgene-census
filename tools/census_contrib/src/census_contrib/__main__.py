@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 import logging
-import pathlib
 import sys
+from pathlib import Path
+from typing import Union
 
 import pyarrow as pa
 import tiledbsoma as soma
@@ -22,22 +23,24 @@ def main() -> int:
     setup_logging(args)
 
     try:
+        metadata_path = args.cwd.joinpath(args.metadata)
+        logger.info("Load and validate metadata")
+        metadata = validate_metadata(load_metadata(metadata_path))
+
+        embedding_path = args.cwd.joinpath(metadata.id)
+
         if args.cmd == "validate":
-            expected_metadata = validate_metadata(load_metadata(args.metadata))
-            validate_contrib_embedding(args.uri, args.accession, expected_metadata)
+            validate_contrib_embedding(embedding_path, metadata)
 
-        else:  # ingestor
-            logger.info("Load and validate metadata")
-            metadata = validate_metadata(load_metadata(args.metadata))
-
+        else:  # ingest
             logger.info("Ingesting")
             ingest(args, metadata)
 
             logger.info("Consolidating")
-            consolidate_array(args.save_soma_to)
+            consolidate_array(embedding_path)
 
             logger.info("Validating SOMA array")
-            validate_contrib_embedding(args.save_soma_to, args.accession, metadata)
+            validate_contrib_embedding(embedding_path, metadata)
 
     except (ValueError, TypeError) as e:
         args.error(str(e))
@@ -60,7 +63,7 @@ def setup_logging(args: Arguments) -> None:
 
 
 def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
-    save_to = pathlib.PosixPath(args.save_soma_to)
+    save_to = args.cwd.joinpath(metadata.id)
     if save_to.exists():
         args.error("SOMA output path already exists")
     save_to.mkdir(parents=True, exist_ok=True)
@@ -77,7 +80,6 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
             save_to.as_posix(), value_range=domains["d"], shape=shape, context=soma_context()
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
-            A.metadata["CxG_accession_id"] = args.accession
             A.metadata["CxG_contrib_metadata"] = metadata.as_json()
             for block in EagerIterator(emb_pipe):
                 if len(block) > 0:
@@ -85,23 +87,21 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
-def validate_contrib_embedding(uri: str, expected_accession: str, expected_metadata: EmbeddingMetadata) -> None:
+def validate_contrib_embedding(uri: Union[str, Path], expected_metadata: EmbeddingMetadata) -> None:
     """
     Validate embedding where embedding metadata is encoded in the array.
 
     Raises upon invalid result
     """
-    with soma.open(uri, context=soma_context()) as A:
-        accession = A.metadata["CxG_accession_id"]
-        metadata = json.loads(A.metadata["CxG_contrib_metadata"])
+    array_path: str = Path(uri).as_posix()
 
-    if accession != expected_accession:
-        raise ValueError("Expected and actual accession do not match")
+    with soma.open(array_path, context=soma_context()) as A:
+        metadata = json.loads(A.metadata["CxG_contrib_metadata"])
 
     if expected_metadata.as_dict() != metadata:
         raise ValueError("Expected and actual metadata do not match")
 
-    validate_embedding(uri, EmbeddingMetadata(**metadata))
+    validate_embedding(array_path, EmbeddingMetadata(**metadata))
 
 
 if __name__ == "__main__":

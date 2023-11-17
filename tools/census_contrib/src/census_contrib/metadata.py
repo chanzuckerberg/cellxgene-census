@@ -4,7 +4,7 @@ import datetime
 import json
 import pathlib
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import attrs
 import cellxgene_census
@@ -19,6 +19,7 @@ def none_or_str(v: Optional[str]) -> str:
 
 @attrs.define(kw_only=True, frozen=True)
 class EmbeddingMetadata:
+    id: str = field(validator=validators.instance_of(str))
     title: str = field(validator=validators.instance_of(str))
     description: str = field(validator=validators.instance_of(str))
     contact_name: str = field(validator=validators.instance_of(str))
@@ -49,7 +50,7 @@ class EmbeddingMetadata:
         return attrs.asdict(self)
 
 
-def load_metadata(path: str) -> EmbeddingMetadata:
+def load_metadata(path: Union[str, pathlib.Path]) -> EmbeddingMetadata:
     metadata_path = pathlib.PosixPath(path)
     if not metadata_path.is_file():
         raise ValueError("--metadata: file does not exist")
@@ -120,6 +121,9 @@ def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     5. Title must have length < 96 characters
     6. Description must have length < 2048 characters
     """
+
+    if not metadata.id:
+        raise ValueError("metadata is missing 'id' (accession)")
 
     validate_census_info(metadata)
     validate_doi(metadata)

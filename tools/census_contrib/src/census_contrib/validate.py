@@ -38,6 +38,8 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
     """
     Validate an embedding saved as a SOMASparseNDArray, e.g., obsm-like. Raises on invalid
     """
+    logger.info(f"Validating {uri}")
+
     obs_joinids, _ = get_obs_soma_joinids(metadata)
 
     with soma.open(uri, context=soma_context()) as A:
@@ -61,7 +63,6 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
 
         with concurrent.futures.ThreadPoolExecutor() as tp:
             for tbl, _ in EagerIterator(
-                # NOTE: TODO: size could be scaled based on size of second axis, e.g.,. more constant nnz per block
                 A.read(result_order="row-major").blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1]).tables(),
                 pool=tp,
             ):
@@ -71,14 +72,6 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
 
                 _in_all = tp.submit(isin_all, i, obs_joinids)
                 _in_range = tp.submit(is_in_range_all, j, 0, metadata.n_features - 1)
-
-                # # verify all dim0 values are legit obs soma_joinid values
-                # if not isin_all(i, obs_joinids):
-                #     raise ValueError("Embedding contains joinids not present in experiment obs")
-
-                # # Verify all dim1 values are in expected domain
-                # if not is_in_range_all(j, 0, metadata.n_features - 1):
-                #     raise ValueError("Embedding dim_1 values not in range [0, n_features)")
 
                 # Embedding must contain no dups
                 no_dups = check_dups.send(tbl)

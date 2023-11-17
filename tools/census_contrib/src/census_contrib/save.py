@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import copy
 import math
-from typing import Optional, Tuple
+from pathlib import Path
+from typing import Optional, Tuple, Union
 
 import pyarrow as pa
 import tiledbsoma as soma
@@ -84,14 +85,15 @@ def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float
 
 
 def create_obsm_like_array(
-    uri: str,
+    uri: Union[str, Path],
     value_range: Tuple[float, float],  # closed, i.e., inclusive [min, max]
     shape: Tuple[int, int],
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.SparseNDArray:
     """Create and return opened array. Can be used as a context manager."""
+    array_path: str = Path(uri).as_posix()
     return soma.SparseNDArray.create(
-        uri,
+        array_path,
         type=pa.float32(),
         shape=shape,
         context=context,
@@ -99,8 +101,10 @@ def create_obsm_like_array(
     )
 
 
-def consolidate_array(uri: str) -> None:
+def consolidate_array(uri: Union[str, Path]) -> None:
     import tiledb
+
+    array_path: str = Path(uri).as_posix()
 
     for mode in ("fragment_meta", "array_meta", "fragments", "commits"):
         try:
@@ -115,12 +119,12 @@ def consolidate_array(uri: str) -> None:
                     }
                 )
             )
-            logger.info(f"Consolidate: start mode={mode}, uri={uri}")
-            tiledb.consolidate(uri, ctx=ctx)
-            logger.info(f"Vacuum: start mode={mode}, uri={uri}")
-            tiledb.vacuum(uri, ctx=ctx)
+            logger.info(f"Consolidate: start mode={mode}, uri={array_path}")
+            tiledb.consolidate(array_path, ctx=ctx)
+            logger.info(f"Vacuum: start mode={mode}, uri={array_path}")
+            tiledb.vacuum(array_path, ctx=ctx)
         except tiledb.TileDBError as e:
-            logger.error(f"Consolidation error, uri={uri}: {str(e)}")
+            logger.error(f"Consolidation error, uri={array_path}: {str(e)}")
             raise
 
-    logger.info(f"Consolidate/vacuum: end uri={uri}")
+    logger.info(f"Consolidate/vacuum: end uri={array_path}")

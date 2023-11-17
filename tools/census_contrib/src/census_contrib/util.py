@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import math
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Iterator, Optional, ParamSpec, TypeVar, cast
+from typing import Iterator, Optional, TypeVar, cast
 
 import tiledbsoma as soma
 
@@ -12,7 +12,7 @@ def get_logger() -> logging.Logger:
     return logging.getLogger("census_contrib")
 
 
-DEFAULT_READ_BUFFER_SIZE = 8 * 1024**3
+DEFAULT_READ_BUFFER_SIZE = 4 * 1024**3
 MAX_NNZ_GOAL = DEFAULT_READ_BUFFER_SIZE // 8  # sizeof(int64) - worst case size
 
 
@@ -35,7 +35,6 @@ def soma_context() -> soma.options.SOMATileDBContext:
 
 
 _T = TypeVar("_T")
-_P = ParamSpec("_P")
 
 
 class EagerIterator(Iterator[_T]):
