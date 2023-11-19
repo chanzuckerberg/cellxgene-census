@@ -28,12 +28,13 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     # causes deterministic selection of roughly 1,000 cells:
     MODULUS = 32768
     # minimum Spearman rank correlation to consider token sequences effectively identical; this
-    # allows for rare, slight differences in token sequences possibly arising from from numerical
-    # precision issues in ranking lowly-expressed genes.
-    RHO_THRESHOLD = 0.995
+    # allows for rare, slight differences in token sequences possibly arising from unstable sorting
+    # of lowly-expressed genes, or reduced numerical precision in the 'normalized' layer (amplified
+    # by the division by gene medians)
+    RHO_THRESHOLD = 0.99
     # notwithstanding RHO_THRESHOLD, we'll check that almost all token sequences are -exactly-
     # identical.
-    EXACT_THRESHOLD = 0.98
+    EXACT_THRESHOLD = 0.99
 
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
