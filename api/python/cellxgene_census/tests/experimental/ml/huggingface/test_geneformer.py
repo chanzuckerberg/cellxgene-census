@@ -56,7 +56,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         ad = cellxgene_census.get_anndata(
             census,
             "homo_sapiens",
-            X_name="raw",
+            X_name="normalized",
             obs_coords=cell_ids,
             column_names=tiledbsoma.AxisColumnNames(var=["feature_id"]),
         )
