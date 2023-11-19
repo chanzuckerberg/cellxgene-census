@@ -29,8 +29,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     MODULUS = 32768
     # minimum Spearman rank correlation to consider token sequences effectively identical; this
     # allows for rare, slight differences in token sequences possibly arising from unstable sorting
-    # of lowly-expressed genes, or reduced numerical precision in the 'normalized' layer (amplified
-    # by the division by gene medians)
+    # of lowly-expressed genes.
     RHO_THRESHOLD = 0.99
     # notwithstanding RHO_THRESHOLD, we'll check that almost all token sequences are -exactly-
     # identical.
@@ -56,6 +55,13 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         ad = cellxgene_census.get_anndata(
             census,
             "homo_sapiens",
+            # We'll give TranscriptomeTokenizer the row-"normalized" layer even though it
+            # row-normalizes internally, and thus could consume the "raw" counts. We found the
+            # latter approach leads to a higher degree of token sequence discrepancies with our
+            # GeneformerTokenizer, which consumes the normalized layer. We guess this is due to the
+            # normalized layer's reduced-precision storage, differences which may be amplified when
+            # the tokenization algorithm takes the ratio of the normalized values to precomputed
+            # medians.
             X_name="normalized",
             obs_coords=cell_ids,
             column_names=tiledbsoma.AxisColumnNames(var=["feature_id"]),
