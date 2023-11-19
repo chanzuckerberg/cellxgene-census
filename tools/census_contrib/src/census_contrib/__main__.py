@@ -4,15 +4,19 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
+import cellxgene_census
+import numpy as np
 import pyarrow as pa
+import scanpy as sc
 import tiledbsoma as soma
 
 from .args import Arguments
+from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
 from .save import consolidate_array, create_obsm_like_array
-from .util import EagerIterator, get_logger, soma_context
+from .util import EagerIterator, blocksize, get_logger, soma_context
 from .validate import validate_embedding
 
 logger = get_logger()
@@ -30,7 +34,15 @@ def main() -> int:
         embedding_path = args.cwd.joinpath(metadata.id)
 
         if args.cmd == "validate":
+            logger.info("Validating SOMA array")
             validate_contrib_embedding(embedding_path, metadata)
+
+            logger.info("Creating QC umaps")
+            create_qc_plots(args.cwd, embedding_path, metadata)
+
+        elif args.cmd == "qcplots":
+            logger.info("Creating QC umaps")
+            create_qc_plots(args.cwd, embedding_path, metadata)
 
         else:  # ingest
             logger.info("Ingesting")
@@ -41,6 +53,9 @@ def main() -> int:
 
             logger.info("Validating SOMA array")
             validate_contrib_embedding(embedding_path, metadata)
+
+            logger.info("Creating QC umaps")
+            create_qc_plots(args.cwd, embedding_path, metadata)
 
     except (ValueError, TypeError) as e:
         args.error(str(e))
@@ -60,6 +75,7 @@ def setup_logging(args: Arguments) -> None:
 
     # turn down some other stuff
     logging.getLogger("numba").setLevel(logging.WARNING)
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 
 
 def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
@@ -68,6 +84,9 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
         args.error("SOMA output path already exists")
     save_to.mkdir(parents=True, exist_ok=True)
 
+    obs_joinids, obs_shape = get_obs_soma_joinids(metadata)
+    assert obs_joinids[0] == 0 and obs_joinids[-1] == (obs_shape[0] - 1), "Census coordinates are unexpected"
+
     with args.ingestor(args, metadata) as emb_pipe:
         assert emb_pipe.type == pa.float32()
 
@@ -75,7 +94,18 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
         domains = emb_pipe.domains
         if domains["i"][0] < 0 or domains["j"][0] < 0:
             args.error("Coordinate values in embedding are negative")
-        shape = (domains["i"][1] + 1, domains["j"][1] + 1)
+        if domains["i"][1] > obs_shape[0]:
+            args.error("Coordinate values in embedding dim 0 are outside obs joinid range")
+        if domains["j"] != (0, metadata.n_features - 1):
+            args.error("Coordinate values in embedding dim 1 are not (0, n_features)")
+
+        if domains["i"][0] > 0 or domains["i"][1] < obs_shape[0]:
+            logging.warning("Embedding is a subset of cells.")
+
+        assert 0 == domains["j"][0] and (metadata.n_features - 1) == domains["j"][1]
+        assert domains["i"][0] <= domains["i"][1] < obs_shape[0]
+        shape = (obs_shape[0], metadata.n_features)
+
         with create_obsm_like_array(
             save_to.as_posix(), value_range=domains["d"], shape=shape, context=soma_context()
         ) as A:
@@ -102,6 +132,86 @@ def validate_contrib_embedding(uri: Union[str, Path], expected_metadata: Embeddi
         raise ValueError("Expected and actual metadata do not match")
 
     validate_embedding(array_path, EmbeddingMetadata(**metadata))
+
+
+def load_qc_anndata(
+    embedding: Path, metadata: EmbeddingMetadata, obs_value_filter: str, obs_columns: List[str], emb_name: str
+) -> Optional[sc.AnnData]:
+    """Returns None if the value filter excludes all cells"""
+    with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
+        experiment = census["census_data"][metadata.experiment_name]
+        with experiment.axis_query(
+            measurement_name=metadata.measurement_name,
+            obs_query=soma.AxisQuery(value_filter=obs_value_filter),
+            var_query=soma.AxisQuery(coords=(slice(0, 1),)),  # we don't use X data, so minimize load memory & time
+        ) as query:
+            if not query.n_obs:
+                return None
+
+            # Load AnnData and X[raw]
+            adata = query.to_anndata(X_name="raw", column_names={"obs": obs_columns})
+
+            # Load embedding associated with the obs joinids
+            with soma.open(embedding.as_posix(), context=soma_context()) as E:
+                # read embedding and obs joinids
+                size = blocksize(E.shape[1])
+                to_stack = list(
+                    blk.toarray()
+                    for blk, _ in E.read(coords=(query.obs_joinids().to_numpy(),))
+                    .blockwise(axis=0, size=size, reindex_disable_on_axis=1)
+                    .scipy(compress=False)
+                )
+                if not to_stack:  # ie, are there embeddings for these cells?
+                    return None
+                embedding_data = np.vstack(to_stack)
+
+                # Save as an obsm layer
+                adata.obsm[emb_name] = embedding_data
+
+    return adata
+
+
+def make_random_palette(n_colors: int) -> List[str]:
+    rng = np.random.default_rng()
+    colors = rng.integers(0, 0xFFFFFF, size=n_colors, dtype=np.uint32)
+    return [f"#{c:06X}" for c in colors]
+
+
+def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> None:
+    sc._settings.settings.autoshow = False
+    sc._settings.settings.figdir = (cwd / "figures").as_posix()
+
+    cases = {
+        "spleen": "is_primary_data == True and tissue_general == 'spleen'",
+        "spinal_cord": "is_primary_data == True and tissue_general == 'spinal cord'",
+    }
+    emb_name = "X_emb"
+
+    color_by_columns = ["cell_type", "dataset_id", "assay"]
+
+    for k, filter in cases.items():
+        logger.info(f"Loading AnnData for QC UMAP for {k}")
+        adata = load_qc_anndata(embedding, metadata, filter, color_by_columns, emb_name)
+        if not adata:
+            logger.info(f"Zero cells available for {k}, skipping UMAP")
+            continue
+
+        logger.info(repr(adata))
+
+        logger.info(f"Computing neighbor graph for {k}")
+        sc.pp.neighbors(adata, use_rep=emb_name)
+
+        logger.info(f"Computing UMAP for {k}")
+        sc.tl.umap(adata)
+
+        logger.info(f"Saving UMAP plots for {k}")
+        for color_by in color_by_columns:
+            n_categories = len(adata.obs[color_by].astype(str).astype("category").cat.categories)
+            plot_color_kwargs: Dict[str, Any] = dict(color=color_by)
+            # scanpy does a good job until category counts > 102
+            if n_categories > len(sc.plotting.palettes.default_102):
+                plot_color_kwargs["palette"] = make_random_palette(n_categories)
+            sc.pl.umap(adata, title=f"{k}, colored by {color_by}", save=f"_{k}_{color_by}.png", **plot_color_kwargs)
 
 
 if __name__ == "__main__":

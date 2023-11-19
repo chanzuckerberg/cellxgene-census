@@ -9,6 +9,7 @@ dependencies= [
     "requests",
     "typed-argument-parser",
     "typing_extensions",
+    "scanpy"
 ]
 
 [tool.setuptools.packages.find]

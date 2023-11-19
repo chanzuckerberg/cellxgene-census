@@ -56,6 +56,10 @@ class ValidateEmbedding(CommonArgs):
     pass
 
 
+class QCPlots(CommonArgs):
+    pass
+
+
 class Arguments(Tap):  # type: ignore[misc]
     def __init__(self) -> None:
         super().__init__(underscores_to_dashes=True)
@@ -67,6 +71,7 @@ class Arguments(Tap):  # type: ignore[misc]
         self.add_subparser("npy", NPYEmbedding, help="Ingest embedding from NPY files")
         self.add_subparser("test", TestEmbedding, help="Generate a random test embedding")
         self.add_subparser("validate", ValidateEmbedding, help="Validate existing embedding")
+        self.add_subparser("qcplots", QCPlots, help="Generate QC plots")
 
     def path_fix(self, arg_name: str) -> None:
         if hasattr(self, arg_name):

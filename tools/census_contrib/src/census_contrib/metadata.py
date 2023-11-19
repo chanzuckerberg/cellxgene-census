@@ -118,7 +118,7 @@ def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     2. Census version, experiment and measurement must exist
     3. DOI must validate
     4. All supplied URLs must resolve
-    5. Title must have length < 96 characters
+    5. Title must have length < 128 characters
     6. Description must have length < 2048 characters
     """
 
@@ -129,11 +129,11 @@ def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     validate_doi(metadata)
     validate_urls(metadata)
 
-    # 5. Title must have length < 96 characters
-    MAX_TITLE_LENGTH = 96
+    # 5. Title must have length < 128 characters
+    MAX_TITLE_LENGTH = 128
     if not metadata.title or len(metadata.title) > MAX_TITLE_LENGTH:
         raise ValueError(
-            "Metadata: title must be string between 1 and {MAX_TITLE_LENGTH} characters in length",
+            f"Metadata: title must be string between 1 and {MAX_TITLE_LENGTH} characters in length",
         )
 
     # 6. Description must have length < 2048 characters
