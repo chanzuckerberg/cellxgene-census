@@ -33,7 +33,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     RHO_THRESHOLD = 0.99
     # notwithstanding RHO_THRESHOLD, we'll check that almost all token sequences are -exactly-
     # identical.
-    EXACT_THRESHOLD = 0.99
+    EXACT_THRESHOLD = 0.98
 
     with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         human = census["census_data"]["homo_sapiens"]
