@@ -26,7 +26,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
     geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
     """
     # causes deterministic selection of roughly 1,000 cells:
-    MODULUS = 262144
+    MODULUS = 32768
     # minimum Spearman rank correlation to consider token sequences effectively identical; this
     # allows for rare, slight differences in token sequences possibly arising from unstable sorting
     # and/or minor numerical precision differences in lowly-expressed genes.
