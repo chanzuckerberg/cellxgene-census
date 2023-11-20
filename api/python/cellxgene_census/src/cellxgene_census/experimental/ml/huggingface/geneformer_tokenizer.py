@@ -81,10 +81,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         super().__init__(
             experiment,
             measurement_name="RNA",
-            layer_name="normalized",
-            # configure query to fetch the relevant genes only
-            # FIXME: commented out because (as of this writing) it actually slows down the query!
-            # var_query=tiledbsoma.AxisQuery(coords=(self.model_gene_ids,)),
+            layer_name="raw",
             **kwargs,
         )
 
@@ -160,8 +157,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
         Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
-        # project cell_Xrow onto model_gene_ids and normalize
-        model_counts = cell_Xrow[:, self.model_gene_ids]
+        # project cell_Xrow onto model_gene_ids and normalize by row sum.
+        # notice we divide by the total count of the complete row (not only of the projected
+        # values); this follows Geneformer's internal tokenizer.
+        model_counts = cell_Xrow[:, self.model_gene_ids].multiply(1.0 / cell_Xrow.sum())
         assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
         # assert len(model_counts.data) == np.count_nonzero(model_counts.data)
         model_expr = model_counts.multiply(self.model_gene_medians_factor)
