@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
+import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -10,12 +11,13 @@ import cellxgene_census
 import numpy as np
 import pyarrow as pa
 import scanpy as sc
+import scipy.sparse as sp
 import tiledbsoma as soma
 
 from .args import Arguments
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
-from .save import consolidate_array, create_obsm_like_array
+from .save import apply_float_mode, consolidate_array, create_obsm_like_array
 from .util import EagerIterator, blocksize, get_logger, soma_context
 from .validate import validate_embedding
 
@@ -58,6 +60,9 @@ def main() -> int:
             create_qc_plots(args.cwd, embedding_path, metadata)
 
     except (ValueError, TypeError) as e:
+        if args.verbose:
+            traceback.print_exc()
+
         args.error(str(e))
 
     logger.info("Finished")
@@ -107,13 +112,18 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
         shape = (obs_shape[0], metadata.n_features)
 
         with create_obsm_like_array(
-            save_to.as_posix(), value_range=domains["d"], shape=shape, context=soma_context()
+            save_to.as_posix(),
+            value_range=domains["d"],
+            shape=shape,
+            context=soma_context(),
+            float_mode=args.float_mode,
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
             A.metadata["CxG_contrib_metadata"] = metadata.as_json()
             for block in EagerIterator(emb_pipe):
                 if len(block) > 0:
                     logger.debug(f"Writing block length {len(block)}")
+                    block = apply_float_mode(block, args.float_mode, args.float_precision)
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
@@ -138,6 +148,9 @@ def load_qc_anndata(
     embedding: Path, metadata: EmbeddingMetadata, obs_value_filter: str, obs_columns: List[str], emb_name: str
 ) -> Optional[sc.AnnData]:
     """Returns None if the value filter excludes all cells"""
+    if "soma_joinid" not in obs_columns:
+        obs_columns = ["soma_joinid"] + obs_columns
+
     with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
         experiment = census["census_data"][metadata.experiment_name]
         with experiment.axis_query(
@@ -150,23 +163,27 @@ def load_qc_anndata(
 
             # Load AnnData and X[raw]
             adata = query.to_anndata(X_name="raw", column_names={"obs": obs_columns})
+            obs_joinids = adata.obs.soma_joinid.to_numpy()
 
-            # Load embedding associated with the obs joinids
-            with soma.open(embedding.as_posix(), context=soma_context()) as E:
-                # read embedding and obs joinids
-                size = blocksize(E.shape[1])
-                to_stack = list(
-                    blk.toarray()
-                    for blk, _ in E.read(coords=(query.obs_joinids().to_numpy(),))
-                    .blockwise(axis=0, size=size, reindex_disable_on_axis=1)
-                    .scipy(compress=False)
-                )
-                if not to_stack:  # ie, are there embeddings for these cells?
-                    return None
-                embedding_data = np.vstack(to_stack)
+        # Load embedding associated with the obs joinids
+        with soma.open(embedding.as_posix(), context=soma_context()) as E:
+            # read embedding and obs joinids
+            size = blocksize(E.shape[1])
+            embeddings = sp.vstack(
+                [
+                    blk
+                    for blk, _ in (
+                        E.read(coords=(obs_joinids,)).blockwise(axis=0, size=size, reindex_disable_on_axis=1).scipy()
+                    )
+                ]
+            )
 
-                # Save as an obsm layer
-                adata.obsm[emb_name] = embedding_data
+            embedding_presence_mask = embeddings.getnnz(axis=1) != 0
+            embeddings = embeddings[embedding_presence_mask, :].toarray()
+            adata = adata[embedding_presence_mask, :]
+
+            # Save as an obsm layer
+            adata.obsm[emb_name] = embeddings
 
     return adata
 

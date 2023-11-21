@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from tap import Tap
 
@@ -12,6 +13,8 @@ class CommonArgs(Tap):  # type: ignore[misc]
     cwd: Path = Path.cwd()  # Working directory
     verbose: int = 0  # Logging level
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
+    float_mode: Literal["scale", "trunc"] = "trunc"
+    float_precision: int = 7  # mantissa bits to preserve (range 4 to 23)
 
     def configure(self) -> None:
         self.add_argument("-v", "--verbose", action="count", default=1, help="Increase logging verbosity")

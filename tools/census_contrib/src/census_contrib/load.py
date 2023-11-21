@@ -189,7 +189,7 @@ class NPYIJDPipe(EmbeddingIJDPipe):
 
 class TestDataIJDPipe(EmbeddingIJDPipe):
     def __init__(self, n_obs: int, n_features: int, metadata: EmbeddingMetadata):
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(seed=0)
         self._scale = 2.0
         self._offset = -0.1
 
