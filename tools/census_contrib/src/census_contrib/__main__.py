@@ -18,7 +18,15 @@ from .args import Arguments
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
 from .save import apply_float_mode, consolidate_array, create_obsm_like_array
-from .util import EagerIterator, blocksize, get_logger, soma_context
+from .util import (
+    EagerIterator,
+    blocksize,
+    blockwise_axis0_scipy_csr,
+    get_logger,
+    get_use_blockwise,
+    set_use_blockwise,
+    soma_context,
+)
 from .validate import validate_embedding
 
 logger = get_logger()
@@ -27,6 +35,9 @@ logger = get_logger()
 def main() -> int:
     args = Arguments().parse_args()
     setup_logging(args)
+
+    # backport to old soma w/o blockwise
+    set_use_blockwise(args.use_blockwise)
 
     try:
         metadata_path = args.cwd.joinpath(args.metadata)
@@ -174,6 +185,8 @@ def load_qc_anndata(
                     blk
                     for blk, _ in (
                         E.read(coords=(obs_joinids,)).blockwise(axis=0, size=size, reindex_disable_on_axis=1).scipy()
+                        if get_use_blockwise()
+                        else blockwise_axis0_scipy_csr(E, coords=(obs_joinids,), size=size, reindex_disable_on_axis=1)
                     )
                 ]
             )

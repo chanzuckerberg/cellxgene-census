@@ -25,7 +25,6 @@ class EmbeddingMetadata:
     contact_name: str = field(validator=validators.instance_of(str))
     contact_email: str = field(validator=validators.instance_of(str))
     contact_affiliation: str = field(validator=validators.instance_of(str))
-    # DOI: str = field(default="", converter=str, validator=validators.instance_of(str))
     DOI: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     additional_information: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     model_link: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
@@ -33,6 +32,7 @@ class EmbeddingMetadata:
     census_version: str = field(validator=validators.instance_of(str))
     experiment_name: str = field(validator=validators.instance_of(str))
     measurement_name: str = field(validator=validators.instance_of(str))
+    n_embeddings: int = field(validator=validators.instance_of(int))
     n_features: int = field(validator=validators.instance_of(int))
     submission_date: str = field(validator=validators.instance_of(str))
 
@@ -148,11 +148,14 @@ def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
 
 def validate_census_info(metadata: EmbeddingMetadata) -> None:
     """Errors / exists upon failure"""
-    lts_releases = cellxgene_census.get_census_version_directory(lts=True)
 
-    # 1. Census version must be an LTS version (implies existence)
-    if metadata.census_version in lts_releases:
-        raise ValueError("Metadata specifies a census_version that is not an LTS release.")
+    releases = cellxgene_census.get_census_version_directory()
+
+    # 1. Census version must exist
+    if metadata.census_version not in releases:
+        raise ValueError("Metadata specifies a census_version that does not exist.")
+
+    # TODO - test for LTS?
 
     # 2. Census version, experiment and measurement must exist
     with cellxgene_census.open_soma(census_version=metadata.census_version) as census:

@@ -14,7 +14,7 @@ import tiledbsoma as soma
 
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
-from .util import EagerIterator, blocksize, get_logger, soma_context
+from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, get_use_blockwise, soma_context
 
 _NPT = TypeVar("_NPT", bound=npt.NDArray[np.number[Any]])
 
@@ -60,10 +60,12 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
         next(check_dups)  # prime the generator
 
         size = blocksize(shape[1])
-
+        counted_embeddings = 0
         with concurrent.futures.ThreadPoolExecutor() as tp:
             for tbl, _ in EagerIterator(
-                A.read(result_order="row-major").blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1]).tables(),
+                A.read(result_order="row-major").blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1]).tables()
+                if get_use_blockwise()
+                else blockwise_axis0_tables(A, result_order="row-major", size=size, reindex_disable_on_axis=[0, 1]),
                 pool=tp,
             ):
                 logger.debug(f"Read table, length {len(tbl)}")
@@ -72,6 +74,9 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
 
                 _in_all = tp.submit(isin_all, i, obs_joinids)
                 _in_range = tp.submit(is_in_range_all, j, 0, metadata.n_features - 1)
+
+                # Keep count of dim0 coordinates seen
+                counted_embeddings += len(np.unique(i.to_numpy()))
 
                 # Embedding must contain no dups
                 no_dups = check_dups.send(tbl)
@@ -85,6 +90,11 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
                 # Verify all dim1 values are in expected domain
                 if not _in_range.result():
                     raise ValueError("Embedding dim_1 values not in range [0, n_features)")
+
+        if counted_embeddings != metadata.n_embeddings:
+            raise ValueError(
+                f"Number of embeddings in data [{counted_embeddings}] and metadata [{metadata.n_embeddings}] do not match."
+            )
 
 
 def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None:

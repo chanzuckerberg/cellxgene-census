@@ -15,6 +15,7 @@ class CommonArgs(Tap):  # type: ignore[misc]
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
     float_mode: Literal["scale", "trunc"] = "trunc"
     float_precision: int = 7  # mantissa bits to preserve (range 4 to 23)
+    use_blockwise: bool = False  # Use the SOMA 1.5 blockwise iterators (requires tiledbsoma 1.5+)
 
     def configure(self) -> None:
         self.add_argument("-v", "--verbose", action="count", default=1, help="Increase logging verbosity")
@@ -48,11 +49,11 @@ class NPYEmbedding(CommonArgs):
 
 
 class TestEmbedding(CommonArgs):
-    n_obs: int = 0  # number of cells to embed
-
     def configure(self) -> None:
         super().configure()
-        self.set_defaults(ingestor=lambda args, metadata: test_embedding(args.n_obs, metadata.n_features, metadata))
+        self.set_defaults(
+            ingestor=lambda args, metadata: test_embedding(metadata.n_embeddings, metadata.n_features, metadata)
+        )
 
 
 class ValidateEmbedding(CommonArgs):

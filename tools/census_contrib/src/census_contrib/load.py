@@ -13,7 +13,7 @@ from typing_extensions import Self
 
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
-from .util import blocksize, get_logger, soma_context
+from .util import blocksize, blockwise_axis0_tables, get_logger, get_use_blockwise, soma_context
 
 logger = get_logger()
 
@@ -49,11 +49,16 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
         if self._A.soma_type != "SOMASparseNDArray" or self._A.ndim != 2:
             raise ValueError("Must be a 2D SOMA SparseNDArray")
         size = blocksize(self._A.shape[1])
+
         self._reader = (
-            tbl.rename_columns(["i", "j", "d"])
-            for tbl, _ in self._A.read(result_order="row-major")
-            .blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1])
-            .tables()
+            (
+                tbl.rename_columns(["i", "j", "d"])
+                for tbl, _ in self._A.read(result_order="row-major")
+                .blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1])
+                .tables()
+            )
+            if get_use_blockwise()
+            else blockwise_axis0_tables(self._A, result_order="row_major", size=size, reindex_disable_on_axis=[0, 1])
         )
         return self
 
@@ -194,8 +199,6 @@ class TestDataIJDPipe(EmbeddingIJDPipe):
         self._offset = -0.1
 
         all_obs, obs_shape = get_obs_soma_joinids(metadata)
-        if not n_obs:
-            n_obs = len(all_obs)
         if n_obs == len(all_obs):
             obs_joinids = all_obs
         else:
