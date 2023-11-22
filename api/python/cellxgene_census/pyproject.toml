@@ -7,7 +7,7 @@ name = "cellxgene_census"
 dynamic = ["version"]
 description = "API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit https://github.com/chanzuckerberg/cellxgene-census/"
 authors = [
-    { name = "Chan Zuckerberg Initiative", email = "soma@chanzuckerberg.com" }
+    { name = "Chan Zuckerberg Initiative Foundation", email = "soma@chanzuckerberg.com" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
@@ -31,7 +31,7 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma~=1.4.3",
+    "tiledbsoma~=1.5.1",
     "anndata",
     "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
     "requests",
