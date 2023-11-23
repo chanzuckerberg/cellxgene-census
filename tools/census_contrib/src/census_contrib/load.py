@@ -58,7 +58,12 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
                 .tables()
             )
             if get_use_blockwise()
-            else blockwise_axis0_tables(self._A, result_order="row_major", size=size, reindex_disable_on_axis=[0, 1])
+            else (
+                tbl.rename_columns(["i", "j", "d"])
+                for tbl, _ in blockwise_axis0_tables(
+                    self._A, result_order="row-major", size=size, reindex_disable_on_axis=[0, 1]
+                )
+            )
         )
         return self
 

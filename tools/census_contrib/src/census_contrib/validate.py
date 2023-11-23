@@ -12,7 +12,7 @@ import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .census_util import get_obs_soma_joinids
+from .census_util import get_census_obs_uri_region, get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
 from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, get_use_blockwise, soma_context
 
@@ -28,10 +28,25 @@ obs dataframe, and M is user defined (e.g., for a 2D UMAP, M would be 2).
 2. All dim0 values in the embedding must be a legal obs soma_joinid in the corresponding Census experiment
 3. An embedding must have at least one (1) cell embedded
 4. Embedding data type must be float32 and coordinates must be int64
+5. Storage format version must match associated Census
 
 """
 
 logger = get_logger()
+
+
+def validate_compatible_tiledb_storage_format(uri: str, metadata: EmbeddingMetadata) -> None:
+    import tiledb
+
+    # Fetch embedding storage version
+    emb_storage_version = tiledb.open(uri).schema.version
+
+    # Fetch associated Census array URI and its associated storage version
+    census_uri, census_region = get_census_obs_uri_region(metadata)
+    census_storage_version = tiledb.open(census_uri, config={"vfs.s3.region": census_region}).schema.version
+
+    if emb_storage_version != census_storage_version:
+        raise ValueError("tiledb storage versions for embedding and Census are mismatched")
 
 
 def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:

@@ -27,7 +27,7 @@ from .util import (
     set_use_blockwise,
     soma_context,
 )
-from .validate import validate_embedding
+from .validate import validate_compatible_tiledb_storage_format, validate_embedding
 
 logger = get_logger()
 
@@ -115,7 +115,7 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
         if domains["j"] != (0, metadata.n_features - 1):
             args.error("Coordinate values in embedding dim 1 are not (0, n_features)")
 
-        if domains["i"][0] > 0 or domains["i"][1] < obs_shape[0]:
+        if domains["i"][0] > 0 or domains["i"][1] < (obs_shape[0] - 1):
             logging.warning("Embedding is a subset of cells.")
 
         assert 0 == domains["j"][0] and (metadata.n_features - 1) == domains["j"][1]
@@ -126,12 +126,14 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
             save_to.as_posix(),
             value_range=domains["d"],
             shape=shape,
-            context=soma_context(),
+            context=soma_context({"sm.check_coord_dups": True}),
             float_mode=args.float_mode,
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
             A.metadata["CxG_contrib_metadata"] = metadata.as_json()
             for block in EagerIterator(emb_pipe):
+                assert isinstance(block, pa.Table), "Embedding pipe did not yield an Arrow Table"
+                assert block.column_names == ["i", "j", "d"]  # we care about the order
                 if len(block) > 0:
                     logger.debug(f"Writing block length {len(block)}")
                     block = apply_float_mode(block, args.float_mode, args.float_precision)
@@ -147,12 +149,14 @@ def validate_contrib_embedding(uri: Union[str, Path], expected_metadata: Embeddi
     array_path: str = Path(uri).as_posix()
 
     with soma.open(array_path, context=soma_context()) as A:
-        metadata = json.loads(A.metadata["CxG_contrib_metadata"])
+        metadata_dict = json.loads(A.metadata["CxG_contrib_metadata"])
 
-    if expected_metadata.as_dict() != metadata:
+    if expected_metadata.as_dict() != metadata_dict:
         raise ValueError("Expected and actual metadata do not match")
 
-    validate_embedding(array_path, EmbeddingMetadata(**metadata))
+    metadata = EmbeddingMetadata(**metadata_dict)
+    validate_compatible_tiledb_storage_format(array_path, metadata)
+    validate_embedding(array_path, metadata)
 
 
 def load_qc_anndata(

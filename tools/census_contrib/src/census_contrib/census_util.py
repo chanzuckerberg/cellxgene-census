@@ -28,3 +28,14 @@ def get_obs_soma_joinids(
 
         joinids = cast(npt.NDArray[np.int64], tbl.column("soma_joinid").to_numpy())
         return joinids, (joinids.max() + 1,)
+
+
+def get_census_obs_uri_region(metadata: EmbeddingMetadata) -> Tuple[str, str]:
+    with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
+        exp = census["census_data"][metadata.experiment_name]
+        uri = exp.obs.uri
+        assert isinstance(uri, str)
+
+    desc = cellxgene_census.get_census_version_description(census_version=metadata.census_version)
+    region = desc.get("soma", {}).get("s3_region", "us-west-2")
+    return uri, region

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import numpy as np
+import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 from somacore.options import PlatformConfig
@@ -23,15 +24,15 @@ PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
                 "soma_dim_0": {
                     "tile": 2048,
                     "filters": [
-                        "PositiveDeltaFilter",
-                        {"_type": "ZstdFilter", "level": 5},
+                        {"_type": "PositiveDeltaFilter", "window": 2048},
+                        {"_type": "ZstdFilter", "level": 9},
                     ],
                 },
                 "soma_dim_1": {
                     "tile": 2048,
                     "filters": [
-                        "ByteShuffleFilter",
-                        {"_type": "ZstdFilter", "level": 5},
+                        "DeltaFilter",
+                        {"_type": "ZstdFilter", "level": 9},
                     ],
                 },
             },
@@ -53,7 +54,7 @@ def soma_data_filter(value_range: Tuple[float, float], float_mode: str, sig_bits
     if float_mode == "trunc":
         return [
             "ByteShuffleFilter",
-            {"_type": "ZstdFilter", "level": 13},
+            {"_type": "ZstdFilter", "level": 19},
         ]
 
     assert float_mode == "scale"
@@ -110,23 +111,39 @@ def create_obsm_like_array(
 
 def apply_float_mode(tbl: pa.Table, float_mode: str, sig_bits: int = 7) -> pa.Table:
     if float_mode == "scale":
+        # noop - done w/ TileDB filter
         return tbl
 
     assert float_mode == "trunc"
     assert tbl.field("d").type == pa.float32()
-
-    # IEEE 754 float32 has 23 bit mantissa but look it up just for fun
-    nmant = np.finfo(np.float32).nmant
-    assert 4 < sig_bits <= nmant
-    mask = ~((1 << (nmant - sig_bits)) - 1) & 0xFFFFFFFF
-    if sig_bits == nmant:
-        return tbl
-
-    tbl = tbl.combine_chunks()
-    d = tbl.column("d").chunk(0)
-    d = pa.compute.bit_wise_and(d.view(pa.uint32()), pa.scalar(mask, type=pa.uint32())).view(pa.float32())
-    tbl = tbl.set_column(tbl.column_names.index("d"), "d", d)
+    d = tbl.column("d").combine_chunks().to_numpy(zero_copy_only=False, writable=True)
+    d = roundHalfToEven(d, sig_bits)
+    tbl = tbl.set_column(tbl.column_names.index("d"), "d", pa.array(d))
     return tbl
+
+
+def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np.float32]:
+    """
+    Generate reduced precision floating point array, with round half to even.
+
+    IMPORANT: In-place operation.
+
+    Ref: https://gmd.copernicus.org/articles/14/377/2021/gmd-14-377-2021.html
+    """
+    assert a.dtype == np.float32  # code below assumes this
+    nmant = 23
+    bits = 32
+    if keepbits < 1 or keepbits >= nmant:
+        return a
+    maskbits = nmant - keepbits
+    full_mask = (1 << bits) - 1
+    mask = (full_mask >> maskbits) << maskbits
+    half_quantum1 = (1 << (maskbits - 1)) - 1
+
+    b = a.view(np.int32)
+    b += ((b >> maskbits) & 1) + half_quantum1
+    b &= mask
+    return a
 
 
 def consolidate_array(uri: Union[str, Path]) -> None:

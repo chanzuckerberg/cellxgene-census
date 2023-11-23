@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import math
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Any, Generator, Iterator, Optional, Sequence, Tuple, TypeVar, Union, cast
+from typing import Any, Dict, Generator, Iterator, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -29,12 +29,14 @@ def blocksize(n_features: int, nnz_goal: int = MAX_NNZ_GOAL) -> int:
     return cast(int, 2 ** round(math.log2((nnz_goal) / n_features)))
 
 
-def soma_context() -> soma.options.SOMATileDBContext:
-    """Return soma context with default config"""
+def soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
+    """Return soma context with default config."""
+    tiledb_config = tiledb_config or {}
     return soma.options.SOMATileDBContext().replace(
         tiledb_config={
             "py.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
             "soma.init_buffer_bytes": DEFAULT_READ_BUFFER_SIZE + 10 * 1024,
+            **tiledb_config,
         }
     )
 
