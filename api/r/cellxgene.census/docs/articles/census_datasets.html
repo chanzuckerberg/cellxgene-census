@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,8 +84,7 @@
 
 
 
-
-<div class="row">
+<script src="census_datasets_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Census Datasets example</h1>
             
@@ -439,7 +438,6 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <p>Create a query on the mouse experiment, “RNA” measurement, for the <code>dataset_id</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">"tiledbsoma"</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: package 'tiledbsoma' was built under R version 4.3.1</span></span>
 <span><span class="va">obs_query</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"</span></span>
 <span><span class="op">)</span></span>
@@ -448,18 +446,11 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  obs_query <span class="op">=</span> <span class="va">obs_query</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">dataset_seurat</span> <span class="op">&lt;-</span> <span class="va">expt_query</span><span class="op">$</span><span class="fu">to_seurat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
-<span><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
-<span><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
-<span><span class="co">#&gt; https://r-spatial.org/r/2023/05/15/evolution4.html.</span></span>
-<span><span class="co">#&gt; It may be desirable to make the sf package available;</span></span>
-<span><span class="co">#&gt; package maintainers should consider adding sf to Suggests:.</span></span>
-<span><span class="co">#&gt; The sp package is now running under evolution status 2</span></span>
-<span><span class="co">#&gt;      (status 2 uses the sf package in place of rgdal)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dataset_seurat</span><span class="op">)</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
 <span><span class="co">#&gt; 52392 features across 40220 samples within 1 assay </span></span>
-<span><span class="co">#&gt; Active assay: RNA (52392 features, 0 variable features)</span></span></code></pre></div>
+<span><span class="co">#&gt; Active assay: RNA (52392 features, 0 variable features)</span></span>
+<span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="downloading-the-original-source-h5ad-file-of-a-dataset">Downloading the original source H5AD file of a dataset<a class="anchor" aria-label="anchor" href="#downloading-the-original-source-h5ad-file-of-a-dataset"></a>
@@ -499,7 +490,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Chan Zuckerberg Initiative.</p>
+<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">
