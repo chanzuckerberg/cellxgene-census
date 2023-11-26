@@ -5,50 +5,48 @@ from typing import Literal
 
 from tap import Tap
 
-from .load import csv_ingest, npy_ingest, soma_ingest, test_embedding
+from .load import npy_ingest, soma_ingest, test_embedding
 
 
-# Common across all sub-commands
 class CommonArgs(Tap):  # type: ignore[misc]
     cwd: Path = Path.cwd()  # Working directory
     verbose: int = 0  # Logging level
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
-    float_mode: Literal["scale", "trunc"] = "trunc"
-    float_precision: int = 7  # mantissa bits to preserve (range 4 to 23)
-    use_blockwise: bool = False  # Use the SOMA 1.5 blockwise iterators (requires tiledbsoma 1.5+)
 
     def configure(self) -> None:
+        super().configure()
         self.add_argument("-v", "--verbose", action="count", default=1, help="Increase logging verbosity")
 
 
-class SOMAEmbedding(CommonArgs):
-    soma_uri: Path  # Embedding encoded as a SOMA SparseNDArray
+class IngestCommonArgs(CommonArgs):
+    float_mode: Literal["scale", "trunc"] = "trunc"
+    float_precision: int = 7  # mantissa bits to preserve (range 4 to 23)
+
+
+class IngestSOMAEmbedding(IngestCommonArgs):
+    """Ingest embedding from SOMA SparseNDArray."""
+
+    soma_path: Path  # Embedding encoded as a SOMA SparseNDArray
 
     def configure(self) -> None:
         super().configure()
-        self.add_argument("soma_uri")
-        self.set_defaults(ingestor=lambda args, metadata: soma_ingest(args.soma_uri, metadata))
+        self.set_defaults(ingestor=lambda args, metadata: soma_ingest(args.soma_path, metadata))
 
 
-class CSVEmbedding(CommonArgs):
-    csv_uri: Path  # Embedding encoded as a CSV (or TSV) file
+class IngestNPYEmbedding(IngestCommonArgs):
+    """Ingest embedding from NPY files."""
 
-    def configure(self) -> None:
-        super().configure()
-        self.add_argument("csv_uri")
-        self.set_defaults(ingestor=lambda args, metadata: csv_ingest(args.csv_uri, metadata))
-
-
-class NPYEmbedding(CommonArgs):
-    joinid_uri: Path  # Embedding soma_joinids, either .txt or .npy
-    embedding_uri: Path  # Embedding coordinates
+    joinid_path: Path  # Embedding soma_joinids, either .txt or .npy file
+    embedding_path: Path  # Embedding coordinates, .npy file
 
     def configure(self) -> None:
         super().configure()
-        self.set_defaults(ingestor=lambda args, metadata: npy_ingest(args.joinid_uri, args.embedding_uri, metadata))
+        self.set_defaults(ingestor=lambda args, metadata: npy_ingest(args.joinid_path, args.embedding_path, metadata))
 
 
-class TestEmbedding(CommonArgs):
+class IngestTestEmbedding(IngestCommonArgs):
+    """Generate a test embedding containing random values."""
+
     def configure(self) -> None:
         super().configure()
         self.set_defaults(
@@ -56,12 +54,10 @@ class TestEmbedding(CommonArgs):
         )
 
 
-class ValidateEmbedding(CommonArgs):
-    pass
+class InjectEmbedding(CommonArgs):
+    """Add existing embedding to a Census build as an obsm layer."""
 
-
-class QCPlots(CommonArgs):
-    pass
+    census_path: Path  # Census build path
 
 
 class Arguments(Tap):  # type: ignore[misc]
@@ -69,13 +65,13 @@ class Arguments(Tap):  # type: ignore[misc]
         super().__init__(underscores_to_dashes=True)
 
     def configure(self) -> None:
-        self.add_subparsers(dest="cmd", help="Embedding source format", required=True)
-        self.add_subparser("soma", SOMAEmbedding, help="Ingest embedding from SOMA SparseNDArray")
-        self.add_subparser("csv", CSVEmbedding, help="Ingest embedding from CSV file")
-        self.add_subparser("npy", NPYEmbedding, help="Ingest embedding from NPY files")
-        self.add_subparser("test", TestEmbedding, help="Generate a random test embedding")
-        self.add_subparser("validate", ValidateEmbedding, help="Validate existing embedding")
-        self.add_subparser("qcplots", QCPlots, help="Generate QC plots")
+        self.add_subparsers(dest="cmd", required=True)
+        self.add_subparser("ingest-soma", IngestSOMAEmbedding, help="Ingest embedding from SOMA SparseNDArray")
+        self.add_subparser("ingest-npy", IngestNPYEmbedding, help="Ingest embedding from NPY files")
+        self.add_subparser("ingest-test", IngestTestEmbedding, help="Generate an embedding containing random values")
+        self.add_subparser("validate", CommonArgs, help="Validate an existing embedding")
+        self.add_subparser("qcplots", CommonArgs, help="Generate QC plots for an existing embedding")
+        self.add_subparser("inject", InjectEmbedding, help="Add existing embedding to a Census build as an obsm layer")
 
     def path_fix(self, arg_name: str) -> None:
         if hasattr(self, arg_name):
@@ -91,5 +87,5 @@ class Arguments(Tap):  # type: ignore[misc]
         if not self.cwd.is_dir():
             raise ValueError("Must specify working directory")
 
-        for arg_name in ["joinid_uri", "embedding_uri", "soma_uri", "csv_uri"]:
+        for arg_name in ["joinid_path", "embedding_path", "soma_path"]:
             self.path_fix(arg_name)

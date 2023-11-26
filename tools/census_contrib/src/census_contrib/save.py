@@ -146,12 +146,11 @@ def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np
     return a
 
 
-def consolidate_array(uri: Union[str, Path]) -> None:
+def _consolidate_tiledb_object(uri: Union[str, Path], modes: Tuple[str, ...]) -> None:
     import tiledb
 
-    array_path: str = Path(uri).as_posix()
-
-    for mode in ("fragment_meta", "array_meta", "fragments", "commits"):
+    path: str = Path(uri).as_posix()
+    for mode in modes:
         try:
             ctx = tiledb.Ctx(
                 tiledb.Config(
@@ -164,12 +163,26 @@ def consolidate_array(uri: Union[str, Path]) -> None:
                     }
                 )
             )
-            logger.info(f"Consolidate: start mode={mode}, uri={array_path}")
-            tiledb.consolidate(array_path, ctx=ctx)
-            logger.info(f"Vacuum: start mode={mode}, uri={array_path}")
-            tiledb.vacuum(array_path, ctx=ctx)
+            logger.info(f"Consolidate: start mode={mode}, uri={path}")
+            tiledb.consolidate(path, ctx=ctx)
+            logger.info(f"Vacuum: start mode={mode}, uri={path}")
+            tiledb.vacuum(path, ctx=ctx)
         except tiledb.TileDBError as e:
-            logger.error(f"Consolidation error, uri={array_path}: {str(e)}")
+            logger.error(f"Consolidation error, uri={path}: {str(e)}")
             raise
 
-    logger.info(f"Consolidate/vacuum: end uri={array_path}")
+    logger.info(f"Consolidate/vacuum: end uri={path}")
+
+
+def consolidate_array(uri: Union[str, Path]) -> None:
+    _consolidate_tiledb_object(uri, ("fragment_meta", "array_meta", "fragments", "commits"))
+
+
+def consolidate_group(uri: Union[str, Path]) -> None:
+    # TODO: There is a bug in TileDB-Py that prevents consolidation of
+    # group metadata. Skipping this step for now - remove this work-around
+    # when the bug is fixed. As of 0.23.0, it is not yet fixed.
+    #
+    # modes = ("group_meta",)
+    modes = ()
+    _consolidate_tiledb_object(uri, modes)

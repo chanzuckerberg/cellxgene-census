@@ -13,7 +13,7 @@ from typing_extensions import Self
 
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
-from .util import blocksize, blockwise_axis0_tables, get_logger, get_use_blockwise, soma_context
+from .util import blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
 logger = get_logger()
 
@@ -57,7 +57,7 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
                 .blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1])
                 .tables()
             )
-            if get_use_blockwise()
+            if has_blockwise_iterator()
             else (
                 tbl.rename_columns(["i", "j", "d"])
                 for tbl, _ in blockwise_axis0_tables(
@@ -260,58 +260,9 @@ def test_embedding(n_obs: int, n_features: int, metadata: EmbeddingMetadata) -> 
     return TestDataIJDPipe(n_obs, n_features, metadata)
 
 
-def soma_ingest(soma_uri: Path, _: EmbeddingMetadata) -> EmbeddingIJDPipe:
-    return SOMAIJDPipe(soma_uri)
+def soma_ingest(soma_path: Path, _: EmbeddingMetadata) -> EmbeddingIJDPipe:
+    return SOMAIJDPipe(soma_path)
 
 
-def npy_ingest(joinid_uri: Path, embedding_uri: Path, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
-    return NPYIJDPipe(joinid_uri, embedding_uri)
-
-
-def csv_ingest(csv_uri: Path, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
-    # only partially implemented
-    raise NotImplementedError()
-
-    # SAVE for now
-
-    # def skip_comment(row):
-    #     if row.text.startswith("# "):
-    #         return "skip"
-    #     else:
-    #         return "error"
-
-    # parse_opts = {"invalid_row_handler": skip_comment}
-    # if args.csv_uri.endswith(".csv"):
-    #     parse_opts["delimiter"] = ","
-    # elif args.csv_uri.endswith(".tsv"):
-    #     parse_opts["delimiter"] = "\t"
-    # parse_options = csv.ParseOptions(*parse_opts)
-
-    # tbl = csv.read_csv(
-    #     args.csv_uri, parse_options=parse_options, invalid_row_handler=skip_comment
-    # )
-
-    # # Expect column names:
-    # #  soma_joinid
-    # #  0..N
-
-    # # first drop unexpected columns - i.e., by name or by type
-    # drop = []
-    # for n in range(tbl.num_columns):
-    #     field = tbl.schema.field(n)
-    #     if field.name == "soma_joinid":
-    #         if not pa.types.is_integer(field.type):
-    #             drop.append(field.name)
-    #         continue
-
-    #     if not pa.types.is_floating(field.type):
-    #         drop.append(field.name)
-    #         continue
-
-    #     try:
-    #         int(field.name)
-    #     except ValueError:
-    #         drop.append(field.name)
-
-    # if drop:
-    #     tbl = tbl.drop_columns(drop)
+def npy_ingest(joinid_path: Path, embedding_path: Path, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
+    return NPYIJDPipe(joinid_path, embedding_path)

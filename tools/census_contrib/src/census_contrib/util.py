@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import functools
 import logging
 import math
+import pathlib
+import urllib
 from concurrent.futures import Future, ThreadPoolExecutor
+from importlib.metadata import metadata
 from typing import Any, Dict, Generator, Iterator, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import numpy as np
@@ -11,6 +15,16 @@ import pandas as pd
 import pyarrow as pa
 import scipy.sparse as sp
 import tiledbsoma as soma
+from packaging.version import Version
+
+
+@functools.cache
+def has_blockwise_iterator() -> bool:
+    """
+    Feature flag. Return true if the tiledbsoma SparseNDArray contains the blockwise iterator.
+    Introduced in version 1.5.
+    """
+    return cast(bool, Version(metadata("tiledbsoma")) >= Version("1.5.0"))
 
 
 def get_logger() -> logging.Logger:
@@ -39,6 +53,11 @@ def soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options
             **tiledb_config,
         }
     )
+
+
+def uri_to_path(uri: str) -> pathlib.Path:
+    assert uri.startswith("file://")
+    return pathlib.Path(urllib.parse.unquote(urllib.parse.urlparse(uri).path))
 
 
 _T = TypeVar("_T")
@@ -85,23 +104,11 @@ class EagerIterator(Iterator[_T]):
 
 #
 # ----------
-# backport from tiledbsoma 1.5 as a temporary means of running on prior verisons
+# backport from tiledbsoma 1.5 as a temporary means of running on prior versions.
+#
+# Remove once the Census builder is on tiledbsoma>=1.5.0
 # ----------
 #
-use_blockwise = False
-
-
-def get_use_blockwise() -> bool:
-    global use_blockwise
-    return use_blockwise
-
-
-def set_use_blockwise(ubw: bool) -> bool:
-    global use_blockwise
-    use_blockwise = ubw
-    return use_blockwise
-
-
 def blockwise_axis0_tables(
     A: soma.SparseNDArray,
     coords: soma.options.SparseNDCoords = (),
@@ -236,3 +243,10 @@ def _coords_strider(coords: soma.options.SparseNDCoord, length: int, stride: int
         assert isinstance(coords, np.ndarray) and coords.dtype == np.int64
         for i in range(0, len(coords), stride):
             yield cast(npt.NDArray[np.int64], coords[i : i + stride])
+
+
+#
+# ----------
+# end of blockwise iter backport
+# ----------
+#

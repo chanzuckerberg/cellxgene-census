@@ -14,7 +14,7 @@ import tiledbsoma as soma
 
 from .census_util import get_census_obs_uri_region, get_obs_soma_joinids
 from .metadata import EmbeddingMetadata
-from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, get_use_blockwise, soma_context
+from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
 _NPT = TypeVar("_NPT", bound=npt.NDArray[np.number[Any]])
 
@@ -79,7 +79,7 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
         with concurrent.futures.ThreadPoolExecutor() as tp:
             for tbl, _ in EagerIterator(
                 A.read(result_order="row-major").blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1]).tables()
-                if get_use_blockwise()
+                if has_blockwise_iterator()
                 else blockwise_axis0_tables(A, result_order="row-major", size=size, reindex_disable_on_axis=[0, 1]),
                 pool=tp,
             ):

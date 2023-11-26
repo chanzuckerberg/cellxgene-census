@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
 import sys
 import traceback
 from pathlib import Path
@@ -17,15 +18,15 @@ import tiledbsoma as soma
 from .args import Arguments
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
-from .save import apply_float_mode, consolidate_array, create_obsm_like_array
+from .save import apply_float_mode, consolidate_array, consolidate_group, create_obsm_like_array
 from .util import (
     EagerIterator,
     blocksize,
     blockwise_axis0_scipy_csr,
     get_logger,
-    get_use_blockwise,
-    set_use_blockwise,
+    has_blockwise_iterator,
     soma_context,
+    uri_to_path,
 )
 from .validate import validate_compatible_tiledb_storage_format, validate_embedding
 
@@ -36,39 +37,22 @@ def main() -> int:
     args = Arguments().parse_args()
     setup_logging(args)
 
-    # backport to old soma w/o blockwise
-    set_use_blockwise(args.use_blockwise)
-
     try:
         metadata_path = args.cwd.joinpath(args.metadata)
         logger.info("Load and validate metadata")
         metadata = validate_metadata(load_metadata(metadata_path))
-
         embedding_path = args.cwd.joinpath(metadata.id)
 
         if args.cmd == "validate":
-            logger.info("Validating SOMA array")
-            validate_contrib_embedding(embedding_path, metadata)
-
-            logger.info("Creating QC umaps")
-            create_qc_plots(args.cwd, embedding_path, metadata)
-
+            validate_cmd(args, embedding_path, metadata)
         elif args.cmd == "qcplots":
-            logger.info("Creating QC umaps")
-            create_qc_plots(args.cwd, embedding_path, metadata)
-
-        else:  # ingest
-            logger.info("Ingesting")
-            ingest(args, metadata)
-
-            logger.info("Consolidating")
-            consolidate_array(embedding_path)
-
-            logger.info("Validating SOMA array")
-            validate_contrib_embedding(embedding_path, metadata)
-
-            logger.info("Creating QC umaps")
-            create_qc_plots(args.cwd, embedding_path, metadata)
+            qcplots_cmd(args, embedding_path, metadata)
+        elif args.cmd.startswith("ingest-"):  # ingest
+            ingest_cmd(args, embedding_path, metadata)
+        elif args.cmd == "inject":
+            inject_cmd(args, embedding_path, metadata)
+        else:
+            args.print_help()
 
     except (ValueError, TypeError) as e:
         if args.verbose:
@@ -92,6 +76,38 @@ def setup_logging(args: Arguments) -> None:
     # turn down some other stuff
     logging.getLogger("numba").setLevel(logging.WARNING)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
+
+
+def validate_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+    logger.info("Validating SOMA array")
+    validate_contrib_embedding(embedding_path, metadata)
+
+    logger.info("Creating QC umaps")
+    create_qc_plots(args.cwd, embedding_path, metadata)
+
+
+def qcplots_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+    logger.info("Creating QC umaps")
+    create_qc_plots(args.cwd, embedding_path, metadata)
+
+
+def ingest_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+    logger.info("Ingesting")
+    ingest(args, metadata)
+
+    logger.info("Consolidating")
+    consolidate_array(embedding_path)
+
+    logger.info("Validating SOMA array")
+    validate_contrib_embedding(embedding_path, metadata)
+
+    logger.info("Creating QC umaps")
+    create_qc_plots(args.cwd, embedding_path, metadata)
+
+
+def inject_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+    logger.info("Adding embedding to Census build")
+    inject_embedding_into_census_build(args.census_path, embedding_path, metadata)
 
 
 def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
@@ -189,7 +205,7 @@ def load_qc_anndata(
                     blk
                     for blk, _ in (
                         E.read(coords=(obs_joinids,)).blockwise(axis=0, size=size, reindex_disable_on_axis=1).scipy()
-                        if get_use_blockwise()
+                        if has_blockwise_iterator()
                         else blockwise_axis0_scipy_csr(E, coords=(obs_joinids,), size=size, reindex_disable_on_axis=1)
                     )
                 ]
@@ -205,15 +221,14 @@ def load_qc_anndata(
     return adata
 
 
-def make_random_palette(n_colors: int) -> List[str]:
-    rng = np.random.default_rng()
-    colors = rng.integers(0, 0xFFFFFF, size=n_colors, dtype=np.uint32)
-    return [f"#{c:06X}" for c in colors]
-
-
 def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> None:
     sc._settings.settings.autoshow = False
     sc._settings.settings.figdir = (cwd / "figures").as_posix()
+
+    def make_random_palette(n_colors: int) -> List[str]:
+        rng = np.random.default_rng()
+        colors = rng.integers(0, 0xFFFFFF, size=n_colors, dtype=np.uint32)
+        return [f"#{c:06X}" for c in colors]
 
     cases = {
         "spleen": "is_primary_data == True and tissue_general == 'spleen'",
@@ -246,6 +261,78 @@ def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> 
             if n_categories > len(sc.plotting.palettes.default_102):
                 plot_color_kwargs["palette"] = make_random_palette(n_categories)
             sc.pl.umap(adata, title=f"{k}, colored by {color_by}", save=f"_{k}_{color_by}.png", **plot_color_kwargs)
+
+
+def inject_embedding_into_census_build(
+    census_path: Path, embedding_src_path: Path, metadata: EmbeddingMetadata
+) -> None:
+    """
+    Inject an existing embedding (ingested via this tool) into its corresponding Census build.
+    Presumed workflow:
+        * build census
+        * create embedding(s)
+        * inject embeddings
+        * publish census
+
+    Assumptions:
+    1. The embedding matches the Census build (e.g., soma_joinids)
+    2. The Census build and embedding are on the local file system
+
+    Process:
+    1. create obsm if needed
+    2. copy embedding into obsm dir
+    3. clean up embedding metadata
+    4. add embedding to obsm group
+    5. conslidate obsm
+    6. validate that group edits worked, etc.
+    """
+    obsm_layer_name = metadata.id
+
+    # Pre-checks
+    logger.info(f"Injecting embedding into {census_path.as_posix()} with name obsm['{obsm_layer_name}']")
+    if not census_path.is_dir() or not soma.Collection.exists(census_path.as_posix()):
+        raise ValueError("Census path does not exist, is not on local file system or is not a Collection")
+    if not embedding_src_path.is_dir() or not soma.SparseNDArray.exists(embedding_src_path.as_posix()):
+        raise ValueError("Embedding path does not exist, is not on local file system or is not a SparseNDArray")
+
+    # Get ms URI, and do additional precautionary checks
+    with soma.open(census_path.as_posix(), context=soma_context()) as census:
+        exp = census["census_data"][metadata.experiment_name]
+        if metadata.n_embeddings > exp.obs.count:
+            raise ValueError("Metadata and census obs shape mismatch")
+        with soma.open(embedding_src_path.as_posix(), context=soma_context()) as E:
+            if E.shape[0] != exp.obs.count:
+                raise ValueError("Census obs and embedding shape mismatch")
+        ms_path = uri_to_path(exp.ms[metadata.measurement_name].uri)
+
+    # Create obsm if it does not already exist
+    with soma.open(ms_path.as_posix(), mode="w", context=soma_context()) as ms:
+        if "obsm" not in ms:
+            logger.info(f"obsm does not exist, adding to {ms_path}")
+            ms.add_new_collection("obsm")
+
+    obsm_path = ms_path / "obsm"
+    assert soma.Measurement.exists(ms_path.as_posix())
+    assert soma.Collection.exists(obsm_path.as_posix())
+
+    # Copy the pre-existing embedding into the obsm collection directory. Raises if exists.
+    embedding_dst_path = obsm_path / obsm_layer_name
+    logger.info(f"Copy {embedding_src_path.as_posix()} -> {embedding_dst_path.as_posix()}")
+    shutil.copytree(embedding_src_path, embedding_dst_path)
+
+    # Add the embedding to the `obsm` collection
+    with soma.open(ms_path.as_posix(), mode="w", context=soma_context()) as ms:
+        with soma.open(embedding_dst_path.as_posix()) as emb_copy:
+            ms["obsm"].set(obsm_layer_name, emb_copy, use_relative_uri=True)
+
+    # clean up metadata on the the embedding copy
+    with soma.open(embedding_dst_path.as_posix(), mode="w") as E:
+        del E.metadata["CxG_contrib_metadata"]
+
+    # consolidate/vacuum all
+    consolidate_group(ms_path)
+    consolidate_group(obsm_path)
+    consolidate_array(embedding_dst_path)
 
 
 if __name__ == "__main__":
