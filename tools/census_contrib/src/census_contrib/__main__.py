@@ -324,10 +324,6 @@ def inject_embedding_into_census_build(
         with soma.open(embedding_dst_path.as_posix()) as emb_copy:
             ms["obsm"].set(obsm_layer_name, emb_copy, use_relative_uri=True)
 
-    # clean up metadata on the the embedding copy
-    with soma.open(embedding_dst_path.as_posix(), mode="w") as E:
-        del E.metadata["CxG_contrib_metadata"]
-
     # consolidate/vacuum all
     consolidate_group(ms_path)
     consolidate_group(obsm_path)
