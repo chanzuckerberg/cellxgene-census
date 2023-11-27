@@ -14,11 +14,13 @@ Typical usage follows a simple recipe:
 ## Stand-alone embeddings
 
 For embeddings to be published stand-alone (i.e., not as part of `obsm`):
+
 1. Create a working directory
 2. Create a meta.yml file containing all required fields, populated with contirbutor-provided metadata
 3. Run the ingest step.
 
 Embeddings can be provided in one of two formats:
+
 * SOMA SparseNDArray - where dim0 is the obs joinid, dim1 is the user provided feature index, and the embedding is float32
 * NPY dense NDArray of embedding, with a second NPY or TXT containing the joinids
 
@@ -29,11 +31,13 @@ python -m census_contrib ingest-npy --cwd working-dir --joinid-path joinids.npy 
 ```
 
 Or alternatively:
+
 ```bash
 python -m census_contrib ingest-soma --cwd working-dir -v --soma-path a-sparse-soma-array
 ```
 
 In all cases:
+
 * there must exist a file `meta.yml` in `working-dir` that contains metadata
 * the resulting ("ingested") embedding will be written into the `working-dir`, with the accession ID (from the `meta.yml`) as its file name
 
@@ -42,14 +46,15 @@ In all cases:
 Given a _local copy_ of a Census build, this command will take a previously ingested embedding and add it to the Census build `obsm` collection as a new layer.
 
 Typical usage:
+
 ```bash
 python -m census_contrib inject --cwd working-dir --census-path path-to-census-build/soma
 ```
 
 This command:
+
 * places a copy of the embedding into the Census build directory
 * adds the embedding array to the `obsm` layer
-
 
 ## Embedding metadata
 
