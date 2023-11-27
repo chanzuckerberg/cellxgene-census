@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import math
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
@@ -38,7 +37,10 @@ PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
             },
             "attrs": {
                 "soma_data": {
-                    "filters": None,
+                    "filters": [
+                        "ByteShuffleFilter",
+                        {"_type": "ZstdFilter", "level": 19},
+                    ],
                 }
             },
             "cell_order": "row-major",
@@ -49,45 +51,10 @@ PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
 }
 
 
-def soma_data_filter(value_range: Tuple[float, float], float_mode: str, sig_bits: int = 20) -> PlatformConfig:
-    """Given an embedding's value range, generate appropriate filter pipeline for soma_data attribute"""
-    if float_mode == "trunc":
-        return [
-            "ByteShuffleFilter",
-            {"_type": "ZstdFilter", "level": 19},
-        ]
-
-    assert float_mode == "scale"
-
-    dmin, dmax = value_range
-    if dmin is None or dmax is None or dmin >= dmax:
-        raise ValueError("Value range malformed, expected [min,max]")
-
-    offset = dmin
-    bytewidth = 4
-    factor = 1.0 / ((2 ** (sig_bits - math.log2(dmax - dmin))) - 1)
-    assert 0 < sig_bits <= (8 * bytewidth)
-
-    # FloatScaleFilter stores round((raw_float - offset) / factor), as an signed int of width bytewidth
-    return [
-        {
-            "_type": "FloatScaleFilter",
-            "factor": factor,
-            "offset": offset,
-            "bytewidth": bytewidth,
-        },
-        "BitShuffleFilter",
-        {"_type": "ZstdFilter", "level": 5},
-    ]
-
-
-def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float], float_mode: str) -> PlatformConfig:
+def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float]) -> PlatformConfig:
     platform_config = copy.deepcopy(PLATFORM_CONFIG_TEMPLATE)
-
     tdb_schema = platform_config["tiledb"]["create"]
     tdb_schema["dims"]["soma_dim_1"]["tile"] = shape[1]
-    tdb_schema["attrs"]["soma_data"]["filters"] = soma_data_filter(value_range, float_mode)
-
     return platform_config
 
 
@@ -95,7 +62,6 @@ def create_obsm_like_array(
     uri: Union[str, Path],
     value_range: Tuple[float, float],  # closed, i.e., inclusive [min, max]
     shape: Tuple[int, int],
-    float_mode: str,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.SparseNDArray:
     """Create and return opened array. Can be used as a context manager."""
@@ -105,16 +71,11 @@ def create_obsm_like_array(
         type=pa.float32(),
         shape=shape,
         context=context,
-        platform_config=make_platform_config(shape, value_range, float_mode),
+        platform_config=make_platform_config(shape, value_range),
     )
 
 
-def apply_float_mode(tbl: pa.Table, float_mode: str, sig_bits: int = 7) -> pa.Table:
-    if float_mode == "scale":
-        # noop - done w/ TileDB filter
-        return tbl
-
-    assert float_mode == "trunc"
+def reduce_float_precision(tbl: pa.Table, sig_bits: int = 7) -> pa.Table:
     assert tbl.field("d").type == pa.float32()
     d = tbl.column("d").combine_chunks().to_numpy(zero_copy_only=False, writable=True)
     d = roundHalfToEven(d, sig_bits)
@@ -130,7 +91,7 @@ def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np
 
     Ref: https://gmd.copernicus.org/articles/14/377/2021/gmd-14-377-2021.html
     """
-    assert a.dtype == np.float32  # code below assumes this
+    assert a.dtype == np.float32  # code below assumes IEEE 754 float32
     nmant = 23
     bits = 32
     if keepbits < 1 or keepbits >= nmant:

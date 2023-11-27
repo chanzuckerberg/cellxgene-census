@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal
 
 from tap import Tap
 
@@ -19,7 +18,6 @@ class CommonArgs(Tap):  # type: ignore[misc]
 
 
 class IngestCommonArgs(CommonArgs):
-    float_mode: Literal["scale", "trunc"] = "trunc"
     float_precision: int = 7  # mantissa bits to preserve (range 4 to 23)
 
 

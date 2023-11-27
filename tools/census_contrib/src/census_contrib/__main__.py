@@ -18,7 +18,7 @@ import tiledbsoma as soma
 from .args import Arguments
 from .census_util import get_obs_soma_joinids
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
-from .save import apply_float_mode, consolidate_array, consolidate_group, create_obsm_like_array
+from .save import consolidate_array, consolidate_group, create_obsm_like_array, reduce_float_precision
 from .util import (
     EagerIterator,
     blocksize,
@@ -143,7 +143,6 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
             value_range=domains["d"],
             shape=shape,
             context=soma_context({"sm.check_coord_dups": True}),
-            float_mode=args.float_mode,
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
             A.metadata["CxG_contrib_metadata"] = metadata.as_json()
@@ -152,7 +151,7 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
                 assert block.column_names == ["i", "j", "d"]  # we care about the order
                 if len(block) > 0:
                     logger.debug(f"Writing block length {len(block)}")
-                    block = apply_float_mode(block, args.float_mode, args.float_precision)
+                    block = reduce_float_precision(block, args.float_precision)
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
