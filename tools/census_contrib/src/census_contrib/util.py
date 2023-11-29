@@ -24,7 +24,7 @@ def has_blockwise_iterator() -> bool:
     Feature flag. Return true if the tiledbsoma SparseNDArray contains the blockwise iterator.
     Introduced in version 1.5.
     """
-    return cast(bool, Version(metadata("tiledbsoma")) >= Version("1.5.0"))
+    return cast(bool, Version(metadata("tiledbsoma")["Version"]) >= Version("1.5.0"))
 
 
 def get_logger() -> logging.Logger:
