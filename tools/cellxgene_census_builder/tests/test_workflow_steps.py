@@ -76,6 +76,7 @@ def test_do_the_release(tmp_path: pathlib.Path, dryrun: bool) -> None:
         config=CensusBuildConfig(
             build_tag=build_tag,
             cellxgene_census_S3_path=TEST_BUCKET_PATH,
+            cellxgene_census_default_mirror_S3_path=TEST_BUCKET_PATH,
             dryrun=dryrun,
         ),
     )
