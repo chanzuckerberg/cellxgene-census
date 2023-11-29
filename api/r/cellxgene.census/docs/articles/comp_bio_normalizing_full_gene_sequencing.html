@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,8 +84,7 @@
 
 
 
-
-<div class="row">
+<script src="comp_bio_normalizing_full_gene_sequencing_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Normalizing full-length gene sequencing data</h1>
             
@@ -135,11 +134,14 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>        <span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">liver_dataset</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   soma_joinid collection_id      collection_name collection_doi dataset_id dataset_title</span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         525 0b9d8a04-bb9d-44d… Tabula Muris S… 10.1038/s4158… 4546e757-… Liver - A si…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: dataset_h5ad_path &lt;chr&gt;, dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   soma_joinid                        collection_id    collection_name</span></span>
+<span><span class="co">#&gt; 1         525 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt;              collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 1 10.1038/s41586-020-2496-1 4546e757-34d0-4d17-be06-538318925fcd</span></span>
+<span><span class="co">#&gt;                                                                                       dataset_title</span></span>
+<span><span class="co">#&gt; 1 Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
+<span><span class="co">#&gt;                           dataset_h5ad_path dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 1 4546e757-34d0-4d17-be06-538318925fcd.h5ad                     2859</span></span></code></pre></div>
 <p>Now we can use this id to fetch the data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">liver_dataset_id</span> <span class="op">&lt;-</span> <span class="va">liver_dataset</span><span class="op">[</span><span class="fl">1</span>,<span class="st">"dataset_id"</span><span class="op">]</span></span>
@@ -165,7 +167,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <code class="sourceCode R"><span><span class="va">liver_seurat</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
 <span><span class="co">#&gt; 52392 features across 2859 samples within 1 assay </span></span>
-<span><span class="co">#&gt; Active assay: RNA (52392 features, 0 variable features)</span></span></code></pre></div>
+<span><span class="co">#&gt; Active assay: RNA (52392 features, 0 variable features)</span></span>
+<span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 <p>Let’s get the genes measured in this dataset.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">liver_dataset_joinid</span> <span class="op">&lt;-</span> <span class="va">liver_dataset</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
@@ -177,11 +180,16 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">liver_seurat</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
 <span><span class="co">#&gt; 17992 features across 2859 samples within 1 assay </span></span>
-<span><span class="co">#&gt; Active assay: RNA (17992 features, 0 variable features)</span></span></code></pre></div>
+<span><span class="co">#&gt; Active assay: RNA (17992 features, 0 variable features)</span></span>
+<span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 <p>We can see that out of all genes in the Census <strong>17,992</strong> were measured in this dataset.</p>
 <p>Now let’s normalize these genes by gene length. We can easily do this because the Census has gene lengths included in the gene metadata under <code>feature_length</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">liver_seurat</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, slot <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The `slot` argument of `GetAssayData()` is deprecated as of SeuratObject 5.0.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use the `layer` argument instead.</span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.</span></span></span>
 <span><span class="co">#&gt; 5 x 5 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;                    cell3530079 cell3530080 cell3530081 cell3530082 cell3530083</span></span>
 <span><span class="co">#&gt; ENSMUSG00000025900           .           .           .           .           .</span></span>
@@ -256,7 +264,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Chan Zuckerberg Initiative.</p>
+<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,8 +84,7 @@
 
 
 
-
-<div class="row">
+<script src="census_query_extract_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Querying and fetching the single-cell data and cell/gene metadata</h1>
             
@@ -167,36 +166,106 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <p>For example let’s see what are the possible values available for <code>sex</code>. To this we can load all cell metadata but fetching only for the column <code>sex</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 1</span></span></span>
-<span><span class="co">#&gt;   sex    </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> unknown</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> female </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> male</span></span></code></pre></div>
+<span><span class="co">#&gt;            sex</span></span>
+<span><span class="co">#&gt; 1      unknown</span></span>
+<span><span class="co">#&gt; 670     female</span></span>
+<span><span class="co">#&gt; 385438    male</span></span></code></pre></div>
 <p>As you can see there are only three different values for sex, that is <code>"male"</code>, <code>"female"</code> and <code>"unknown"</code>.</p>
 <p>With this information we can fetch all cell metatadata for a specific sex value, for example <code>"unknown"</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"sex == 'unknown'"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,251,334 × 21</span></span></span>
-<span><span class="co">#&gt;    soma_joinid dataset_id  assay assay_ontology_term_id cell_type cell_type_ontology_t…¹</span></span>
-<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           0 f171db61-e… 10x … EFO:0009922            syncytio… CL:0000525            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1 f171db61-e… 10x … EFO:0009922            placenta… CL:2000060            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           2 f171db61-e… 10x … EFO:0009922            syncytio… CL:0000525            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           3 f171db61-e… 10x … EFO:0009922            syncytio… CL:0000525            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           4 f171db61-e… 10x … EFO:0009922            extravil… CL:0008036            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           5 f171db61-e… 10x … EFO:0009922            placenta… CL:2000060            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           6 f171db61-e… 10x … EFO:0009922            syncytio… CL:0000525            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           7 f171db61-e… 10x … EFO:0009922            extravil… CL:0008036            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           8 f171db61-e… 10x … EFO:0009922            placenta… CL:2000060            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           9 f171db61-e… 10x … EFO:0009922            syncytio… CL:0000525            </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,251,324 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​cell_type_ontology_term_id</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 15 more variables: development_stage &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   development_stage_ontology_term_id &lt;chr&gt;, disease &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   disease_ontology_term_id &lt;chr&gt;, donor_id &lt;chr&gt;, is_primary_data &lt;lgl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   self_reported_ethnicity &lt;chr&gt;, self_reported_ethnicity_ontology_term_id &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   sex &lt;chr&gt;, sex_ontology_term_id &lt;chr&gt;, suspension_type &lt;chr&gt;, tissue &lt;chr&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt;    soma_joinid                           dataset_id     assay assay_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1            0 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 2            1 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 3            2 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 4            3 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 5            4 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 6            5 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 7            6 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 8            7 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 9            8 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 10           9 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 11          10 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt; 12          11 f171db61-e57e-4535-a06a-35d8b6ef8f2b 10x 3' v3            EFO:0009922</span></span>
+<span><span class="co">#&gt;                        cell_type cell_type_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1       syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt; 2  placental villous trophoblast                 CL:2000060</span></span>
+<span><span class="co">#&gt; 3       syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt; 4       syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt; 5       extravillous trophoblast                 CL:0008036</span></span>
+<span><span class="co">#&gt; 6  placental villous trophoblast                 CL:2000060</span></span>
+<span><span class="co">#&gt; 7       syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt; 8       extravillous trophoblast                 CL:0008036</span></span>
+<span><span class="co">#&gt; 9  placental villous trophoblast                 CL:2000060</span></span>
+<span><span class="co">#&gt; 10      syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt; 11      syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt; 12      syncytiotrophoblast cell                 CL:0000525</span></span>
+<span><span class="co">#&gt;                          development_stage development_stage_ontology_term_id disease</span></span>
+<span><span class="co">#&gt; 1  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 2  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 3  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 4  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 5  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 6  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 7  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 8  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 9  9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 10 9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 11 9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt; 12 9th week post-fertilization human stage                     HsapDv:0000046  normal</span></span>
+<span><span class="co">#&gt;    disease_ontology_term_id  donor_id is_primary_data self_reported_ethnicity</span></span>
+<span><span class="co">#&gt; 1              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 2              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 3              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 4              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 5              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 6              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 7              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 8              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 9              PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 10             PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 11             PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt; 12             PATO:0000461 P13_fetus           FALSE                 unknown</span></span>
+<span><span class="co">#&gt;    self_reported_ethnicity_ontology_term_id     sex sex_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 2                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 3                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 4                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 5                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 6                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 7                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 8                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 9                                   unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 10                                  unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 11                                  unknown unknown              unknown</span></span>
+<span><span class="co">#&gt; 12                                  unknown unknown              unknown</span></span>
+<span><span class="co">#&gt;    suspension_type          tissue tissue_ontology_term_id tissue_general</span></span>
+<span><span class="co">#&gt; 1          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 2          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 3          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 4          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 5          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 6          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 7          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 8          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 9          nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 10         nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 11         nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt; 12         nucleus decidua basalis          UBERON:0000453       placenta</span></span>
+<span><span class="co">#&gt;    tissue_general_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 2                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 3                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 4                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 5                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 6                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 7                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 8                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 9                   UBERON:0001987</span></span>
+<span><span class="co">#&gt; 10                  UBERON:0001987</span></span>
+<span><span class="co">#&gt; 11                  UBERON:0001987</span></span>
+<span><span class="co">#&gt; 12                  UBERON:0001987</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 3251322 rows ]</span></span></code></pre></div>
 <p>You can use both <code>column_names</code> and <code>value_filter</code> to perform specific queries. For example let’s fetch the <code>disease</code> column for the <code>cell_type</code> <code>"B cell"</code> in the <code>tissue_general</code> <code>"lung"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cell_metadata_b_cell</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
@@ -245,11 +314,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
 <span><span class="co">#&gt;   feature_name feature_length</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AQP5                   <span style="text-decoration: underline;">1</span>884</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TUBB4B                 <span style="text-decoration: underline;">2</span>037</span></span></code></pre></div>
+<span><span class="co">#&gt; 1         AQP5           1884</span></span>
+<span><span class="co">#&gt; 2       TUBB4B           2037</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="querying-expression-data-as-seurat">Querying expression data as <code>Seurat</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-seurat"></a>
@@ -284,7 +351,8 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">seurat_obj</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
 <span><span class="co">#&gt; 2 features across 2729 samples within 1 assay </span></span>
-<span><span class="co">#&gt; Active assay: RNA (2 features, 0 variable features)</span></span></code></pre></div>
+<span><span class="co">#&gt; Active assay: RNA (2 features, 0 variable features)</span></span>
+<span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
@@ -370,7 +438,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Chan Zuckerberg Initiative.</p>
+<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">
