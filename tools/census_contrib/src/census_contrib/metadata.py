@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import datetime
-import json
 import pathlib
-import sys
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union, cast
 
 import attrs
+import cattrs
+import cattrs.preconf.json
+import cattrs.preconf.pyyaml
 import cellxgene_census
 import requests
-import yaml
 from attrs import field, validators
+from typing_extensions import Self
 
 
 def none_or_str(v: Optional[str]) -> str:
@@ -18,13 +19,25 @@ def none_or_str(v: Optional[str]) -> str:
 
 
 @attrs.define(kw_only=True, frozen=True)
+class Contact:
+    name: str = field(validator=validators.instance_of(str))
+    email: str = field(validator=validators.instance_of(str))
+    affiliation: str = field(validator=validators.instance_of(str))
+
+
+@attrs.define(kw_only=True, frozen=True)
 class EmbeddingMetadata:
     id: str = field(validator=validators.instance_of(str))
     title: str = field(validator=validators.instance_of(str))
     description: str = field(validator=validators.instance_of(str))
-    contact_name: str = field(validator=validators.instance_of(str))
-    contact_email: str = field(validator=validators.instance_of(str))
-    contact_affiliation: str = field(validator=validators.instance_of(str))
+    primary_contact: Contact = field(validator=validators.instance_of(Contact))
+    additional_contacts: Tuple[Contact, ...] = field(
+        factory=tuple,
+        validator=validators.deep_iterable(
+            validators.instance_of(Contact),
+            validators.instance_of(tuple),
+        ),
+    )
     DOI: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     additional_information: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     model_link: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
@@ -34,20 +47,36 @@ class EmbeddingMetadata:
     measurement_name: str = field(validator=validators.instance_of(str))
     n_embeddings: int = field(validator=validators.instance_of(int))
     n_features: int = field(validator=validators.instance_of(int))
-    submission_date: str = field(validator=validators.instance_of(str))
+    submission_date: datetime.date = field(validator=validators.instance_of(datetime.date))
 
-    @submission_date.validator
-    def check(self, _: attrs.Attribute[Any], value: Any) -> None:
-        try:
-            datetime.date.fromisoformat(value)
-        except ValueError as e:
-            raise ValueError(f"submission_date not ISO date: expected 'YYYY-MM-DD', got '{value}'") from e
+    @classmethod
+    def from_dict(cls, md: Dict[str, Any]) -> Self:
+        return cast(Self, cattrs.structure_attrs_fromdict(md, cls))
 
-    def as_json(self) -> str:
-        return json.dumps(attrs.asdict(self))
+    @classmethod
+    def from_yaml(cls, data: str) -> Self:
+        return cast(
+            Self,
+            cattrs.preconf.pyyaml.make_converter(forbid_extra_keys=True, prefer_attrib_converters=True).loads(
+                data, cls
+            ),
+        )
 
-    def as_dict(self) -> Dict[str, Any]:
-        return attrs.asdict(self)
+    @classmethod
+    def from_json(cls, data: str) -> Self:
+        return cast(
+            Self,
+            cattrs.preconf.json.make_converter(forbid_extra_keys=True, prefer_attrib_converters=True).loads(data, cls),
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return cast(Dict[str, Any], cattrs.unstructure(self))
+
+    def to_json(self) -> str:
+        return cast(str, cattrs.preconf.json.make_converter().dumps(self))
+
+    def to_yaml(self) -> str:
+        return cast(str, cattrs.preconf.pyyaml.make_converter().dumps(self))
 
 
 def load_metadata(path: Union[str, pathlib.Path]) -> EmbeddingMetadata:
@@ -55,60 +84,22 @@ def load_metadata(path: Union[str, pathlib.Path]) -> EmbeddingMetadata:
     if not metadata_path.is_file():
         raise ValueError("--metadata: file does not exist")
 
-    if metadata_path.suffix in [".yml", ".yaml"]:
-        with open(metadata_path) as f:
-            md = yaml.load(f, Loader=NoDatesSafeLoader)
-
-    elif metadata_path.suffix == ".json":
-        with open(metadata_path) as f:
-            md = json.load(f)
-
-    else:
-        raise ValueError("--metadata: unrecognized file format")
-
-    if not isinstance(md, dict):
-        raise ValueError("--metadata: file format did not contain a dictionary")
-    expected_fields = set(attrs.fields_dict(EmbeddingMetadata).keys())
-    found_fields = set(md.keys())
-    if expected_fields ^ found_fields:
-        print("metadata - unexpected fields.", file=sys.stderr)
-        if found_fields - expected_fields:
-            print(f"Extra: {found_fields - expected_fields}.", file=sys.stderr)
-        if expected_fields - found_fields:
-            print(f"Missing: {expected_fields - found_fields}", file=sys.stderr)
-        raise ValueError("--metadata: unexpected metadata file contents")
+    with open(metadata_path) as f:
+        data = f.read()
 
     try:
-        cmd = EmbeddingMetadata(**md)
-    except (ValueError, TypeError) as e:
+        if metadata_path.suffix in [".yml", ".yaml"]:
+            cmd = EmbeddingMetadata.from_yaml(data)
+        elif metadata_path.suffix == ".json":
+            cmd = EmbeddingMetadata.from_json(data)
+        else:
+            raise ValueError("--metadata: unrecognized file format")
+    except (ValueError, TypeError, cattrs.ClassValidationError) as e:
         raise ValueError(f"--metadata format error: {str(e)}") from e
+    except cattrs.ForbiddenExtraKeysError as e:
+        raise ValueError(f"metadata contained extra keys: {str(e)}") from e
 
     return cmd
-
-
-# Acknowledgement: https://stackoverflow.com/a/37958106
-class NoDatesSafeLoader(yaml.SafeLoader):
-    @classmethod
-    def remove_implicit_resolver(cls, tag_to_remove: str) -> None:
-        """
-        Remove implicit resolvers for a particular tag
-
-        Takes care not to modify resolvers in super classes.
-
-        We want to load datetimes as strings, not dates, because we
-        go on to serialize as json which doesn't have the advanced types
-        of yaml, and leads to incompatibilities down the track.
-        """
-        if "yaml_implicit_resolvers" not in cls.__dict__:
-            cls.yaml_implicit_resolvers = cls.yaml_implicit_resolvers.copy()
-
-        for first_letter, mappings in cls.yaml_implicit_resolvers.items():
-            cls.yaml_implicit_resolvers[first_letter] = [
-                (tag, regexp) for tag, regexp in mappings if tag != tag_to_remove
-            ]
-
-
-NoDatesSafeLoader.remove_implicit_resolver("tag:yaml.org,2002:timestamp")
 
 
 def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:

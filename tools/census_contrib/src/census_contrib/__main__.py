@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 import shutil
 import sys
@@ -80,7 +79,7 @@ def setup_logging(args: Arguments) -> None:
 
 def validate_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
     logger.info("Validating SOMA array")
-    validate_contrib_embedding(embedding_path, metadata)
+    validate_contrib_embedding(embedding_path, metadata, skip_storage_version_check=args.skip_storage_version_check)
 
     logger.info("Creating QC umaps")
     create_qc_plots(args.cwd, embedding_path, metadata)
@@ -99,7 +98,7 @@ def ingest_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadat
     consolidate_array(embedding_path)
 
     logger.info("Validating SOMA array")
-    validate_contrib_embedding(embedding_path, metadata)
+    validate_contrib_embedding(embedding_path, metadata, skip_storage_version_check=args.skip_storage_version_check)
 
     logger.info("Creating QC umaps")
     create_qc_plots(args.cwd, embedding_path, metadata)
@@ -145,7 +144,7 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
             context=soma_context({"sm.check_coord_dups": True}),
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
-            A.metadata["CxG_contrib_metadata"] = metadata.as_json()
+            A.metadata["CxG_contrib_metadata"] = metadata.to_json()
             for block in EagerIterator(emb_pipe):
                 assert isinstance(block, pa.Table), "Embedding pipe did not yield an Arrow Table"
                 assert block.column_names == ["i", "j", "d"]  # we care about the order
@@ -155,7 +154,9 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
-def validate_contrib_embedding(uri: Union[str, Path], expected_metadata: EmbeddingMetadata) -> None:
+def validate_contrib_embedding(
+    uri: Union[str, Path], expected_metadata: EmbeddingMetadata, skip_storage_version_check: bool = False
+) -> None:
     """
     Validate embedding where embedding metadata is encoded in the array.
 
@@ -164,13 +165,14 @@ def validate_contrib_embedding(uri: Union[str, Path], expected_metadata: Embeddi
     array_path: str = Path(uri).as_posix()
 
     with soma.open(array_path, context=soma_context()) as A:
-        metadata_dict = json.loads(A.metadata["CxG_contrib_metadata"])
+        metadata = EmbeddingMetadata.from_json(A.metadata["CxG_contrib_metadata"])
 
-    if expected_metadata.as_dict() != metadata_dict:
+    if expected_metadata != metadata:
         raise ValueError("Expected and actual metadata do not match")
 
-    metadata = EmbeddingMetadata(**metadata_dict)
-    validate_compatible_tiledb_storage_format(array_path, metadata)
+    if not skip_storage_version_check:
+        validate_compatible_tiledb_storage_format(array_path, metadata)
+
     validate_embedding(array_path, metadata)
 
 

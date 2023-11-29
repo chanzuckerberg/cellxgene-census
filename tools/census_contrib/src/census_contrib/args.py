@@ -11,6 +11,7 @@ class CommonArgs(Tap):  # type: ignore[misc]
     cwd: Path = Path.cwd()  # Working directory
     verbose: int = 0  # Logging level
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
+    skip_storage_version_check: bool = False  # Skip TileDB storage equivalence check
 
     def configure(self) -> None:
         super().configure()

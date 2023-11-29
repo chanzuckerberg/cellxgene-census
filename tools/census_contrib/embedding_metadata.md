@@ -14,23 +14,56 @@ Embedding values are stored as a float32, and are precision reduced to the preci
 
 ## Metadata
 
-Each embedding will contain a variety of metadata stored in the SOMA `metadata` slot, encoded as a JSON string. This metadata includes the following fields encoded as a dictionary:
+Each embedding will contain a variety of metadata stored in the SOMA `metadata` slot, encoded as a JSON string. This metadata includes the following fields encoded as a JSON object:
 
-| Field name             | Optionality | Type    | Description                                                                                      |
-| ---------------------- | ----------- | ------- | ------------------------------------------------------------------------------------------------ |
-| id                     | required    | string  | CZI-assigned accession ID for this embedding                                                     |
-| title                  | required    | string  | Brief project title                                                                              |
-| description            | required    | string  | Succinct description of the method and characteristics of the embeddings and model               |
-| contact_name           | required    | string  | Name of corresponding author.                                                                    |
-| contact_email          | required    | string  | Email address for the corresponding author.                                                      |
-| contact_affiliation    | required    | string  | Corresponding athor's affiliation, eg., Brown Lab, Chicago University                            |
-| DOI                    | optional    | string  | DOI or URL                                                                                       |
-| additional_information | optional    | string  | Additional information on method or embedding.                                                   |
-| model_link             | optional    | string  | URL - link to models hosted for public access, e.g., Hugging Face, Google Drive, etc.            |
-| data_type              | required    | string  | Data type. Currently one of "obs_embedding" (cell embedding) or "var_embedding" (gene embedding) |
-| census_version         | required    | string  | The Census version associated with the embeddings, expressed as a Census tag (e.g., 2023-10-23)  |
-| experiment_name        | required    | string  | Experiment (organism), currently one of "homo_sapiens" or "mus_musculus"                         |
-| measurement_name       | required    | string  | The measurement name embeddings are associated with, normally "RNA"                              |
-| n_embeddings           | required    | integer | Number of embedded cells, integer.                                                               |
-| n_features             | required    | integer | Number of features (embedding vector size per cell), integer.                                    |
-| submission_date        | required    | string  | Date the contribution was received, ISO 8601 date, YYYY-MM-DD                                    |
+| Field name             | Required | Type          | Description                                                                           |
+| ---------------------- | -------- | ------------- | ------------------------------------------------------------------------------------- |
+| id                     | required | string        | CZI-assigned accession ID for this embedding                                          |
+| title                  | required | string        | Brief project title                                                                   |
+| description            | required | string        | Succinct description of the method and characteristics of the embeddings and model    |
+| primary_contact        | required | Contact       | Primary contact person for these embeddings.                                          |
+| additional_contacts    | required | List[Contact] | Additional contact persons. May be an empty list.                                     |
+| DOI                    | optional | string        | DOI or URL                                                                            |
+| additional_information | optional | string        | Additional information on method or embedding.                                        |
+| model_link             | optional | string        | URL - link to models hosted for public access, e.g., Hugging Face, Google Drive, etc. |
+| data_type              | required | string        | Data type. Currently one of "obs_embedding" (cell) or "var_embedding" (gene)          |
+| census_version         | required | string        | The Census version (tab) associated with the embeddings, e.g., 2023-10-23             |
+| experiment_name        | required | string        | Experiment (organism), currently one of "homo_sapiens" or "mus_musculus"              |
+| measurement_name       | required | string        | The measurement name embeddings are associated with, normally "RNA"                   |
+| n_embeddings           | required | integer       | Number of embedded cells, integer.                                                    |
+| n_features             | required | integer       | Number of features (embedding vector size per cell), integer.                         |
+| submission_date        | required | string        | Date the contribution was received, ISO 8601 date, YYYY-MM-DD                         |
+
+A `Contact` is a JSON object with the following fields:
+
+| Field name  | Optionality | Type   | Description                                             |
+| ----------- | ----------- | ------ | ------------------------------------------------------- |
+| name        | required    | string | Contact name, e.g., Sue Smith                           |
+| email       | required    | string | Contact email, e.g., <sue@university.edu>               |
+| affiliation | required    | string | Contact affiliation, e.g, Smith Lab, Chicaco University |
+
+For example:
+
+```json
+{
+  "id": "CxG-contrib-99999",
+  "title": "An embedding",
+  "description": "Longer description of the embedding and method used to generate it",
+  "primary_contact": {
+    "name": "Sue Smith",
+    "email": "sue@university.edu",
+    "affiliation": "Smith Lab, Chicago University",
+  },
+  "additional_contacts": [],
+  "DOI": "https://doi.org/...",
+  "additional_information": "",
+  "model_link": "https://smithlab.chicago.edu/...",
+  "data_type": "obs_embedding",
+  "census_version": "2023-10-23",
+  "experiment_name": "mus_musculus",
+  "measurement_name": "RNA",
+  "n_embeddings": 5684805,
+  "n_features": 200,
+  "submission_date": "2023-11-18"
+}
+```

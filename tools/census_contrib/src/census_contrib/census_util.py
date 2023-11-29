@@ -14,9 +14,7 @@ logger = get_logger()
 
 
 @functools.cache
-def get_obs_soma_joinids(
-    metadata: EmbeddingMetadata,
-) -> Tuple[npt.NDArray[np.int64], Tuple[int, ...]]:
+def get_obs_soma_joinids(metadata: EmbeddingMetadata) -> Tuple[npt.NDArray[np.int64], Tuple[int, ...]]:
     """
     Return experiment obs soma_joind values and obs shape appropriate for the
     Census version specified in the metadata.

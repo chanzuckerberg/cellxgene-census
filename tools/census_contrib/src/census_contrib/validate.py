@@ -36,6 +36,7 @@ logger = get_logger()
 
 
 def validate_compatible_tiledb_storage_format(uri: str, metadata: EmbeddingMetadata) -> None:
+    """Verify Census build and Embedding TileDB formats are identical"""
     import tiledb
 
     # Fetch embedding storage version
