@@ -27,6 +27,45 @@ def get_embedding(
     obs_soma_joinids: Union[npt.NDArray[np.int64], pa.Array],
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> npt.NDArray[np.float32]:
+    """
+    Read cell (obs) embeddings and return as a dense NumPy ndarray. Any cells without
+    an embedding will return NaN values.
+
+    Args:
+        census_version:
+            The Census version tag, e.g., "2023-10-23". Used to verify that the contents of
+            the embedding contain embedded cells from the same Census version.
+        embedding_uri:
+            The URI containing the embedding data.
+        obs_soma_joinids:
+            The slice of the embedding to fetch and return.
+        context:
+            A custom :class:`SOMATileDBContext` which will be used to open the SOMA object.
+            Optional, defaults to None.
+
+    Returns:
+        A :class:`numpy.ndarray` containing the embeddings. Embeddings are positionally
+        indexed by the obs_soma_joinids. In other words, the cell identified by
+        `obs_soma_joinids[i]` corresponds to the `ith` positoin in the returned ndarray.
+
+    Raises:
+        ValueError: if the Census and embedding are mismatched.
+
+    Lifecycle:
+        experimental
+
+    Examples:
+        >>> obs_somaids_to_fetch = np.array([10,11], dtype=np.int64)
+        >>> emb = cellxgene_census.experimental.get_embedding('2023-10-23', embedding_uri, obs_somaids_to_fetch)
+        >>> emb.shape
+        (2, 200)
+        >>> emb[:, 0:4]
+        array([[ 0.02954102,  1.0390625 , -0.14550781, -0.40820312],
+            [-0.00224304,  1.265625  ,  0.05883789, -0.7890625 ]],
+            dtype=float32)
+
+    """
+
     if isinstance(obs_soma_joinids, (pa.Array, pa.ChunkedArray)):
         obs_soma_joinids = obs_soma_joinids.to_numpy()
     if obs_soma_joinids.dtype != np.int64:
@@ -45,7 +84,8 @@ def get_embedding(
 
         if resolved_census_version is None:
             warnings.warn(
-                "Unable to determine Census version - skipping validation of Census and embedding version.", stacklevel=1
+                "Unable to determine Census version - skipping validation of Census and embedding version.",
+                stacklevel=1,
             )
         elif resolved_census_version != census_directory.get(embedding_metadata["census_version"], None):
             raise ValueError("Census and embedding mismatch - census_version not equal")
