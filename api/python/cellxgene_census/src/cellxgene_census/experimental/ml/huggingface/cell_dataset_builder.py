@@ -6,8 +6,6 @@ import scipy.sparse
 from datasets import Dataset
 from tiledbsoma import Experiment, ExperimentAxisQuery
 
-from cellxgene_census.experimental.util import X_sparse_iter
-
 
 class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
     """
@@ -40,7 +38,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         measurement_name: str = "RNA",
         layer_name: str = "raw",
         *,
-        _cells_per_chunk: int = 100_000,
+        block_size: Optional[int] = None,
         **kwargs: Any,
     ):
         """
@@ -50,12 +48,14 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         - `experiment`: Census Experiment to be queried.
         - `measurement_name`: Measurement in the experiment, default "RNA".
         - `layer_name`: Name of the X layer to process, default "raw".
+        - `block_size`: Number of cells to process in-memory at once. If unspecified,
+           `tiledbsoma.SparseNDArrayRead.blockwise()` will select a default.
         - `kwargs`: passed through to `ExperimentAxisQuery()`, especially `obs_query`
            and `var_query`.
         """
         super().__init__(experiment, measurement_name, **kwargs)
         self.layer_name = layer_name
-        self._cells_per_chunk = _cells_per_chunk
+        self.block_size = block_size
 
     def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
         """
@@ -65,12 +65,12 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         """
 
         def gen() -> Generator[Dict[str, Any], None, None]:
-            for (page_cell_joinids, _), Xpage in X_sparse_iter(
-                self, self.layer_name, stride=self._cells_per_chunk, reindex_sparse_axis=False
+            for Xblock, (block_cell_joinids, _) in (
+                self.X(self.layer_name).blockwise(axis=0, reindex_disable_on_axis=[1], size=self.block_size).scipy()
             ):
-                assert isinstance(Xpage, scipy.sparse.csr_matrix)
-                for i, cell_joinid in enumerate(page_cell_joinids):
-                    yield self.cell_item(cell_joinid, Xpage.getrow(i))
+                assert isinstance(Xblock, scipy.sparse.csr_matrix)
+                for i, cell_joinid in enumerate(block_cell_joinids):
+                    yield self.cell_item(cell_joinid, Xblock.getrow(i))
 
         return Dataset.from_generator(_DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {}))
 
