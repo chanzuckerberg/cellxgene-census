@@ -221,16 +221,18 @@ def do_the_release(args: CensusBuildArgs) -> bool:
     parsed_url = urlparse(args.config.cellxgene_census_S3_path)
     prefix = parsed_url.path
 
+    # Absolute URIs are deprecated, but we still need to support them for legacy reasons.
+    # They should point to the default mirror location.
     release: CensusVersionDescription = {
         "release_date": None,
         "release_build": args.build_tag,
         "soma": {
-            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "soma/"),
+            "uri": urlcat(args.config.cellxgene_census_default_mirror_S3_path, args.build_tag, "soma/"),
             "relative_uri": urlcat(prefix, args.build_tag, "soma/"),
             "s3_region": "us-west-2",
         },
         "h5ads": {
-            "uri": urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "h5ads/"),
+            "uri": urlcat(args.config.cellxgene_census_default_mirror_S3_path, args.build_tag, "h5ads/"),
             "relative_uri": urlcat(prefix, args.build_tag, "h5ads/"),
             "s3_region": "us-west-2",
         },
