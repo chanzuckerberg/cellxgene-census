@@ -22,7 +22,7 @@ open_soma_latest_for_test <- function(...) {
 # is withdrawn for any reason.
 KNOWN_CENSUS_VERSION <- "2023-05-15" # an LTS version
 KNOWN_CENSUS_URI <- paste0(
-  "s3://cellxgene-data-public/cell-census/",
+  "s3://cellxgene-census-public-us-west-2/cell-census/",
   KNOWN_CENSUS_VERSION,
   "/soma/"
 )

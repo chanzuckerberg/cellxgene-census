@@ -198,12 +198,12 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
             "release_date": "2022-10-30",
             "release_build": "2022-10-01",
             "soma": {
-                "uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/",
+                "uri": "s3://cellxgene-census-public-us-west-2/cell-census/2022-10-01/soma/",
                 "relative_uri": "/cell-census/2022-10-01/soma/",
                 "s3_region": "us-west-2",
             },
             "h5ads": {
-                "uri": "s3://cellxgene-data-public/cell-census/2022-10-01/h5ads/",
+                "uri": "s3://cellxgene-census-public-us-west-2/cell-census/2022-10-01/h5ads/",
                 "relative_uri": "/cell-census/2022-10-01/soma/",
                 "s3_region": "us-west-2",
             },
@@ -214,7 +214,11 @@ def test_open_soma_defaults_to_stable(requests_mock: rm.Mocker) -> None:
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma()
         m.assert_called_once_with(
-            {"uri": "s3://cellxgene-data-public/cell-census/2022-10-01/soma/", "region": "us-west-2", "provider": "S3"},
+            {
+                "uri": "s3://cellxgene-census-public-us-west-2/cell-census/2022-10-01/soma/",
+                "region": "us-west-2",
+                "provider": "S3",
+            },
             None,
         )
 
