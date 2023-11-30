@@ -15,7 +15,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     cell in CELLxGENE Census ExperimentAxisQuery results (human).
 
     This class requires the Geneformer package to be installed separately with:
-    `pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e`
+    `pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1`
 
     Example usage:
 
@@ -29,7 +29,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
             census["census_data"]["homo_sapiens"],
             # set obs_query to define some subset of Census cells:
             obs_query=tiledbsoma.AxisQuery(value_filter="is_primary_data == True and tissue_general == 'tongue'"),
-            obs_attributes=(
+            obs_column_names=(
                 "soma_joinid",
                 "cell_type_ontology_term_id",
             ),
@@ -40,10 +40,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
     Dataset item contents:
     - `input_ids`: Geneformer token sequence for the cell
     - `length`: Length of the token sequence
-    - and the specified `obs_attributes` (cell metadata from the experiment obs dataframe)
+    - and the specified `obs_column_names` (cell metadata from the experiment obs dataframe)
     """
 
-    obs_attributes: Set[str]
+    obs_column_names: Set[str]
     max_input_tokens: int
 
     # set of gene soma_joinids corresponding to genes modeled by Geneformer:
@@ -55,6 +55,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self,
         experiment: tiledbsoma.Experiment,
         *,
+        obs_column_names: Optional[Sequence[str]] = None,
         obs_attributes: Optional[Sequence[str]] = None,
         max_input_tokens: int = 2048,
         token_dictionary_file: str = "",
@@ -64,27 +65,23 @@ class GeneformerTokenizer(CellDatasetBuilder):
         """
         - `experiment`: Census Experiment to query
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
-        - `obs_attributes`: names of attributes to propagate from the experiment obs dataframe
-           (cell metadata) into each Dataset item
+        - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
+           of each Dataset item
         - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
         """
-        assert (
-            "normalized" in experiment.ms["RNA"].X
-        ), "Experiment RNA measurement lacks 'normalized' layer; try 'latest' Census version (2023-08-01 or newer)"
+        if obs_attributes:  # old name of obs_column_names
+            obs_column_names = obs_attributes
 
         self.max_input_tokens = max_input_tokens
-        self.obs_attributes = set(obs_attributes) if obs_attributes else set()
+        self.obs_column_names = set(obs_column_names) if obs_column_names else set()
         self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
         super().__init__(
             experiment,
             measurement_name="RNA",
-            layer_name="normalized",
-            # configure query to fetch the relevant genes only
-            # FIXME: commented out because (as of this writing) it actually slows down the query!
-            # var_query=tiledbsoma.AxisQuery(coords=(self.model_gene_ids,)),
+            layer_name="raw",
             **kwargs,
         )
 
@@ -107,7 +104,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
                 # pyproject.toml can't express Geneformer git+https dependency
                 raise ImportError(
                     "Please install Geneformer with: "
-                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@39ab62e"
+                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1"
                 ) from None
             if not token_dictionary_file:
                 token_dictionary_file = geneformer.tokenizer.TOKEN_DICTIONARY_FILE
@@ -149,8 +146,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
     def __enter__(self) -> "GeneformerTokenizer":
         super().__enter__()
         # On context entry, load the necessary cell metadata (obs_df)
-        obs_column_names = list(self.obs_attributes)
-        if "soma_joinid" not in self.obs_attributes:
+        obs_column_names = list(self.obs_column_names)
+        if "soma_joinid" not in self.obs_column_names:
             obs_column_names.append("soma_joinid")
         self.obs_df = self.obs(column_names=obs_column_names).concat().to_pandas().set_index("soma_joinid")
         return self
@@ -160,8 +157,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
         Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
-        # project cell_Xrow onto model_gene_ids and normalize
-        model_counts = cell_Xrow[:, self.model_gene_ids]
+        # project cell_Xrow onto model_gene_ids and normalize by row sum.
+        # notice we divide by the total count of the complete row (not only of the projected
+        # values); this follows Geneformer's internal tokenizer.
+        model_counts = cell_Xrow[:, self.model_gene_ids].multiply(1.0 / cell_Xrow.sum())
         assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
         # assert len(model_counts.data) == np.count_nonzero(model_counts.data)
         model_expr = model_counts.multiply(self.model_gene_medians_factor)
@@ -174,8 +173,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         input_ids = self.model_gene_tokens[token_order]
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
-        # add the requested obs_attributes
-        for attr in self.obs_attributes:
+        # add the requested obs attributes
+        for attr in self.obs_column_names:
             if attr != "soma_joinid":
                 ans[attr] = self.obs_df.at[cell_joinid, attr]
             else:
