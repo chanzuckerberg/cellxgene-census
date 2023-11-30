@@ -3,7 +3,7 @@ test_that("open_soma", {
   on.exit(coll$close(), add = TRUE)
   expect_true(coll$is_open())
   expect_equal(coll$mode(), "READ")
-  expect_true(startsWith(coll$uri, "s3://cellxgene-data-public/cell-census/"))
+  expect_true(startsWith(coll$uri, "s3://cellxgene-census-public-us-west-2/cell-census/"))
   expect_true(coll$exists())
   expect_true(coll$get("census_data")$get("homo_sapiens")$exists())
 })
