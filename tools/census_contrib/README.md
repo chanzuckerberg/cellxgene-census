@@ -58,26 +58,4 @@ This command:
 
 ## Embedding metadata
 
-The following structure defines metadata for an embedding. When stored in a community contributed embedding, it is a JSON object. The `census_contrib` tool requires this metadata, and can accept it as either a file named `meta.yml` or `meta.json`.
-
-Contents (in YAML):
-
-```yaml
-id: accession-id  # required
-title: a short title  # required
-description: >-  # optional
-  A longer description.
-contact_name: Contact Person  # required
-contact_email: contact email  # required 
-contact_affiliation: Organization  # required
-DOI:  # optional
-additional_information:  # optional
-model_link:  # optional
-data_type: obs_embedding  # required
-census_version: 2023-10-23 # required
-experiment_name: mus_musculus # required - the associated experiment
-measurement_name: RNA # required - the associated measurement
-n_embeddings: 5684805  # required - number of embedded cells
-n_features: 200 # required - number of features in the embedding
-submission_date: 2023-11-18  # required
-```
+The [metadata schema definition](embedding_metadata.md) describes the contents of accepted metadata. When stored in a contributed embedding, it is a JSON-encoded string, stored in the SOMANDArray metadata with key `CxG_contrib_metadata`. The `census_contrib` tool requires this metadata for most operations, and can accept it as either a file named `meta.yml` or `meta.json`.
