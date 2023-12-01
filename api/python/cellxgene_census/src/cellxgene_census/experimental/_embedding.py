@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import warnings
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -19,6 +19,39 @@ import tiledbsoma as soma
 
 from .._open import _build_soma_tiledb_context, open_soma
 from .._release_directory import get_census_version_directory
+
+
+def get_embedding_metadata(
+    embedding_uri: str, context: Optional[soma.options.SOMATileDBContext] = None
+) -> Dict[str, Any]:
+    """
+    Read embedding metadata and return as a Python dict.
+
+    Args:
+        embedding_uri:
+            The embedding URI
+        context:
+            A custom :class:`SOMATileDBContext` which will be used to open the SOMA object.
+            Optional, defaults to None.
+
+    Returns:
+        A Python dictionary containing metadata describing the embedding.
+
+    Examples:
+        >>> get_experiment_metadata(uri)
+
+    """
+
+    # Currently, all embeddings are hosted in us-west-2 so use that as a default.
+    # Allow the user to override for exceptional cases.
+    context = _build_soma_tiledb_context("us-west-2", context)
+
+    with soma.open(embedding_uri, context=context) as E:
+        # read embedding metadata and decode the JSON-encoded string
+        embedding_metadata = json.loads(E.metadata["CxG_contrib_metadata"])
+        assert isinstance(embedding_metadata, dict)
+
+    return cast(Dict[str, Any], embedding_metadata)
 
 
 def get_embedding(
