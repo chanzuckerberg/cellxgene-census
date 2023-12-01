@@ -2,7 +2,7 @@
    :parser: myst_parser.sphinx_
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 4
    :hidden:
 
    cellxgene_census_docsite_installation.md
