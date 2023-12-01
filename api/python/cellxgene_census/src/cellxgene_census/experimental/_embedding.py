@@ -46,7 +46,7 @@ def get_embedding(
     Returns:
         A :class:`numpy.ndarray` containing the embeddings. Embeddings are positionally
         indexed by the obs_soma_joinids. In other words, the cell identified by
-        `obs_soma_joinids[i]` corresponds to the `ith` positoin in the returned ndarray.
+        `obs_soma_joinids[i]` corresponds to the `ith` position in the returned ndarray.
 
     Raises:
         ValueError: if the Census and embedding are mismatched.
