@@ -106,7 +106,7 @@ def ingest_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadat
 
 def inject_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
     logger.info("Adding embedding to Census build")
-    inject_embedding_into_census_build(args.census_path, embedding_path, metadata)
+    inject_embedding_into_census_build(args.census_path, args.obsm_key, embedding_path, metadata)
 
 
 def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
@@ -265,7 +265,7 @@ def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> 
 
 
 def inject_embedding_into_census_build(
-    census_path: Path, embedding_src_path: Path, metadata: EmbeddingMetadata
+    census_path: Path, obsm_key: Optional[str], embedding_src_path: Path, metadata: EmbeddingMetadata
 ) -> None:
     """
     Inject an existing embedding (ingested via this tool) into its corresponding Census build.
@@ -287,7 +287,7 @@ def inject_embedding_into_census_build(
     5. conslidate obsm
     6. validate that group edits worked, etc.
     """
-    obsm_layer_name = metadata.id
+    obsm_layer_name = obsm_key or metadata.id
 
     # Pre-checks
     logger.info(f"Injecting embedding into {census_path.as_posix()} with name obsm['{obsm_layer_name}']")

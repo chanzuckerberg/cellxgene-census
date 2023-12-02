@@ -57,6 +57,7 @@ class InjectEmbedding(CommonArgs):
     """Add existing embedding to a Census build as an obsm layer."""
 
     census_path: Path  # Census build path
+    obsm_key: str  # key to store embedding as in the obsm collection
 
 
 class Arguments(Tap):  # type: ignore[misc]
