@@ -19,6 +19,7 @@ import owlready2
 
 
 class OntologyMapper(ABC):
+
     # Terms to ignore when mapping
     BLOCK_LIST = [
         "BFO_0000004",
@@ -50,7 +51,8 @@ class OntologyMapper(ABC):
         except TypeError:
             self._ontology = owlready2.get_ontology(ontology_owl_path).load()
 
-    def get_high_level_terms(self, ontology_term_id: str) -> List[str]:
+    def get_high_level_terms(self, ontology_term_id: str) -> List[Optional[str]]:
+
         """
         Returns the associated high-level ontology term IDs from any other ID
         """
@@ -98,10 +100,7 @@ class OntologyMapper(ABC):
         Return the top high level term
         """
 
-        terms = self.get_high_level_terms(ontology_term_id)
-        if terms and terms[0]:
-            return terms[0]
-        return None
+        return self.get_high_level_terms(ontology_term_id)[0]
 
     @abstractmethod
     def _get_branch_ancestors(self, owl_entity):
@@ -204,6 +203,7 @@ class OntologyMapper(ABC):
 
 
 class CellMapper(OntologyMapper):
+
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
     CXG_CL_ONTOLOGY_URL = "https://github.com/obophenotype/cell-ontology/releases/download/v2023-07-20/cl.owl"
     # Only look up ancestors under Cell
@@ -239,6 +239,7 @@ class CellMapper(OntologyMapper):
 
 
 class TissueMapper(OntologyMapper):
+
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
     CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
 
@@ -426,14 +427,14 @@ class CellClassMapper(CellMapper):
         "CL_0000473",  # defensive cell
         "CL_0000066",  # epithelial cell
         "CL_0000988",  # hematopoietic cell
-        "CL_0000183",  # NEW contractile cell
         "CL_0002319",  # neural cell
         "CL_0011115",  # precursor cell
         "CL_0000151",  # secretory cell
         "CL_0000039",  # NEW germ cell line
         "CL_0000064",  # NEW ciliated cell
-        "CL_0000219",  # NEW motile cell
+        "CL_0000183",  # NEW contractile cell
         "CL_0000188",  # NEW cell of skeletal muscle
+        "CL_0000219",  # NEW motile cell
         "CL_0000325",  # NEW stuff accumulating cell
         "CL_0000349",  # NEW extraembryonic cell
         "CL_0000586",  # NEW germ cell
@@ -444,8 +445,6 @@ class CellClassMapper(CellMapper):
         "CL_0009010",  # NEW transit amplifying cell
         "CL_1000600",  # NEW lower urinary tract cell
         "CL_4033054",  # NEW perivascular cell
-        "CL_0002321",  # NEW embryonic cell(metazoa)
-        "CL_0000677",  # NEW gut absorptive cell
     ]
 
     def __init__(self):
@@ -486,50 +485,49 @@ class CellSubclassMapper(CellMapper):
         "CL_0002076",  # endo-epithelial cell
         "CL_0002078",  # meso-epithelial cell
         "CL_0011026",  # progenitor cell
-        "CL_0002077",  # NEW ecto-epithelial cell
-        "CL_0000068",  # NEW duct epithelial cell
-        "CL_0000075",  # NEW columnar/cuboidal epithelial cell
-        "CL_0000150",  # NEW glandular epithelial cell
-        "CL_0002327",  # NEW mammary gland epithelial cell
-        "CL_0000159",  # NEW seromucus secreting cell
-        "CL_0000082",  # NEW epithelial cell of lung
-        "CL_0000083",  # NEW epithelial cell of pancreas
-        "CL_1000296",  # NEW epithelial cell of urethra
-        "CL_0000076",  # NEW squamous epithelial cell
-        "CL_0002535",  # NEW epithelial cell of cervix
-        "CL_0002536",  # NEW epithelial cell of amnion
-        "CL_0000098",  # NEW sensory epithelial cell
-        "CL_0000079",  # NEW stratified epithelial cell
-        "CL_0002518",  # NEW kidney epithelial cell
-        "CL_0000076",  # NEW squamous epithelial cell
-        "CL_0000187",  # NEW muscle cell
+        "CL_0000015",  # NEW male germ cell
+        "CL_0000021",  # NEW female germ cell
         "CL_0000034",  # NEW stem cell
         "CL_0000055",  # NEW non-terminally differentiated cell
+        "CL_0000068",  # NEW duct epithelial cell
+        "CL_0000075",  # NEW columnar/cuboidal epithelial cell
+        "CL_0000076",  # NEW squamous epithelial cell
+        "CL_0000079",  # NEW stratified epithelial cell
+        "CL_0000082",  # NEW epithelial cell of lung
+        "CL_0000083",  # NEW epithelial cell of pancreas
         "CL_0000095",  # NEW neuron associated cell
+        "CL_0000098",  # NEW sensory epithelial cell
         "CL_0000136",  # NEW fat cell
+        "CL_0000147",  # NEW pigment cell
+        "CL_0000150",  # NEW glandular epithelial cell
+        "CL_0000159",  # NEW seromucus secreting cell
         "CL_0000182",  # NEW hepatocyte
         "CL_0000186",  # NEW myofibroblast cell
         "CL_0000187",  # NEW muscle cell
         "CL_0000221",  # NEW ectodermal cell
-        "CL_0000244",  # NEW urothelial cell
-        "CL_0000680",  # NEW muscle precursor cell
-        "CL_0002222",  # NEW vertebrate lens cell
-        "CL_0002503",  # NEW adventitial cell
-        "CL_0005006",  # NEW ionocyte
-        "CL_0009010",  # NEW transit amplifying cell
-        "CL_2000064",  # NEW pituitary gland cell
-        "CL_0000015",  # NEW male germ cell
-        "CL_0000021",  # NEW female germ cell
-        "CL_0000147",  # NEW pigment cell
         "CL_0000222",  # NEW mesodermal cell
+        "CL_0000244",  # NEW urothelial cell
         "CL_0000351",  # NEW trophoblast cell
         "CL_0000584",  # NEW enterocyte
         "CL_0000586",  # NEW germ cell
         "CL_0000670",  # NEW primordial germ cell
+        "CL_0000680",  # NEW muscle precursor cell
         "CL_0001063",  # NEW neoplastic cell
+        "CL_0002077",  # NEW ecto-epithelial cell
+        "CL_0002222",  # NEW vertebrate lens cell
+        "CL_0002327",  # NEW mammary gland epithelial cell
+        "CL_0002503",  # NEW adventitial cell
+        "CL_0002518",  # NEW kidney epithelial cell
+        "CL_0002535",  # NEW epithelial cell of cervix
+        "CL_0002536",  # NEW epithelial cell of amnion
+        "CL_0005006",  # NEW ionocyte
         "CL_0008019",  # NEW mesenchymal cell
         "CL_0008034",  # NEW mural cell
+        "CL_0009010",  # NEW transit amplifying cell
+        "CL_1000296",  # NEW epithelial cell of urethra
         "CL_1000497",  # NEW kidney cell
+        "CL_2000004",  # NEW pituitary gland cell
+        "CL_2000064",  # NEW ovarian surface epithelial cell
         "CL_4030031",  # NEW interstitial cell
     ]
 
