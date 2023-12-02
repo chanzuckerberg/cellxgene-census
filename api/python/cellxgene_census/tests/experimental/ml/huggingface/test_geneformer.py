@@ -1,83 +1,96 @@
+import datasets
 import pytest
 import tiledbsoma
+from py.path import local as Path
+from scipy.stats import spearmanr
 
 import cellxgene_census
 
 try:
+    from geneformer import TranscriptomeTokenizer
+
     from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
     pass
 
 
-def select_census_version_for_geneformer_tests() -> str:
-    # GeneformerTokenizer needs the "normalized" X layer which wasn't yet available in
-    # "stable" at the time this was written. This should provide a graceful transition
-    # once we next advance "stable" (after which it could be eliminated).
-    with cellxgene_census.open_soma(census_version="stable") as stable:
-        if "normalized" in stable["census_data"]["homo_sapiens"].ms["RNA"].X:
-            return "stable"
-    return "2023-09-04"
+CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
 
 
-@pytest.mark.skip(
-    "FIXME: 2023-09-04 Census release was deleted and cell soma_joinids have changed in subsequent versions"
-)
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-@pytest.mark.parametrize(
-    "cells_per_chunk",
-    [4, 100_000],
-)
-def test_GeneformerTokenizer(cells_per_chunk: int) -> None:
-    # cell soma_joinid: (token sequence length, prefix of token sequence)
-    expected_data = {
-        1234567: (2048, [15947, 7062, 621, 9291, 9939, 16985, 4113]),
-        3703701: (2048, [11180, 11367, 512, 1557, 968, 16411, 16445]),
-        8641969: (2011, [3264, 9400, 5485, 2053, 376, 11436, 4533]),
-        9876536: (1215, [4285, 6349, 9512, 10856, 520, 7883, 1250]),
-        13580237: (2048, [24685, 650, 16997, 15633, 15287, 8121, 13147]),
-        14814804: (2048, [16725, 17261, 5368, 16472, 4662, 4737, 11143]),
-        16049371: (660, [3707, 10967, 13452, 9538, 13925, 1310, 4093]),
-        18518505: (2048, [7711, 9681, 1532, 15633, 14929, 652, 6061]),
-        19753072: (2048, [1181, 15982, 4529, 12996, 9061, 3789, 16865]),
-        20987639: (1367, [8681, 10047, 9069, 6623, 14968, 16865, 7725]),
-        22222206: (2048, [15933, 15623, 8809, 754, 25306, 411, 6872]),
-        23456773: (2048, [15633, 11385, 16997, 650, 17184, 3408, 7066]),
-        25925907: (1589, [15602, 10824, 3106, 608, 8510, 13232, 24344]),
-        28395041: (589, [6556, 19788, 18489, 2124, 10509, 2218, 6567]),
-        30864175: (815, [10057, 9500, 2936, 21070, 13659, 5081, 9209]),
-        32098742: (2048, [4067, 948, 1324, 5261, 16985, 1511, 10268]),
-    }
+def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
+    """
+    Test that GeneformerTokenizer produces the same token sequences as the original
+    geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
+    """
+    # causes deterministic selection of roughly 1,000 cells:
+    MODULUS = 32768
+    # minimum Spearman rank correlation to consider token sequences effectively identical; this
+    # allows for rare, slight differences in token sequences possibly arising from unstable sorting
+    # and/or minor numerical precision differences in lowly-expressed genes.
+    RHO_THRESHOLD = 0.99
+    # notwithstanding RHO_THRESHOLD, we'll check that almost all token sequences are -exactly-
+    # identical.
+    EXACT_THRESHOLD = 0.98
 
-    with cellxgene_census.open_soma(census_version=select_census_version_for_geneformer_tests()) as census:
+    with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
+        human = census["census_data"]["homo_sapiens"]
+        # read obs dataframe to get soma_joinids of all primary cells
+        obs_df = (
+            human.obs.read(column_names=["soma_joinid"], value_filter="is_primary_data == True").concat().to_pandas()
+        )
+        # select those with soma_joinid == 0 (mod MODULUS)
+        cell_ids = [it for it in obs_df["soma_joinid"].tolist() if it % MODULUS == 0]
+
+        # run our GeneformerTokenizer on them
         with GeneformerTokenizer(
-            census["census_data"]["homo_sapiens"],
-            obs_query=tiledbsoma.AxisQuery(coords=(list(expected_data.keys()),)),
-            obs_attributes=(
-                "soma_joinid",
-                "cell_type_ontology_term_id",
-                "tissue_ontology_term_id",
-            ),
-            _cells_per_chunk=cells_per_chunk,  # test with & without pagination
+            human,
+            obs_query=tiledbsoma.AxisQuery(coords=(cell_ids,)),
         ) as tokenizer:
-            df = tokenizer.build().to_pandas()
-            assert len(df) == len(expected_data)
-            for row in df.itertuples():
-                assert row.length == expected_data[row.soma_joinid][0]
-                top_tokens = expected_data[row.soma_joinid][1]
-                assert row.input_ids.tolist()[: len(top_tokens)] == top_tokens
-                assert row.cell_type_ontology_term_id
-                assert row.tissue_ontology_term_id
+            test_tokens = [it["input_ids"] for it in tokenizer.build()]
+
+        # write h5ad for use with geneformer.TranscriptomeTokenizer
+        ad = cellxgene_census.get_anndata(
+            census,
+            "homo_sapiens",
+            X_name="raw",
+            obs_coords=cell_ids,
+            column_names=tiledbsoma.AxisColumnNames(var=["feature_id"]),
+        )
+        ad.var.rename(columns={"feature_id": "ensembl_id"}, inplace=True)
+        ad.obs["n_counts"] = ad.X.sum(axis=1)
+        h5ad_dir = tmpdir.join("h5ad")
+        h5ad_dir.mkdir()
+        ad.write_h5ad(h5ad_dir.join("tokenizeme.h5ad"))
+        # run geneformer.TranscriptomeTokenizer to get "true" tokenizations
+        # see: https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/tokenizer.py
+        TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, tmpdir, "tk", file_format="h5ad")
+        true_tokens = [it["input_ids"] for it in datasets.load_from_disk(tmpdir.join("tk.dataset"))]
+
+        # check GeneformerTokenizer sequences against geneformer.TranscriptomeTokenizer's
+        assert len(test_tokens) == len(cell_ids)
+        assert len(true_tokens) == len(cell_ids)
+        identical = 0
+        for i, cell_id in enumerate(cell_ids):
+            assert len(test_tokens[i]) == len(true_tokens[i])
+            rho, _ = spearmanr(test_tokens[i], true_tokens[i])
+            if rho < RHO_THRESHOLD:
+                # token sequences are too dissimilar; assert exact identity so that pytest -vv will
+                # show the complete diff:
+                assert (
+                    test_tokens[i] == true_tokens[i]
+                ), f"Discrepant token sequences for cell soma_joinid={cell_id}; Spearman rho={rho}"
+            elif test_tokens[i] == true_tokens[i]:
+                identical += 1
+        assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
-@pytest.mark.skip(
-    "FIXME: 2023-09-04 Census release was deleted and cell soma_joinids have changed in subsequent versions"
-)
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:
-    with cellxgene_census.open_soma(census_version=select_census_version_for_geneformer_tests()) as census:
+    with cellxgene_census.open_soma(census_version=CENSUS_VERSION_FOR_GENEFORMER_TESTS) as census:
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             # set obs_query to define some subset of Census cells:

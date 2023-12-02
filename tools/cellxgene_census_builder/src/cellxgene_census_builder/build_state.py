@@ -37,6 +37,9 @@ class CensusBuildConfig:
     # Primary bucket location
     cellxgene_census_S3_path: str = field(default="s3://cellxgene-data-public/cell-census")
     #
+    # Default mirror bucket location. Used for building legacy absolute URIs.
+    cellxgene_census_default_mirror_S3_path: str = field(default="s3://cellxgene-census-public-us-west-2/cell-census")
+    #
     # Replica bucket location
     cellxgene_census_S3_replica_path: str = field(default=None)
     logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
