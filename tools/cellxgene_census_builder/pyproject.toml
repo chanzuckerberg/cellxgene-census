@@ -27,25 +27,25 @@ classifiers = [
 ]
 dependencies= [
     "typing_extensions==4.8.0",
-    "pyarrow==13.0.0",
-    "pandas[performance]==2.0.3",
-    "anndata==0.9",
+    "pyarrow==14.0.1",
+    "pandas[performance]==2.1.3",
+    "anndata==0.10.3",
     "numpy==1.23.5",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # IMPORTANT: the tiledbsoma version lag that used in cellxgene-census package.
-    "tiledbsoma==1.4.4",
-    "cellxgene-census==1.6.0",
-    "scipy==1.10.1",  # cellxgene-census==1.5.1 forces scipy<1.11
-    "fsspec==2023.9.2",
-    "s3fs==2023.9.2",
+    "tiledbsoma==1.5.1",
+    "cellxgene-census==1.8.0",
+    "scipy==1.11.4",
+    "fsspec==2023.10.0",
+    "s3fs==2023.10.0",
     "requests==2.31.0",
-    "aiohttp==3.9.0",
+    "aiohttp==3.9.1",
     "Cython", # required by owlready2
     "wheel",  # required by owlready2
     "owlready2==0.44",
-    "gitpython==3.1.37",
+    "gitpython==3.1.40",
     "attrs==23.1.0",
-    "psutil==5.9.5",
+    "psutil==5.9.6",
     "pyyaml==6.0.1",
     "numba==0.56.4",
 ]
