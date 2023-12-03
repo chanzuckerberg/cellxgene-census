@@ -19,7 +19,6 @@ import owlready2
 
 
 class OntologyMapper(ABC):
-
     # Terms to ignore when mapping
     BLOCK_LIST = [
         "BFO_0000004",
@@ -203,7 +202,6 @@ class OntologyMapper(ABC):
 
 
 class CellMapper(OntologyMapper):
-
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
     CXG_CL_ONTOLOGY_URL = "https://github.com/obophenotype/cell-ontology/releases/download/v2023-07-20/cl.owl"
     # Only look up ancestors under Cell
@@ -239,7 +237,6 @@ class CellMapper(OntologyMapper):
 
 
 class TissueMapper(OntologyMapper):
-
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
     CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
 
