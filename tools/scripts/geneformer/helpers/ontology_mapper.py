@@ -51,7 +51,6 @@ class OntologyMapper(ABC):
             self._ontology = owlready2.get_ontology(ontology_owl_path).load()
 
     def get_high_level_terms(self, ontology_term_id: str) -> List[Optional[str]]:
-
         """
         Returns the associated high-level ontology term IDs from any other ID
         """
