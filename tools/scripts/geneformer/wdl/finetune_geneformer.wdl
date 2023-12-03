@@ -12,6 +12,7 @@ task finetune_geneformer {
     command <<<
         set -euxo pipefail
         >&2 sha256sum /census-geneformer/*.py
+        export TQDM_MININTERVAL=10
         python3 /census-geneformer/finetune-geneformer.py \
             -e ~{epochs} ~{'-c ' + config} \
             ~{dataset} \
