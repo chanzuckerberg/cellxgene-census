@@ -25,6 +25,7 @@ class Dataset:
 
     # Optional - as reported by REST API
     dataset_title: str = ""  # CELLxGENE dataset title
+    citation: str = ""  # CELLxGENE citation
     collection_id: str = ""  # CELLxGENE collection id
     collection_name: str = ""  # CELLxGENE collection name
     collection_doi: str = ""  # CELLxGENE collection doi

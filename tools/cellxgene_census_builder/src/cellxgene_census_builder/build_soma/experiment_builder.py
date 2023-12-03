@@ -1,6 +1,5 @@
 import concurrent.futures
 import gc
-import io
 import logging
 from contextlib import ExitStack
 from typing import (
@@ -54,7 +53,6 @@ from .mp import (
     log_on_broken_process_pool,
     n_workers_from_memory_budget,
 )
-from .source_assets import cat_file
 from .stats import get_obs_stats, get_var_stats
 from .summary_cell_counts import (
     accumulate_summary_counts,
@@ -107,40 +105,15 @@ class ExperimentSpecification:
 
     name: str
     anndata_cell_filter_spec: AnnDataFilterSpec
-    gene_feature_length_uris: List[str]
-    gene_feature_length: pd.DataFrame
 
     @classmethod
     def create(
         cls,
         name: str,
         anndata_cell_filter_spec: AnnDataFilterSpec,
-        gene_feature_length_uris: List[str],
     ) -> Self:
         """Factory method. Do not instantiate the class directly."""
-        gene_feature_length = cls._load_gene_feature_length(gene_feature_length_uris)
-        logging.info(f"Loaded gene lengths external reference for {name}, {len(gene_feature_length)} genes.")
-        return cls(
-            name,
-            anndata_cell_filter_spec,
-            gene_feature_length_uris,
-            gene_feature_length,
-        )
-
-    @classmethod
-    def _load_gene_feature_length(cls, gene_feature_length_uris: Sequence[str]) -> pd.DataFrame:
-        """
-        Private. Load any external assets required to create the experiment.
-        """
-        return pd.concat(
-            pd.read_csv(
-                io.BytesIO(cat_file(uri)),
-                names=["feature_id", "feature_name", "gene_version", "feature_length"],
-            )
-            .set_index("feature_id")
-            .drop(columns=["feature_name", "gene_version"])
-            for uri in gene_feature_length_uris
-        )
+        return cls(name, anndata_cell_filter_spec)
 
 
 class ExperimentBuilder:
@@ -175,10 +148,6 @@ class ExperimentBuilder:
     @property
     def anndata_cell_filter_spec(self) -> AnnDataFilterSpec:
         return self.specification.anndata_cell_filter_spec
-
-    @property
-    def gene_feature_length(self) -> pd.DataFrame:
-        return self.specification.gene_feature_length
 
     def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
@@ -321,8 +290,6 @@ class ExperimentBuilder:
         # it is possible there is nothing to write
         if self.var_df is not None and len(self.var_df) > 0:
             self.var_df["soma_joinid"] = range(len(self.var_df))
-            self.var_df = self.var_df.drop(columns=["feature_length"]).join(self.gene_feature_length, on="feature_id")
-            self.var_df.feature_length.fillna(0, inplace=True)
             self.var_df = anndata_ordered_bool_issue_853_workaround(self.var_df)
             self.var_df = self.var_df.set_index("soma_joinid", drop=False)
 
@@ -370,7 +337,7 @@ class ExperimentBuilder:
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
 
             # LIL is fast way to create spmatrix
-            pm = sparse.lil_array((max_dataset_joinid + 1, self.n_var), dtype=bool)
+            pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
             for dataset_joinid, presence in self.presence.items():
                 data, cols = presence
                 pm[dataset_joinid, cols] = data
@@ -527,7 +494,7 @@ def _accumulate_all_X_layers(
             assert (row >= 0).all()
             col = local_var_joinids[X.col]
             assert (col >= 0).all()
-            X_remap = sparse.coo_array((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
+            X_remap = sparse.coo_matrix((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
             with soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
                 experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
             gc.collect()

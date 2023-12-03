@@ -42,7 +42,7 @@ def open_anndata(
         # These are schema versions this code is known to work with. This is a
         # sanity check, which would be better implemented via a unit test at
         # some point in the future.
-        assert CXG_SCHEMA_VERSION in ["3.1.0", "3.0.0"]
+        assert CXG_SCHEMA_VERSION in ["4.0.0"]
 
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
@@ -80,6 +80,7 @@ def open_anndata(
                 # TODO - these should be looked up in the ontology
                 raw_var["feature_name"] = "unknown"
                 raw_var["feature_reference"] = "unknown"
+                raw_var["feature_length"] = 0
                 var = pd.concat([ad.var, raw_var])
             else:
                 var = ad.raw.var

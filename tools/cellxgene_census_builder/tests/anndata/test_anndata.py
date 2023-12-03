@@ -72,7 +72,7 @@ def test_open_anndata_equalizes_raw_and_normalized(datasets_with_larger_raw_laye
 
     # Check that the var has a new row with feature_is_filtered=True and unknown
     # for the two other parameters
-    assert h5ad.var.shape == (4, 4)
+    assert h5ad.var.shape == (4, 5)
     added_var = h5ad.var.loc["homo_sapiens_d"]
     assert added_var.feature_is_filtered
     assert added_var.feature_name == "unknown"
@@ -125,4 +125,4 @@ def test_make_anndata_cell_filter_assay(h5ad_with_assays: ad.AnnData) -> None:
 
 def test_get_cellxgene_schema_version(h5ad_simple: ad.AnnData) -> None:
     version = get_cellxgene_schema_version(h5ad_simple)
-    assert version == "3.1.0"
+    assert version == "4.0.0"

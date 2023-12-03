@@ -10,7 +10,8 @@ from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION
 from .util import fetch_json
 
-CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
+# CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
+CXG_BASE_URI = "https://api.cellxgene.dev.single-cell.czi.technology/"
 
 
 def parse_manifest_file(manifest_fp: io.TextIOBase) -> List[Dataset]:
@@ -85,6 +86,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
             dataset_id=dataset_id,
             dataset_asset_h5ad_uri=asset_h5ad_uri,
             dataset_title=null_to_empty_str(dataset["title"]),
+            citation=dataset["citation"],
             collection_id=dataset["collection_id"],
             collection_name=null_to_empty_str(dataset["collection_name"]),
             collection_doi=null_to_empty_str(dataset["collection_doi"]),

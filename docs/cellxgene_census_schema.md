@@ -1,8 +1,8 @@
 # CZ CELLxGENE Discover Census Schema
 
-**Version**: 1.2.0
+**Version**: 1.3.0
 
-**Last edited**: Sept, 2023.
+**Last edited**: December, 2023.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -382,9 +382,14 @@ All datasets used to build the Census MUST be included in a table modeled as a `
 </thead>
 <tbody>
   <tr>
+    <td>citation</td>
+    <td>string</td>
+    <td>As defined in the CELLxGENE schema.</td>
+  </tr>
+  <tr>
     <td>collection_id</td>
     <td>string</td>
-    <td rowspan="5">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
+    <td rowspan="6">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
   </tr>
   <tr>
     <td>collection_name</td>
@@ -752,7 +757,7 @@ The following columns MUST be included:
   <tr>
     <td>feature_length</td>
     <td>int</td>
-    <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+    <td>As defined in CELLxGENE dataset schema</a>.</td>
   </tr>
   <tr>
     <td>nnz</td>
@@ -838,7 +843,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   </tr>
   <tr>
     <td>assay_ontology_term_id</td>
-    <td colspan="2" rowspan="17">As defined in CELLxGENE dataset schema</td>
+    <td colspan="2" rowspan="19">As defined in CELLxGENE dataset schema</td>
   </tr>
   <tr>
     <td>assay</td>
@@ -868,6 +873,9 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
     <td>is_primary_data</td>
   </tr>
   <tr>
+    <td>observation_joinid</td>
+  </tr>
+  <tr>
     <td>self_reported_ethnicity_ontology_term_id</td>
   </tr>
   <tr>
@@ -887,6 +895,9 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
   </tr>
   <tr>
     <td>tissue</td>
+  </tr>
+  <tr>
+    <td>tissue_type</td>
   </tr>
   <tr>
     <td>nnz</td>
@@ -917,6 +928,12 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 </table>
 
 ## Changelog
+
+### Version 1.3.0
+
+* Update to require [CELLxGENE schema version 4.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md)
+* Adds `citation` to "Census table of CELLxGENE Discover datasets – `census_obj["census_info"]["datasets"]`"
+* Adds `observation_joinid` and `tissue_type` to `obs` dataframe
 
 ### Version 1.2.0
 

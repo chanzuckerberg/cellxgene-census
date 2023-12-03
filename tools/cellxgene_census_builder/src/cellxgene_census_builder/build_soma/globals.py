@@ -9,7 +9,7 @@ from ..util import cpu_count
 
 CENSUS_SCHEMA_VERSION = "1.2.0"
 
-CXG_SCHEMA_VERSION = "3.1.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "4.0.0"  # the CELLxGENE schema version supported
 
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
 # hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
@@ -17,6 +17,7 @@ CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/downl
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_COLUMNS = [
+    "citation",
     "collection_id",
     "collection_name",
     "collection_doi",
@@ -73,6 +74,7 @@ CXG_OBS_TERM_COLUMNS = {
     "disease_ontology_term_id": pa.large_string(),
     "donor_id": pa.large_string(),
     "is_primary_data": pa.bool_(),
+    "observation_joinid": pa.large_string(),
     "self_reported_ethnicity": pa.large_string(),
     "self_reported_ethnicity_ontology_term_id": pa.large_string(),
     "sex": pa.large_string(),
@@ -80,6 +82,7 @@ CXG_OBS_TERM_COLUMNS = {
     "suspension_type": pa.large_string(),
     "tissue": pa.large_string(),
     "tissue_ontology_term_id": pa.large_string(),
+    "tissue_type": pa.large_string(),
 }
 CENSUS_OBS_STATS_COLUMNS = {
     # Columns computed during the Census build and written to the Census obs dataframe.
@@ -134,44 +137,29 @@ _RepetativeStringLabelObs = [
     "tissue_ontology_term_id",
     "tissue_general",
     "tissue_general_ontology_term_id",
+    "tissue_type",
+]
+_NonRepeatitiveStringObs = [
+    k
+    for k in CENSUS_OBS_TERM_COLUMNS
+    if (k not in _RepetativeStringLabelObs)
+    and (pa.types.is_string(CENSUS_OBS_TERM_COLUMNS[k]) or pa.types.is_large_string(CENSUS_OBS_TERM_COLUMNS[k]))
 ]
 _NumericObs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
-            "dims": {
-                "soma_joinid": {
-                    "filters": [
-                        "DoubleDeltaFilter",
-                        {"_type": "ZstdFilter", "level": 19},
-                    ]
-                }
-            },
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
             "attrs": {
                 **{
-                    k: {
-                        "filters": [
-                            "DictionaryFilter",
-                            {"_type": "ZstdFilter", "level": 19},
-                        ]
-                    }
+                    k: {"filters": ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]}
                     for k in _RepetativeStringLabelObs
                 },
-                **{
-                    k: {
-                        "filters": [
-                            "ByteShuffleFilter",
-                            {"_type": "ZstdFilter", "level": 5},
-                        ]
-                    }
-                    for k in _NumericObs
-                },
+                **{k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]} for k in _NumericObs},
+                **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _NonRepeatitiveStringObs},
             },
-            "offsets_filters": [
-                "DoubleDeltaFilter",
-                {"_type": "ZstdFilter", "level": 19},
-            ],
+            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
             "allows_duplicates": True,
         }
     }
@@ -217,7 +205,7 @@ CENSUS_VAR_PLATFORM_CONFIG = {
                     k: {
                         "filters": [
                             "ByteShuffleFilter",
-                            {"_type": "ZstdFilter", "level": 5},
+                            {"_type": "ZstdFilter", "level": 9},
                         ]
                     }
                     for k in _NumericVar
