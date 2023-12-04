@@ -227,7 +227,7 @@ class ExperimentBuilder:
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
         # but may need to evolve this logic if that assumption is not scalable.
-        tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name"]]
+        tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name", "feature_length"]]
         for key in CENSUS_VAR_TERM_COLUMNS:
             if key not in tv:
                 tv[key] = np.full((len(tv),), 0, dtype=CENSUS_VAR_TERM_COLUMNS[key].to_pandas_dtype())
