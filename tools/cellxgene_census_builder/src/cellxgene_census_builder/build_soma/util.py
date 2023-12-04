@@ -4,7 +4,6 @@ from typing import Any, Iterator, Optional, Union
 
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
 import requests
 from scipy import sparse
 
@@ -83,35 +82,6 @@ def is_nonnegative_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmat
         return False
     else:
         return True
-
-
-def anndata_ordered_bool_issue_853_workaround(df: pd.DataFrame) -> pd.DataFrame:
-    # """
-    # TileDB-SOMA does not support creating dataframe with categorical / dictionary
-    # column types.
-    # """
-    # copied = False
-    # for k in df.keys():
-    #     if pd.api.types.is_categorical_dtype(df[k]):
-    #         if not copied:
-    #             df = df.copy()
-    #             copied = True
-
-    #         df[k] = df[k].astype(df[k].cat.categories.dtype)
-
-    # AnnData has a bug (https://github.com/scverse/anndata/issues/853) which will
-    # cause Pandas CategoricalDtype `ordered` to be a numpy.bool_, rather than a bool.
-    # This causes Arrow to blow up.
-    copied = False
-    for k in df.keys():
-        if pd.api.types.is_categorical_dtype(df[k]) and type(df[k].cat.ordered) == np.bool_:
-            if not copied:
-                df = df.copy()
-                copied = True
-
-            df[k] = df[k].cat.set_categories(df[k].cat.categories, ordered=bool(df[k].cat.ordered))
-
-    return df
 
 
 def get_git_commit_sha() -> str:

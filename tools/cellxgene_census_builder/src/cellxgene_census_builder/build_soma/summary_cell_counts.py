@@ -7,9 +7,6 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME
-from .util import (
-    anndata_ordered_bool_issue_853_workaround,
-)
 
 
 def create_census_summary_cell_counts(
@@ -26,8 +23,6 @@ def create_census_summary_cell_counts(
         .agg({"unique_cell_count": "sum", "total_cell_count": "sum", "label": "first"})
     )
     df["soma_joinid"] = df.index.astype(np.int64)
-
-    df = anndata_ordered_bool_issue_853_workaround(df)
 
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(

@@ -58,7 +58,7 @@ from .summary_cell_counts import (
     accumulate_summary_counts,
     init_summary_counts_accumulator,
 )
-from .util import anndata_ordered_bool_issue_853_workaround, array_chunker, is_nonnegative_integral
+from .util import array_chunker, is_nonnegative_integral
 
 
 @attrs.define
@@ -218,7 +218,6 @@ class ExperimentBuilder:
 
         # drop columns we don't want to write (e.g., organism)
         obs_df = obs_df[list(CENSUS_OBS_TERM_COLUMNS)]
-        obs_df = anndata_ordered_bool_issue_853_workaround(obs_df)
 
         # accumulate obs
         self.obs_df_accumulation.append(obs_df)
@@ -290,7 +289,6 @@ class ExperimentBuilder:
         # it is possible there is nothing to write
         if self.var_df is not None and len(self.var_df) > 0:
             self.var_df["soma_joinid"] = range(len(self.var_df))
-            self.var_df = anndata_ordered_bool_issue_853_workaround(self.var_df)
             self.var_df = self.var_df.set_index("soma_joinid", drop=False)
 
             self.global_var_joinids = self.var_df[["feature_id", "soma_joinid"]].set_index("feature_id")
