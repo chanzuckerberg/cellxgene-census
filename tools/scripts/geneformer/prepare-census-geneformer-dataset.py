@@ -4,6 +4,7 @@
 import argparse
 import json
 import logging
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -19,6 +20,7 @@ from helpers.ontology_mapper import CellSubclassMapper
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(os.path.basename(__file__))
+NPROC = multiprocessing.cpu_count()
 
 
 def main(argv):
@@ -56,10 +58,13 @@ def main(argv):
         dataset = dataset.map(
             lambda it: {
                 "cell_subclass_ontology_term_id": obs_df.loc[it["soma_joinid"]]["cell_subclass_ontology_term_id"]
-            }
+            },
+            num_proc=NPROC,
         )
     if "cell_subclass" in args.obs_columns:
-        dataset = dataset.map(lambda it: {"cell_subclass": obs_df.loc[it["soma_joinid"]]["cell_subclass"]})
+        dataset = dataset.map(
+            lambda it: {"cell_subclass": obs_df.loc[it["soma_joinid"]]["cell_subclass"]}, num_proc=NPROC
+        )
     logger.info(str(dataset))
     if len(dataset):
         logger.info(dataset[0])
