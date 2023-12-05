@@ -64,7 +64,8 @@ if __name__ == "__main__":
         ad,
         model_filename,
     )
-    vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0))
+    # vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0))
+    vae_q.is_trained = True
     latent = vae_q.get_latent_representation()
 
     ad.write_h5ad("anndata-full.h5ad", compression="gzip")
