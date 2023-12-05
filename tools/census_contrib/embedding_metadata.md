@@ -1,9 +1,11 @@
 # Community Contributed Embedding Schema
 
+☝ *NOTE:* if you have feedback on this format, we could love to hear from you. Feel free to file a GitHub issue, or reach out at <soma@chanzuckerberg.org>.
+
 Each embedding is encoded as a SOMA SparseNDArray, where:
 
 * dimension 0 (`soma_dim_0`) encodes the cell (obs) `soma_joinid` value
-* dimension 1 (`soma_dim_1`) encodes the embedding feature, and is in the range [0, N) where N is the number of featues in the embedding
+* dimension 1 (`soma_dim_1`) encodes the embedding feature, and is in the range [0, N) where N is the number of features in the embedding
 * data (`soma_data`) is float32
 
 ⚠️ **IMPORTANT:** Community-contributed embeddings may embed a subset of the cells in any given Census version. If a cell has an embedding, it will be explicitly stored in the sparse array, _even if the embedding value is zero_. In other words, missing array values values imply that the cell was not embedded, whereas zero valued embeddings are explicitly stored. Put another way, the `nnz` of the embedding array indicate the number of embedded cells, not the number of non-zero values.
