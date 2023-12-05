@@ -39,9 +39,7 @@ if __name__ == "__main__":
     hv = hvgs_df.highly_variable
 
     hv.to_pickle("hv_genes.pkl")
-    # fmt: off
     hv_idx = hv[hv].index
-    # fmt: on
 
     query = census["census_data"][experiment_name].axis_query(
         measurement_name="RNA",

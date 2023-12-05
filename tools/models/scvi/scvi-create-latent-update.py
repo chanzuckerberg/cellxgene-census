@@ -22,9 +22,7 @@ if __name__ == "__main__":
     obs_value_filter = census_config.get("obs_query")
 
     hv = pd.read_pickle("hv_genes.pkl")
-    # fmt: off
     hv_idx = hv[hv].index
-    # fmt: on
 
     if obs_value_filter is not None:
         obs_query = soma.AxisQuery(value_filter=obs_value_filter)
@@ -52,8 +50,6 @@ if __name__ == "__main__":
     del census, query, hv, hv_idx
     gc.collect()
 
-    # TODO: ensure that the anndata we're loading doesn't have obs filtering
-
     model_config = config.get("model")
     model_filename = model_config.get("filename")
     n_latent = model_config.get("n_latent")
@@ -64,8 +60,11 @@ if __name__ == "__main__":
         ad,
         model_filename,
     )
-    # vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0))
-    vae_q.is_trained = True
+    # Uncomment #1 if you want to do a forward pass with an additional training epoch.
+    # Uncomment #2 if you want to do a forward pass without additional training.
+
+    # vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0)) # 1
+    vae_q.is_trained = True # 2
     latent = vae_q.get_latent_representation()
 
     ad.write_h5ad("anndata-full.h5ad", compression="gzip")
