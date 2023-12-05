@@ -1,6 +1,6 @@
 # Community Contributed Embedding Schema
 
-☝ *NOTE:* if you have feedback on this format, we could love to hear from you. Feel free to file a GitHub issue, or reach out at <soma@chanzuckerberg.org>.
+☝ _NOTE:_ if you have feedback on this format, we could love to hear from you. Feel free to file a GitHub issue, or reach out at <soma@chanzuckerberg.org>.
 
 Each embedding is encoded as a SOMA SparseNDArray, where:
 
