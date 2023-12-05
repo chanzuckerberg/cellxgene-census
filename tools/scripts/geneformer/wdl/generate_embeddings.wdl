@@ -65,7 +65,9 @@ task generate_embeddings {
         String output_uri
         String s3_region
 
-        # if part is supplied, process only cells satisfying: soma_joinid % parts == part
+        Int emb_layer = -1  # -1 or 0
+
+        # for scattering over partitions: process only part# of parts
         Int? part
         Int parts = 1
 
@@ -81,7 +83,7 @@ task generate_embeddings {
         export AWS_DEFAULT_REGION='~{s3_region}'
         export TQDM_MININTERVAL=10
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            ~{"--part " + part} --parts ~{parts} --batch-size 10 --tiledbsoma \
+            --emb-layer ~{emb_layer} ~{"--part " + part} --parts ~{parts} --batch-size 10 --tiledbsoma \
             '~{model}' '~{dataset}' '~{output_uri}'
     >>>
 
