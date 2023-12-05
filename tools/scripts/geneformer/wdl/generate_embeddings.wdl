@@ -5,6 +5,7 @@ workflow scatter_generate_embeddings {
         Directory dataset
         Directory model
         String output_uri
+        Int? emb_layer
         Int parts = 10
 
         String s3_region = "us-west-2"
@@ -19,7 +20,7 @@ workflow scatter_generate_embeddings {
     scatter (part in range(parts)) {
         call generate_embeddings after init_embeddings_array {
             input:
-            dataset, model, output_uri, s3_region, part, parts, docker
+            dataset, model, emb_layer, output_uri, s3_region, part, parts, docker
         }
     }
 
