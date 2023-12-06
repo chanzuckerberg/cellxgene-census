@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from concurrent import futures
-from typing import Any, Optional
+from typing import Any, Callable, Optional, Sequence, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -37,27 +37,48 @@ Notes:
 """
 
 
-def _get_batch_index(query: soma.ExperimentAxisQuery, batch_key: str) -> pd.Series[Any]:
-    """Return categorical series representing the batch key, with codes that
-    index the key."""
+def _get_batch_index(
+    query: soma.ExperimentAxisQuery,
+    batch_key: Union[str, Sequence[str]],
+    batch_key_func: Optional[Callable[..., Any]] = None,
+) -> pd.Series[Any]:
+    """
+    Return categorical series representing the batch key, with codes that index the key.
+    """
+    if isinstance(batch_key, str):
+        batch_key = [batch_key]
+    batch_key = list(batch_key)
+    assert isinstance(batch_key, list) and len(batch_key) > 0
+
     obs: pd.DataFrame = (
-        query.obs(column_names=["soma_joinid", batch_key])
-        .concat()
-        .to_pandas()
-        .set_index("soma_joinid")[[batch_key]]
-        .astype("category")
+        query.obs(column_names=["soma_joinid"] + batch_key).concat().to_pandas().set_index("soma_joinid")[batch_key]
     )
-    assert pd.api.types.is_categorical_dtype(obs[batch_key].dtype)
-    return obs[batch_key]
+
+    batch_series: pd.Series[Any]
+    if batch_key_func is not None:
+        # apply user lambda
+        batch_series = obs.apply(batch_key_func, axis=1, result_type="reduce")
+    elif len(batch_key) > 1:
+        # if multiple keys, stringify and concat
+        obs = obs.astype(str)
+        batch_series = obs[cast(str, batch_key[0])]
+        batch_series = batch_series.str.cat(obs[batch_key[1:]])
+    else:
+        # if a single key, just use it
+        batch_series = obs[cast(str, batch_key[0])]
+
+    batch_series = batch_series.astype("category")
+    return batch_series
 
 
 def _highly_variable_genes_seurat_v3(
     query: soma.ExperimentAxisQuery,
-    batch_key: Optional[str] = None,
+    batch_key: Optional[Union[str, Sequence[str]]] = None,
     n_top_genes: int = 1000,
     layer: str = "raw",
     span: float = 0.3,
     max_loess_jitter: float = 1e-6,
+    batch_key_func: Optional[Callable[..., Any]] = None,
 ) -> pd.DataFrame:
     try:
         import skmisc.loess
@@ -66,7 +87,7 @@ def _highly_variable_genes_seurat_v3(
 
     batch_indexer = None
     if batch_key is not None:
-        batch_index = _get_batch_index(query, batch_key)
+        batch_index = _get_batch_index(query, batch_key, batch_key_func)
         n_batches = len(batch_index.cat.categories)
         n_samples = batch_index.value_counts().loc[batch_index.cat.categories.to_numpy()].to_numpy()
         if n_batches > 1:
@@ -119,6 +140,11 @@ def _highly_variable_genes_seurat_v3(
         N = n_samples[batch]
 
         not_const = v > 0
+        if N == 1 or not not_const.any():
+            reg_std[batch].fill(1)
+            clip_val[batch, :] = u
+            continue
+
         y = np.log10(v[not_const])
         x = np.log10(u[not_const])
 
@@ -164,9 +190,12 @@ def _highly_variable_genes_seurat_v3(
                 acc.update(var_dim, data)
 
         counts_sum, squared_counts_sum = acc.finalize()
-        norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
-            (n_samples * np.square(batches_u.T)).T + squared_counts_sum - 2 * counts_sum * batches_u
-        )
+        # Don't raise python errors for 0/0, etc, just generate Inf/NaN
+        with np.errstate(divide="ignore", invalid="ignore"):
+            norm_gene_vars = (1 / ((n_samples - 1) * np.square(reg_std.T))).T * (
+                (n_samples * np.square(batches_u.T)).T + squared_counts_sum - 2 * counts_sum * batches_u
+            )
+            norm_gene_vars[np.isnan(norm_gene_vars)] = 0
         del acc, counts_sum, squared_counts_sum
 
     ranked_norm_gene_vars = np.argsort(np.argsort(-norm_gene_vars, axis=1), axis=1)
@@ -204,8 +233,9 @@ def highly_variable_genes(
     layer: str = "raw",
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
-    batch_key: Optional[str] = None,
+    batch_key: Optional[Union[str, Sequence[str]]] = None,
     max_loess_jitter: float = 1e-6,
+    batch_key_func: Optional[Callable[..., Any]] = None,
 ) -> pd.DataFrame:
     """
     Identify and annotate highly variable genes contained in the query results.
@@ -235,11 +265,22 @@ def highly_variable_genes(
             estimate the loess variance model fit.
 
         batch_key:
-            If specified, gene selection will be done by batch and combined.
+            If specified, gene selection will be done by batch and combined. Specify the
+            obs column name, or list of column names, identifying the batches. If not specified,
+            all gene selection is done as a single batch.
+
+            If multiple batch keys are specified, and no batch_key_func is specified, the
+            batch key will be generated by converting values to string and concatenating
+            them.
 
         max_lowess_jitter:
             The maximum jitter to add to data in case of LOESS failure (can
             occur when dataset has low entry counts.)
+
+        batch_key_func:
+            Optional function to create a user-defined batch key. Function will be called
+            once per row in the obs dataframe. Function will receive a single argument:
+            a Pandas Series containing values specified in the `batch_key` argument.
 
     Returns:
         Pandas DataFrame containing annotations for all `var` values specified by the
@@ -248,6 +289,27 @@ def highly_variable_genes(
 
     Raises:
         ValueError: if the flavor paramater is not `seurat_v3`.
+
+
+    Examples:
+
+        Fetch Pandas DataFrame containing var annotations for the query selection, using
+        `dataset_id` as a batch key.
+
+        >>> hvg = highly_variable_genes(query, batch_key="dataset_id")
+
+        Fetch highly variable genes, using the concatenation of `dataset_id` and `donor_id` a
+        a batch key:
+
+        >>> hvg = highly_variable_genes(query, batch_key=["dataset_id", "donor_id"])
+
+        Fetch highly variable genes, with a user-defined batch key function:
+
+        >>> hvg = highly_variable_genes(
+                query,
+                batch_key="donor_id",
+                batch_key_func=lambda s: return "batch0" if s.donor_id == "99" else "batch1"
+            )
 
     Lifecycle:
         experimental
@@ -261,6 +323,7 @@ def highly_variable_genes(
         layer=layer,
         span=span,
         batch_key=batch_key,
+        batch_key_func=batch_key_func,
         max_loess_jitter=max_loess_jitter,
     )
 
@@ -277,8 +340,9 @@ def get_highly_variable_genes(
     n_top_genes: int = 1000,
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
-    batch_key: Optional[str] = None,
+    batch_key: Optional[Union[str, Sequence[str]]] = None,
     max_loess_jitter: float = 1e-6,
+    batch_key_func: Optional[Callable[..., Any]] = None,
 ) -> pd.DataFrame:
     """
     Convenience wrapper
@@ -328,7 +392,9 @@ def get_highly_variable_genes(
             estimate the loess variance model fit.
 
         batch_key:
-            If specified, gene selection will be done by batch and combined.
+            If specified, gene selection will be done by batch and combined. Specify the
+            obs column name, or list of column names, identifying the batches. If not specified,
+            all gene selection is done as a single batch.
 
         max_lowess_jitter:
             The maximum jitter to add to data in case of LOESS failure (can
@@ -391,5 +457,6 @@ def get_highly_variable_genes(
             flavor=flavor,
             span=span,
             batch_key=batch_key,
+            batch_key_func=batch_key_func,
             max_loess_jitter=max_loess_jitter,
         )

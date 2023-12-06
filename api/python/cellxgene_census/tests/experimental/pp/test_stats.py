@@ -1,6 +1,7 @@
 from typing import Any, Tuple, Union
 
 import numpy as np
+import numpy.ma as ma
 import pandas as pd
 import pytest
 import tiledbsoma as soma
@@ -86,6 +87,59 @@ def test_mean_variance(
             if calc_variance:
                 variance = var(coo, axis=axis)
                 assert np.allclose(variance, mean_variance["variance"], atol=1e-5, rtol=1e-2)
+
+
+@pytest.mark.experimental
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("axis", [0, 1])
+@pytest.mark.parametrize("calc_mean,calc_variance", [(True, True)])
+@pytest.mark.parametrize(
+    "experiment_name,obs_coords",
+    [
+        ("mus_musculus", (slice(0, 1_000),)),
+    ],
+)
+def test_mean_variance_nnz_only(
+    experiment_name: str,
+    axis: int,
+    calc_mean: bool,
+    calc_variance: bool,
+    small_mem_context: soma.SOMATileDBContext,
+    obs_coords: Tuple[None, slice],
+) -> None:
+    # Note: since this test requires materializing the matrix in memory to compute the mean/variance,
+    # we're going to use a coord slice based approach. This will ensure the matrix can fit in memory.
+    with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
+        with census["census_data"][experiment_name].axis_query(
+            measurement_name="RNA", obs_query=soma.AxisQuery(coords=obs_coords)
+        ) as query:
+            mean_variance = pp.mean_variance(
+                query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, nnz_only=True, ddof=0
+            )
+
+            table = query.X("raw").tables().concat()
+            data = table["soma_data"].to_numpy()
+
+            dim_0 = query.indexer.by_obs(table["soma_dim_0"])
+            dim_1 = query.indexer.by_var(table["soma_dim_1"])
+            coo = sparse.coo_matrix((data, (dim_0, dim_1)), shape=(query.n_obs, query.n_vars))
+
+            dense = coo.toarray()
+
+            mask = np.ones(coo.shape)
+            r, c = coo.nonzero()
+            for x, y in zip(r, c):
+                mask[x, y] = 0
+            masked = ma.masked_array(dense, mask=mask)  # type: ignore[no-untyped-call, var-annotated]
+
+            if calc_mean:
+                mean = masked.mean(axis=axis)  # type: ignore[no-untyped-call]
+                assert np.allclose(mean, mean_variance["mean"], atol=1e-5, rtol=1e-1, equal_nan=True)
+
+            if calc_variance:
+                variance = masked.var(axis=axis, ddof=0)  # type: ignore[no-untyped-call]
+                va = mean_variance["variance"].to_numpy()
+                assert np.allclose(variance, va, atol=1e-5, rtol=1e-2, equal_nan=True)
 
 
 def test_mean_variance_no_flags() -> None:

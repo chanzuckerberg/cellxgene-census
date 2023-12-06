@@ -8,6 +8,7 @@
    cellxgene_census_docsite_installation.md
    cellxgene_census_docsite_quick_start.md
    articles
+   Census in AWS ☁️ <cellxgene_census_aws_open_data.md> 
    cellxgene_census_docsite_schema.md
    cellxgene_census_docsite_data_release_info.md
    python-api

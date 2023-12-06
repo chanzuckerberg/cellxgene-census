@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Chan Zuckerberg Initiative
+# Copyright (c) 2022-2023 Chan Zuckerberg Initiative Foundation
 #
 # Licensed under the MIT License.
 

@@ -19,13 +19,16 @@ def mean_variance(
     calculate_mean: bool = False,
     calculate_variance: bool = False,
     ddof: int = 1,
+    nnz_only: bool = False,
 ) -> pd.DataFrame:
     """
     Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations
     are done in an accumulative chunked fashion. For the mean and variance calculations,
-    the total number of elements (N) is the corresponding dimension size:
+    the total number of elements (N) is, by default, the corresponding dimension size:
     for column-wise calculations (``axis = 0``) N is number of rows,
     for row-wise calculations (``axis = 1``) N is number of columns.
+    For metrics calculated only on nnz (explicitly stored)values of the sparse matrix,
+    specify ``nnz_only=True``.
 
     Args:
         query:
@@ -45,6 +48,9 @@ def mean_variance(
 
         ddof:
             "Delta Degrees of Freedom": the divisor used in the calculation for variance is ``N - ddof``, where ``N`` represents the number of elements.
+
+        nnz_only:
+            If ``True`` mean and variance will only be calculated over explicitly stored values in the sparse matrix. Defaults to ``False``.
 
     Returns:
         Pandas DataFrame indexed by the ``soma_joinid`` and with columns ``mean`` (if ``calculate_mean = True``), and ``variance`` (if ``calculate_variance = True``)
@@ -82,7 +88,7 @@ def mean_variance(
     )
 
     if calculate_variance:
-        mvn = MeanVarianceAccumulator(n_batches, n_samples, n_dim_0, ddof=ddof)
+        mvn = MeanVarianceAccumulator(n_batches, n_samples, n_dim_0, ddof=ddof, nnz_only=nnz_only)
         for dim, data in iterate():
             mvn.update(dim, data)
         _, _, all_u, all_var = mvn.finalize()
@@ -90,7 +96,7 @@ def mean_variance(
             result["mean"] = all_u
         result["variance"] = all_var
     else:
-        mn = MeanAccumulator(n_dim_1, n_dim_0)
+        mn = MeanAccumulator(n_dim_1, n_dim_0, nnz_only=nnz_only)
         for dim, data in iterate():
             mn.update(dim, data)
         all_u = mn.finalize()

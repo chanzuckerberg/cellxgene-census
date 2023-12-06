@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,8 +84,7 @@
 
 
 
-
-<div class="row">
+<script src="comp_bio_data_integration_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Integrating multi-dataset slices of data with Seurat</h1>
             
@@ -134,13 +133,18 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span></span>
 <span><span class="co"># Print rows with liver data</span></span>
 <span><span class="va">census_datasets</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"Liver"</span>, <span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_title</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 8</span></span></span>
-<span><span class="co">#&gt;   soma_joinid collection_id            collection_name collection_doi dataset_id</span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         525 0b9d8a04-bb9d-44da-aa27… Tabula Muris S… 10.1038/s4158… 4546e757-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         547 0b9d8a04-bb9d-44da-aa27… Tabula Muris S… 10.1038/s4158… 6202a243-…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: dataset_title &lt;chr&gt;, dataset_h5ad_path &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt;    soma_joinid                        collection_id    collection_name</span></span>
+<span><span class="co">#&gt; 14         525 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt; 35         547 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt;               collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 14 10.1038/s41586-020-2496-1 4546e757-34d0-4d17-be06-538318925fcd</span></span>
+<span><span class="co">#&gt; 35 10.1038/s41586-020-2496-1 6202a243-b713-4e12-9ced-c387f8483dea</span></span>
+<span><span class="co">#&gt;                                                                                        dataset_title</span></span>
+<span><span class="co">#&gt; 14 Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
+<span><span class="co">#&gt; 35        Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
+<span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 14 4546e757-34d0-4d17-be06-538318925fcd.h5ad                     2859</span></span>
+<span><span class="co">#&gt; 35 6202a243-b713-4e12-9ced-c387f8483dea.h5ad                     7294</span></span></code></pre></div>
 <p>Now we can use the values from <code>dataset_id</code> to query and load a Seurat object with all the cells from those datasets.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tabula_muris_liver_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"4546e757-34d0-4d17-be06-538318925fcd"</span>, <span class="st">"6202a243-b713-4e12-9ced-c387f8483dea"</span><span class="op">)</span></span>
@@ -277,15 +281,22 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt; Merging objects</span></span>
 <span><span class="co">#&gt; Finding neighborhoods</span></span>
 <span><span class="co">#&gt; Finding anchors</span></span>
-<span><span class="co">#&gt;  Found 7026 anchors</span></span>
+<span><span class="co">#&gt;  Found 7136 anchors</span></span>
 <span><span class="co">#&gt; Filtering anchors</span></span>
-<span><span class="co">#&gt;  Retained 4880 anchors</span></span>
+<span><span class="co">#&gt;  Retained 5048 anchors</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span>
 <span><span class="co">#&gt; Merging dataset 1 into 2</span></span>
 <span><span class="co">#&gt; Extracting anchors for merged samples</span></span>
 <span><span class="co">#&gt; Finding integration vectors</span></span>
 <span><span class="co">#&gt; Finding integration vector weights</span></span>
-<span><span class="co">#&gt; Integrating data</span></span></code></pre></div>
+<span><span class="co">#&gt; Integrating data</span></span>
+<span><span class="co">#&gt; Warning: Assay integrated changing from Assay to SCTAssay</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span></code></pre></div>
 <p>And inspect the new results by UMAP.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
@@ -293,20 +304,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 13:30:46 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 13:30:46 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 13:30:46 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 13:30:46 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 17:32:58 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 17:32:58 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 17:32:58 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 17:32:58 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 13:30:47 Writing NN index file to temp file /var/folders/9q/j_1zpqns7vz_s5n9l6_b943r0000gr/T//RtmpwHKO6w/file16d2113ba6e8</span></span>
-<span><span class="co">#&gt; 13:30:47 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 13:30:51 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 13:30:51 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 13:30:52 Initializing from normalized Laplacian + noise (using irlba)</span></span>
-<span><span class="co">#&gt; 13:30:53 Commencing optimization for 200 epochs, with 410804 positive edges</span></span>
-<span><span class="co">#&gt; 13:30:59 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 17:32:59 Writing NN index file to temp file /tmp/Rtmp91c2fH/file1306c933fc5688</span></span>
+<span><span class="co">#&gt; 17:32:59 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 17:33:02 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 17:33:02 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 17:33:03 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 17:33:03 Commencing optimization for 200 epochs, with 409718 positive edges</span></span>
+<span><span class="co">#&gt; 17:33:07 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
@@ -356,7 +367,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Chan Zuckerberg Initiative.</p>
+<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -16,7 +16,7 @@ ListReporterToFile <- R6::R6Class("ListReporterToFile",
     start_test = function(context, test) {
       # print stdout for live progress
       cat("START TEST (", as.character(Sys.time()), "): ", test, "\n")
-      super$start_test()
+      super$start_test(context, test)
     },
     end_test = function(context, test) {
       super$end_test(context, test)
