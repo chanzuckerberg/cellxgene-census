@@ -14,7 +14,6 @@ The `Dockerfile` provides the recipe for the docker image used by the WDLs, whic
 
 Using a [miniwdl-aws](https://github.com/miniwdl-ext/miniwdl-aws) deployment with suitable GPU instance types enabled on the underlying AWS Batch compute environment, and assuming the docker image has been built and pushed to a suitable repository like ECR (tagged `$DOCKER_TAG`).
 
-
 Preparing a tokenized training dataset with 2,500 primary cells per human cell type:
 
 ```bash
