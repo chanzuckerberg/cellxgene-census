@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Uncomment #2 if you want to do a forward pass without additional training.
 
     # vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0)) # 1
-    vae_q.is_trained = True # 2
+    vae_q.is_trained = True  # 2
     latent = vae_q.get_latent_representation()
 
     ad.write_h5ad("anndata-full.h5ad", compression="gzip")

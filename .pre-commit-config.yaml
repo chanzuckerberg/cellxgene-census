@@ -67,6 +67,7 @@ repos:
           - pandas-stubs
           - typing_extensions
           - types-PyYAML
+          - scvi-tools
 
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.7.0
