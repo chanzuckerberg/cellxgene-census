@@ -26,6 +26,7 @@ def get_anndata(
     var_value_filter: Optional[str] = None,
     var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[soma.AxisColumnNames] = None,
+    obsm_layers: Optional[Sequence[str]] = (),
 ) -> anndata.AnnData:
     """
     Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
@@ -56,6 +57,8 @@ def get_anndata(
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
         column_names:
             Columns to fetch for ``obs`` and ``var`` dataframes.
+        obsm_layers:
+            Additional obsm layers to read and return in the ``obsm`` slot.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
@@ -78,4 +81,4 @@ def get_anndata(
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
         var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
-        return query.to_anndata(X_name=X_name, column_names=column_names, X_layers=X_layers)
+        return query.to_anndata(X_name=X_name, column_names=column_names, X_layers=X_layers, obsm_layers=obsm_layers)
