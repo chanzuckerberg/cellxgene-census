@@ -12,8 +12,9 @@ from cellxgene_census.experimental.diffexp.memento.diff_expr import CUBE_LOGICAL
 def estimators_df(dim_counts: Dict[str, int]) -> pd.DataFrame:
     """Create a dummy estimators DataFrame, with all combinations of variables."""
     columns = CUBE_LOGICAL_DIMS_OBS + ["feature_id"]
-    dim_counts = {var: 1 for var in columns} | (dim_counts or {})
-    dim_values = {var: [f"{var}_{chr(ord('a') + i)}" for i in range(n)] for var, n in dim_counts.items()}
+    dim_counts_full = {var: 1 for var in columns}
+    dim_counts_full.update(dim_counts or {})
+    dim_values = {var: [f"{var}_{chr(ord('a') + i)}" for i in range(n)] for var, n in dim_counts_full.items()}
 
     rows = list(itertools.product(*dim_values.values()))
     estimators = pd.DataFrame(data=rows, columns=columns).astype("str")
