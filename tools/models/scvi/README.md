@@ -34,7 +34,11 @@ This file takes the previously generated model and obtains the latent space repr
 1. Call the `scvi.model.SCVI.load_query_data()` function on this AnnData. This allows to work on a dataset that has more cells than the one the model is trained on (which is required so that the model doesn't need to be re-trained from scratch on each Census version). A further pass of training is possible, but we just set `is_trained = True` to skip it.
 1. We call `get_latent_representation()` to generate the embeddings
 1. Both the final h5ad file, the embeddings and the cell index are saved as part of the output.
+
 ## Selection of model parameters
 
 The final selection of parameters for the training phase was based on a hyper parameter search as described in the [CELLxGENE Discover Census scvi-tools initial autotune report](https://github.com/YosefLab/census-scvi/blob/main/experiments/autotune/notebooks/2023_09_autotune_report.ipynb)
+
 ## Environment setup
+
+The training has been performed on an AWS EC2 machine (instance type: g4dn.12xlarge)
