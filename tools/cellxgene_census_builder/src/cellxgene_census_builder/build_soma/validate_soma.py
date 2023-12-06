@@ -43,6 +43,7 @@ from .globals import (
     CXG_SCHEMA_VERSION,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
+    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .mp import (
@@ -534,14 +535,24 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
         X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
         assert X_raw.shape == X_norm.shape
 
+        is_smart_seq = np.isin(
+            exp.obs.read(column_names=["assay_ontology_term_id"])
+            .concat()
+            .to_pandas()
+            .assay_ontology_term_id.to_numpy(),
+            SMART_SEQ,
+        )
+
         var_df = (
             exp.ms[MEASUREMENT_RNA_NAME]
-            .var.read(column_names=["soma_joinid"])
+            .var.read(column_names=["soma_joinid", "feature_length"])
             .concat()
             .to_pandas()
             .set_index("soma_joinid")
         )
         n_cols = len(var_df)
+        feature_length = var_df.feature_length.to_numpy()
+        assert (feature_length > 0).any()
         assert X_raw.shape[1] == n_cols
 
         ROW_SLICE_SIZE = 100_000
@@ -564,11 +575,15 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             norm_csr = sparse.coo_matrix((norm["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
             raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
 
+            sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
+            if sseq_mask.any():
+                raw_csr[sseq_mask, :] /= feature_length
+
             assert np.allclose(
-                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-1, atol=1e-1
+                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
             ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
             assert np.allclose(
-                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data, rtol=1e-2, atol=1e-2
+                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
             ), f"{experiment_specification.name}: normalized layer does not match raw contents"
             gc.collect()
 

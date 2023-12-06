@@ -724,7 +724,9 @@ Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read count
 This is an experimental data artifact - it may be removed at any time.
 
 A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
-For a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
+For Smart-Seq assays, given a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
+as `normalized[i,j] = (X[i,j] / var[j].feature_length) / sum(X[i, ] / var.feature_length[j])`.
+For all other assays, for a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
 as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
 
 #### Feature metadata – `census_obj["census_data"][organism].ms["RNA"].var` – `SOMADataFrame`

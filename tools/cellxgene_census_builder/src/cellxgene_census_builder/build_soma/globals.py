@@ -184,37 +184,12 @@ CENSUS_VAR_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
             "capacity": 2**16,
-            "dims": {
-                "soma_joinid": {
-                    "filters": [
-                        "DoubleDeltaFilter",
-                        {"_type": "ZstdFilter", "level": 19},
-                    ]
-                }
-            },
+            "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
             "attrs": {
-                **{
-                    k: {
-                        "filters": [
-                            {"_type": "ZstdFilter", "level": 19},
-                        ]
-                    }
-                    for k in _StringLabelVar
-                },
-                **{
-                    k: {
-                        "filters": [
-                            "ByteShuffleFilter",
-                            {"_type": "ZstdFilter", "level": 9},
-                        ]
-                    }
-                    for k in _NumericVar
-                },
+                **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _StringLabelVar},
+                **{k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]} for k in _NumericVar},
             },
-            "offsets_filters": [
-                "DoubleDeltaFilter",
-                {"_type": "ZstdFilter", "level": 19},
-            ],
+            "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
             "allows_duplicates": True,
         }
     }
@@ -229,26 +204,10 @@ CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG = {
         "create": {
             "capacity": 2**16,
             "dims": {
-                "soma_dim_0": {
-                    "tile": 2048,
-                    "filters": [{"_type": "ZstdFilter", "level": 5}],
-                },
-                "soma_dim_1": {
-                    "tile": 2048,
-                    "filters": [
-                        "ByteShuffleFilter",
-                        {"_type": "ZstdFilter", "level": 5},
-                    ],
-                },
+                "soma_dim_0": {"tile": 2048, "filters": [{"_type": "ZstdFilter", "level": 5}]},
+                "soma_dim_1": {"tile": 2048, "filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]},
             },
-            "attrs": {
-                "soma_data": {
-                    "filters": [
-                        "ByteShuffleFilter",
-                        {"_type": "ZstdFilter", "level": 5},
-                    ]
-                }
-            },
+            "attrs": {"soma_data": {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 5}]}},
             "cell_order": "row-major",
             "tile_order": "row-major",
             "allows_duplicates": True,
@@ -264,20 +223,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
         "tiledb": {
             "create": {
                 **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
-                "attrs": {
-                    "soma_data": {
-                        "filters": [
-                            {
-                                "_type": "FloatScaleFilter",
-                                "factor": CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR,
-                                "offset": 0.5,
-                                "bytewidth": 4,
-                            },
-                            "ByteShuffleFilter",
-                            {"_type": "ZstdFilter", "level": 5},
-                        ]
-                    }
-                },
+                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 19}]}},
             }
         }
     },
@@ -310,6 +256,13 @@ RNA_SEQ = [
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
     "EFO:0700010",  # TruDrop
     "EFO:0700011",  # GEXSCOPE technology
+    "EFO:0700016",  # Smart-seq v4
+]
+
+# Smart-Seq has special handling in the "normalized" X layers
+SMART_SEQ = [
+    "EFO:0008930",  # Smart-seq
+    "EFO:0008931",  # Smart-seq2
     "EFO:0700016",  # Smart-seq v4
 ]
 
