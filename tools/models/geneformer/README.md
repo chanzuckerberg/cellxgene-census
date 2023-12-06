@@ -50,7 +50,7 @@ Generating cell embeddings (takes 8-12h on up to 256 g5.2xlarge, generates 130Gi
 MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 \
 MINIWDL__AWS__SUBMIT_PERIOD=60 \
 miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
-    ~/src/cellxgene-census/tools/scripts/geneformer/wdl/generate_embeddings.wdl \
+    wdl/generate_embeddings.wdl \
     emb_layer=0 \
     dataset=s3://MYBUCKET/geneformer/datasets/census-2023-10-23/dataset/census-2023-10-23 \
     model=s3://MYBUCKET/geneformer/models/2500_per_cell_type_8epochs/model/2500_per_cell_type_8epochs \
