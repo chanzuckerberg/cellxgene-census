@@ -10,7 +10,7 @@ task prepare_census_geneformer_dataset {
         String sampling_column = "cell_subclass"
         String census_version = "latest"
 
-        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
+        String docker
     }
 
     command <<<

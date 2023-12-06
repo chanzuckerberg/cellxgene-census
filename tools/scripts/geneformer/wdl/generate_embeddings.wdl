@@ -9,7 +9,7 @@ workflow scatter_generate_embeddings {
         Int parts = 10
 
         String s3_region = "us-west-2"
-        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
+        String docker
     }
 
     call init_embeddings_array {

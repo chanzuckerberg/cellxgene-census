@@ -9,7 +9,7 @@ task finetune_geneformer {
         Int epochs = 8
         File? config
 
-        String docker = "699936264352.dkr.ecr.us-west-2.amazonaws.com/mlin-census-scratch:latest"
+        String docker
     }
 
     command <<<
