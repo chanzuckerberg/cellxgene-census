@@ -126,19 +126,24 @@ def _validate_release_info(
     prefix = parsed_url.path
 
     expected_soma_locator = {
-        "uri": urlcat(census_base_url, rls_tag, "soma/"),
         "relative_uri": urlcat(prefix, rls_tag, "soma/"),
         "s3_region": CENSUS_AWS_REGION,
     }
     expected_h5ads_locator = {
-        "uri": urlcat(census_base_url, rls_tag, "h5ads/"),
         "relative_uri": urlcat(prefix, rls_tag, "h5ads/"),
         "s3_region": CENSUS_AWS_REGION,
     }
 
-    if rls_info["soma"] != expected_soma_locator:
+    # uri (a.k.a. absolute_uri) is legacy and depends on a specific location. To simplify
+    # the code, we can skip this check.
+    rls_info_soma = dict(rls_info["soma"])
+    del rls_info_soma["uri"]
+    rls_info_h5ads = dict(rls_info["h5ads"])
+    del rls_info_h5ads["uri"]
+
+    if rls_info_soma != expected_soma_locator:
         raise ValueError(f"Release record for {rls_tag} contained unexpected SOMA locator")
-    if rls_info["h5ads"] != expected_h5ads_locator:
+    if rls_info_h5ads != expected_h5ads_locator:
         raise ValueError(f"Release record for {rls_tag} contained unexpected H5AD locator")
 
 
