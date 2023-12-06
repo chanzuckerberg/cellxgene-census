@@ -147,3 +147,42 @@ def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
             )
 
             assert raise_info.value.args[0] == "Unknown X layer name"
+
+
+@pytest.mark.skip(reason="Enable when obsm is available in a live Census distribution.")
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("obsm_layer", ["scvi", "geneformer"])
+def test_get_anndata_obsm_one_layer(census: soma.Collection, obsm_layer: str) -> None:
+    with census:
+        ad = cellxgene_census.get_anndata(
+            census,
+            organism="Homo sapiens",
+            X_name="raw",
+            obs_coords=slice(100),
+            var_coords=slice(200),
+            obsm_layers=[obsm_layer],
+        )
+
+    assert len(ad.obsm.keys()) == 1
+    assert obsm_layer in ad.obsm.keys()
+    assert ad.obsm[obsm_layer].shape[0] == 100
+
+
+@pytest.mark.skip(reason="Enable when obsm is available in a live Census distribution.")
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("obsm_layers", [["scvi", "geneformer"]])
+def test_get_anndata_obsm_two_layers(census: soma.Collection, obsm_layers: List[str]) -> None:
+    with census:
+        ad = cellxgene_census.get_anndata(
+            census,
+            organism="Homo sapiens",
+            X_name="raw",
+            obs_coords=slice(100),
+            var_coords=slice(200),
+            obsm_layers=obsm_layers,
+        )
+
+    assert len(ad.obsm.keys()) == 2
+    for obsm_layer in obsm_layers:
+        assert obsm_layer in ad.obsm.keys()
+        assert ad.obsm[obsm_layer].shape[0] == 100

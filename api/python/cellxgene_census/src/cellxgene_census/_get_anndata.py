@@ -21,12 +21,12 @@ def get_anndata(
     measurement_name: str = "RNA",
     X_name: str = "raw",
     X_layers: Optional[Sequence[str]] = (),
+    obsm_layers: Optional[Sequence[str]] = (),
     obs_value_filter: Optional[str] = None,
     obs_coords: Optional[SparseDFCoord] = None,
     var_value_filter: Optional[str] = None,
     var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[soma.AxisColumnNames] = None,
-    obsm_layers: Optional[Sequence[str]] = (),
 ) -> anndata.AnnData:
     """
     Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
