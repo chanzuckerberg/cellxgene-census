@@ -63,6 +63,7 @@ repos:
         exclude: ^tools/cellxgene_census_builder
         args: ["--config", "./tools/pyproject.toml"]
         additional_dependencies:
+          - attrs
           - numpy
           - pandas-stubs
           - typing_extensions
