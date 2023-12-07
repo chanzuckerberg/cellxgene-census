@@ -45,7 +45,7 @@ test_that("get_seurat", {
     obs_value_filter = "tissue_general == 'vasculature'",
     obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
     # TODO when obsm_layer(s) are available in public census:
-    # obsm_layers = c("X_scvi"),
+    # obsm_layers = c("scvi"),
     var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
     var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
   )
@@ -148,7 +148,7 @@ test_that("get_single_cell_experiment", {
     obs_value_filter = "tissue_general == 'vasculature'",
     obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
     # TODO when obsm_layer(s) are available in public census:
-    # obsm_layers = c("X_scvi"),
+    # obsm_layers = c("scvi"),
     var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
     var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
   )
