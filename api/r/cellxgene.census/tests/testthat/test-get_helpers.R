@@ -44,6 +44,8 @@ test_that("get_seurat", {
     "Mus musculus",
     obs_value_filter = "tissue_general == 'vasculature'",
     obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    # TODO when obsm_layer(s) are available in public census:
+    # obsm_layers = c("X_scvi"),
     var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
     var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
   )
@@ -55,6 +57,9 @@ test_that("get_seurat", {
   expect_gt(ncol(seurat_assay), 0)
   expect_setequal(seurat_assay[[]][, "feature_name"], c("0610010K14Rik", "Gm53058"))
   expect_equal(sum(seurat[[]][, "tissue_general"] == "vasculature"), ncol(seurat_assay))
+
+  # reductions should be empty on default setting of obsm_layers:
+  expect_equal(length(Reductions(seurat)), 0)
 })
 
 test_that("get_seurat coords", {
@@ -142,6 +147,8 @@ test_that("get_single_cell_experiment", {
     "Mus musculus",
     obs_value_filter = "tissue_general == 'vasculature'",
     obs_column_names = c("soma_joinid", "cell_type", "tissue", "tissue_general", "assay"),
+    # TODO when obsm_layer(s) are available in public census:
+    # obsm_layers = c("X_scvi"),
     var_value_filter = "feature_name %in% c('Gm53058', '0610010K14Rik')",
     var_column_names = c("soma_joinid", "feature_id", "feature_name", "feature_length")
   )
@@ -158,6 +165,9 @@ test_that("get_single_cell_experiment", {
 
   expect_setequal(SingleCellExperiment::rowData(sce)[, "feature_name"], c("0610010K14Rik", "Gm53058"))
   expect_equal(sum(SingleCellExperiment::colData(sce)[, "tissue_general"] == "vasculature"), ncol(sce))
+
+  # reductions should be empty on default setting of obsm_layers:
+  expect_equal(length(SingleCellExperiment::reducedDims(sce)), 0)
 })
 
 test_that("get_single_cell_experiment coords", {
