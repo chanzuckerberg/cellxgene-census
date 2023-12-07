@@ -12,6 +12,7 @@ get_seurat(
   obs_value_filter = NULL,
   obs_coords = NULL,
   obs_column_names = NULL,
+  obsm_layers = FALSE,
   var_value_filter = NULL,
   var_coords = NULL,
   var_column_names = NULL,
@@ -34,6 +35,8 @@ within \code{X}.}
 \item{obs_coords}{A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.}
 
 \item{obs_column_names}{Columns to fetch for the \code{obs} data frame.}
+
+\item{obsm_layers}{Names of arrays in obsm to add as the cell embeddings; pass FALSE to suppress loading in any dimensional reductions.}
 
 \item{var_value_filter}{Same as \code{obs_value_filter} but for \code{var}.}
 

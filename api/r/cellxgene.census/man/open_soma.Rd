@@ -4,7 +4,12 @@
 \alias{open_soma}
 \title{Open the Census}
 \usage{
-open_soma(census_version = "stable", uri = NULL, tiledbsoma_ctx = NULL)
+open_soma(
+  census_version = "stable",
+  uri = NULL,
+  tiledbsoma_ctx = NULL,
+  mirror = NULL
+)
 }
 \arguments{
 \item{census_version}{The version of the Census, e.g., "stable".}
@@ -16,6 +21,8 @@ released version. (If supplied, takes precedence over
 \item{tiledbsoma_ctx}{A \code{tiledbsoma::SOMATileDBContext} built using
 \code{new_SOMATileDBContext_for_census()}. Optional (created automatically)
 if using \code{census_version} and the context does not need to be reused.}
+
+\item{mirror}{The Census mirror to access; one of \code{names(get_census_mirror_directory())}.}
 }
 \value{
 Top-level \code{tiledbsoma::SOMACollection} object. After use, the census
