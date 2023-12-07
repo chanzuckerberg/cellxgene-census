@@ -555,7 +555,10 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
         assert (feature_length > 0).any()
         assert X_raw.shape[1] == n_cols
 
-        ROW_SLICE_SIZE = 100_000
+        ROW_SLICE_SIZE = 20_000
+        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (
+            2**31 - 1
+        )  # else, will fail in scipy due to int32 overflow during coordinate broadcasting
         for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
             raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
             norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
@@ -577,6 +580,7 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
             if sseq_mask.any():
+                # this is a very costly operation - do it only when necessary
                 raw_csr[sseq_mask, :] /= feature_length
 
             assert np.allclose(
@@ -642,7 +646,7 @@ def validate_X_layers(
             futures = (
                 [
                     ppe.submit(
-                        1_000_000 * mem_budget_factor,
+                        250_000 * mem_budget_factor,
                         _validate_Xnorm_layer,
                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
                     )
