@@ -41,4 +41,4 @@ The final selection of parameters for the training phase was based on a hyper pa
 
 ## Environment setup
 
-The training has been performed on an AWS EC2 machine (instance type: g4dn.12xlarge)
+The training has been performed on an AWS EC2 machine (instance type: g4dn.12xlarge), running on Ubuntu 20.04. Run [scvi-init.sh](scvi-init.sh) to set up the environment required to run the pipeline.
