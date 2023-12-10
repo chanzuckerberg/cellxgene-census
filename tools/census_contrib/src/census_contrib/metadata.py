@@ -15,7 +15,6 @@ from typing_extensions import Self
 
 from .util import get_logger
 
-
 logger = get_logger()
 
 
