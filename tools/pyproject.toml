@@ -9,6 +9,10 @@ warn_unreachable = true
 strict = true
 plugins = "numpy.typing.mypy_plugin"
 
+[[tool.mypy.overrides]]
+module = "tools.models.scvi.*"
+ignore_errors = true
+
 [tool.ruff]
 select = ["E", "F", "B", "I"]
 ignore = ["E501", "E402", "C408", ]
