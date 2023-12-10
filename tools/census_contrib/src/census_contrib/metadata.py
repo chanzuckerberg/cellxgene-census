@@ -13,6 +13,11 @@ import requests
 from attrs import field, validators
 from typing_extensions import Self
 
+from .util import get_logger
+
+
+logger = get_logger()
+
 
 def none_or_str(v: Optional[str]) -> str:
     return "" if v is None else v
@@ -181,12 +186,12 @@ def validate_urls(metadata: EmbeddingMetadata) -> None:
     """Errors / exits upon failure"""
 
     # 4. All supplied URLs must resolve
-    for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("additional_information", "model_link")]:
-        if not url:
-            continue
+    for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("model_link",)]:
+        if url:
+            if url.startswith("https://"):
+                r = requests.head(url, allow_redirects=True)
+                if r.status_code == 200:
+                    continue
+                raise ValueError(f"Metadata contains unresolvable URL {fld_name}={url}")
 
-        r = requests.head(url, allow_redirects=True)
-        if r.status_code == 200:
-            continue
-
-        raise ValueError(f"Metadata contains unresolvable URL {fld_name}={url}")
+            logger.warning(f"Unable to verify URI {fld_name}={url}")

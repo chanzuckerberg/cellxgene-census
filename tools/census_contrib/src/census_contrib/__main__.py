@@ -131,7 +131,7 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
             args.error("Coordinate values in embedding dim 1 are not (0, n_features)")
 
         if domains["i"][0] > 0 or domains["i"][1] < (obs_shape[0] - 1):
-            logging.warning("Embedding is a subset of cells.")
+            logger.warning("Embedding is a subset of cells.")
 
         assert 0 == domains["j"][0] and (metadata.n_features - 1) == domains["j"][1]
         assert domains["i"][0] <= domains["i"][1] < obs_shape[0]
