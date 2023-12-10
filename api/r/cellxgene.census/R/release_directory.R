@@ -66,7 +66,7 @@ get_census_mirror_directory <- function() {
 #' @export
 #'
 #' @examples
-#' get_census_mirror("us-west-2")
+#' get_census_mirror("AWS-S3-us-west-2")
 get_census_mirror <- function(mirror) {
   if (is.null(mirror)) {
     mirror <- "default"

@@ -1,0 +1,19 @@
+# Name of a categorical column/feature in the Dataset to use as the classifier label
+label_feature: cell_subclass
+# Specific labels to exclude from training and evaluation
+label_blocklist:
+  - native cell
+# Also exclude labels with too few examples
+label_min_examples: 10
+# Fraction of the input Dataset to hold out for evaluation
+test_size: 0.1
+# Arguments for transformers.training_args.TrainingArguments
+training_args:
+  learning_rate: 0.00005
+  lr_scheduler_type: linear
+  warmup_steps: 500
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 2
+  num_train_epochs: 16
+  bf16: true
