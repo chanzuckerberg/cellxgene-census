@@ -22,7 +22,6 @@ from .cube_schema import (
     CUBE_DIMS_VAR,
     CUBE_LOGICAL_DIMS_OBS,
     CUBE_TILEDB_ATTRS_OBS,
-    CUBE_TILEDB_DIMS_OBS,
     ESTIMATOR_NAMES,
     build_cube_schema,
 )
@@ -220,13 +219,16 @@ def pass_2_compute_estimators(
     obs_df = (
         query.obs(column_names=["soma_joinid"] + CUBE_LOGICAL_DIMS_OBS).concat().to_pandas().set_index("soma_joinid")
     )
+    for col in CUBE_LOGICAL_DIMS_OBS:
+        obs_df[col] = obs_df[col].astype("category")
+
     obs_df = obs_df.join(size_factors[["approx_size_factor"]])
 
     if tiledb.array_exists(ESTIMATORS_CUBE_ARRAY_URI):
         logging.info("Pass 2: Resuming")
     else:
         # accumulate into a TileDB array
-        tiledb.Array.create(ESTIMATORS_CUBE_ARRAY_URI, build_cube_schema())
+        tiledb.Array.create(ESTIMATORS_CUBE_ARRAY_URI, build_cube_schema(obs_df))
         logging.info("Pass 2: Created new estimators cube")
 
     # Process X by cube rows. This ensures that estimators are computed
@@ -303,7 +305,7 @@ def pass_2_compute_estimators(
 
         # perform check for existing data
         with tiledb.open(ESTIMATORS_CUBE_ARRAY_URI, mode="r") as estimators_cube:
-            df = estimators_cube.query(dims=CUBE_TILEDB_DIMS_OBS, attrs=CUBE_TILEDB_ATTRS_OBS).df[:]
+            df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:]
             existing_groups = df.drop_duplicates()
             existing_groups = existing_groups.set_index(list(existing_groups.columns))
 
