@@ -846,6 +846,63 @@ def validate_internal_consistency(
     return True
 
 
+def validate_soma_bounding_box(
+    soma_path: str, experiment_specifications: List[ExperimentSpecification], eb_info: Dict[str, EbInfo]
+) -> bool:
+    """
+    Verify that single-cell-data/TileDB-SOMA#1969 is not affecting our results.
+    """
+
+    def get_sparse_arrays(C: soma.Collection) -> List[soma.SparseNDArray]:
+        uris = []
+        for soma_obj in C.values():
+            type = soma_obj.soma_type
+            if type == "SOMASparseNDArray":
+                uris.append(soma_obj.uri)
+            elif type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
+                uris += get_sparse_arrays(soma_obj)
+        return uris
+
+    def bounding_box(SA: soma.SparseNDArray) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+        m = SA.metadata
+        return (
+            (m["soma_dim_0_domain_lower"], m["soma_dim_0_domain_upper"]),
+            (m["soma_dim_1_domain_lower"], m["soma_dim_1_domain_upper"]),
+        )
+
+    # first, confirm we set shape correctly, as the code uses it as the max bounnding box
+    for eb in experiment_specifications:
+        with open_experiment(soma_path, eb) as exp:
+            n_obs = eb_info[eb.name].n_obs
+            n_vars = eb_info[eb.name].n_vars
+            if "raw" in exp.ms["RNA"].X:
+                assert exp.ms["RNA"].X["raw"].shape[0] == n_obs
+                assert exp.ms["RNA"].X["raw"].shape[1] == n_vars
+            if "normalized" in exp.ms["RNA"].X:
+                assert exp.ms["RNA"].X["normalized"].shape[0] == n_obs
+                assert exp.ms["RNA"].X["normalized"].shape[1] == n_vars
+            if "feature_dataset_presence_matrix" in exp.ms["RNA"]:
+                assert exp.ms["RNA"]["feature_dataset_presence_matrix"].shape[1] == n_vars
+
+    # now check that the bounding boxes are in between nonempty-domain and shape. Unfortunately,
+    # SOMA is ambiguous about which is correct, and the result depends on the data path. More
+    # info on this at single-cell-data/TileDB-SOMA#1971
+    with soma.open(soma_path) as C:
+        sparse_array_uris = get_sparse_arrays(C)
+
+    for uri in sparse_array_uris:
+        with tiledb.open(uri) as SA:
+            nonempty_domain = SA.nonempty_domain()
+        with soma.open(uri) as SA:
+            soma_bounding_box = bounding_box(SA)
+            shape_bounding_box = ((0, SA.shape[0] - 1), (0, SA.shape[1] - 1))
+        assert (nonempty_domain == soma_bounding_box) or (
+            shape_bounding_box == soma_bounding_box
+        ), f"Bounding box mismatch for {uri}:  {nonempty_domain}, {soma_bounding_box}, {shape_bounding_box}"
+
+    return True
+
+
 def validate(args: CensusBuildArgs) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
@@ -870,5 +927,6 @@ def validate(args: CensusBuildArgs) -> bool:
     assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
     assert validate_consolidation(soma_path)
+    assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
     logging.info("Validation finished (success)")
     return True
