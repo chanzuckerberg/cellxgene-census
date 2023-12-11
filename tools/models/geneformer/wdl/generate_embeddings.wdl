@@ -37,9 +37,10 @@ task init_embeddings_array {
     }
 
     command <<<
+        set -euo pipefail
         # use venv with pinned, older tiledbsoma/tiledb to ensure compatibility with
         # Census embeddings curator
-        source embeddings_tiledbsoma_venv/bin/activate
+        source /census-geneformer/embeddings_tiledbsoma_venv/bin/activate
         python3 - <<'EOF'
         import tiledb
         import tiledbsoma
@@ -81,7 +82,7 @@ task generate_embeddings {
     command <<<
         set -euo pipefail
         >&2 sha256sum /census-geneformer/*.py
-        source embeddings_tiledbsoma_venv/bin/activate
+        source /census-geneformer/embeddings_tiledbsoma_venv/bin/activate
         mkdir hf
         export HF_HOME="$(pwd)/hf"
         export TMPDIR="$HF_HOME"

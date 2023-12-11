@@ -19,7 +19,7 @@ Preparing a tokenized training dataset with 2,500 primary cells per human cell t
 ```bash
 miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
     wdl/prepare_datasets.wdl docker=$DOCKER_TAG \
-    N=2500 sampling_column=cell_type output_name=2500_per_cell_type \
+    census_version=2023-10-23 N=2500 sampling_column=cell_type output_name=2500_per_cell_type \
     --s3upload s3://MYBUCKET/geneformer/datasets/2500_per_cell_type/
 ```
 
@@ -28,7 +28,7 @@ And a tokenized dataset for all of Census (371GiB!):
 ```bash
 miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
     wdl/prepare_datasets.wdl docker=$DOCKER_TAG \
-    output_name=census-2023-10-23 value_filter='is_primary_data==True or is_primary_data==False' \
+    census_version=2023-10-23 output_name=census-2023-10-23 value_filter='is_primary_data==True or is_primary_data==False' \
     --s3upload s3://MYBUCKET/geneformer/datasets/census-2023-10-23/
 ```
 
