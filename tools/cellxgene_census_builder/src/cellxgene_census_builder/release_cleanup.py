@@ -55,8 +55,6 @@ def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool, s3
             rls_info = release_manifest[rls_tag]
             assert isinstance(rls_info, dict)
             uri = urlcat(census_base_url, rls_tag + "/")
-            assert uri == urlcat(rls_info["soma"]["uri"], "..")  # defensive assert
-            assert uri == urlcat(rls_info["h5ads"]["uri"], "..")  # defensive assert
             _perform_recursive_delete(rls_tag, uri, dryrun)
 
 
