@@ -8,7 +8,17 @@ import pandas as pd
 import scipy.stats as stats
 import tiledb
 
-CUBE_LOGICAL_DIMS_OBS = ["cell_type", "dataset_id", "assay", "suspension_type", "donor_id", "disease", "sex"]
+CUBE_LOGICAL_DIMS_OBS = [
+    "cell_type_ontology_term_id",
+    "dataset_id",
+    "tissue_general_ontology_term_id",
+    "assay_ontology_term_id",
+    "donor_id",
+    "disease_ontology_term_id",
+    "sex_ontology_term_id",
+    "development_stage_ontology_term_id",
+    "self_reported_ethnicity_ontology_term_id",
+]
 
 
 def run(cube_path_: str, filter_: str, treatment: str) -> pd.DataFrame:

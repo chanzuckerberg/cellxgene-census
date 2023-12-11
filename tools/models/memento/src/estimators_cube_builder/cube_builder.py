@@ -21,10 +21,10 @@ from tiledbsoma import SOMATileDBContext
 from .cube_schema import (
     CUBE_DIMS_VAR,
     CUBE_LOGICAL_DIMS_OBS,
-    CUBE_SCHEMA,
     CUBE_TILEDB_ATTRS_OBS,
     CUBE_TILEDB_DIMS_OBS,
     ESTIMATOR_NAMES,
+    build_cube_schema,
 )
 from .estimators import bin_size_factor, compute_mean, compute_sem, compute_sev, compute_variance, gen_multinomial
 from .mp import create_resource_pool_executor
@@ -114,7 +114,7 @@ def compute_all_estimators_for_gene(
 
     n_obs = len(X_dense)
     if n_obs == 0:
-        return pd.Series(data=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=float)
+        return pd.Series(data=[0.0] * len(ESTIMATOR_NAMES), dtype=float)
 
     nnz = gene_group.shape[0]
     min_ = X_sparse.min()
@@ -125,7 +125,11 @@ def compute_all_estimators_for_gene(
     variance = compute_variance(X_csc, Q, size_factors_dense, group_name=group_name)
     sev, selv = compute_sev(X_csc, Q, size_factors_dense, num_boot=500, group_name=group_name)
 
-    return pd.Series(data=[nnz, n_obs, min_, max_, sum_, mean, sem, variance, sev, selv])
+    estimators = dict(
+        n_obs=n_obs, nnz=nnz, min=min_, max=max_, sum=sum_, mean=mean, sem=sem, var=variance, sev=sev, selv=selv
+    )
+
+    return pd.Series(data=[estimators[n] for n in ESTIMATOR_NAMES], dtype=np.float64)
 
 
 def compute_all_estimators_for_batch_tdb(
@@ -222,7 +226,7 @@ def pass_2_compute_estimators(
         logging.info("Pass 2: Resuming")
     else:
         # accumulate into a TileDB array
-        tiledb.Array.create(ESTIMATORS_CUBE_ARRAY_URI, CUBE_SCHEMA)
+        tiledb.Array.create(ESTIMATORS_CUBE_ARRAY_URI, build_cube_schema())
         logging.info("Pass 2: Created new estimators cube")
 
     # Process X by cube rows. This ensures that estimators are computed
@@ -370,6 +374,7 @@ def build() -> bool:
             logging.info("Pass 1: Compute Approx Size Factors")
             size_factors = pass_1_compute_size_factors(query, layer)
 
+            size_factors = size_factors.astype({col: "category" for col in CUBE_LOGICAL_DIMS_OBS})
             tiledb.from_pandas(OBS_WITH_SIZE_FACTOR_TILEDB_ARRAY_URI, size_factors.reset_index(), index_col=[0])
             logging.info("Saved `obs_with_size_factor` TileDB Array")
         else:
