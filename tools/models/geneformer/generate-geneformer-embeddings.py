@@ -26,6 +26,8 @@ def main(argv):
         import tiledb
         import tiledbsoma
 
+        logger.info(f"loaded tiledbsoma=={tiledbsoma.__version__} tiledb=={tiledb.__version__}")
+
         aws_region = "us-west-2"
         try:
             aws_region = boto3.Session().region_name
