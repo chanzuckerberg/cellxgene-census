@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import attrs
 from typing import TYPE_CHECKING
 
+import attrs
 
 if TYPE_CHECKING:
     from .args import Arguments
