@@ -1,4 +1,6 @@
-<span style="background-color: #F6DDCC; color; font-size: 18px"> 🚨 A **normalized layer**, plus cell and gene **pre-calculated stats** are now available!  Find out more [here.](articles/2023/20231012-normalized_layer_precalc_stats.md)</span>
+<span style="background-color: #f2ebc7; color; font-size: 18px"> 🚀 New to the Census: we’ve created a **centralized hub of models and embeddings** using Census data. [Check it out](https://cellxgene.cziscience.com/census-models)!
+
+ </span>
 
 # CZ CELLxGENE Discover Census
 
