@@ -4,11 +4,18 @@
 \alias{new_SOMATileDBContext_for_census}
 \title{Create \code{SOMATileDBContext} for Census}
 \usage{
-new_SOMATileDBContext_for_census(census_version_description, ...)
+new_SOMATileDBContext_for_census(
+  census_version_description,
+  mirror = "default",
+  ...
+)
 }
 \arguments{
 \item{census_version_description}{The result of \code{get_census_version_description()}
 for the desired Census version.}
+
+\item{mirror}{The name of the intended census mirror (or \code{get_census_mirror_directory()[[name]]}
+to save the lookup), or NULL to configure for local file access.}
 
 \item{...}{Custom configuration options.}
 }

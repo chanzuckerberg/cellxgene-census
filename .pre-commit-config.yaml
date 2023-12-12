@@ -58,14 +58,27 @@ repos:
           - types-setuptools
           - types-PyYAML
       - id: mypy
-        name: mypy-tools-not-builder
+        name: mypy-tools-census-contrib
+        files: ^tools/census_contrib
+        args: ["--config-file=./tools/census_contrib/pyproject.toml", "--python-version=3.10"]
+        additional_dependencies:
+          - attrs
+          - types-requests
+          - pandas-stubs
+          - numpy
+          - typing_extensions
+          - types-setuptools
+          - types-PyYAML
+      - id: mypy
+        name: mypy-tools-other
         files: ^tools/
-        exclude: ^tools/cellxgene_census_builder
+        exclude: ^tools/(cellxgene_census_builder|census_contrib)
         args: ["--config", "./tools/pyproject.toml"]
         additional_dependencies:
           - numpy
           - pandas-stubs
           - typing_extensions
+          - types-PyYAML
 
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.7.0

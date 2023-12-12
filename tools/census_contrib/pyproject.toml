@@ -1,0 +1,46 @@
+[project]
+name = "census_contrib"
+dynamic = ["version"]
+
+dependencies= [
+    "attrs",
+    "cattrs>=23.2.2",
+    "tiledbsoma==1.4.4",  # IMPORTANT: this must match the Census Builder version
+    "cellxgene-census==1.6.0",  # IMPORTANT: this must match the Census Builder version
+    "pyyaml",
+    "requests",
+    "typed-argument-parser",
+    "typing_extensions",
+    "scanpy"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["census_contrib*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
+
+[tool.setuptools.package-data]
+"cellxgene_census" = ["py.typed"]
+
+[tool.setuptools_scm]
+root = "../.."
+
+[tool.black]
+line-length = 120
+target_version = ['py310']
+
+[tool.mypy]
+show_error_codes = true
+ignore_missing_imports = true
+warn_unreachable = true
+strict = true
+plugins = "numpy.typing.mypy_plugin"
+
+[tool.ruff]
+select = ["E", "F", "B", "I"]
+ignore = ["E501", "E402", "C408", ]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.isort]
+known-first-party =["census_contrib"]
