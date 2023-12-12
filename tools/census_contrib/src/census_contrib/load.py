@@ -12,7 +12,7 @@ import tiledbsoma as soma
 from typing_extensions import Self
 
 from .census_util import get_obs_soma_joinids
-from .metadata import EmbeddingMetadata
+from .config import Config
 from .util import blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
 logger = get_logger()
@@ -198,12 +198,12 @@ class NPYIJDPipe(EmbeddingIJDPipe):
 
 
 class TestDataIJDPipe(EmbeddingIJDPipe):
-    def __init__(self, n_obs: int, n_features: int, metadata: EmbeddingMetadata):
+    def __init__(self, n_obs: int, n_features: int, config: Config):
         rng = np.random.default_rng(seed=0)
         self._scale = 2.0
         self._offset = -0.1
 
-        all_obs, obs_shape = get_obs_soma_joinids(metadata)
+        all_obs, obs_shape = get_obs_soma_joinids(config)
         if n_obs == len(all_obs):
             obs_joinids = all_obs
         else:
@@ -256,13 +256,13 @@ class TestDataIJDPipe(EmbeddingIJDPipe):
         }
 
 
-def test_embedding(n_obs: int, n_features: int, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
-    return TestDataIJDPipe(n_obs, n_features, metadata)
+def test_embedding(n_obs: int, n_features: int, config: Config) -> EmbeddingIJDPipe:
+    return TestDataIJDPipe(n_obs, n_features, config)
 
 
-def soma_ingest(soma_path: Path, _: EmbeddingMetadata) -> EmbeddingIJDPipe:
+def soma_ingest(soma_path: Path, _: Config) -> EmbeddingIJDPipe:
     return SOMAIJDPipe(soma_path)
 
 
-def npy_ingest(joinid_path: Path, embedding_path: Path, metadata: EmbeddingMetadata) -> EmbeddingIJDPipe:
+def npy_ingest(joinid_path: Path, embedding_path: Path, _: Config) -> EmbeddingIJDPipe:
     return NPYIJDPipe(joinid_path, embedding_path)

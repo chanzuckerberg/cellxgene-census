@@ -61,7 +61,7 @@ For example:
   "additional_information": "",
   "model_link": "https://smithlab.chicago.edu/...",
   "data_type": "obs_embedding",
-  "census_version": "2023-10-23",
+  "census_version": "2023-12-15",
   "experiment_name": "mus_musculus",
   "measurement_name": "RNA",
   "n_embeddings": 5684805,

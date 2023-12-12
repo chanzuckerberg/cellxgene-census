@@ -7,7 +7,6 @@ import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import cellxgene_census
 import numpy as np
 import pyarrow as pa
 import scanpy as sc
@@ -15,7 +14,8 @@ import scipy.sparse as sp
 import tiledbsoma as soma
 
 from .args import Arguments
-from .census_util import get_obs_soma_joinids
+from .census_util import get_obs_soma_joinids, open_census
+from .config import Config
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
 from .save import consolidate_array, consolidate_group, create_obsm_like_array, reduce_float_precision
 from .util import (
@@ -39,17 +39,19 @@ def main() -> int:
     try:
         metadata_path = args.cwd.joinpath(args.metadata)
         logger.info("Load and validate metadata")
-        metadata = validate_metadata(load_metadata(metadata_path))
+        metadata = validate_metadata(args, load_metadata(metadata_path))
         embedding_path = args.cwd.joinpath(metadata.id)
 
+        config = Config(args=args, metadata=metadata)
+
         if args.cmd == "validate":
-            validate_cmd(args, embedding_path, metadata)
+            validate_cmd(config, embedding_path)
         elif args.cmd == "qcplots":
-            qcplots_cmd(args, embedding_path, metadata)
+            qcplots_cmd(config, embedding_path)
         elif args.cmd.startswith("ingest-"):  # ingest
-            ingest_cmd(args, embedding_path, metadata)
+            ingest_cmd(config, embedding_path)
         elif args.cmd == "inject":
-            inject_cmd(args, embedding_path, metadata)
+            inject_cmd(config, embedding_path)
         else:
             args.print_help()
 
@@ -77,48 +79,55 @@ def setup_logging(args: Arguments) -> None:
     logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 
 
-def validate_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+def validate_cmd(config: Config, embedding_path: Path) -> None:
     logger.info("Validating SOMA array")
-    validate_contrib_embedding(embedding_path, metadata, skip_storage_version_check=args.skip_storage_version_check)
+    validate_contrib_embedding(
+        embedding_path, config, skip_storage_version_check=config.args.skip_storage_version_check
+    )
 
     logger.info("Creating QC umaps")
-    create_qc_plots(args.cwd, embedding_path, metadata)
+    create_qc_plots(config, embedding_path)
 
 
-def qcplots_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+def qcplots_cmd(config: Config, embedding_path: Path) -> None:
     logger.info("Creating QC umaps")
-    create_qc_plots(args.cwd, embedding_path, metadata)
+    create_qc_plots(config, embedding_path)
 
 
-def ingest_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+def ingest_cmd(config: Config, embedding_path: Path) -> None:
+    args = config.args
+
     logger.info("Ingesting")
-    ingest(args, metadata)
+    ingest(config)
 
     logger.info("Consolidating")
     consolidate_array(embedding_path)
 
     logger.info("Validating SOMA array")
-    validate_contrib_embedding(embedding_path, metadata, skip_storage_version_check=args.skip_storage_version_check)
+    validate_contrib_embedding(embedding_path, config, skip_storage_version_check=args.skip_storage_version_check)
 
     logger.info("Creating QC umaps")
-    create_qc_plots(args.cwd, embedding_path, metadata)
+    create_qc_plots(config, embedding_path)
 
 
-def inject_cmd(args: Arguments, embedding_path: Path, metadata: EmbeddingMetadata) -> None:
+def inject_cmd(config: Config, embedding_path: Path) -> None:
     logger.info("Adding embedding to Census build")
-    inject_embedding_into_census_build(args.census_path, args.obsm_key, embedding_path, metadata)
+    inject_embedding_into_census_build(config, embedding_path)
 
 
-def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
+def ingest(config: Config) -> None:
+    metadata = config.metadata
+    args = config.args
+
     save_to = args.cwd.joinpath(metadata.id)
     if save_to.exists():
         args.error("SOMA output path already exists")
     save_to.mkdir(parents=True, exist_ok=True)
 
-    obs_joinids, obs_shape = get_obs_soma_joinids(metadata)
+    obs_joinids, obs_shape = get_obs_soma_joinids(config)
     assert obs_joinids[0] == 0 and obs_joinids[-1] == (obs_shape[0] - 1), "Census coordinates are unexpected"
 
-    with args.ingestor(args, metadata) as emb_pipe:
+    with args.ingestor(config) as emb_pipe:
         assert emb_pipe.type == pa.float32()
 
         # Create output object
@@ -154,9 +163,7 @@ def ingest(args: Arguments, metadata: EmbeddingMetadata) -> None:
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
-def validate_contrib_embedding(
-    uri: Union[str, Path], expected_metadata: EmbeddingMetadata, skip_storage_version_check: bool = False
-) -> None:
+def validate_contrib_embedding(uri: Union[str, Path], config: Config, skip_storage_version_check: bool = False) -> None:
     """
     Validate embedding where embedding metadata is encoded in the array.
 
@@ -167,23 +174,29 @@ def validate_contrib_embedding(
     with soma.open(array_path, context=soma_context()) as A:
         metadata = EmbeddingMetadata.from_json(A.metadata["CxG_contrib_metadata"])
 
-    if expected_metadata != metadata:
+    if config.metadata != metadata:
         raise ValueError("Expected and actual metadata do not match")
 
     if not skip_storage_version_check:
-        validate_compatible_tiledb_storage_format(array_path, metadata)
+        validate_compatible_tiledb_storage_format(array_path, config)
 
-    validate_embedding(array_path, metadata)
+    validate_embedding(config, array_path)
 
 
 def load_qc_anndata(
-    embedding: Path, metadata: EmbeddingMetadata, obs_value_filter: str, obs_columns: List[str], emb_name: str
+    config: Config,
+    embedding: Path,
+    obs_value_filter: str,
+    obs_columns: List[str],
+    emb_name: str,
 ) -> Optional[sc.AnnData]:
     """Returns None if the value filter excludes all cells"""
     if "soma_joinid" not in obs_columns:
         obs_columns = ["soma_joinid"] + obs_columns
 
-    with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
+    metadata = config.metadata
+
+    with open_census(census_version=config.metadata.census_version, census_uri=config.args.census_uri) as census:
         experiment = census["census_data"][metadata.experiment_name]
         with experiment.axis_query(
             measurement_name=metadata.measurement_name,
@@ -222,9 +235,9 @@ def load_qc_anndata(
     return adata
 
 
-def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> None:
+def create_qc_plots(config: Config, embedding: Path) -> None:
     sc._settings.settings.autoshow = False
-    sc._settings.settings.figdir = (cwd / "figures").as_posix()
+    sc._settings.settings.figdir = (config.args.cwd / "figures").as_posix()
 
     def make_random_palette(n_colors: int) -> List[str]:
         rng = np.random.default_rng()
@@ -241,7 +254,7 @@ def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> 
 
     for k, filter in cases.items():
         logger.info(f"Loading AnnData for QC UMAP for {k}")
-        adata = load_qc_anndata(embedding, metadata, filter, color_by_columns, emb_name)
+        adata = load_qc_anndata(config, embedding, filter, color_by_columns, emb_name)
         if not adata:
             logger.info(f"Zero cells available for {k}, skipping UMAP")
             continue
@@ -264,9 +277,7 @@ def create_qc_plots(cwd: Path, embedding: Path, metadata: EmbeddingMetadata) -> 
             sc.pl.umap(adata, title=f"{k}, colored by {color_by}", save=f"_{k}_{color_by}.png", **plot_color_kwargs)
 
 
-def inject_embedding_into_census_build(
-    census_path: Path, obsm_key: Optional[str], embedding_src_path: Path, metadata: EmbeddingMetadata
-) -> None:
+def inject_embedding_into_census_build(config: Config, embedding_src_path: Path) -> None:
     """
     Inject an existing embedding (ingested via this tool) into its corresponding Census build.
     Presumed workflow:
@@ -287,17 +298,20 @@ def inject_embedding_into_census_build(
     5. conslidate obsm
     6. validate that group edits worked, etc.
     """
+    metadata = config.metadata
+    census_write_path = config.args.census_write_path
+    obsm_key = config.args.obsm_key
     obsm_layer_name = obsm_key or metadata.id
 
     # Pre-checks
-    logger.info(f"Injecting embedding into {census_path.as_posix()} with name obsm['{obsm_layer_name}']")
-    if not census_path.is_dir() or not soma.Collection.exists(census_path.as_posix()):
+    logger.info(f"Injecting embedding into {census_write_path.as_posix()} with name obsm['{obsm_layer_name}']")
+    if not census_write_path.is_dir() or not soma.Collection.exists(census_write_path.as_posix()):
         raise ValueError("Census path does not exist, is not on local file system or is not a Collection")
     if not embedding_src_path.is_dir() or not soma.SparseNDArray.exists(embedding_src_path.as_posix()):
         raise ValueError("Embedding path does not exist, is not on local file system or is not a SparseNDArray")
 
     # Get ms URI, and do additional precautionary checks
-    with soma.open(census_path.as_posix(), context=soma_context()) as census:
+    with soma.open(census_write_path.as_posix(), context=soma_context()) as census:
         exp = census["census_data"][metadata.experiment_name]
         if metadata.n_embeddings > exp.obs.count:
             raise ValueError("Metadata and census obs shape mismatch")
