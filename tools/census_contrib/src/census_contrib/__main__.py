@@ -153,7 +153,7 @@ def ingest(config: Config) -> None:
             context=soma_context({"sm.check_coord_dups": True}),
         ) as A:
             logger.debug(f"Array created at {save_to.as_posix()}")
-            A.metadata["CxG_contrib_metadata"] = metadata.to_json()
+            A.metadata["CxG_embedding_info"] = metadata.to_json()
             for block in EagerIterator(emb_pipe):
                 assert isinstance(block, pa.Table), "Embedding pipe did not yield an Arrow Table"
                 assert block.column_names == ["i", "j", "d"]  # we care about the order
@@ -172,7 +172,7 @@ def validate_contrib_embedding(uri: Union[str, Path], config: Config, skip_stora
     array_path: str = Path(uri).as_posix()
 
     with soma.open(array_path, context=soma_context()) as A:
-        metadata = EmbeddingMetadata.from_json(A.metadata["CxG_contrib_metadata"])
+        metadata = EmbeddingMetadata.from_json(A.metadata["CxG_embedding_info"])
 
     if config.metadata != metadata:
         raise ValueError("Expected and actual metadata do not match")

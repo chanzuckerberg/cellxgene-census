@@ -58,4 +58,4 @@ This command:
 
 ## Embedding metadata
 
-The [metadata schema definition](embedding_metadata.md) describes the contents of accepted metadata. When stored in a contributed embedding, it is a JSON-encoded string, stored in the SOMANDArray metadata with key `CxG_contrib_metadata`. The `census_contrib` tool requires this metadata for most operations, and can accept it as either a file named `meta.yml` or `meta.json`.
+The [metadata schema definition](embedding_metadata.md) describes the contents of accepted metadata. When stored in a contributed embedding, it is a JSON-encoded string, stored in the SOMANDArray metadata with key `CxG_embedding_info`. The `census_contrib` tool requires this metadata for most operations, and can accept it as either a file named `meta.yml` or `meta.json`.

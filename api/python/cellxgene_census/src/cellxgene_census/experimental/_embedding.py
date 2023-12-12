@@ -48,7 +48,7 @@ def get_embedding_metadata(
 
     with soma.open(embedding_uri, context=context) as E:
         # read embedding metadata and decode the JSON-encoded string
-        embedding_metadata = json.loads(E.metadata["CxG_contrib_metadata"])
+        embedding_metadata = json.loads(E.metadata["CxG_embedding_info"])
         assert isinstance(embedding_metadata, dict)
 
     return cast(Dict[str, Any], embedding_metadata)
@@ -113,7 +113,7 @@ def get_embedding(
     resolved_census_version = census_directory.get(census_version, None)
 
     with soma.open(embedding_uri, context=context) as E:
-        embedding_metadata = json.loads(E.metadata["CxG_contrib_metadata"])
+        embedding_metadata = json.loads(E.metadata["CxG_embedding_info"])
 
         if resolved_census_version is None:
             warnings.warn(
