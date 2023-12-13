@@ -8,7 +8,7 @@ task prepare_census_geneformer_dataset {
         Array[String] obs_columns = ["soma_joinid", "cell_type", "cell_type_ontology_term_id", "cell_subclass", "cell_subclass_ontology_term_id"]
         Int N = 0
         String sampling_column = "cell_subclass"
-        String census_version = "latest"
+        String census_version = "stable"
 
         String docker
     }

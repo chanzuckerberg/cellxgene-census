@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 
 from tap import Tap
 
@@ -12,6 +13,9 @@ class CommonArgs(Tap):  # type: ignore[misc]
     verbose: int = 0  # Logging level
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
     skip_storage_version_check: bool = False  # Skip TileDB storage equivalence check
+    census_uri: Optional[
+        str
+    ] = None  # override Census URI. If not specified, will look up using metadata `census_version` field.
 
     def configure(self) -> None:
         super().configure()
@@ -29,7 +33,7 @@ class IngestSOMAEmbedding(IngestCommonArgs):
 
     def configure(self) -> None:
         super().configure()
-        self.set_defaults(ingestor=lambda args, metadata: soma_ingest(args.soma_path, metadata))
+        self.set_defaults(ingestor=lambda config: soma_ingest(config.args.soma_path, config))
 
 
 class IngestNPYEmbedding(IngestCommonArgs):
@@ -40,7 +44,9 @@ class IngestNPYEmbedding(IngestCommonArgs):
 
     def configure(self) -> None:
         super().configure()
-        self.set_defaults(ingestor=lambda args, metadata: npy_ingest(args.joinid_path, args.embedding_path, metadata))
+        self.set_defaults(
+            ingestor=lambda config: npy_ingest(config.args.joinid_path, config.args.embedding_path, config)
+        )
 
 
 class IngestTestEmbedding(IngestCommonArgs):
@@ -49,14 +55,14 @@ class IngestTestEmbedding(IngestCommonArgs):
     def configure(self) -> None:
         super().configure()
         self.set_defaults(
-            ingestor=lambda args, metadata: test_embedding(metadata.n_embeddings, metadata.n_features, metadata)
+            ingestor=lambda config: test_embedding(config.metadata.n_embeddings, config.metadata.n_features, config)
         )
 
 
 class InjectEmbedding(CommonArgs):
     """Add existing embedding to a Census build as an obsm layer."""
 
-    census_path: Path  # Census build path
+    census_write_path: Path  # Census writable (build) path
     obsm_key: str  # key to store embedding as in the obsm collection
 
 

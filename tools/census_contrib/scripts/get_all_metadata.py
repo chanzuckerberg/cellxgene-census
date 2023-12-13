@@ -8,7 +8,7 @@ def main(fnames: list[str]) -> int:
     md = {}
     for fn in fnames:
         with soma.open(fn) as A:
-            d = json.loads(A.metadata["CxG_contrib_metadata"])
+            d = json.loads(A.metadata["CxG_embedding_info"])
             md[d["id"]] = d
 
     json.dump(md, sys.stdout)

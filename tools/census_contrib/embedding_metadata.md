@@ -25,7 +25,7 @@ Each embedding will contain a variety of metadata stored in the SOMA `metadata` 
 | description            | required | string        | Succinct description of the method and characteristics of the embeddings and model    |
 | primary_contact        | required | Contact       | Primary contact person for these embeddings.                                          |
 | additional_contacts    | required | List[Contact] | Additional contact persons. May be an empty list.                                     |
-| DOI                    | optional | string        | DOI or URL                                                                            |
+| DOI                    | optional | string        | DOI (must not be a URL)                                                               |
 | additional_information | optional | string        | Additional information on method or embedding.                                        |
 | model_link             | optional | string        | URL - link to models hosted for public access, e.g., Hugging Face, Google Drive, etc. |
 | data_type              | required | string        | Data type. Currently one of "obs_embedding" (cell) or "var_embedding" (gene)          |
@@ -57,11 +57,11 @@ For example:
     "affiliation": "Smith Lab, Chicago University",
   },
   "additional_contacts": [],
-  "DOI": "https://doi.org/...",
+  "DOI": "10.1038/s41592-018-0229-2",
   "additional_information": "",
   "model_link": "https://smithlab.chicago.edu/...",
   "data_type": "obs_embedding",
-  "census_version": "2023-10-23",
+  "census_version": "2023-12-15",
   "experiment_name": "mus_musculus",
   "measurement_name": "RNA",
   "n_embeddings": 5684805,
