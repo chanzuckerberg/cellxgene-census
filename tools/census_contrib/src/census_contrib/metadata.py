@@ -13,6 +13,12 @@ import requests
 from attrs import field, validators
 from typing_extensions import Self
 
+from .args import Arguments
+from .census_util import open_census
+from .util import get_logger
+
+logger = get_logger()
+
 
 def none_or_str(v: Optional[str]) -> str:
     return "" if v is None else v
@@ -102,7 +108,7 @@ def load_metadata(path: Union[str, pathlib.Path]) -> EmbeddingMetadata:
     return cmd
 
 
-def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
+def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     """
     Checks to perform on metadata:
     1. Census version must be an LTS version (implies existence)
@@ -116,7 +122,7 @@ def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     if not metadata.id:
         raise ValueError("metadata is missing 'id' (accession)")
 
-    validate_census_info(metadata)
+    validate_census_info(args, metadata)
     validate_doi(metadata)
     validate_urls(metadata)
 
@@ -137,19 +143,20 @@ def validate_metadata(metadata: EmbeddingMetadata) -> EmbeddingMetadata:
     return metadata
 
 
-def validate_census_info(metadata: EmbeddingMetadata) -> None:
+def validate_census_info(args: Arguments, metadata: EmbeddingMetadata) -> None:
     """Errors / exists upon failure"""
 
-    releases = cellxgene_census.get_census_version_directory()
+    if not args.census_uri:  # ie. if no override of census
+        releases = cellxgene_census.get_census_version_directory()
 
-    # 1. Census version must exist
-    if metadata.census_version not in releases:
-        raise ValueError("Metadata specifies a census_version that does not exist.")
+        # 1. Census version must exist
+        if metadata.census_version not in releases:
+            raise ValueError("Metadata specifies a census_version that does not exist.")
 
     # TODO - test for LTS?
 
     # 2. Census version, experiment and measurement must exist
-    with cellxgene_census.open_soma(census_version=metadata.census_version) as census:
+    with open_census(census_version=metadata.census_version, census_uri=args.census_uri) as census:
         if metadata.experiment_name not in census["census_data"]:
             raise ValueError("Metadata specifies non-existent experiment_name")
 
@@ -158,6 +165,9 @@ def validate_census_info(metadata: EmbeddingMetadata) -> None:
 
         assert census["census_data"][metadata.experiment_name].obs.count > 0
         assert census["census_data"][metadata.experiment_name].ms[metadata.measurement_name].var.count > 0
+
+        if metadata.n_embeddings > census["census_data"][metadata.experiment_name].obs.count:
+            raise ValueError("Metadata n_embeddings larger than obs joinid")
 
 
 def validate_doi(metadata: EmbeddingMetadata) -> None:
@@ -181,12 +191,12 @@ def validate_urls(metadata: EmbeddingMetadata) -> None:
     """Errors / exits upon failure"""
 
     # 4. All supplied URLs must resolve
-    for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("additional_information", "model_link")]:
-        if not url:
-            continue
+    for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("model_link",)]:
+        if url:
+            if url.startswith("https://"):
+                r = requests.head(url, allow_redirects=True)
+                if r.status_code == 200:
+                    continue
+                raise ValueError(f"Metadata contains unresolvable URL {fld_name}={url}")
 
-        r = requests.head(url, allow_redirects=True)
-        if r.status_code == 200:
-            continue
-
-        raise ValueError(f"Metadata contains unresolvable URL {fld_name}={url}")
+            logger.warning(f"Unable to verify URI {fld_name}={url}")
