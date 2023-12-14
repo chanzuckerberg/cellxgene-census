@@ -57,3 +57,4 @@ articles:
     - census_datasets
     - census_dataset_presence
     - census_compute_over_X
+    - census_access_maintained_embeddings
