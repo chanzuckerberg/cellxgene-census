@@ -27,13 +27,15 @@ CUBE_LOGICAL_DIMS_OBS = [
     "suspension_type",
 ]
 
-CUBE_TILEDB_DIMS_OBS = [CUBE_LOGICAL_DIMS_OBS[0:0]]
+CUBE_TILEDB_DIMS_OBS = CUBE_LOGICAL_DIMS_OBS[0:0]
 
 CUBE_TILEDB_ATTRS_OBS = CUBE_LOGICAL_DIMS_OBS[0:]
 
 CUBE_DIMS_VAR = ["feature_id"]
 
-CUBE_TILEDB_DIMS = CUBE_DIMS_VAR
+CUBE_LOGICAL_DIMS = CUBE_LOGICAL_DIMS_OBS + CUBE_DIMS_VAR
+
+CUBE_TILEDB_DIMS = CUBE_DIMS_VAR + CUBE_TILEDB_DIMS_OBS
 
 # ESTIMATOR_NAMES = ["nnz", "n_obs", "min", "max", "sum", "mean", "sem", "var", "sev", "selv"]
 ESTIMATOR_NAMES = ["n_obs", "mean", "sem", "var", "selv"]
