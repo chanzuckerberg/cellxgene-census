@@ -7,7 +7,7 @@ import tiledbsoma as soma
 
 from ..util import cpu_count
 
-CENSUS_SCHEMA_VERSION = "1.2.0"
+CENSUS_SCHEMA_VERSION = "1.3.0"
 
 CXG_SCHEMA_VERSION = "4.0.0"  # the CELLxGENE schema version supported
 
