@@ -13,7 +13,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 
 from .census_util import get_census_obs_uri_region, get_obs_soma_joinids
-from .metadata import EmbeddingMetadata
+from .config import Config
 from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
 _NPT = TypeVar("_NPT", bound=npt.NDArray[np.number[Any]])
@@ -35,7 +35,7 @@ obs dataframe, and M is user defined (e.g., for a 2D UMAP, M would be 2).
 logger = get_logger()
 
 
-def validate_compatible_tiledb_storage_format(uri: str, metadata: EmbeddingMetadata) -> None:
+def validate_compatible_tiledb_storage_format(uri: str, config: Config) -> None:
     """Verify Census build and Embedding TileDB formats are identical"""
     import tiledb
 
@@ -43,20 +43,20 @@ def validate_compatible_tiledb_storage_format(uri: str, metadata: EmbeddingMetad
     emb_storage_version = tiledb.open(uri).schema.version
 
     # Fetch associated Census array URI and its associated storage version
-    census_uri, census_region = get_census_obs_uri_region(metadata)
-    census_storage_version = tiledb.open(census_uri, config={"vfs.s3.region": census_region}).schema.version
+    census_obs_uri, census_region = get_census_obs_uri_region(config)
+    census_storage_version = tiledb.open(census_obs_uri, config={"vfs.s3.region": census_region}).schema.version
 
     if emb_storage_version != census_storage_version:
         raise ValueError("tiledb storage versions for embedding and Census are mismatched")
 
 
-def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
+def validate_embedding(config: Config, uri: str) -> None:
     """
     Validate an embedding saved as a SOMASparseNDArray, e.g., obsm-like. Raises on invalid
     """
     logger.info(f"Validating {uri}")
-
-    obs_joinids, _ = get_obs_soma_joinids(metadata)
+    metadata = config.metadata
+    obs_joinids, _ = get_obs_soma_joinids(config)
 
     with soma.open(uri, context=soma_context()) as A:
         shape = A.shape
@@ -65,7 +65,7 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
         if A.schema.field("soma_data").type != pa.float32():
             raise ValueError("Embedding data type not float32")
 
-        _validate_shape(shape, metadata)
+        _validate_shape(shape, config)
 
         # Must have at least one cell embedded
         if A.nnz == 0:
@@ -113,8 +113,8 @@ def validate_embedding(uri: str, metadata: EmbeddingMetadata) -> None:
             )
 
 
-def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None:
-    _, obs_shape = get_obs_soma_joinids(metadata)
+def _validate_shape(shape: Tuple[int, ...], config: Config) -> None:
+    _, obs_shape = get_obs_soma_joinids(config)
 
     if len(shape) != 2:
         raise ValueError("Embedding must be 2D")
@@ -122,7 +122,7 @@ def _validate_shape(shape: Tuple[int, ...], metadata: EmbeddingMetadata) -> None
     if shape[0] != obs_shape[0]:
         raise ValueError(f"Shapes differ: embedding {shape[0]},  obs shape {obs_shape[0]}.")
 
-    if shape[1] != metadata.n_features:
+    if shape[1] != config.metadata.n_features:
         raise ValueError(
             "Embedding and metadata specify a different number of embedding features.",
         )
