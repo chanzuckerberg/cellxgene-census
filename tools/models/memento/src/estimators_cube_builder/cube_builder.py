@@ -78,8 +78,7 @@ def compute_all_estimators_for_obs_group(obs_group_rows: pd.DataFrame, obs_df: p
     """Computes all estimators for a given obs group's expression values"""
     obs_group_name = cast(Tuple[str, ...], obs_group_rows.name)
 
-    distinct_soma_joinids = obs_group_rows[["soma_dim_0"]].drop_duplicates().set_index("soma_dim_0")
-    size_factors_for_obs_group = distinct_soma_joinids.join(obs_df[["approx_size_factor"]])
+    size_factors_for_obs_group = obs_group_rows[[]].join(obs_df[["approx_size_factor"]])
 
     gene_groups = obs_group_rows.groupby(CUBE_DIMS_VAR, observed=True)
     estimators = gene_groups.apply(
@@ -101,7 +100,7 @@ def compute_all_estimators_for_gene(
 
     data_dense = (
         size_factors_for_obs_group[[]]  # just the soma_dim_0 index
-        .join(gene_group_rows[["soma_dim_0", "soma_data"]].set_index("soma_dim_0"), how="left")
+        .join(gene_group_rows[["soma_data"]], how="left")
         .reset_index()
     )
 
@@ -166,9 +165,10 @@ def compute_all_estimators_for_batch_tdb(
 
 def compute_all_estimators_for_batch_pd(X_df: pd.DataFrame, obs_df: pd.DataFrame, var_df: pd.DataFrame) -> pd.DataFrame:
     result = (
-        X_df.merge(var_df[CUBE_DIMS_VAR], left_on="soma_dim_1", right_index=True)
-        .merge(obs_df[CUBE_LOGICAL_DIMS_OBS], left_on="soma_dim_0", right_index=True)
-        .drop(columns=["soma_dim_1"])
+        X_df.set_index("soma_dim_1")
+        .join(var_df[CUBE_DIMS_VAR])
+        .set_index("soma_dim_0")
+        .join(obs_df[CUBE_LOGICAL_DIMS_OBS])
         .groupby(CUBE_LOGICAL_DIMS_OBS, observed=True, sort=False)
         .apply(lambda obs_group: compute_all_estimators_for_obs_group(obs_group, obs_df))
         .rename(mapper=dict(enumerate(ESTIMATOR_NAMES)), axis=1)
@@ -318,7 +318,7 @@ def pass_2_compute_estimators(
         # perform check for existing data
         # TODO: can skip if known to have started with an empty cube
         with tiledb.open(ESTIMATORS_CUBE_ARRAY_URI, mode="r") as estimators_cube:
-            df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:]
+            df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:][CUBE_LOGICAL_DIMS_OBS]
             existing_groups = df.drop_duplicates()
             existing_groups = existing_groups.set_index(list(existing_groups.columns))
 
