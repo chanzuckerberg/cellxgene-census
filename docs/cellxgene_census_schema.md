@@ -339,7 +339,7 @@ An example of this `SOMADataFrame` is shown below:
 <tbody>
   <tr>
     <td>census_schema_version</td>
-    <td>1.2.0</td>
+    <td>1.3.0</td>
   </tr>
   <tr>
     <td>census_build_date</td>
