@@ -1,4 +1,4 @@
-<span style="background-color: #f6cce5; color; font-size: 18px"> 🚀 New to the Census: we’ve created a **centralized hub of models and embeddings** using Census data. [Check it out](https://cellxgene.cziscience.com/census-models)!
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: we’ve created a **centralized hub of models and embeddings** using Census data. [Check it out](https://cellxgene.cziscience.com/census-models)!
 
  </span>
 
