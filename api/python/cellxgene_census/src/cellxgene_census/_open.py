@@ -32,6 +32,7 @@ DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     "soma.init_buffer_bytes": 1 * 1024**3,
     # S3 requests should not be signed, since we want to allow anonymous access
     "vfs.s3.no_sign_request": "true",
+    "vfs.s3.region": "us-west-2",
 }
 
 api_logger = logging.getLogger("cellxgene_census")
