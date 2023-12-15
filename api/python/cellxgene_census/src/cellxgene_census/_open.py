@@ -30,6 +30,8 @@ DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
+    # S3 requests should not be signed, since we want to allow anonymous access
+    "vfs.s3.no_sign_request": "true",
 }
 
 api_logger = logging.getLogger("cellxgene_census")
@@ -68,38 +70,21 @@ def _open_soma(
     Private. Merge config defaults and return open census as a soma Collection/context.
     """
 
+    # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
+    context = context or get_default_soma_context()
+
+    # If S3 provider is specified, build a default context with a region
     if locator["provider"] == "S3":
-        context = _build_soma_tiledb_context(locator.get("region"), context)
-    else:  # If no provider is specified, build a default context (don't pass region)
-        context = _build_soma_tiledb_context(None, context)
+        context = context.replace(tiledb_config={"vfs.s3.region": locator.get("region")})
 
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def _build_soma_tiledb_context(
-    s3_region: Optional[str] = None, context: Optional[soma.options.SOMATileDBContext] = None
-) -> soma.options.SOMATileDBContext:
-    """
-    Private. Build a SOMATileDBContext with sensible defaults. If user-defined context is provided, only update the
-    `vfs.s3.region` only.
-    """
+def get_default_soma_context() -> soma.options.SOMATileDBContext:
+    """Return a SOMATileDBContext with sensible defaults that can be further customized by the user before being passed
+    to ``open_soma()``.  Use the ``replace()`` method on the return object to customize its settings."""
 
-    if not context:
-        # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
-        context = soma.options.SOMATileDBContext()
-        tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
-        if s3_region is not None:
-            tiledb_config["vfs.s3.region"] = s3_region
-        # S3 requests should not be signed, since we want to allow anonymous access
-        tiledb_config["vfs.s3.no_sign_request"] = "true"
-        context = context.replace(tiledb_config=tiledb_config)
-    else:
-        # if specified, the user context takes precedence _except_ for AWS Region in locator
-        if s3_region is not None:
-            tiledb_config = context.tiledb_ctx.config()
-            tiledb_config["vfs.s3.region"] = s3_region
-            context = context.replace(tiledb_config=tiledb_config)
-    return context
+    return soma.options.SOMATileDBContext().replace(tiledb_config=DEFAULT_TILEDB_CONFIGURATION)
 
 
 def open_soma(
