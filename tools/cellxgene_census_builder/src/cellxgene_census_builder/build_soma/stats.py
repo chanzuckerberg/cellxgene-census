@@ -6,7 +6,7 @@ import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
 
-from .globals import CENSUS_OBS_STATS_COLUMNS, CENSUS_VAR_STATS_COLUMNS
+from .globals import CENSUS_OBS_TABLE_SPEC, CENSUS_VAR_TABLE_SPEC
 
 
 def get_obs_stats(
@@ -27,11 +27,13 @@ def get_obs_stats(
 
     return pd.DataFrame(
         data={
-            "raw_sum": raw_sum.astype(CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()),
-            "nnz": nnz.astype(CENSUS_OBS_STATS_COLUMNS["nnz"].to_pandas_dtype()),
-            "raw_mean_nnz": raw_mean_nnz.astype(CENSUS_OBS_STATS_COLUMNS["raw_mean_nnz"].to_pandas_dtype()),
-            "raw_variance_nnz": raw_variance_nnz.astype(CENSUS_OBS_STATS_COLUMNS["raw_variance_nnz"].to_pandas_dtype()),
-            "n_measured_vars": n_measured_vars.astype(CENSUS_OBS_STATS_COLUMNS["n_measured_vars"].to_pandas_dtype()),
+            "raw_sum": raw_sum.astype(CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()),
+            "nnz": nnz.astype(CENSUS_OBS_TABLE_SPEC.field("nnz").to_pandas_dtype()),
+            "raw_mean_nnz": raw_mean_nnz.astype(CENSUS_OBS_TABLE_SPEC.field("raw_mean_nnz").to_pandas_dtype()),
+            "raw_variance_nnz": raw_variance_nnz.astype(
+                CENSUS_OBS_TABLE_SPEC.field("raw_variance_nnz").to_pandas_dtype()
+            ),
+            "n_measured_vars": n_measured_vars.astype(CENSUS_OBS_TABLE_SPEC.field("n_measured_vars").to_pandas_dtype()),
         }
     )
 
@@ -52,8 +54,8 @@ def get_var_stats(
 
     return pd.DataFrame(
         data={
-            "nnz": nnz.astype(CENSUS_VAR_STATS_COLUMNS["nnz"].to_pandas_dtype()),
-            "n_measured_obs": n_measured_obs.astype(CENSUS_VAR_STATS_COLUMNS["n_measured_obs"].to_pandas_dtype()),
+            "nnz": nnz.astype(CENSUS_VAR_TABLE_SPEC.field("nnz").to_pandas_dtype()),
+            "n_measured_obs": n_measured_obs.astype(CENSUS_VAR_TABLE_SPEC.field("n_measured_obs").to_pandas_dtype()),
         }
     )
 

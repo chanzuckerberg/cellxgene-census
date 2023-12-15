@@ -6,6 +6,7 @@ import tiledb
 import tiledbsoma as soma
 
 from ..util import cpu_count
+from .schema_util import FieldSpec, TableSpec
 
 CENSUS_SCHEMA_VERSION = "1.3.0"
 
@@ -16,27 +17,33 @@ CXG_SCHEMA_VERSION = "4.0.0"  # the CELLxGENE schema version supported
 CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
-CENSUS_DATASETS_COLUMNS = [
-    "citation",
-    "collection_id",
-    "collection_name",
-    "collection_doi",
-    "dataset_id",
-    "dataset_version_id",
-    "dataset_title",
-    "dataset_h5ad_path",
-    "dataset_total_cell_count",
-]
+CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
+    [
+        ("soma_joinid", pa.int64()),
+        ("citation", pa.large_string()),
+        ("collection_id", pa.large_string()),
+        ("collection_name", pa.large_string()),
+        ("collection_doi", pa.large_string()),
+        ("dataset_id", pa.large_string()),
+        ("dataset_version_id", pa.large_string()),
+        ("dataset_title", pa.large_string()),
+        ("dataset_h5ad_path", pa.large_string()),
+        ("dataset_total_cell_count", pa.int64()),
+    ]
+)
 CENSUS_DATASETS_NAME = "datasets"  # object name
 
-CENSUS_SUMMARY_CELL_COUNTS_COLUMNS = {
-    "organism": pa.string(),
-    "category": pa.string(),
-    "label": pa.string(),
-    "ontology_term_id": pa.string(),
-    "total_cell_count": pa.int64(),
-    "unique_cell_count": pa.int64(),
-}
+CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC = TableSpec.create(
+    [
+        ("soma_joinid", pa.int64()),
+        FieldSpec(name="organism", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="category", type=pa.string(), is_dictionary=True),
+        ("label", pa.string()),
+        ("ontology_term_id", pa.string()),
+        ("total_cell_count", pa.int64()),
+        ("unique_cell_count", pa.int64()),
+    ]
+)
 
 # top-level SOMA collection
 CENSUS_INFO_NAME = "census_info"
@@ -58,49 +65,65 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 
 
 # CXG schema columns we preserve in our census, and the Arrow type to encode as.  Schema:
-# https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md
+# https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md
 #
 # NOTE: a few additional columns are added (they are not defined in the CXG schema),
 # eg., dataset_id, tissue_general, etc.
-CXG_OBS_TERM_COLUMNS = {
-    # Columns pulled from the CXG H5AD
-    "assay": pa.large_string(),
-    "assay_ontology_term_id": pa.large_string(),
-    "cell_type": pa.large_string(),
-    "cell_type_ontology_term_id": pa.large_string(),
-    "development_stage": pa.large_string(),
-    "development_stage_ontology_term_id": pa.large_string(),
-    "disease": pa.large_string(),
-    "disease_ontology_term_id": pa.large_string(),
-    "donor_id": pa.large_string(),
-    "is_primary_data": pa.bool_(),
-    "observation_joinid": pa.large_string(),
-    "self_reported_ethnicity": pa.large_string(),
-    "self_reported_ethnicity_ontology_term_id": pa.large_string(),
-    "sex": pa.large_string(),
-    "sex_ontology_term_id": pa.large_string(),
-    "suspension_type": pa.large_string(),
-    "tissue": pa.large_string(),
-    "tissue_ontology_term_id": pa.large_string(),
-    "tissue_type": pa.large_string(),
-}
-CENSUS_OBS_STATS_COLUMNS = {
-    # Columns computed during the Census build and written to the Census obs dataframe.
-    "raw_sum": pa.float64(),
-    "nnz": pa.int64(),
-    "raw_mean_nnz": pa.float64(),
-    "raw_variance_nnz": pa.float64(),
-    "n_measured_vars": pa.int64(),
-}
-CENSUS_OBS_TERM_COLUMNS = {
-    # Columns written to the Census obs dataframe.
-    "soma_joinid": pa.int64(),
-    "dataset_id": pa.large_string(),
-    **CXG_OBS_TERM_COLUMNS,
-    "tissue_general": pa.large_string(),
-    "tissue_general_ontology_term_id": pa.large_string(),
-    **CENSUS_OBS_STATS_COLUMNS,
-}
+#
+CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modification.
+    "assay",
+    "assay_ontology_term_id",
+    "cell_type",
+    "cell_type_ontology_term_id",
+    "development_stage",
+    "development_stage_ontology_term_id",
+    "disease",
+    "disease_ontology_term_id",
+    "donor_id",
+    "is_primary_data",
+    "observation_joinid",
+    "self_reported_ethnicity",
+    "self_reported_ethnicity_ontology_term_id",
+    "sex",
+    "sex_ontology_term_id",
+    "suspension_type",
+    "tissue",
+    "tissue_ontology_term_id",
+    "tissue_type",
+]
+CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+CENSUS_OBS_TABLE_SPEC = TableSpec.create(
+    [
+        ("soma_joinid", pa.int64()),
+        FieldSpec(name="dataset_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="assay", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="assay_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="cell_type", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="cell_type_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="development_stage", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="development_stage_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="disease", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="disease_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="donor_id", type=pa.string(), is_dictionary=True),
+        ("is_primary_data", pa.bool_()),
+        ("observation_joinid", pa.large_string()),
+        FieldSpec(name="self_reported_ethnicity", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="self_reported_ethnicity_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="sex", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="sex_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="suspension_type", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="tissue", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="tissue_ontology_term_id", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="tissue_type", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="tissue_general", type=pa.string(), is_dictionary=True),
+        FieldSpec(name="tissue_general_ontology_term_id", type=pa.string(), is_dictionary=True),
+        ("raw_sum", pa.float64()),
+        ("nnz", pa.int64()),
+        ("raw_mean_nnz", pa.float64()),
+        ("raw_variance_nnz", pa.float64()),
+        ("n_measured_vars", pa.int64()),
+    ]
+)
 
 """
 Materialization of obs/var schema in TileDB is tuned with the following, largely informed by empirical testing:
@@ -115,37 +138,8 @@ Materialization of obs/var schema in TileDB is tuned with the following, largely
   higher Zstd compression beyond level=5, so the level was not increased further (and level=5 is still reasonable for
   writes)
 """
-
-_RepetativeStringLabelObs = [
-    # these columns are highly repetative string labels and will have appropriate filter
-    "assay",
-    "assay_ontology_term_id",
-    "cell_type",
-    "cell_type_ontology_term_id",
-    "dataset_id",
-    "development_stage",
-    "development_stage_ontology_term_id",
-    "disease",
-    "disease_ontology_term_id",
-    "donor_id",
-    "self_reported_ethnicity",
-    "self_reported_ethnicity_ontology_term_id",
-    "sex",
-    "sex_ontology_term_id",
-    "suspension_type",
-    "tissue",
-    "tissue_ontology_term_id",
-    "tissue_general",
-    "tissue_general_ontology_term_id",
-    "tissue_type",
-]
-_NonRepeatitiveStringObs = [
-    k
-    for k in CENSUS_OBS_TERM_COLUMNS
-    if (k not in _RepetativeStringLabelObs)
-    and (pa.types.is_string(CENSUS_OBS_TERM_COLUMNS[k]) or pa.types.is_large_string(CENSUS_OBS_TERM_COLUMNS[k]))
-]
-_NumericObs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+_NumericObsAttrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+_AllOtherObsAttrs = [f.name for f in CENSUS_OBS_TABLE_SPEC.fields if f.name not in _NumericObsAttrs]
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
@@ -153,11 +147,9 @@ CENSUS_OBS_PLATFORM_CONFIG = {
             "dims": {"soma_joinid": {"filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}]}},
             "attrs": {
                 **{
-                    k: {"filters": ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]}
-                    for k in _RepetativeStringLabelObs
+                    k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]} for k in _NumericObsAttrs
                 },
-                **{k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]} for k in _NumericObs},
-                **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _NonRepeatitiveStringObs},
+                **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _AllOtherObsAttrs},
             },
             "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
             "allows_duplicates": True,
@@ -165,19 +157,16 @@ CENSUS_OBS_PLATFORM_CONFIG = {
     }
 }
 
-CENSUS_VAR_STATS_COLUMNS = {
-    # Columns computed during the Census build and written to the Census var dataframe.
-    "nnz": pa.int64(),
-    "n_measured_obs": pa.int64(),
-}
-CENSUS_VAR_TERM_COLUMNS = {
-    # Columns written to the Census var dataframe.
-    "soma_joinid": pa.int64(),
-    "feature_id": pa.large_string(),
-    "feature_name": pa.large_string(),
-    "feature_length": pa.int64(),
-    **CENSUS_VAR_STATS_COLUMNS,
-}
+CENSUS_VAR_TABLE_SPEC = TableSpec.create(
+    [
+        ("soma_joinid", pa.int64()),
+        ("feature_id", pa.large_string()),
+        ("feature_name", pa.large_string()),
+        ("feature_length", pa.int64()),
+        ("nnz", pa.int64()),
+        ("n_measured_obs", pa.int64()),
+    ]
+)
 _StringLabelVar = ["feature_id", "feature_name"]
 _NumericVar = ["nnz", "n_measured_obs", "feature_length"]
 CENSUS_VAR_PLATFORM_CONFIG = {

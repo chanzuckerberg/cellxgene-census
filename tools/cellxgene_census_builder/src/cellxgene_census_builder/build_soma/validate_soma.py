@@ -28,16 +28,16 @@ from .experiment_builder import ExperimentSpecification
 from .experiment_specs import make_experiment_specs
 from .globals import (
     CENSUS_DATA_NAME,
-    CENSUS_DATASETS_COLUMNS,
     CENSUS_DATASETS_NAME,
+    CENSUS_DATASETS_TABLE_SPEC,
     CENSUS_INFO_NAME,
     CENSUS_OBS_STATS_COLUMNS,
-    CENSUS_OBS_TERM_COLUMNS,
+    CENSUS_OBS_TABLE_SPEC,
     CENSUS_SCHEMA_VERSION,
-    CENSUS_SUMMARY_CELL_COUNTS_COLUMNS,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
+    CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC,
     CENSUS_SUMMARY_NAME,
-    CENSUS_VAR_TERM_COLUMNS,
+    CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
@@ -104,9 +104,9 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
             assert name in census_info, f"`{name}` missing from census_info"
             assert soma.DataFrame.exists(census_info[name].uri)
 
-        assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
+        assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_TABLE_SPEC.field_names())
         assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
-            list(CENSUS_SUMMARY_CELL_COUNTS_COLUMNS) + ["soma_joinid"]
+            CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC.field_names()
         )
         assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
 
@@ -174,7 +174,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
             ad = anndata_cell_filter(unfiltered_ad, need_X=False)
             dataset_obs = (
                 se.obs.read(
-                    column_names=list(CENSUS_OBS_TERM_COLUMNS),
+                    column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
                     value_filter=f"dataset_id == '{dataset_id}'",
                 )
                 .concat()
@@ -191,6 +191,12 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
                 .drop(columns=["soma_joinid"])
                 .reset_index(drop=True)
             )
+
+            # decategorize census obs slice, as it will not have the same categories as H5AD obs,
+            # preventing Pandas from performing the DataFrame equivalance operation.
+            for key in dataset_obs:
+                if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
+                    dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
 
             assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
             if ad.n_obs > 0:
@@ -224,17 +230,19 @@ def validate_axis_dataframes(
         census_data = census[CENSUS_DATA_NAME]
 
         # check schema
-        expected_obs_columns = CENSUS_OBS_TERM_COLUMNS
-        expected_var_columns = CENSUS_VAR_TERM_COLUMNS
         for eb in experiment_specifications:
             obs = census_data[eb.name].obs
             var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
-            assert sorted(obs.keys()) == sorted(expected_obs_columns.keys())
-            assert sorted(var.keys()) == sorted(expected_var_columns.keys())
+            assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
+            assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
             for field in obs.schema:
-                assert field.type == expected_obs_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
+                assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
+                    field.type
+                ), f"Unexpected type in {field.name}: {field.type}"
             for field in var.schema:
-                assert field.type == expected_var_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
+                assert CENSUS_VAR_TABLE_SPEC.field(field.name).is_type_equivalent(
+                    field.type
+                ), f"Unexpected type in {field.name}: {field.type}"
 
     # check shapes & perform weak test of contents
     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
@@ -430,7 +438,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                 raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
                 np.add.at(raw_sum, rows_by_position, X_raw_data)
                 raw_sum = raw_sum.astype(
-                    CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()
+                    CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
                 )  # back to the storage type
                 assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
 
@@ -875,14 +883,14 @@ def validate_soma_bounding_box(
         with open_experiment(soma_path, eb) as exp:
             n_obs = eb_info[eb.name].n_obs
             n_vars = eb_info[eb.name].n_vars
-            if "raw" in exp.ms["RNA"].X:
-                assert exp.ms["RNA"].X["raw"].shape[0] == n_obs
-                assert exp.ms["RNA"].X["raw"].shape[1] == n_vars
-            if "normalized" in exp.ms["RNA"].X:
-                assert exp.ms["RNA"].X["normalized"].shape[0] == n_obs
-                assert exp.ms["RNA"].X["normalized"].shape[1] == n_vars
-            if "feature_dataset_presence_matrix" in exp.ms["RNA"]:
-                assert exp.ms["RNA"]["feature_dataset_presence_matrix"].shape[1] == n_vars
+            if "raw" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape[0] == n_obs
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape[1] == n_vars
+            if "normalized" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape[0] == n_obs
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape[1] == n_vars
+            if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:
+                assert exp.ms[MEASUREMENT_RNA_NAME]["feature_dataset_presence_matrix"].shape[1] == n_vars
 
     # now check that the bounding boxes are in between nonempty-domain and shape. Unfortunately,
     # SOMA is ambiguous about which is correct, and the result depends on the data path. More
