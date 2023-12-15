@@ -13,13 +13,34 @@ Learn how to stream the single-cell data and metadata from Census into your mach
     cellxgene_census_docsite_quick_start.md
     notebooks/api_demo/census_query_extract.ipynb
     notebooks/api_demo/census_gget_demo.ipynb
-   
-Using integrated embbedings and models
+
+[NEW! 🚀] Using integrated embbedings and models
 ----------
 
 Tutorials that show you how to retrieve pre-calculated Census embbedings and use their associated models for your workflows.
+
+Access Census embeddings.
+
+.. toctree::
+    :maxdepth: 1
    
-[Coming soon]
+    notebooks/api_demo/census_access_maintained_embeddings.ipynb
+    notebooks/api_demo/census_embedding.ipynb
+    
+Use the Census trained models.
+
+.. toctree::
+    :maxdepth: 1
+    
+    notebooks/analysis_demo/comp_bio_geneformer_prediction.ipynb
+    notebooks/analysis_demo/comp_bio_scvi_model_use.ipynb 
+   
+Exploring human biology with Census embeddings.
+
+.. toctree::
+    :maxdepth: 1
+    
+    notebooks/analysis_demo/comp_bio_embedding_exploration.ipynb
 
 Uderstanding Census data
 ----------
