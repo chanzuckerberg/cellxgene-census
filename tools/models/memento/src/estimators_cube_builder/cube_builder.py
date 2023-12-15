@@ -70,7 +70,7 @@ def compute_all_estimators_for_obs_group(obs_group_rows: pd.DataFrame, obs_df: p
     """Computes all estimators for a given obs group's expression values"""
     obs_group_name = cast(Tuple[str, ...], obs_group_rows.name)
 
-    size_factors_for_obs_group = obs_group_rows[[]].join(obs_df[["approx_size_factor"]])
+    size_factors_for_obs_group = obs_df[["approx_size_factor"]].loc[obs_group_rows[[]].index.drop_duplicates()]
 
     gene_groups = obs_group_rows.groupby(CUBE_DIMS_VAR, observed=True)
     estimators = gene_groups.apply(
@@ -411,12 +411,12 @@ def build(
     return True
 
 
-@click.command()  # type: ignore[misc]
-@click.option("--cube-uri")  # type: ignore[misc]
-@click.option("--experiment-uri")  # type: ignore[misc]
-@click.option("--measurement_name", default="RNA")  # type: ignore[misc]
-@click.option("--layer", default="raw")  # type: ignore[misc]
-@click.option("--validate/--no-validate", is_flag=True, default=True)  # type: ignore[misc]
+@click.command()
+@click.option("--cube-uri")
+@click.option("--experiment-uri")
+@click.option("--measurement_name", default="RNA")
+@click.option("--layer", default="raw")
+@click.option("--validate/--no-validate", is_flag=True, default=True)
 def build_cli(cube_uri: str, experiment_uri: str, measurement_name: str, layer: str, validate: bool) -> None:
     build(cube_uri, experiment_uri, measurement_name, layer, validate)
 

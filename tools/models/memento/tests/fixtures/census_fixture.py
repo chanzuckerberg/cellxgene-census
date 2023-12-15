@@ -1,6 +1,7 @@
 import os
 import sys
 
+import pyarrow as pa
 import tiledbsoma as soma
 from somacore import AxisQuery
 
@@ -10,10 +11,15 @@ def subset_census(query: soma.ExperimentAxisQuery, output_base_dir: str) -> None
     Subset the census cube to the given query, returning a new cube.
     """
     with soma.Experiment.create(uri=output_base_dir) as exp_subset:
+        x_data = query.X(layer_name="raw").tables().concat()
+
         obs_data = query.obs().concat()
+        # remove obs rows with no X data
+        x_soma_dim_0_unique = pa.Table.from_arrays([x_data["soma_dim_0"].unique()], names=["soma_dim_0"])
+        obs_data = obs_data.join(x_soma_dim_0_unique, keys="soma_joinid", right_keys="soma_dim_0", join_type="inner")
         obs = soma.DataFrame.create(os.path.join(output_base_dir, "obs"), schema=obs_data.schema)
-        exp_subset.set("obs", obs)
         obs.write(obs_data)
+        exp_subset.set("obs", obs)
 
         ms = exp_subset.add_new_collection("ms")
         rna = ms.add_new_collection("RNA", soma.Measurement)
@@ -22,7 +28,6 @@ def subset_census(query: soma.ExperimentAxisQuery, output_base_dir: str) -> None
         var = rna.add_new_dataframe("var", schema=var_data.schema)
         var.write(var_data)
 
-        x_data = query.X(layer_name="raw").tables().concat()
         x_type = x_data.schema.field_by_name("soma_data").type
         rna.add_new_collection("X")
         rna["X"].add_new_sparse_ndarray("raw", type=x_type, shape=(None, None))
