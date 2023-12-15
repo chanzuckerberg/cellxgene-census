@@ -32,8 +32,8 @@ Use the Census trained models.
 .. toctree::
     :maxdepth: 1
     
-    notebooks/analysis_demo/comp_bio_geneformer_prediction.ipynb
     notebooks/analysis_demo/comp_bio_scvi_model_use.ipynb 
+    notebooks/analysis_demo/comp_bio_geneformer_prediction.ipynb
    
 Exploring human biology with Census embeddings.
 
