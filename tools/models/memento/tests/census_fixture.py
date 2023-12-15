@@ -1,4 +1,5 @@
 import os
+import sys
 
 import tiledbsoma as soma
 from somacore import AxisQuery
@@ -29,19 +30,19 @@ def subset_census(query: soma.ExperimentAxisQuery, output_base_dir: str) -> None
 
 
 if __name__ == "__main__":
+    experiment_uri, obs_value_filter, var_value_filter, output_cube_path = sys.argv[1:5]
+
     context = soma.SOMATileDBContext().replace(
         tiledb_config={
             "soma.init_buffer_bytes": 128 * 1024**2,
             "vfs.s3.region": "us-west-2",
-            "vfs.s3.no_sign_request": True,
+            "vfs.s3.no_sign_request": "false",
         }
     )
-    with soma.Experiment.open(
-        "s3://cellxgene-data-public/cell-census/2023-10-23/soma/census_data/homo_sapiens", context=context
-    ) as exp:
+    with soma.Experiment.open(experiment_uri, context=context) as exp:
         query = exp.axis_query(
             measurement_name="RNA",
-            var_query=AxisQuery(value_filter="feature_id in ['ENSG00000000419']"),  # , 'ENSG00000002330']"),
-            obs_query=AxisQuery(value_filter="is_primary_data == True and tissue_general == 'embryo'"),
+            obs_query=AxisQuery(value_filter=obs_value_filter),
+            var_query=AxisQuery(value_filter=var_value_filter),
         )
-        subset_census(query, "small-census")
+        subset_census(query, output_cube_path)
