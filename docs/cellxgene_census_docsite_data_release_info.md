@@ -1,6 +1,6 @@
 # Census data releases
 
-**Last edited**: July 7th, 2023.
+**Last edited**: December 15th, 2023.
 
 **Contents:**
 
@@ -60,6 +60,52 @@ census <- open_soma(census_version = "latest")
 ```
 
 ## List of LTS Census data releases
+
+### LTS 2023-12-15
+
+Open this data release by specifying `census_version = "2023-12-15"` in future calls to `open_soma()`.
+
+#### Version information
+
+| Information                       | Value      |
+|-----------------------------------|------------|
+| Census schema version             | [1.2.0](https://github.com/chanzuckerberg/cellxgene-census/blob/3ff1033135b3a9365c239a9442798d88aae94d03/docs/cellxgene_census_schema.md) |
+| Census build date                 | 2023-12-15 |
+| Dataset schema version            | [3.1.0](https://github.com/chanzuckerberg/single-cell-curation/blob/8ae36ef3fb5a826511dc657d1b8c6d4a772d32e8/schema/3.1.0/schema.md)      |
+| Number of datasets                | 651        |
+
+#### Cell and donor counts
+
+| Type              | _Homo sapiens_ | _Mus musculus_ |
+|-------------------|----------------|----------------|
+| Total cells       | 62,998,417     | 5,684,805      |
+| Unique cells      | 36,227,903     | 4,128,230     |
+| Number of donors  | 15,588         | 1,990          |
+
+#### Cell metadata
+
+| Category                | _Homo sapiens_ | _Mus musculus_ |
+|-------------------------|----------------|----------------|
+| Assay                   | 20             | 10              |
+| Cell type               | 631            | 248            |
+| Development stage       | 173            | 36             |
+| Disease                 | 72             | 5              |
+| Self-reported ethnicity | 30             | _NA_           |
+| Sex                     | 3              | 3              |
+| Suspension type         | 2              | 2              |
+| Tissue                  | 230            | 74             |
+| Tissue general          | 53             | 27             |
+
+#### Cell embbedings
+
+Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
+
+Available `obsm` slots:
+
+| Method                  | _Homo sapiens_ | _Mus musculus_ |
+|-------------------------|----------------|----------------|
+| scVI                    | `scvi`         | `scvi`         |
+| Fine-tuned Geneformer   | `geneformer`   | _NA_           |
 
 ### LTS 2023-07-25
 
