@@ -19,7 +19,6 @@ from tiledbsoma import SOMATileDBContext
 
 from .cube_schema import (
     CUBE_DIMS_VAR,
-    CUBE_LOGICAL_DIMS,
     CUBE_LOGICAL_DIMS_OBS,
     CUBE_TILEDB_ATTRS_OBS,
     ESTIMATOR_NAMES,
@@ -158,7 +157,7 @@ def compute_all_estimators_for_batch_tdb(
             logging.warning(f"Pass 2: Batch {batch} had empty result, cells={len(soma_dim_0)}, nnz={len(X_df)}")
         logging.info(f"Pass 2: End X batch {batch}, cells={len(soma_dim_0)}, nnz={len(X_df)}")
 
-        assert all(result.reset_index()[CUBE_LOGICAL_DIMS].value_counts() <= 1), "tiledb batch has repeated cube rows"
+        assert all(result.index.value_counts() <= 1), "tiledb batch has repeated cube rows"
 
     gc.collect()
 
@@ -242,19 +241,6 @@ def pass_2_compute_estimators(
     cube_obs_coords = obs_df[CUBE_LOGICAL_DIMS_OBS].groupby(CUBE_LOGICAL_DIMS_OBS, observed=True)
     cube_obs_coord_groups = cube_obs_coords.groups
 
-    # # verify that each groups' soma_joinids are disjoint
-    # all_soma_joinids = set()
-    # all_group_dims = set()
-    # for group_soma_joinids in cube_obs_coord_groups.values():
-    #     assert len(all_soma_joinids.intersection(group_soma_joinids)) == 0, "cube rows have repeated soma_joinids"
-    #     all_soma_joinids.update(group_soma_joinids)
-    #
-    #     associated_obs_rows = obs_df.loc[group_soma_joinids][CUBE_LOGICAL_DIMS_OBS]
-    #     assert associated_obs_rows.drop_duplicates().shape[0] == 1, "group's cube rows do not share the same obs dims"
-    #     group_dims = tuple(associated_obs_rows.drop_duplicates().iloc[0])
-    #     assert group_dims not in all_group_dims, "group's cube obs dims are not unique to this group"
-    #     all_group_dims.add(group_dims)
-
     soma_dim_0_batch: List[int] = []
     batch_futures = []
     n = n_cum_cells = 0
@@ -288,7 +274,6 @@ def pass_2_compute_estimators(
                     )
 
                 tiledb.from_pandas(ESTIMATORS_CUBE_ARRAY_URI, batch_result, mode="append")
-                # validate_cube(ESTIMATORS_CUBE_ARRAY_URI)
 
         with cProfile.Profile() as pr:
             for soma_dim_0_ids in cube_obs_coord_groups.values():
@@ -357,18 +342,11 @@ def pass_2_compute_estimators(
 
         # Accumulate results
 
-        # all_group_dims = set()
         n_cum_cells = 0
         for n, future in enumerate(futures.as_completed(batch_futures), start=1):
             batch_result = future.result()
             # TODO: move writing of tiledb array to compute_all_estimators_for_batch_tdb; no need to return result
             if len(batch_result) > 0:
-                # for dims in result.index:
-                #     group_dims = tuple(dims)
-                #     assert group_dims not in all_group_dims, \
-                #         f"cube row is not unique: {group_dims}"
-                #     all_group_dims.add(group_dims)
-
                 batch_result = batch_result.reset_index(CUBE_LOGICAL_DIMS_OBS)
 
                 # NOTE: The Pandas categorical columns must have the same underlying dictionaries as the TileDB Array
@@ -381,7 +359,6 @@ def pass_2_compute_estimators(
 
                 logging.info("Pass 2: Writing to estimator cube.")
                 tiledb.from_pandas(ESTIMATORS_CUBE_ARRAY_URI, batch_result, mode="append")
-                # validate_cube(ESTIMATORS_CUBE_ARRAY_URI)
 
             else:
                 logging.warning("Pass 2: Batch had empty result")
@@ -391,8 +368,6 @@ def pass_2_compute_estimators(
             gc.collect()
 
         logging.info("Pass 2: Completed")
-
-        # pd.DataFrame(all_group_dims, columns=CUBE_LOGICAL_DIMS).to_csv("all_group_dims.csv")
 
 
 def build(validate: bool = True) -> bool:
@@ -441,9 +416,9 @@ def build(validate: bool = True) -> bool:
 
         pass_2_compute_estimators(query, size_factors, measurement_name=measurement_name, layer=layer)
 
-        if validate:
-            logging.info("Validating estimators cube")
-            validate_cube(ESTIMATORS_CUBE_ARRAY_URI)
-            logging.info("Validation complete")
+    if validate:
+        logging.info("Validating estimators cube")
+        validate_cube(ESTIMATORS_CUBE_ARRAY_URI, exp_uri)  # raises exception if invalid
+        logging.info("Validation complete")
 
     return True
