@@ -4,10 +4,10 @@ import gc
 import logging
 import multiprocessing
 import os
-import sys
 from concurrent import futures
 from typing import List, Tuple, cast
 
+import click
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -32,9 +32,7 @@ PROFILE_MODE = bool(os.getenv("PROFILE_MODE", False))  # Run pass 2 in single-pr
 
 # TODO: parameterize constants below
 
-ESTIMATORS_CUBE_ARRAY_URI = "estimators_cube"
-
-OBS_WITH_SIZE_FACTOR_TILEDB_ARRAY_URI = "obs_with_size_factor"
+OBS_SIZE_FACTORS_ARRAY_SUFFIX = "_size_factors"
 
 TILEDB_SOMA_BUFFER_BYTES = 2**31
 
@@ -52,13 +50,7 @@ MAX_WORKERS = None  # None means use multiprocessing's dynamic default
 # highly variable, we could just limit by process/worker count).
 MAX_CELLS = 512_000
 
-VAR_VALUE_FILTER = None
-# For testing. Note this only affects pass 2, since all genes must be considered when computing size factors in pass 1.
-# VAR_VALUE_FILTER = "feature_id in ['ENSG00000000419', 'ENSG00000002330']"
-
 OBS_VALUE_FILTER = "is_primary_data == True"
-# For testing
-# OBS_VALUE_FILTER = "is_primary_data == True and tissue_general == 'embryo'"
 
 
 logging.basicConfig(
@@ -219,7 +211,7 @@ def pass_1_compute_size_factors(query: ExperimentAxisQuery, layer: str) -> pd.Da
 
 
 def pass_2_compute_estimators(
-    query: ExperimentAxisQuery, size_factors: pd.DataFrame, /, measurement_name: str, layer: str
+    cube_uri: str, query: ExperimentAxisQuery, size_factors: pd.DataFrame, /, measurement_name: str, layer: str
 ) -> None:
     var_df = query.var().concat().to_pandas().set_index("soma_joinid")
     obs_df = (
@@ -228,11 +220,11 @@ def pass_2_compute_estimators(
 
     obs_df = obs_df.join(size_factors[["approx_size_factor"]])
 
-    if tiledb.array_exists(ESTIMATORS_CUBE_ARRAY_URI):
+    if tiledb.array_exists(cube_uri):
         logging.info("Pass 2: Resuming")
     else:
         # accumulate into a TileDB array
-        tiledb.Array.create(ESTIMATORS_CUBE_ARRAY_URI, build_cube_schema(obs_df))
+        tiledb.Array.create(cube_uri, build_cube_schema(obs_df))
         logging.info("Pass 2: Created new estimators cube")
 
     # Process X by cube rows. This ensures that estimators are computed
@@ -273,7 +265,7 @@ def pass_2_compute_estimators(
                         batch_result[col_], categories=obs_df[col_].unique().astype(str)
                     )
 
-                tiledb.from_pandas(ESTIMATORS_CUBE_ARRAY_URI, batch_result, mode="append")
+                tiledb.from_pandas(cube_uri, batch_result, mode="append")
 
         with cProfile.Profile() as pr:
             for soma_dim_0_ids in cube_obs_coord_groups.values():
@@ -317,7 +309,7 @@ def pass_2_compute_estimators(
 
         # perform check for existing data
         # TODO: can skip if known to have started with an empty cube
-        with tiledb.open(ESTIMATORS_CUBE_ARRAY_URI, mode="r") as estimators_cube:
+        with tiledb.open(cube_uri, mode="r") as estimators_cube:
             df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:][CUBE_LOGICAL_DIMS_OBS]
             existing_groups = df.drop_duplicates()
             existing_groups = existing_groups.set_index(list(existing_groups.columns))
@@ -358,7 +350,7 @@ def pass_2_compute_estimators(
                     )
 
                 logging.info("Pass 2: Writing to estimator cube.")
-                tiledb.from_pandas(ESTIMATORS_CUBE_ARRAY_URI, batch_result, mode="append")
+                tiledb.from_pandas(cube_uri, batch_result, mode="append")
 
             else:
                 logging.warning("Pass 2: Batch had empty result")
@@ -370,14 +362,12 @@ def pass_2_compute_estimators(
         logging.info("Pass 2: Completed")
 
 
-def build(validate: bool = True) -> bool:
+def build(
+    cube_uri: str, experiment_uri: str, measurement_name: str = "RNA", layer: str = "raw", validate: bool = True
+) -> bool:
     # init multiprocessing
     if multiprocessing.get_start_method(True) != "spawn":
         multiprocessing.set_start_method("spawn", True)
-
-    exp_uri = sys.argv[1] if len(sys.argv) > 1 else sys.exit(1)
-    layer = sys.argv[2] if len(sys.argv) > 2 else "raw"
-    measurement_name = "RNA"
 
     soma_ctx = SOMATileDBContext(
         tiledb_config={
@@ -385,40 +375,51 @@ def build(validate: bool = True) -> bool:
             "vfs.s3.no_sign_request": True,
         }
     )
-    with soma.Experiment.open(uri=exp_uri, context=soma_ctx) as exp:
+    with soma.Experiment.open(uri=experiment_uri, context=soma_ctx) as exp:
         query = exp.axis_query(
             measurement_name=measurement_name,
             obs_query=AxisQuery(value_filter=OBS_VALUE_FILTER),
-            # Note: Must use *all* genes to compute size factors correctly, even when var filter is
-            # being used for testing
-            var_query=AxisQuery(),
         )
         logging.info(f"Pass 1: Processing {query.n_obs} cells and {query.n_vars} genes")
 
-        if not tiledb.array_exists(OBS_WITH_SIZE_FACTOR_TILEDB_ARRAY_URI):
+        obs_size_factors_uri = cube_uri + OBS_SIZE_FACTORS_ARRAY_SUFFIX
+        if not tiledb.array_exists(obs_size_factors_uri):
             logging.info("Pass 1: Compute Approx Size Factors")
             size_factors = pass_1_compute_size_factors(query, layer)
 
             size_factors = size_factors.astype({col: "category" for col in CUBE_LOGICAL_DIMS_OBS})
-            tiledb.from_pandas(OBS_WITH_SIZE_FACTOR_TILEDB_ARRAY_URI, size_factors.reset_index(), index_col=[0])
+            tiledb.from_pandas(obs_size_factors_uri, size_factors.reset_index(), index_col=[0])
             logging.info("Saved `obs_with_size_factor` TileDB Array")
         else:
             logging.info("Pass 1: Compute Approx Size Factors (loading from stored data)")
-            size_factors = tiledb.open(OBS_WITH_SIZE_FACTOR_TILEDB_ARRAY_URI).df[:].set_index("soma_joinid")
+            size_factors = tiledb.open(obs_size_factors_uri).df[:].set_index("soma_joinid")
 
         logging.info("Pass 2: Compute Estimators")
         query = exp.axis_query(
             measurement_name=measurement_name,
             obs_query=AxisQuery(value_filter=OBS_VALUE_FILTER),
-            var_query=AxisQuery(value_filter=VAR_VALUE_FILTER),
         )
         logging.info(f"Pass 2: Processing {query.n_obs} cells and {query.n_vars} genes")
 
-        pass_2_compute_estimators(query, size_factors, measurement_name=measurement_name, layer=layer)
+        pass_2_compute_estimators(cube_uri, query, size_factors, measurement_name=measurement_name, layer=layer)
 
     if validate:
         logging.info("Validating estimators cube")
-        validate_cube(ESTIMATORS_CUBE_ARRAY_URI, exp_uri)  # raises exception if invalid
+        validate_cube(cube_uri, experiment_uri)  # raises exception if invalid
         logging.info("Validation complete")
 
     return True
+
+
+@click.command()  # type: ignore[misc]
+@click.option("--cube-uri")  # type: ignore[misc]
+@click.option("--experiment-uri")  # type: ignore[misc]
+@click.option("--measurement_name", default="RNA")  # type: ignore[misc]
+@click.option("--layer", default="raw")  # type: ignore[misc]
+@click.option("--validate/--no-validate", is_flag=True, default=True)  # type: ignore[misc]
+def build_cli(cube_uri: str, experiment_uri: str, measurement_name: str, layer: str, validate: bool) -> None:
+    build(cube_uri, experiment_uri, measurement_name, layer, validate)
+
+
+if __name__ == "__main__":
+    build_cli()

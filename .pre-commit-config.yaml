@@ -38,6 +38,7 @@ repos:
         args: ["--config-file=./api/python/cellxgene_census/pyproject.toml"]
         additional_dependencies:
           - attrs
+          - types-click
           - types-requests
           - pytest
           - pandas-stubs
