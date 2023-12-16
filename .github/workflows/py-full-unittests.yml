@@ -18,7 +18,7 @@ jobs:
       - name: Install OS dependencies
         run: |
           sudo apt update
-          sudo apt install build-essential
+          sudo apt install -y build-essential
 
       - name: Install dependencies (including experimental)
         run: |
