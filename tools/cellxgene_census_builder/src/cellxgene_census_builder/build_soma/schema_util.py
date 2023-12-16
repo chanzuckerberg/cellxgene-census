@@ -71,12 +71,17 @@ class FieldSpec:
 @attrs.define(frozen=True, kw_only=True, slots=True)
 class TableSpec:
     fields: List[FieldSpec]
+    use_arrow_dictionaries: bool  # Feature flag to enable/disable dictionary/enum support
 
     @classmethod
-    def create(cls, fields: Sequence[Union[FieldSpec, Tuple[str, pa.DataType]]]) -> TableSpec:
+    def create(
+        cls, fields: Sequence[Union[FieldSpec, Tuple[str, pa.DataType]]], *, use_arrow_dictionary: bool = False
+    ) -> TableSpec:
         u = []
         for f in fields:
             if isinstance(f, FieldSpec):
+                if not use_arrow_dictionary and f.is_dictionary:
+                    f = attrs.evolve(f, is_dictionary=False)
                 u.append(f)
             else:
                 name, type = f
@@ -86,7 +91,7 @@ class TableSpec:
         if len(set(f.name for f in u)) != len(fields):
             raise ValueError("All field names must be unique.")
 
-        return TableSpec(fields=u)
+        return TableSpec(fields=u, use_arrow_dictionaries=use_arrow_dictionary)
 
     def to_arrow_schema(self, df: Optional[pd.DataFrame]) -> pa.Schema:
         """

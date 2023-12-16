@@ -1,5 +1,5 @@
 import functools
-from typing import Set
+from typing import Any, List, Set, Tuple, Union
 
 import pyarrow as pa
 import tiledb
@@ -7,6 +7,10 @@ import tiledbsoma as soma
 
 from ..util import cpu_count
 from .schema_util import FieldSpec, TableSpec
+
+# Feature flag - enables/disables use of Arrow dictionary / TileDB enum for
+# DataFrame columns. True is enabled, False is disabled.
+USE_ARROW_DICTIONARY = False
 
 CENSUS_SCHEMA_VERSION = "1.3.0"
 
@@ -29,7 +33,8 @@ CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
         ("dataset_title", pa.large_string()),
         ("dataset_h5ad_path", pa.large_string()),
         ("dataset_total_cell_count", pa.int64()),
-    ]
+    ],
+    use_arrow_dictionary=USE_ARROW_DICTIONARY,
 )
 CENSUS_DATASETS_NAME = "datasets"  # object name
 
@@ -42,7 +47,8 @@ CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC = TableSpec.create(
         ("ontology_term_id", pa.string()),
         ("total_cell_count", pa.int64()),
         ("unique_cell_count", pa.int64()),
-    ]
+    ],
+    use_arrow_dictionary=USE_ARROW_DICTIONARY,
 )
 
 # top-level SOMA collection
@@ -92,54 +98,62 @@ CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modificatio
     "tissue_type",
 ]
 CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
-CENSUS_OBS_TABLE_SPEC = TableSpec.create(
-    [
-        ("soma_joinid", pa.int64()),
-        FieldSpec(name="dataset_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="assay", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="assay_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="cell_type", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="cell_type_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="development_stage", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="development_stage_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="disease", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="disease_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="donor_id", type=pa.string(), is_dictionary=True),
-        ("is_primary_data", pa.bool_()),
-        ("observation_joinid", pa.large_string()),
-        FieldSpec(name="self_reported_ethnicity", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="self_reported_ethnicity_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="sex", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="sex_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="suspension_type", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="tissue", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="tissue_ontology_term_id", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="tissue_type", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="tissue_general", type=pa.string(), is_dictionary=True),
-        FieldSpec(name="tissue_general_ontology_term_id", type=pa.string(), is_dictionary=True),
-        ("raw_sum", pa.float64()),
-        ("nnz", pa.int64()),
-        ("raw_mean_nnz", pa.float64()),
-        ("raw_variance_nnz", pa.float64()),
-        ("n_measured_vars", pa.int64()),
-    ]
-)
+CENSUS_OBS_FIELDS: List[Union[FieldSpec, Tuple[str, pa.DataType]]] = [
+    ("soma_joinid", pa.int64()),
+    FieldSpec(name="dataset_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="assay", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="assay_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="cell_type", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="cell_type_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="development_stage", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="development_stage_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="disease", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="disease_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="donor_id", type=pa.string(), is_dictionary=True),
+    ("is_primary_data", pa.bool_()),
+    ("observation_joinid", pa.large_string()),
+    FieldSpec(name="self_reported_ethnicity", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="self_reported_ethnicity_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="sex", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="sex_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="suspension_type", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="tissue", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="tissue_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="tissue_type", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="tissue_general", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="tissue_general_ontology_term_id", type=pa.string(), is_dictionary=True),
+    ("raw_sum", pa.float64()),
+    ("nnz", pa.int64()),
+    ("raw_mean_nnz", pa.float64()),
+    ("raw_variance_nnz", pa.float64()),
+    ("n_measured_vars", pa.int64()),
+]
+CENSUS_OBS_TABLE_SPEC = TableSpec.create(CENSUS_OBS_FIELDS, use_arrow_dictionary=USE_ARROW_DICTIONARY)
 
 """
-Materialization of obs/var schema in TileDB is tuned with the following, largely informed by empirical testing:
-* string columns with repeating labels use DictionaryFilter, which efficiently encodes these highly repetative strings.
-  Columns with non-repetative values (e.g., var.feature_id) are NOT dictionary coded.
-* obs/var DataFrame show significant improvement in on-disk size and read performance at high Zstd compression level,
-  making it worth the extra build/write compute time. Level set to highest value that does not require additional
-  resources at decompression (nb. 20+ requres additional memory).
-* int64 index columns (soma_joinid, soma_dim_0, etc) empirically show wins from ByteShuffle followed by Zstd.
-  First dimension of axis dataframes are always monotonically increasing, and also beneit from DoubleDelta.
-* Benchmarking X slicing (using lung demo notebook) used to tune X[raw]. Read / query performance did not benefit from
-  higher Zstd compression beyond level=5, so the level was not increased further (and level=5 is still reasonable for
-  writes)
+Materialization (filter pipelines, capacity, etc) of obs/var schema in TileDB is tuned by empirical testing.
 """
+# Numeric columns
 _NumericObsAttrs = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
-_AllOtherObsAttrs = [f.name for f in CENSUS_OBS_TABLE_SPEC.fields if f.name not in _NumericObsAttrs]
+# Categorical/dict-like columns
+_DictLikeObsAttrs = [
+    f.name
+    for f in CENSUS_OBS_FIELDS
+    if isinstance(f, FieldSpec) and f.is_dictionary
+    if f.is_dictionary and f.name not in (_NumericObsAttrs + ["soma_joinid"])
+]
+# Best of the rest
+_AllOtherObsAttrs = [
+    f.name
+    for f in CENSUS_OBS_TABLE_SPEC.fields
+    if f.name not in (_DictLikeObsAttrs + _NumericObsAttrs + ["soma_joinid"])
+]
+# Dict filter varies depending on whether we are using dictionary types in the schema
+_DictLikeFilter: List[Any] = (
+    [{"_type": "ZstdFilter", "level": 19}]
+    if USE_ARROW_DICTIONARY
+    else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
+)
 CENSUS_OBS_PLATFORM_CONFIG = {
     "tiledb": {
         "create": {
@@ -149,6 +163,7 @@ CENSUS_OBS_PLATFORM_CONFIG = {
                 **{
                     k: {"filters": ["ByteShuffleFilter", {"_type": "ZstdFilter", "level": 9}]} for k in _NumericObsAttrs
                 },
+                **{k: {"filters": _DictLikeFilter} for k in _DictLikeObsAttrs},
                 **{k: {"filters": [{"_type": "ZstdFilter", "level": 19}]} for k in _AllOtherObsAttrs},
             },
             "offsets_filters": ["DoubleDeltaFilter", {"_type": "ZstdFilter", "level": 19}],
@@ -165,7 +180,8 @@ CENSUS_VAR_TABLE_SPEC = TableSpec.create(
         ("feature_length", pa.int64()),
         ("nnz", pa.int64()),
         ("n_measured_obs", pa.int64()),
-    ]
+    ],
+    use_arrow_dictionary=USE_ARROW_DICTIONARY,
 )
 _StringLabelVar = ["feature_id", "feature_name"]
 _NumericVar = ["nnz", "n_measured_obs", "feature_length"]
