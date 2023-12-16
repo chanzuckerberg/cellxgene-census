@@ -9,6 +9,11 @@ jobs:
   all_unit_tests:
     runs-on: single-cell-1tb-runner
     steps:
+      - name: Install OS dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git-all
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -16,11 +21,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11
-
-      - name: Install OS dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential git-all
 
       - name: debugging
         run: |
