@@ -3,6 +3,7 @@ name: Python cellxgene_census package full unit tests
 # Run all Python unit tets, including those that are too expensive to run frequently.
 
 on:
+  pull_request:
   workflow_dispatch: # used for debugging or manual validation
 
 jobs:
