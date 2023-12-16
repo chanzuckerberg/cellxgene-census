@@ -4,7 +4,6 @@ name: cellxgene_census package full unit tests
 # This workflow requires a very large capacity runner, e.g., 1TiB RAM.
 
 on:
-  pull_request:
   # schedule:
   #   - cron: "0 1 * * 0" # every Sunday night, 1AM UTC
   workflow_dispatch: # used for debugging or manual validation
