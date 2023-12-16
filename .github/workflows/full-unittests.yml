@@ -16,7 +16,7 @@ jobs:
       - name: Install OS dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git-all
+          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev
 
       - uses: actions/checkout@v4
         with:
@@ -33,16 +33,14 @@ jobs:
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
 
-      - name: Log debugging info
+      - name: Pytest (--expensive --experimental)
         run: |
-          echo tiledbsoma.show_package_version():
+          echo 'tiledbsoma.show_package_version():'
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
           echo ---------
           echo pip freeze
           pip freeze
-
-      - name: Pytest (--expensive --experimental)
-        run: |
+          echo ---------
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
@@ -51,7 +49,9 @@ jobs:
       - name: Install OS dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git-all
+          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev
+          # sanity checks
+          cmake 
 
       - uses: actions/checkout@v4
         with:
@@ -59,12 +59,12 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
-          extra-repositories: https://tiledb-inc.r-universe.dev
+          extra-repositories: https://tiledb-inc.r-universe.dev, https://cloud.r-project.org, https://chanzuckerberg.r-universe.dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ./api/r/cellxgene.census
-          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::remotes
+          extra-packages: any::rcmdcheck, any::remotes
           cache: true
 
       - name: testthat
