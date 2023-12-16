@@ -52,7 +52,6 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int) -> str:
     last_error: aiohttp.ClientPayloadError | None = None
     for attempt in range(4):
         try:
-            print(dataset.dataset_asset_h5ad_uri, dataset_path)
             fs.get_file(dataset.dataset_asset_h5ad_uri, dataset_path)
             break
         except aiohttp.ClientPayloadError as e:
