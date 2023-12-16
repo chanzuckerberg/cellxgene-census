@@ -1,12 +1,16 @@
-name: Python cellxgene_census package full unit tests
+name: cellxgene_census package full unit tests
 
-# Run all Python unit tets, including those that are too expensive to run frequently.
+# Run all unit tets, including those that are too expensive to run frequently.
+# This workflow requires a very large capacity runner, e.g., 1TiB RAM.
 
 on:
+  pull_request:
+  # schedule:
+  #   - cron: "0 1 * * 0" # every Sunday night, 1AM UTC
   workflow_dispatch: # used for debugging or manual validation
 
 jobs:
-  all_unit_tests:
+  py_unit_tests:
     runs-on: single-cell-1tb-runner
     steps:
       - name: Install OS dependencies
@@ -31,7 +35,10 @@ jobs:
 
       - name: Log debugging info
         run: |
+          echo tiledbsoma.show_package_version():
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
+          echo ---------
+          echo pip freeze
           pip freeze
 
       - name: Pytest (--expensive --experimental)
