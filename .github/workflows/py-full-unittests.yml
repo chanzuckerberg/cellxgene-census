@@ -26,7 +26,11 @@ jobs:
         run: |
           pwd
           printenv
-          ls -l
+          ls -la
+          ls -la api/python/cellxgene_census/
+          git status
+          git describe
+          git tag
 
       - name: Install python dependencies (including experimental)
         run: |
