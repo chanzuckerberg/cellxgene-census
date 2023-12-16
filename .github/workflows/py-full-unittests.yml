@@ -22,9 +22,18 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential git-all
 
+      - name: debugging
+        run: |
+          pwd
+          printenv
+          ls -l
+
       - name: Install python dependencies (including experimental)
         run: |
-          python -m pip install -U pip setuptools wheel
+          python -m pip install -U pip setuptools setuptools_scm wheel
+          # debugging
+          python -m setuptools_scm -c ./api/python/cellxgene_census/pyproject.toml
+
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
