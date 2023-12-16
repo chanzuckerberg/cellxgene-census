@@ -22,22 +22,9 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: debugging
-        run: |
-          pwd
-          printenv
-          ls -la
-          ls -la api/python/cellxgene_census/
-          git status
-          git describe
-          git tag
-
       - name: Install python dependencies (including experimental)
         run: |
           python -m pip install -U pip setuptools setuptools_scm wheel
-          # debugging
-          python -m setuptools_scm -c ./api/python/cellxgene_census/pyproject.toml
-
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
@@ -45,7 +32,8 @@ jobs:
       - name: Log debugging info
         run: |
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
+          pip freeze
 
       - name: Pytest (--expensive --experimental)
         run: |
-          PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/ -k test_incremental_read_obs
+          PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
