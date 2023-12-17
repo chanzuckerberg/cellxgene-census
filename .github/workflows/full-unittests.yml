@@ -67,5 +67,6 @@ jobs:
 
       - name: testthat
         run: |
+          Rscript -e 'remotes::install_local("./api/r/cellxgene.census")'
           Rscript -e 'library("testthat"); library("cellxgene.census"); test_dir("./api/r/cellxgene.census/tests/")'
           Rscript -e 'library("testthat"); library("cellxgene.census"); test_dir("./api/r/cellxgene.census/tests/testthat/acceptance-tests.R")'
