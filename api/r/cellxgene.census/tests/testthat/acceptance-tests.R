@@ -102,7 +102,7 @@ test_that("test_incremental_read_X_human", {
 })
 
 test_that("test_incremental_read_X_human-large-buffer-size", {
-  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
 
   organism <- "homo_sapiens"
