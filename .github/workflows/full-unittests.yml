@@ -12,6 +12,8 @@ on:
 jobs:
   py_unit_tests:
     runs-on: single-cell-1tb-runner
+    strategy:
+      fail-fast: false # prevent this job from killing other jobs
     steps:
       - name: log system state
         run: |
@@ -51,6 +53,8 @@ jobs:
 
   r_unit_tests:
     runs-on: single-cell-1tb-runner
+    strategy:
+      fail-fast: false # prevent this job from killing other jobs
     steps:
       - name: log system state
         run: |
