@@ -1,7 +1,8 @@
 name: cellxgene_census package full unit tests
 
 # Run all unit tets, including those that are too expensive to run frequently.
-# This workflow requires a very large capacity runner, e.g., 1TiB RAM.
+# This workflow requires a very large capacity runner, e.g., 1TiB RAM. There
+# is no swap, so OOM will cause the workflow to fail with OOMKilled (exit code 137)
 
 on:
   # schedule:
@@ -10,7 +11,6 @@ on:
 
 jobs:
   py_unit_tests:
-    if: false # TODO XXX REMINDER: TEMPORARILY DISABLE JOB
     runs-on: single-cell-1tb-runner
     steps:
       - name: Install OS dependencies
@@ -34,6 +34,7 @@ jobs:
           pip install './api/python/cellxgene_census/[experimental]'
 
       - name: Pytest (--expensive --experimental)
+        continue-on-error: true # workflow continues even if this step fails
         run: |
           echo 'tiledbsoma.show_package_version():'
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
@@ -42,6 +43,14 @@ jobs:
           pip freeze
           echo ---------
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
+
+      - name: log system state
+        run: |
+          free
+          echo ---------
+          df -kh
+          echo ---------
+          sudo dmesg | tail --40
 
   r_unit_tests:
     runs-on: single-cell-1tb-runner
@@ -66,9 +75,17 @@ jobs:
           cache: true
 
       - name: testthat
+        continue-on-error: true # workflow continues even if this step fails
         run: |
           Rscript -e 'remotes::install_local("./api/r/cellxgene.census")'
           Rscript -e 'library("tiledbsoma"); tiledbsoma::show_package_versions()'
           Rscript -e 'library("testthat"); library("cellxgene.census"); test_dir("./api/r/cellxgene.census/tests/")'
-          # Rscript ./api/r/cellxgene.census/tests/testthat/acceptance-tests.R
           Rscript -e 'library("cellxgene.census"); library(testthat); test_file("./api/r/cellxgene.census/tests/testthat/acceptance-tests.R")'
+
+      - name: log system state
+        run: |
+          free
+          echo ---------
+          df -kh
+          echo ---------
+          sudo dmesg | tail --40
