@@ -70,6 +70,10 @@ def compute_all_estimators_for_obs_group(obs_group_rows: pd.DataFrame, obs_df: p
     """Computes all estimators for a given obs group's expression values"""
     obs_group_name = cast(Tuple[str, ...], obs_group_rows.name)
 
+    # Filter obs to the rows of the current group, and retrieve the "size factors" data for those rows. The full set
+    # of rows in the group is needed to create "dense" arrays used to compute estimators each gene in
+    # compute_all_estimators_for_gene(), where the full set of obs rows can no longer be determined from the "sparse"
+    # set of expression values for a given gene.
     size_factors_for_obs_group = obs_df[["approx_size_factor"]].loc[obs_group_rows[[]].index.drop_duplicates()]
 
     gene_groups = obs_group_rows.groupby(CUBE_DIMS_VAR, observed=True)
@@ -168,6 +172,7 @@ def compute_all_estimators_for_batch_pd(X_df: pd.DataFrame, obs_df: pd.DataFrame
     return result
 
 
+# TODO: replace this with obs.raw_sum
 def sum_gene_expression_levels_by_cell(X_tbl: pa.Table, batch: int) -> pd.Series[float]:
     logging.info(f"Pass 1: Computing X batch {batch}, nnz={X_tbl.shape[0]}")
 
