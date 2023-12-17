@@ -40,15 +40,13 @@ jobs:
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
+          echo '--------- tiledbsoma.show_package_version():'
+          python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
+          echo '--------- PIP package versions:'
+          pip freeze
 
       - name: pytest (--expensive --experimental)
         run: |
-          echo 'tiledbsoma.show_package_version():'
-          python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
-          echo ---------
-          echo pip freeze
-          pip freeze
-          echo ---------
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
