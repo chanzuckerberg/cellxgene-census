@@ -7,7 +7,7 @@ Usage instructions:
 
 1. It is recommended to run this script on an AWS EC2 `r6id.24xlarge` instance running `Ubuntu 22.04`, >=1024GB root drive, in the `us-west-2` region. The instance must be configured with swap space, making use of the available SSD drives. Copy this [script](https://github.com/chanzuckerberg/cellxgene-census/blob/d9bd1eb4a3e14974a0e7d9c23fb8368e79b92c2d/tools/scripts/aws/swapon_instance_storage.sh) to the instance and run as root: `sudo swapon_instance_storage.sh`.
 2. Install Python: `sudo apt install python3-venv`
-3. Setup a virtualenv and `pip install tiledbsoma psutil`.
+3. Setup a virtualenv and `pip install tiledbsoma psutil click`.
 4. `git clone git@github.com:chanzuckerberg/cellxgene-census.git`
 5. To run: `/usr/bin/time -v python -m tools/models/memento_builder s3://cellxgene-data-public/cell-census/2023-10-23/soma/census_data/homo_sapiens 2>&1 | tee ~/memento/cell_census_summary_cube.log`.
 6. Consolidate the estimator cube:
