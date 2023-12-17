@@ -16,7 +16,7 @@ jobs:
       - name: Install OS dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev
+          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
 
       - uses: actions/checkout@v4
         with:
@@ -49,9 +49,7 @@ jobs:
       - name: Install OS dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev
-          # sanity checks
-          cmake 
+          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
 
       - uses: actions/checkout@v4
         with:
