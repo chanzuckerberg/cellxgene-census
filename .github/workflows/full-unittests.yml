@@ -70,4 +70,5 @@ jobs:
           Rscript -e 'remotes::install_local("./api/r/cellxgene.census")'
           Rscript -e 'library("tiledbsoma"); tiledbsoma::show_package_versions()'
           Rscript -e 'library("testthat"); library("cellxgene.census"); test_dir("./api/r/cellxgene.census/tests/")'
-          Rscript ./api/r/cellxgene.census/tests/testthat/acceptance-tests.R
+          # Rscript ./api/r/cellxgene.census/tests/testthat/acceptance-tests.R
+          Rscript -e 'library("cellxgene.census"); library(testthat); test_file("./api/r/cellxgene.census/tests/testthat/acceptance-tests.R")'
