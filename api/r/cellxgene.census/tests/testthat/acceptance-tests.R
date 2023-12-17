@@ -126,7 +126,7 @@ test_that("test_incremental_read_X_mouse", {
 })
 
 test_that("test_incremental_read_X_mouse-large-buffer-size", {
-  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
 
   organism <- "mus_musculus"
@@ -322,7 +322,7 @@ test_that("test_seurat_common-tissue", {
 })
 
 test_that("test_seurat_common-tissue-large-buffer-size", {
-  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
 
   test_args <- list(
@@ -350,7 +350,7 @@ test_that("test_seurat_common-cell-type", {
 })
 
 test_that("test_seurat_common-cell-type-large-buffer-size", {
-  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
 
   test_args <- list(
@@ -366,7 +366,7 @@ test_that("test_seurat_common-cell-type-large-buffer-size", {
 test_that("test_seurat_whole-enchilada-large-buffer-size", {
   # SKIP: R is not capable to load into memory
   if (FALSE) {
-    census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+    census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
     on.exit(census$close(), add = TRUE)
 
     test_args <- list(
@@ -494,7 +494,7 @@ test_that("test_sce_common-tissue", {
 })
 
 test_that("test_sce_common-tissue-large-buffer-size", {
-  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
 
   test_args <- list(
@@ -522,7 +522,7 @@ test_that("test_sce_common-cell-type", {
 })
 
 test_that("test_sce_common-cell-type-large-buffer-size", {
-  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
 
   test_args <- list(
@@ -538,7 +538,7 @@ test_that("test_sce_common-cell-type-large-buffer-size", {
 test_that("test_sce_whole-enchilada-large-buffer-size", {
   # SKIP: R is not capable to load into memory
   if (FALSE) {
-    census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(4 * 1024**3))
+    census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
     on.exit(census$close(), add = TRUE)
 
     test_args <- list(
