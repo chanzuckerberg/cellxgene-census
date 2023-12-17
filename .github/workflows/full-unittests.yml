@@ -1,7 +1,7 @@
 name: cellxgene_census package full unit tests
 
 # Run all unit tets, including those that are too expensive to run frequently.
-# This workflow requires a very large capacity runner, e.g., 1TiB RAM. There
+# This workflow requires a very large capacity runner, e.g., 1+TiB RAM. There
 # is no swap, so OOM will cause the workflow to fail with OOMKilled (exit code 137)
 
 on:
