@@ -5,15 +5,23 @@ name: cellxgene_census package full unit tests
 # is no swap, so OOM will cause the workflow to fail with OOMKilled (exit code 137)
 
 on:
-  # schedule:
-  #   - cron: "0 1 * * 0" # every Sunday night, 1AM UTC
-  workflow_dispatch: # used for debugging or manual validation
+  schedule:
+    - cron: "0 1 * * 6" # every Saturday night, 1AM UTC
+  workflow_dispatch: # used for debugging or manual validation of a branch
 
 jobs:
   py_unit_tests:
     runs-on: single-cell-1tb-runner
     steps:
-      - name: Install OS dependencies
+      - name: log system state
+        run: |
+          free
+          echo ---------
+          df -kh
+          echo ---------
+          lscpu
+
+      - name: install OS dependencies
         run: |
           sudo apt update
           sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
@@ -26,15 +34,14 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install python dependencies (including experimental)
+      - name: install python dependencies (including experimental)
         run: |
           python -m pip install -U pip setuptools setuptools_scm wheel
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
 
-      - name: Pytest (--expensive --experimental)
-        continue-on-error: true # workflow continues even if this step fails
+      - name: pytest (--expensive --experimental)
         run: |
           echo 'tiledbsoma.show_package_version():'
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
@@ -44,18 +51,18 @@ jobs:
           echo ---------
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
+  r_unit_tests:
+    runs-on: single-cell-1tb-runner
+    steps:
       - name: log system state
         run: |
           free
           echo ---------
           df -kh
           echo ---------
-          sudo dmesg | tail --40
+          lscpu
 
-  r_unit_tests:
-    runs-on: single-cell-1tb-runner
-    steps:
-      - name: Install OS dependencies
+      - name: install OS dependencies
         run: |
           sudo apt update
           sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
@@ -75,17 +82,8 @@ jobs:
           cache: true
 
       - name: testthat
-        continue-on-error: true # workflow continues even if this step fails
         run: |
           Rscript -e 'remotes::install_local("./api/r/cellxgene.census")'
           Rscript -e 'library("tiledbsoma"); tiledbsoma::show_package_versions()'
           Rscript -e 'library("testthat"); library("cellxgene.census"); test_dir("./api/r/cellxgene.census/tests/")'
           Rscript -e 'library("cellxgene.census"); library(testthat); test_file("./api/r/cellxgene.census/tests/testthat/acceptance-tests.R")'
-
-      - name: log system state
-        run: |
-          free
-          echo ---------
-          df -kh
-          echo ---------
-          sudo dmesg | tail --40
