@@ -10,8 +10,7 @@ from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION
 from .util import fetch_json
 
-# CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
-CXG_BASE_URI = "https://api.cellxgene.dev.single-cell.czi.technology/"
+CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 
 
 def parse_manifest_file(manifest_fp: io.TextIOBase) -> List[Dataset]:
