@@ -1,8 +1,8 @@
 ---
-title: "Access CELLxGENE-maintained embeddings (scVI, Geneformer)"
+title: "Access CELLxGENE collaboration embeddings (scVI, Geneformer)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Access CELLxGENE-maintained embeddings (scVI, Geneformer)}
+  %\VignetteIndexEntry{Access CELLxGENE collaboration embeddings (scVI, Geneformer)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 options(width = 88, max.print = 100)
 ```
 
-This notebook demonstrates basic access to CELLxGENE-maintained embeddings of CELLxGENE Discover Census. Currently, embeddings from scVI and a fine-tuned Geneformer model are maintained by CELLxGENE Discover. There are other CELLxGENE-hosted embeddings contributed by the community to CELLxGENE Discover, find out more about these in the [Census model page](https://cellxgene.cziscience.com/census-models).
+This notebook demonstrates basic access to CELLxGENE collaboration embeddings of CELLxGENE Discover Census. Currently, embeddings from scVI and a fine-tuned Geneformer model are maintained by CELLxGENE Discover. There are other CELLxGENE-hosted embeddings contributed by the community to CELLxGENE Discover, find out more about these in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
 **Contents**
 
