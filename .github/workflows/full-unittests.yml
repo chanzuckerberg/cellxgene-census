@@ -57,6 +57,8 @@ jobs:
       - name: install tiledbsoma version override
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
         run: |
+          # Due to a bug in the tiledbsoma setup, this must be installed editable, ie., `-e`.
+          # Filed as single-cell-data/TileDB-SOMA#1991
           pip install -e '${{ github.event.inputs.tiledbsoma_python_dependency }}'
 
       - name: pytest (--expensive --experimental)
@@ -69,7 +71,6 @@ jobs:
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
-    if: false # TEMPORARILY DISABLE FOR DEBUGGING
     runs-on: single-cell-1tb-runner
     strategy:
       fail-fast: false # prevent this job from killing other jobs
