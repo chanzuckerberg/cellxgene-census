@@ -9,7 +9,8 @@ from ..util import cpu_count
 from .schema_util import FieldSpec, TableSpec
 
 # Feature flag - enables/disables use of Arrow dictionary / TileDB enum for
-# DataFrame columns. True is enabled, False is disabled.
+# DataFrame columns. True is enabled, False is disabled. Usage currently blocked
+# by several TileDB-SOMA bugs.
 USE_ARROW_DICTIONARY = False
 
 CENSUS_SCHEMA_VERSION = "1.3.0"
