@@ -56,6 +56,19 @@ def test_open_soma_with_plain_soma_context(latest_locator: CensusLocator) -> Non
 
 
 @pytest.mark.live_corpus
+def test_open_soma_with_customized_tiledb_config(latest_locator: CensusLocator) -> None:
+    soma_init_buffer_bytes = "221000"
+    tiledb_config = {
+        "soma.init_buffer_bytes": soma_init_buffer_bytes,
+        "vfs.s3.region": latest_locator.get("s3_region"),
+    }
+    with cellxgene_census.open_soma(uri=latest_locator["uri"], tiledb_config=tiledb_config) as census:
+        assert census.uri == latest_locator["uri"]
+        # Verify that user-provided custom config is passed through correctly
+        assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
+
+
+@pytest.mark.live_corpus
 def test_open_soma_with_customized_plain_soma_context(latest_locator: CensusLocator) -> None:
     soma_init_buffer_bytes = "221000"
     timestamp_ms = int(time.time() * 1000) - 10  # don't use exactly current time, as that is the default
@@ -101,6 +114,12 @@ def test_open_soma_invalid_args() -> None:
         match=re.escape("Must specify either a census version or an explicit URI."),
     ):
         cellxgene_census.open_soma(census_version=None)
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Only one of tiledb_config and context can be specified."),
+    ):
+        cellxgene_census.open_soma(tiledb_config={}, context=soma.SOMATileDBContext())
 
 
 def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
@@ -321,3 +340,12 @@ def test_can_open_with_anonymous_access() -> None:
     with cellxgene_census.open_soma(census_version="latest") as census:
         assert census is not None
         assert isinstance(census, soma.Collection)
+
+
+def test_get_default_soma_context_tiledb_config_overrides() -> None:
+    context = get_default_soma_context(
+        tiledb_config={"nondefault.config.option": "true", "vfs.s3.no_sign_request": "false"}
+    )
+    assert context.tiledb_config["nondefault.config.option"] == "true", "adds new option"
+    assert context.tiledb_config["vfs.s3.no_sign_request"] == "false", "overrides existing default"
+    assert context.tiledb_config["vfs.s3.region"] == "us-west-2", "keeps existing default"
