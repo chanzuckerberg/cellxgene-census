@@ -51,4 +51,4 @@ def small_mem_context() -> soma.SOMATileDBContext:
             "soma.init_buffer_bytes": 32 * 1024**2,
         },
     }
-    return soma.SOMATileDBContext().replace(**cfg)
+    return get_default_soma_context().replace(**cfg)
