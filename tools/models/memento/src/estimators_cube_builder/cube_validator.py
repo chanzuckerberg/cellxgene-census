@@ -33,6 +33,7 @@ def _validate_n_obs_sum(cube: tiledb.SparseArray, source_obs: tiledb.SparseArray
     # Sum of n_obs (for each gene) will not generally be equal to the number of rows in the obs table, because
     # not all obs groups will have X data for a given gene and will not be included in the cube. The best we can do is
     # ensure the per-gene n_obs sums are less than the number of rows in the obs table.
+    # TODO: Check against var.nnz
     assert all(cube_n_obs_sums < source_obs_len)
 
 
