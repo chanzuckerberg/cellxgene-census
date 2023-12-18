@@ -17,7 +17,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .._open import _build_soma_tiledb_context, open_soma
+from .._open import get_default_soma_context, open_soma
 from .._release_directory import get_census_version_directory
 
 
@@ -42,9 +42,8 @@ def get_embedding_metadata(
 
     """
 
-    # Currently, all embeddings are hosted in us-west-2 so use that as a default.
-    # Allow the user to override for exceptional cases.
-    context = _build_soma_tiledb_context("us-west-2", context)
+    # Allow the user to override context for exceptional cases (e.g. the aws region)
+    context = context or get_default_soma_context()
 
     with soma.open(embedding_uri, context=context) as E:
         # read embedding metadata and decode the JSON-encoded string
@@ -104,9 +103,8 @@ def get_embedding(
     if obs_soma_joinids.dtype != np.int64:
         raise TypeError("obs_soma_joinids must be array of int64")
 
-    # Currently, all embeddings are hosted in us-west-2 so use that as a default.
-    # Allow the user to override for exceptional cases.
-    context = _build_soma_tiledb_context("us-west-2", context)
+    # Allow the user to override context for exceptional cases (e.g. the aws region)
+    context = context or get_default_soma_context()
 
     # Attempt to resolve census version aliases
     census_directory = get_census_version_directory()
