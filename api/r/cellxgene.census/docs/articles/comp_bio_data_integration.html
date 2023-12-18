@@ -50,6 +50,9 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE-maintained embeddings (scVI, Geneformer)</a>
+    <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
@@ -61,6 +64,7 @@
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE-maintained embeddings (scVI, Geneformer)</a>
   </div>
 </li>
       </ul>
@@ -302,20 +306,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 20:19:25 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 20:19:25 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 20:19:25 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 20:19:25 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 09:02:49 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 09:02:49 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 09:02:49 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 09:02:49 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 20:19:27 Writing NN index file to temp file /tmp/RtmpoGGMnB/file319d2596cf604</span></span>
-<span><span class="co">#&gt; 20:19:27 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 20:19:30 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 20:19:31 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 20:19:31 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
-<span><span class="co">#&gt; 20:19:32 Commencing optimization for 200 epochs, with 409718 positive edges</span></span>
-<span><span class="co">#&gt; 20:19:36 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 09:02:50 Writing NN index file to temp file /tmp/RtmpUjrD14/filed5f850e606f9</span></span>
+<span><span class="co">#&gt; 09:02:50 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 09:02:54 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 09:02:54 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 09:02:55 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 09:02:55 Commencing optimization for 200 epochs, with 409718 positive edges</span></span>
+<span><span class="co">#&gt; 09:02:59 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>

@@ -43,6 +43,10 @@ reference:
     - get_census_version_directory
 
 articles:
+- title: Embeddings
+  navbar: "Use Census embeddings"
+  contents:
+    - census_access_maintained_embeddings
 - title: Analysis
   navbar: "Explore and analyze the data"
   contents:
@@ -57,3 +61,4 @@ articles:
     - census_datasets
     - census_dataset_presence
     - census_compute_over_X
+    - census_access_maintained_embeddings
