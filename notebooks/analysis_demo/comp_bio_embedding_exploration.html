@@ -527,12 +527,24 @@ melanocyte cluster.</p></li>
 <h2>Retinal bipolar neurons in eye<a class="headerlink" href="#Retinal-bipolar-neurons-in-eye" title="Permalink to this heading">¶</a></h2>
 <p>In a more detailed analysis of retinal bipolar neurons in the eye, we focus on subclustering within this cell type across various embeddings. This involves rerunning UMAP specifically for retinal bipolar neurons and applying Leiden clustering to each embedding. Additionally, we employ <a class="reference external" href="https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html">HDBSCAN</a>, a density-based clustering algorithm, on a full pairwise Euclidean distance matrix calculated from each embedding to compare the
 clustering results.</p>
-<p>Key findings from this analysis include: - In the scGPT embedding, the nearest neighbor graph construction reveals 25 distinct clusters, but the density-based HDBSCAN approach identifies only 3 clusters, indicating a significant difference in clustering patterns. - The UCE and SCVI embeddings show good agreement between graph-based and density-based clustering methods. - For Geneformer, the subclusters observed in UMAP appear to be an artifact of the graph construction, as HDBSCAN results in
-only one primary cluster.</p>
-<p>When assessing the Normalized Mutual Information (NMI) score between Leiden and HDBSCAN cluster assignments, it’s found that: - All embeddings yield Leiden clusters with generally good agreement across methods (NMI &gt; 0.65), indicating a consistent clustering pattern. - HDBSCAN clusterings are more method-specific, reflecting inherent differences in how each embedding interprets distances and densities. Geneformer, in particular, shows minimal agreement with other methods as HDBSCAN only
-identified one main cluster. This is expected as Geneformer was finetuned on a cell subclass prediction task, which will homogenize cells belonging to the same label. - Additionally, all methods, except SCVI, distinctly separate retinal bipolar neurons by batch (dataset ID), underscoring the presence of batch effects.</p>
-<p>From this analysis, we can draw a couple conclusions: - The construction of k-nearest neighbor graphs in embeddings like UMAP can lead to the identification of subclusters that are not evident when examining pairwise distances directly in the original embedding spaces. This suggests that the reliance of UMAP (and many other methods spanning a wide variety of tasks) on k-nearest neighbor graphs may introduce biologically unjustifiable subclusters. This is a known phenomenon and further supports
-the recommendation to cross-reference findings using fuller representations of the data. - In this example, UCE clusters the data much more than other methods. This observation holds true in both graph- and density-based clustering. The small clusters identified in UCE often lack unique or biologically relevant gene expression signatures, necessitating further investigation to understand any biological relevance or lack thereof for each of the identified clusters.</p>
+<p>Key findings from this analysis include:</p>
+<ul class="simple">
+<li><p>In the scGPT embedding, the nearest neighbor graph construction reveals 25 distinct clusters, but the density-based HDBSCAN approach identifies only 3 clusters, indicating a significant difference in clustering patterns.</p></li>
+<li><p>The UCE and SCVI embeddings show good agreement between graph-based and density-based clustering methods.</p></li>
+<li><p>For Geneformer, the subclusters observed in UMAP appear to be an artifact of the graph construction, as HDBSCAN results in only one primary cluster.</p></li>
+</ul>
+<p>When assessing the Normalized Mutual Information (NMI) score between Leiden and HDBSCAN cluster assignments, it’s found that:</p>
+<ul class="simple">
+<li><p>All embeddings yield Leiden clusters with generally good agreement across methods (NMI &gt; 0.65), indicating a consistent clustering pattern.</p></li>
+<li><p>HDBSCAN clusterings are more method-specific, reflecting inherent differences in how each embedding interprets distances and densities. Geneformer, in particular, shows minimal agreement with other methods as HDBSCAN only identified one main cluster. This is expected as Geneformer was finetuned on a cell subclass prediction task, which will homogenize cells belonging to the same label.</p></li>
+<li><p>Additionally, all methods, except SCVI, distinctly separate retinal bipolar neurons by batch (dataset ID), underscoring the presence of batch effects.</p></li>
+</ul>
+<p>From this analysis, we can draw a couple conclusions:</p>
+<ul class="simple">
+<li><p>The construction of k-nearest neighbor graphs in embeddings like UMAP can lead to the identification of subclusters that are not evident when examining pairwise distances directly in the original embedding spaces. This suggests that the reliance of UMAP (and many other methods spanning a wide variety of tasks) on k-nearest neighbor graphs may introduce biologically unjustifiable subclusters. This is a known phenomenon and further supports the recommendation to cross-reference findings using
+fuller representations of the data.</p></li>
+<li><p>In this example, UCE clusters the data much more than other methods. This observation holds true in both graph- and density-based clustering. The small clusters identified in UCE often lack unique or biologically relevant gene expression signatures, necessitating further investigation to understand any biological relevance or lack thereof for each of the identified clusters.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
