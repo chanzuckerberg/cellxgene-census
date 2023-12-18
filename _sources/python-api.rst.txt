@@ -13,6 +13,7 @@ Open/retrieve Cell Census data
     :nosignatures:
 
     cellxgene_census.open_soma
+    cellxgene_census.get_default_soma_context
     cellxgene_census.get_source_h5ad_uri
     cellxgene_census.download_source_h5ad
 

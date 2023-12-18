@@ -54,32 +54,45 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
-                    </span>
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
-                      <div style="height: 16px!important; display: flex;">
-                        <span class="beta">BETA</span>
-                      </div>
-                    </span>
-                    <hr class="navbar-divider">
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
                   </span>
                 </span>
             </span>
@@ -89,10 +102,10 @@
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -273,10 +286,26 @@
     <span class="p">)</span>
 </pre></div>
 </div>
-<p>If a local copy of the Census data exists, users can access it by providing the path to the <code class="docutils literal notranslate"><span class="pre">soma/</span></code> folder.</p>
+<p>If a <strong>local copy</strong> of the Census data exists, users can access it by providing the path to the <code class="docutils literal notranslate"><span class="pre">soma/</span></code> folder.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&quot;local/path/to/soma/&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+   <span class="o">...</span>
+</pre></div>
+</div>
+<p>If a copy of the Census data exists in a <strong>private S3 bucket</strong>, users can access it by providing the URI <code class="docutils literal notranslate"><span class="pre">soma/</span></code>
+folder in the S3 bucket. This will also require customizing a <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> configuration to specify the
+bucket’s AWS region and that signed requests should be used for S3 API calls. You can customize the Census API’s default
+<code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> settings by calling <code class="docutils literal notranslate"><span class="pre">get_default_soma_context().replace(...)</span></code> and passing this context to
+<code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3://my-private-data-bucket/cell-census/2023-07-25/soma/&quot;</span>
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+    <span class="n">tiledb_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;vfs.s3.no_sign_request&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;vfs.s3.region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">})</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
    <span class="o">...</span>
 </pre></div>
 </div>
@@ -285,17 +314,11 @@
 <h3>TileDB-SOMA API (Python and R)<a class="headerlink" href="#tiledb-soma-api-python-and-r" title="Permalink to this heading">¶</a></h3>
 <p>The Census API provides convenience wrappers for TileDB-SOMA to access the Census Data hosted at AWS. Users can interact directly with the Census TileDB data directly via the TileDB-SOMA APIs. Please refer to the <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">TileDb-SOMA documentation</a> for full details on usage.</p>
 <p>For example, in Python users can create an iterator for the cell metadata Data Frame as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;vfs.s3.region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-west-2&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;vfs.s3.no_sign_request&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;py.init_buffer_bytes&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
-    <span class="s2">&quot;soma.init_buffer_bytes&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">ctx</span> <span class="o">=</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">SOMATileDBContext</span><span class="p">()</span>
-<span class="n">ctx</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tiledb_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span>
 
 <span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/&quot;</span>
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">()</span>
 
 <span class="k">with</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
     <span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>

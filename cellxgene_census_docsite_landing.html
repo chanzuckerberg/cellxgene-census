@@ -52,32 +52,45 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
-                    </span>
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
-                      <div style="height: 16px!important; display: flex;">
-                        <span class="beta">BETA</span>
-                      </div>
-                    </span>
-                    <hr class="navbar-divider">
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
                   </span>
                 </span>
             </span>
@@ -87,10 +100,10 @@
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -172,7 +185,8 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <p><span style="background-color: #F6DDCC; color; font-size: 18px"> 🚨 A <strong>normalized layer</strong>, plus cell and gene <strong>pre-calculated stats</strong> are now available!  Find out more <a class="reference internal" href="articles/2023/20231012-normalized_layer_precalc_stats.html"><span class="std std-doc">here.</span></a></span></p>
+  <p><span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: we’ve created a <strong>centralized hub of models and embeddings</strong> using Census data. <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Check it out</a>!</p>
+ </span>
 <section id="cz-cellxgene-discover-census">
 <h1>CZ CELLxGENE Discover Census<a class="headerlink" href="#cz-cellxgene-discover-census" title="Permalink to this heading">¶</a></h1>
 <p>The Census provides efficient computational tooling to <strong>access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover</strong>. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData, Seurat, or SingleCellExperiment objects, thus accelerating your research by significantly minimizing data harmonization.</p>

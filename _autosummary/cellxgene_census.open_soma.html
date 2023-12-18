@@ -46,7 +46,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="cellxgene_census.get_source_h5ad_uri" href="cellxgene_census.get_source_h5ad_uri.html" />
+    <link rel="next" title="cellxgene_census.get_default_soma_context" href="cellxgene_census.get_default_soma_context.html" />
     <link rel="prev" title="Python API" href="../python-api.html" /> 
 </head>
 
@@ -54,32 +54,45 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="../_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
-                    </span>
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
-                      <div style="height: 16px!important; display: flex;">
-                        <span class="beta">BETA</span>
-                      </div>
-                    </span>
-                    <hr class="navbar-divider">
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
                   </span>
                 </span>
             </span>
@@ -89,10 +102,10 @@
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -139,6 +152,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#cellxgene_census.open_soma"><code class="docutils literal notranslate"><span class="pre">open_soma()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.get_default_soma_context.html">cellxgene_census.get_default_soma_context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cellxgene_census.get_source_h5ad_uri.html">cellxgene_census.get_source_h5ad_uri</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cellxgene_census.download_source_h5ad.html">cellxgene_census.download_source_h5ad</a></li>
 </ul>
@@ -219,6 +233,14 @@ It can be used as a context manager, which will automatically close upon exit.</
     or a version are specified, or an invalid mirror is provided.</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="cellxgene_census.get_source_h5ad_uri.html#cellxgene_census.get_source_h5ad_uri" title="cellxgene_census.get_source_h5ad_uri"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_source_h5ad_uri()</span></code></a>: Look up the location of the source H5AD.</p></li>
+<li><p><a class="reference internal" href="cellxgene_census.get_default_soma_context.html#cellxgene_census.get_default_soma_context" title="cellxgene_census.get_default_soma_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_default_soma_context()</span></code></a>: Get a default SOMA context that can be updated with custom settings and used
+as the <code class="docutils literal notranslate"><span class="pre">context</span></code> argument.</p></li>
+</ul>
+</div>
 <p class="rubric">Lifecycle</p>
 <p>maturing</p>
 <p class="rubric">Examples</p>
@@ -264,7 +286,7 @@ close the Census upon exit of the context.</p>
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../python-api.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cellxgene_census.get_source_h5ad_uri.html" class="btn btn-neutral float-right" title="cellxgene_census.get_source_h5ad_uri" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cellxgene_census.get_default_soma_context.html" class="btn btn-neutral float-right" title="cellxgene_census.get_default_soma_context" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

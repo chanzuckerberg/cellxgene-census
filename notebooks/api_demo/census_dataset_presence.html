@@ -49,40 +49,53 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Exploring the Census Datasets table" href="census_datasets.html" />
-    <link rel="prev" title="Computing on X using online (incremental) algorithms" href="census_compute_over_X.html" /> 
+    <link rel="next" title="Exploring pre-calculated summary cell counts" href="census_summary_cell_counts.html" />
+    <link rel="prev" title="Exploring the Census Datasets table" href="census_datasets.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="../../_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
-                    </span>
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
-                      <div style="height: 16px!important; display: flex;">
-                        <span class="beta">BETA</span>
-                      </div>
-                    </span>
-                    <hr class="navbar-divider">
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
                   </span>
                 </span>
             </span>
@@ -92,10 +105,10 @@
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -138,8 +151,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-using-integrated-embbedings-and-models">[NEW! 🚀] Using integrated embbedings and models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Genes measured in each cell (dataset presence matrix)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Opening-the-Census">Opening the Census</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Fetching-the-IDs-of-the-Census-datasets">Fetching the IDs of the Census datasets</a></li>
@@ -149,15 +166,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#Identifying-all-genes-measured-in-a-dataset">Identifying all genes measured in a dataset</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_duplicated_cells.html">Understanding and filtering out duplicate cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_gget_demo.html">Querying data using the gget cellxgene module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
 <li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#experimental">Experimental</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
@@ -1253,8 +1267,8 @@ Feature is present.
             
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="census_compute_over_X.html" class="btn btn-neutral float-left" title="Computing on X using online (incremental) algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="census_datasets.html" class="btn btn-neutral float-right" title="Exploring the Census Datasets table" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="census_datasets.html" class="btn btn-neutral float-left" title="Exploring the Census Datasets table" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_summary_cell_counts.html" class="btn btn-neutral float-right" title="Exploring pre-calculated summary cell counts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

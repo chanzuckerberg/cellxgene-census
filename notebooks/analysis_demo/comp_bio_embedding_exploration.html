@@ -1,0 +1,1015 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Exploring biologically relevant clusters in Census embeddings &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Learning about the CZ CELLxGENE Census" href="comp_bio_census_info.html" />
+    <link rel="prev" title="Geneformer for cell class prediction and data projection" href="comp_bio_geneformer_prediction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.9.1
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#new-using-integrated-embbedings-and-models">[NEW! 🚀] Using integrated embbedings and models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_embedding.html">Access CELLxGENE-hosted embeddings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_scvi_model_use.html">scVI for cell type prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_geneformer_prediction.html">Geneformer for cell class prediction and data projection</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Exploring biologically relevant clusters in Census embeddings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Background">Background</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Imports-and-function-definitions">Imports and function definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Melanocytes-in-eye">Melanocytes in eye</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Retinal-bipolar-neurons-in-eye">Retinal bipolar neurons in eye</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Dopaminergic-neurons-in-brain">Dopaminergic neurons in brain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Pulmonary-ionocytes-in-lung-(Tabula-Sapiens)">Pulmonary ionocytes in lung (Tabula Sapiens)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Exploring biologically relevant clusters in Census embeddings</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/analysis_demo/comp_bio_embedding_exploration.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Exploring-biologically-relevant-clusters-in-Census-embeddings">
+<h1>Exploring biologically relevant clusters in Census embeddings<a class="headerlink" href="#Exploring-biologically-relevant-clusters-in-Census-embeddings" title="Permalink to this heading">¶</a></h1>
+<p>In this notebook, we explore biologically relevant clusters in Census embeddings using UMAP as a visualization tool. This demonstration assumes knowledge of how to access both, maintained and hosted (community) Census embeddings. To learn the basics on accessing these data please visit the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
+<p><strong>IMPORTANT:</strong> This tutorial requires cellxgene-census package version 1.9.1 or later.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Background</p></li>
+<li><p>Requirements</p></li>
+<li><p>Imports and function definitions</p></li>
+<li><p>Melanocytes in eye</p></li>
+<li><p>Retinal bipolar neurons in eye</p></li>
+<li><p>Dopaminergic neurons in brain</p></li>
+<li><p>Pulmonary ionocytes in lung</p></li>
+</ol>
+<blockquote>
+<div><p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable is_primary_data which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
+</div></blockquote>
+<section id="Background">
+<h2>Background<a class="headerlink" href="#Background" title="Permalink to this heading">¶</a></h2>
+<p>The journey from a gene expression matrix to a 2D scatterplot involves numerous highly nonlinear transformations. Such transformations can introduce artifacts that affect both the global and local structures in the visualized manifold.</p>
+<p>Common issues like overclustering and clustering by batch are typical artifacts resulting from these dimensionality reduction methods. With that in mind, these embeddings and their UMAP visualizations are best used as tools for generating hypotheses. They should not be the final word in analysis. Instead, we recommend focusing on the full representation of the embedding matrices and ultimately returning to the underlying gene expressions to investigate the reasons behind the observed clustering
+patterns.</p>
+<p>One of the key objectives of foundation models in single-cell RNA sequencing is to embed cells within a universal coordinate system that minimizes the impact of technical variations, such as batch effects. However, as we will see in the examples presented in this notebook, cells often cluster by batch. This clustering could be biologically driven, as certain cell types or states might be unique to specific batches (e.g. datasets). In other cases, the separation might be purely due to systematic
+technical biases or a combination of both biological and technical factors. Complicating the matter, the techniques used for nearest neighbor graph construction and 2D projection can themselves amplify batch effects. Rigorous benchmarking is necessary to fully assess each model’s capability in integrating data within their respective latent spaces. This complexity highlights that data integration in single-cell RNA sequencing remains a challenging and unsolved problem.</p>
+<p>In this tutorial, we briefly highlight a few simple case studies that illustrate the capacity of these embeddings to capture intriguing biological phenomena.</p>
+<p><strong>Disclaimers</strong></p>
+<ol class="arabic simple">
+<li><p>These embeddings were explored in-depth in a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene">cellxgene</a> instance and not all of the insights gleaned there will be expanded on here.</p></li>
+<li><p>Most of the following examples utilize UMAP to visualize embeddings in a 2D scatter plot, however as shown <a class="reference external" href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011288">here</a> and <a class="reference external" href="https://www.cell.com/cell-systems/pdf/S2405-4712(23)00209-0.pdf">here</a>, biological interpretations from these visualizations may be innacurate.</p></li>
+</ol>
+</section>
+<section id="Requirements">
+<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>cellxgene-census</p></li>
+<li><p>scanpy</p></li>
+<li><p>numpy</p></li>
+<li><p>scipy</p></li>
+<li><p>leidenalg</p></li>
+<li><p>hdbscan</p></li>
+<li><p>pandas</p></li>
+<li><p>scikit-learn</p></li>
+</ul>
+</section>
+<section id="Imports-and-function-definitions">
+<h2>Imports and function definitions<a class="headerlink" href="#Imports-and-function-definitions" title="Permalink to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding</span><span class="p">,</span> <span class="n">get_embedding_metadata</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">emb_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate UMAPs from embeddings stored in `adata.obsm`.</span>
+<span class="sd">    `emb_names` is a list that contains keys present in `adata.obsm`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">emb_name</span> <span class="ow">in</span> <span class="n">emb_names</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generating UMAP for </span><span class="si">{</span><span class="n">emb_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="n">emb_name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;umap&quot;</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="n">emb_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">neighbors_key</span><span class="o">=</span><span class="n">emb_name</span><span class="p">)</span>
+        <span class="n">X_emb_name</span> <span class="o">=</span> <span class="n">emb_name</span> <span class="k">if</span> <span class="n">emb_name</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;X_&quot;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;X_</span><span class="si">{</span><span class="n">emb_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">!=</span> <span class="s2">&quot;euclidean&quot;</span><span class="p">:</span>
+            <span class="n">X_emb_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">X_emb_name</span><span class="si">}</span><span class="s2">_umap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">]</span>
+
+    <span class="n">adata</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">]</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">adata</span>
+
+
+<span class="k">def</span> <span class="nf">build_anndata_with_embeddings</span><span class="p">(</span>
+    <span class="n">embedding_uris</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">embedding_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">census_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">experiment_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For a given set of Census cell coordinates (soma_joinids)</span>
+<span class="sd">    fetch embeddings with TileDBSoma and return the corresponding</span>
+<span class="sd">    AnnData with embeddings slotted in.</span>
+
+<span class="sd">    `embedding_uris` is a dict with community embedding names as the keys and S3 URI as the values.</span>
+<span class="sd">    `embedding_names` is a list with embedding names included in Census.</span>
+
+
+<span class="sd">    Assume that all embeddings provided are coming from the same experiment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Getting anndata with Census embeddings: &quot;</span><span class="p">,</span> <span class="n">embedding_names</span><span class="p">)</span>
+
+        <span class="n">ad</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+            <span class="n">census</span><span class="p">,</span>
+            <span class="n">organism</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">,</span>
+            <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+            <span class="n">obs_value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">,</span>
+            <span class="n">obs_coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+            <span class="n">obsm_layers</span><span class="o">=</span><span class="n">embedding_names</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">embedding_uris</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Getting community embedding:&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">embedding_uri</span> <span class="o">=</span> <span class="n">embedding_uris</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">ad</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span><span class="n">census_version</span><span class="p">,</span> <span class="n">embedding_uri</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+
+    <span class="c1"># Embeddings with missing data contain all NaN,</span>
+    <span class="c1"># so we must find the intersection of non-NaN rows in the fetched embeddings</span>
+    <span class="c1"># and subset the AnnData accordingly.</span>
+    <span class="n">filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">obsm</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">nan_row_sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">total_columns</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">filt</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nan_row_sums</span> <span class="o">!=</span> <span class="n">total_columns</span><span class="p">)</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">ad</span><span class="p">[</span><span class="n">filt</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">ad</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># human embeddings</span>
+<span class="n">CENSUS_VERSION</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">EXPERIMENT_NAME</span> <span class="o">=</span> <span class="s2">&quot;homo_sapiens&quot;</span>
+
+<span class="c1"># These are embeddings contributed by the community hosted in S3</span>
+<span class="n">embedding_uris_community</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;scgpt&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;s3://cellxgene-contrib-public/contrib/cell-census/soma/</span><span class="si">{</span><span class="n">CENSUS_VERSION</span><span class="si">}</span><span class="s2">/CxG-contrib-1/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;uce&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;s3://cellxgene-contrib-public/contrib/cell-census/soma/</span><span class="si">{</span><span class="n">CENSUS_VERSION</span><span class="si">}</span><span class="s2">/CxG-contrib-2/&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># These are embeddings included in the Census data</span>
+<span class="n">embedding_names_census</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">,</span> <span class="s2">&quot;scvi&quot;</span><span class="p">]</span>
+
+<span class="c1"># All embedding names</span>
+<span class="n">embedding_names_all</span> <span class="o">=</span> <span class="n">embedding_names_census</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">embedding_uris_community</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Melanocytes-in-eye">
+<h2>Melanocytes in eye<a class="headerlink" href="#Melanocytes-in-eye" title="Permalink to this heading">¶</a></h2>
+<section id="Sample-and-fetch-150k-cells-from-eye-tissue">
+<h3>Sample and fetch 150k cells from eye tissue<a class="headerlink" href="#Sample-and-fetch-150k-cells-from-eye-tissue" title="Permalink to this heading">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span>
+
+<span class="c1"># Let&#39;s find our cells of interest</span>
+<span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;tissue_general==&#39;eye&#39; and is_primary_data == True&quot;</span>
+
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">EXPERIMENT_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span>
+
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">obs_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;cells in&quot;</span><span class="p">,</span> <span class="n">obs_value_filter</span><span class="p">)</span>
+
+<span class="c1"># Let&#39;s subset to 150K</span>
+<span class="n">n_subset_cells</span> <span class="o">=</span> <span class="mi">150000</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selecting &quot;</span><span class="p">,</span> <span class="n">n_subset_cells</span><span class="p">,</span> <span class="s2">&quot; random cells&quot;</span><span class="p">)</span>
+<span class="n">idx_rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">obs_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">n_subset_cells</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">soma_joinids_subset</span> <span class="o">=</span> <span class="n">obs_df</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">idx_rand</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1"># Let&#39;s get the AnnData</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">build_anndata_with_embeddings</span><span class="p">(</span>
+    <span class="n">embedding_uris_community</span><span class="p">,</span>
+    <span class="n">embedding_names_census</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="n">soma_joinids_subset</span><span class="p">,</span>
+    <span class="n">experiment_name</span><span class="o">=</span><span class="n">EXPERIMENT_NAME</span><span class="p">,</span>
+    <span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">embedding_names_all</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+799353 cells in tissue_general==&#39;eye&#39; and is_primary_data == True
+Selecting  150000  random cells
+Getting anndata with Census embeddings:  [&#39;geneformer&#39;, &#39;scvi&#39;]
+Getting community embedding: scgpt
+Getting community embedding: uce
+Generating UMAP for geneformer
+Generating UMAP for scvi
+Generating UMAP for scgpt
+Generating UMAP for uce
+</pre></div></div>
+</div>
+</section>
+<section id="Observations">
+<h3>Observations<a class="headerlink" href="#Observations" title="Permalink to this heading">¶</a></h3>
+<p>In the study of melanocytes within the eye, the following observations are made across various embeddings:</p>
+<ul class="simple">
+<li><p>Melanocytes are distinctly clustered in all embeddings, with OCA2 as a noted marker.</p></li>
+<li><p>KIT, <a class="reference external" href="https://iovs.arvojournals.org/article.aspx?articleid=2743921">identified as a marker for mature melanocytes</a>, shows varying degrees of separation. In SCVI and UCE embeddings, mature and immature melanocytes are clearly separable based on KIT expression. The scGPT embedding shows a slight extension from the main melanocyte cluster, indicative of some separation, where KIT expression is concentrated. In Geneformer, cells expressing KIT are primarily found at one end of the larger
+melanocyte cluster.</p></li>
+<li><p>The UCE embedding demonstrates potential signs of overclustering. An example is seen in retinal bipolar neurons, which separate into numerous small satellite clusters without clear gene expression signatures. The high degree of local structure in the UCE manifold is probably due to the presence of many disconnected components in the graph constructed by UMAP. This could also indicate that the embedding may capture less global structure.</p></li>
+<li><p>Across all embeddings, assays tend to cluster separately. The extent to which this reflects biological variability versus technical variation is unclear.</p></li>
+<li><p>Qualitatively, SCVI appears to offer the best integration across different datasets, with other embeddings showing more pronounced clustering by dataset.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;geneformer_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;OCA2&quot;</span><span class="p">,</span> <span class="s2">&quot;KIT&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scgpt_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;OCA2&quot;</span><span class="p">,</span> <span class="s2">&quot;KIT&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;uce_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;OCA2&quot;</span><span class="p">,</span> <span class="s2">&quot;KIT&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scvi_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;OCA2&quot;</span><span class="p">,</span> <span class="s2">&quot;KIT&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_1.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_2.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_3.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_7_3.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;geneformer_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scgpt_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;uce_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scvi_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_1.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_2.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_3.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_8_3.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Retinal-bipolar-neurons-in-eye">
+<h2>Retinal bipolar neurons in eye<a class="headerlink" href="#Retinal-bipolar-neurons-in-eye" title="Permalink to this heading">¶</a></h2>
+<p>In a more detailed analysis of retinal bipolar neurons in the eye, we focus on subclustering within this cell type across various embeddings. This involves rerunning UMAP specifically for retinal bipolar neurons and applying Leiden clustering to each embedding. Additionally, we employ <a class="reference external" href="https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html">HDBSCAN</a>, a density-based clustering algorithm, on a full pairwise Euclidean distance matrix calculated from each embedding to compare the
+clustering results.</p>
+<p>Key findings from this analysis include: - In the scGPT embedding, the nearest neighbor graph construction reveals 25 distinct clusters, but the density-based HDBSCAN approach identifies only 3 clusters, indicating a significant difference in clustering patterns. - The UCE and SCVI embeddings show good agreement between graph-based and density-based clustering methods. - For Geneformer, the subclusters observed in UMAP appear to be an artifact of the graph construction, as HDBSCAN results in
+only one primary cluster.</p>
+<p>When assessing the Normalized Mutual Information (NMI) score between Leiden and HDBSCAN cluster assignments, it’s found that: - All embeddings yield Leiden clusters with generally good agreement across methods (NMI &gt; 0.65), indicating a consistent clustering pattern. - HDBSCAN clusterings are more method-specific, reflecting inherent differences in how each embedding interprets distances and densities. Geneformer, in particular, shows minimal agreement with other methods as HDBSCAN only
+identified one main cluster. This is expected as Geneformer was finetuned on a cell subclass prediction task, which will homogenize cells belonging to the same label. - Additionally, all methods, except SCVI, distinctly separate retinal bipolar neurons by batch (dataset ID), underscoring the presence of batch effects.</p>
+<p>From this analysis, we can draw a couple conclusions: - The construction of k-nearest neighbor graphs in embeddings like UMAP can lead to the identification of subclusters that are not evident when examining pairwise distances directly in the original embedding spaces. This suggests that the reliance of UMAP (and many other methods spanning a wide variety of tasks) on k-nearest neighbor graphs may introduce biologically unjustifiable subclusters. This is a known phenomenon and further supports
+the recommendation to cross-reference findings using fuller representations of the data. - In this example, UCE clusters the data much more than other methods. This observation holds true in both graph- and density-based clustering. The small clusters identified in UCE often lack unique or biologically relevant gene expression signatures, necessitating further investigation to understand any biological relevance or lack thereof for each of the identified clusters.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hdbscan</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span> <span class="n">squareform</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">normalized_mutual_info_score</span>
+
+<span class="c1"># subset anndata</span>
+<span class="n">adata_rbn</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;retinal bipolar neuron&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># generate UMAPs</span>
+<span class="n">adata_rbn</span> <span class="o">=</span> <span class="n">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata_rbn</span><span class="p">,</span> <span class="n">embedding_names_all</span><span class="p">)</span>
+
+<span class="c1"># run clustering methods</span>
+<span class="k">for</span> <span class="n">embedding</span> <span class="ow">in</span> <span class="n">embedding_names_all</span><span class="p">:</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata_rbn</span><span class="p">,</span> <span class="n">obsp</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_connectivities&quot;</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_leiden&quot;</span><span class="p">)</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">embedding</span><span class="p">]</span>
+
+    <span class="c1"># calculate full pairwise distance matrix</span>
+    <span class="n">pairwise_dist</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="s2">&quot;euclidean&quot;</span><span class="p">))</span>
+    <span class="c1"># run HDBSCAN</span>
+    <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_hdbscan&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">hdbscan</span><span class="o">.</span><span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">min_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">pairwise_dist</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># display UMAPs and report normalized mutual information scores between leiden and hdbscan cluster assignments</span>
+<span class="k">for</span> <span class="n">embedding</span> <span class="ow">in</span> <span class="n">embedding_names_all</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Normalized mutual information between Leiden and HDBSCAN clusters:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">normalized_mutual_info_score</span><span class="p">(</span><span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_leiden&quot;</span><span class="p">],</span> <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_hdbscan&quot;</span><span class="p">]))</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">adata_rbn</span><span class="p">,</span>
+        <span class="n">basis</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_umap&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_leiden&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding</span><span class="si">}</span><span class="s2">_hdbscan&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">],</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># compare leiden and hdbscan cluster assignments across methods and display the similarity tables</span>
+<span class="n">embedding_keys</span> <span class="o">=</span> <span class="n">embedding_names_all</span>
+<span class="n">sim_scores_leiden</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">embedding_keys</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">embedding_keys</span><span class="p">)))</span>
+<span class="n">sim_scores_hdbscan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">embedding_keys</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">embedding_keys</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">embedding_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">embedding_keys</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">embedding_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">embedding_keys</span><span class="p">):</span>
+        <span class="n">sim_scores_leiden</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized_mutual_info_score</span><span class="p">(</span>
+            <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding_i</span><span class="si">}</span><span class="s2">_leiden&quot;</span><span class="p">],</span> <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding_j</span><span class="si">}</span><span class="s2">_leiden&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">sim_scores_hdbscan</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized_mutual_info_score</span><span class="p">(</span>
+            <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding_i</span><span class="si">}</span><span class="s2">_hdbscan&quot;</span><span class="p">],</span> <span class="n">adata_rbn</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">embedding_j</span><span class="si">}</span><span class="s2">_hdbscan&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+<span class="n">sim_scores_leiden_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">sim_scores_leiden</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">embedding_keys</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">embedding_keys</span><span class="p">)</span>
+<span class="n">sim_scores_hdbscan_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">sim_scores_hdbscan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">embedding_keys</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">embedding_keys</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leiden:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sim_scores_leiden_table</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HDBSCAN:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sim_scores_hdbscan_table</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Generating UMAP for geneformer
+Generating UMAP for scvi
+Generating UMAP for scgpt
+Generating UMAP for uce
+WARNING: adata.X seems to be already log-transformed.
+Normalized mutual information between Leiden and HDBSCAN clusters:
+0.08115140648299893
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_1.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Normalized mutual information between Leiden and HDBSCAN clusters:
+0.7314893672395334
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_3.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_3.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Normalized mutual information between Leiden and HDBSCAN clusters:
+0.33702547333985217
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_5.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_5.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Normalized mutual information between Leiden and HDBSCAN clusters:
+0.7730928192948211
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_7.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_10_7.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Leiden:
+            geneformer      scvi     scgpt       uce
+geneformer    1.000000  0.723355  0.721222  0.677754
+scvi          0.723355  1.000000  0.775717  0.753719
+scgpt         0.721222  0.775717  1.000000  0.822202
+uce           0.677754  0.753719  0.822202  1.000000
+
+HDBSCAN:
+            geneformer      scvi     scgpt       uce
+geneformer    1.000000  0.089308  0.106379  0.073141
+scvi          0.089308  1.000000  0.480575  0.646415
+scgpt         0.106379  0.480575  1.000000  0.356779
+uce           0.073141  0.646415  0.356779  1.000000
+</pre></div></div>
+</div>
+</section>
+<section id="Dopaminergic-neurons-in-brain">
+<h2>Dopaminergic neurons in brain<a class="headerlink" href="#Dopaminergic-neurons-in-brain" title="Permalink to this heading">¶</a></h2>
+<section id="Sample-and-fetch-150k-cells-from-brain-tissue">
+<h3>Sample and fetch 150k cells from brain tissue<a class="headerlink" href="#Sample-and-fetch-150k-cells-from-brain-tissue" title="Permalink to this heading">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s find our cells of interest</span>
+<span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;tissue_general==&#39;brain&#39; and is_primary_data == True&quot;</span>
+
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">EXPERIMENT_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span>
+
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">obs_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;cells in&quot;</span><span class="p">,</span> <span class="n">obs_value_filter</span><span class="p">)</span>
+
+<span class="c1"># Let&#39;s subset to 150K</span>
+<span class="n">n_subset_cells</span> <span class="o">=</span> <span class="mi">150000</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selecting &quot;</span><span class="p">,</span> <span class="n">n_subset_cells</span><span class="p">,</span> <span class="s2">&quot; random cells&quot;</span><span class="p">)</span>
+<span class="n">idx_rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">obs_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">n_subset_cells</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">soma_joinids_subset</span> <span class="o">=</span> <span class="n">obs_df</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">idx_rand</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1"># Let&#39;s get the AnnData</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">build_anndata_with_embeddings</span><span class="p">(</span>
+    <span class="n">embedding_uris_community</span><span class="p">,</span>
+    <span class="n">embedding_names_census</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="n">soma_joinids_subset</span><span class="p">,</span>
+    <span class="n">experiment_name</span><span class="o">=</span><span class="n">EXPERIMENT_NAME</span><span class="p">,</span>
+    <span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">embedding_names_all</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+11896761 cells in tissue_general==&#39;brain&#39; and is_primary_data == True
+Selecting  150000  random cells
+Getting anndata with Census embeddings:  [&#39;geneformer&#39;, &#39;scvi&#39;]
+Getting community embedding: scgpt
+Getting community embedding: uce
+Generating UMAP for geneformer
+Generating UMAP for scvi
+Generating UMAP for scgpt
+Generating UMAP for uce
+</pre></div></div>
+</div>
+</section>
+<section id="id1">
+<h3>Observations<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>Here, we visualize a randomly selected subset of cells in the brain from CELLxGENE Census. We can observe that dopaminergic neurons, marked by TH expression, separate into distinct clusters in Geneformer and SCVI latent spaces, whereas in UCE and scGPT embeddings, they are grouped at one end of a larger neuron cluster.</p>
+<p>All embeddings show a tendency to cluster by assay, indicating a consistent pattern across different models. Conditions like glioblastoma are clearly separated in all embeddings, while pilocytic astrocytoma is distinctly clustered in Geneformer and UCE and more mixed in others.</p>
+<p>In the UCE embedding, we observe many small satellite glioblastoma clusters outside the main cluster that do not have distinct gene expression signatures. This is similar to what we observed previously in the eye (e.g. for the retinal bipolar neurons).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;geneformer_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;TH&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scgpt_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;TH&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;uce_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;TH&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scvi_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;TH&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;disease&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_1.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_2.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_3.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_14_3.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Pulmonary-ionocytes-in-lung-(Tabula-Sapiens)">
+<h2>Pulmonary ionocytes in lung (Tabula Sapiens)<a class="headerlink" href="#Pulmonary-ionocytes-in-lung-(Tabula-Sapiens)" title="Permalink to this heading">¶</a></h2>
+<section id="Fetch-lung-cells-from-Tabula-Sapiens">
+<h3>Fetch lung cells from Tabula Sapiens<a class="headerlink" href="#Fetch-lung-cells-from-Tabula-Sapiens" title="Permalink to this heading">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;tissue_general==&#39;lung&#39; and dataset_id==&#39;53d208b0-2cfd-4366-9866-c3c6114081bc&#39;&quot;</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">build_anndata_with_embeddings</span><span class="p">(</span>
+    <span class="n">embedding_uris_community</span><span class="p">,</span>
+    <span class="n">embedding_names_census</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="n">obs_value_filter</span><span class="p">,</span>
+    <span class="n">experiment_name</span><span class="o">=</span><span class="n">EXPERIMENT_NAME</span><span class="p">,</span>
+    <span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">generate_umaps_from_embeddings</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">embedding_names_all</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Getting anndata with Census embeddings:  [&#39;geneformer&#39;, &#39;scvi&#39;]
+Getting community embedding: scgpt
+Getting community embedding: uce
+Generating UMAP for geneformer
+Generating UMAP for scvi
+Generating UMAP for scgpt
+Generating UMAP for uce
+</pre></div></div>
+</div>
+</section>
+<section id="id2">
+<h3>Observations<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p>For the case study focusing on pulmonary ionocytes in lung tissue, as part of the Tabula Sapiens project, the following observations are noted:</p>
+<ul class="simple">
+<li><p>In all embeddings, except for SCVI, a clear separation is seen between SmartSeq data and 10x data. The distinction is most pronounced in the scGPT embedding.</p></li>
+<li><p>CFTR, a marker for pulmonary ionocytes, identifies a rare cell type in the lung. This cell type is distinctly recognizable in all the embeddings.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;geneformer_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CFTR&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scgpt_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CFTR&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;uce_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CFTR&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;scvi_umap&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CFTR&quot;</span><span class="p">,</span> <span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_1.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_2.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_3.png" src="../../_images/notebooks_analysis_demo_comp_bio_embedding_exploration_18_3.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="comp_bio_geneformer_prediction.html" class="btn btn-neutral float-left" title="Geneformer for cell class prediction and data projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="comp_bio_census_info.html" class="btn btn-neutral float-right" title="Learning about the CZ CELLxGENE Census" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

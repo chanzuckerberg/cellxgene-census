@@ -1,0 +1,1009 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Geneformer for cell class prediction and data projection &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Exploring biologically relevant clusters in Census embeddings" href="comp_bio_embedding_exploration.html" />
+    <link rel="prev" title="scVI for cell type prediction and data projection" href="comp_bio_scvi_model_use.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.9.1
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#new-using-integrated-embbedings-and-models">[NEW! 🚀] Using integrated embbedings and models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_embedding.html">Access CELLxGENE-hosted embeddings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_scvi_model_use.html">scVI for cell type prediction and data projection</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Geneformer for cell class prediction and data projection</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Preparing-data-and-model">Preparing data and model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Using-the-Geneformer-fine-tuned-model-for-cell-subclass-inference">Using the Geneformer fine-tuned model for cell subclass inference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Using-the-Geneformer-fine-tuned-model-for-data-projection">Using the Geneformer fine-tuned model for data projection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Geneformer for cell class prediction and data projection</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/analysis_demo/comp_bio_geneformer_prediction.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Geneformer-for-cell-class-prediction-and-data-projection">
+<h1>Geneformer for cell class prediction and data projection<a class="headerlink" href="#Geneformer-for-cell-class-prediction-and-data-projection" title="Permalink to this heading">¶</a></h1>
+<p>This notebook provides examples to utilize the CELLxGENE collaboration fine-tuned Geneformer model with user data. For more information on the model please refer to the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
+<p><strong>IMPORTANT:</strong> This tutorial requires cellxgene-census package version 1.9.1 or later.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Requirements.</p></li>
+<li><p>Preparing data and model.</p></li>
+<li><p>Using the Geneformer fine-tuned model for <strong>cell subclass inference</strong>.</p></li>
+<li><p>Using the Geneformer fine-tuned model for <strong>data projection</strong>.</p></li>
+</ol>
+<blockquote>
+<div><p>⚠️ Note “cell subclass” is a high-level grouping of cell types as annotated in CELLxGENE Discover via the CL ontology see [<a class="reference external" href="https://cellxgene.cziscience.com/collections](https://cellxgene.cziscience.com/collections">https://cellxgene.cziscience.com/collections](https://cellxgene.cziscience.com/collections</a></p>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
+</div></blockquote>
+<section id="Requirements">
+<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading">¶</a></h2>
+<section id="System-requirements">
+<h3>System requirements<a class="headerlink" href="#System-requirements" title="Permalink to this heading">¶</a></h3>
+<p>To run this notebook the following are required:</p>
+<ul class="simple">
+<li><p>Unix system.</p></li>
+<li><p>A system with one or more GPUs is highly recommended.</p></li>
+<li><p><a class="reference external" href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS command-line interface</a>.</p></li>
+<li><p><a class="reference external" href="https://huggingface.co/ctheodoris/Geneformer">Geneformer Python package</a> and its dependencies.</p></li>
+<li><p>CELLxGENE Census package.</p></li>
+</ul>
+</section>
+<section id="Downloading-example-data">
+<h3>Downloading example data<a class="headerlink" href="#Downloading-example-data" title="Permalink to this heading">¶</a></h3>
+<p>Throughout the notebook the 10X PBMC 3K dataset will be used, you can download it via the following shell commands.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>mkdir<span class="w"> </span>-p<span class="w"> </span>data
+<span class="o">!</span>wget<span class="w"> </span>-nv<span class="w"> </span>-O<span class="w"> </span>data/pbmc3k_filtered_gene_bc_matrices.tar.gz<span class="w"> </span>http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz
+<span class="o">!</span>tar<span class="w"> </span>-xzf<span class="w"> </span>data/pbmc3k_filtered_gene_bc_matrices.tar.gz<span class="w"> </span>-C<span class="w"> </span>data/
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-12-15 14:09:38 URL:https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz [7621991/7621991] -&gt; &#34;data/pbmc3k_filtered_gene_bc_matrices.tar.gz&#34; [1]
+</pre></div></div>
+</div>
+</section>
+<section id="Downloading-the-fine-tuned-Geneformer-model">
+<h3>Downloading the fine-tuned Geneformer model<a class="headerlink" href="#Downloading-the-fine-tuned-Geneformer-model" title="Permalink to this heading">¶</a></h3>
+<p>The model is currently hosted in S3, you can find out more deatails in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
+<p>Additional information, including its S3 URI, is also included in the metadata of the corresponding embeddings inside Census. These metadata can be obtained as follows.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
+
+<span class="n">geneformer_info</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span>
+<span class="n">geneformer_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">geneformer_info</span><span class="p">[</span><span class="s2">&quot;CxG_embedding_info&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">geneformer_info</span><span class="p">[</span><span class="s2">&quot;model_link&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;s3://cellxgene-contrib-public/models/geneformer/2023-12-15/homo_sapiens/fined-tuned-model/&#39;
+</pre></div></div>
+</div>
+<p>And we can download it via the AWS CLI.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>aws<span class="w"> </span>s3<span class="w"> </span>sync<span class="w"> </span>s3://cellxgene-contrib-public/models/geneformer/2023-12-15/homo_sapiens/fined-tuned-model/<span class="w"> </span>./fine_tuned_geneformer<span class="w">  </span>--no-progress<span class="w"> </span>--only-show-errors
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Importing-required-packages">
+<h3>Importing required packages<a class="headerlink" href="#Importing-required-packages" title="Permalink to this heading">¶</a></h3>
+<p>Finally all the required packages are loaded.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BertForSequenceClassification</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="n">DataCollatorForCellClassification</span>
+<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="n">TranscriptomeTokenizer</span>
+<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="n">EmbExtractor</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.ml.huggingface</span> <span class="kn">import</span> <span class="n">GeneformerTokenizer</span>
+<span class="kn">import</span> <span class="nn">datasets</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Preparing-data-and-model">
+<h2>Preparing data and model<a class="headerlink" href="#Preparing-data-and-model" title="Permalink to this heading">¶</a></h2>
+<section id="Preparing-single-cell-data">
+<h3>Preparing single-cell data<a class="headerlink" href="#Preparing-single-cell-data" title="Permalink to this heading">¶</a></h3>
+<p>Let’s load the test data. In preparation to use with Geneformer we do the following:</p>
+<ul class="simple">
+<li><p>Set the index as the ENSEMBL ID and stores it in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;ensembl_id&quot;</span></code></p></li>
+<li><p>Add read counts to the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;n_counts&quot;</span></code></p></li>
+<li><p>Add an ID column to be used for joining later in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;joinid&quot;</span></code></p></li>
+</ul>
+<p>Then we write the resulting H5AD file to disk.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_10x_mtx</span><span class="p">(</span><span class="s2">&quot;data/filtered_gene_bc_matrices/hg19/&quot;</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">&quot;gene_ids&quot;</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;ensembl_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;n_counts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;joinid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">n_obs</span><span class="p">))</span>
+
+<span class="n">h5ad_dir</span> <span class="o">=</span> <span class="s2">&quot;./data/h5ad/&quot;</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">h5ad_dir</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">h5ad_dir</span><span class="p">)</span>
+
+<span class="n">adata</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">h5ad_dir</span> <span class="o">+</span> <span class="s2">&quot;pbmcs.h5ad&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now we can tokenize the test data using Geneformer’s tokenizer, while keeping track of <code class="docutils literal notranslate"><span class="pre">&quot;joinid&quot;</span></code> for future joining.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">token_dir</span> <span class="o">=</span> <span class="s2">&quot;data/tokenized_data/&quot;</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">token_dir</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">token_dir</span><span class="p">)</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">TranscriptomeTokenizer</span><span class="p">(</span><span class="n">custom_attr_name_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;joinid&quot;</span><span class="p">:</span> <span class="s2">&quot;joinid&quot;</span><span class="p">})</span>
+<span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize_data</span><span class="p">(</span>
+    <span class="n">data_directory</span><span class="o">=</span><span class="n">h5ad_dir</span><span class="p">,</span>
+    <span class="n">output_directory</span><span class="o">=</span><span class="n">token_dir</span><span class="p">,</span>
+    <span class="n">output_prefix</span><span class="o">=</span><span class="s2">&quot;pbmc&quot;</span><span class="p">,</span>
+    <span class="n">file_format</span><span class="o">=</span><span class="s2">&quot;h5ad&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Tokenizing data/h5ad/pbmcs.h5ad
+data/h5ad/pbmcs.h5ad has no column attribute &#39;filter_pass&#39;; tokenizing all cells.
+Creating dataset.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "834af62ee9f54dbe98c1083f90a352b2", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3d73fa30975643bbb4a423b3d37a70eb", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+<section id="Preparing-data-from-model">
+<h3>Preparing data from model<a class="headerlink" href="#Preparing-data-from-model" title="Permalink to this heading">¶</a></h3>
+<p>Then let’s fetch the mapping dictionary between Geneformer IDs and the associated cell subclass labels. This information is stored along the fine-tuned model.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./fine_tuned_geneformer/&quot;</span>
+<span class="n">label_mapping_dict_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="s2">&quot;label_to_cell_subclass.json&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_mapping_dict_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+    <span class="n">label_mapping_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This dictionary contains all the possible cell labels available for the model, and the predictions on the section below will use these labels.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">label_mapping_dict</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;0&#39;: &#39;B cell&#39;,
+ &#39;1&#39;: &#39;BEST4+ intestinal epithelial cell, human&#39;,
+ &#39;2&#39;: &#39;CD4-positive, alpha-beta T cell&#39;,
+ &#39;3&#39;: &#39;CD8-positive, alpha-beta T cell&#39;,
+ &#39;4&#39;: &#39;CNS neuron (sensu Vertebrata)&#39;,
+ &#39;5&#39;: &#39;GABAergic neuron&#39;,
+ &#39;6&#39;: &#39;T cell&#39;,
+ &#39;7&#39;: &#39;abnormal cell&#39;,
+ &#39;8&#39;: &#39;adventitial cell&#39;,
+ &#39;9&#39;: &#39;animal cell&#39;,
+ &#39;10&#39;: &#39;bone cell&#39;,
+ &#39;11&#39;: &#39;cardiocyte&#39;,
+ &#39;12&#39;: &#39;cell of skeletal muscle&#39;,
+ &#39;13&#39;: &#39;ciliated cell&#39;,
+ &#39;14&#39;: &#39;columnar/cuboidal epithelial cell&#39;,
+ &#39;15&#39;: &#39;connective tissue cell&#39;,
+ &#39;16&#39;: &#39;contractile cell&#39;,
+ &#39;17&#39;: &#39;defensive cell&#39;,
+ &#39;18&#39;: &#39;dendritic cell&#39;,
+ &#39;19&#39;: &#39;duct epithelial cell&#39;,
+ &#39;20&#39;: &#39;ecto-epithelial cell&#39;,
+ &#39;21&#39;: &#39;ectodermal cell&#39;,
+ &#39;22&#39;: &#39;endo-epithelial cell&#39;,
+ &#39;23&#39;: &#39;endocrine cell&#39;,
+ &#39;24&#39;: &#39;endothelial cell&#39;,
+ &#39;25&#39;: &#39;epithelial cell&#39;,
+ &#39;26&#39;: &#39;epithelial cell of lung&#39;,
+ &#39;27&#39;: &#39;epithelial cell of pancreas&#39;,
+ &#39;28&#39;: &#39;epithelial cell of urethra&#39;,
+ &#39;29&#39;: &#39;eukaryotic cell&#39;,
+ &#39;30&#39;: &#39;exocrine cell&#39;,
+ &#39;31&#39;: &#39;fat cell&#39;,
+ &#39;32&#39;: &#39;fibroblast&#39;,
+ &#39;33&#39;: &#39;germ cell&#39;,
+ &#39;34&#39;: &#39;glandular epithelial cell&#39;,
+ &#39;35&#39;: &#39;glial cell&#39;,
+ &#39;36&#39;: &#39;glutamatergic neuron&#39;,
+ &#39;37&#39;: &#39;hematopoietic cell&#39;,
+ &#39;38&#39;: &#39;hematopoietic precursor cell&#39;,
+ &#39;39&#39;: &#39;hepatocyte&#39;,
+ &#39;40&#39;: &#39;inflammatory cell&#39;,
+ &#39;41&#39;: &#39;interneuron&#39;,
+ &#39;42&#39;: &#39;interstitial cell&#39;,
+ &#39;43&#39;: &#39;ionocyte&#39;,
+ &#39;44&#39;: &#39;kidney cell&#39;,
+ &#39;45&#39;: &#39;kidney epithelial cell&#39;,
+ &#39;46&#39;: &#39;leukocyte&#39;,
+ &#39;47&#39;: &#39;lymphocyte&#39;,
+ &#39;48&#39;: &#39;macrophage&#39;,
+ &#39;49&#39;: &#39;male germ cell&#39;,
+ &#39;50&#39;: &#39;mammary gland epithelial cell&#39;,
+ &#39;51&#39;: &#39;mesenchymal cell&#39;,
+ &#39;52&#39;: &#39;meso-epithelial cell&#39;,
+ &#39;53&#39;: &#39;mesodermal cell&#39;,
+ &#39;54&#39;: &#39;monocyte&#39;,
+ &#39;55&#39;: &#39;motor neuron&#39;,
+ &#39;56&#39;: &#39;mural cell&#39;,
+ &#39;57&#39;: &#39;muscle cell&#39;,
+ &#39;58&#39;: &#39;myeloid cell&#39;,
+ &#39;59&#39;: &#39;myofibroblast cell&#39;,
+ &#39;60&#39;: &#39;neoplastic cell&#39;,
+ &#39;61&#39;: &#39;neural cell&#39;,
+ &#39;62&#39;: &#39;neuron&#39;,
+ &#39;63&#39;: &#39;neuron associated cell&#39;,
+ &#39;64&#39;: &#39;non-terminally differentiated cell&#39;,
+ &#39;65&#39;: &#39;ovarian surface epithelial cell&#39;,
+ &#39;66&#39;: &#39;pericyte&#39;,
+ &#39;67&#39;: &#39;phagocyte&#39;,
+ &#39;68&#39;: &#39;pigment cell&#39;,
+ &#39;69&#39;: &#39;precursor cell&#39;,
+ &#39;70&#39;: &#39;primary cultured cell&#39;,
+ &#39;71&#39;: &#39;primordial germ cell&#39;,
+ &#39;72&#39;: &#39;progenitor cell&#39;,
+ &#39;73&#39;: &#39;salivary gland cell&#39;,
+ &#39;74&#39;: &#39;sebaceous gland cell&#39;,
+ &#39;75&#39;: &#39;secretory cell&#39;,
+ &#39;76&#39;: &#39;sensory neuron&#39;,
+ &#39;77&#39;: &#39;seromucus secreting cell&#39;,
+ &#39;78&#39;: &#39;somatic cell&#39;,
+ &#39;79&#39;: &#39;squamous epithelial cell&#39;,
+ &#39;80&#39;: &#39;stem cell&#39;,
+ &#39;81&#39;: &#39;stratified epithelial cell&#39;,
+ &#39;82&#39;: &#39;stromal cell&#39;,
+ &#39;83&#39;: &#39;supporting cell&#39;,
+ &#39;84&#39;: &#39;transit amplifying cell&#39;,
+ &#39;85&#39;: &#39;transitional epithelial cell&#39;,
+ &#39;86&#39;: &#39;trophoblast cell&#39;,
+ &#39;87&#39;: &#39;vertebrate lens cell&#39;}
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Using-the-Geneformer-fine-tuned-model-for-cell-subclass-inference">
+<h2>Using the Geneformer fine-tuned model for cell subclass inference<a class="headerlink" href="#Using-the-Geneformer-fine-tuned-model-for-cell-subclass-inference" title="Permalink to this heading">¶</a></h2>
+<section id="Loading-tokenized-data">
+<h3>Loading tokenized data<a class="headerlink" href="#Loading-tokenized-data" title="Permalink to this heading">¶</a></h3>
+<p>Let’s load the tokenized test data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_from_disk</span><span class="p">(</span><span class="n">token_dir</span> <span class="o">+</span> <span class="s2">&quot;pbmc.dataset&quot;</span><span class="p">)</span>
+<span class="n">dataset</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Dataset({
+    features: [&#39;input_ids&#39;, &#39;joinid&#39;, &#39;length&#39;],
+    num_rows: 2700
+})
+</pre></div></div>
+</div>
+<p>We add a dummy cell metadata column <code class="docutils literal notranslate"><span class="pre">&quot;label&quot;</span></code> needed for Geneformer to make predictions.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Performing-inference-of-cell-subclass">
+<h3>Performing inference of cell subclass<a class="headerlink" href="#Performing-inference-of-cell-subclass" title="Permalink to this heading">¶</a></h3>
+<p>Now we can load the model and run the inference workflow.</p>
+<blockquote>
+<div><p>⚠️ Note, this step will be slow with CPUs, a machine with one GPU is recommended</p>
+</div></blockquote>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># reload pretrained model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BertForSequenceClassification</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+<span class="c1"># create the trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">data_collator</span><span class="o">=</span><span class="n">DataCollatorForCellClassification</span><span class="p">())</span>
+<span class="c1"># use trainer</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<!-- empty output --></div>
+</div>
+<p>And finally we select the most likely cell class based on the probability vector from the predictions of each cell in our test data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_label_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">predicted_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_mapping_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">predicted_label_ids</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Inspecting-inference-results">
+<h3>Inspecting inference results<a class="headerlink" href="#Inspecting-inference-results" title="Permalink to this heading">¶</a></h3>
+<p>Then we add the prediction back to our loaded AnnData test dataset.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predicted_labels</span>
+</pre></div>
+</div>
+</div>
+<p>And it’s ready for inspecting the predictions. Let’s visualize the predictions on the UMAP space, the following is a basic processing workflow to derive a UMAP representation, of the data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_mean</span><span class="o">=</span><span class="mf">0.0125</span><span class="p">,</span> <span class="n">max_mean</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">min_disp</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s2">&quot;arpack&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s also add the original cell type annotations as obtained in <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html">Scapy’s annotation tutorial</a> of the same data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+<span class="n">original_cell_types</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;CD4-positive, alpha-beta T cell (1)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD4-positive, alpha-beta T cell (2)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD14-positive, monocyte&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;B cell (1)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD8-positive, alpha-beta T cell&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FCGR3A-positive, monocyte&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;natural killer cell&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dendritic cell&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;megakaryocyte&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;B cell (2)&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">rename_categories</span><span class="p">(</span><span class="s2">&quot;leiden&quot;</span><span class="p">,</span> <span class="n">original_cell_types</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>These are the original annotations.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;leiden&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Original Annotations&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_37_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_37_0.png" />
+</div>
+</div>
+<p>And these are the predicted annotations.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted Geneformer Annotations&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_39_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_39_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Using-the-Geneformer-fine-tuned-model-for-data-projection">
+<h2>Using the Geneformer fine-tuned model for data projection<a class="headerlink" href="#Using-the-Geneformer-fine-tuned-model-for-data-projection" title="Permalink to this heading">¶</a></h2>
+<section id="Generating-Geneformer-embeddings-for-10X-PBMC-3K-data">
+<h3>Generating Geneformer embeddings for 10X PBMC 3K data<a class="headerlink" href="#Generating-Geneformer-embeddings-for-10X-PBMC-3K-data" title="Permalink to this heading">¶</a></h3>
+<p>To project new data, for example the 10X PBMC 3K data, into the Census embedding space from Geneformer’s fine-tune model, we can use <code class="docutils literal notranslate"><span class="pre">EmbExtractor</span></code> from the <a class="reference external" href="https://huggingface.co/ctheodoris/Geneformer">Geneformer</a> package as follows.</p>
+<p>We first need to get the number of categories (cell subclasses) present in the model.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">label_mapping_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then we can run the <code class="docutils literal notranslate"><span class="pre">EmbExtractor</span></code>, which randomize the cells during the process and thus we keep track of <code class="docutils literal notranslate"><span class="pre">&quot;joinid&quot;</span></code>.</p>
+<blockquote>
+<div><p>⚠️ Note, this step will be slow with CPUs, a machine with one GPU is recommended</p>
+</div></blockquote>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;data/geneformer_embeddings&quot;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+
+<span class="n">embex</span> <span class="o">=</span> <span class="n">EmbExtractor</span><span class="p">(</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;CellClassifier&quot;</span><span class="p">,</span>
+    <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">,</span>
+    <span class="n">max_ncells</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">emb_label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;joinid&quot;</span><span class="p">],</span>
+    <span class="n">emb_layer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">forward_batch_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">nproc</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">embs</span> <span class="o">=</span> <span class="n">embex</span><span class="o">.</span><span class="n">extract_embs</span><span class="p">(</span>
+    <span class="n">model_directory</span><span class="o">=</span><span class="n">model_dir</span><span class="p">,</span>
+    <span class="n">input_data_file</span><span class="o">=</span><span class="n">token_dir</span> <span class="o">+</span> <span class="s2">&quot;pbmc.dataset&quot;</span><span class="p">,</span>
+    <span class="n">output_directory</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+    <span class="n">output_prefix</span><span class="o">=</span><span class="s2">&quot;emb&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4a7549668929432f8a5ff1552ab9ee02", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<p>Then we simply re-order the embeddings based on <code class="docutils literal notranslate"><span class="pre">&quot;joinid&quot;</span></code> and then merge them to the original AnnData</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embs</span> <span class="o">=</span> <span class="n">embs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;joinid&quot;</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;joinid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s take a look at these Geneformer embeddings in a UMAP representation</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;geneformer&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;10X PBMC 3K in Geneformer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_48_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_48_0.png" />
+</div>
+</div>
+</section>
+<section id="Joining-Geneformer-embeddings-from-10X-PBMC-3K-data-with-other-Census-datasets">
+<h3>Joining Geneformer embeddings from 10X PBMC 3K data with other Census datasets<a class="headerlink" href="#Joining-Geneformer-embeddings-from-10X-PBMC-3K-data-with-other-Census-datasets" title="Permalink to this heading">¶</a></h3>
+<p>There are multiple datasets in Census from PBMCs, and all human Census data has pre-calculated Geneformer embeddings, so now we can join the embeddings we generated above from the 10X PBMC 3K dataset with Census data.</p>
+<p>Let’s grab a few PBMC datasets from Census and request the Geneformer embeddings.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
+
+<span class="c1"># Some PBMC data from these collections</span>
+<span class="c1"># 1. https://cellxgene.cziscience.com/collections/c697eaaf-a3be-4251-b036-5f9052179e70</span>
+<span class="c1"># 2. https://cellxgene.cziscience.com/collections/f2a488bf-782f-4c20-a8e5-cb34d48c1f7e</span>
+
+<span class="n">dataset_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fa8605cf-f27e-44af-ac2a-476bee4410d3&quot;</span><span class="p">,</span> <span class="s2">&quot;3c75a463-6a87-4132-83a8-c3002624394d&quot;</span><span class="p">]</span>
+
+<span class="n">adata_census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="o">=</span><span class="n">census</span><span class="p">,</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id in </span><span class="si">{</span><span class="n">dataset_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">obsm_layers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To simplify let’s select the genes that are also present in the 10X PBMC 3K dataset.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_census</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">adata_census</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;feature_id&quot;</span><span class="p">]</span>
+<span class="n">shared_genes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata_census</span><span class="o">.</span><span class="n">var_names</span><span class="p">))</span>
+<span class="n">adata_census</span> <span class="o">=</span> <span class="n">adata_census</span><span class="p">[:,</span> <span class="n">shared_genes</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>And take a subset of these cells, let’s take 3K cells to match the size of the test data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">index_subset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">adata_census</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">adata_census</span> <span class="o">=</span> <span class="n">adata_census</span><span class="p">[</span><span class="n">index_subset</span><span class="p">,</span> <span class="p">:]</span>
+</pre></div>
+</div>
+</div>
+<p>Now we can join these Census data to the 10X PBMC 3K data</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_census</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Census - &quot;</span> <span class="o">+</span> <span class="n">adata_census</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;10X PBMC 3K&quot;</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Predicted - &quot;</span> <span class="o">+</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="n">adata_joined</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">adata</span><span class="p">,</span> <span class="n">adata_census</span><span class="p">],</span> <span class="n">join</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s now inspect all of the cells in the UMAP space.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_joined</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;geneformer&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_joined</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_joined</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_59_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_59_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_joined</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_60_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_60_0.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="comp_bio_scvi_model_use.html" class="btn btn-neutral float-left" title="scVI for cell type prediction and data projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="comp_bio_embedding_exploration.html" class="btn btn-neutral float-right" title="Exploring biologically relevant clusters in Census embeddings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

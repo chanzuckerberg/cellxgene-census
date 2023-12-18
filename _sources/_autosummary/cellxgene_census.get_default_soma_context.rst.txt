@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_default\_soma\_context
+=============================================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_default_soma_context

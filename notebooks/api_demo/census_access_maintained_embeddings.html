@@ -1,0 +1,818 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Access CELLxGENE collaboration embeddings (scVI, Geneformer) &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Access CELLxGENE-hosted embeddings" href="census_embedding.html" />
+    <link rel="prev" title="Querying data using the gget cellxgene module" href="census_gget_demo.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.9.1
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#new-using-integrated-embbedings-and-models">[NEW! 🚀] Using integrated embbedings and models</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Quick-start">Quick start</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Storage-format">Storage format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Query-cells-and-load-associated-embeddings">Query cells and load associated embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="census_embedding.html">Access CELLxGENE-hosted embeddings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_scvi_model_use.html">scVI for cell type prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_geneformer_prediction.html">Geneformer for cell class prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_access_maintained_embeddings.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Access-CELLxGENE-collaboration-embeddings-(scVI,-Geneformer)">
+<h1>Access CELLxGENE collaboration embeddings (scVI, Geneformer)<a class="headerlink" href="#Access-CELLxGENE-collaboration-embeddings-(scVI,-Geneformer)" title="Permalink to this heading">¶</a></h1>
+<p>This notebook demonstrates basic access to CELLxGENE collaboration embeddings of CELLxGENE Discover Census. Currently, embeddings from scVI and a fine-tuned Geneformer model are maintained by CELLxGENE Discover. There are other CELLxGENE-hosted embeddings contributed by the community to CELLxGENE Discover, find out more about these in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
+<p><strong>IMPORTANT:</strong> This tutorial requires cellxgene-census package version 1.9.1 or later.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Quick start</p></li>
+<li><p>Storage format</p></li>
+<li><p>Query cells and load associated embeddings</p></li>
+</ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
+<section id="Quick-start">
+<h2>Quick start<a class="headerlink" href="#Quick-start" title="Permalink to this heading">¶</a></h2>
+<p>CELLxGENE collaboration embeddings are stored in the <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot of selected Census versions, you can easily export them into an AnnData as shown below for any slice of Census. This example queries all cells from tongue tissue.</p>
+<p>⚠️ Note that Geneformer embeddings are only available for human data</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="n">emb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;geneformer&quot;</span><span class="p">]</span>
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+        <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue == &#39;tongue&#39;&quot;</span><span class="p">,</span>
+        <span class="n">obsm_layers</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 372 × 60664
+    obs: &#39;soma_joinid&#39;, &#39;dataset_id&#39;, &#39;assay&#39;, &#39;assay_ontology_term_id&#39;, &#39;cell_type&#39;, &#39;cell_type_ontology_term_id&#39;, &#39;development_stage&#39;, &#39;development_stage_ontology_term_id&#39;, &#39;disease&#39;, &#39;disease_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;is_primary_data&#39;, &#39;self_reported_ethnicity&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex&#39;, &#39;sex_ontology_term_id&#39;, &#39;suspension_type&#39;, &#39;tissue&#39;, &#39;tissue_ontology_term_id&#39;, &#39;tissue_general&#39;, &#39;tissue_general_ontology_term_id&#39;, &#39;raw_sum&#39;, &#39;nnz&#39;, &#39;raw_mean_nnz&#39;, &#39;raw_variance_nnz&#39;, &#39;n_measured_vars&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;, &#39;nnz&#39;, &#39;n_measured_obs&#39;
+    obsm: &#39;scvi&#39;, &#39;geneformer&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AxisArrays with keys: scvi, geneformer
+</pre></div></div>
+</div>
+</section>
+<section id="Storage-format">
+<h2>Storage format<a class="headerlink" href="#Storage-format" title="Permalink to this heading">¶</a></h2>
+<p>Each embedding is encoded as a SOMA SparseNDArray under <code class="docutils literal notranslate"><span class="pre">obsm</span></code> of an organism’s SOMA Experiment, where:</p>
+<ul class="simple">
+<li><p>dimension 0 (<code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code>) encodes the cell (obs) <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value</p></li>
+<li><p>dimension 1 (<code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code>) encodes the embedding feature, and is in the range [0, N) where N is the number of featues in the embedding</p></li>
+<li><p>data (<code class="docutils literal notranslate"><span class="pre">soma_data</span></code>) is float32</p></li>
+</ul>
+<p>The first axis of the embedding array will have the same shape as the corresponding <code class="docutils literal notranslate"><span class="pre">obs</span></code> DataFrame for the Census build and experiment. The second axis of the embedding will have a shape (0, N) where N is the number of features in the embedding.</p>
+<p>Embedding values, while stored as a float32, are precision reduced. Currently they are equivalent to a bfloat16, i.e., have 8 bits of exponent and 7 bits of mantissa.</p>
+</section>
+<section id="Query-cells-and-load-associated-embeddings">
+<h2>Query cells and load associated embeddings<a class="headerlink" href="#Query-cells-and-load-associated-embeddings" title="Permalink to this heading">¶</a></h2>
+<p>This section demonstrates several methods to query cells from the Census by <code class="docutils literal notranslate"><span class="pre">obs</span></code> metadata, and then fetch embeddings associated with each cell.</p>
+<section id="Loading-embeddings-into-an-AnnData-obsm-slot">
+<h3>Loading embeddings into an AnnData <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot<a class="headerlink" href="#Loading-embeddings-into-an-AnnData-obsm-slot" title="Permalink to this heading">¶</a></h3>
+<p>There are two main ways to load CELLxGENE collaboration embeddings into an AnnData.</p>
+<ol class="arabic simple">
+<li><p>Via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code>.</p></li>
+<li><p>With a lazy query via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>.</p></li>
+</ol>
+<section id="AnnData-embeddings-via-cellxgene_census.get_anndata()">
+<h4>AnnData embeddings via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code><a class="headerlink" href="#AnnData-embeddings-via-cellxgene_census.get_anndata()" title="Permalink to this heading">¶</a></h4>
+<p>This is the simplest way of getting the embeddings. In this example we create an AnnData for all “central nervous system” cells.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">scanpy</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
+
+<span class="n">emb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;geneformer&quot;</span><span class="p">]</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]},</span>
+    <span class="n">obsm_layers</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Then we can take a quick look at the embeddings in a 2D scatter plot via UMAP.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scanpy</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span>
+<span class="n">scanpy</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+<span class="n">scanpy</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;scVI&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_access_maintained_embeddings_12_0.png" src="../../_images/notebooks_api_demo_census_access_maintained_embeddings_12_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scanpy</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;geneformer&quot;</span><span class="p">)</span>
+<span class="n">scanpy</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+<span class="n">scanpy</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Geneformer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_access_maintained_embeddings_13_0.png" src="../../_images/notebooks_api_demo_census_access_maintained_embeddings_13_0.png" />
+</div>
+</div>
+</section>
+<section id="AnnData-embeddings-via-ExperimentAxisQuery">
+<h4>AnnData embeddings via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code><a class="headerlink" href="#AnnData-embeddings-via-ExperimentAxisQuery" title="Permalink to this heading">¶</a></h4>
+<p>Using an <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code> to get embeddings into an AnnData has the main advantage of inspecting the query in a lazy manner before loading all data into AnnData.</p>
+<p>As a reminder this class offers a lazy interface to query Census based on cell and gene metadata, and provides access to the correspondong expression data, cell/gene metadata, and the embeddings.</p>
+<p>Let’s initiate a lazy query with the same filters as the previous example.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">import</span> <span class="nn">scanpy</span>
+
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
+
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span> <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, before downloading all the data we can take a look at different attributes, for example the number of cells in our query.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">n_obs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+31780
+</pre></div></div>
+</div>
+<p>Then create an AnnData.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;geneformer&quot;</span><span class="p">]</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">to_anndata</span><span class="p">(</span><span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span> <span class="n">obsm_layers</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]})</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 31780 × 60664
+    obs: &#39;cell_type&#39;, &#39;tissue_general&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;, &#39;nnz&#39;, &#39;n_measured_obs&#39;
+    obsm: &#39;scvi&#39;, &#39;geneformer&#39;
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Loading-embeddings-into-a-Scipy-matrices-and-NumPy-arrays">
+<h3>Loading embeddings into a Scipy matrices and NumPy arrays<a class="headerlink" href="#Loading-embeddings-into-a-Scipy-matrices-and-NumPy-arrays" title="Permalink to this heading">¶</a></h3>
+<p>This section demonstrates how to get embedings for a slice of census directly into Scipy sparse matrices or NumPy arrays.</p>
+<p>We demonstrate this access pattern by a lazy query via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>.</p>
+<p>First we open a handle to Census and initiate a query to create an <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>. In this example we will query for all human cells of <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> equal to <code class="docutils literal notranslate"><span class="pre">'central</span> <span class="pre">nervous</span> <span class="pre">system'</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
+
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span> <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>And now we can access any of the following:</p>
+<ul class="simple">
+<li><p>Expression data via the method <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>.</p></li>
+<li><p>Cell and gene metadata via the mehtods <code class="docutils literal notranslate"><span class="pre">query.obs()</span></code> and <code class="docutils literal notranslate"><span class="pre">query.var()</span></code>, respectively.</p></li>
+<li><p>The cell embeddings via the method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code>.</p></li>
+</ul>
+<p>The method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code> returns a reader class <code class="docutils literal notranslate"><span class="pre">soma.SparseNDArrayRead</span></code>, which in turns can return different types of iterators. In this case we will use a <code class="docutils literal notranslate"><span class="pre">blockwise.scipy()</span></code> iterator that guarantees full re-indexed rows in scipy sparse csr format.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb_iter</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obsm</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">blockwise</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">scipy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Each iteration of <code class="docutils literal notranslate"><span class="pre">emb_iter</span></code> would return a tuple of size 3 with the following elements:</p>
+<ol class="arabic simple">
+<li><p>The scipy sparse matrix for this iteration.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values for the rows (cells).</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values for the columns (genes).</p></li>
+</ol>
+<p>Thus if we’d like to concatenate all of the resulting sparse matrices we can do the following:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">chunk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">emb_iter</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>An now we have an sparse matrix with the embedding data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;31780x200 sparse matrix of type &#39;&lt;class &#39;numpy.float32&#39;&gt;&#39;
+        with 6356000 stored elements in Compressed Sparse Row format&gt;
+</pre></div></div>
+</div>
+<p>Which can be easily converted to a numpy array.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span> <span class="o">=</span> <span class="n">emb</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+<span class="n">emb</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[ 3.9672852e-03,  1.2878418e-02,  4.8632812e-01, ...,
+        -3.5742188e-01, -3.0664062e-01, -1.3198853e-03],
+       [ 2.5390625e-02,  5.9814453e-03,  5.5078125e-01, ...,
+        -1.6015625e-01, -1.0000000e+00,  3.6132812e-01],
+       [ 1.0070801e-03,  1.9165039e-02,  5.4296875e-01, ...,
+         3.9648438e-01, -9.8828125e-01,  1.1796875e+00],
+       ...,
+       [-3.7109375e-02,  2.3315430e-02,  7.8125000e-02, ...,
+        -7.6953125e-01,  1.4218750e+00,  2.4316406e-01],
+       [-1.2756348e-02,  3.1494141e-02,  4.2187500e-01, ...,
+        -9.4140625e-01,  1.7890625e+00, -1.1484375e+00],
+       [-2.9663086e-02, -6.2942505e-04,  4.4531250e-01, ...,
+         3.6315918e-03,  8.4765625e-01, -7.2656250e-01]], dtype=float32)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(31780, 200)
+</pre></div></div>
+</div>
+<p>And we can then load the corresponding expression data or the metadata. In this example we retrieve the cell types for all cells in this slice.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cell_type</th>
+      <th>tissue_general</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ependymal cell</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>astrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>astrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>astrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>astrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>31775</th>
+      <td>oligodendrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>31776</th>
+      <td>oligodendrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>31777</th>
+      <td>oligodendrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>31778</th>
+      <td>oligodendrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+    <tr>
+      <th>31779</th>
+      <td>oligodendrocyte</td>
+      <td>central nervous system</td>
+    </tr>
+  </tbody>
+</table>
+<p>31780 rows × 2 columns</p>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_gget_demo.html" class="btn btn-neutral float-left" title="Querying data using the gget cellxgene module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="census_embedding.html" class="btn btn-neutral float-right" title="Access CELLxGENE-hosted embeddings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

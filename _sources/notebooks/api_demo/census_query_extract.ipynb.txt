@@ -11,9 +11,9 @@
     "**Contents**\n",
     "\n",
     "1. Opening the census.\n",
-    "2. Querying cell metadata (obs).\n",
-    "3. Querying gene metadata (var).\n",
-    "4. Querying expression data.\n",
+    "2. Querying expression data.\n",
+    "3. Querying cell metadata (obs).\n",
+    "4. Querying gene metadata (var).\n",
     "\n",
     "⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable `is_primary_data` which is described in the [Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data).\n",
     "\n",
@@ -59,6 +59,328 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "## Querying expression data\n",
+    "\n",
+    "A convenient way to query and fetch expression data is to use the `get_anndata` method of the `cellxgene_census` API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.\n",
+    "\n",
+    "The method will return an `anndata.AnnData` object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:\n",
+    "\n",
+    "- `column_names` — a dictionary with two keys `obs` and `var` whose values are lists of strings indicating the columns to select for cell and gene metadata respectively.\n",
+    "- `obs_value_filter` —  python expression with selection conditions to fetch **cells** meeting a criteria. For full details see [tiledb.QueryCondition](https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition).\n",
+    "- `var_value_filter` —  python expression with selection conditions to fetch **genes** meeting a criteria. Details as above.  For full details see [tiledb.QueryCondition](https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition).\n",
+    "\n",
+    "\n",
+    "For example if we want to fetch the expression data for:\n",
+    "\n",
+    "- Genes `\"ENSG00000161798\"` and `\"ENSG00000188229\"`.\n",
+    "- All `\"B cells\"` of `\"lung\"` with `\"COVID-19\"` from non-duplicated cells.\n",
+    "- With all gene metadata and adding `sex` cell metadata."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-07-28T16:17:02.614453Z",
+     "iopub.status.busy": "2023-07-28T16:17:02.614195Z",
+     "iopub.status.idle": "2023-07-28T16:17:25.266817Z",
+     "shell.execute_reply": "2023-07-28T16:17:25.266197Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "adata = cellxgene_census.get_anndata(\n",
+    "    census=census,\n",
+    "    organism=\"Homo sapiens\",\n",
+    "    var_value_filter=\"feature_id in ['ENSG00000161798', 'ENSG00000188229']\",\n",
+    "    obs_value_filter=\"cell_type == 'B cell' and tissue_general == 'lung' and disease == 'COVID-19' and is_primary_data == True\",\n",
+    "    column_names={\"obs\": [\"sex\"]},\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "And now we can take a look at the results."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-07-28T16:17:25.269991Z",
+     "iopub.status.busy": "2023-07-28T16:17:25.269539Z",
+     "iopub.status.idle": "2023-07-28T16:17:25.273729Z",
+     "shell.execute_reply": "2023-07-28T16:17:25.273120Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "AnnData object with n_obs × n_vars = 2313 × 2\n",
+       "    obs: 'sex', 'cell_type', 'tissue_general', 'disease', 'is_primary_data'\n",
+       "    var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "adata"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-07-28T16:17:25.276258Z",
+     "iopub.status.busy": "2023-07-28T16:17:25.275933Z",
+     "iopub.status.idle": "2023-07-28T16:17:25.283846Z",
+     "shell.execute_reply": "2023-07-28T16:17:25.283232Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>sex</th>\n",
+       "      <th>cell_type</th>\n",
+       "      <th>tissue_general</th>\n",
+       "      <th>disease</th>\n",
+       "      <th>is_primary_data</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>unknown</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>unknown</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2308</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2309</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2310</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2311</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2312</th>\n",
+       "      <td>male</td>\n",
+       "      <td>B cell</td>\n",
+       "      <td>lung</td>\n",
+       "      <td>COVID-19</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>2313 rows × 5 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          sex cell_type tissue_general   disease  is_primary_data\n",
+       "0        male    B cell           lung  COVID-19             True\n",
+       "1        male    B cell           lung  COVID-19             True\n",
+       "2     unknown    B cell           lung  COVID-19             True\n",
+       "3        male    B cell           lung  COVID-19             True\n",
+       "4     unknown    B cell           lung  COVID-19             True\n",
+       "...       ...       ...            ...       ...              ...\n",
+       "2308     male    B cell           lung  COVID-19             True\n",
+       "2309     male    B cell           lung  COVID-19             True\n",
+       "2310     male    B cell           lung  COVID-19             True\n",
+       "2311     male    B cell           lung  COVID-19             True\n",
+       "2312     male    B cell           lung  COVID-19             True\n",
+       "\n",
+       "[2313 rows x 5 columns]"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "adata.obs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-07-28T16:17:25.286287Z",
+     "iopub.status.busy": "2023-07-28T16:17:25.285970Z",
+     "iopub.status.idle": "2023-07-28T16:17:25.291899Z",
+     "shell.execute_reply": "2023-07-28T16:17:25.291285Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>soma_joinid</th>\n",
+       "      <th>feature_id</th>\n",
+       "      <th>feature_name</th>\n",
+       "      <th>feature_length</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>8626</td>\n",
+       "      <td>ENSG00000161798</td>\n",
+       "      <td>AQP5</td>\n",
+       "      <td>1884</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>27047</td>\n",
+       "      <td>ENSG00000188229</td>\n",
+       "      <td>TUBB4B</td>\n",
+       "      <td>2037</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   soma_joinid       feature_id feature_name  feature_length\n",
+       "0         8626  ENSG00000161798         AQP5            1884\n",
+       "1        27047  ENSG00000188229       TUBB4B            2037"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "adata.var"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For a full description of `get_anndata()` refer to `help(cellxgene_census.get_anndata)`\n",
+    "\n",
+    "Don't forget to close the census!"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "## Querying cell metadata (obs)\n",
     "\n",
     "The human gene metadata of the Census, for RNA assays, is located at `census[\"census_data\"][\"homo_sapiens\"].obs`. This is a `SOMADataFrame` and as such it can be materialized as a `pandas.DataFrame` via the methods `read().concat().to_pandas()`. \n",
@@ -79,7 +401,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": 6,
    "metadata": {
     "execution": {
      "iopub.execute_input": "2023-07-28T16:16:50.420972Z",
@@ -116,7 +438,7 @@
        " 'tissue_general_ontology_term_id']"
       ]
      },
-     "execution_count": 2,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -140,7 +462,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 7,
    "metadata": {
     "execution": {
      "iopub.execute_input": "2023-07-28T16:16:50.760164Z",
@@ -198,7 +520,7 @@
        "385437     male"
       ]
      },
-     "execution_count": 3,
+     "execution_count": 7,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -220,7 +542,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 8,
    "metadata": {
     "execution": {
      "iopub.execute_input": "2023-07-28T16:16:53.843663Z",
@@ -545,8 +867,8 @@
        "</div>"
       ],
       "text/plain": [
-       "         soma_joinid                            dataset_id          assay   \n",
-       "0                  0  f171db61-e57e-4535-a06a-35d8b6ef8f2b      10x 3' v3  \\\n",
+       "         soma_joinid                            dataset_id          assay  \\\n",
+       "0                  0  f171db61-e57e-4535-a06a-35d8b6ef8f2b      10x 3' v3   \n",
        "1                  1  f171db61-e57e-4535-a06a-35d8b6ef8f2b      10x 3' v3   \n",
        "2                  2  f171db61-e57e-4535-a06a-35d8b6ef8f2b      10x 3' v3   \n",
        "3                  3  f171db61-e57e-4535-a06a-35d8b6ef8f2b      10x 3' v3   \n",
@@ -558,8 +880,8 @@
        "3251332     56274576  2adb1f8a-a6b1-4909-8ee8-484814e2d4bf  microwell-seq   \n",
        "3251333     56274577  2adb1f8a-a6b1-4909-8ee8-484814e2d4bf  microwell-seq   \n",
        "\n",
-       "        assay_ontology_term_id                           cell_type   \n",
-       "0                  EFO:0009922            syncytiotrophoblast cell  \\\n",
+       "        assay_ontology_term_id                           cell_type  \\\n",
+       "0                  EFO:0009922            syncytiotrophoblast cell   \n",
        "1                  EFO:0009922       placental villous trophoblast   \n",
        "2                  EFO:0009922            syncytiotrophoblast cell   \n",
        "3                  EFO:0009922            syncytiotrophoblast cell   \n",
@@ -571,8 +893,8 @@
        "3251332            EFO:0030002  cord blood hematopoietic stem cell   \n",
        "3251333            EFO:0030002  cord blood hematopoietic stem cell   \n",
        "\n",
-       "        cell_type_ontology_term_id                        development_stage   \n",
-       "0                       CL:0000525  9th week post-fertilization human stage  \\\n",
+       "        cell_type_ontology_term_id                        development_stage  \\\n",
+       "0                       CL:0000525  9th week post-fertilization human stage   \n",
        "1                       CL:2000060  9th week post-fertilization human stage   \n",
        "2                       CL:0000525  9th week post-fertilization human stage   \n",
        "3                       CL:0000525  9th week post-fertilization human stage   \n",
@@ -584,8 +906,8 @@
        "3251332                 CL:2000095                      newborn human stage   \n",
        "3251333                 CL:2000095                      newborn human stage   \n",
        "\n",
-       "        development_stage_ontology_term_id disease disease_ontology_term_id   \n",
-       "0                           HsapDv:0000046  normal             PATO:0000461  \\\n",
+       "        development_stage_ontology_term_id disease disease_ontology_term_id  \\\n",
+       "0                           HsapDv:0000046  normal             PATO:0000461   \n",
        "1                           HsapDv:0000046  normal             PATO:0000461   \n",
        "2                           HsapDv:0000046  normal             PATO:0000461   \n",
        "3                           HsapDv:0000046  normal             PATO:0000461   \n",
@@ -597,8 +919,8 @@
        "3251332                     HsapDv:0000082  normal             PATO:0000461   \n",
        "3251333                     HsapDv:0000082  normal             PATO:0000461   \n",
        "\n",
-       "         ... is_primary_data  self_reported_ethnicity   \n",
-       "0        ...           False                  unknown  \\\n",
+       "         ... is_primary_data  self_reported_ethnicity  \\\n",
+       "0        ...           False                  unknown   \n",
        "1        ...           False                  unknown   \n",
        "2        ...           False                  unknown   \n",
        "3        ...           False                  unknown   \n",
@@ -610,8 +932,8 @@
        "3251332  ...            True              Han Chinese   \n",
        "3251333  ...            True              Han Chinese   \n",
        "\n",
-       "        self_reported_ethnicity_ontology_term_id      sex   \n",
-       "0                                        unknown  unknown  \\\n",
+       "        self_reported_ethnicity_ontology_term_id      sex  \\\n",
+       "0                                        unknown  unknown   \n",
        "1                                        unknown  unknown   \n",
        "2                                        unknown  unknown   \n",
        "3                                        unknown  unknown   \n",
@@ -623,8 +945,8 @@
        "3251332                           HANCESTRO:0027  unknown   \n",
        "3251333                           HANCESTRO:0027  unknown   \n",
        "\n",
-       "        sex_ontology_term_id suspension_type                tissue   \n",
-       "0                    unknown         nucleus       decidua basalis  \\\n",
+       "        sex_ontology_term_id suspension_type                tissue  \\\n",
+       "0                    unknown         nucleus       decidua basalis   \n",
        "1                    unknown         nucleus       decidua basalis   \n",
        "2                    unknown         nucleus       decidua basalis   \n",
        "3                    unknown         nucleus       decidua basalis   \n",
@@ -652,7 +974,7 @@
        "[3251334 rows x 21 columns]"
       ]
      },
-     "execution_count": 4,
+     "execution_count": 8,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -674,7 +996,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 9,
    "metadata": {
     "execution": {
      "iopub.execute_input": "2023-07-28T16:17:00.447314Z",
@@ -705,7 +1027,7 @@
        "Name: count, dtype: int64"
       ]
      },
-     "execution_count": 5,
+     "execution_count": 9,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -739,7 +1061,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 10,
    "metadata": {
     "execution": {
      "iopub.execute_input": "2023-07-28T16:17:01.932237Z",
@@ -755,7 +1077,7 @@
        "['soma_joinid', 'feature_id', 'feature_name', 'feature_length']"
       ]
      },
-     "execution_count": 6,
+     "execution_count": 10,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -777,7 +1099,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 11,
    "metadata": {
     "execution": {
      "iopub.execute_input": "2023-07-28T16:17:02.341116Z",
@@ -836,7 +1158,7 @@
        "1       TUBB4B            2037  ENSG00000188229"
       ]
      },
-     "execution_count": 7,
+     "execution_count": 11,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -854,328 +1176,6 @@
     ")\n",
     "\n",
     "gene_metadata"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "## Querying expression data\n",
-    "\n",
-    "A convenient way to query and fetch expression data is to use the `get_anndata` method of the `cellxgene_census` API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.\n",
-    "\n",
-    "The method will return an `anndata.AnnData` object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:\n",
-    "\n",
-    "- `column_names` — a dictionary with two keys `obs` and `var` whose values are lists of strings indicating the columns to select for cell and gene metadata respectively.\n",
-    "- `obs_value_filter` —  python expression with selection conditions to fetch **cells** meeting a criteria. For full details see [tiledb.QueryCondition](https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition).\n",
-    "- `var_value_filter` —  python expression with selection conditions to fetch **genes** meeting a criteria. Details as above.  For full details see [tiledb.QueryCondition](https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition).\n",
-    "\n",
-    "\n",
-    "For example if we want to fetch the expression data for:\n",
-    "\n",
-    "- Genes `\"ENSG00000161798\"` and `\"ENSG00000188229\"`.\n",
-    "- All `\"B cells\"` of `\"lung\"` with `\"COVID-19\"` from non-duplicated cells.\n",
-    "- With all gene metadata and adding `sex` cell metadata."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 8,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-07-28T16:17:02.614453Z",
-     "iopub.status.busy": "2023-07-28T16:17:02.614195Z",
-     "iopub.status.idle": "2023-07-28T16:17:25.266817Z",
-     "shell.execute_reply": "2023-07-28T16:17:25.266197Z"
-    }
-   },
-   "outputs": [],
-   "source": [
-    "adata = cellxgene_census.get_anndata(\n",
-    "    census=census,\n",
-    "    organism=\"Homo sapiens\",\n",
-    "    var_value_filter=\"feature_id in ['ENSG00000161798', 'ENSG00000188229']\",\n",
-    "    obs_value_filter=\"cell_type == 'B cell' and tissue_general == 'lung' and disease == 'COVID-19' and is_primary_data == True\",\n",
-    "    column_names={\"obs\": [\"sex\"]},\n",
-    ")"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "And now we can take a look at the results."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 9,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-07-28T16:17:25.269991Z",
-     "iopub.status.busy": "2023-07-28T16:17:25.269539Z",
-     "iopub.status.idle": "2023-07-28T16:17:25.273729Z",
-     "shell.execute_reply": "2023-07-28T16:17:25.273120Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "AnnData object with n_obs × n_vars = 2313 × 2\n",
-       "    obs: 'sex', 'cell_type', 'tissue_general', 'disease', 'is_primary_data'\n",
-       "    var: 'soma_joinid', 'feature_id', 'feature_name', 'feature_length'"
-      ]
-     },
-     "execution_count": 9,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "adata"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 10,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-07-28T16:17:25.276258Z",
-     "iopub.status.busy": "2023-07-28T16:17:25.275933Z",
-     "iopub.status.idle": "2023-07-28T16:17:25.283846Z",
-     "shell.execute_reply": "2023-07-28T16:17:25.283232Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/html": [
-       "<div>\n",
-       "<style scoped>\n",
-       "    .dataframe tbody tr th:only-of-type {\n",
-       "        vertical-align: middle;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe tbody tr th {\n",
-       "        vertical-align: top;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe thead th {\n",
-       "        text-align: right;\n",
-       "    }\n",
-       "</style>\n",
-       "<table border=\"1\" class=\"dataframe\">\n",
-       "  <thead>\n",
-       "    <tr style=\"text-align: right;\">\n",
-       "      <th></th>\n",
-       "      <th>sex</th>\n",
-       "      <th>cell_type</th>\n",
-       "      <th>tissue_general</th>\n",
-       "      <th>disease</th>\n",
-       "      <th>is_primary_data</th>\n",
-       "    </tr>\n",
-       "  </thead>\n",
-       "  <tbody>\n",
-       "    <tr>\n",
-       "      <th>0</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>1</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2</th>\n",
-       "      <td>unknown</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>3</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>4</th>\n",
-       "      <td>unknown</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>...</th>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2308</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2309</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2310</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2311</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2312</th>\n",
-       "      <td>male</td>\n",
-       "      <td>B cell</td>\n",
-       "      <td>lung</td>\n",
-       "      <td>COVID-19</td>\n",
-       "      <td>True</td>\n",
-       "    </tr>\n",
-       "  </tbody>\n",
-       "</table>\n",
-       "<p>2313 rows × 5 columns</p>\n",
-       "</div>"
-      ],
-      "text/plain": [
-       "          sex cell_type tissue_general   disease  is_primary_data\n",
-       "0        male    B cell           lung  COVID-19             True\n",
-       "1        male    B cell           lung  COVID-19             True\n",
-       "2     unknown    B cell           lung  COVID-19             True\n",
-       "3        male    B cell           lung  COVID-19             True\n",
-       "4     unknown    B cell           lung  COVID-19             True\n",
-       "...       ...       ...            ...       ...              ...\n",
-       "2308     male    B cell           lung  COVID-19             True\n",
-       "2309     male    B cell           lung  COVID-19             True\n",
-       "2310     male    B cell           lung  COVID-19             True\n",
-       "2311     male    B cell           lung  COVID-19             True\n",
-       "2312     male    B cell           lung  COVID-19             True\n",
-       "\n",
-       "[2313 rows x 5 columns]"
-      ]
-     },
-     "execution_count": 10,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "adata.obs"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 11,
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2023-07-28T16:17:25.286287Z",
-     "iopub.status.busy": "2023-07-28T16:17:25.285970Z",
-     "iopub.status.idle": "2023-07-28T16:17:25.291899Z",
-     "shell.execute_reply": "2023-07-28T16:17:25.291285Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/html": [
-       "<div>\n",
-       "<style scoped>\n",
-       "    .dataframe tbody tr th:only-of-type {\n",
-       "        vertical-align: middle;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe tbody tr th {\n",
-       "        vertical-align: top;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe thead th {\n",
-       "        text-align: right;\n",
-       "    }\n",
-       "</style>\n",
-       "<table border=\"1\" class=\"dataframe\">\n",
-       "  <thead>\n",
-       "    <tr style=\"text-align: right;\">\n",
-       "      <th></th>\n",
-       "      <th>soma_joinid</th>\n",
-       "      <th>feature_id</th>\n",
-       "      <th>feature_name</th>\n",
-       "      <th>feature_length</th>\n",
-       "    </tr>\n",
-       "  </thead>\n",
-       "  <tbody>\n",
-       "    <tr>\n",
-       "      <th>0</th>\n",
-       "      <td>8626</td>\n",
-       "      <td>ENSG00000161798</td>\n",
-       "      <td>AQP5</td>\n",
-       "      <td>1884</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>1</th>\n",
-       "      <td>27047</td>\n",
-       "      <td>ENSG00000188229</td>\n",
-       "      <td>TUBB4B</td>\n",
-       "      <td>2037</td>\n",
-       "    </tr>\n",
-       "  </tbody>\n",
-       "</table>\n",
-       "</div>"
-      ],
-      "text/plain": [
-       "   soma_joinid       feature_id feature_name  feature_length\n",
-       "0         8626  ENSG00000161798         AQP5            1884\n",
-       "1        27047  ENSG00000188229       TUBB4B            2037"
-      ]
-     },
-     "execution_count": 11,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "adata.var"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "For a full description of `get_anndata()` refer to `help(cellxgene_census.get_anndata)`\n",
-    "\n",
-    "Don't forget to close the census!"
    ]
   },
   {

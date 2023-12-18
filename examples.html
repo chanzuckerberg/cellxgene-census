@@ -46,7 +46,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Computing on X using online (incremental) algorithms" href="notebooks/api_demo/census_compute_over_X.html" />
+    <link rel="next" title="Querying and fetching the single-cell data and cell/gene metadata." href="notebooks/api_demo/census_query_extract.html" />
     <link rel="prev" title="cellxgene_census.experimental.util.X_sparse_iter" href="_autosummary/cellxgene_census.experimental.util.X_sparse_iter.html" /> 
 </head>
 
@@ -54,32 +54,45 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
-                    </span>
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
-                      <div style="height: 16px!important; display: flex;">
-                        <span class="beta">BETA</span>
-                      </div>
-                    </span>
-                    <hr class="navbar-divider">
-                    <span class="navbar-cxg-link">
-                      <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">Census</a>
                   </span>
                 </span>
             </span>
@@ -89,10 +102,10 @@
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -135,27 +148,40 @@
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Python tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_datasets.html">Exploring the Census Datasets table</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_duplicated_cells.html">Understanding and filtering out duplicate cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html">Querying data using the gget cellxgene module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exporting-data">Exporting data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
 <li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html">Querying data using the gget cellxgene module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#new-using-integrated-embbedings-and-models">[NEW! 🚀] Using integrated embbedings and models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_embedding.html">Access CELLxGENE-hosted embeddings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_scvi_model_use.html">scVI for cell type prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_geneformer_prediction.html">Geneformer for cell class prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#uderstanding-census-data">Uderstanding Census data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="notebooks/api_demo/census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis">Analysis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html">Integrating multi-dataset slices of data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analyzing-census-data">Analyzing Census data</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html">Integrating multi-dataset slices of data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#experimental">Experimental</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalable-computing">Scalable computing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="notebooks/experimental/highly_variable_genes.html">Experimental Highly Variable Genes API</a></li>
 <li class="toctree-l3"><a class="reference internal" href="notebooks/experimental/mean_variance.html">Out-of-core (incremental) mean and variance calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scalable-machine-learning">Scalable machine learning</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="notebooks/experimental/pytorch.html">Training a PyTorch Model</a></li>
 </ul>
 </li>
@@ -202,126 +228,81 @@
                 
   <section id="python-tutorials">
 <h1>Python tutorials<a class="headerlink" href="#python-tutorials" title="Permalink to this heading">¶</a></h1>
-<section id="api">
-<h2>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h2>
+<section id="exporting-data">
+<h2>Exporting data<a class="headerlink" href="#exporting-data" title="Permalink to this heading">¶</a></h2>
+<p>Learn how to stream the single-cell data and metadata from Census into your machine.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_compute_over_X.html#Incremental-count-and-mean-calculation.">Incremental count and mean calculation.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_compute_over_X.html#Incremental-variance-calculation">Incremental variance calculation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_compute_over_X.html#Counting-cells-per-gene,-grouped-by-dataset_id">Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html#Opening-the-Census">Opening the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html#Fetching-the-IDs-of-the-Census-datasets">Fetching the IDs of the Census datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html#Fetching-the-dataset-presence-matrix">Fetching the dataset presence matrix</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html#Identifying-genes-measured-in-a-specific-dataset.">Identifying genes measured in a specific dataset.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html#Identifying-datasets-that-measured-specific-genes">Identifying datasets that measured specific genes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html#Identifying-all-genes-measured-in-a-dataset">Identifying all genes measured in a dataset</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_datasets.html">Exploring the Census Datasets table</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_datasets.html#Fetching-the-datasets-table">Fetching the datasets table</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_datasets.html#Fetching-the-expression-data-from-a-single-dataset">Fetching the expression data from a single dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_datasets.html#Downloading-the-original-source-H5AD-file-of-a-dataset.">Downloading the original source H5AD file of a dataset.</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_duplicated_cells.html">Understanding and filtering out duplicate cells</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_duplicated_cells.html#Why-are-there-duplicate-cells-in-the-Census?">Why are there duplicate cells in the Census?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_duplicated_cells.html#An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data">An example: duplicate cells in the Tabula Muris Senis data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_duplicated_cells.html#Filtering-out-duplicate-cells">Filtering out duplicate cells</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html">Querying data using the gget cellxgene module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html#Install-gget-and-set-up-cellxgene-module">Install gget and set up cellxgene module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html#Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)">Fetch an AnnData object by selecting gene(s), tissue(s) and cell type(s)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html#Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression">Plot a dot plot similar to those shown on the CZ CELLxGENE Discover Gene Expression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html#Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)">Fetch only cell metadata (corresponds to AnnData.obs)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html#Use-gget-cellxgene-from-the-command-line">Use gget cellxgene from the command line</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html#Opening-the-census">Opening the census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html#Querying-cell-metadata-(obs)">Querying cell metadata (obs)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html#Querying-gene-metadata-(var)">Querying gene metadata (var)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html#Querying-expression-data">Querying expression data</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_summary_cell_counts.html#Fetching-the-census_summary_cell_counts-dataframe">Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/api_demo/census_summary_cell_counts.html#Creating-summary-counts-beyond-pre-calculated-values.">Creating summary counts beyond pre-calculated values.</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_gget_demo.html">Querying data using the gget cellxgene module</a></li>
 </ul>
 </div>
 </section>
-<section id="analysis">
-<h2>Analysis<a class="headerlink" href="#analysis" title="Permalink to this heading">¶</a></h2>
+<section id="new-using-integrated-embbedings-and-models">
+<h2>[NEW! 🚀] Using integrated embbedings and models<a class="headerlink" href="#new-using-integrated-embbedings-and-models" title="Permalink to this heading">¶</a></h2>
+<p>Tutorials that show you how to retrieve pre-calculated Census embbedings and use their associated models for your workflows.</p>
+<p>Access Census embeddings.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html#Opening-the-Census">Opening the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html#Census-organization">Census organization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html#Cell-metadata">Cell metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html#Gene-metadata">Gene metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html#Census-summary-content-tables">Census summary content tables</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html#Understanding-Census-contents-beyond-the-summary-tables">Understanding Census contents beyond the summary tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_embedding.html">Access CELLxGENE-hosted embeddings</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html">Integrating multi-dataset slices of data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html#Finding-and-fetching-data-from-mouse-liver-(10X-Genomics-and-Smart-Seq2)">Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html#Gene-length-normalization-of-Smart-Seq2-data.">Gene-length normalization of Smart-Seq2 data.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html#Integration-with-scvi-tools">Integration with scvi-tools</a></li>
+</div>
+<p>Use the Census trained models.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_scvi_model_use.html">scVI for cell type prediction and data projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_geneformer_prediction.html">Geneformer for cell class prediction and data projection</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html#Learning-about-the-lung-data-in-the-Census">Learning about the lung data in the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html#Fetching-all-single-cell-human-lung-data-from-the-Census">Fetching all single-cell human lung data from the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html#Calculating-QC-metrics-of-the-lung-data">Calculating QC metrics of the lung data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html#Creating-a-normalized-expression-layer-and-embeddings">Creating a normalized expression layer and embeddings</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html#Opening-the-census">Opening the census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html#Fetching-full-length-example-sequencing-data-(Smart-Seq)">Fetching full-length example sequencing data (Smart-Seq)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html#Normalizing-expression-to-account-for-gene-length">Normalizing expression to account for gene length</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html#Validation-through-clustering-exploration">Validation through clustering exploration</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_summarize_axis_query.html#Opening-the-Census">Opening the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_summarize_axis_query.html#Summarizing-cell-metadata">Summarizing cell metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_summarize_axis_query.html#Full-Census-metadata-stats">Full Census metadata stats</a></li>
-</ul>
-</li>
+</div>
+<p>Exploring human biology with Census embeddings.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
 </ul>
 </div>
 </section>
-<section id="experimental">
-<h2>Experimental<a class="headerlink" href="#experimental" title="Permalink to this heading">¶</a></h2>
+<section id="uderstanding-census-data">
+<h2>Uderstanding Census data<a class="headerlink" href="#uderstanding-census-data" title="Permalink to this heading">¶</a></h2>
+<p>Gain a better understanding on the nature of the Census data and how it’s organized.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/experimental/highly_variable_genes.html">Experimental Highly Variable Genes API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/highly_variable_genes.html#get_highly_variable_genes">get_highly_variable_genes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/highly_variable_genes.html#highly_variable_genes">highly_variable_genes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_demo/census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/experimental/mean_variance.html">Out-of-core (incremental) mean and variance calculation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/mean_variance.html#The-mean-and-variance-API">The mean and variance API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/mean_variance.html#Example:-calculate-mean-and-variance-for-a-slice-of-the-Census">Example: calculate mean and variance for a slice of the Census</a></li>
+</div>
+</section>
+<section id="analyzing-census-data">
+<h2>Analyzing Census data<a class="headerlink" href="#analyzing-census-data" title="Permalink to this heading">¶</a></h2>
+<p>A few examples of relevant analysis pipelines with Census data.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_data_integration_scvi.html">Integrating multi-dataset slices of data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/analysis_demo/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/experimental/pytorch.html">Training a PyTorch Model</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Open-the-Census">Open the Census</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Create-an-ExperimentDataPipe">Create an ExperimentDataPipe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Split-the-dataset">Split the dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Create-the-DataLoader">Create the DataLoader</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Define-the-model">Define the model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Train-the-model">Train the model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/experimental/pytorch.html#Make-predictions-with-the-model">Make predictions with the model</a></li>
+</div>
+</section>
+<section id="scalable-computing">
+<h2>Scalable computing<a class="headerlink" href="#scalable-computing" title="Permalink to this heading">¶</a></h2>
+<p>Demonstrations of memory-efficient compute workflows that leverage the streaming capabilities of Census.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/experimental/highly_variable_genes.html">Experimental Highly Variable Genes API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/experimental/mean_variance.html">Out-of-core (incremental) mean and variance calculation</a></li>
 </ul>
-</li>
+</div>
+</section>
+<section id="scalable-machine-learning">
+<h2>Scalable machine learning<a class="headerlink" href="#scalable-machine-learning" title="Permalink to this heading">¶</a></h2>
+<p>Learn about features to do data modeling directly from Census into machine learning toolkits.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/experimental/pytorch.html">Training a PyTorch Model</a></li>
 </ul>
 </div>
 </section>
@@ -333,7 +314,7 @@
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="_autosummary/cellxgene_census.experimental.util.X_sparse_iter.html" class="btn btn-neutral float-left" title="cellxgene_census.experimental.util.X_sparse_iter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="notebooks/api_demo/census_compute_over_X.html" class="btn btn-neutral float-right" title="Computing on X using online (incremental) algorithms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="notebooks/api_demo/census_query_extract.html" class="btn btn-neutral float-right" title="Querying and fetching the single-cell data and cell/gene metadata." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
