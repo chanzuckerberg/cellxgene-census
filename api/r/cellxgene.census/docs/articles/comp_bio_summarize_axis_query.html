@@ -51,7 +51,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
-    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE-maintained embeddings (scVI, Geneformer)</a>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
@@ -64,7 +64,7 @@
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
-    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE-maintained embeddings (scVI, Geneformer)</a>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
   </div>
 </li>
       </ul>
@@ -155,7 +155,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  <span class="st">"cell types in the Census! The first few are: "</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">unique_cell_type</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; There are 613 cell types in the Census! The first few are:  syncytiotrophoblast cell, placental villous trophoblast, extravillous trophoblast, trophoblast giant cell, decidual natural killer cell, human, T cell</span></span></code></pre></div>
+<span><span class="co">#&gt; There are 631 cell types in the Census! The first few are:  oligodendrocyte, oligodendrocyte precursor cell, astrocyte of the cerebral cortex, microglial cell, cerebral cortex endothelial cell, vascular leptomeningeal cell</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="example-summarize-a-subset-of-cell-types-selected-with-a-value_filter">Example: Summarize a subset of cell types, selected with a <code>value_filter</code><a class="anchor" aria-label="anchor" href="#example-summarize-a-subset-of-cell-types-selected-with-a-value_filter"></a>
@@ -210,10 +210,10 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type_ontology_term_id</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">top_10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; CL:0000746 CL:0008034 CL:0002548 CL:0000115 CL:0002131 CL:0000763 CL:0000669 CL:0000003 </span></span>
-<span><span class="co">#&gt;     159096      84750      79618      64190      61830      32088      27515      22707 </span></span>
-<span><span class="co">#&gt; CL:0000057 CL:0002144 </span></span>
-<span><span class="co">#&gt;      20117      18593</span></span></code></pre></div>
+<span><span class="co">#&gt; CL:0000746 CL:0008034 CL:0002131 CL:0002548 CL:0000115 CL:0000763 CL:0000057 CL:0000669 </span></span>
+<span><span class="co">#&gt;     160974      99458      96953      79733      79626      35560      33075      27515 </span></span>
+<span><span class="co">#&gt; CL:0000003 CL:0002144 </span></span>
+<span><span class="co">#&gt;      23613      18593</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -240,15 +240,15 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span><span class="co">#&gt; [1] "homo_sapiens"</span></span>
-<span><span class="co">#&gt;   Unique  cell_type_ontology_term_id  values:  613 </span></span>
-<span><span class="co">#&gt;   Unique  assay_ontology_term_id  values:  19 </span></span>
-<span><span class="co">#&gt;   Unique  tissue_ontology_term_id  values:  220 </span></span>
+<span><span class="co">#&gt;   Unique  cell_type_ontology_term_id  values:  631 </span></span>
+<span><span class="co">#&gt;   Unique  assay_ontology_term_id  values:  20 </span></span>
+<span><span class="co">#&gt;   Unique  tissue_ontology_term_id  values:  230 </span></span>
 <span><span class="co">#&gt; [1] "mus_musculus"</span></span>
 <span><span class="co">#&gt;   Unique  cell_type_ontology_term_id  values:  248 </span></span>
-<span><span class="co">#&gt;   Unique  assay_ontology_term_id  values:  9 </span></span>
-<span><span class="co">#&gt;   Unique  tissue_ontology_term_id  values:  66</span></span>
+<span><span class="co">#&gt;   Unique  assay_ontology_term_id  values:  10 </span></span>
+<span><span class="co">#&gt;   Unique  tissue_ontology_term_id  values:  74</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Complete Census contains "</span>, <span class="va">total_cells</span>, <span class="st">" cells."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Complete Census contains  61656118  cells.</span></span></code></pre></div>
+<span><span class="co">#&gt; Complete Census contains  68683222  cells.</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
