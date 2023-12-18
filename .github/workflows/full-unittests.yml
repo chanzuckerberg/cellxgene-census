@@ -1,8 +1,9 @@
 name: cellxgene_census package full unit tests
 
-# Run all unit tets, including those that are too expensive to run frequently.
-# This workflow requires a very large capacity runner, e.g., 1+TiB RAM. There
-# is no swap, so OOM will cause the workflow to fail with OOMKilled (exit code 137)
+# Run all unit tests, including those that are too expensive to run frequently.
+# This workflow requires a very large capacity runner, e.g., 1+TiB RAM, which is
+# currently available through self-hosted runners. These runners have no swap,
+# so an OOM will cause the workflow to fail with OOMKilled (exit code 137)
 
 on:
   schedule:
@@ -29,8 +30,6 @@ jobs:
           sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
 
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -70,8 +69,6 @@ jobs:
           sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
 
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: r-lib/actions/setup-r@v2
         with:
