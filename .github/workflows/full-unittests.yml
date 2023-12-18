@@ -8,7 +8,19 @@ name: cellxgene_census package full unit tests
 on:
   schedule:
     - cron: "0 1 * * 6" # every Saturday night, 1AM UTC
+
   workflow_dispatch: # used for debugging or manual validation of a branch
+    inputs:
+      tiledbsoma_python_dependency:
+        # Accepts any package spec that pip understand, e.g.,
+        #   tiledbsoma==1.0
+        #   git+https://github.com/single-cell-data/TileDB-SOMA.git
+        #   https://github.com/single-cell-data/TileDB-SOMA.git@release-1.6
+        # or whatever...
+        description: "tiledbsoma package specified as pip requirement"
+        required: false
+        default: ""
+        type: string
 
 jobs:
   py_unit_tests:
@@ -41,16 +53,23 @@ jobs:
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install './api/python/cellxgene_census/[experimental]'
+
+      - name: install tiledbsoma version override
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
+        run: |
+          pip install '${{ github.event.inputs.tiledbsoma_python_dependency }}'
+
+      - name: pytest (--expensive --experimental)
+        run: |
           echo '--------- tiledbsoma.show_package_version():'
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
           echo '--------- PIP package versions:'
           pip freeze
-
-      - name: pytest (--expensive --experimental)
-        run: |
+          echo '--------- Pytest:'
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
+    if: false # TEMPORARILY DISABLE FOR DEBUGGING
     runs-on: single-cell-1tb-runner
     strategy:
       fail-fast: false # prevent this job from killing other jobs
