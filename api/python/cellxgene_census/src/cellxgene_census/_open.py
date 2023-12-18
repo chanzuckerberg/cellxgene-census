@@ -30,6 +30,9 @@ DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
+    # S3 requests should not be signed, since we want to allow anonymous access
+    "vfs.s3.no_sign_request": "true",
+    "vfs.s3.region": "us-west-2",
 }
 
 api_logger = logging.getLogger("cellxgene_census")
@@ -68,38 +71,52 @@ def _open_soma(
     Private. Merge config defaults and return open census as a soma Collection/context.
     """
 
+    # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
+    context = context or get_default_soma_context()
+
+    # If S3 provider is specified, build a default context with a region
     if locator["provider"] == "S3":
-        context = _build_soma_tiledb_context(locator.get("region"), context)
-    else:  # If no provider is specified, build a default context (don't pass region)
-        context = _build_soma_tiledb_context(None, context)
+        context = context.replace(tiledb_config={"vfs.s3.region": locator.get("region")})
 
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def _build_soma_tiledb_context(
-    s3_region: Optional[str] = None, context: Optional[soma.options.SOMATileDBContext] = None
-) -> soma.options.SOMATileDBContext:
-    """
-    Private. Build a SOMATileDBContext with sensible defaults. If user-defined context is provided, only update the
-    `vfs.s3.region` only.
+def get_default_soma_context() -> soma.options.SOMATileDBContext:
+    """Return a ``SOMATileDBContext`` with sensible defaults that can be further customized by the user.  The customized
+    context can then be passed to ``open_soma()`` or a ``SOMAObject.open()`` method,
+    such as ``tiledbsoma.Experiment.open()``.  Use the ``replace()`` method on the returned object to customize its
+    settings.
+
+    Returns:
+        A ``SOMATileDBContext`` object with sensible defaults.
+
+    Examples:
+
+        To reduce the amount of memory used by TileDB-SOMA I/O operations:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            ctx = cellxgene_census.get_default_soma_context().replace(
+                tiledb_config={"py.init_buffer_bytes": 128 * 1024**2,
+                               "soma.init_buffer_bytes": 128 * 1024**2})
+            c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
+
+        To access a copy of the Census located in a private bucket that is located in a different S3 region, use:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            ctx = cellxgene_census.get_default_soma_context().replace(
+                tiledb_config={"vfs.s3.no_sign_request": "false",
+                               "vfs.s3.region": "us-east-1"})
+            c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
+
+    Lifecycle:
+        experimental
     """
 
-    if not context:
-        # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
-        context = soma.options.SOMATileDBContext()
-        tiledb_config = {**DEFAULT_TILEDB_CONFIGURATION}
-        if s3_region is not None:
-            tiledb_config["vfs.s3.region"] = s3_region
-        # S3 requests should not be signed, since we want to allow anonymous access
-        tiledb_config["vfs.s3.no_sign_request"] = "true"
-        context = context.replace(tiledb_config=tiledb_config)
-    else:
-        # if specified, the user context takes precedence _except_ for AWS Region in locator
-        if s3_region is not None:
-            tiledb_config = context.tiledb_ctx.config()
-            tiledb_config["vfs.s3.region"] = s3_region
-            context = context.replace(tiledb_config=tiledb_config)
-    return context
+    return soma.options.SOMATileDBContext().replace(tiledb_config=DEFAULT_TILEDB_CONFIGURATION)
 
 
 def open_soma(
@@ -131,6 +148,11 @@ def open_soma(
     Raises:
         ValueError: if the census cannot be found, the URI cannot be opened, neither a URI
             or a version are specified, or an invalid mirror is provided.
+
+    See Also:
+        - :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.
+        - :func:`get_default_soma_context`: Get a default SOMA context that can be updated with custom settings and used
+          as the ``context`` argument.
 
     Lifecycle:
         maturing

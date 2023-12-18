@@ -1,6 +1,8 @@
 import pytest
 import tiledbsoma as soma
 
+from cellxgene_census import get_default_soma_context
+
 TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
 
 
@@ -49,7 +51,6 @@ def small_mem_context() -> soma.SOMATileDBContext:
     cfg = {
         "tiledb_config": {
             "soma.init_buffer_bytes": 32 * 1024**2,
-            "vfs.s3.no_sign_request": True,
         },
     }
-    return soma.SOMATileDBContext().replace(**cfg)
+    return get_default_soma_context().replace(**cfg)
