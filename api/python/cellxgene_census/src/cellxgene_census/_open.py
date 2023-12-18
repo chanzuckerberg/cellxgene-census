@@ -82,8 +82,39 @@ def _open_soma(
 
 
 def get_default_soma_context() -> soma.options.SOMATileDBContext:
-    """Return a SOMATileDBContext with sensible defaults that can be further customized by the user before being passed
-    to ``open_soma()``.  Use the ``replace()`` method on the return object to customize its settings."""
+    """Return a ``SOMATileDBContext`` with sensible defaults that can be further customized by the user.  The customized
+    context can then be passed to ``open_soma()`` or a ``SOMAObject.open()`` method,
+    such as ``tiledbsoma.Experiment.open()``.  Use the ``replace()`` method on the returned object to customize its
+    settings.
+
+    Returns:
+        A ``SOMATileDBContext`` object with sensible defaults.
+
+    Examples:
+
+        To reduce the amount of memory used by TileDB-SOMA I/O operations:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            ctx = cellxgene_census.get_default_soma_context().replace(
+                tiledb_config={"py.init_buffer_bytes": 128 * 1024**2,
+                               "soma.init_buffer_bytes": 128 * 1024**2})
+            c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
+
+        To access a copy of the Census located in a private bucket that is located in a different S3 region, use:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            ctx = cellxgene_census.get_default_soma_context().replace(
+                tiledb_config={"vfs.s3.no_sign_request": "false",
+                               "vfs.s3.region": "us-east-1"})
+            c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
+
+    Lifecycle:
+        experimental
+    """
 
     return soma.options.SOMATileDBContext().replace(tiledb_config=DEFAULT_TILEDB_CONFIGURATION)
 
@@ -117,6 +148,11 @@ def open_soma(
     Raises:
         ValueError: if the census cannot be found, the URI cannot be opened, neither a URI
             or a version are specified, or an invalid mirror is provided.
+
+    See Also:
+        - :func:`get_source_h5ad_uri`: Look up the location of the source H5AD.
+        - :func:`get_default_soma_context`: Get a default SOMA context that can be updated with custom settings and used
+          as the ``context`` argument.
 
     Lifecycle:
         maturing
