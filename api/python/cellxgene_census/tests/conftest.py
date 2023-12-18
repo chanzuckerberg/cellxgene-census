@@ -1,6 +1,8 @@
 import pytest
 import tiledbsoma as soma
 
+from cellxgene_census import get_default_soma_context
+
 TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
 
 
