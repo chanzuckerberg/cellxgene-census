@@ -14,8 +14,8 @@ on:
       tiledbsoma_python_dependency:
         # Accepts any package spec that pip understand, e.g.,
         #   tiledbsoma==1.0
-        #   git+https://github.com/single-cell-data/TileDB-SOMA.git
-        #   https://github.com/single-cell-data/TileDB-SOMA.git@release-1.6
+        #   git+https://github.com/single-cell-data/TileDB-SOMA.git#egg=tiledbsoma&subdirectory=apis/python/
+        #   git+https://github.com/single-cell-data/TileDB-SOMA.git@release-1.6#egg=tiledbsoma&subdirectory=apis/python/
         # or whatever...
         description: "tiledbsoma package specified as pip requirement"
         required: false
@@ -57,7 +57,7 @@ jobs:
       - name: install tiledbsoma version override
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
         run: |
-          pip install '${{ github.event.inputs.tiledbsoma_python_dependency }}'
+          pip install -e '${{ github.event.inputs.tiledbsoma_python_dependency }}'
 
       - name: pytest (--expensive --experimental)
         run: |
@@ -65,7 +65,7 @@ jobs:
           python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
           echo '--------- PIP package versions:'
           pip freeze
-          echo '--------- Pytest:'
+
           PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
 
   r_unit_tests:
