@@ -26,7 +26,7 @@ from torch import distributed as dist
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 
-from ..._open import _build_soma_tiledb_context
+from ... import get_default_soma_context
 from ..util._eager_iter import _EagerIterator
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
@@ -99,7 +99,7 @@ def _open_experiment(
 ) -> soma.Experiment:
     """Internal method for opening a SOMA ``Experiment`` as a context manager."""
 
-    context = _build_soma_tiledb_context(aws_region)
+    context = get_default_soma_context().replace(tiledb_config={"vfs.s3.region": aws_region} if aws_region else {})
 
     with soma.Experiment.open(uri, context=context) as exp:
         yield exp
