@@ -343,7 +343,8 @@ test_that("test_seurat_common-cell-type", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    obs_value_filter = "cell_type == 'neuron'"
+    obs_value_filter = "cell_type == 'neuron'",
+    obs_coords = 1:15000000
   )
 
   test_seurat(test_args)
@@ -357,7 +358,8 @@ test_that("test_seurat_common-cell-type-large-buffer-size", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    obs_value_filter = "cell_type == 'neuron'"
+    obs_value_filter = "cell_type == 'neuron'",
+    obs_coords = 1:15000000
   )
 
   test_seurat(test_args)
@@ -515,7 +517,8 @@ test_that("test_sce_common-cell-type", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    obs_value_filter = "cell_type == 'neuron'"
+    obs_value_filter = "cell_type == 'neuron'",
+    obs_coords = 1:15000000
   )
 
   test_sce(test_args)
@@ -529,7 +532,8 @@ test_that("test_sce_common-cell-type-large-buffer-size", {
     census = census,
     organism = "Homo sapiens",
     measurement_name = "RNA",
-    obs_value_filter = "cell_type == 'neuron'"
+    obs_value_filter = "cell_type == 'neuron'",
+    obs_coords = 1:15000000
   )
 
   test_sce(test_args)
