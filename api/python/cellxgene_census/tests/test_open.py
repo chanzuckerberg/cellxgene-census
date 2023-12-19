@@ -90,7 +90,7 @@ def test_open_soma_with_customized_default_soma_context(latest_locator: CensusLo
         assert census.context.tiledb_ctx.config()["vfs.s3.region"] == latest_locator.get("s3_region")
         assert census.context.tiledb_ctx.config()["py.init_buffer_bytes"] == f"{1 * 1024 ** 3}"
 
-        # Verify that the user-overriden config settings are set correctly in the TileDB context object.
+        # Verify that the user-overridden config settings are set correctly in the TileDB context object.
         assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
 
