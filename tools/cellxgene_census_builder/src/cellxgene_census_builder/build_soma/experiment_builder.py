@@ -42,6 +42,7 @@ from .globals import (
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
+    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .mp import (
@@ -361,9 +362,7 @@ class ExperimentBuilder:
             return
 
         logging.info(f"Write X normalized: {self.name} - starting")
-        is_smart_seq = np.isin(
-            self.obs_df.assay_ontology_term_id.to_numpy(), ["EFO:0008930", "EFO:0008931", "EFO:0700016"]
-        )
+        is_smart_seq = np.isin(self.obs_df.assay_ontology_term_id.to_numpy(), SMART_SEQ)
         assert self.var_df is not None
         feature_length = self.var_df.feature_length.to_numpy()
 
