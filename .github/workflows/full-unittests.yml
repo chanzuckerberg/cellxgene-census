@@ -3,7 +3,22 @@ name: cellxgene_census package full unit tests
 # Run all unit tests, including those that are too expensive to run frequently.
 # This workflow requires a very large capacity runner, e.g., 1+TiB RAM, which is
 # currently available through self-hosted runners. These runners have no swap,
-# so an OOM will cause the workflow to fail with OOMKilled (exit code 137)
+# so an OOM will cause the workflow to fail with OOMKilled (exit code 137).
+#
+# By default, will install from `main` and run the latest acceptance tests in `main`.
+#
+#   gh workflow run full-unittests.yml
+#
+# You can run it against a branch with:
+#
+#   gh workflow run full-unittests.yml --ref _branch_name_
+#
+# The python (not R) job supports installing a specific `tiledbsoma` version, allowing
+# the test to run with any tiledbsoma version, including branches from the TileDB-SOMA
+# repo. For example, to test against the head of main, do:
+#
+#   gh workflow run full-unittests.yml \
+#      -f 'tiledbsoma_python_dependency=git+https://github.com/single-cell-data/TileDB-SOMA.git#egg=tiledbsoma&subdirectory=apis/python/'
 
 on:
   schedule:
