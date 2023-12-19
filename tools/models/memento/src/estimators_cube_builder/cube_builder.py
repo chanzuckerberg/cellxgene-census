@@ -9,6 +9,7 @@ from typing import List, Tuple, cast
 
 import click
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import scipy.sparse
@@ -82,6 +83,7 @@ def compute_all_estimators_for_obs_group(obs_group_rows: pd.DataFrame, obs_df: p
             obs_group_name, gene_group_rows, size_factors_for_obs_group
         )
     )
+
     assert (
         estimators.index.nunique() == obs_group_rows["feature_id"].nunique()
     ), f"estimators count incorrect in group {obs_group_name}"
@@ -89,26 +91,13 @@ def compute_all_estimators_for_obs_group(obs_group_rows: pd.DataFrame, obs_df: p
 
 
 def compute_all_estimators_for_gene(
-    obs_group_name: Tuple[str, ...], gene_group_rows: pd.DataFrame, size_factors_for_obs_group: pd.DataFrame
+    gene_group_name: Tuple[str, ...], gene_group_rows: pd.DataFrame, size_factors_for_obs_group: pd.DataFrame
 ) -> pd.Series[float]:
     """Computes all estimators for a given {<dim1>, ..., <dimN>, gene} group of expression values"""
-    group_name = cast(Tuple[str, ...], (*obs_group_name, gene_group_rows.name))
 
-    data_dense = (
-        size_factors_for_obs_group[[]]  # just the soma_dim_0 index
-        .join(gene_group_rows[["soma_data"]], how="left")
-        .reset_index()
-    )
+    data_dense, X_dense, size_factors_dense = dense_gene_data(gene_group_rows, size_factors_for_obs_group)
 
-    X_dense = data_dense.soma_data.to_numpy()
-    X_dense = np.nan_to_num(X_dense)
-    size_factors_dense = size_factors_for_obs_group.approx_size_factor.to_numpy()
-
-    data_sparse = data_dense[data_dense.soma_data.notna()]
-    X_sparse = data_sparse.soma_data.to_numpy()
-    X_csc = scipy.sparse.coo_array(
-        (X_sparse, (data_sparse.index, np.zeros(len(data_sparse), dtype=int))), shape=(len(data_dense), 1)
-    ).tocsc()
+    X_csc, X_sparse = sparse_gene_data(data_dense)
 
     n_obs = len(X_dense)
     if n_obs == 0:
@@ -120,14 +109,36 @@ def compute_all_estimators_for_gene(
     sum_ = X_sparse.sum()
     mean = compute_mean(X_dense, size_factors_dense)
     sem = compute_sem(X_dense, size_factors_dense)
-    variance = compute_variance(X_csc, Q, size_factors_dense, group_name=group_name)
-    sev, selv = compute_sev(X_csc, Q, size_factors_dense, num_boot=500, group_name=group_name)
+    variance = compute_variance(X_csc, Q, size_factors_dense, group_name=gene_group_name)
+    sev, selv = compute_sev(X_csc, Q, size_factors_dense, num_boot=500, group_name=gene_group_name)
 
     estimators = dict(
         n_obs=n_obs, nnz=nnz, min=min_, max=max_, sum=sum_, mean=mean, sem=sem, var=variance, sev=sev, selv=selv
     )
 
     return pd.Series(data=[estimators[n] for n in ESTIMATOR_NAMES], dtype=np.float64)
+
+
+def sparse_gene_data(data_dense: pd.DataFrame) -> Tuple[scipy.sparse.csc_matrix, npt.NDArray[np.float32]]:
+    data_sparse = data_dense[data_dense.soma_data.notna()]
+    X_sparse = data_sparse.soma_data.to_numpy()
+    X_csc = scipy.sparse.coo_array(
+        (X_sparse, (data_sparse.index, np.zeros(len(data_sparse), dtype=int))), shape=(len(data_dense), 1)
+    ).tocsc()
+    return X_csc, X_sparse
+
+
+def dense_gene_data(
+    gene_group_rows: pd.DataFrame, size_factors_for_obs_group: pd.DataFrame
+) -> Tuple[pd.DataFrame, npt.NDArray[np.float32], npt.NDArray[np.float64]]:
+    # TODO: can we also eliminate reset_index()
+    data_dense = pd.concat([size_factors_for_obs_group[[]], gene_group_rows[["soma_data"]]], axis=1).reset_index()
+
+    X_dense = data_dense.soma_data.to_numpy()
+    X_dense = np.nan_to_num(X_dense)
+    size_factors_dense = size_factors_for_obs_group.approx_size_factor.to_numpy()
+
+    return data_dense, X_dense, size_factors_dense
 
 
 def compute_all_estimators_for_batch_tdb(
@@ -284,7 +295,7 @@ def pass_2_compute_estimators(
             if len(soma_dim_0_batch) > 0:
                 process_batch()
 
-            pr.dump_stats(f"pass_2_compute_estimators_{n}.prof")
+            pr.dump_stats(f"/tmp/pass_2_compute_estimators_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.prof")
 
     else:  # use multiprocessing
 
