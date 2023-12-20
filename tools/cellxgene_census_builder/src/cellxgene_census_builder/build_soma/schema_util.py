@@ -47,7 +47,7 @@ class FieldSpec:
         """
         Return True if this FieldSpec is equivalent to the Arrow `other_type`.
         For convenience in comparing with types inferred from Pandas DataFrames,
-        where strings and other Arrow non-primtives are stored as objects, allow a
+        where strings and other Arrow non-primitives are stored as objects, allow a
         pa.null DataType to be equivalent to Arrow non-primitive.
         """
         if pa.types.is_dictionary(other_type) and self.is_dictionary:
@@ -149,7 +149,7 @@ class TableSpec:
         return pa.schema(pa_fields)
 
     def field_names(self) -> Sequence[str]:
-        """Return field names for this TableSpec as a seuqence of string"""
+        """Return field names for this TableSpec as a sequence of string"""
         return list(field.name for field in self.fields)
 
     def field(self, key: str) -> FieldSpec:
