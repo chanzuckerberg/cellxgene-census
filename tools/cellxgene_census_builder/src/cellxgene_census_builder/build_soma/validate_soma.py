@@ -193,7 +193,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
             )
 
             # decategorize census obs slice, as it will not have the same categories as H5AD obs,
-            # preventing Pandas from performing the DataFrame equivalance operation.
+            # preventing Pandas from performing the DataFrame equivalence operation.
             for key in dataset_obs:
                 if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
                     dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)

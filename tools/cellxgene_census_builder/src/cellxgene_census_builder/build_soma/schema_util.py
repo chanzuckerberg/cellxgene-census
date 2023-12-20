@@ -22,16 +22,34 @@ OptDataFrame = TypeVar("OptDataFrame", pd.DataFrame, None, Optional[pd.DataFrame
 
 @attrs.define(frozen=True, kw_only=True, slots=True)
 class FieldSpec:
-    name: str
-    type: pa.DataType  # this is the value_type if `is_dictionary` is True
-    is_dictionary: bool = False
+    """Define the schema spec for a single field (aka column). Fields with is_dictionary==True are candidates
+    for encoding as a Arrow dictionary type.
+    """
+
+    name: str  # field name
+    type: pa.DataType  # field type, or the value_type if `is_dictionary` is True
+    is_dictionary: bool = False  # dictionary or primitive field type
 
     def to_pandas_dtype(self, *, ignore_dict_type: bool = False) -> npt.DTypeLike:
+        """
+        Return the Pandas dtype for this field.
+
+        This is only possible if the field is not a dictionary-type field.
+
+        The caller may request the dictionary value type, effectively ignoring the is_dictionary
+        attribute, by setting `ignore_dict_type` to True.
+        """
         if not ignore_dict_type and self.is_dictionary and not pa.types.is_dictionary(self.type):
             raise TypeError("Unable to determine final Pandas type for dictionary.")
         return cast(npt.DTypeLike, self.type.to_pandas_dtype())
 
     def is_type_equivalent(self, other_type: pa.DataType, *, null_non_primitive_equivalence: bool = False) -> bool:
+        """
+        Return True if this FieldSpec is equivalent to the Arrow `other_type`.
+        For convenience in comparing with types inferred from Pandas DataFrames,
+        where strings and other Arrow non-primtives are stored as objects, allow a
+        pa.null DataType to be equivalent to Arrow non-primitive.
+        """
         if pa.types.is_dictionary(other_type) and self.is_dictionary:
             self.is_type_equivalent(
                 other_type.value_type, null_non_primitive_equivalence=null_non_primitive_equivalence
@@ -62,6 +80,7 @@ class FieldSpec:
         return False
 
     def _check_type_compat(self, other_type: pa.DataType, empty_dataframe: bool) -> None:
+        """Internal - peforms the type check and raises on non-equivalent types (False)."""
         if not self.is_type_equivalent(other_type, null_non_primitive_equivalence=empty_dataframe):
             raise TypeError(
                 f"Incompatible or unsupported type for field {self.name}: expected {repr(self.type)}, got {repr(other_type)}"
@@ -70,6 +89,13 @@ class FieldSpec:
 
 @attrs.define(frozen=True, kw_only=True, slots=True)
 class TableSpec:
+    """
+    List of FieldSpec defining an Arrow Table, with a table-wide feature flag enabling/disabling
+    use of Dictionary types.
+
+    Instantiate ONLY with the class method `create`.
+    """
+
     fields: List[FieldSpec]
     use_arrow_dictionaries: bool  # Feature flag to enable/disable dictionary/enum support
 
@@ -123,9 +149,11 @@ class TableSpec:
         return pa.schema(pa_fields)
 
     def field_names(self) -> Sequence[str]:
+        """Return field names for this TableSpec as a seuqence of string"""
         return list(field.name for field in self.fields)
 
     def field(self, key: str) -> FieldSpec:
+        """Return the named field, or raise ValueError if no such key."""
         r = [f for f in self.fields if f.name == key]
         if not r:
             raise ValueError("No such item")

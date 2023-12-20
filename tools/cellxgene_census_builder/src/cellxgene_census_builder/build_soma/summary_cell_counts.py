@@ -95,7 +95,7 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
                 columns="is_primary_data",
                 index=["organism", "ontology_term_id", "label"],
                 fill_value=0,
-                aggfunc="sum",
+                aggfunc="sum",  # noop: each element is unique. Necessary to prevent cast from int to float by default aggfunc (mean)
             )
         )
         if True not in counts:
