@@ -209,7 +209,7 @@ def test_hvg_vs_scanpy(
             "Homo sapiens",
             "is_primary_data == True",
             "dataset_id",
-            slice(500_000, 1_000_000),
+            slice(1_000_000, 4_000_000),
             marks=pytest.mark.expensive,
         ),
     ],

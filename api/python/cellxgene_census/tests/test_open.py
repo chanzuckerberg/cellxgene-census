@@ -35,24 +35,22 @@ def test_open_soma_stable() -> None:
             assert census.context.tiledb_ctx.config()[k] == str(v)
 
 
-@pytest.mark.live_corpus
-def test_open_soma_latest() -> None:
-    # There should _always_ be a 'latest'
-    with cellxgene_census.open_soma(census_version="latest") as census:
-        assert census is not None
-        assert isinstance(census, soma.Collection)
-
-
 @pytest.fixture(scope="module")
 def latest_locator() -> CensusLocator:
     return cellxgene_census.get_census_version_description("latest")["soma"]
 
 
 @pytest.mark.live_corpus
-def test_open_soma_with_plain_soma_context(latest_locator: CensusLocator) -> None:
-    with cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext()) as census:
-        # Verify the default region is set correctly in the TileDB context object.
-        assert census.context.tiledb_ctx.config()["vfs.s3.region"] == latest_locator.get("s3_region")
+def test_open_soma_latest(latest_locator: CensusLocator) -> None:
+    with cellxgene_census.open_soma(census_version="latest") as census:
+        # There should _always_ be a 'latest'
+        assert census is not None
+
+        # It should always be a SOMA Collection
+        assert isinstance(census, soma.Collection)
+
+        # Verify that open_soma() actually opened "latest"
+        assert census.uri == latest_locator["uri"]
 
 
 @pytest.mark.live_corpus
@@ -76,13 +74,15 @@ def test_open_soma_with_customized_plain_soma_context(latest_locator: CensusLoca
         "timestamp": timestamp_ms,
         "tiledb_config": {
             "soma.init_buffer_bytes": soma_init_buffer_bytes,
+            # The below settings are required to access the Census, but otherwise not material to the test.
+            # By virtue of the Census opening successfully, we know these settings are being applied.
             "vfs.s3.region": latest_locator.get("s3_region"),
+            "vfs.s3.no_sign_request": "true",
         },
     }
     context = soma.SOMATileDBContext().replace(**cfg)
     with cellxgene_census.open_soma(uri=latest_locator["uri"], context=context) as census:
-        assert census.uri == latest_locator["uri"]
-        # Verify that user-provided custom config is passed through correctly
+        # Verify that the user-provided config settings are set correctly in the TileDB context object.
         assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
 
@@ -90,20 +90,20 @@ def test_open_soma_with_customized_plain_soma_context(latest_locator: CensusLoca
 @pytest.mark.live_corpus
 def test_open_soma_with_customized_default_soma_context(latest_locator: CensusLocator) -> None:
     soma_init_buffer_bytes = "221000"
-    assert get_default_soma_context().tiledb_config["vfs.s3.no_sign_request"] == "true"
 
     timestamp_ms = int(time.time() * 1000) - 10  # don't use exactly current time, as that is the default
     custom_context = get_default_soma_context().replace(
-        tiledb_config={"soma.init_buffer_bytes": soma_init_buffer_bytes, "vfs.s3.no_sign_request": "false"},
+        tiledb_config={"soma.init_buffer_bytes": soma_init_buffer_bytes},
         timestamp=timestamp_ms,
     )
 
     with cellxgene_census.open_soma(census_version="latest", context=custom_context) as census:
-        # Verify the soma context defaults are set correctly in the TileDB context object.
-        assert census.context.tiledb_ctx.config()["vfs.s3.no_sign_request"] == "false"
+        # Verify the non-overriden soma context defaults are set correctly in the TileDB context object.
+        assert census.context.tiledb_ctx.config()["vfs.s3.no_sign_request"] == "true"
         assert census.context.tiledb_ctx.config()["vfs.s3.region"] == latest_locator.get("s3_region")
+        assert census.context.tiledb_ctx.config()["py.init_buffer_bytes"] == f"{1 * 1024 ** 3}"
 
-        # Verify that the user-provided custom config is set correctly in the TileDB context object.
+        # Verify that the user-overridden config settings are set correctly in the TileDB context object.
         assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
 
