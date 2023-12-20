@@ -40,6 +40,7 @@ on:
 jobs:
   py_unit_tests:
     runs-on: single-cell-1tb-runner
+    timeout-minutes: 1440 # 24 hour timeout
     strategy:
       fail-fast: false # prevent this job from killing other jobs
     steps:
@@ -89,6 +90,7 @@ jobs:
 
   r_unit_tests:
     runs-on: single-cell-1tb-runner
+    timeout-minutes: 1440 # 24 hour timeout
     strategy:
       fail-fast: false # prevent this job from killing other jobs
     steps:
