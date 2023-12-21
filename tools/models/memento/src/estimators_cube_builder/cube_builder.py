@@ -199,30 +199,17 @@ def sum_gene_expression_levels_by_cell(X_tbl: pa.Table, batch: int) -> pd.Series
     return result  # type: ignore
 
 
-def pass_1_compute_size_factors(query: ExperimentAxisQuery, layer: str) -> pd.DataFrame:
+def pass_1_compute_size_factors(query: ExperimentAxisQuery) -> pd.DataFrame:
     obs_df = (
-        query.obs(column_names=["soma_joinid"] + CUBE_LOGICAL_DIMS_OBS).concat().to_pandas().set_index("soma_joinid")
+        query.obs(column_names=["soma_joinid", "raw_sum"] + CUBE_LOGICAL_DIMS_OBS)
+        .concat()
+        .to_pandas()
+        .set_index("soma_joinid")
     )
-    obs_df["size_factor"] = 0  # accumulated
-
-    executor = futures.ThreadPoolExecutor()
-    summing_futures = []
-    X_rows = query._ms.X[layer].shape[0]
-    cum_rows = 0
-    for n, X_tbl in enumerate(query.X(layer).tables(), start=1):
-        cum_rows += X_tbl.shape[0]
-        logging.info(f"Pass 1: Submitting X batch {n}, nnz={X_tbl.shape[0]}, {100 * cum_rows / X_rows:0.1f}%")
-        summing_futures.append(executor.submit(sum_gene_expression_levels_by_cell, X_tbl, n))
-
-    for n, summing_future in enumerate(futures.as_completed(summing_futures), start=1):
-        # Accumulate cell sums, since a given cell's X values may be returned across multiple tables
-        cell_sums = summing_future.result()
-        obs_df["size_factor"] = obs_df["size_factor"].add(cell_sums, fill_value=0)
-        logging.info(f"Pass 1: Completed {n} of {len(summing_futures)} batches, " f"total cube rows={len(obs_df)}")
 
     # Convert size factors to relative - prevents small floats for variance
-    global_n_umi = obs_df["size_factor"].values.mean()
-    obs_df["size_factor"] = obs_df["size_factor"].values / global_n_umi
+    global_n_umi = obs_df["raw_sum"].values.mean()
+    obs_df["size_factor"] = obs_df["raw_sum"].values / global_n_umi
 
     # Bin all sums to have fewer unique values, to speed up bootstrap computation
     obs_df["approx_size_factor"] = bin_size_factor(obs_df["size_factor"].values)
@@ -403,7 +390,7 @@ def build(
         obs_size_factors_uri = cube_uri + OBS_SIZE_FACTORS_ARRAY_SUFFIX
         if not tiledb.array_exists(obs_size_factors_uri):
             logging.info("Pass 1: Compute Approx Size Factors")
-            size_factors = pass_1_compute_size_factors(query, layer)
+            size_factors = pass_1_compute_size_factors(query)
 
             size_factors = size_factors.astype({col: "category" for col in CUBE_LOGICAL_DIMS_OBS})
             tiledb.from_pandas(obs_size_factors_uri, size_factors.reset_index(), index_col=[0])
