@@ -4,6 +4,7 @@ import gc
 import logging
 import multiprocessing
 import os
+import shutil
 from concurrent import futures
 from typing import List, Tuple, cast
 
@@ -238,9 +239,13 @@ def pass_2_compute_estimators(
     obs_df = obs_df.join(size_factors[["approx_size_factor"]])
 
     if tiledb.array_exists(cube_uri):
-        logging.info("Pass 2: Resuming")
+        logging.info("Pass 2: Resuming from existing estimators cube")
+        with tiledb.open(cube_uri, mode="r") as estimators_cube:
+            df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:][CUBE_LOGICAL_DIMS_OBS]
+            existing_groups = df.drop_duplicates()
+            existing_groups = existing_groups.set_index(list(existing_groups.columns))
     else:
-        # accumulate into a TileDB array
+        existing_groups = None
         tiledb.Array.create(cube_uri, build_cube_schema(obs_df))
         logging.info("Pass 2: Created new estimators cube")
 
@@ -324,15 +329,8 @@ def pass_2_compute_estimators(
                 )
             )
 
-        # perform check for existing data
-        # TODO: can skip if known to have started with an empty cube
-        with tiledb.open(cube_uri, mode="r") as estimators_cube:
-            df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:][CUBE_LOGICAL_DIMS_OBS]
-            existing_groups = df.drop_duplicates()
-            existing_groups = existing_groups.set_index(list(existing_groups.columns))
-
         for group_key, soma_dim_0_ids in cube_obs_coord_groups.items():
-            if group_key not in existing_groups.index:
+            if existing_groups is None or group_key not in existing_groups.index:
                 soma_dim_0_batch.extend(soma_dim_0_ids)
             else:
                 logging.info(f"Pass 2: Group {group_key} already computed. Skipping computation.")
@@ -434,7 +432,26 @@ def build(
 @click.option("--measurement_name", default="RNA")
 @click.option("--layer", default="raw")
 @click.option("--validate/--no-validate", is_flag=True, default=True)
-def build_cli(cube_uri: str, experiment_uri: str, measurement_name: str, layer: str, validate: bool) -> None:
+@click.option("--resume", is_flag=True, default=False)
+@click.option("--overwrite", is_flag=True, default=False)
+def build_cli(
+    cube_uri: str, experiment_uri: str, measurement_name: str, layer: str, validate: bool, resume: bool, overwrite: bool
+) -> None:
+    if resume and overwrite:
+        raise ValueError("Cannot specify both --resume and --overwrite")
+
+    if tiledb.array_exists(cube_uri):
+        if resume:
+            logging.info(f"Resuming from existing estimators cube at {cube_uri}.")
+        elif overwrite:
+            logging.info(f"Overwriting existing estimators cube at {cube_uri}.")
+            shutil.rmtree(cube_uri)
+        else:
+            logging.error(
+                "Estimators cube already exists and neither --resume or --overwrite options specified. Exiting."
+            )
+            exit(1)
+
     build(cube_uri, experiment_uri, measurement_name, layer, validate)
 
 
