@@ -16,6 +16,7 @@ from typing import (
 
 import anndata
 import attrs
+import numba
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -32,16 +33,16 @@ from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
-    CENSUS_OBS_TERM_COLUMNS,
+    CENSUS_OBS_TABLE_SPEC,
     CENSUS_VAR_PLATFORM_CONFIG,
-    CENSUS_VAR_TERM_COLUMNS,
-    CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR,
+    CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
     CXG_OBS_TERM_COLUMNS,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
+    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .mp import (
@@ -160,26 +161,8 @@ class ExperimentBuilder:
         # create `ms`
         ms = self.experiment.add_new_collection("ms")
 
-        # create `obs`
-        obs_schema = pa.schema(list(CENSUS_OBS_TERM_COLUMNS.items()))
-        self.experiment.add_new_dataframe(
-            "obs",
-            schema=obs_schema,
-            index_column_names=["soma_joinid"],
-            platform_config=CENSUS_OBS_PLATFORM_CONFIG,
-        )
-
         # make measurement and add to ms collection
-        rna_measurement = ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
-
-        # create `var` in the measurement
-        var_schema = pa.schema(list(CENSUS_VAR_TERM_COLUMNS.items()))
-        rna_measurement.add_new_dataframe(
-            "var",
-            schema=var_schema,
-            index_column_names=["soma_joinid"],
-            platform_config=CENSUS_VAR_PLATFORM_CONFIG,
-        )
+        ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
     def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
         anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
@@ -205,19 +188,19 @@ class ExperimentBuilder:
         add_tissue_mapping(obs_df, dataset.dataset_id)
 
         # add any other computed columns
-        for key in CENSUS_OBS_TERM_COLUMNS:
+        for key in CENSUS_OBS_TABLE_SPEC.field_names():
             if key not in obs_df:
                 obs_df[key] = np.full(
                     (len(obs_df),),
                     np.nan,
-                    dtype=CENSUS_OBS_TERM_COLUMNS[key].to_pandas_dtype(),
+                    dtype=CENSUS_OBS_TABLE_SPEC.field(key).to_pandas_dtype(ignore_dict_type=True),
                 )
 
         # Accumulate aggregation counts
         self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
 
         # drop columns we don't want to write (e.g., organism)
-        obs_df = obs_df[list(CENSUS_OBS_TERM_COLUMNS)]
+        obs_df = obs_df[list(CENSUS_OBS_TABLE_SPEC.field_names())]
 
         # accumulate obs
         self.obs_df_accumulation.append(obs_df)
@@ -228,9 +211,11 @@ class ExperimentBuilder:
         # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
         # but may need to evolve this logic if that assumption is not scalable.
         tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name", "feature_length"]]
-        for key in CENSUS_VAR_TERM_COLUMNS:
+        for key in CENSUS_VAR_TABLE_SPEC.field_names():
             if key not in tv:
-                tv[key] = np.full((len(tv),), 0, dtype=CENSUS_VAR_TERM_COLUMNS[key].to_pandas_dtype())
+                tv[key] = np.full(
+                    (len(tv),), 0, dtype=CENSUS_VAR_TABLE_SPEC.field(key).to_pandas_dtype(ignore_dict_type=True)
+                )
         self.var_df = (
             pd.concat([self.var_df, tv], ignore_index=True).drop_duplicates() if self.var_df is not None else tv
         )
@@ -254,34 +239,56 @@ class ExperimentBuilder:
 
     def write_obs_dataframe(self) -> None:
         logging.info(f"{self.name}: writing obs dataframe")
+        assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
-        if self.obs_df is None or len(self.obs_df) == 0:
+        obs_df = CENSUS_OBS_TABLE_SPEC.recategoricalize(self.obs_df)
+        obs_schema = CENSUS_OBS_TABLE_SPEC.to_arrow_schema(obs_df)
+
+        # create `obs`
+        self.experiment.add_new_dataframe(
+            "obs",
+            schema=obs_schema,
+            index_column_names=["soma_joinid"],
+            platform_config=CENSUS_OBS_PLATFORM_CONFIG,
+        )
+
+        if obs_df is None or obs_df.empty:
             logging.info(f"{self.name}: empty obs dataframe")
         else:
-            logging.debug(f"experiment {self.name} obs = {self.obs_df.shape}")
-            assert not np.isnan(self.obs_df.nnz.to_numpy()).any()  # sanity check
+            logging.debug(f"experiment {self.name} obs = {obs_df.shape}")
+            assert not np.isnan(obs_df.nnz.to_numpy()).any()  # sanity check
             pa_table = pa.Table.from_pandas(
-                self.obs_df,
-                preserve_index=False,
-                columns=list(CENSUS_OBS_TERM_COLUMNS),
+                obs_df, preserve_index=False, columns=list(CENSUS_OBS_TABLE_SPEC.field_names())
             )
-            self.experiment.obs.write(pa_table)  # type:ignore
+            self.experiment.obs.write(pa_table)
 
     def write_var_dataframe(self) -> None:
         logging.info(f"{self.name}: writing var dataframe")
+        assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
-        if self.var_df is None or len(self.var_df) == 0:
+        rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]
+
+        var_df = CENSUS_VAR_TABLE_SPEC.recategoricalize(self.var_df)
+        var_schema = CENSUS_VAR_TABLE_SPEC.to_arrow_schema(var_df)
+
+        # create `var` in the measurement
+        rna_measurement.add_new_dataframe(
+            "var",
+            schema=var_schema,
+            index_column_names=["soma_joinid"],
+            platform_config=CENSUS_VAR_PLATFORM_CONFIG,
+        )
+
+        if var_df is None or var_df.empty:
             logging.info(f"{self.name}: empty var dataframe")
         else:
-            logging.debug(f"experiment {self.name} var = {self.var_df.shape}")
+            logging.debug(f"experiment {self.name} var = {var_df.shape}")
             pa_table = pa.Table.from_pandas(
-                self.var_df,
-                preserve_index=False,
-                columns=list(CENSUS_VAR_TERM_COLUMNS),
+                var_df, preserve_index=False, columns=list(CENSUS_VAR_TABLE_SPEC.field_names())
             )
-            self.experiment.ms["RNA"].var.write(pa_table)  # type:ignore
+            rna_measurement.var.write(pa_table)
 
     def populate_var_axis(self) -> None:
         logging.info(f"{self.name}: populate var axis")
@@ -345,7 +352,7 @@ class ExperimentBuilder:
             assert pm.count_nonzero() == pm.nnz
             assert pm.dtype == bool
 
-            fdpm = self.experiment.ms["RNA"].add_new_sparse_ndarray(  # type:ignore
+            fdpm = self.experiment.ms[MEASUREMENT_RNA_NAME].add_new_sparse_ndarray(  # type:ignore
                 FEATURE_DATASET_PRESENCE_MATRIX_NAME,
                 type=pa.bool_(),
                 shape=(max_dataset_joinid + 1, self.n_var),
@@ -361,8 +368,9 @@ class ExperimentBuilder:
             return
 
         logging.info(f"Write X normalized: {self.name} - starting")
-        # grab the previously calculated sum of the X['raw'] layer
-        raw_sum = self.obs_df.raw_sum.to_numpy()
+        is_smart_seq = np.isin(self.obs_df.assay_ontology_term_id.to_numpy(), SMART_SEQ)
+        assert self.var_df is not None
+        feature_length = self.var_df.feature_length.to_numpy()
 
         if args.config.multi_process:
             STRIDE = 1_000_000  # controls TileDB fragment size, which impacts consolidation time
@@ -371,7 +379,9 @@ class ExperimentBuilder:
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
-                    pe.submit(_write_X_normalized, (self.experiment.uri, start_id, STRIDE, raw_sum))
+                    pe.submit(
+                        _write_X_normalized, (self.experiment.uri, start_id, STRIDE, feature_length, is_smart_seq)
+                    )
                     for start_id in range(0, self.n_obs, STRIDE)
                 ]
                 for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
@@ -382,7 +392,7 @@ class ExperimentBuilder:
                     log_process_resource_status()
 
         else:
-            _write_X_normalized((self.experiment.uri, 0, self.n_obs, raw_sum))
+            _write_X_normalized((self.experiment.uri, 0, self.n_obs, feature_length, is_smart_seq))
 
         logging.info(f"Write X normalized: {self.name} - finished")
         log_process_resource_status()
@@ -731,30 +741,16 @@ def reopen_experiment_builders(
             yield eb
 
 
-def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> None:
+def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.NDArray[np.bool_]]) -> None:
     """
     Helper for ExperimentBuilder.write_X_normalized.
 
     Read indicated rows from X['raw'], write to X['normalized']
     """
-    experiment_uri, obs_joinid_start, n, raw_sum = args
+    experiment_uri, obs_joinid_start, n, feature_length, is_smart_seq = args
     logging.info(f"Write X normalized - starting block {obs_joinid_start}")
 
-    """
-    Adjust normlized layer to never encode zero-valued cells where the raw count
-    value is greater than zero. In our current schema configuration, FloatScaleFilter
-    reduces the precision of each value, storing ``round((raw_float - offset) / factor)``
-    as a four byte int.
-
-    To ensure non-zero raw values, which would _normally_ scale to zero under
-    these conditions, we add the smallest possible sigma to each value (note that
-    zero valued coordinates are not stored, as this is a sparse array).
-
-    Reducing the above transformation, and assuming float32 values, the smallest sigma is
-    1/2 of the scale factor (bits of precision). Accounting for IEEE float precision,
-    this reduces to:
-    """
-    sigma = 0.5 * (CENSUS_X_LAYER_NORMALIZED_FLOAT_SCALE_FACTOR + np.finfo(np.float32).epsneg)
+    sigma = np.finfo(np.float32).smallest_subnormal
 
     with soma.open(
         urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
@@ -766,27 +762,88 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.float32]]) -> 
         ) as X_normalized:
             with create_thread_pool_executor(max_workers=8) as pool:
                 lazy_reader = EagerIterator(
-                    X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),)).tables(),
-                    pool=pool,
-                )
-                lazy_divider = EagerIterator(
                     (
-                        (
-                            X_tbl["soma_dim_0"],
-                            X_tbl["soma_dim_1"],
-                            X_tbl["soma_data"].to_numpy() / raw_sum[X_tbl["soma_dim_0"]] + sigma,
+                        (tbl, obs_indices.to_numpy())
+                        for tbl, (obs_indices, _) in X_raw.read(
+                            coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),)
                         )
-                        for X_tbl in lazy_reader
+                        .blockwise(axis=0, reindex_disable_on_axis=[1])
+                        .tables()
                     ),
                     pool=pool,
                 )
-                for soma_dim_0, soma_dim_1, soma_data in lazy_divider:
-                    assert np.all(soma_data > 0.0), "Found unexpected zero value in raw layer data"
+
+                def _norm_it(
+                    tbl: pa.Table, obs_indices: npt.NDArray[np.int64]
+                ) -> Tuple[
+                    npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float32], npt.NDArray[np.int64]
+                ]:
+                    d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
+                    d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
+                    data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
+                    data = _normalize(d0, d1, data, is_smart_seq[obs_indices], feature_length)
+                    data = _roundHalfToEven(data, keepbits=15)
+                    data[data == 0] = sigma
+                    return d0, d1, data, obs_indices
+
+                lazy_norm_reader = EagerIterator(
+                    (_norm_it(tbl, obs_indices) for tbl, obs_indices in lazy_reader), pool=pool
+                )
+
+                for d0, d1, data, obs_indices in lazy_norm_reader:
                     X_normalized.write(
-                        pa.Table.from_arrays(
-                            [soma_dim_0, soma_dim_1, soma_data],
-                            names=["soma_dim_0", "soma_dim_1", "soma_data"],
+                        pa.Table.from_pydict(
+                            {
+                                "soma_dim_0": obs_indices[d0],
+                                "soma_dim_1": d1,
+                                "soma_data": data,
+                            }
                         )
                     )
 
     logging.info(f"Write X normalized - finished block {obs_joinid_start}")
+
+
+@numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _normalize(
+    d0: npt.NDArray[np.int64],
+    d1: npt.NDArray[np.int64],
+    data: npt.NDArray[np.float32],
+    is_smart_seq: npt.NDArray[np.bool_],
+    feature_length: npt.NDArray[np.float32],
+) -> npt.NDArray[np.float32]:
+    # normalize and sum COO data along rows (assertion: will have full rows (along axis 0))
+    norm_data = np.where(is_smart_seq[d0], data / feature_length[d1], data)
+    row_sum = np.zeros((d0.max() + 1,), dtype=np.float64)
+    for i in range(len(d0)):
+        row_sum[d0[i]] += norm_data[i]
+
+    result = np.empty_like(data)
+    for i in range(len(d0)):
+        result[i] = norm_data[i] / row_sum[d0[i]]
+
+    return result
+
+
+@numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np.float32]:
+    """
+    Generate reduced precision floating point array, with round half to even.
+    IMPORANT: In-place operation.
+
+    Ref: https://gmd.copernicus.org/articles/14/377/2021/gmd-14-377-2021.html
+    """
+    assert a.dtype is np.dtype(np.float32)  # code below assumes IEEE 754 float32
+    nmant = 23
+    bits = 32
+    if keepbits < 1 or keepbits >= nmant:
+        return a
+    maskbits = nmant - keepbits
+    full_mask = (1 << bits) - 1
+    mask = (full_mask >> maskbits) << maskbits
+    half_quantum1 = (1 << (maskbits - 1)) - 1
+
+    b = a.view(np.int32)
+    b += ((b >> maskbits) & 1) + half_quantum1
+    b &= mask
+    return a
