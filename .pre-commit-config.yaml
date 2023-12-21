@@ -47,7 +47,7 @@ repos:
       - id: mypy
         name: mypy-tools-cellxgene_census_builder
         files: ^tools/cellxgene_census_builder
-        args: ["--config-file=./tools/cellxgene_census_builder/pyproject.toml", "--python-version=3.10"]
+        args: ["--config-file=./tools/cellxgene_census_builder/pyproject.toml", "--python-version=3.11"]
         additional_dependencies:
           - attrs
           - types-requests
