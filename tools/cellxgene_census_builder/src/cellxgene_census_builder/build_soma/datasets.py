@@ -6,7 +6,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_DATASETS_COLUMNS, CENSUS_DATASETS_NAME
+from .globals import CENSUS_DATASETS_NAME, CENSUS_DATASETS_TABLE_SPEC
 
 T = TypeVar("T", bound="Dataset")
 
@@ -25,6 +25,7 @@ class Dataset:
 
     # Optional - as reported by REST API
     dataset_title: str = ""  # CELLxGENE dataset title
+    citation: str = ""  # CELLxGENE citation
     collection_id: str = ""  # CELLxGENE collection id
     collection_name: str = ""  # CELLxGENE collection name
     collection_doi: str = ""  # CELLxGENE collection doi
@@ -69,14 +70,14 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     """
     logging.info("Creating dataset_manifest")
     manifest_df = Dataset.to_dataframe(datasets)
-    manifest_df = manifest_df[CENSUS_DATASETS_COLUMNS + ["soma_joinid"]]
+    manifest_df = manifest_df[list(CENSUS_DATASETS_TABLE_SPEC.field_names())]
     if len(manifest_df) == 0:
         return
 
+    schema = CENSUS_DATASETS_TABLE_SPEC.to_arrow_schema(manifest_df)
+
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(
-        CENSUS_DATASETS_NAME,
-        schema=pa.Schema.from_pandas(manifest_df, preserve_index=False),
-        index_column_names=["soma_joinid"],
+        CENSUS_DATASETS_NAME, schema=schema, index_column_names=["soma_joinid"]
     ) as manifest:
         manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False))

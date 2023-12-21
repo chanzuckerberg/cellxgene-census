@@ -42,7 +42,7 @@ def open_anndata(
         # These are schema versions this code is known to work with. This is a
         # sanity check, which would be better implemented via a unit test at
         # some point in the future.
-        assert CXG_SCHEMA_VERSION in ["3.1.0", "3.0.0"]
+        assert CXG_SCHEMA_VERSION in ["4.0.0"]
 
         if h5ad.schema_version == "":
             h5ad.schema_version = get_cellxgene_schema_version(ad)
@@ -80,6 +80,7 @@ def open_anndata(
                 # TODO - these should be looked up in the ontology
                 raw_var["feature_name"] = "unknown"
                 raw_var["feature_reference"] = "unknown"
+                raw_var["feature_length"] = 0
                 var = pd.concat([ad.var, raw_var])
             else:
                 var = ad.raw.var
@@ -96,7 +97,7 @@ def open_anndata(
             not isinstance(X, (sparse.csr_matrix, sparse.csc_matrix)) or X.has_canonical_format
         ), f"Found H5AD with non-canonical X matrix in {path}"
 
-        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns, dtype=np.float32)
+        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns)
         assert not need_X or ad.X.shape == (len(ad.obs), len(ad.var))
 
         # TODO: In principle, we could look up missing feature_name, but for now, just assert they exist
@@ -154,7 +155,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         assert ad.raw is None
 
         # This discards all other ancillary state, eg, obsm/varm/....
-        ad = anndata.AnnData(X=X, obs=obs, var=var, dtype=np.float32)
+        ad = anndata.AnnData(X=X, obs=obs, var=var)
 
         assert (
             X is None or isinstance(X, np.ndarray) or X.has_canonical_format

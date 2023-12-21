@@ -28,21 +28,22 @@ from .experiment_builder import ExperimentSpecification
 from .experiment_specs import make_experiment_specs
 from .globals import (
     CENSUS_DATA_NAME,
-    CENSUS_DATASETS_COLUMNS,
     CENSUS_DATASETS_NAME,
+    CENSUS_DATASETS_TABLE_SPEC,
     CENSUS_INFO_NAME,
     CENSUS_OBS_STATS_COLUMNS,
-    CENSUS_OBS_TERM_COLUMNS,
+    CENSUS_OBS_TABLE_SPEC,
     CENSUS_SCHEMA_VERSION,
-    CENSUS_SUMMARY_CELL_COUNTS_COLUMNS,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
+    CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC,
     CENSUS_SUMMARY_NAME,
-    CENSUS_VAR_TERM_COLUMNS,
+    CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
+    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .mp import (
@@ -103,9 +104,9 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
             assert name in census_info, f"`{name}` missing from census_info"
             assert soma.DataFrame.exists(census_info[name].uri)
 
-        assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_COLUMNS + ["soma_joinid"])
+        assert sorted(census_info[CENSUS_DATASETS_NAME].keys()) == sorted(CENSUS_DATASETS_TABLE_SPEC.field_names())
         assert sorted(census_info[CENSUS_SUMMARY_CELL_COUNTS_NAME].keys()) == sorted(
-            list(CENSUS_SUMMARY_CELL_COUNTS_COLUMNS) + ["soma_joinid"]
+            CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC.field_names()
         )
         assert sorted(census_info[CENSUS_SUMMARY_NAME].keys()) == sorted(["label", "value", "soma_joinid"])
 
@@ -173,7 +174,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
             ad = anndata_cell_filter(unfiltered_ad, need_X=False)
             dataset_obs = (
                 se.obs.read(
-                    column_names=list(CENSUS_OBS_TERM_COLUMNS),
+                    column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
                     value_filter=f"dataset_id == '{dataset_id}'",
                 )
                 .concat()
@@ -190,6 +191,12 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
                 .drop(columns=["soma_joinid"])
                 .reset_index(drop=True)
             )
+
+            # decategorize census obs slice, as it will not have the same categories as H5AD obs,
+            # preventing Pandas from performing the DataFrame equivalence operation.
+            for key in dataset_obs:
+                if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
+                    dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
 
             assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
             if ad.n_obs > 0:
@@ -223,17 +230,19 @@ def validate_axis_dataframes(
         census_data = census[CENSUS_DATA_NAME]
 
         # check schema
-        expected_obs_columns = CENSUS_OBS_TERM_COLUMNS
-        expected_var_columns = CENSUS_VAR_TERM_COLUMNS
         for eb in experiment_specifications:
             obs = census_data[eb.name].obs
             var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
-            assert sorted(obs.keys()) == sorted(expected_obs_columns.keys())
-            assert sorted(var.keys()) == sorted(expected_var_columns.keys())
+            assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
+            assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
             for field in obs.schema:
-                assert field.type == expected_obs_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
+                assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
+                    field.type
+                ), f"Unexpected type in {field.name}: {field.type}"
             for field in var.schema:
-                assert field.type == expected_var_columns[field.name], f"Unexpected type in {field.name}: {field.type}"
+                assert CENSUS_VAR_TABLE_SPEC.field(field.name).is_type_equivalent(
+                    field.type
+                ), f"Unexpected type in {field.name}: {field.type}"
 
     # check shapes & perform weak test of contents
     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
@@ -429,7 +438,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                 raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
                 np.add.at(raw_sum, rows_by_position, X_raw_data)
                 raw_sum = raw_sum.astype(
-                    CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()
+                    CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
                 )  # back to the storage type
                 assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
 
@@ -534,17 +543,30 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
         X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
         assert X_raw.shape == X_norm.shape
 
+        is_smart_seq = np.isin(
+            exp.obs.read(column_names=["assay_ontology_term_id"])
+            .concat()
+            .to_pandas()
+            .assay_ontology_term_id.to_numpy(),
+            SMART_SEQ,
+        )
+
         var_df = (
             exp.ms[MEASUREMENT_RNA_NAME]
-            .var.read(column_names=["soma_joinid"])
+            .var.read(column_names=["soma_joinid", "feature_length"])
             .concat()
             .to_pandas()
             .set_index("soma_joinid")
         )
         n_cols = len(var_df)
+        feature_length = var_df.feature_length.to_numpy()
+        assert (feature_length > 0).any()
         assert X_raw.shape[1] == n_cols
 
-        ROW_SLICE_SIZE = 100_000
+        ROW_SLICE_SIZE = 20_000
+        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (
+            2**31 - 1
+        )  # else, will fail in scipy due to int32 overflow during coordinate broadcasting
         for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
             raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
             norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
@@ -564,11 +586,16 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             norm_csr = sparse.coo_matrix((norm["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
             raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
 
+            sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
+            if sseq_mask.any():
+                # this is a very costly operation - do it only when necessary
+                raw_csr[sseq_mask, :] /= feature_length
+
             assert np.allclose(
-                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-1, atol=1e-1
+                norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
             ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
             assert np.allclose(
-                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).data, rtol=1e-2, atol=1e-2
+                norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
             ), f"{experiment_specification.name}: normalized layer does not match raw contents"
             gc.collect()
 
@@ -627,7 +654,7 @@ def validate_X_layers(
             futures = (
                 [
                     ppe.submit(
-                        1_000_000 * mem_budget_factor,
+                        250_000 * mem_budget_factor,
                         _validate_Xnorm_layer,
                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
                     )
@@ -827,6 +854,79 @@ def validate_internal_consistency(
     return True
 
 
+def validate_soma_bounding_box(
+    soma_path: str, experiment_specifications: List[ExperimentSpecification], eb_info: Dict[str, EbInfo]
+) -> bool:
+    """
+    Verify that single-cell-data/TileDB-SOMA#1969 is not affecting our results.
+
+    IMPORTANT: it is _known_ to affect at least one array, which is removed from
+    the assertions below until the bug is fixed.
+    """
+
+    def get_sparse_arrays(C: soma.Collection) -> List[soma.SparseNDArray]:
+        uris = []
+        for soma_obj in C.values():
+            type = soma_obj.soma_type
+            if type == "SOMASparseNDArray":
+                uris.append(soma_obj.uri)
+            elif type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
+                uris += get_sparse_arrays(soma_obj)
+        return uris
+
+    def bounding_box(SA: soma.SparseNDArray) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+        m = SA.metadata
+        return (
+            (m["soma_dim_0_domain_lower"], m["soma_dim_0_domain_upper"]),
+            (m["soma_dim_1_domain_lower"], m["soma_dim_1_domain_upper"]),
+        )
+
+    # first, confirm we set shape correctly, as the code uses it as the max bounnding box
+    for eb in experiment_specifications:
+        with open_experiment(soma_path, eb) as exp:
+            n_obs = eb_info[eb.name].n_obs
+            n_vars = eb_info[eb.name].n_vars
+            if "raw" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape[0] == n_obs
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape[1] == n_vars
+            if "normalized" in exp.ms[MEASUREMENT_RNA_NAME].X:
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape[0] == n_obs
+                assert exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape[1] == n_vars
+            if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:
+                assert exp.ms[MEASUREMENT_RNA_NAME]["feature_dataset_presence_matrix"].shape[1] == n_vars
+
+    # now check that the bounding boxes are in between nonempty-domain and shape. Unfortunately,
+    # SOMA is ambiguous about which is correct, and the result depends on the data path. More
+    # info on this at single-cell-data/TileDB-SOMA#1971
+    with soma.open(soma_path) as C:
+        sparse_array_uris = get_sparse_arrays(C)
+
+    KNOWN_TO_FAIL_DUE_TO_TILEDBSOMA_1969 = [
+        "census_data/mus_musculus/ms/RNA/X/normalized",
+    ]
+
+    for uri in sparse_array_uris:
+        with tiledb.open(uri) as SA:
+            nonempty_domain = SA.nonempty_domain()
+        with soma.open(uri) as SA:
+            soma_bounding_box = bounding_box(SA)
+            shape_bounding_box = ((0, SA.shape[0] - 1), (0, SA.shape[1] - 1))
+
+        # TEMP WORK AROUND - same test - just warn instead of asserting
+        if not ((nonempty_domain == soma_bounding_box) or (shape_bounding_box == soma_bounding_box)):
+            if any(filter(lambda s: uri.endswith(s), KNOWN_TO_FAIL_DUE_TO_TILEDBSOMA_1969)):
+                logging.error(
+                    f"Bounding box mismatch for {uri}:  {nonempty_domain}, {soma_bounding_box}, {shape_bounding_box}"
+                )
+                continue
+
+        assert (nonempty_domain == soma_bounding_box) or (
+            shape_bounding_box == soma_bounding_box
+        ), f"Bounding box mismatch for {uri}:  {nonempty_domain}, {soma_bounding_box}, {shape_bounding_box}"
+
+    return True
+
+
 def validate(args: CensusBuildArgs) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
@@ -851,5 +951,6 @@ def validate(args: CensusBuildArgs) -> bool:
     assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
     assert validate_consolidation(soma_path)
+    assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
     logging.info("Validation finished (success)")
     return True

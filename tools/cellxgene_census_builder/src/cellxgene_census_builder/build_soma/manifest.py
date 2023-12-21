@@ -85,6 +85,7 @@ def load_manifest_from_CxG() -> List[Dataset]:
             dataset_id=dataset_id,
             dataset_asset_h5ad_uri=asset_h5ad_uri,
             dataset_title=null_to_empty_str(dataset["title"]),
+            citation=dataset["citation"],
             collection_id=dataset["collection_id"],
             collection_name=null_to_empty_str(dataset["collection_name"]),
             collection_doi=null_to_empty_str(dataset["collection_doi"]),
