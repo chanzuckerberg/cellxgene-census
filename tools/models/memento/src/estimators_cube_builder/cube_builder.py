@@ -5,6 +5,7 @@ import logging
 import multiprocessing
 import os
 import shutil
+import warnings
 from concurrent import futures
 from datetime import datetime
 from typing import List, Tuple, cast
@@ -62,6 +63,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logging.captureWarnings(True)
+
+# Suppress warnings from Pandas and NumPy
+warnings.filterwarnings("ignore")
 
 
 # pd.options.display.max_columns = None
@@ -343,13 +347,14 @@ def pass_2_compute_estimators(
             current_time = datetime.now()
             elapsed_time = current_time - start_time
             pct_complete = n_cells_processed / n_total_cells
+            est_total_time = elapsed_time / pct_complete
             logging.info(
                 f"Pass 2: Completed {n_batches_submitted} of {len(batch_futures)} batches, "
                 f"batches={100 * n_batches_submitted / len(batch_futures):0.1f}%, "
                 f"cells={100 * n_cells_processed / n_total_cells:0.1f}%, "
                 f"elapsed={elapsed_time}, "
-                f"est. total time={elapsed_time / pct_complete}, "
-                f"est. remaining time={elapsed_time / (1 - pct_complete) if pct_complete < 1 else 0}"
+                f"est. total time={est_total_time}, "
+                f"est. remaining time={est_total_time - elapsed_time}"
             )
             gc.collect()
 
