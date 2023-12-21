@@ -144,7 +144,7 @@ def dense_gene_data(
 
 
 def compute_all_estimators_for_batch_tdb(
-    soma_dim_0: List[int], obs_df: pd.DataFrame, var_df: pd.DataFrame, X_uri: str, batch: int
+    soma_dim_0: List[int], obs_df: pd.DataFrame, var_df: pd.DataFrame, X_uri: str, batch: int, cube_uri: str
 ) -> pd.DataFrame:
     """Compute estimators for each gene"""
 
@@ -166,6 +166,8 @@ def compute_all_estimators_for_batch_tdb(
         logging.info(f"Pass 2: End X batch {batch}, cells={len(soma_dim_0)}, nnz={len(X_df)}")
 
         assert all(result.index.value_counts() <= 1), "tiledb batch has repeated cube rows"
+
+    write_estimators_batch(result, obs_df, cube_uri)
 
     gc.collect()
 
@@ -274,7 +276,7 @@ def pass_2_compute_estimators(
             nonlocal n
             n += 1
             batch_result = compute_all_estimators_for_batch_tdb(
-                soma_dim_0_batch, obs_df, var_df, query.experiment.ms[measurement_name].X[layer].uri, n
+                soma_dim_0_batch, obs_df, var_df, query.experiment.ms[measurement_name].X[layer].uri, n, cube_uri
             )
             if len(batch_result) > 0:
                 batch_result = batch_result.reset_index(CUBE_LOGICAL_DIMS_OBS)
@@ -326,6 +328,7 @@ def pass_2_compute_estimators(
                     var_df,
                     X_uri,
                     n,
+                    cube_uri,
                 )
             )
 
@@ -351,30 +354,30 @@ def pass_2_compute_estimators(
 
         n_cum_cells = 0
         for n, future in enumerate(futures.as_completed(batch_futures), start=1):
-            batch_result = future.result()
-            # TODO: move writing of tiledb array to compute_all_estimators_for_batch_tdb; no need to return result
-            if len(batch_result) > 0:
-                batch_result = batch_result.reset_index(CUBE_LOGICAL_DIMS_OBS)
-
-                # NOTE: The Pandas categorical columns must have the same underlying dictionaries as the TileDB Array
-                #  schema's enumeration columns
-                for col_ in CUBE_LOGICAL_DIMS_OBS:
-                    # TODO: DRY up category values generation with build_cube_schema (they must be equivalent)
-                    batch_result[col_] = pd.Categorical(
-                        batch_result[col_], categories=obs_df[col_].unique().astype(str)
-                    )
-
-                logging.info("Pass 2: Writing to estimator cube.")
-                tiledb.from_pandas(cube_uri, batch_result, mode="append")
-
-            else:
-                logging.warning("Pass 2: Batch had empty result")
+            future.result()
             logging.info(
                 f"Pass 2: Completed {n} of {len(batch_futures)} batches ({100 * n / len(batch_futures):0.1f}%)"
             )
             gc.collect()
 
         logging.info("Pass 2: Completed")
+
+
+def write_estimators_batch(batch_result: pd.DataFrame, obs_df: pd.DataFrame, cube_uri: str) -> None:
+    if len(batch_result) > 0:
+        batch_result = batch_result.reset_index(CUBE_LOGICAL_DIMS_OBS)
+
+        # TODO: Can remove once https://github.com/TileDB-Inc/TileDB-Py/issues/1879 fix is available
+        # Ensure Pandas categorical columns must have the same underlying dictionaries as the TileDB Array
+        #  schema's enumeration columns
+        for col_ in CUBE_LOGICAL_DIMS_OBS:
+            batch_result[col_] = pd.Categorical(batch_result[col_], categories=obs_df[col_].unique().astype(str))
+
+        logging.info("Pass 2: Writing to estimator cube.")
+        tiledb.from_pandas(cube_uri, batch_result, mode="append")
+
+    else:
+        logging.warning("Pass 2: Batch had empty result")
 
 
 def build(
