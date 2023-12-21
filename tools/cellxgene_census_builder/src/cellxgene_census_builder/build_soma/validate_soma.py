@@ -901,8 +901,13 @@ def validate_soma_bounding_box(
     with soma.open(soma_path) as C:
         sparse_array_uris = get_sparse_arrays(C)
 
+    # This list will WARN, not ASSERT. Which is the best we can do until the core issue is resolved,
+    # or we monkeypatch the end array. TBD which is best, so warn for now.
     KNOWN_TO_FAIL_DUE_TO_TILEDBSOMA_1969 = [
         "census_data/mus_musculus/ms/RNA/X/normalized",
+        "census_data/homo_sapiens/ms/RNA/X/normalized",
+        "census_data/mus_musculus/ms/RNA/X/raw",
+        "census_data/homo_sapiens/ms/RNA/X/raw",
     ]
 
     for uri in sparse_array_uris:
