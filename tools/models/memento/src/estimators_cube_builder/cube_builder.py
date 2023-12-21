@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import shutil
 from concurrent import futures
+from datetime import datetime
 from typing import List, Tuple, cast
 
 import click
@@ -145,7 +146,7 @@ def dense_gene_data(
 
 def compute_all_estimators_for_batch_tdb(
     soma_dim_0: List[int], obs_df: pd.DataFrame, var_df: pd.DataFrame, X_uri: str, batch: int, cube_uri: str
-) -> pd.DataFrame:
+) -> int:
     """Compute estimators for each gene"""
 
     with soma.SparseNDArray.open(
@@ -171,7 +172,7 @@ def compute_all_estimators_for_batch_tdb(
 
     gc.collect()
 
-    return result
+    return len(soma_dim_0)
 
 
 def compute_all_estimators_for_batch_pd(X_df: pd.DataFrame, obs_df: pd.DataFrame, var_df: pd.DataFrame) -> pd.DataFrame:
@@ -246,7 +247,7 @@ def pass_2_compute_estimators(
 
     soma_dim_0_batch: List[int] = []
     batch_futures = []
-    n = n_cum_cells = 0
+    n_batches_submitted = n_cells_submitted = 0
 
     executor = create_resource_pool_executor(max_workers=MAX_WORKERS, max_resources=MAX_CELLS)
 
@@ -260,23 +261,16 @@ def pass_2_compute_estimators(
         import cProfile
 
         def process_batch() -> None:
-            nonlocal n
-            n += 1
-            batch_result = compute_all_estimators_for_batch_tdb(
-                soma_dim_0_batch, obs_df, var_df, query.experiment.ms[measurement_name].X[layer].uri, n, cube_uri
+            nonlocal n_batches_submitted
+            n_batches_submitted += 1
+            compute_all_estimators_for_batch_tdb(
+                soma_dim_0_batch,
+                obs_df,
+                var_df,
+                query.experiment.ms[measurement_name].X[layer].uri,
+                n_batches_submitted,
+                cube_uri,
             )
-            if len(batch_result) > 0:
-                batch_result = batch_result.reset_index(CUBE_LOGICAL_DIMS_OBS)
-
-                # NOTE: The Pandas categorical columns must have the same underlying dictionaries as the TileDB Array
-                #  schema's enumeration columns
-                for col_ in CUBE_LOGICAL_DIMS_OBS:
-                    # TODO: DRY up category values generation with build_cube_schema (they must be equivalent)
-                    batch_result[col_] = pd.Categorical(
-                        batch_result[col_], categories=obs_df[col_].unique().astype(str)
-                    )
-
-                tiledb.from_pandas(cube_uri, batch_result, mode="append")
 
         with cProfile.Profile() as pr:
             for soma_dim_0_ids in cube_obs_coord_groups.values():
@@ -295,15 +289,15 @@ def pass_2_compute_estimators(
     else:  # use multiprocessing
 
         def submit_batch(soma_dim_0_batch_: List[int]) -> None:
-            nonlocal n, n_cum_cells
-            n += 1
-            n_cum_cells += len(soma_dim_0_batch_)
+            nonlocal n_batches_submitted, n_cells_submitted
+            n_batches_submitted += 1
+            n_cells_submitted += len(soma_dim_0_batch_)
 
             X_uri = query.experiment.ms[measurement_name].X[layer].uri
 
             logging.info(
-                f"Pass 2: Submitting cells batch {n}, cells={len(soma_dim_0_batch_)}, "
-                f"{100 * n_cum_cells / n_total_cells:0.1f}%"
+                f"Pass 2: Submitting cells batch {n_batches_submitted}, cells={len(soma_dim_0_batch_)}, "
+                f"{100 * n_cells_submitted / n_total_cells:0.1f}%"
             )
 
             batch_futures.append(
@@ -314,10 +308,12 @@ def pass_2_compute_estimators(
                     obs_df,
                     var_df,
                     X_uri,
-                    n,
+                    n_batches_submitted,
                     cube_uri,
                 )
             )
+
+        start_time = datetime.now()
 
         for group_key, soma_dim_0_ids in cube_obs_coord_groups.items():
             if existing_groups is None or group_key not in existing_groups.index:
@@ -339,11 +335,21 @@ def pass_2_compute_estimators(
 
         # Accumulate results
 
-        n_cum_cells = 0
-        for n, future in enumerate(futures.as_completed(batch_futures), start=1):
-            future.result()
+        n_cells_processed = 0
+        for n_batches_submitted, future in enumerate(futures.as_completed(batch_futures), start=1):
+            n = future.result()
+            n_cells_processed += n
+
+            current_time = datetime.now()
+            elapsed_time = current_time - start_time
+            pct_complete = n_cells_processed / n_total_cells
             logging.info(
-                f"Pass 2: Completed {n} of {len(batch_futures)} batches ({100 * n / len(batch_futures):0.1f}%)"
+                f"Pass 2: Completed {n_batches_submitted} of {len(batch_futures)} batches, "
+                f"batches={100 * n_batches_submitted / len(batch_futures):0.1f}%, "
+                f"cells={100 * n_cells_processed / n_total_cells:0.1f}%, "
+                f"elapsed={elapsed_time}, "
+                f"est. total time={elapsed_time / pct_complete}, "
+                f"est. remaining time={elapsed_time / (1 - pct_complete) if pct_complete < 1 else 0}"
             )
             gc.collect()
 
