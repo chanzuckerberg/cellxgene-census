@@ -50,11 +50,13 @@ class FieldSpec:
         where strings and other Arrow non-primitives are stored as objects, allow a
         pa.null DataType to be equivalent to Arrow non-primitive.
         """
-        if pa.types.is_dictionary(other_type) and self.is_dictionary:
-            self.is_type_equivalent(
-                other_type.value_type, null_non_primitive_equivalence=null_non_primitive_equivalence
-            )
-            return True
+        if self.is_dictionary:
+            if pa.types.is_dictionary(other_type):
+                return FieldSpec(name=self.name, type=self.type, is_dictionary=False).is_type_equivalent(
+                    other_type.value_type, null_non_primitive_equivalence=null_non_primitive_equivalence
+                )
+            else:
+                return False
 
         if self.type == other_type:
             return True
@@ -119,7 +121,7 @@ class TableSpec:
 
         return TableSpec(fields=u, use_arrow_dictionaries=use_arrow_dictionary)
 
-    def to_arrow_schema(self, df: Optional[pd.DataFrame]) -> pa.Schema:
+    def to_arrow_schema(self, df: Optional[pd.DataFrame] = None) -> pa.Schema:
         """
         Returns Arrow schema for a Table.
 
