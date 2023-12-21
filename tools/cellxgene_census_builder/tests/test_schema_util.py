@@ -1,13 +1,11 @@
-import pytest
-
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-
+import pytest
 from cellxgene_census_builder.build_soma.schema_util import FieldSpec, TableSpec
 
 
-def test_create_spec():
+def test_create_spec() -> None:
     fields = [
         ("soma_joinid", pa.int64()),
         ("a", pa.string()),
@@ -37,7 +35,7 @@ def test_create_spec():
     assert not ts.use_arrow_dictionaries
 
 
-def test_dict_feature_flag():
+def test_dict_feature_flag() -> None:
     fields = [
         FieldSpec(name="a", type=pa.string(), is_dictionary=True),
         FieldSpec(name="b", type=pa.large_string(), is_dictionary=True),
@@ -52,7 +50,7 @@ def test_dict_feature_flag():
     assert all(pa.types.is_dictionary(schema.field(fname).type) for fname in schema.names)
 
 
-def test_fieldspec_to_pandas_dtype():
+def test_fieldspec_to_pandas_dtype() -> None:
     assert FieldSpec(name="test", type=pa.int32()).to_pandas_dtype() == np.int32
     assert FieldSpec(name="test", type=pa.string()).to_pandas_dtype() == np.object_
     with pytest.raises(TypeError):
@@ -62,7 +60,7 @@ def test_fieldspec_to_pandas_dtype():
     )
 
 
-def test_fieldspec_is_type_equivalent():
+def test_fieldspec_is_type_equivalent() -> None:
     # primitives
     assert FieldSpec(name="test", type=pa.int32()).is_type_equivalent(pa.int32())
     assert not FieldSpec(name="test", type=pa.int8()).is_type_equivalent(pa.int32())
@@ -108,7 +106,7 @@ def test_fieldspec_is_type_equivalent():
     FieldSpec(name="test", type=pa.string())._check_type_compat(pa.null(), True)
 
 
-def test_tablespec_recategoricalize():
+def test_tablespec_recategoricalize() -> None:
     df_nocat = pd.DataFrame({"a": [0, 1, 2], "b": ["a", "b", "c"], "c": [True, False, True]})
     df_cat = pd.DataFrame(
         {"a": df_nocat.a.astype("category"), "b": df_nocat.b.astype("category"), "c": df_nocat.c.astype("category")}
@@ -121,7 +119,7 @@ def test_tablespec_recategoricalize():
             FieldSpec(name="b", type=pa.string(), is_dictionary=False),
             FieldSpec(name="c", type=pa.bool_(), is_dictionary=False),
         ],
-        use_arrow_dictionary=False
+        use_arrow_dictionary=False,
     )
     assert df_nocat.equals(ts.recategoricalize(df_nocat))
     assert df_nocat.equals(ts.recategoricalize(df_cat))
