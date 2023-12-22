@@ -2,7 +2,7 @@ import os
 import pathlib
 import re
 import time
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import anndata
 import numpy as np
@@ -106,6 +106,56 @@ def test_open_soma_with_customized_default_soma_context(latest_locator: CensusLo
         # Verify that the user-overridden config settings are set correctly in the TileDB context object.
         assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
+
+
+def test_open_soma_uri_with_custom_s3_region() -> None:
+    with patch("cellxgene_census._open.soma.open") as m:
+        cellxgene_census.open_soma(
+            uri="s3://bucket/cell-census/2022-11-01/soma/", tiledb_config={"vfs.s3.region": "region-1"}
+        )
+
+        m.assert_called_once_with(
+            "s3://bucket/cell-census/2022-11-01/soma/", mode="r", soma_type=soma.Collection, context=ANY
+        )
+        assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "region-1"
+
+
+def test_open_soma_census_version_with_custom_s3_region(requests_mock: rm.Mocker) -> None:
+    mock_mirrors = {
+        "default": "test-mirror",
+        "test-mirror": {"provider": "S3", "base_uri": "s3://mirror-bucket/", "region": "mirror-region-1"},
+    }
+    requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
+
+    dir = {
+        "latest": "2022-11-01",
+        "2022-11-01": {
+            "release_date": "2022-11-30",
+            "soma": {
+                "relative_uri": "/cell-census/2022-11-01/soma/",
+            },
+        },
+    }
+    requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
+
+    # Verify that the mirror's S3 region is used, overriding the default (us-west-2)
+    assert get_default_soma_context().tiledb_config["vfs.s3.region"] == "us-west-2", "test pre-condition"
+    with patch("cellxgene_census._open.soma.open") as m:
+        cellxgene_census.open_soma(census_version="latest")
+
+        m.assert_called_once_with(
+            "s3://mirror-bucket/cell-census/2022-11-01/soma/", mode="r", soma_type=soma.Collection, context=ANY
+        )
+        assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "mirror-region-1"
+
+    # Verify that the mirror's S3 region is used, overriding even a user-provided region
+    with patch("cellxgene_census._open.soma.open") as m:
+        cellxgene_census.open_soma(census_version="latest", tiledb_config={"vfs.s3.region": "region-2"})
+
+        m.assert_called_once_with(
+            "s3://mirror-bucket/cell-census/2022-11-01/soma/", mode="r", soma_type=soma.Collection, context=ANY
+        )
+        assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "mirror-region-1"
 
 
 def test_open_soma_invalid_args() -> None:

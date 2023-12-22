@@ -74,7 +74,8 @@ def _open_soma(
     # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
     context = context or get_default_soma_context()
 
-    # If S3 provider is specified, build a default context with a region
+    # A locator's S3 bucket and region are instrinsically coupled, so ensure that the context always uses the
+    # locator's region, even if the passed-in context specifies an alternate S3 region
     if locator["provider"] == "S3":
         context = context.replace(tiledb_config={"vfs.s3.region": locator.get("region")})
 
