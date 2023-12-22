@@ -109,6 +109,8 @@ def test_open_soma_with_customized_default_soma_context(latest_locator: CensusLo
 
 
 def test_open_soma_uri_with_custom_s3_region() -> None:
+    assert get_default_soma_context().tiledb_config["vfs.s3.region"] != "region-1", "test pre-condition"
+
     with patch("cellxgene_census._open.soma.open") as m:
         cellxgene_census.open_soma(
             uri="s3://bucket/cell-census/2022-11-01/soma/", tiledb_config={"vfs.s3.region": "region-1"}
@@ -120,7 +122,9 @@ def test_open_soma_uri_with_custom_s3_region() -> None:
         assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "region-1"
 
 
-def test_open_soma_census_version_with_custom_s3_region(requests_mock: rm.Mocker) -> None:
+def test_open_soma_census_version_always_uses_mirror_s3_region(requests_mock: rm.Mocker) -> None:
+    assert get_default_soma_context().tiledb_config["vfs.s3.region"] != "mirror-region-1", "test pre-condition"
+
     mock_mirrors = {
         "default": "test-mirror",
         "test-mirror": {"provider": "S3", "base_uri": "s3://mirror-bucket/", "region": "mirror-region-1"},
@@ -138,8 +142,7 @@ def test_open_soma_census_version_with_custom_s3_region(requests_mock: rm.Mocker
     }
     requests_mock.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, json=dir)
 
-    # Verify that the mirror's S3 region is used, overriding the default (us-west-2)
-    assert get_default_soma_context().tiledb_config["vfs.s3.region"] == "us-west-2", "test pre-condition"
+    # Verify that the mirror's S3 region is used, overriding the default
     with patch("cellxgene_census._open.soma.open") as m:
         cellxgene_census.open_soma(census_version="latest")
 
