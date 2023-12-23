@@ -90,8 +90,8 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
 
     Args:
         tiledb_config:
-            A dictionary of TileDB configuration parameters.  If specified, the specified parameters will override the
-            defaults.  If not specified, the default configuration will be returned.
+            A dictionary of TileDB configuration parameters. If specified, the parameters will override the
+            defaults. If not specified, the default configuration will be returned.
 
     Returns:
         A ``SOMATileDBContext`` object with sensible defaults.
