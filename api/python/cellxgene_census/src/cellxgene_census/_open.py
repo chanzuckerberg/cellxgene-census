@@ -74,18 +74,24 @@ def _open_soma(
     # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
     context = context or get_default_soma_context()
 
-    # If S3 provider is specified, build a default context with a region
+    # A locator's S3 bucket and region are intrinsically coupled, so ensure that the context always uses the
+    # locator's region, even if the passed-in context specifies an alternate S3 region
     if locator["provider"] == "S3":
         context = context.replace(tiledb_config={"vfs.s3.region": locator.get("region")})
 
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def get_default_soma_context() -> soma.options.SOMATileDBContext:
+def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
     """Return a ``SOMATileDBContext`` with sensible defaults that can be further customized by the user.  The customized
-    context can then be passed to ``open_soma()`` or a ``SOMAObject.open()`` method,
+    context can then be passed to ``open_soma(context=...)`` or a ``SOMAObject.open(context=...)`` method,
     such as ``tiledbsoma.Experiment.open()``.  Use the ``replace()`` method on the returned object to customize its
-    settings.
+    settings further.
+
+    Args:
+        tiledb_config:
+            A dictionary of TileDB configuration parameters. If specified, the parameters will override the
+            defaults. If not specified, the default configuration will be returned.
 
     Returns:
         A ``SOMATileDBContext`` object with sensible defaults.
@@ -97,7 +103,7 @@ def get_default_soma_context() -> soma.options.SOMATileDBContext:
         .. highlight:: python
         .. code-block:: python
 
-            ctx = cellxgene_census.get_default_soma_context().replace(
+            ctx = cellxgene_census.get_default_soma_context(
                 tiledb_config={"py.init_buffer_bytes": 128 * 1024**2,
                                "soma.init_buffer_bytes": 128 * 1024**2})
             c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
@@ -107,7 +113,7 @@ def get_default_soma_context() -> soma.options.SOMATileDBContext:
         .. highlight:: python
         .. code-block:: python
 
-            ctx = cellxgene_census.get_default_soma_context().replace(
+            ctx = cellxgene_census.get_default_soma_context(
                 tiledb_config={"vfs.s3.no_sign_request": "false",
                                "vfs.s3.region": "us-east-1"})
             c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
@@ -116,7 +122,8 @@ def get_default_soma_context() -> soma.options.SOMATileDBContext:
         experimental
     """
 
-    return soma.options.SOMATileDBContext().replace(tiledb_config=DEFAULT_TILEDB_CONFIGURATION)
+    tiledb_config = dict(DEFAULT_TILEDB_CONFIGURATION, **(tiledb_config or {}))
+    return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
 
 
 def open_soma(
@@ -124,6 +131,7 @@ def open_soma(
     census_version: Optional[str] = DEFAULT_CENSUS_VERSION,
     mirror: Optional[str] = None,
     uri: Optional[str] = None,
+    tiledb_config: Optional[Dict[str, Any]] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
     """Open the Census by version or URI.
@@ -137,9 +145,14 @@ def open_soma(
         uri:
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
+        tiledb_config:
+            A dictionary of TileDB configuration parameters that will be used to open the SOMA object.  Optional,
+            defaults to None.  If specified, the parameters will override the default settings specified by
+           ``get_default_soma_context().tiledb_config``.  Only one of the ``tiledb_config and ``context`` params
+            can be specified.
         context:
-            A custom :class:`SOMATileDBContext` which will be used to open the SOMA object.
-            Optional, defaults to None.
+            A custom :class:`SOMATileDBContext` that will be used to open the SOMA object.
+            Optional, defaults to None.  Only one of the ``tiledb_config and ``context`` params can be specified.
 
     Returns:
         A SOMA Collection object containing the top-level census.
@@ -189,7 +202,18 @@ def open_soma(
 
         >>> with cellxgene_census.open_soma(mirror="s3-us-west-2") as census:
                 ...
+
+        Open a Census with a custom TileDB configuration setting.
+
+        >>> with cellxgene_census.open_soma(tiledb_config={"py.init_buffer_bytes": 128 * 1024**2}) as census:
+                ...
     """
+
+    if tiledb_config is not None and context is not None:
+        raise ValueError("Only one of tiledb_config and context can be specified.")
+
+    if tiledb_config is not None:
+        context = get_default_soma_context(tiledb_config=tiledb_config)
 
     if uri is not None:
         return _open_soma({"uri": uri, "region": None, "provider": "unknown"}, context)

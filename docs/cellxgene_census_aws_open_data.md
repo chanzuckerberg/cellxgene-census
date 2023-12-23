@@ -106,20 +106,18 @@ with cellxgene_census.open_soma(uri="local/path/to/soma/") as census:
 ```
 
 If a copy of the Census data exists in a **private S3 bucket**, users can access it by providing the URI `soma/`
-folder in the S3 bucket. This will also require customizing a `SOMATileDBContext` configuration to specify the
-bucket's AWS region and that signed requests should be used for S3 API calls. You can customize the Census API's default
-`SOMATileDBContext` settings by calling `get_default_soma_context().replace(...)` and passing this context to
-`open_soma()`. For example:
+folder in the S3 bucket. This will also require customizing TileDB configuration options to specify the
+bucket's AWS region and that signed requests should be used for S3 API calls. This can be done as follows:
 
 ``` python
 import cellxgene_census
 
 uri = "s3://my-private-data-bucket/cell-census/2023-07-25/soma/"
-ctx = cellxgene_census.get_default_soma_context().replace(
-    tiledb_config={"vfs.s3.no_sign_request": "false",
-                   "vfs.s3.region": "us-east-1"})
 
-with cellxgene_census.open_soma(uri=uri, context=ctx) as census:
+tiledb_config={"vfs.s3.no_sign_request": "false",
+               "vfs.s3.region": "us-east-1"}
+
+with cellxgene_census.open_soma(uri=uri, tiledb_config=tiledb_config) as census:
    ...
 ```
 
