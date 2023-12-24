@@ -176,3 +176,12 @@ class TableSpec:
                 df[fld.name] = df[fld.name].astype(df[fld.name].cat.categories.dtype)
 
         return df
+
+
+def decategoricalize(df: pd.DataFrame, *, inplace: bool = False) -> pd.DataFrame:
+    if not inplace:
+        df = df.copy()
+    for key in df:
+        if isinstance(df[key].dtype, pd.CategoricalDtype):
+            df[key] = df[key].astype(df[key].cat.categories.dtype)
+    return df

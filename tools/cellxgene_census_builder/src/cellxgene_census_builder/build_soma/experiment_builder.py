@@ -29,7 +29,7 @@ from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
-from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
+from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
@@ -59,7 +59,7 @@ from .summary_cell_counts import (
     accumulate_summary_counts,
     init_summary_counts_accumulator,
 )
-from .util import array_chunker, is_nonnegative_integral
+from .util import is_nonnegative_integral
 
 
 @attrs.define
@@ -165,8 +165,8 @@ class ExperimentBuilder:
         ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
     def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
-        anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
-        return anndata_cell_filter(ad, need_X=False)
+        anndata_cell_filter = make_anndata_cell_filter2(self.anndata_cell_filter_spec)
+        return anndata_cell_filter(ad)
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
         """
@@ -455,8 +455,7 @@ def _accumulate_all_X_layers(
     """
     logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     gc.collect()
-    _, unfiltered_ad = next(open_anndata(assets_path, [dataset], need_X=True))
-    assert unfiltered_ad.isbacked is False
+    unfiltered_ad = open_anndata2(assets_path, dataset)
 
     results: List[AccumulateXResult] = []
     for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
@@ -470,21 +469,10 @@ def _accumulate_all_X_layers(
 
         assert eb.global_var_joinids is not None
 
-        anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
+        anndata_cell_filter = make_anndata_cell_filter2(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad)
         if ad.n_obs == 0:
             continue
-
-        # follow CELLxGENE 3.0 schema conventions for raw/X aliasing when only raw counts exist
-        raw_X, raw_var = (ad.X, ad.var) if ad.raw is None else (ad.raw.X, ad.raw.var)
-
-        if not is_nonnegative_integral(raw_X):
-            logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
-
-        if isinstance(raw_X, np.ndarray):
-            raw_X = sparse.csr_matrix(raw_X)
-
-        raw_X.eliminate_zeros()
 
         # save X['raw']
         layer_name = "raw"
@@ -492,36 +480,65 @@ def _accumulate_all_X_layers(
             f"{eb.name}: saving X layer '{layer_name}' for dataset '{dataset.dataset_id}' "
             f"({progress[0]} of {progress[1]})"
         )
-        local_var_joinids = raw_var.join(eb.global_var_joinids).soma_joinid.to_numpy()
+        local_var_joinids = ad.var.join(eb.global_var_joinids).soma_joinid.to_numpy()
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
 
-        for n, X in enumerate(array_chunker(raw_X), start=1):
-            logging.debug(f"{eb.name}/{layer_name}: X chunk {n} {dataset.dataset_id}")
+        # accumulators
+        pres_data = np.zeros((ad.n_vars,), dtype=np.bool_)  # presence by dataset
+        obs_stats: pd.DataFrame = pd.DataFrame()
+        var_stats: pd.DataFrame = pd.DataFrame()
+
+        STRIDE = 250_000
+        for idx in range(0, ad.n_obs, STRIDE):
+            logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//STRIDE + 1} {dataset.dataset_id}")
+
+            X = ad[idx : idx + STRIDE].X
+            if isinstance(X, np.ndarray):
+                X = sparse.csr_matrix(X)
+
+            if not is_nonnegative_integral(X):
+                logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
+
+            X.eliminate_zeros()
+
+            # accumulate presence info
+            pres_data = pres_data | (X.sum(axis=0) > 0).A[0]
+            assert isinstance(pres_data, np.ndarray)
+
+            # accumulate obs/var axis stats
+            _obs_stats, _var_stats = _get_axis_stats(X, idx + dataset_obs_joinid_start, local_var_joinids)
+            obs_stats = pd.concat([obs_stats, _obs_stats]) if obs_stats.empty else _obs_stats
+            var_stats = var_stats.add(_var_stats, fill_value=0).astype(np.int64) if var_stats.empty else _var_stats
+
             # remap to match axes joinids
-            row = X.row.astype(np.int64) + dataset_obs_joinid_start
+            X = X.tocoo()
+            row = X.row.astype(np.int64) + idx + dataset_obs_joinid_start
             assert (row >= 0).all()
             col = local_var_joinids[X.col]
             assert (col >= 0).all()
-            X_remap = sparse.coo_matrix((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
+            data = X.data
+
             with soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
-                experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
+                experiment.ms[ms_name].X[layer_name].write(
+                    pa.Table.from_pydict(
+                        {
+                            "soma_dim_0": row,
+                            "soma_dim_1": col,
+                            "soma_data": data,
+                        }
+                    )
+                )
+
             gc.collect()
 
         # Save presence information by dataset_id
         assert dataset.soma_joinid >= 0  # i.e., it was assigned prior to this step
-        pres_data: npt.NDArray[np.bool_] = raw_X.sum(axis=0) > 0
-        if isinstance(pres_data, np.matrix):
-            pres_data = pres_data.A
-        pres_data = pres_data[0]
         pres_cols: npt.NDArray[np.int64] = local_var_joinids[np.arange(ad.n_vars, dtype=np.int64)]
-
         assert pres_data.dtype == bool
         assert pres_cols.dtype == np.int64
         assert pres_data.shape == (ad.n_vars,)
         assert pres_data.shape == pres_cols.shape
         assert ad.n_vars <= eb.n_var
-
-        obs_stats, var_stats = _get_axis_stats(raw_X, dataset_obs_joinid_start, local_var_joinids)
 
         results.append(
             (
@@ -537,7 +554,7 @@ def _accumulate_all_X_layers(
         )
 
         # tidy
-        del ad, raw_X, raw_var, local_var_joinids, row, col, X_remap, pres_data, pres_cols, obs_stats, var_stats
+        del ad, local_var_joinids, row, col, pres_data, pres_cols, obs_stats, var_stats
 
     gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")

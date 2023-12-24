@@ -1,12 +1,12 @@
 import gc
 import logging
 from datetime import datetime, timezone
-from typing import List
+from typing import Iterator, List
 
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from .anndata import open_anndata
+from .anndata import AnnDataProxy, open_anndata2
 from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
@@ -146,7 +146,9 @@ def accumulate_axes(
     n = 0
 
     with create_thread_pool_executor() as pool:
-        adata_iter = open_anndata(assets_path, datasets, need_X=False, backed="r")
+        adata_iter: Iterator[tuple[Dataset, AnnDataProxy]] = (
+            (dataset, open_anndata2(assets_path, dataset)) for dataset in datasets
+        )
         if args.config.multi_process:
             adata_iter = EagerIterator(adata_iter, pool)
 
