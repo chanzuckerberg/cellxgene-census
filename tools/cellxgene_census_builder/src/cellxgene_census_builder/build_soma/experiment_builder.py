@@ -529,6 +529,7 @@ def _accumulate_all_X_layers(
                     )
                 )
 
+            del X, row, col, data
             gc.collect()
 
         # Save presence information by dataset_id
@@ -554,7 +555,7 @@ def _accumulate_all_X_layers(
         )
 
         # tidy
-        del ad, local_var_joinids, row, col, pres_data, pres_cols, obs_stats, var_stats
+        del ad, local_var_joinids, pres_data, pres_cols, obs_stats, var_stats
 
     gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
