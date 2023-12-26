@@ -1,8 +1,10 @@
-import concurrent.futures
 import logging
-from typing import List
+import re
+from concurrent.futures import Executor, Future, as_completed
+from typing import List, Optional, Sequence
 
 import attrs
+import tiledb
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
@@ -27,37 +29,49 @@ class ConsolidationCandidate:
 
 
 def consolidate(args: CensusBuildArgs, uri: str) -> None:
+    """The old API - consolidate & vacuum everything, and return when done."""
+    with create_process_pool_executor(args) as ppe:
+        futures = submit_consolidate(args, uri, pool=ppe, vacuum=True, exclude=None)
+
+        # Wait for consolidation to complete
+        for future in as_completed(futures):
+            log_on_broken_process_pool(ppe)
+            uri = future.result()
+
+
+def submit_consolidate(
+    args: CensusBuildArgs, uri: str, pool: Executor, vacuum: bool, exclude: Optional[Sequence[str]] = None
+) -> Sequence[Future[str]]:
     """
-    This is a non-portable, TileDB-specific consolidation routine.
+    This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
+    futures, each of which returns the URI for the array/group.
+
+    Will vacuum if requested. Excludes any object URI matching a regex in the exclude list.
     """
     if soma.get_storage_engine() != "tiledb":
-        return
+        return ()
 
-    logging.info("Consolidate: started")
-    uris_to_consolidate = _gather(uri)
-    _run(args, uris_to_consolidate)
-    logging.info("Consolidate: finished")
+    exclude = [] if exclude is None else exclude
+    uris_to_consolidate = [obj for obj in _gather(uri) if not any(re.fullmatch(e, obj.uri) for e in exclude)]
+    logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
+
+    futures = [pool.submit(_consolidate_tiledb_object, uri, vacuum) for uri in uris_to_consolidate]
+    for obj, future in zip(uris_to_consolidate, futures, strict=True):
+
+        def log(msg: str = f"Consolidate: completed: {obj.uri}") -> None:
+            logging.info(msg)
+
+        future.add_done_callback(lambda _: log())
+
+    logging.info(f"Consolidate: {len(futures)} consolidation jobs queued")
+    return futures
 
 
 def _gather(uri: str) -> List[ConsolidationCandidate]:
     # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
         uris_to_consolidate = list_uris_to_consolidate(census)
-    logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
     return uris_to_consolidate
-
-
-def _run(args: CensusBuildArgs, uris_to_consolidate: List[ConsolidationCandidate]) -> None:
-    # Queue consolidator for each array
-    with create_process_pool_executor(args) as ppe:
-        futures = [ppe.submit(consolidate_tiledb_object, uri) for uri in uris_to_consolidate]
-        logging.info(f"Consolidate: {len(futures)} consolidation jobs queued")
-
-        # Wait for consolidation to complete
-        for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
-            log_on_broken_process_pool(ppe)
-            uri = future.result()
-            logging.info(f"Consolidate: completed [{n} of {len(futures)}]: {uri}")
 
 
 def list_uris_to_consolidate(
@@ -86,46 +100,42 @@ def list_uris_to_consolidate(
     return uris
 
 
-def consolidate_tiledb_object(obj: ConsolidationCandidate) -> str:
-    assert soma.get_storage_engine() == "tiledb"
-
-    import tiledb
-
-    uri = obj.uri
-    if obj.is_array():
-        modes = ["fragment_meta", "array_meta", "fragments", "commits"]
-    else:
-        # TODO: There is a bug in TileDB-Py that prevents consolidation of
-        # group metadata. Skipping this step for now - remove this work-around
-        # when the bug is fixed. As of 0.23.0, it is not yet fixed.
-        #
-        # modes = ["group_meta"]
-        modes = []
-
-    # Possible future enhancement - cap fragment size. Increases number of
-    # fragments, with unknown perf hit, but could make some ops simpler.
-    # For example, this caps each fragment at approximately 10GiB.
-    #   "sm.consolidation.max_fragment_size": 10 * 1024**3,
+def _consolidate_array(uri: str, vacuum: bool) -> None:
+    modes = ["fragment_meta", "array_meta", "fragments", "commits"]
 
     for mode in modes:
-        try:
-            ctx = tiledb.Ctx(
-                tiledb.Config(
-                    {
-                        **DEFAULT_TILEDB_CONFIG,
-                        "sm.consolidation.buffer_size": 3 * 1024**3,
-                        "sm.consolidation.mode": mode,
-                        "sm.vacuum.mode": mode,
-                    }
-                )
-            )
-            logging.info(f"Consolidate: start mode={mode}, uri={uri}")
-            tiledb.consolidate(uri, ctx=ctx)
-            logging.info(f"Vacuum: start mode={mode}, uri={uri}")
-            tiledb.vacuum(uri, ctx=ctx)
-        except tiledb.TileDBError as e:
-            logging.error(f"Consolidation error, uri={uri}: {str(e)}")
-            raise
+        tiledb.consolidate(
+            uri,
+            config=tiledb.Config(
+                {
+                    **DEFAULT_TILEDB_CONFIG,
+                    "sm.consolidation.buffer_size": 1 * 1024**3,
+                    "sm.consolidation.mode": mode,
+                }
+            ),
+        )
 
-    logging.info(f"Consolidate/vacuum: end uri={uri}")
-    return uri
+        if vacuum:
+            tiledb.vacuum(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG, "sm.vacuum.mode": mode}))
+
+
+def _consolidate_group(uri: str, vacuum: bool) -> None:
+    tiledb.Group.consolidate_metadata(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG}))
+    if vacuum:
+        tiledb.Group.vacuum_metadata(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG}))
+
+
+def _consolidate_tiledb_object(obj: ConsolidationCandidate, vacuum: bool) -> str:
+    assert soma.get_storage_engine() == "tiledb"
+
+    try:
+        logging.info(f"Consolidate[vacuum={vacuum}] start, uri={obj.uri}")
+        if obj.is_array():
+            _consolidate_array(obj.uri, vacuum)
+        else:
+            _consolidate_group(obj.uri, vacuum)
+        logging.info(f"Consolidate[vacuum={vacuum}] finish, uri={obj.uri}")
+        return obj.uri
+    except tiledb.TileDBError as e:
+        logging.error(f"Consolidate[vacuum={vacuum}] error, uri={obj.uri}: {str(e)}")
+        raise

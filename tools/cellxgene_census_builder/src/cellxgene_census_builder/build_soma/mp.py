@@ -64,7 +64,9 @@ def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[in
     if max_workers is None:
         max_workers = _default_worker_process_count(args)
     logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
-    return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
+    return ProcessPoolExecutor(
+        max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=10
+    )
 
 
 def create_thread_pool_executor(max_workers: Optional[int] = None) -> ThreadPoolExecutor:
@@ -258,7 +260,7 @@ class _Scheduler(threading.Thread):
         else:
             assert not isinstance(result, BaseException)
             wi.future.set_result(result)
-        scheduler._release_resouces(wi)
+        scheduler._release_resources(wi)
 
     def _schedule_work(self, work: _WorkItem[Any]) -> None:
         """must hold lock"""
@@ -274,7 +276,7 @@ class _Scheduler(threading.Thread):
             work.fn, work.args, work.kwargs, callback=_work_item_done, error_callback=_work_item_error
         )
 
-    def _release_resouces(self, wi: _WorkItem[Any]) -> None:
+    def _release_resources(self, wi: _WorkItem[Any]) -> None:
         with self._condition:
             self.resources_in_use -= wi.resources
             self._condition.notify()

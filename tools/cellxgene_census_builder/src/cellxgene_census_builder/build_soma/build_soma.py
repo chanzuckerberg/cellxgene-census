@@ -1,3 +1,4 @@
+import concurrent.futures
 import gc
 import logging
 from datetime import datetime, timezone
@@ -8,7 +9,7 @@ import tiledbsoma as soma
 from ..build_state import CensusBuildArgs
 from .anndata import AnnDataProxy, open_anndata2
 from .census_summary import create_census_summary
-from .consolidate import consolidate
+from .consolidate import submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -22,7 +23,7 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import EagerIterator, create_thread_pool_executor
+from .mp import EagerIterator, create_process_pool_executor, create_thread_pool_executor
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
@@ -92,7 +93,9 @@ def build(args: CensusBuildArgs) -> int:
 
     # consolidate TileDB data
     if args.config.consolidate:
-        consolidate(args, root_collection.uri)
+        with create_process_pool_executor(args) as ppe:
+            consolidation_futures = submit_consolidate(args, root_collection.uri, pool=ppe, vacuum=True)
+            concurrent.futures.wait(consolidation_futures, return_when=concurrent.futures.ALL_COMPLETED)
 
     return 0
 

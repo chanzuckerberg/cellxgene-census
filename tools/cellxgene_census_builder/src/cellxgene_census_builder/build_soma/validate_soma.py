@@ -566,8 +566,18 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             2**31 - 1
         )  # else, will fail in scipy due to int32 overflow during coordinate broadcasting
         for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
-            raw = X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
-            norm = X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),)).tables().concat()
+            raw = (
+                X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
+                .tables()
+                .concat()
+                .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
+            )
+            norm = (
+                X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
+                .tables()
+                .concat()
+                .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
+            )
 
             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
