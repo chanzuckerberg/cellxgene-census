@@ -23,7 +23,7 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import EagerIterator, create_process_pool_executor, create_thread_pool_executor
+from .mp import EagerIterator, create_process_pool_executor, create_thread_pool_executor, log_on_broken_process_pool
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
@@ -88,13 +88,22 @@ def build(args: CensusBuildArgs) -> int:
         root_collection, experiment_builders, filtered_datasets, args.config.build_tag
     )
 
-    # Step 6 - create and save derived artifacts
-    build_step6_save_derived_data(root_collection, experiment_builders, args)
+    # Step 6 - create and save derived artifacts. Consolidate (do NOT vacuum) in parallel.
+    with create_process_pool_executor(args, max_workers=3) as consolidation_ppe:
+        consolidation_futures = submit_consolidate(
+            args, root_collection.uri, pool=consolidation_ppe, vacuum=False, exclude=(r".*/X/normalized",)
+        )
+        build_step6_save_derived_data(root_collection, experiment_builders, args)
+        log_on_broken_process_pool(consolidation_ppe)
 
-    # consolidate TileDB data
+        # wait for all consolidators to finish before proceeding
+        concurrent.futures.wait(consolidation_futures, return_when=concurrent.futures.ALL_COMPLETED)
+        del consolidation_futures
+
+    # Final step: consolidate and vacuum TileDB data. Some may already be consolidated, but it is fine to do it again.
     if args.config.consolidate:
-        with create_process_pool_executor(args) as ppe:
-            consolidation_futures = submit_consolidate(args, root_collection.uri, pool=ppe, vacuum=True)
+        with create_process_pool_executor(args) as consolidation_ppe:
+            consolidation_futures = submit_consolidate(args, root_collection.uri, pool=consolidation_ppe, vacuum=True)
             concurrent.futures.wait(consolidation_futures, return_when=concurrent.futures.ALL_COMPLETED)
 
     return 0

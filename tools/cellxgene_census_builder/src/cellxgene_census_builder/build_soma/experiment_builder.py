@@ -46,11 +46,9 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .mp import (
-    EagerIterator,
     ResourcePoolProcessExecutor,
     create_process_pool_executor,
     create_resource_pool_executor,
-    create_thread_pool_executor,
     log_on_broken_process_pool,
     n_workers_from_memory_budget,
 )
@@ -373,16 +371,17 @@ class ExperimentBuilder:
         feature_length = self.var_df.feature_length.to_numpy()
 
         if args.config.multi_process:
-            STRIDE = 1_000_000  # controls TileDB fragment size, which impacts consolidation time
-            # memory budget: 3 attribute buffers * 3 threads * 100% buffer
-            mem_budget = 3 * 3 * 2 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
+            WRITE_NORM_STRIDE = 500_000  # controls TileDB fragment size, which impacts consolidation time
+            # memory budget: 3 attribute buffers * 3 threads * typical-nnz * overhead
+            mem_budget = int(20 * WRITE_NORM_STRIDE * 5000 * 2.1)
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
                     pe.submit(
-                        _write_X_normalized, (self.experiment.uri, start_id, STRIDE, feature_length, is_smart_seq)
+                        _write_X_normalized,
+                        (self.experiment.uri, start_id, WRITE_NORM_STRIDE, feature_length, is_smart_seq),
                     )
-                    for start_id in range(0, self.n_obs, STRIDE)
+                    for start_id in range(0, self.n_obs, WRITE_NORM_STRIDE)
                 ]
                 for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
                     log_on_broken_process_pool(pe)
@@ -434,6 +433,10 @@ class AccumXEBParams:
     anndata_cell_filter_spec: AnnDataFilterSpec
     global_var_joinids: Optional[pd.DataFrame]
     experiment_uri: str
+
+
+# Read dim0 coords stride
+ACCUM_X_STRIDE = 250_000
 
 
 def _accumulate_all_X_layers(
@@ -488,11 +491,10 @@ def _accumulate_all_X_layers(
         obs_stats: pd.DataFrame = pd.DataFrame()
         var_stats: pd.DataFrame = pd.DataFrame()
 
-        STRIDE = 250_000
-        for idx in range(0, ad.n_obs, STRIDE):
-            logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//STRIDE + 1} {dataset.dataset_id}")
+        for idx in range(0, ad.n_obs, ACCUM_X_STRIDE):
+            logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
 
-            X = ad[idx : idx + STRIDE].X
+            X = ad[idx : idx + ACCUM_X_STRIDE].X
             if isinstance(X, np.ndarray):
                 X = sparse.csr_matrix(X)
 
@@ -620,7 +622,8 @@ def _accumulate_X(
 
     if executor is not None:
         return executor.submit(
-            12 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
+            # memory budget: stride X avg nnz X 20 bytes X overhead + space for obs/var (currently fixed value)
+            int(max(dataset.mean_genes_per_cell, 3000) * ACCUM_X_STRIDE * 20 * 2 + 1024**3),
             _accumulate_all_X_layers,
             assets_path,
             dataset,
@@ -770,6 +773,17 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
 
     sigma = np.finfo(np.float32).smallest_subnormal
 
+    def _norm_it(
+        tbl: pa.Table, obs_indices: npt.NDArray[np.int64]
+    ) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float32], npt.NDArray[np.int64]]:
+        d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
+        d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
+        data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
+        data = _normalize(d0, d1, data, is_smart_seq[obs_indices], feature_length)
+        data = _roundHalfToEven(data, keepbits=15)
+        data[data == 0] = sigma
+        return d0, d1, data, obs_indices
+
     with soma.open(
         urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
     ) as X_raw:
@@ -778,46 +792,23 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
             mode="w",
             context=SOMA_TileDB_Context(),
         ) as X_normalized:
-            with create_thread_pool_executor(max_workers=8) as pool:
-                lazy_reader = EagerIterator(
-                    (
-                        (tbl, obs_indices.to_numpy())
-                        for tbl, (obs_indices, _) in X_raw.read(
-                            coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),)
-                        )
-                        .blockwise(axis=0, reindex_disable_on_axis=[1])
-                        .tables()
-                    ),
-                    pool=pool,
-                )
-
-                def _norm_it(
-                    tbl: pa.Table, obs_indices: npt.NDArray[np.int64]
-                ) -> Tuple[
-                    npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float32], npt.NDArray[np.int64]
-                ]:
-                    d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
-                    d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
-                    data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
-                    data = _normalize(d0, d1, data, is_smart_seq[obs_indices], feature_length)
-                    data = _roundHalfToEven(data, keepbits=15)
-                    data[data == 0] = sigma
-                    return d0, d1, data, obs_indices
-
-                lazy_norm_reader = EagerIterator(
-                    (_norm_it(tbl, obs_indices) for tbl, obs_indices in lazy_reader), pool=pool
-                )
-
-                for d0, d1, data, obs_indices in lazy_norm_reader:
-                    X_normalized.write(
-                        pa.Table.from_pydict(
-                            {
-                                "soma_dim_0": obs_indices[d0],
-                                "soma_dim_1": d1,
-                                "soma_data": data,
-                            }
-                        )
+            lazy_reader = (
+                (tbl, obs_indices.to_numpy())
+                for tbl, (obs_indices, _) in X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),))
+                .blockwise(axis=0, size=2 * n, reindex_disable_on_axis=[1])
+                .tables()
+            )
+            lazy_norm_reader = (_norm_it(tbl, obs_indices) for tbl, obs_indices in lazy_reader)
+            for d0, d1, data, obs_indices in lazy_norm_reader:
+                X_normalized.write(
+                    pa.Table.from_pydict(
+                        {
+                            "soma_dim_0": obs_indices[d0],
+                            "soma_dim_1": d1,
+                            "soma_data": data,
+                        }
                     )
+                )
 
     logging.info(f"Write X normalized - finished block {obs_joinid_start}")
 

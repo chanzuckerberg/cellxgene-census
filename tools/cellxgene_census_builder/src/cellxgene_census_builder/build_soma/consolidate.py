@@ -56,13 +56,6 @@ def submit_consolidate(
     logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
 
     futures = [pool.submit(_consolidate_tiledb_object, uri, vacuum) for uri in uris_to_consolidate]
-    for obj, future in zip(uris_to_consolidate, futures, strict=True):
-
-        def log(msg: str = f"Consolidate: completed: {obj.uri}") -> None:
-            logging.info(msg)
-
-        future.add_done_callback(lambda _: log())
-
     logging.info(f"Consolidate: {len(futures)} consolidation jobs queued")
     return futures
 
@@ -101,7 +94,7 @@ def list_uris_to_consolidate(
 
 
 def _consolidate_array(uri: str, vacuum: bool) -> None:
-    modes = ["fragment_meta", "array_meta", "fragments", "commits"]
+    modes = ["fragment_meta", "array_meta", "commits", "fragments"]
 
     for mode in modes:
         tiledb.consolidate(

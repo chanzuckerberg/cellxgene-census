@@ -30,6 +30,8 @@ class Dataset:
     collection_name: str = ""  # CELLxGENE collection name
     collection_doi: str = ""  # CELLxGENE collection doi
     asset_h5ad_filesize: int = -1
+    cell_count: int = -1
+    mean_genes_per_cell: float = -1.0
 
     # Optional, inferred from data if not already known
     schema_version: str = ""  # empty string if version unknown
