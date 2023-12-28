@@ -371,9 +371,9 @@ class ExperimentBuilder:
         feature_length = self.var_df.feature_length.to_numpy()
 
         if args.config.multi_process:
-            WRITE_NORM_STRIDE = 500_000  # controls TileDB fragment size, which impacts consolidation time
+            WRITE_NORM_STRIDE = 250_000  # controls TileDB fragment size, which impacts consolidation time
             # memory budget: 3 attribute buffers * 3 threads * typical-nnz * overhead
-            mem_budget = int(20 * WRITE_NORM_STRIDE * 5000 * 2.1)
+            mem_budget = int(20 * WRITE_NORM_STRIDE * 4000 * 2.1) + (1 * 1024**3)
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
@@ -623,7 +623,10 @@ def _accumulate_X(
     if executor is not None:
         return executor.submit(
             # memory budget: stride X avg nnz X 20 bytes X overhead + space for obs/var (currently fixed value)
-            int(max(dataset.mean_genes_per_cell, 3000) * ACCUM_X_STRIDE * 20 * 2 + 1024**3),
+            int(
+                max(dataset.mean_genes_per_cell, 3000) * max(ACCUM_X_STRIDE, dataset.cell_count) * 20 * 2
+                + (1 * 1024**3)
+            ),
             _accumulate_all_X_layers,
             assets_path,
             dataset,
