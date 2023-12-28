@@ -63,6 +63,7 @@ def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[in
     assert _mp_config_checks()
     if max_workers is None:
         max_workers = _default_worker_process_count(args)
+    max_workers = max(1, max_workers)
     logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
     return ProcessPoolExecutor(
         max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=10
