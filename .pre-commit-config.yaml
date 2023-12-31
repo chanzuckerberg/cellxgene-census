@@ -57,6 +57,7 @@ repos:
           - typing_extensions
           - types-setuptools
           - types-PyYAML
+          - types-psutil
       - id: mypy
         name: mypy-tools-census-contrib
         files: ^tools/census_contrib

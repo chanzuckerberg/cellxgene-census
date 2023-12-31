@@ -33,6 +33,7 @@ from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
+    CENSUS_OBS_STATS_COLUMNS,
     CENSUS_OBS_TABLE_SPEC,
     CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TABLE_SPEC,
@@ -625,7 +626,7 @@ def _accumulate_X(
             # memory budget: stride X avg nnz X 20 bytes X overhead + space for obs/var (currently fixed value)
             int(
                 max(dataset.mean_genes_per_cell, 3000) * max(ACCUM_X_STRIDE, dataset.cell_count) * 20 * 2
-                + (1 * 1024**3)
+                + (2 * 1024**3)
             ),
             _accumulate_all_X_layers,
             assets_path,
@@ -659,7 +660,12 @@ def populate_X_layers(
     logging.debug("populate_X_layers begin")
     results: List[AccumulateXResult] = []
     if args.config.multi_process:
-        with create_resource_pool_executor(args) as pe:
+        # reserve memory to accumulate the stats
+        n_obs = sum(eb.n_obs for eb in experiment_builders)
+        n_stats_per_obs = len(CENSUS_OBS_STATS_COLUMNS) * 8  # all 64 bit stats
+        total_memory_budget = args.config.memory_budget - (n_obs * n_stats_per_obs * 2)
+
+        with create_resource_pool_executor(args, max_resources=total_memory_budget) as pe:
             futures = {
                 _accumulate_X(
                     assets_path,

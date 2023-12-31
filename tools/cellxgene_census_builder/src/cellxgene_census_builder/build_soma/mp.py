@@ -25,7 +25,7 @@ from typing import (
 import attrs
 
 from ..build_state import CensusBuildArgs
-from ..util import cpu_count, process_init
+from ..util import cpu_count, log_system_memory_status, process_init
 
 
 def _mp_config_checks() -> bool:
@@ -283,10 +283,11 @@ class _Scheduler(threading.Thread):
             self._condition.notify()
 
     def _debug_msg(self, msg: str) -> None:
+        log_system_memory_status()
         logging.debug(
             f"ResourcePoolProcessExecutor: {msg} ["
-            f"free={self.max_resources-self.resources_in_use} "
-            f"in_use={self.resources_in_use} "
+            f"free={self.max_resources-self.resources_in_use} ({100.*(self.max_resources-self.resources_in_use)/self.max_resources:2.1f}%), "
+            f"in-use={self.resources_in_use} ({100.*self.resources_in_use/self.max_resources:2.1f}%), "
             f"unsched={len(self._pending_work)}"
             "]"
         )

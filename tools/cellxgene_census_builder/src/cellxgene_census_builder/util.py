@@ -3,8 +3,12 @@ import multiprocessing
 import os
 import platform
 import re
+import threading
+import time
 import urllib.parse
 from typing import cast
+
+import psutil
 
 from .build_state import CensusBuildArgs
 from .logging import logging_init
@@ -159,20 +163,71 @@ class ProcessResourceGetter:
         return int(stats_fields[11]), int(stats_fields[12])
 
 
-_resource_getter = ProcessResourceGetter()
+class SystemResourceGetter:
+    """
+    Access to system resource state, primary for diagnostic/debugging purposes. Currently
+    provides current and high water mark for:
+    * memory total
+    * memory available
+
+    Linux-only at the moment.
+    https://docs.kernel.org/filesystems/proc.html
+    """
+
+    # historical maxima
+    max_mem_used = -1
+    mem_total = psutil.virtual_memory().total
+
+    @property
+    def mem_used(self) -> int:
+        mem_used = self.mem_total - psutil.virtual_memory().available
+        self.max_mem_used = max(self.max_mem_used, mem_used)
+        return mem_used
+
+
+_process_resource_getter = ProcessResourceGetter()
+_system_resource_getter = SystemResourceGetter()
 
 
 def log_process_resource_status(preface: str = "Resource use:", level: int = logging.DEBUG) -> None:
     """Print current and historical max of thread and (memory) map counts"""
     if platform.system() == "Linux":
+        me = psutil.Process()
+        mem_full_info = me.memory_full_info()
+
         logging.log(
             level,
-            f"{preface} threads: {_resource_getter.thread_count} "
-            f"[max: {_resource_getter.max_thread_count}], "
-            f"maps: {_resource_getter.map_count} "
-            f"[max: {_resource_getter.max_map_count}], "
-            f"page faults (cumm): {_resource_getter.majflt[1]}",
+            f"{preface} pid={me.pid}, threads={_process_resource_getter.thread_count} "
+            f"(max={_process_resource_getter.max_thread_count}), "
+            f"maps={_process_resource_getter.map_count} "
+            f"(max={_process_resource_getter.max_map_count}), "
+            f"page-faults(cumm)={_process_resource_getter.majflt[1]} "
+            f"uss={mem_full_info.uss}, rss={mem_full_info.rss}",
         )
+    log_system_memory_status(level=level)
+
+
+def log_system_memory_status(preface: str = "System memory:", level: int = logging.DEBUG) -> None:
+    mem_used = _system_resource_getter.mem_used
+    max_mem_used = _system_resource_getter.max_mem_used
+    mem_total = _system_resource_getter.mem_total
+    logging.log(
+        level,
+        f"{preface} used={mem_used} ({100.*mem_used/mem_total:2.1f}%), "
+        f"max-used={max_mem_used} ({100.*max_mem_used/mem_total:2.1f}%), "
+        f"total={mem_total}",
+    )
+
+
+def start_resource_logger(log_period_sec: float = 10.0, level: int = logging.INFO) -> threading.Thread:
+    def resource_logger_target() -> None:
+        while True:
+            log_system_memory_status(level=level)
+            time.sleep(log_period_sec)
+
+    t = threading.Thread(target=resource_logger_target, daemon=True, name="Resource Logger")
+    t.start()
+    return t
 
 
 def cpu_count() -> int:
