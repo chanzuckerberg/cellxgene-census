@@ -14,7 +14,7 @@ Learn how to stream the single-cell data and metadata from Census into your mach
     notebooks/api_demo/census_query_extract.ipynb
     notebooks/api_demo/census_gget_demo.ipynb
 
-[NEW! 🚀] Using integrated embbedings and models
+[NEW! 🚀] Using integrated embeddings and models
 ----------
 
 Tutorials that show you how to retrieve pre-calculated Census embbedings and use their associated models for your workflows.
