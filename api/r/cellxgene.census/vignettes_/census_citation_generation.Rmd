@@ -52,7 +52,7 @@ Then we load the dataset table which contains a column `"citation"` for each dat
 ```{r,message=FALSE,warning=FALSE}
 datasets <- census$get("census_info")$get("datasets")$read()$concat()
 datasets <- as.data.frame(datasets)
-datasets["citation"]
+head(datasets["citation"])
 ```
 
 And now we can use the column `"dataset_id"` present in both the dataset table and the Census cell metadata to create citation strings for any Census slice.
