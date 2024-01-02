@@ -17,7 +17,7 @@ Learn how to stream the single-cell data and metadata from Census into your mach
 [NEW! 🚀] Using integrated embeddings and models
 ----------
 
-Tutorials that show you how to retrieve pre-calculated Census embbedings and use their associated models for your workflows.
+Tutorials that show you how to retrieve pre-calculated Census embeddings and use their associated models for your workflows.
 
 Access Census embeddings.
 
