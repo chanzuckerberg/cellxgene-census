@@ -21,7 +21,7 @@ This notebook demonstrates how to generate a citation string for all datasets co
 
 1. Requirements
 2. Generating citation strings
-   1. Via a cell metadata query
+   1. Via cell metadata query
    2. Via Seurat query
    3. Via SingleCellExperiment query
 
@@ -57,7 +57,7 @@ datasets["citation"]
 
 And now we can use the column `"dataset_id"` present in both the dataset table and the Census cell metadata to create citation strings for any Census slice.
 
-### Via a cell metadata query
+### Via cell metadata query
 
 ```{r,message=FALSE,warning=FALSE}
 # Query cell metadata
