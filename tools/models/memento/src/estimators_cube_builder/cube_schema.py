@@ -9,6 +9,7 @@ from tiledb import (
     DictionaryFilter,
     Dim,
     Domain,
+    DoubleDeltaFilter,
     Enumeration,
     FilterList,
     ZstdFilter,
@@ -63,13 +64,21 @@ def build_cube_schema(obs: pd.DataFrame) -> ArraySchema:
                 for dim_name in CUBE_TILEDB_DIMS
             ]
         ),
+        # TODO: Not all attrs need to be int32
         attrs=[
-            Attr(name=attr_name, dtype=np.int32, enum_label=attr_name, nullable=False)
+            Attr(
+                name=attr_name,
+                dtype=np.int32,
+                enum_label=attr_name,
+                nullable=False,
+                filters=FilterList([ZstdFilter(level=19)]),
+            )
             for attr_name in CUBE_TILEDB_ATTRS_OBS
         ]
         + [
             Attr(
                 name=estimator_name,
+                # TODO: use float32?
                 dtype="float64",
                 var=False,
                 nullable=False,
@@ -77,6 +86,7 @@ def build_cube_schema(obs: pd.DataFrame) -> ArraySchema:
             )
             for estimator_name in ESTIMATOR_NAMES
         ],
+        offsets_filters=FilterList([DoubleDeltaFilter(), ZstdFilter(level=19)]),
         cell_order="row-major",
         tile_order="row-major",
         capacity=10000,
