@@ -12,6 +12,7 @@ Learn how to stream the single-cell data and metadata from Census into your mach
    
     cellxgene_census_docsite_quick_start.md
     notebooks/api_demo/census_query_extract.ipynb
+    notebooks/api_demo/census_citation_generation.ipynb
     notebooks/api_demo/census_gget_demo.ipynb
 
 [NEW! 🚀] Using integrated embeddings and models
