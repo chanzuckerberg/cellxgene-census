@@ -210,26 +210,30 @@
 <h1>cellxgene_census.get_default_soma_context<a class="headerlink" href="#cellxgene-census-get-default-soma-context" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="cellxgene_census.get_default_soma_context">
-<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_default_soma_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SOMATileDBContext</span></span></span><a class="headerlink" href="#cellxgene_census.get_default_soma_context" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_default_soma_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tiledb_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SOMATileDBContext</span></span></span><a class="headerlink" href="#cellxgene_census.get_default_soma_context" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> with sensible defaults that can be further customized by the user.  The customized
-context can then be passed to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> or a <code class="docutils literal notranslate"><span class="pre">SOMAObject.open()</span></code> method,
+context can then be passed to <code class="docutils literal notranslate"><span class="pre">open_soma(context=...)</span></code> or a <code class="docutils literal notranslate"><span class="pre">SOMAObject.open(context=...)</span></code> method,
 such as <code class="docutils literal notranslate"><span class="pre">tiledbsoma.Experiment.open()</span></code>.  Use the <code class="docutils literal notranslate"><span class="pre">replace()</span></code> method on the returned object to customize its
-settings.</p>
+settings further.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> object with sensible defaults.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tiledb_config</strong> – A dictionary of TileDB configuration parameters. If specified, the parameters will override the
+defaults. If not specified, the default configuration will be returned.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> object with sensible defaults.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <p>To reduce the amount of memory used by TileDB-SOMA I/O operations:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">(</span>
     <span class="n">tiledb_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;py.init_buffer_bytes&quot;</span><span class="p">:</span> <span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
                    <span class="s2">&quot;soma.init_buffer_bytes&quot;</span><span class="p">:</span> <span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">})</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&quot;s3://my-private-bucket/census/soma&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To access a copy of the Census located in a private bucket that is located in a different S3 region, use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">(</span>
     <span class="n">tiledb_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;vfs.s3.no_sign_request&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
                    <span class="s2">&quot;vfs.s3.region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">})</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&quot;s3://my-private-bucket/census/soma&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>

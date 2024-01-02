@@ -187,8 +187,8 @@
                 
   <section id="cz-cellxgene-discover-census-schema">
 <h1>CZ CELLxGENE Discover Census Schema<a class="headerlink" href="#cz-cellxgene-discover-census-schema" title="Permalink to this heading">¶</a></h1>
-<p><strong>Version</strong>: 1.2.0</p>
-<p><strong>Last edited</strong>: Sept, 2023.</p>
+<p><strong>Version</strong>: 1.3.0</p>
+<p><strong>Last edited</strong>: December, 2023.</p>
 <p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED” “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <a class="reference external" href="https://tools.ietf.org/html/bcp14">BCP 14</a>, <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc2119.txt">RFC2119</a>, and <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc8174.txt">RFC8174</a> when, and only when, they appear in all capitals, as shown here.</p>
 <section id="census-overview">
 <h2>Census overview<a class="headerlink" href="#census-overview" title="Permalink to this heading">¶</a></h2>
@@ -540,7 +540,7 @@
 <tbody>
   <tr>
     <td>census_schema_version</td>
-    <td>1.2.0</td>
+    <td>1.3.0</td>
   </tr>
   <tr>
     <td>census_build_date</td>
@@ -583,9 +583,14 @@
 </thead>
 <tbody>
   <tr>
+    <td>citation</td>
+    <td>string</td>
+    <td>As defined in the CELLxGENE schema.</td>
+  </tr>
+  <tr>
     <td>collection_id</td>
     <td>string</td>
-    <td rowspan="5">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
+    <td rowspan="6">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
   </tr>
   <tr>
     <td>collection_name</td>
@@ -921,7 +926,9 @@
 <h4>Matrix Data, normalized count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;normalized&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray" title="Permalink to this heading">¶</a></h4>
 <p>This is an experimental data artifact - it may be removed at any time.</p>
 <p>A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
-For a value <code class="docutils literal notranslate"><span class="pre">X[i,j]</span></code> in the counts (raw) matrix, library-size normalized values are defined
+For Smart-Seq assays, given a value <code class="docutils literal notranslate"><span class="pre">X[i,j]</span></code> in the counts (raw) matrix, library-size normalized values are defined
+as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]</span> <span class="pre">=</span> <span class="pre">(X[i,j]</span> <span class="pre">/</span> <span class="pre">var[j].feature_length)</span> <span class="pre">/</span> <span class="pre">sum(X[i,</span> <span class="pre">]</span> <span class="pre">/</span> <span class="pre">var.feature_length[j])</span></code>.
+For all other assays, for a value <code class="docutils literal notranslate"><span class="pre">X[i,j]</span></code> in the counts (raw) matrix, library-size normalized values are defined
 as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]</span> <span class="pre">=</span> <span class="pre">X[i,j]</span> <span class="pre">/</span> <span class="pre">sum(X[i,</span> <span class="pre">])</span></code>.</p>
 </section>
 <section id="feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe">
@@ -951,7 +958,7 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
   <tr>
     <td>feature_length</td>
     <td>int</td>
-    <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+    <td>As defined in CELLxGENE dataset schema</a>.</td>
   </tr>
   <tr>
     <td>nnz</td>
@@ -1032,7 +1039,7 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
   </tr>
   <tr>
     <td>assay_ontology_term_id</td>
-    <td colspan="2" rowspan="17">As defined in CELLxGENE dataset schema</td>
+    <td colspan="2" rowspan="19">As defined in CELLxGENE dataset schema</td>
   </tr>
   <tr>
     <td>assay</td>
@@ -1062,6 +1069,9 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
     <td>is_primary_data</td>
   </tr>
   <tr>
+    <td>observation_joinid</td>
+  </tr>
+  <tr>
     <td>self_reported_ethnicity_ontology_term_id</td>
   </tr>
   <tr>
@@ -1081,6 +1091,9 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
   </tr>
   <tr>
     <td>tissue</td>
+  </tr>
+  <tr>
+    <td>tissue_type</td>
   </tr>
   <tr>
     <td>nnz</td>
@@ -1114,6 +1127,14 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
 </section>
 <section id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h2>
+<section id="version-1-3-0">
+<h3>Version 1.3.0<a class="headerlink" href="#version-1-3-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Update to require <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md">CELLxGENE schema version 4.0.0</a></p></li>
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">citation</span></code> to “Census table of CELLxGENE Discover datasets – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code>”</p></li>
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">observation_joinid</span></code> and <code class="docutils literal notranslate"><span class="pre">tissue_type</span></code> to <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe</p></li>
+</ul>
+</section>
 <section id="version-1-2-0">
 <h3>Version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">

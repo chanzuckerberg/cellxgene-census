@@ -294,18 +294,16 @@
 </pre></div>
 </div>
 <p>If a copy of the Census data exists in a <strong>private S3 bucket</strong>, users can access it by providing the URI <code class="docutils literal notranslate"><span class="pre">soma/</span></code>
-folder in the S3 bucket. This will also require customizing a <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> configuration to specify the
-bucket’s AWS region and that signed requests should be used for S3 API calls. You can customize the Census API’s default
-<code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> settings by calling <code class="docutils literal notranslate"><span class="pre">get_default_soma_context().replace(...)</span></code> and passing this context to
-<code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>. For example:</p>
+folder in the S3 bucket. This will also require customizing TileDB configuration options to specify the
+bucket’s AWS region and that signed requests should be used for S3 API calls. This can be done as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;s3://my-private-data-bucket/cell-census/2023-07-25/soma/&quot;</span>
-<span class="n">ctx</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_default_soma_context</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-    <span class="n">tiledb_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;vfs.s3.no_sign_request&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
-                   <span class="s2">&quot;vfs.s3.region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">})</span>
 
-<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+<span class="n">tiledb_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;vfs.s3.no_sign_request&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;vfs.s3.region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">}</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">tiledb_config</span><span class="o">=</span><span class="n">tiledb_config</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
    <span class="o">...</span>
 </pre></div>
 </div>
