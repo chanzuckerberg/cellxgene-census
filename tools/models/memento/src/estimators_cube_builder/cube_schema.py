@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict
 
 import numpy as np
@@ -15,7 +17,9 @@ from tiledb import (
     ZstdFilter,
 )
 
-CUBE_LOGICAL_DIMS_OBS = [
+OBS_TILEDB_DIMS = ["obs_group_joinid"]
+
+OBS_LOGICAL_DIMS = [
     "cell_type_ontology_term_id",
     "dataset_id",
     "tissue_general_ontology_term_id",
@@ -28,42 +32,34 @@ CUBE_LOGICAL_DIMS_OBS = [
     "suspension_type",
 ]
 
-CUBE_TILEDB_DIMS_OBS = CUBE_LOGICAL_DIMS_OBS[0:0]
+CUBE_LOGICAL_DIMS = ["feature_id"] + OBS_LOGICAL_DIMS
 
-CUBE_TILEDB_ATTRS_OBS = CUBE_LOGICAL_DIMS_OBS[0:]
-
-CUBE_DIMS_VAR = ["feature_id"]
-
-CUBE_LOGICAL_DIMS = CUBE_LOGICAL_DIMS_OBS + CUBE_DIMS_VAR
-
-CUBE_TILEDB_DIMS = CUBE_DIMS_VAR + CUBE_TILEDB_DIMS_OBS
+ESTIMATORS_TILEDB_DIMS = ["feature_id", "obs_group_joinid"]
 
 # ESTIMATOR_NAMES = ["nnz", "n_obs", "min", "max", "sum", "mean", "sem", "var", "sev", "selv"]
 ESTIMATOR_NAMES = ["n_obs", "mean", "sem", "var", "selv"]
 
 
-def build_cube_schema_enums(obs: pd.DataFrame) -> Dict[str, Enumeration]:
-    def build_enum(dim_name: str) -> Enumeration:
-        return Enumeration(
-            name=dim_name,
-            ordered=False,
-            values=obs[dim_name].unique().astype(str),
+def build_obs_categorical_values(obs_groups: pd.DataFrame) -> Dict[str, Enumeration]:
+    return {dim_name: obs_groups[dim_name].unique().astype(str) for dim_name in OBS_LOGICAL_DIMS}
+
+
+def build_obs_groups_schema(n_obs_groups: int, obs_categorical_values: Dict[str, Enumeration]) -> ArraySchema:
+    domain = Domain(
+        Dim(
+            name="obs_group_joinid",
+            dtype=np.uint32,
+            domain=(0, n_obs_groups),
+            filters=FilterList([ZstdFilter(level=19)]),
         )
-
-    return {dim_name: build_enum(dim_name) for dim_name in CUBE_LOGICAL_DIMS_OBS}
-
-
-def build_cube_schema(obs: pd.DataFrame) -> ArraySchema:
-    named_enums = build_cube_schema_enums(obs)
-
+    )
+    assert set(OBS_TILEDB_DIMS) == set([dim.name for dim in domain])
     return ArraySchema(
-        enums=named_enums.values(),
-        domain=Domain(
-            *[
-                Dim(name=dim_name, dtype="ascii", filters=FilterList([DictionaryFilter(), ZstdFilter(level=19)]))
-                for dim_name in CUBE_TILEDB_DIMS
-            ]
-        ),
+        enums=[
+            Enumeration(name=dim_name, ordered=False, values=categories)
+            for (dim_name, categories) in obs_categorical_values.items()
+        ],
+        domain=domain,
         # TODO: Not all attrs need to be int32
         attrs=[
             Attr(
@@ -73,9 +69,27 @@ def build_cube_schema(obs: pd.DataFrame) -> ArraySchema:
                 nullable=False,
                 filters=FilterList([ZstdFilter(level=19)]),
             )
-            for attr_name in CUBE_TILEDB_ATTRS_OBS
-        ]
-        + [
+            for attr_name in OBS_LOGICAL_DIMS
+        ],
+        offsets_filters=FilterList([DoubleDeltaFilter(), ZstdFilter(level=19)]),
+        cell_order="row-major",
+        tile_order="row-major",
+        capacity=10000,
+        sparse=True,
+        allows_duplicates=True,
+    )
+
+
+def build_estimators_schema(n_groups: int) -> ArraySchema:
+    domain = Domain(
+        Dim(name="feature_id", dtype="ascii", filters=FilterList([DictionaryFilter(), ZstdFilter(level=19)])),
+        Dim(name="obs_group_joinid", dtype=np.uint32, domain=(0, n_groups), filters=FilterList([ZstdFilter(level=19)])),
+    )
+    assert set(ESTIMATORS_TILEDB_DIMS) == set([dim.name for dim in domain])
+    return ArraySchema(
+        domain=domain,
+        # TODO: Not all attrs need to be int32
+        attrs=[
             Attr(
                 name=estimator_name,
                 # TODO: use float32?
@@ -86,10 +100,13 @@ def build_cube_schema(obs: pd.DataFrame) -> ArraySchema:
             )
             for estimator_name in ESTIMATOR_NAMES
         ],
-        offsets_filters=FilterList([DoubleDeltaFilter(), ZstdFilter(level=19)]),
         cell_order="row-major",
         tile_order="row-major",
         capacity=10000,
         sparse=True,
         allows_duplicates=True,
     )
+
+
+OBS_GROUPS_ARRAY = "obs_groups"
+ESTIMATORS_ARRAY = "estimators"

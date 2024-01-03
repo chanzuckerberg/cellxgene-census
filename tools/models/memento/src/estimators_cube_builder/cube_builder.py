@@ -22,11 +22,13 @@ from somacore import AxisQuery, ExperimentAxisQuery
 from tiledbsoma import SOMATileDBContext
 
 from .cube_schema import (
-    CUBE_DIMS_VAR,
-    CUBE_LOGICAL_DIMS_OBS,
-    CUBE_TILEDB_ATTRS_OBS,
     ESTIMATOR_NAMES,
-    build_cube_schema,
+    ESTIMATORS_ARRAY,
+    OBS_GROUPS_ARRAY,
+    OBS_LOGICAL_DIMS,
+    build_estimators_schema,
+    build_obs_categorical_values,
+    build_obs_groups_schema,
 )
 from .cube_validator import validate_cube
 from .estimators import bin_size_factor, compute_mean, compute_sem, compute_sev, compute_variance, gen_multinomial
@@ -36,7 +38,7 @@ PROFILE_MODE = bool(os.getenv("PROFILE_MODE", False))  # Run pass 2 in single-pr
 
 # TODO: parameterize constants below
 
-OBS_SIZE_FACTORS_ARRAY_SUFFIX = "_size_factors"
+OBS_SIZE_FACTORS_ARRAY = "size_factors"
 
 TILEDB_SOMA_BUFFER_BYTES = 2**31
 
@@ -65,6 +67,7 @@ logging.basicConfig(
 logging.captureWarnings(True)
 
 # Suppress warnings from Pandas and NumPy
+# TODO: Make this more specific! We just want to ignore "runtimewarning...degrees of freedom" errors
 warnings.filterwarnings("ignore")
 
 
@@ -83,7 +86,7 @@ def compute_all_estimators_for_obs_group(obs_group_rows: pd.DataFrame, obs_df: p
     # set of expression values for a given gene.
     size_factors_for_obs_group = obs_df[["approx_size_factor"]].loc[obs_group_rows[[]].index.drop_duplicates()]
 
-    gene_groups = obs_group_rows.groupby(CUBE_DIMS_VAR, observed=True)
+    gene_groups = obs_group_rows.groupby(["feature_id"], observed=True)
     estimators = gene_groups.apply(
         lambda gene_group_rows: compute_all_estimators_for_gene(
             obs_group_name, gene_group_rows, size_factors_for_obs_group
@@ -149,7 +152,7 @@ def dense_gene_data(
 
 
 def compute_all_estimators_for_batch_tdb(
-    soma_dim_0: List[int], obs_df: pd.DataFrame, var_df: pd.DataFrame, X_uri: str, batch: int, cube_uri: str
+    soma_dim_0: List[int], obs_df: pd.DataFrame, var_df: pd.DataFrame, X_uri: str, batch: int, estimators_uri: str
 ) -> int:
     """Compute estimators for each gene"""
 
@@ -172,7 +175,7 @@ def compute_all_estimators_for_batch_tdb(
 
         assert all(result.index.value_counts() <= 1), "tiledb batch has repeated cube rows"
 
-    write_estimators_batch(result, obs_df, cube_uri)
+    write_estimators_batch(result, estimators_uri)
 
     gc.collect()
 
@@ -182,10 +185,12 @@ def compute_all_estimators_for_batch_tdb(
 def compute_all_estimators_for_batch_pd(X_df: pd.DataFrame, obs_df: pd.DataFrame, var_df: pd.DataFrame) -> pd.DataFrame:
     result = (
         X_df.set_index("soma_dim_1")
-        .join(var_df[CUBE_DIMS_VAR])
+        .join(var_df[["feature_id"]])
         .set_index("soma_dim_0")
-        .join(obs_df[CUBE_LOGICAL_DIMS_OBS])
-        .groupby(CUBE_LOGICAL_DIMS_OBS, observed=True, sort=False)
+        .join(
+            obs_df[["obs_group_joinid"]]
+        )  # TODO: If we do a left join here, we end up with the "dense" array needed for compute_all_estimators_for_gene(); might be more efficient to dense first and make sparse later
+        .groupby("obs_group_joinid", sort=False)
         .apply(lambda obs_group: compute_all_estimators_for_obs_group(obs_group, obs_df))
         .rename(mapper=dict(enumerate(ESTIMATOR_NAMES)), axis=1)
     )
@@ -206,7 +211,7 @@ def sum_gene_expression_levels_by_cell(X_tbl: pa.Table, batch: int) -> pd.Series
 
 def pass_1_compute_size_factors(query: ExperimentAxisQuery) -> pd.DataFrame:
     obs_df = (
-        query.obs(column_names=["soma_joinid", "raw_sum"] + CUBE_LOGICAL_DIMS_OBS)
+        query.obs(column_names=["soma_joinid", "raw_sum"] + OBS_LOGICAL_DIMS)
         .concat()
         .to_pandas()
         .set_index("soma_joinid")
@@ -219,35 +224,50 @@ def pass_1_compute_size_factors(query: ExperimentAxisQuery) -> pd.DataFrame:
     # Bin all sums to have fewer unique values, to speed up bootstrap computation
     obs_df["approx_size_factor"] = bin_size_factor(obs_df["size_factor"].values)
 
-    return cast(pd.DataFrame, obs_df[CUBE_LOGICAL_DIMS_OBS + ["approx_size_factor"]])
+    return cast(pd.DataFrame, obs_df[OBS_LOGICAL_DIMS + ["approx_size_factor"]])
 
 
 def pass_2_compute_estimators(
     cube_uri: str, query: ExperimentAxisQuery, size_factors: pd.DataFrame, /, measurement_name: str, layer: str
 ) -> None:
     var_df = query.var().concat().to_pandas().set_index("soma_joinid")
-    obs_df = (
-        query.obs(column_names=["soma_joinid"] + CUBE_LOGICAL_DIMS_OBS).concat().to_pandas().set_index("soma_joinid")
-    )
+    obs_df = query.obs(column_names=["soma_joinid"] + OBS_LOGICAL_DIMS).concat().to_pandas().set_index("soma_joinid")
+
+    # Process X by obs groups (i.e. cube rows). This ensures that estimators are computed
+    # for all X data contributing to a given obs group aggregation.
+    logging.info("Pass 2: Computing obs groups")
+    obs_grouped = obs_df[OBS_LOGICAL_DIMS].groupby(OBS_LOGICAL_DIMS, observed=True)
+    obs_df["obs_group_joinid"] = obs_grouped.ngroup()
+    obs_groups_soma_joinids = obs_grouped.groups
+
+    obs_groups_uri = os.path.join(cube_uri, OBS_GROUPS_ARRAY)
+    estimators_uri = os.path.join(cube_uri, ESTIMATORS_ARRAY)
+
+    if tiledb.array_exists(estimators_uri):
+        logging.info("Pass 2: Resuming from existing estimators cube")
+        with tiledb.open(obs_groups_uri, mode="r") as estimators_cube_array:
+            existing_obs_group_joinids = (
+                estimators_cube_array.query(attrs=[], dims=["obs_group_joinid"]).df[:].index.drop_duplicates()
+            )
+    else:
+        logging.info("Pass 2: Creating new estimators cube")
+        existing_obs_group_joinids = None
+        obs_groups_df = obs_df[["obs_group_joinid"] + OBS_LOGICAL_DIMS].drop_duplicates().set_index("obs_group_joinid")
+        obs_categorical_values = build_obs_categorical_values(obs_groups_df)
+        tiledb.Array.create(
+            uri=obs_groups_uri, schema=build_obs_groups_schema(len(obs_grouped), obs_categorical_values)
+        )
+        tiledb.Array.create(uri=estimators_uri, schema=build_estimators_schema(len(obs_grouped)))
+        # TODO: Can remove once https://github.com/TileDB-Inc/TileDB-Py/issues/1879 fix is available
+        # Ensure Pandas categorical columns must have the same underlying dictionaries as the TileDB Array
+        # schema's enumeration columns
+        for col in OBS_LOGICAL_DIMS:
+            obs_groups_df[col] = pd.Categorical(obs_groups_df[col], categories=obs_categorical_values[col])
+        tiledb.from_pandas(obs_groups_uri, obs_groups_df, mode="append")
+
+    logging.info("Pass 2: Starting estimators computation")
 
     obs_df = obs_df.join(size_factors[["approx_size_factor"]])
-
-    if tiledb.array_exists(cube_uri):
-        logging.info("Pass 2: Resuming from existing estimators cube")
-        with tiledb.open(cube_uri, mode="r") as estimators_cube:
-            df = estimators_cube.query(attrs=CUBE_TILEDB_ATTRS_OBS).df[:][CUBE_LOGICAL_DIMS_OBS]
-            existing_groups = df.drop_duplicates()
-            existing_groups = existing_groups.set_index(list(existing_groups.columns))
-    else:
-        existing_groups = None
-        tiledb.Array.create(cube_uri, build_cube_schema(obs_df))
-        logging.info("Pass 2: Created new estimators cube")
-
-    # Process X by cube rows. This ensures that estimators are computed
-    # for all X data contributing to a given cube row aggregation.
-    # Note: `groups` converts categoricals to strs, which is not memory-efficient
-    cube_obs_coords = obs_df[CUBE_LOGICAL_DIMS_OBS].groupby(CUBE_LOGICAL_DIMS_OBS, observed=True)
-    cube_obs_coord_groups = cube_obs_coords.groups
 
     soma_dim_0_batch: List[int] = []
     batch_futures = []
@@ -273,12 +293,12 @@ def pass_2_compute_estimators(
                 var_df,
                 query.experiment.ms[measurement_name].X[layer].uri,
                 n_batches_submitted,
-                cube_uri,
+                estimators_uri,
             )
 
         with cProfile.Profile() as pr:
-            for soma_dim_0_ids in cube_obs_coord_groups.values():
-                soma_dim_0_batch.extend(soma_dim_0_ids)
+            for obs_group_soma_joinids in obs_groups_soma_joinids.values():
+                soma_dim_0_batch.extend(obs_group_soma_joinids)
                 if len(soma_dim_0_batch) < MIN_BATCH_SIZE:
                     continue
 
@@ -313,17 +333,17 @@ def pass_2_compute_estimators(
                     var_df,
                     X_uri,
                     n_batches_submitted,
-                    cube_uri,
+                    estimators_uri,
                 )
             )
 
         start_time = datetime.now()
 
-        for group_key, soma_dim_0_ids in cube_obs_coord_groups.items():
-            if existing_groups is None or group_key not in existing_groups.index:
-                soma_dim_0_batch.extend(soma_dim_0_ids)
+        for group_id, obs_group_soma_joinids in obs_groups_soma_joinids.items():
+            if existing_obs_group_joinids is None or group_id not in existing_obs_group_joinids:
+                soma_dim_0_batch.extend(obs_group_soma_joinids)
             else:
-                logging.info(f"Pass 2: Group {group_key} already computed. Skipping computation.")
+                logging.info(f"Pass 2: Group {group_id} already computed. Skipping computation.")
                 continue
 
             # Fetch data for multiple cube rows at once, to reduce X.read() call count
@@ -361,18 +381,13 @@ def pass_2_compute_estimators(
         logging.info("Pass 2: Completed")
 
 
-def write_estimators_batch(batch_result: pd.DataFrame, obs_df: pd.DataFrame, cube_uri: str) -> None:
+def write_estimators_batch(batch_result: pd.DataFrame, estimators_uri: str) -> None:
     if len(batch_result) > 0:
-        batch_result = batch_result.reset_index(CUBE_LOGICAL_DIMS_OBS)
-
-        # TODO: Can remove once https://github.com/TileDB-Inc/TileDB-Py/issues/1879 fix is available
-        # Ensure Pandas categorical columns must have the same underlying dictionaries as the TileDB Array
-        #  schema's enumeration columns
-        for col_ in CUBE_LOGICAL_DIMS_OBS:
-            batch_result[col_] = pd.Categorical(batch_result[col_], categories=obs_df[col_].unique().astype(str))
+        batch_result = batch_result.reset_index()
 
         logging.info("Pass 2: Writing to estimator cube.")
-        tiledb.from_pandas(cube_uri, batch_result, mode="append")
+
+        tiledb.from_pandas(estimators_uri, batch_result, mode="append")
 
     else:
         logging.warning("Pass 2: Batch had empty result")
@@ -398,12 +413,12 @@ def build(
         )
         logging.info(f"Pass 1: Processing {query.n_obs} cells and {query.n_vars} genes")
 
-        obs_size_factors_uri = cube_uri + OBS_SIZE_FACTORS_ARRAY_SUFFIX
+        obs_size_factors_uri = os.path.join(cube_uri, OBS_SIZE_FACTORS_ARRAY)
         if not tiledb.array_exists(obs_size_factors_uri):
             logging.info("Pass 1: Compute Approx Size Factors")
             size_factors = pass_1_compute_size_factors(query)
 
-            size_factors = size_factors.astype({col: "category" for col in CUBE_LOGICAL_DIMS_OBS})
+            size_factors = size_factors.astype({col: "category" for col in OBS_LOGICAL_DIMS})
             tiledb.from_pandas(obs_size_factors_uri, size_factors.reset_index(), index_col=[0])
             logging.info("Saved `obs_with_size_factor` TileDB Array")
         else:
@@ -441,7 +456,7 @@ def build_cli(
     if resume and overwrite:
         raise ValueError("Cannot specify both --resume and --overwrite")
 
-    if tiledb.array_exists(cube_uri):
+    if tiledb.array_exists(os.path.join(cube_uri, ESTIMATORS_ARRAY)):
         if resume:
             logging.info(f"Resuming from existing estimators cube at {cube_uri}.")
         elif overwrite:
