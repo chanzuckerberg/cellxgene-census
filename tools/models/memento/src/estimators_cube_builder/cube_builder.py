@@ -406,6 +406,9 @@ def build(
             "vfs.s3.no_sign_request": True,
         }
     )
+
+    os.makedirs(cube_uri, exist_ok=True)
+
     with soma.Experiment.open(uri=experiment_uri, context=soma_ctx) as exp:
         query = exp.axis_query(
             measurement_name=measurement_name,
@@ -456,7 +459,7 @@ def build_cli(
     if resume and overwrite:
         raise ValueError("Cannot specify both --resume and --overwrite")
 
-    if tiledb.array_exists(os.path.join(cube_uri, ESTIMATORS_ARRAY)):
+    if os.path.exists(cube_uri):
         if resume:
             logging.info(f"Resuming from existing estimators cube at {cube_uri}.")
         elif overwrite:
