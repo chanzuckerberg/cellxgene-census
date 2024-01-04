@@ -425,6 +425,7 @@ def build(
             tiledb.from_pandas(obs_size_factors_uri, size_factors.reset_index(), index_col=[0])
             logging.info("Saved `obs_with_size_factor` TileDB Array")
         else:
+            # TODO: Can remove caching of size factors; computing this is now fast
             logging.info("Pass 1: Compute Approx Size Factors (loading from stored data)")
             size_factors = tiledb.open(obs_size_factors_uri).df[:].set_index("soma_joinid")
 

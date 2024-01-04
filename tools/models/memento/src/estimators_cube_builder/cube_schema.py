@@ -75,7 +75,7 @@ def build_obs_groups_schema(n_obs_groups: int, obs_categorical_values: Dict[str,
         cell_order="row-major",
         tile_order="row-major",
         capacity=10000,
-        sparse=True,
+        sparse=True,  # TODO: Dense would work
         allows_duplicates=True,
     )
 
@@ -88,7 +88,6 @@ def build_estimators_schema(n_groups: int) -> ArraySchema:
     assert ESTIMATORS_TILEDB_DIMS == [dim.name for dim in domain]
     return ArraySchema(
         domain=domain,
-        # TODO: Not all attrs need to be int32
         attrs=[
             Attr(
                 name=estimator_name,
