@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 from typing import List, Tuple, cast
 
@@ -7,6 +8,8 @@ import numpy.typing as npt
 import pandas as pd
 import scipy.stats as stats
 import tiledb
+
+from tools.models.memento.src.estimators_cube_builder.cube_schema import ESTIMATORS_ARRAY, OBS_GROUPS_ARRAY
 
 CUBE_LOGICAL_DIMS_OBS = [
     "cell_type_ontology_term_id",
@@ -23,15 +26,17 @@ CUBE_LOGICAL_DIMS_OBS = [
 
 
 def run(cube_path_: str, filter_: str, treatment: str) -> pd.DataFrame:
-    estimators_df = query_estimators(cube_path_, filter_)
-    cell_counts, design, features, mean, se_mean = setup(estimators_df, treatment)
+    cube_df = query_estimators(cube_path_, filter_)
+    cell_counts, design, features, mean, se_mean = setup(cube_df, treatment)
     return compute_hypothesis_test(cell_counts, design, features, mean, se_mean)
 
 
 def query_estimators(cube_path_: str, filter_: str) -> pd.DataFrame:
-    with tiledb.open(cube_path_, "r") as estimators:
-        estimators_df = estimators.query(cond=filter_).df[:]
-        return cast(pd.DataFrame, estimators_df)
+    with tiledb.open(os.path.join(cube_path_, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
+        with tiledb.open(os.path.join(cube_path_, ESTIMATORS_ARRAY), "r") as estimators_array:
+            obs_groups_df = obs_groups_array.query(cond=filter_).df[:]
+            estimators_df = estimators_array.df[obs_groups_df.obs_group_joinid.values]
+            return cast(pd.DataFrame, obs_groups_df.merge(estimators_df, on="obs_group_joinid"))
 
 
 def compute_hypothesis_test(
@@ -58,9 +63,9 @@ def compute_hypothesis_test(
 
 
 def setup(
-    estimators: pd.DataFrame, treatment_variable: str
+    cube: pd.DataFrame, treatment_variable: str
 ) -> Tuple[npt.NDArray[np.float64], pd.DataFrame, List[str], pd.DataFrame, pd.DataFrame]:
-    distinct_treatment_values = estimators[[treatment_variable]].nunique()[0]
+    distinct_treatment_values = cube[[treatment_variable]].nunique()[0]
     assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
 
     # make treatment variable be in the first column of the design matrix
@@ -68,14 +73,14 @@ def setup(
         covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment_variable
     ]
 
-    mean = estimators.pivot_table(index=variables, columns="feature_id", values="mean").fillna(1e-3)
-    se_mean = estimators.pivot_table(index=variables, columns="feature_id", values="sem").fillna(1e-4)
+    mean = cube.pivot_table(index=variables, columns="feature_id", values="mean").fillna(1e-3)
+    se_mean = cube.pivot_table(index=variables, columns="feature_id", values="sem").fillna(1e-4)
 
-    groups = estimators[variables + ["n_obs"]].drop_duplicates(variables)
+    groups = cube[variables + ["n_obs"]].drop_duplicates(variables)
     cell_counts = cast(npt.NDArray[np.float64], groups["n_obs"].values)
     design = pd.get_dummies(groups[variables], drop_first=True, dtype=int)
 
-    features = estimators["feature_id"].drop_duplicates().tolist()
+    features = cube["feature_id"].drop_duplicates().tolist()
 
     assert len(cell_counts) == len(groups)
     assert design.shape[0] == len(groups)
