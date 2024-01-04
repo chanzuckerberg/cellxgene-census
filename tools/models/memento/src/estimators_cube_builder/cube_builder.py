@@ -141,8 +141,8 @@ def dense_gene_data(
     gene_group_rows: pd.DataFrame, size_factors_for_obs_group: pd.DataFrame
 ) -> Tuple[pd.DataFrame, npt.NDArray[np.float32], npt.NDArray[np.float64]]:
     data_dense = pd.concat(
-        [size_factors_for_obs_group[[]], gene_group_rows[["soma_data"]]], axis=1, copy=False
-    ).reset_index()
+        [size_factors_for_obs_group, gene_group_rows.soma_data], axis=1, copy=False
+    ).soma_data.reset_index()
 
     X_dense = data_dense.soma_data.to_numpy()
     X_dense = np.nan_to_num(X_dense)
