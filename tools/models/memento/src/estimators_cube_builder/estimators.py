@@ -33,7 +33,7 @@ def fill_invalid(val: npt.NDArray[np.float64], group_name: Tuple[str, ...]) -> n
 
     if num_invalid == val.shape[0]:
         # if all values are invalid, there are no valid values to choose from, so return all nans
-        logging.warning(f"all bootstrap variances are invalid for group {group_name}")
+        logging.debug(f"all bootstrap variances are invalid for group {group_name}")
         return np.full(shape=val.shape, fill_value=np.nan)
 
     val[invalid_mask] = np.random.choice(val[~invalid_mask], num_invalid)
@@ -102,7 +102,7 @@ def compute_variance(
     variance = mm_M2 - mm_M1**2
 
     if variance < 0:
-        logging.warning(f"negative variance ({variance}) for group {group_name}: {X.data}")
+        logging.debug(f"negative variance ({variance}) for group {group_name}: {X.data}")
         variance = mean
 
     return cast(np.float64, variance[0])

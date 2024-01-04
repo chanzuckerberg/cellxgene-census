@@ -67,6 +67,9 @@ repos:
           - numpy
           - pandas-stubs
           - typing_extensions
+          - pytest
+          - types-click
+
 
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.7.0
