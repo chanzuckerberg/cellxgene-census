@@ -18,6 +18,7 @@ jobs:
 
     steps:
       - name: log system state
+        if: ${{ matrix.os == 'single-cell-8c64g-runner' }}
         run: |
           free -g
           echo ---------
