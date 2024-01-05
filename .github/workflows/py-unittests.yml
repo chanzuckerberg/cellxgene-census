@@ -17,6 +17,14 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
+      - name: log system state
+        run: |
+          free -g
+          echo ---------
+          df -kh
+          echo ---------
+          lscpu
+          echo ---------
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
