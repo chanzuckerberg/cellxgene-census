@@ -52,11 +52,6 @@ jobs:
           echo ---------
           lscpu
 
-      - name: install OS dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
-
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
@@ -101,11 +96,6 @@ jobs:
           df -kh
           echo ---------
           lscpu
-
-      - name: install OS dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential git-all libxml2-dev libssl-dev libcurl4-openssl-dev cmake
 
       - uses: actions/checkout@v4
 
