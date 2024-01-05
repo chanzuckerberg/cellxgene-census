@@ -35,7 +35,10 @@ def run(cube_path_: str, filter_: str, treatment: str) -> pd.DataFrame:
 def query_estimators(cube_path_: str, filter_: str) -> pd.DataFrame:
     with tiledb.open(os.path.join(cube_path_, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         with tiledb.open(os.path.join(cube_path_, ESTIMATORS_ARRAY), "r") as estimators_array:
-            obs_groups_df = obs_groups_array.query(cond=filter_).df[:]
+            obs_groups_df = obs_groups_array.query(cond=filter_ or None).df[:]
+            # convert categorical columns to ints
+            for col in obs_groups_df.select_dtypes(include=["category"]).columns:
+                obs_groups_df[col] = obs_groups_df[col].cat.codes
             estimators_df = estimators_array.df[obs_groups_df.obs_group_joinid.values]
             return cast(pd.DataFrame, obs_groups_df.merge(estimators_df, on="obs_group_joinid"))
 
