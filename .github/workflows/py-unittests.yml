@@ -36,7 +36,7 @@ jobs:
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 --experimental ./api/python/cellxgene_census/tests/experimental
       - uses: actions/upload-artifact@v3
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'single-cell-8c64g-runner'
         with:
           name: coverage
           path: ./.coverage*
