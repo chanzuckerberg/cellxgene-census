@@ -90,8 +90,12 @@ def build(args: CensusBuildArgs) -> int:
 
     # Step 6 - create and save derived artifacts. Consolidate (do NOT vacuum) in parallel.
     with create_process_pool_executor(args, max_workers=3) as consolidation_ppe:
-        consolidation_futures = submit_consolidate(
-            args, root_collection.uri, pool=consolidation_ppe, vacuum=False, exclude=(r".*/X/normalized",)
+        consolidation_futures = (
+            submit_consolidate(
+                args, root_collection.uri, pool=consolidation_ppe, vacuum=False, exclude=(r".*/X/normalized",)
+            )
+            if args.config.consolidate
+            else []
         )
         build_step6_save_derived_data(root_collection, experiment_builders, args)
         log_on_broken_process_pool(consolidation_ppe)
@@ -133,15 +137,18 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
-    if len(datasets) == 0:
+    all_datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
+    if len(all_datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
     if args.config.test_first_n is not None and args.config.test_first_n > 0:
         # Process the N smallest datasets
-        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
+        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
+
+    else:
+        datasets = all_datasets
 
     # Stage all files
     stage_source_assets(datasets, args)
