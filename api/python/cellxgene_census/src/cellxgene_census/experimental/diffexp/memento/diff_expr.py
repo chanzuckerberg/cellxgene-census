@@ -9,7 +9,8 @@ import pandas as pd
 import scipy.stats as stats
 import tiledb
 
-from tools.models.memento.src.estimators_cube_builder.cube_schema import ESTIMATORS_ARRAY, OBS_GROUPS_ARRAY
+OBS_GROUPS_ARRAY = "obs_groups"
+ESTIMATORS_ARRAY = "estimators"
 
 CUBE_LOGICAL_DIMS_OBS = [
     "cell_type_ontology_term_id",
