@@ -8,7 +8,7 @@ import shutil
 import warnings
 from concurrent import futures
 from datetime import datetime
-from typing import List, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast
 
 import click
 import numpy as np
@@ -112,19 +112,29 @@ def compute_all_estimators_for_gene(
     if n_obs == 0:
         return pd.Series(data=[0.0] * len(ESTIMATOR_NAMES), dtype=float)
 
-    nnz = gene_group_rows.shape[0]
-    min_ = X_sparse.min()
-    max_ = X_sparse.max()
-    sum_ = X_sparse.sum()
-    mean = compute_mean(X_dense, size_factors_dense)
-    sem = compute_sem(X_dense, size_factors_dense)
-    variance = compute_variance(X_csc, Q, size_factors_dense, group_name=gene_group_name)
-    sev, selv = compute_sev(X_csc, Q, size_factors_dense, num_boot=500, group_name=gene_group_name)
+    estimators: Dict[str, Any] = {}
+    if "n_obs" in ESTIMATOR_NAMES:
+        estimators["n_obs"] = n_obs
+    if "nnz" in ESTIMATOR_NAMES:
+        estimators["nnz"] = gene_group_rows.shape[0]
+    if "min" in ESTIMATOR_NAMES:
+        estimators["min"] = X_sparse.min()
+    if "max" in ESTIMATOR_NAMES:
+        estimators["max"] = X_sparse.max()
+    if "sum" in ESTIMATOR_NAMES:
+        estimators["sum"] = X_sparse.sum()
+    if "mean" in ESTIMATOR_NAMES:
+        estimators["mean"] = compute_mean(X_dense, size_factors_dense)
+    if "sem" in ESTIMATOR_NAMES:
+        estimators["sem"] = compute_sem(X_dense, size_factors_dense)
+    if "var" in ESTIMATOR_NAMES:
+        estimators["var"] = compute_variance(X_csc, Q, size_factors_dense, group_name=gene_group_name)
+    if "sev" in ESTIMATOR_NAMES or "selv" in ESTIMATOR_NAMES:
+        estimators["sev"], estimators["selv"] = compute_sev(
+            X_csc, Q, size_factors_dense, num_boot=500, group_name=gene_group_name
+        )
 
-    estimators = dict(
-        n_obs=n_obs, nnz=nnz, min=min_, max=max_, sum=sum_, mean=mean, sem=sem, var=variance, sev=sev, selv=selv
-    )
-
+    # order matters for estimators
     return pd.Series(data=[estimators[n] for n in ESTIMATOR_NAMES], dtype=np.float64)
 
 
@@ -442,6 +452,12 @@ def build(
         logging.info("Validating estimators cube")
         validate_cube(cube_uri, experiment_uri)  # raises exception if invalid
         logging.info("Validation complete")
+
+    logging.info("Consolidating and vacuuming estimators array")
+    tiledb.consolidate(os.path.join(cube_uri, ESTIMATORS_ARRAY))
+    tiledb.vacuum(os.path.join(cube_uri, ESTIMATORS_ARRAY))
+
+    logging.info("Done building estimators cube")
 
     return True
 
