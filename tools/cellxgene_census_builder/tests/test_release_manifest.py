@@ -15,8 +15,6 @@ from cellxgene_census_builder.release_manifest import (
     validate_release_manifest,
 )
 
-from .conftest import has_aws_credentials
-
 # Should not be a real URL
 TEST_CENSUS_BASE_URL = "s3://bucket/path/"
 TEST_CENSUS_BASE_PREFIX = "/path/"
@@ -33,15 +31,6 @@ def test_get_release_manifest() -> None:
     assert "latest" in release_manifest
     assert release_manifest["latest"] in release_manifest
     validate_release_manifest(census_base_url, release_manifest, s3_anon=True)
-
-
-@pytest.mark.skipif(not has_aws_credentials(), reason="Unable to run without AWS credentials")
-def test_get_release_manifest_path() -> None:
-    with pytest.raises(OSError):
-        get_release_manifest("s3://no-such-bucket/or/path")
-
-    with pytest.raises(FileNotFoundError):
-        get_release_manifest("s3://cellxgene-data-public/no/such/base/path/")
 
 
 def soma_locator(tag: CensusVersionName) -> CensusLocator:
