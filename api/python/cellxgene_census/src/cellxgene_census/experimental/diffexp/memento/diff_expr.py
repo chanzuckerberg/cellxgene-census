@@ -85,7 +85,7 @@ def compute_hypothesis_test(
 def setup(
     cube: pd.DataFrame, treatment_variable: str
 ) -> Tuple[npt.NDArray[np.float64], pd.DataFrame, List[str], pd.DataFrame, pd.DataFrame]:
-    distinct_treatment_values = cube[[treatment_variable]].nunique()[0]
+    distinct_treatment_values = cube[treatment_variable].nunique()
     assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
 
     # make treatment variable be in the first column of the design matrix
