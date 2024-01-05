@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import logging
 import os
 import sys
 from typing import List, Tuple, cast
@@ -40,7 +41,20 @@ def query_estimators(cube_path_: str, filter_: str) -> pd.DataFrame:
             for col in obs_groups_df.select_dtypes(include=["category"]).columns:
                 obs_groups_df[col] = obs_groups_df[col].cat.codes
             estimators_df = estimators_array.df[obs_groups_df.obs_group_joinid.values]
-            return cast(pd.DataFrame, obs_groups_df.merge(estimators_df, on="obs_group_joinid"))
+
+            # TODO: Determine whether it's reasonable to drop these values, or if we should revisit how they're being
+            #  computed in the first place. If reasonable, this filtering should be done by the cube builder, not here.
+            # This filtering ensures that we will  not take of logs of non-positive values, or end up with selm values
+            # of 0
+            drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
+            if drop_mask.any():
+                logging.warning(
+                    f"dropping {drop_mask.sum()} rows with invalid values ({drop_mask.sum() / len(drop_mask):.2%})"
+                )
+                estimators_df = estimators_df[~drop_mask]
+
+            cube_df = obs_groups_df.merge(estimators_df, on="obs_group_joinid")
+            return cast(pd.DataFrame, cube_df)
 
 
 def compute_hypothesis_test(
@@ -60,6 +74,8 @@ def compute_hypothesis_test(
         lm = np.log(m)
         selm = (np.log(m + sem) - np.log(m - sem)) / 2
 
+        assert (selm > 0).all()
+
         coef, z, pv = de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
         de_result.append((feature, coef, z, pv))
 
@@ -76,7 +92,7 @@ def setup(
     variables = [treatment_variable] + [
         covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment_variable
     ]
-
+    # make a table with a column per feature, and a row per obs group
     mean = cube.pivot_table(index=variables, columns="feature_id", values="mean").fillna(1e-3)
     se_mean = cube.pivot_table(index=variables, columns="feature_id", values="sem").fillna(1e-4)
 
@@ -116,6 +132,7 @@ def de_wls(
     coef = WLS.coef_[treatment_col]
 
     W = np.diag(1 / v)
+
     beta_var_hat = np.diag(np.linalg.pinv(X.T @ W @ X))
     se = np.sqrt(beta_var_hat[treatment_col])
 
