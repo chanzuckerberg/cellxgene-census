@@ -141,6 +141,9 @@ class AnnDataProxy:
     def shape(self) -> tuple[int, int]:
         return self.n_obs, self.n_vars
 
+    def __len__(self) -> int:
+        return self.shape[0]
+
     def __getitem__(self, key: Index) -> "AnnDataProxy":
         odx, vdx = _normed_index(key)
         odx = _index_index(self._obs_idx, odx, self.n_obs)
