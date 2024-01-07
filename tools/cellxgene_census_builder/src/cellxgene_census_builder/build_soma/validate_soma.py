@@ -353,10 +353,7 @@ def _validate_X_obs_axis_stats(
         census_obs.raw_variance_nnz.to_numpy(), var(expected_X, axis=1, ddof=1), rtol=1e-03, atol=1e-05
     ), f"{eb.name}:{dataset.dataset_id} obs.raw_variance_nnz incorrect."
 
-    # obs.n_measured_vars
-    assert (
-        census_obs.n_measured_vars.to_numpy() == (expected_X.sum(axis=0) > 0).sum()
-    ).all(), f"{eb.name}:{dataset.dataset_id} obs.n_measured_vars incorrect."
+    # obs.n_measured_vars skipped - handled in _validate_Xraw_contents_by_dataset()
 
     return True
 
@@ -396,6 +393,12 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
             if len(obs_df) == 0:
                 continue
 
+            # Assert the stats values look reasonable
+            assert all(
+                np.isfinite(obs_df[col]).all() and (obs_df[col] >= 0).all()
+                for col in ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+            )
+
             # get the joinids for the var axis
             var_df = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
@@ -410,7 +413,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
 
             presence_accumulator = np.zeros((len(var_df),), dtype=np.bool_)
 
-            STRIDE = 250_000
+            STRIDE = 125_000
             for idx in range(0, ad.n_obs, STRIDE):
                 obs_joinids_split = obs_df.soma_joinid.to_numpy()[idx : idx + STRIDE]
                 X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"].read((obs_joinids_split, slice(None))).tables().concat()
@@ -438,6 +441,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                     CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
                 )  # back to the storage type
                 assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
+                del raw_sum
 
                 # Assertion 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
                 assert (
@@ -447,7 +451,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                     )
                     != expected_X
                 ).nnz == 0, f"{eb.name}:{dataset.dataset_id} the X matrix elements are not equal."
-                del X_raw_data
+                del X_raw_data, cols_by_position, rows_by_position, expected_X
 
                 # Assertion 2 - the contents of the X matrix are EMPTY for all var ids NOT present in the AnnData.
                 # Test by asserting that no col IDs contain a joinid not in the AnnData.
@@ -458,6 +462,8 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
 
                 presence_accumulator[X_raw_var_joinids] = 1
                 del X_raw_var_joinids
+
+                gc.collect()
 
             # Assertion 3- the contents of the presence matrix match the features present
             # in the AnnData (where presence is defined as having a non-zero value)
@@ -479,11 +485,15 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
             mask = np.zeros((exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME].shape[1],), dtype=bool)
             mask[presence["soma_dim_1"]] = presence["soma_data"]
             assert np.array_equal(presence_accumulator, mask)
+            del mask
 
-            # tidy
-            # del ad, obs_df, var_df, var_index, ad_X, ad_var, presence, presence_accumulator
-            del ad, obs_df, var_df, var_index, presence, presence_accumulator
-            gc.collect()
+            assert (
+                obs_df.n_measured_vars.to_numpy() == presence_accumulator.sum()
+            ).all(), f"{eb.name}:{dataset.dataset_id} obs.n_measured_vars incorrect."
+
+        # tidy
+        del ad, obs_df, var_df, var_index, presence, presence_accumulator, var_joinid_in_adata
+        gc.collect()
 
     del unfiltered_ad
     gc.collect()
@@ -504,7 +514,7 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
 
         X_layer = exp.ms[MEASUREMENT_RNA_NAME].X[layer_name]
         n_rows, n_cols = X_layer.shape
-        ROW_SLICE_SIZE = 100_000
+        ROW_SLICE_SIZE = 125_000
 
         for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
             slice_of_X = X_layer.read(coords=(slice(row, row + ROW_SLICE_SIZE - 1),)).tables().concat()
@@ -561,7 +571,7 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
         assert (feature_length > 0).any()
         assert X_raw.shape[1] == n_cols
 
-        ROW_SLICE_SIZE = 20_000
+        ROW_SLICE_SIZE = 25_000
         assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (
             2**31 - 1
         )  # else, will fail in scipy due to int32 overflow during coordinate broadcasting
@@ -593,11 +603,14 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             norm_csr = sparse.coo_matrix((norm["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
             raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
+            del raw, norm, dim0, dim1, row, col
+            gc.collect()
 
             sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
             if sseq_mask.any():
                 # this is a very costly operation - do it only when necessary
                 raw_csr[sseq_mask, :] /= feature_length
+            del sseq_mask
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
@@ -605,6 +618,8 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
             assert np.allclose(
                 norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
             ), f"{experiment_specification.name}: normalized layer does not match raw contents"
+
+            del norm_csr, raw_csr
             gc.collect()
 
     gc.collect()
@@ -656,13 +671,13 @@ def validate_X_layers(
                 avg_row_nnz = max(avg_row_nnz, math.ceil(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
 
     if args.config.multi_process:
-        ROWS_PER_PROCESS = 1_000_000
-        mem_budget_factor = int(10 * avg_row_nnz * 2)  # Heuristic:  3 columns, (int64, int64, float32), 100% pad.
+        ROWS_PER_PROCESS = 500_000
+        mem_budget_factor = int(20 * avg_row_nnz * 2)  # Heuristic:  3 columns, (int64, int64, float32), 100% overhead
         with create_resource_pool_executor(args) as ppe:
             futures = (
                 [
                     ppe.submit(
-                        250_000 * mem_budget_factor,
+                        75_000 * mem_budget_factor,
                         _validate_Xnorm_layer,
                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
                     )
@@ -671,7 +686,7 @@ def validate_X_layers(
                 ]
                 + [
                     ppe.submit(
-                        500_000 * mem_budget_factor,
+                        125_000 * mem_budget_factor,
                         _validate_X_layer_has_unique_coords,
                         (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
                     )
@@ -681,7 +696,7 @@ def validate_X_layers(
                 ]
                 + [
                     ppe.submit(
-                        12 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
+                        6 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
                         _validate_Xraw_contents_by_dataset,
                         (assets_path, soma_path, dataset, experiment_specifications),
                     )
@@ -963,7 +978,8 @@ def validate(args: CensusBuildArgs) -> bool:
     assert (eb_info := validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args))
     assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
-    assert validate_consolidation(soma_path)
+    if args.config.consolidate:
+        assert validate_consolidation(soma_path)
     assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
     logging.info("Validation finished (success)")
     return True

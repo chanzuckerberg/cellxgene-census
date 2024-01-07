@@ -289,8 +289,8 @@ DEFAULT_TILEDB_CONFIG = {
     # Concurrency levels are capped for high-CPU boxes. Left unchecked, some
     # of the largest host configs can bump into Linux kernel thread limits,
     # without any real benefit to overall performance.
-    "sm.compute_concurrency_level": min(cpu_count(), 64),
-    "sm.io_concurrency_level": min(cpu_count(), 64),
+    "sm.compute_concurrency_level": min(cpu_count(), 128),
+    "sm.io_concurrency_level": min(cpu_count(), 128),
 }
 
 

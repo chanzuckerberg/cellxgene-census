@@ -204,7 +204,6 @@ def log_process_resource_status(preface: str = "Resource use:", level: int = log
             f"page-faults(cumm)={_process_resource_getter.majflt[1]} "
             f"uss={mem_full_info.uss}, rss={mem_full_info.rss}",
         )
-    log_system_memory_status(level=level)
 
 
 def log_system_memory_status(preface: str = "System memory:", level: int = logging.DEBUG) -> None:
@@ -213,13 +212,14 @@ def log_system_memory_status(preface: str = "System memory:", level: int = loggi
     mem_total = _system_resource_getter.mem_total
     logging.log(
         level,
-        f"{preface} used={mem_used} ({100.*mem_used/mem_total:2.1f}%), "
-        f"max-used={max_mem_used} ({100.*max_mem_used/mem_total:2.1f}%), "
-        f"total={mem_total}",
+        f"{preface} mem-used={mem_used} ({100.*mem_used/mem_total:2.1f}%), "
+        f"max-mem-used={max_mem_used} ({100.*max_mem_used/mem_total:2.1f}%), "
+        f"mem-total={mem_total} "
+        f"load-avg={tuple(round(i,2) for i in psutil.getloadavg())}",
     )
 
 
-def start_resource_logger(log_period_sec: float = 10.0, level: int = logging.INFO) -> threading.Thread:
+def start_resource_logger(log_period_sec: float = 15.0, level: int = logging.INFO) -> threading.Thread:
     def resource_logger_target() -> None:
         while True:
             log_system_memory_status(level=level)
@@ -227,6 +227,7 @@ def start_resource_logger(log_period_sec: float = 10.0, level: int = logging.INF
 
     t = threading.Thread(target=resource_logger_target, daemon=True, name="Resource Logger")
     t.start()
+    logging.log(level, f"Starting process resource logger with period {log_period_sec}")
     return t
 
 

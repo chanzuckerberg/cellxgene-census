@@ -50,7 +50,7 @@ def _hard_process_cap(args: CensusBuildArgs, n_proc: int) -> int:
 
 def _default_worker_process_count(args: CensusBuildArgs) -> int:
     """Return the default worker process count, subject to configured limit."""
-    return _hard_process_cap(args, cpu_count() + 2)
+    return _hard_process_cap(args, cpu_count())
 
 
 def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
@@ -59,14 +59,20 @@ def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) 
     return min(n_workers, _default_worker_process_count(args))
 
 
-def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
+def create_process_pool_executor(
+    args: CensusBuildArgs,
+    max_workers: Optional[int] = None,
+    max_tasks_per_child: Optional[int] = None,
+) -> ProcessPoolExecutor:
     assert _mp_config_checks()
     if max_workers is None:
         max_workers = _default_worker_process_count(args)
     max_workers = max(1, max_workers)
-    logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
+    logging.debug(
+        f"create_process_pool_executor [max_workers={max_workers}, max_tasks_per_child={max_tasks_per_child}]"
+    )
     return ProcessPoolExecutor(
-        max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=10
+        max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=max_tasks_per_child
     )
 
 

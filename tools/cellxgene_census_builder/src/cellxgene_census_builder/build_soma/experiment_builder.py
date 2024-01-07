@@ -372,9 +372,10 @@ class ExperimentBuilder:
         feature_length = self.var_df.feature_length.to_numpy()
 
         if args.config.multi_process:
-            WRITE_NORM_STRIDE = 250_000  # controls TileDB fragment size, which impacts consolidation time
-            # memory budget: 3 attribute buffers * 3 threads * typical-nnz * overhead
-            mem_budget = int(20 * WRITE_NORM_STRIDE * 4000 * 2.1) + (1 * 1024**3)
+            WRITE_NORM_STRIDE = 2**18  # controls TileDB fragment size, which impacts consolidation time
+            mem_budget = (
+                int(20 * WRITE_NORM_STRIDE * 4000 * 2) + (3 * 1024**3) + feature_length.nbytes + is_smart_seq.nbytes
+            )
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
@@ -488,14 +489,14 @@ def _accumulate_all_X_layers(
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
 
         # accumulators
-        pres_data = np.zeros((ad.n_vars,), dtype=np.bool_)  # presence by dataset
         obs_stats: pd.DataFrame = pd.DataFrame()
         var_stats: pd.DataFrame = pd.DataFrame()
 
         for idx in range(0, ad.n_obs, ACCUM_X_STRIDE):
             logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
 
-            X = ad[idx : idx + ACCUM_X_STRIDE].X
+            ad_slice = ad[idx : idx + ACCUM_X_STRIDE]
+            X = ad_slice.X
             if isinstance(X, np.ndarray):
                 X = sparse.csr_matrix(X)
 
@@ -504,14 +505,10 @@ def _accumulate_all_X_layers(
 
             X.eliminate_zeros()
 
-            # accumulate presence info
-            pres_data = pres_data | (X.sum(axis=0) > 0).A[0]
-            assert isinstance(pres_data, np.ndarray)
-
             # accumulate obs/var axis stats
             _obs_stats, _var_stats = _get_axis_stats(X, idx + dataset_obs_joinid_start, local_var_joinids)
-            obs_stats = pd.concat([obs_stats, _obs_stats]) if obs_stats.empty else _obs_stats
-            var_stats = var_stats.add(_var_stats, fill_value=0).astype(np.int64) if var_stats.empty else _var_stats
+            obs_stats = pd.concat([obs_stats, _obs_stats])
+            var_stats = var_stats.add(_var_stats, fill_value=0).astype(np.int64)
 
             # remap to match axes joinids
             X = X.tocoo()
@@ -537,12 +534,22 @@ def _accumulate_all_X_layers(
 
         # Save presence information by dataset_id
         assert dataset.soma_joinid >= 0  # i.e., it was assigned prior to this step
-        pres_cols: npt.NDArray[np.int64] = local_var_joinids[np.arange(ad.n_vars, dtype=np.int64)]
-        assert pres_data.dtype == bool
-        assert pres_cols.dtype == np.int64
-        assert pres_data.shape == (ad.n_vars,)
-        assert pres_data.shape == pres_cols.shape
         assert ad.n_vars <= eb.n_var
+        obs_stats["n_measured_vars"] = (var_stats.nnz > 0).sum()
+        var_stats["n_measured_obs"] = np.zeros(
+            (len(var_stats),), dtype=CENSUS_VAR_TABLE_SPEC.field("n_measured_obs").to_pandas_dtype()
+        )
+        var_stats.n_measured_obs[var_stats.nnz > 0] = ad.n_obs
+
+        # sanity check on stats
+        assert len(var_stats) == ad.n_vars
+        assert len(obs_stats) == ad.n_obs
+        assert (
+            var_stats.n_measured_obs[var_stats.n_measured_obs != 0] == ad.n_obs
+        ).all(), f"n_measured_obs mismatch: {eb.name}:{dataset.dataset_id}"
+        assert (
+            obs_stats.n_measured_vars == np.count_nonzero(var_stats.nnz > 0)
+        ).all(), f"n_measured_vars mismatch: {eb.name}:{dataset.dataset_id}"
 
         results.append(
             (
@@ -550,18 +557,19 @@ def _accumulate_all_X_layers(
                     dataset.dataset_id,
                     dataset.soma_joinid,
                     eb.name,
-                    pres_data,
-                    pres_cols,
+                    (var_stats.nnz > 0).to_numpy(),
+                    var_stats.index.to_numpy(),
                 ),
                 AxisStats(eb.name, obs_stats, var_stats),
             )
         )
 
         # tidy
-        del ad, local_var_joinids, pres_data, pres_cols, obs_stats, var_stats
+        del ad, local_var_joinids, obs_stats, var_stats
 
     gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
+    log_process_resource_status()
     return results
 
 
@@ -625,7 +633,7 @@ def _accumulate_X(
         return executor.submit(
             # memory budget: stride X avg nnz X 20 bytes X overhead + space for obs/var (currently fixed value)
             int(
-                max(dataset.mean_genes_per_cell, 3000) * max(ACCUM_X_STRIDE, dataset.cell_count) * 20 * 2
+                max(dataset.mean_genes_per_cell, 3000) * max(ACCUM_X_STRIDE, dataset.cell_count) * 20 * 1.0
                 + (2 * 1024**3)
             ),
             _accumulate_all_X_layers,
@@ -782,17 +790,6 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
 
     sigma = np.finfo(np.float32).smallest_subnormal
 
-    def _norm_it(
-        tbl: pa.Table, obs_indices: npt.NDArray[np.int64]
-    ) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float32], npt.NDArray[np.int64]]:
-        d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
-        d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
-        data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
-        data = _normalize(d0, d1, data, is_smart_seq[obs_indices], feature_length)
-        data = _roundHalfToEven(data, keepbits=15)
-        data[data == 0] = sigma
-        return d0, d1, data, obs_indices
-
     with soma.open(
         urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
     ) as X_raw:
@@ -801,23 +798,31 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
             mode="w",
             context=SOMA_TileDB_Context(),
         ) as X_normalized:
-            lazy_reader = (
-                (tbl, obs_indices.to_numpy())
-                for tbl, (obs_indices, _) in X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),))
-                .blockwise(axis=0, size=2 * n, reindex_disable_on_axis=[1])
+            for tbl, (obs_indices, _) in (
+                X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),))
+                .blockwise(axis=0, size=2**16, reindex_disable_on_axis=[1], eager=False)
                 .tables()
-            )
-            lazy_norm_reader = (_norm_it(tbl, obs_indices) for tbl, obs_indices in lazy_reader)
-            for d0, d1, data, obs_indices in lazy_norm_reader:
+            ):
+                d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
+                d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
+                data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
+                d0_index = obs_indices.to_numpy()
+                del tbl, obs_indices
+                data = _normalize(d0, d1, data, is_smart_seq[d0_index], feature_length)
+                data = _roundHalfToEven(data, keepbits=15)
+                data[data == 0] = sigma
+                gc.collect()
                 X_normalized.write(
                     pa.Table.from_pydict(
                         {
-                            "soma_dim_0": obs_indices[d0],
+                            "soma_dim_0": d0_index[d0],
                             "soma_dim_1": d1,
                             "soma_data": data,
                         }
                     )
                 )
+                del d0_index, d0, d1, data
+                gc.collect()
 
     logging.info(f"Write X normalized - finished block {obs_joinid_start}")
 

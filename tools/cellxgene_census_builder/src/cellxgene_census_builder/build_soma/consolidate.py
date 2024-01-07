@@ -8,6 +8,7 @@ import tiledb
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
+from ..util import cpu_count
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
 from .mp import create_process_pool_executor, log_on_broken_process_pool
 
@@ -40,7 +41,12 @@ def consolidate(args: CensusBuildArgs, uri: str) -> None:
 
 
 def submit_consolidate(
-    args: CensusBuildArgs, uri: str, pool: Executor, vacuum: bool, exclude: Optional[Sequence[str]] = None
+    args: CensusBuildArgs,
+    uri: str,
+    pool: Executor,
+    vacuum: bool,
+    include: Optional[Sequence[str]] = None,
+    exclude: Optional[Sequence[str]] = None,
 ) -> Sequence[Future[str]]:
     """
     This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
@@ -52,7 +58,12 @@ def submit_consolidate(
         return ()
 
     exclude = [] if exclude is None else exclude
-    uris_to_consolidate = [obj for obj in _gather(uri) if not any(re.fullmatch(e, obj.uri) for e in exclude)]
+    include = [r".*"] if include is None else include
+    uris_to_consolidate = [
+        obj
+        for obj in _gather(uri)
+        if any(re.fullmatch(i, obj.uri) for i in include) and not any(re.fullmatch(e, obj.uri) for e in exclude)
+    ]
     logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
 
     futures = [pool.submit(_consolidate_tiledb_object, uri, vacuum) for uri in uris_to_consolidate]
@@ -102,6 +113,8 @@ def _consolidate_array(uri: str, vacuum: bool) -> None:
             config=tiledb.Config(
                 {
                     **DEFAULT_TILEDB_CONFIG,
+                    "sm.compute_concurrency_level": max(16, cpu_count()),
+                    "sm.io_concurrency_level": max(16, cpu_count()),
                     "sm.consolidation.buffer_size": 1 * 1024**3,
                     "sm.consolidation.mode": mode,
                 }
