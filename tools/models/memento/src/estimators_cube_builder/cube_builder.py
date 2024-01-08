@@ -108,13 +108,7 @@ def compute_all_estimators_for_gene(
 
     X_csc, X_sparse = sparse_gene_data(data_dense)
 
-    n_obs = len(X_dense)
-    if n_obs == 0:
-        return pd.Series(data=[0.0] * len(ESTIMATOR_NAMES), dtype=float)
-
     estimators: Dict[str, Any] = {}
-    if "n_obs" in ESTIMATOR_NAMES:
-        estimators["n_obs"] = n_obs
     if "nnz" in ESTIMATOR_NAMES:
         estimators["nnz"] = gene_group_rows.shape[0]
     if "min" in ESTIMATOR_NAMES:
@@ -248,6 +242,7 @@ def pass_2_compute_estimators(
     logging.info("Pass 2: Computing obs groups")
     obs_grouped = obs_df[OBS_LOGICAL_DIMS].groupby(OBS_LOGICAL_DIMS, observed=True)
     obs_df["obs_group_joinid"] = obs_grouped.ngroup()
+    # obs_df["n_obs"] = obs_grouped.size()
     obs_groups_soma_joinids = obs_grouped.groups
 
     obs_groups_uri = os.path.join(cube_uri, OBS_GROUPS_ARRAY)
@@ -262,7 +257,12 @@ def pass_2_compute_estimators(
     else:
         logging.info("Pass 2: Creating new estimators cube")
         existing_obs_group_joinids = None
-        obs_groups_df = obs_df[["obs_group_joinid"] + OBS_LOGICAL_DIMS].drop_duplicates().set_index("obs_group_joinid")
+        obs_groups_df = (
+            obs_df.groupby(["obs_group_joinid"] + OBS_LOGICAL_DIMS)
+            .size()
+            .reset_index(OBS_LOGICAL_DIMS)
+            .rename(columns={0: "n_obs"})
+        )
         obs_categorical_values = build_obs_categorical_values(obs_groups_df)
         tiledb.Array.create(
             uri=obs_groups_uri, schema=build_obs_groups_schema(len(obs_grouped), obs_categorical_values)

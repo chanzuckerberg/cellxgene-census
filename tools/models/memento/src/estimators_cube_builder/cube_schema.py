@@ -36,8 +36,8 @@ CUBE_LOGICAL_DIMS = ["feature_id"] + OBS_LOGICAL_DIMS
 
 ESTIMATORS_TILEDB_DIMS = ["feature_id", "obs_group_joinid"]
 
-# ESTIMATOR_NAMES = ["nnz", "n_obs", "min", "max", "sum", "mean", "sem", "var", "sev", "selv"]
-ESTIMATOR_NAMES = ["n_obs", "mean", "sem"]
+# ESTIMATOR_NAMES = ["nnz", "min", "max", "sum", "mean", "sem", "var", "sev", "selv"]
+ESTIMATOR_NAMES = ["mean", "sem"]
 
 
 def build_obs_categorical_values(obs_groups: pd.DataFrame) -> Dict[str, Enumeration]:
@@ -70,6 +70,9 @@ def build_obs_groups_schema(n_obs_groups: int, obs_categorical_values: Dict[str,
                 filters=FilterList([ZstdFilter(level=19)]),
             )
             for attr_name in OBS_LOGICAL_DIMS
+        ]
+        + [
+            Attr(name="n_obs", dtype=np.int32, nullable=False, filters=FilterList([ZstdFilter(level=19)])),
         ],
         offsets_filters=FilterList([DoubleDeltaFilter(), ZstdFilter(level=19)]),
         cell_order="row-major",

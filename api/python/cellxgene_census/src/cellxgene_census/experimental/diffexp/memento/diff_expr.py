@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
+from functools import partial
 from typing import List, Tuple, cast
 
 import numpy as np
@@ -11,6 +12,7 @@ import numpy.typing as npt
 import pandas as pd
 import scipy.stats as stats
 import tiledb
+from sklearn.linear_model import LinearRegression
 
 OBS_GROUPS_ARRAY = "obs_groups"
 ESTIMATORS_ARRAY = "estimators"
@@ -44,10 +46,10 @@ def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List
             )
             estimators_df = estimators_df[~drop_mask]
 
-        return obs_groups_df.merge(estimators_df, on="obs_group_joinid")
+        return cast(pd.DataFrame, estimators_df)
 
 
-def compute_hypothesis_test(cube_path: str, query_filter: str, treatment: str, n_threads: int) -> pd.DataFrame:
+def compute_all(cube_path: str, query_filter: str, treatment: str, n_threads: int) -> pd.DataFrame:
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
 
@@ -63,14 +65,12 @@ def compute_hypothesis_test(cube_path: str, query_filter: str, treatment: str, n
         features = estimators_array.query(attrs=[], dims=["feature_id"]).df[:]["feature_id"].drop_duplicates().tolist()
 
     # partition features into N groups
-    feature_groups = [features.tolist() for features in np.split(np.array(features), min(len(features), n_threads))]
+    n_groups = min(len(features), n_threads)
+    feature_groups = [features.tolist() for features in np.split(np.array(features), n_groups)]
 
     # compute each feature group in parallel
     result_groups = ProcessPoolExecutor(max_workers=n_threads).map(
-        compute_hypothesis_test_features,
-        itertools.cycle([cube_path]),
-        itertools.cycle([obs_groups_df]),
-        itertools.cycle([treatment]),
+        partial(compute_for_features, cube_path, obs_groups_df, treatment),
         feature_groups,
     )
 
@@ -80,56 +80,49 @@ def compute_hypothesis_test(cube_path: str, query_filter: str, treatment: str, n
     return pd.DataFrame(results, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id")
 
 
-def compute_hypothesis_test_features(
+def compute_for_features(
     cube_path: str, obs_groups_df: pd.DataFrame, treatment: str, features: List[str]
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
-    cell_counts, design, mean, se_mean = load_data(cube_path, obs_groups_df, treatment, features)
+    estimators = query_estimators(cube_path, obs_groups_df, features)
+
+    # make treatment variable be in the first column of the design matrix
+    variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
+
+    design = pd.get_dummies(obs_groups_df[variables], drop_first=True, dtype=int)
+
     return [
-        (feature, *compute_hypothesis_test_feature(cell_counts, design, mean, se_mean, feature))  # type:ignore
+        (feature, *compute_for_feature(obs_groups_df, design, estimators, feature))  # type:ignore
         for feature in features
     ]
 
 
-def compute_hypothesis_test_feature(
-    cell_counts: npt.NDArray[np.float32],
+def compute_for_feature(
+    obs_groups_df: pd.DataFrame,
     design: pd.DataFrame,
-    mean: pd.DataFrame,
-    se_mean: pd.DataFrame,
+    estimators: pd.DataFrame,
     feature: str,
 ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
-    m = cast(npt.NDArray[np.float32], mean[feature].values)
-    sem = cast(npt.NDArray[np.float32], se_mean[feature].values)
+    cell_counts = cast(npt.NDArray[np.float32], obs_groups_df["n_obs"].values)
+
+    # extract estimators for the specified feature
+    feature_estimators = estimators[estimators.feature_id == feature][["obs_group_joinid", "mean", "sem"]]
+
+    # ensure estimators are available for all obs groups (for when feature had no expression data for some obs groups)
+    feature_estimators = obs_groups_df[["obs_group_joinid"]].merge(
+        feature_estimators, on="obs_group_joinid", how="left"
+    )
+    m = cast(npt.NDArray[np.float32], feature_estimators["mean"].fillna(1e-3).values)
+    sem = cast(npt.NDArray[np.float32], feature_estimators["sem"].fillna(1e-4).values)
+
+    assert len(m) == len(design)
+    assert len(sem) == len(design)
+
     # Transform to log space (alternatively can resample in log space)
     lm = np.log(m)
     selm = (np.log(m + sem) - np.log(m - sem)) / 2
     assert (selm > 0).all()
+
     return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
-
-
-def load_data(
-    cube_path: str, obs_groups_df: pd.DataFrame, treatment: str, features: List[str]
-) -> Tuple[npt.NDArray[np.float32], pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    cube = query_estimators(cube_path, obs_groups_df, features)
-
-    # make treatment variable be in the first column of the design matrix
-    variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
-    # make a table with a column per feature, and a row per obs group
-    mean = cube.pivot_table(index=variables, columns="feature_id", values="mean").fillna(1e-3)
-    se_mean = cube.pivot_table(index=variables, columns="feature_id", values="sem").fillna(1e-4)
-
-    # TODO: "n_obs" can be stored on obs_groups array, and so cell_counts can be computed from that instead of `cube`
-    groups = cube[variables + ["n_obs"]].drop_duplicates(variables)
-    cell_counts = cast(npt.NDArray[np.float32], groups["n_obs"].values)
-    design = pd.get_dummies(groups[variables], drop_first=True, dtype=int)
-
-    n_groups = len(groups)
-    n_features = cube["feature_id"].nunique()
-    assert len(cell_counts) == n_groups
-    assert design.shape[0] == n_groups
-    assert mean.shape == (n_groups, n_features)
-    assert se_mean.shape == (n_groups, n_features)
-
-    return cell_counts, design, mean, se_mean
 
 
 def de_wls(
@@ -141,8 +134,6 @@ def de_wls(
     """
     Perform DE for each gene using Weighted Least Squares (i.e., a weighted Linear Regression model)
     """
-
-    from sklearn.linear_model import LinearRegression
 
     # fit WLS using sample_weights
     WLS = LinearRegression()
@@ -172,7 +163,7 @@ if __name__ == "__main__":
 
     filter_arg, treatment_arg, cube_path_arg, csv_output_path_arg = sys.argv[1:5]
 
-    de_result = compute_hypothesis_test(cube_path_arg, filter_arg, treatment_arg, n_threads=os.cpu_count() or 1)
+    de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, os.cpu_count() or 1)
 
     # Output DE result
     print(de_result)
