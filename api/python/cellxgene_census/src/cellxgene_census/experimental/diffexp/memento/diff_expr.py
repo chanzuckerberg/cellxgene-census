@@ -53,7 +53,7 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_threads: in
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
 
-        distinct_treatment_values = obs_groups_array.query().df[:][treatment].nunique()
+        distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
 
         # convert categorical columns to ints
