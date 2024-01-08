@@ -38,6 +38,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -101,7 +102,7 @@ to reuse a handle if calling <code>get_source_h5ad_uri()</code> multiple times.<
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">get_source_h5ad_uri</span><span class="op">(</span><span class="st">"0895c838-e550-48a3-a777-dbcd35d30272"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $uri</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/h5ads/0895c838-e550-48a3-a777-dbcd35d30272.h5ad"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/h5ads/0895c838-e550-48a3-a777-dbcd35d30272.h5ad"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $s3_region</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "us-west-2"</span>
