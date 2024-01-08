@@ -20,7 +20,7 @@ from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
-from .anndata import make_anndata_cell_filter2, open_anndata2
+from .anndata import make_anndata_cell_filter2, open_anndata2, open_anndata2_filterable
 from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
 from .experiment_builder import ExperimentSpecification
@@ -371,7 +371,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
     """
     assets_path, soma_path, dataset, experiment_specifications = args
     logging.info(f"validate X[raw] by contents - starting {dataset.dataset_id}")
-    unfiltered_ad = open_anndata2(assets_path, dataset)
+    unfiltered_ad = open_anndata2_filterable(assets_path, dataset, var_column_names=("_index",))
 
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:

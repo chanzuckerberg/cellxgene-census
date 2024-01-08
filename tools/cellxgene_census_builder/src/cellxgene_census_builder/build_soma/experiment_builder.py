@@ -29,7 +29,7 @@ from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
-from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2
+from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2_filterable
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
@@ -438,7 +438,7 @@ class AccumXEBParams:
 
 
 # Read dim0 coords stride
-ACCUM_X_STRIDE = 250_000
+ACCUM_X_STRIDE = 125_000
 
 
 def _accumulate_all_X_layers(
@@ -459,8 +459,7 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    gc.collect()
-    unfiltered_ad = open_anndata2(assets_path, dataset)
+    unfiltered_ad = open_anndata2_filterable(assets_path, dataset, var_column_names=("_index",))
 
     results: List[AccumulateXResult] = []
     for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
@@ -495,8 +494,7 @@ def _accumulate_all_X_layers(
         for idx in range(0, ad.n_obs, ACCUM_X_STRIDE):
             logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
 
-            ad_slice = ad[idx : idx + ACCUM_X_STRIDE]
-            X = ad_slice.X
+            X = ad[idx : idx + ACCUM_X_STRIDE].X
             if isinstance(X, np.ndarray):
                 X = sparse.csr_matrix(X)
 
@@ -504,11 +502,14 @@ def _accumulate_all_X_layers(
                 logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
 
             X.eliminate_zeros()
+            gc.collect()
 
             # accumulate obs/var axis stats
             _obs_stats, _var_stats = _get_axis_stats(X, idx + dataset_obs_joinid_start, local_var_joinids)
             obs_stats = pd.concat([obs_stats, _obs_stats])
             var_stats = var_stats.add(_var_stats, fill_value=0).astype(np.int64)
+            del _obs_stats, _var_stats
+            gc.collect()
 
             # remap to match axes joinids
             X = X.tocoo()
@@ -517,6 +518,8 @@ def _accumulate_all_X_layers(
             col = local_var_joinids[X.col]
             assert (col >= 0).all()
             data = X.data
+            del X
+            gc.collect()
 
             with soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
                 experiment.ms[ms_name].X[layer_name].write(
@@ -529,7 +532,7 @@ def _accumulate_all_X_layers(
                     )
                 )
 
-            del X, row, col, data
+            del row, col, data
             gc.collect()
 
         # Save presence information by dataset_id
@@ -631,9 +634,20 @@ def _accumulate_X(
 
     if executor is not None:
         return executor.submit(
-            # memory budget: stride X avg nnz X 20 bytes X overhead + space for obs/var (currently fixed value)
+            # memory budget:
+            #   X slices: stride * avg_var_nnz * 20 bytes * overhead
+            # + anndata obs/var:  (n_var * 5 cols * 8 + n_obs * 4 * 8) * overhead
+            # + stats space: 5 col * n_obs * 8 bytes * overhead
+            # + working space: fixed value
             int(
-                max(dataset.mean_genes_per_cell, 3000) * max(ACCUM_X_STRIDE, dataset.cell_count) * 20 * 1.0
+                (
+                    max(dataset.mean_genes_per_cell, 3000)
+                    * min(ACCUM_X_STRIDE, dataset.dataset_total_cell_count)
+                    * 20
+                    * 8
+                )
+                + (100_000 * 40 + dataset.dataset_total_cell_count * 32) * 8
+                + (dataset.dataset_total_cell_count * 40) * 8
                 + (2 * 1024**3)
             ),
             _accumulate_all_X_layers,

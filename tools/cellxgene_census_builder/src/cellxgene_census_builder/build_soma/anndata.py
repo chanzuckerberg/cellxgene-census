@@ -1,7 +1,7 @@
 import logging
 from functools import cached_property
 from os import PathLike
-from typing import Any, List, Optional, Protocol, Self, TypedDict, cast
+from typing import Any, List, Optional, Protocol, Self, Tuple, TypedDict, cast
 
 import h5py
 import numpy as np
@@ -12,7 +12,7 @@ from anndata.experimental import CSCDataset, CSRDataset, read_elem, sparse_datas
 
 from ..util import urlcat
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
+from .globals import CXG_OBS_COLUMNS_READ, CXG_SCHEMA_VERSION, CXG_VAR_COLUMNS_READ, FEATURE_REFERENCE_IGNORE
 
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
@@ -91,12 +91,14 @@ class AnnDataProxy:
         view_of: Self | None = None,
         obs_idx: slice | npt.NDArray[np.int64] | None = None,
         var_idx: slice | npt.NDArray[np.int64] | None = None,
+        obs_column_names: Optional[Tuple[str, ...]] = None,
+        var_column_names: Optional[Tuple[str, ...]] = None,
     ):
         self.filename = filename
         self.is_view = view_of is not None
 
         if view_of is None:
-            self._obs, self._var, self._X = self._load_h5ad()
+            self._obs, self._var, self._X = self._load_h5ad(obs_column_names, var_column_names)
             self._obs_idx: slice | npt.NDArray[np.int64] = slice(None)
             self._var_idx: slice | npt.NDArray[np.int64] = slice(None)
         else:
@@ -150,9 +152,26 @@ class AnnDataProxy:
         vdx = _index_index(self._var_idx, vdx, self.n_vars)
         return AnnDataProxy(self.filename, view_of=self, obs_idx=odx, var_idx=vdx)
 
-    def _load_h5ad(self) -> tuple[pd.DataFrame, pd.DataFrame, CSRDataset | CSCDataset | h5py.Dataset]:
+    def _load_dataframe(self, elem: h5py.Group, column_names: Tuple[str, ...]) -> pd.DataFrame:
+        assert len(column_names) > 0
+        assert elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0"
+        index: Optional[npt.NDArray[Any]] = None
+        if "_index" in column_names:
+            index_col_name = elem.attrs["_index"]
+            index = read_elem(elem[index_col_name])
+        return pd.DataFrame(
+            {col_name: read_elem(elem[col_name]) for col_name in column_names if col_name != "_index"}, index=index
+        )
+
+    def _load_h5ad(
+        self, obs_column_names: Optional[Tuple[str, ...]], var_column_names: Optional[Tuple[str, ...]]
+    ) -> tuple[pd.DataFrame, pd.DataFrame, CSRDataset | CSCDataset | h5py.Dataset]:
         """
-        A memory optimization to prevent reading obsm/varm/obsp/varp which are often huge.
+        A memory optimization to prevent reading unnecessary data from the H5AD. This includes
+        skipping:
+            * obsm/varm/obsp/varp
+            * unused obs/var columns
+            * reading both raw and !raw
 
         Could be done with AnnData, at the expense of time & space to to read unused slots.
 
@@ -162,11 +181,13 @@ class AnnDataProxy:
             var, X = (adata.raw.var, adata.raw.X) if adata.raw else (adata.var, adata.X)
             return adata.obs, var, X
 
+        This code utilizes the AnnData on-disk spec and several experimental API (as of 0.10.0).
+        Spec: https://anndata.readthedocs.io/en/latest/fileformat-prose.html
         """
 
         file = h5py.File(self.filename, mode="r")
 
-        # Known to be compatible with this AnnData file encodin
+        # Known to be compatible with this AnnData file encoding
         assert file.attrs["encoding-type"] == "anndata" and file.attrs["encoding-version"] == "0.1.0"
 
         # Verify we are reading the expected CxG schema version.
@@ -176,13 +197,16 @@ class AnnDataProxy:
                 f"{self.filename} -- incorrect CxG schema version (got {schema_version}, expected {CXG_SCHEMA_VERSION})"
             )
 
-        obs = read_elem(file["obs"])
+        # column defaults are everything defined in CxG schema and used by the Builder
+        obs_column_names = obs_column_names or CXG_OBS_COLUMNS_READ
+        var_column_names = var_column_names or CXG_VAR_COLUMNS_READ
+
+        obs = self._load_dataframe(file["obs"], obs_column_names)
         if "raw" in file:
-            var = read_elem(file["raw/var"])
+            var = self._load_dataframe(file["raw/var"], var_column_names)
             X = file["raw/X"]
-            assert var.index.equals(read_elem(file["var"]).index)
         else:
-            var = read_elem(file["var"])
+            var = self._load_dataframe(file["var"], var_column_names)
             X = file["X"]
 
         if isinstance(X, h5py.Group):
@@ -193,13 +217,40 @@ class AnnDataProxy:
         return obs, var, X
 
 
-def open_anndata2(base_path: str, dataset: Dataset) -> AnnDataProxy:
-    return AnnDataProxy(urlcat(base_path, dataset.dataset_h5ad_path))
+def open_anndata2(
+    base_path: str,
+    dataset: Dataset,
+    *,
+    obs_column_names: Optional[Tuple[str, ...]] = None,
+    var_column_names: Optional[Tuple[str, ...]] = None,
+) -> AnnDataProxy:
+    return AnnDataProxy(
+        urlcat(base_path, dataset.dataset_h5ad_path),
+        obs_column_names=obs_column_names,
+        var_column_names=var_column_names,
+    )
+
+
+def open_anndata2_filterable(
+    base_path: str,
+    dataset: Dataset,
+    *,
+    obs_column_names: Optional[Tuple[str, ...]] = None,
+    var_column_names: Optional[Tuple[str, ...]] = None,
+) -> AnnDataProxy:
+    obs_column_names = tuple(set(CXG_OBS_COLUMNS_MINIMUM_READ + (obs_column_names or ())))
+    var_column_names = tuple(set(CXG_VAR_COLUMNS_MINIMUM_READ + (var_column_names or ())))
+    return open_anndata2(base_path, dataset, obs_column_names=obs_column_names, var_column_names=var_column_names)
 
 
 class AnnDataFilterFunction2(Protocol):
     def __call__(self, ad: AnnDataProxy) -> AnnDataProxy:
         ...
+
+
+# The minimum columns required to be able to filter an H5AD
+CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_ontology_term_id")
+CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
 def make_anndata_cell_filter2(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFunction2:

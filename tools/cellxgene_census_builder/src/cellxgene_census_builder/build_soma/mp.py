@@ -23,6 +23,7 @@ from typing import (
 )
 
 import attrs
+import psutil
 
 from ..build_state import CensusBuildArgs
 from ..util import cpu_count, log_system_memory_status, process_init
@@ -324,6 +325,8 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
             processes=max_workers, initializer=initializer, initargs=initargs, maxtasksperchild=max_tasks_per_child
         )
 
+        self.warn_on_resource_limit = int(psutil.virtual_memory().total / cpu_count())
+
         # create and start scheduler thread
         self.scheduler = _Scheduler(self, max_resources)
         self.scheduler.start()
@@ -333,6 +336,9 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         return self.process_pool._state not in ["RUN", "INIT", "CLOSE"]  # type: ignore[attr-defined]
 
     def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
+        if resources > self.warn_on_resource_limit:
+            logging.debug(f"ResourcePoolProcessExecutor: large job submitted fn={fn}, resources={resources}")
+
         f = Future[_T]()
         self.scheduler.submit(_WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs))
         return f

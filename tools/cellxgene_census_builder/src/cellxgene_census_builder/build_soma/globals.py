@@ -98,6 +98,11 @@ CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modificatio
     "tissue_ontology_term_id",
     "tissue_type",
 ]
+CXG_OBS_COLUMNS_READ: Tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata2()
+    *CXG_OBS_TERM_COLUMNS,
+    "organism",
+    "organism_ontology_term_id",
+)
 CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
 CENSUS_OBS_FIELDS: List[Union[FieldSpec, Tuple[str, pa.DataType]]] = [
     ("soma_joinid", pa.int64()),
@@ -173,6 +178,13 @@ CENSUS_OBS_PLATFORM_CONFIG = {
     }
 }
 
+CXG_VAR_COLUMNS_READ: Tuple[str, ...] = (
+    "_index",
+    "feature_name",
+    "feature_length",
+    "feature_reference",
+    "feature_biotype",
+)
 CENSUS_VAR_TABLE_SPEC = TableSpec.create(
     [
         ("soma_joinid", pa.int64()),
