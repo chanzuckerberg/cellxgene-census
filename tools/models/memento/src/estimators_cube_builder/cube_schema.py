@@ -34,7 +34,7 @@ OBS_LOGICAL_DIMS = [
 
 CUBE_LOGICAL_DIMS = ["feature_id"] + OBS_LOGICAL_DIMS
 
-ESTIMATORS_TILEDB_DIMS = ["obs_group_joinid", "feature_id"]
+ESTIMATORS_TILEDB_DIMS = ["feature_id", "obs_group_joinid"]
 
 # ESTIMATOR_NAMES = ["nnz", "n_obs", "min", "max", "sum", "mean", "sem", "var", "sev", "selv"]
 ESTIMATOR_NAMES = ["n_obs", "mean", "sem"]
@@ -82,8 +82,8 @@ def build_obs_groups_schema(n_obs_groups: int, obs_categorical_values: Dict[str,
 
 def build_estimators_schema(n_groups: int) -> ArraySchema:
     domain = Domain(
-        Dim(name="obs_group_joinid", dtype=np.uint32, domain=(0, n_groups), filters=FilterList([ZstdFilter(level=19)])),
         Dim(name="feature_id", dtype="ascii", filters=FilterList([DictionaryFilter(), ZstdFilter(level=19)])),
+        Dim(name="obs_group_joinid", dtype=np.uint32, domain=(0, n_groups), filters=FilterList([ZstdFilter(level=19)])),
     )
     assert ESTIMATORS_TILEDB_DIMS == [dim.name for dim in domain]
     return ArraySchema(
