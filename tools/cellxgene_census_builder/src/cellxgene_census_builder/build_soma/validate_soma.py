@@ -883,8 +883,9 @@ def validate_soma_bounding_box(
     """
     Verify that single-cell-data/TileDB-SOMA#1969 is not affecting our results.
 
-    IMPORTANT: it is _known_ to affect at least one array, which is removed from
-    the assertions below until the bug is fixed.
+    Verification is:
+        * shape is set correctly
+        * no sparse arrays contain the bounding box in metadata
     """
 
     def get_sparse_arrays(C: soma.Collection) -> List[soma.SparseNDArray]:
@@ -897,60 +898,31 @@ def validate_soma_bounding_box(
                 uris += get_sparse_arrays(soma_obj)
         return uris
 
-    def bounding_box(SA: soma.SparseNDArray) -> Tuple[Tuple[int, int], Tuple[int, int]]:
-        m = SA.metadata
-        return (
-            (m["soma_dim_0_domain_lower"], m["soma_dim_0_domain_upper"]),
-            (m["soma_dim_1_domain_lower"], m["soma_dim_1_domain_upper"]),
-        )
-
-    # first, confirm we set shape correctly, as the code uses it as the max bounnding box
+    # first, confirm we set shape correctly, as the code uses it as the max bounding box
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
             n_obs = eb_info[eb.name].n_obs
             n_vars = eb_info[eb.name].n_vars
-            if "raw" in exp.ms[MEASUREMENT_RNA_NAME].X:
-                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape[0] == n_obs
-                assert exp.ms[MEASUREMENT_RNA_NAME].X["raw"].shape[1] == n_vars
-            if "normalized" in exp.ms[MEASUREMENT_RNA_NAME].X:
-                assert exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape[0] == n_obs
-                assert exp.ms[MEASUREMENT_RNA_NAME].X["normalized"].shape[1] == n_vars
+            for layer_name in exp.ms[MEASUREMENT_RNA_NAME].X:
+                assert exp.ms[MEASUREMENT_RNA_NAME].X[layer_name].shape == (n_obs, n_vars)
             if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:
                 assert exp.ms[MEASUREMENT_RNA_NAME]["feature_dataset_presence_matrix"].shape[1] == n_vars
 
-    # now check that the bounding boxes are in between nonempty-domain and shape. Unfortunately,
-    # SOMA is ambiguous about which is correct, and the result depends on the data path. More
-    # info on this at single-cell-data/TileDB-SOMA#1971
     with soma.open(soma_path) as C:
         sparse_array_uris = get_sparse_arrays(C)
 
-    # This list will WARN, not ASSERT. Which is the best we can do until the core issue is resolved,
-    # or we monkeypatch the end array. TBD which is best, so warn for now.
-    KNOWN_TO_FAIL_DUE_TO_TILEDBSOMA_1969 = [
-        "census_data/mus_musculus/ms/RNA/X/normalized",
-        "census_data/homo_sapiens/ms/RNA/X/normalized",
-        "census_data/mus_musculus/ms/RNA/X/raw",
-        "census_data/homo_sapiens/ms/RNA/X/raw",
+    # these must not exist
+    bbox_metadata_keys = [
+        "soma_dim_0_domain_lower",
+        "soma_dim_0_domain_upper",
+        "soma_dim_1_domain_lower",
+        "soma_dim_1_domain_upper",
     ]
-
     for uri in sparse_array_uris:
-        with tiledb.open(uri) as SA:
-            nonempty_domain = SA.nonempty_domain()
         with soma.open(uri) as SA:
-            soma_bounding_box = bounding_box(SA)
-            shape_bounding_box = ((0, SA.shape[0] - 1), (0, SA.shape[1] - 1))
-
-        # TEMP WORK AROUND - same test - just warn instead of asserting
-        if not ((nonempty_domain == soma_bounding_box) or (shape_bounding_box == soma_bounding_box)):
-            if any(filter(lambda s: uri.endswith(s), KNOWN_TO_FAIL_DUE_TO_TILEDBSOMA_1969)):
-                logging.error(
-                    f"Bounding box mismatch for {uri}:  {nonempty_domain}, {soma_bounding_box}, {shape_bounding_box}"
-                )
-                continue
-
-        assert (nonempty_domain == soma_bounding_box) or (
-            shape_bounding_box == soma_bounding_box
-        ), f"Bounding box mismatch for {uri}:  {nonempty_domain}, {soma_bounding_box}, {shape_bounding_box}"
+            metadata = SA.metadata
+            for key in bbox_metadata_keys:
+                assert key not in metadata, f"Unexpected bounding box key {key} found in metadata for {uri}"
 
     return True
 

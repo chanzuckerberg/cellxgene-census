@@ -107,6 +107,10 @@ def build(args: CensusBuildArgs) -> int:
         del consolidation_futures
 
     # Final step: consolidate and vacuum TileDB data. Some may already be consolidated, but it is fine to do it again.
+    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+    tiledb_soma_1969_work_around(root_collection.uri)
+
+    # consolidate TileDB data
     if args.config.consolidate:
         with create_process_pool_executor(args) as consolidation_ppe:
             consolidation_futures = submit_consolidate(args, root_collection.uri, pool=consolidation_ppe, vacuum=True)
@@ -301,3 +305,35 @@ def build_step6_save_derived_data(
 
     logging.info("Build step 6 - Creating derived objects - finished")
     return
+
+
+def tiledb_soma_1969_work_around(census_uri: str) -> None:
+    """See single-cell-data/TileDB-SOMA#1969 and other issues related. Remove any inserted bounding box metadata"""
+
+    bbox_metadata_keys = [
+        "soma_dim_0_domain_lower",
+        "soma_dim_0_domain_upper",
+        "soma_dim_1_domain_lower",
+        "soma_dim_1_domain_upper",
+    ]
+
+    def _walk_tree(C: soma.Collection) -> List[str]:
+        assert C.soma_type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]
+        uris = []
+        for soma_obj in C.values():
+            type = soma_obj.soma_type
+            if type == "SOMASparseNDArray":
+                uris.append(soma_obj.uri)
+            elif type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
+                uris += _walk_tree(soma_obj)
+
+        return uris
+
+    with soma.open(census_uri, mode="r") as census:
+        sparse_ndarray_uris = _walk_tree(census)
+
+    for uri in sparse_ndarray_uris:
+        logging.info(f"tiledb_soma_1969_work_around: deleting bounding box from {uri}")
+        with soma.open(uri, mode="w") as A:
+            for key in bbox_metadata_keys:
+                del A.metadata[key]
