@@ -12,7 +12,7 @@ from anndata.experimental import CSCDataset, CSRDataset, read_elem, sparse_datas
 
 from ..util import urlcat
 from .datasets import Dataset
-from .globals import CXG_OBS_COLUMNS_READ, CXG_SCHEMA_VERSION, CXG_VAR_COLUMNS_READ, FEATURE_REFERENCE_IGNORE
+from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
 
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
@@ -152,16 +152,22 @@ class AnnDataProxy:
         vdx = _index_index(self._var_idx, vdx, self.n_vars)
         return AnnDataProxy(self.filename, view_of=self, obs_idx=odx, var_idx=vdx)
 
-    def _load_dataframe(self, elem: h5py.Group, column_names: Tuple[str, ...]) -> pd.DataFrame:
+    def _load_dataframe(self, elem: h5py.Group, column_names: Optional[Tuple[str, ...]]) -> pd.DataFrame:
+        # if reading all, just use the built-in
+        if not column_names:
+            return cast(pd.DataFrame, read_elem(elem))
+
+        # else read each user-specified column/index separately, taking care to preserve the
+        # original dataframe column ordering
         assert len(column_names) > 0
         assert elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0"
+        column_order = elem.attrs["column-order"]
+        column_names_ordered = [c for c in column_order if c in column_names and c != "_index"]
         index: Optional[npt.NDArray[Any]] = None
         if "_index" in column_names:
             index_col_name = elem.attrs["_index"]
             index = read_elem(elem[index_col_name])
-        return pd.DataFrame(
-            {col_name: read_elem(elem[col_name]) for col_name in column_names if col_name != "_index"}, index=index
-        )
+        return pd.DataFrame({c: read_elem(elem[c]) for c in column_names_ordered}, index=index)
 
     def _load_h5ad(
         self, obs_column_names: Optional[Tuple[str, ...]], var_column_names: Optional[Tuple[str, ...]]
@@ -196,10 +202,6 @@ class AnnDataProxy:
             raise ValueError(
                 f"{self.filename} -- incorrect CxG schema version (got {schema_version}, expected {CXG_SCHEMA_VERSION})"
             )
-
-        # column defaults are everything defined in CxG schema and used by the Builder
-        obs_column_names = obs_column_names or CXG_OBS_COLUMNS_READ
-        var_column_names = var_column_names or CXG_VAR_COLUMNS_READ
 
         obs = self._load_dataframe(file["obs"], obs_column_names)
         if "raw" in file:

@@ -20,6 +20,8 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CXG_OBS_COLUMNS_READ,
+    CXG_VAR_COLUMNS_READ,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
@@ -166,7 +168,13 @@ def accumulate_axes(
 
     with create_thread_pool_executor() as pool:
         adata_iter: Iterator[tuple[Dataset, AnnDataProxy]] = (
-            (dataset, open_anndata2(assets_path, dataset)) for dataset in datasets
+            (
+                dataset,
+                open_anndata2(
+                    assets_path, dataset, obs_column_names=CXG_OBS_COLUMNS_READ, var_column_names=CXG_VAR_COLUMNS_READ
+                ),
+            )
+            for dataset in datasets
         )
         if args.config.multi_process:
             adata_iter = EagerIterator(adata_iter, pool)
