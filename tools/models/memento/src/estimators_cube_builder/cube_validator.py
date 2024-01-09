@@ -4,7 +4,6 @@ import sys
 import tiledb
 
 from .cube_schema import (
-    ESTIMATORS_ARRAY,
     OBS_GROUPS_ARRAY,
     OBS_LOGICAL_DIMS,
 )
@@ -28,14 +27,10 @@ def _validate_all_obs_dims_groups_present(obs_groups: tiledb.SparseArray, source
     ), f"not all obs dimensions groups are present in the cube; missing {len(missing)} groups: {missing}"
 
 
-def _validate_n_obs_sum(estimators: tiledb.SparseArray, source_obs: tiledb.SparseArray) -> None:
-    cube_n_obs_sums = estimators.df[:][["feature_id", "n_obs"]].groupby(["feature_id"]).sum()
+def _validate_n_obs_sum(obs_groups: tiledb.SparseArray, source_obs: tiledb.SparseArray) -> None:
+    cube_n_obs_sums = obs_groups.df[:][["n_obs"]].sum()
     source_obs_len = source_obs.df[:].shape[0]
-    # Sum of n_obs (for each gene) will not generally be equal to the number of rows in the obs table, because
-    # not all obs groups will have X data for a given gene and will not be included in the cube. The best we can do is
-    # ensure the per-gene n_obs sums are less than the number of rows in the obs table.
-    # TODO: Check against var.nnz
-    assert all(cube_n_obs_sums < source_obs_len)
+    assert all(cube_n_obs_sums == source_obs_len)
 
 
 def validate_cube(cube_uri: str, source_experiment_uri: str) -> bool:
@@ -43,15 +38,17 @@ def validate_cube(cube_uri: str, source_experiment_uri: str) -> bool:
     Validate that the cube at the given path is a valid memento estimators cube.
     """
     obs_groups_uri = os.path.join(cube_uri, OBS_GROUPS_ARRAY)
-    estimators_uri = os.path.join(cube_uri, ESTIMATORS_ARRAY)
+    # estimators_uri = os.path.join(cube_uri, ESTIMATORS_ARRAY)
 
     with tiledb.open(os.path.join(source_experiment_uri, "obs")) as source_obs:
         with tiledb.open(obs_groups_uri, "r") as obs_groups:
             _validate_all_obs_dims_groups_present(obs_groups, source_obs)
             _validate_dim_group_uniqueness(obs_groups)
+            _validate_n_obs_sum(obs_groups, source_obs)
 
-            with tiledb.open(estimators_uri, "r") as estimators:
-                _validate_n_obs_sum(estimators, source_obs)
+    # TODO: Check that all 0 < sem < mean
+    # with tiledb.open(estimators_uri, "r") as estimators:
+    #     pass
 
     return True
 
