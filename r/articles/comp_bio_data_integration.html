@@ -61,6 +61,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -136,17 +137,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Print rows with liver data</span></span>
 <span><span class="va">census_datasets</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"Liver"</span>, <span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_title</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;    soma_joinid                        collection_id    collection_name</span></span>
-<span><span class="co">#&gt; 14         525 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
-<span><span class="co">#&gt; 35         547 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt; 15         583 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
+<span><span class="co">#&gt; 36         605 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
 <span><span class="co">#&gt;               collection_doi                           dataset_id</span></span>
-<span><span class="co">#&gt; 14 10.1038/s41586-020-2496-1 4546e757-34d0-4d17-be06-538318925fcd</span></span>
-<span><span class="co">#&gt; 35 10.1038/s41586-020-2496-1 6202a243-b713-4e12-9ced-c387f8483dea</span></span>
+<span><span class="co">#&gt; 15 10.1038/s41586-020-2496-1 4546e757-34d0-4d17-be06-538318925fcd</span></span>
+<span><span class="co">#&gt; 36 10.1038/s41586-020-2496-1 6202a243-b713-4e12-9ced-c387f8483dea</span></span>
+<span><span class="co">#&gt;                      dataset_version_id</span></span>
+<span><span class="co">#&gt; 15 0a851e26-a629-4e59-9b52-9b4d1ce4440b</span></span>
+<span><span class="co">#&gt; 36 70f4f091-86a9-44e3-a92a-54cee98cc223</span></span>
 <span><span class="co">#&gt;                                                                                        dataset_title</span></span>
-<span><span class="co">#&gt; 14 Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
-<span><span class="co">#&gt; 35        Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
+<span><span class="co">#&gt; 15 Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
+<span><span class="co">#&gt; 36        Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
 <span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 14 4546e757-34d0-4d17-be06-538318925fcd.h5ad                     2859</span></span>
-<span><span class="co">#&gt; 35 6202a243-b713-4e12-9ced-c387f8483dea.h5ad                     7294</span></span></code></pre></div>
+<span><span class="co">#&gt; 15 4546e757-34d0-4d17-be06-538318925fcd.h5ad                     2859</span></span>
+<span><span class="co">#&gt; 36 6202a243-b713-4e12-9ced-c387f8483dea.h5ad                     7294</span></span></code></pre></div>
 <p>Now we can use the values from <code>dataset_id</code> to query and load a Seurat object with all the cells from those datasets.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tabula_muris_liver_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"4546e757-34d0-4d17-be06-538318925fcd"</span>, <span class="st">"6202a243-b713-4e12-9ced-c387f8483dea"</span><span class="op">)</span></span>
@@ -193,7 +197,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindVariableFeatures.html" class="external-link">FindVariableFeatures</a></span><span class="op">(</span><span class="va">seurat_obj</span>, selection.method <span class="op">=</span> <span class="st">"vst"</span>, nfeatures <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span></span></code></pre></div>
 <p>And now perform PCA and UMAP</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj</span>, features <span class="op">=</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seurat_obj</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seurat_obj</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
@@ -238,7 +242,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s inspect the results by doing normalization and then UMAP visulization.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
 <span></span>
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ScaleData.html" class="external-link">ScaleData</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -283,9 +287,9 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt; Merging objects</span></span>
 <span><span class="co">#&gt; Finding neighborhoods</span></span>
 <span><span class="co">#&gt; Finding anchors</span></span>
-<span><span class="co">#&gt;  Found 7136 anchors</span></span>
+<span><span class="co">#&gt;  Found 7161 anchors</span></span>
 <span><span class="co">#&gt; Filtering anchors</span></span>
-<span><span class="co">#&gt;  Retained 5048 anchors</span></span>
+<span><span class="co">#&gt;  Retained 4990 anchors</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span>
@@ -301,25 +305,25 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span></code></pre></div>
 <p>And inspect the new results by UMAP.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
 <span></span>
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 10:16:53 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 10:16:53 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 10:16:53 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 10:16:53 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 14:49:10 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 14:49:10 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 14:49:10 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 14:49:10 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 10:16:55 Writing NN index file to temp file /tmp/RtmpzP59ex/file8ed3ae2ddbc</span></span>
-<span><span class="co">#&gt; 10:16:55 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 10:16:58 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 10:16:59 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 10:16:59 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
-<span><span class="co">#&gt; 10:17:00 Commencing optimization for 200 epochs, with 409718 positive edges</span></span>
-<span><span class="co">#&gt; 10:17:04 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 14:49:12 Writing NN index file to temp file /tmp/RtmpRa88jI/file926122f23120</span></span>
+<span><span class="co">#&gt; 14:49:12 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 14:49:16 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 14:49:16 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 14:49:17 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 14:49:17 Commencing optimization for 200 epochs, with 409958 positive edges</span></span>
+<span><span class="co">#&gt; 14:49:21 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>

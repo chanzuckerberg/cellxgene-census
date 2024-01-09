@@ -61,6 +61,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -175,40 +176,40 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">genes_df</span><span class="op">$</span><span class="va">raw_mean</span> <span class="op">&lt;-</span> <span class="va">raw_sum_by_gene</span> <span class="op">/</span> <span class="va">query</span><span class="op">$</span><span class="va">n_obs</span></span>
 <span><span class="va">genes_df</span></span>
 <span><span class="co">#&gt;            feature_id  feature_name     raw_mean</span></span>
-<span><span class="co">#&gt; 1  ENSMUSG00000051951          Xkr4 1.283861e+00</span></span>
-<span><span class="co">#&gt; 2  ENSMUSG00000089699        Gm1992 0.000000e+00</span></span>
-<span><span class="co">#&gt; 3  ENSMUSG00000102343       Gm37381 0.000000e+00</span></span>
-<span><span class="co">#&gt; 4  ENSMUSG00000025900           Rp1 2.914160e-01</span></span>
-<span><span class="co">#&gt; 5  ENSMUSG00000025902         Sox17 6.074154e+01</span></span>
-<span><span class="co">#&gt; 6  ENSMUSG00000104328       Gm37323 5.701742e-05</span></span>
-<span><span class="co">#&gt; 7  ENSMUSG00000033845        Mrpl15 3.621738e+01</span></span>
-<span><span class="co">#&gt; 8  ENSMUSG00000025903        Lypla1 1.827366e+01</span></span>
-<span><span class="co">#&gt; 9  ENSMUSG00000104217       Gm37988 0.000000e+00</span></span>
-<span><span class="co">#&gt; 10 ENSMUSG00000033813         Tcea1 3.960339e+01</span></span>
-<span><span class="co">#&gt; 11 ENSMUSG00000002459         Rgs20 3.212989e+00</span></span>
-<span><span class="co">#&gt; 12 ENSMUSG00000085623       Gm16041 5.701742e-05</span></span>
-<span><span class="co">#&gt; 13 ENSMUSG00000033793       Atp6v1h 6.866793e+01</span></span>
-<span><span class="co">#&gt; 14 ENSMUSG00000025905         Oprk1 4.198763e-01</span></span>
-<span><span class="co">#&gt; 15 ENSMUSG00000033774        Npbwr1 1.140348e-04</span></span>
-<span><span class="co">#&gt; 16 ENSMUSG00000025907        Rb1cc1 3.342227e+01</span></span>
-<span><span class="co">#&gt; 17 ENSMUSG00000090031 4732440D04Rik 1.317102e-02</span></span>
-<span><span class="co">#&gt; 18 ENSMUSG00000087247        Alkal1 5.701742e-05</span></span>
-<span><span class="co">#&gt; 19 ENSMUSG00000033740          St18 1.525501e+01</span></span>
-<span><span class="co">#&gt; 20 ENSMUSG00000051285        Pcmtd1 4.981224e+01</span></span>
-<span><span class="co">#&gt; 21 ENSMUSG00000097797       Gm26901 4.276306e-04</span></span>
-<span><span class="co">#&gt; 22 ENSMUSG00000103067       Gm30414 0.000000e+00</span></span>
-<span><span class="co">#&gt; 23 ENSMUSG00000025909         Sntg1 1.083131e+00</span></span>
-<span><span class="co">#&gt; 24 ENSMUSG00000061024          Rrs1 1.929504e+01</span></span>
-<span><span class="co">#&gt; 25 ENSMUSG00000025911        Adhfe1 1.163515e+01</span></span>
-<span><span class="co">#&gt; 26 ENSMUSG00000067879           Vxn 9.911623e+00</span></span>
-<span><span class="co">#&gt; 27 ENSMUSG00000099827       Gm29520 0.000000e+00</span></span>
-<span><span class="co">#&gt; 28 ENSMUSG00000025912         Mybl1 2.439775e-01</span></span>
-<span><span class="co">#&gt; 29 ENSMUSG00000045210        Vcpip1 3.177732e+01</span></span>
-<span><span class="co">#&gt; 30 ENSMUSG00000097893 1700034P13Rik 5.257291e-01</span></span>
-<span><span class="co">#&gt; 31 ENSMUSG00000025915          Sgk3 1.850455e+01</span></span>
-<span><span class="co">#&gt; 32 ENSMUSG00000046101        Mcmdc2 6.555578e-01</span></span>
-<span><span class="co">#&gt; 33 ENSMUSG00000098234         Snhg6 6.245488e+00</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 52359 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  ENSMUSG00000051951          Xkr4 1.397121e+00</span></span>
+<span><span class="co">#&gt; 2  ENSMUSG00000025900           Rp1 3.162902e-01</span></span>
+<span><span class="co">#&gt; 3  ENSMUSG00000025902         Sox17 6.604085e+01</span></span>
+<span><span class="co">#&gt; 4  ENSMUSG00000033845        Mrpl15 3.939172e+01</span></span>
+<span><span class="co">#&gt; 5  ENSMUSG00000025903        Lypla1 1.986548e+01</span></span>
+<span><span class="co">#&gt; 6  ENSMUSG00000033813         Tcea1 4.305924e+01</span></span>
+<span><span class="co">#&gt; 7  ENSMUSG00000002459         Rgs20 3.496194e+00</span></span>
+<span><span class="co">#&gt; 8  ENSMUSG00000033793       Atp6v1h 7.470932e+01</span></span>
+<span><span class="co">#&gt; 9  ENSMUSG00000025905         Oprk1 4.568752e-01</span></span>
+<span><span class="co">#&gt; 10 ENSMUSG00000033774        Npbwr1 1.241003e-04</span></span>
+<span><span class="co">#&gt; 11 ENSMUSG00000025907        Rb1cc1 3.631679e+01</span></span>
+<span><span class="co">#&gt; 12 ENSMUSG00000033740          St18 1.660110e+01</span></span>
+<span><span class="co">#&gt; 13 ENSMUSG00000051285        Pcmtd1 5.410501e+01</span></span>
+<span><span class="co">#&gt; 14 ENSMUSG00000025909         Sntg1 1.178725e+00</span></span>
+<span><span class="co">#&gt; 15 ENSMUSG00000061024          Rrs1 2.098927e+01</span></span>
+<span><span class="co">#&gt; 16 ENSMUSG00000025911        Adhfe1 1.266112e+01</span></span>
+<span><span class="co">#&gt; 17 ENSMUSG00000079671 2610203C22Rik 9.474621e+00</span></span>
+<span><span class="co">#&gt; 18 ENSMUSG00000025912         Mybl1 2.643129e-01</span></span>
+<span><span class="co">#&gt; 19 ENSMUSG00000045210        Vcpip1 3.456668e+01</span></span>
+<span><span class="co">#&gt; 20 ENSMUSG00000097893 1700034P13Rik 5.721023e-01</span></span>
+<span><span class="co">#&gt; 21 ENSMUSG00000025915          Sgk3 2.012592e+01</span></span>
+<span><span class="co">#&gt; 22 ENSMUSG00000098234         Snhg6 6.784314e+00</span></span>
+<span><span class="co">#&gt; 23 ENSMUSG00000025916       Ppp1r42 2.585422e-01</span></span>
+<span><span class="co">#&gt; 24 ENSMUSG00000025917         Cops5 7.909310e+01</span></span>
+<span><span class="co">#&gt; 25 ENSMUSG00000056763         Cspp1 1.635604e+01</span></span>
+<span><span class="co">#&gt; 26 ENSMUSG00000067851       Arfgef1 1.582897e+01</span></span>
+<span><span class="co">#&gt; 27 ENSMUSG00000042501          Cpa6 1.880119e-02</span></span>
+<span><span class="co">#&gt; 28 ENSMUSG00000048960         Prex2 2.283623e+01</span></span>
+<span><span class="co">#&gt; 29 ENSMUSG00000057715 A830018L16Rik 9.992140e-01</span></span>
+<span><span class="co">#&gt; 30 ENSMUSG00000016918         Sulf1 5.567469e+00</span></span>
+<span><span class="co">#&gt; 31 ENSMUSG00000025938       Slco5a1 2.452015e-01</span></span>
+<span><span class="co">#&gt; 32 ENSMUSG00000042414        Prdm14 6.142964e-03</span></span>
+<span><span class="co">#&gt; 33 ENSMUSG00000005886         Ncoa2 1.707928e+01</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 52384 rows ]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="counting-cells-grouped-by-dataset-and-gene">Counting cells grouped by dataset and gene<a class="anchor" aria-label="anchor" href="#counting-cells-grouped-by-dataset-and-gene"></a>
@@ -270,26 +271,20 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">n_cells_grouped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">n_cells_grouped</span>, <span class="va">var_df</span>, by <span class="op">=</span> <span class="st">"gene_id"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">n_cells_grouped</span><span class="op">$</span><span class="va">feature_name</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">n_cells_grouped</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset_id"</span>, <span class="st">"feature_name"</span>, <span class="st">"n_cells"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 17 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 3</span></span></span>
 <span><span class="co">#&gt;    dataset_id                           feature_name n_cells</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Dlg2           <span style="text-decoration: underline;">79</span>513</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Pcdh9          <span style="text-decoration: underline;">79</span>476</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Malat1         <span style="text-decoration: underline;">79</span>667</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Ptprd          <span style="text-decoration: underline;">79</span>578</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Dlg2              81</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Pcdh9            125</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Malat1         <span style="text-decoration: underline;">12</span>622</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Ptprd            474</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Ptprd          <span style="text-decoration: underline;">79</span>578</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Dlg2           <span style="text-decoration: underline;">79</span>513</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Pcdh9          <span style="text-decoration: underline;">79</span>476</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Malat1         <span style="text-decoration: underline;">79</span>667</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Ptprd            474</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Dlg2              81</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Pcdh9            125</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Malat1         <span style="text-decoration: underline;">12</span>622</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 66ff82b4-9380-469c-bc4b-cfa08eacd325 Dlg2             856</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 66ff82b4-9380-469c-bc4b-cfa08eacd325 Pcdh9           <span style="text-decoration: underline;">2</span>910</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> 66ff82b4-9380-469c-bc4b-cfa08eacd325 Malat1          <span style="text-decoration: underline;">7</span>102</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> 98e5ea9f-16d6-47ec-a529-686e76515e39 Dlg2             908</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> 98e5ea9f-16d6-47ec-a529-686e76515e39 Pcdh9           <span style="text-decoration: underline;">3</span>027</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> 98e5ea9f-16d6-47ec-a529-686e76515e39 Malat1         <span style="text-decoration: underline;">20</span>094</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span> c08f8441-4a10-4748-872a-e70c0bcccdba Dlg2              52</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span> c08f8441-4a10-4748-872a-e70c0bcccdba Pcdh9            117</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span> c08f8441-4a10-4748-872a-e70c0bcccdba Malat1         <span style="text-decoration: underline;">12</span>992</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span></code></pre></div>
 <p>Don’t forget to close the census.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>

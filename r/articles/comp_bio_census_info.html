@@ -61,6 +61,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -185,7 +186,12 @@
 <span><span class="co">#&gt; [18] "tissue"                                  </span></span>
 <span><span class="co">#&gt; [19] "tissue_ontology_term_id"                 </span></span>
 <span><span class="co">#&gt; [20] "tissue_general"                          </span></span>
-<span><span class="co">#&gt; [21] "tissue_general_ontology_term_id"</span></span></code></pre></div>
+<span><span class="co">#&gt; [21] "tissue_general_ontology_term_id"         </span></span>
+<span><span class="co">#&gt; [22] "raw_sum"                                 </span></span>
+<span><span class="co">#&gt; [23] "nnz"                                     </span></span>
+<span><span class="co">#&gt; [24] "raw_mean_nnz"                            </span></span>
+<span><span class="co">#&gt; [25] "raw_variance_nnz"                        </span></span>
+<span><span class="co">#&gt; [26] "n_measured_vars"</span></span></code></pre></div>
 <p>All of these variables are defined in the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#obs-cell-metadata" class="external-link">CELLxGENE dataset schema</a> except for the following:</p>
 <ul>
 <li>
@@ -203,7 +209,8 @@
 <p>These are the variables you can use for querying the Census in case there are specific genes you are interested in.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length" "nnz"           </span></span>
+<span><span class="co">#&gt; [6] "n_measured_obs"</span></span></code></pre></div>
 <p>All of these variables are defined in the CELLxGENE dataset schema except for the following:</p>
 <ul>
 <li>
@@ -219,13 +226,13 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   soma_joinid                      label      value</span></span>
-<span><span class="co">#&gt; 1           0      census_schema_version      1.0.0</span></span>
-<span><span class="co">#&gt; 2           1          census_build_date 2023-07-25</span></span>
-<span><span class="co">#&gt; 3           2     dataset_schema_version      3.0.0</span></span>
-<span><span class="co">#&gt; 4           3           total_cell_count   61656118</span></span>
-<span><span class="co">#&gt; 5           4          unique_cell_count   37447773</span></span>
-<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      13035</span></span>
-<span><span class="co">#&gt; 7           6 number_donors_mus_musculus       1417</span></span></code></pre></div>
+<span><span class="co">#&gt; 1           0      census_schema_version      1.2.0</span></span>
+<span><span class="co">#&gt; 2           1          census_build_date 2023-10-23</span></span>
+<span><span class="co">#&gt; 3           2     dataset_schema_version      3.1.0</span></span>
+<span><span class="co">#&gt; 4           3           total_cell_count   68683222</span></span>
+<span><span class="co">#&gt; 5           4          unique_cell_count   40356133</span></span>
+<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      15588</span></span>
+<span><span class="co">#&gt; 7           6 number_donors_mus_musculus       1990</span></span></code></pre></div>
 <p>Of special interest are the label-value combinations for:</p>
 <ul>
 <li>
@@ -244,19 +251,19 @@
 <code class="sourceCode R"><span><span class="va">census_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary_cell_counts"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">census_counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   soma_joinid     organism category ontology_term_id unique_cell_count total_cell_count</span></span>
-<span><span class="co">#&gt; 1           0 Homo sapiens      all               na          33364242         56400873</span></span>
+<span><span class="co">#&gt; 1           0 Homo sapiens      all               na          36227903         62998417</span></span>
 <span><span class="co">#&gt; 2           1 Homo sapiens    assay      EFO:0008722            264166           279635</span></span>
 <span><span class="co">#&gt; 3           2 Homo sapiens    assay      EFO:0008780             25652            51304</span></span>
-<span><span class="co">#&gt; 4           3 Homo sapiens    assay      EFO:0008919             89477           206754</span></span>
-<span><span class="co">#&gt; 5           4 Homo sapiens    assay      EFO:0008931             78750           188248</span></span>
-<span><span class="co">#&gt; 6           5 Homo sapiens    assay      EFO:0008953              4693             9386</span></span>
+<span><span class="co">#&gt; 4           3 Homo sapiens    assay      EFO:0008796             54753            54753</span></span>
+<span><span class="co">#&gt; 5           4 Homo sapiens    assay      EFO:0008919             89477           206754</span></span>
+<span><span class="co">#&gt; 6           5 Homo sapiens    assay      EFO:0008931             78750           188248</span></span>
 <span><span class="co">#&gt;        label</span></span>
 <span><span class="co">#&gt; 1         na</span></span>
 <span><span class="co">#&gt; 2   Drop-seq</span></span>
 <span><span class="co">#&gt; 3     inDrop</span></span>
-<span><span class="co">#&gt; 4   Seq-Well</span></span>
-<span><span class="co">#&gt; 5 Smart-seq2</span></span>
-<span><span class="co">#&gt; 6   STRT-seq</span></span></code></pre></div>
+<span><span class="co">#&gt; 4   MARS-seq</span></span>
+<span><span class="co">#&gt; 5   Seq-Well</span></span>
+<span><span class="co">#&gt; 6 Smart-seq2</span></span></code></pre></div>
 <p>For each combination of <code>organism</code> and values for each <code>category</code> of cell metadata you can take a look at <code>total_cell_count</code> and <code>unique_cell_count</code> for the cell counts of that combination.</p>
 <p>The values for each <code>category</code> are specified in <code>ontology_term_id</code> and <code>label</code>, which are the value’s IDs and labels, respectively.</p>
 <div class="section level4">
@@ -268,14 +275,14 @@
 <span><span class="co">#&gt;                          </span></span>
 <span><span class="co">#&gt;                           Homo sapiens Mus musculus</span></span>
 <span><span class="co">#&gt;   all                                1            1</span></span>
-<span><span class="co">#&gt;   assay                             19            9</span></span>
-<span><span class="co">#&gt;   cell_type                        613          248</span></span>
-<span><span class="co">#&gt;   disease                           64            5</span></span>
-<span><span class="co">#&gt;   self_reported_ethnicity           26            1</span></span>
+<span><span class="co">#&gt;   assay                             20           10</span></span>
+<span><span class="co">#&gt;   cell_type                        631          248</span></span>
+<span><span class="co">#&gt;   disease                           72            5</span></span>
+<span><span class="co">#&gt;   self_reported_ethnicity           30            1</span></span>
 <span><span class="co">#&gt;   sex                                3            3</span></span>
 <span><span class="co">#&gt;   suspension_type                    1            1</span></span>
-<span><span class="co">#&gt;   tissue                           220           66</span></span>
-<span><span class="co">#&gt;   tissue_general                    54           27</span></span></code></pre></div>
+<span><span class="co">#&gt;   tissue                           230           74</span></span>
+<span><span class="co">#&gt;   tissue_general                    53           27</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="example-cell-counts-for-each-sequencing-assay-in-human-data">Example: cell counts for each sequencing assay in human data<a class="anchor" aria-label="anchor" href="#example-cell-counts-for-each-sequencing-assay-in-human-data"></a>
@@ -292,11 +299,11 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_counts</span><span class="op">[</span><span class="va">census_counts</span><span class="op">$</span><span class="va">label</span> <span class="op">==</span> <span class="st">"microglial cell"</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;      soma_joinid     organism  category ontology_term_id unique_cell_count</span></span>
-<span><span class="co">#&gt; 70            69 Homo sapiens cell_type       CL:0000129            268114</span></span>
-<span><span class="co">#&gt; 1039        1038 Mus musculus cell_type       CL:0000129             48998</span></span>
+<span><span class="co">#&gt; 72            71 Homo sapiens cell_type       CL:0000129            359243</span></span>
+<span><span class="co">#&gt; 1080        1079 Mus musculus cell_type       CL:0000129             48998</span></span>
 <span><span class="co">#&gt;      total_cell_count           label</span></span>
-<span><span class="co">#&gt; 70             370771 microglial cell</span></span>
-<span><span class="co">#&gt; 1039            62617 microglial cell</span></span></code></pre></div>
+<span><span class="co">#&gt; 72             544977 microglial cell</span></span>
+<span><span class="co">#&gt; 1080            75885 microglial cell</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -319,136 +326,136 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_df</span> <span class="op">&lt;-</span>   <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"is_primary_data"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                         cell_type is_primary_data</span></span>
-<span><span class="co">#&gt; 1        syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 2   placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 3        syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 4        syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 5        extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 6   placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 7        syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 8        extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 9   placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 10       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 11       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 12       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 13  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 14  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 15       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 16       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 17       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 18       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 19       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 20       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 21       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 22       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 23  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 24       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 25       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 26       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 27       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 28       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 29       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 30       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 31  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 32         trophoblast giant cell           FALSE</span></span>
-<span><span class="co">#&gt; 33       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 34  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 35       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 36       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 37  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 38  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 39       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 40       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 41       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 42       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 43       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 44  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 45  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 46       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 47  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 48       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 49       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 50       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 51       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 52       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 53       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 54       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 55  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 56  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 57  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 58       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 59       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 60       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 61  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 62       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 63       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 64       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 65       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 66  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 67       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 68  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 69       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 70       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 71       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 72       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 73  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 74  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 75  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 76  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 77       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 78       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 79       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 80  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 81       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 82       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 83       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 84  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 85       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 86       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 87       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 88  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 89  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 90       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 91       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 92  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 93       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 94       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 95       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 96       extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 97       syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 98  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 99  placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 100      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 101 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 102      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 103      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 104      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 105 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 106 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 107 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 108 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 109      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 110 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 111 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 112      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 113      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 114      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 115 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 116      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 117 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 118 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 119      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 120      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 121      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 122      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 123      syncytiotrophoblast cell           FALSE</span></span>
-<span><span class="co">#&gt; 124 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 125 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 126 placental villous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 127      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt; 128      extravillous trophoblast           FALSE</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 56400745 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt;                            cell_type is_primary_data</span></span>
+<span><span class="co">#&gt; 1                    oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 2     oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 3   astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 4   astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 5   astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 6     oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 7   astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 8                    microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 9   astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 10  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 11  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 12  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 13  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 14  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 15  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 16    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 17                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 18  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 19  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 20  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 21  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 22  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 23    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 24  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 25  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 26    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 27                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 28                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 29  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 30  cerebral cortex endothelial cell           FALSE</span></span>
+<span><span class="co">#&gt; 31                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 32                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 33                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 34                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 35                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 36                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 37                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 38                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 39  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 40                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 41  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 42                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 43    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 44                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 45  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 46    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 47                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 48    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 49  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 50  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 51  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 52                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 53                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 54                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 55  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 56  cerebral cortex endothelial cell           FALSE</span></span>
+<span><span class="co">#&gt; 57                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 58                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 59                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 60                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 61                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 62    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 63    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 64                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 65    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 66                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 67  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 68                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 69    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 70                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 71  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 72  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 73  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 74    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 75  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 76    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 77                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 78                   microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 79    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 80                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 81                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 82  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 83                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 84  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 85  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 86                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 87  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 88                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 89    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 90    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 91  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 92  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 93  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 94                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 95  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 96  astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 97                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 98                   oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 99    oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 100                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 101                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 102                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 103 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 104   oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 105                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 106   oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 107                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 108                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 109                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 110                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 111   oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 112                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 113                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 114 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 115                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 116 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 117                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 118                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 119                  oligodendrocyte           FALSE</span></span>
+<span><span class="co">#&gt; 120 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 121 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 122   oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt; 123                  microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 124 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 125 astrocyte of the cerebral cortex           FALSE</span></span>
+<span><span class="co">#&gt; 126                  microglial cell           FALSE</span></span>
+<span><span class="co">#&gt; 127 cerebral cortex endothelial cell           FALSE</span></span>
+<span><span class="co">#&gt; 128   oligodendrocyte precursor cell           FALSE</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 62998289 rows ]</span></span></code></pre></div>
 <p>The number of rows is the total number of cells for humans. Now, if you wish to get the cell counts per cell type we can work with this data frame.</p>
 <p>In addition, we will only focus on cells that are marked with <code>is_primary_data=TRUE</code> as this ensures we de-duplicate cells that appear more than once in CELLxGENE Discover.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -459,27 +466,37 @@
 <span></span>
 <span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 33364242</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 36227903</span></span></code></pre></div>
 <p>This is the number of unique cells. Now let’s look at the counts per cell type:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_cell_type_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_df</span><span class="op">$</span><span class="va">cell_type</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                          neuron            glutamatergic neuron </span></span>
-<span><span class="co">#&gt;                         2673669                         1541605 </span></span>
-<span><span class="co">#&gt; CD4-positive, alpha-beta T cell CD8-positive, alpha-beta T cell </span></span>
-<span><span class="co">#&gt;                         1258976                         1235987 </span></span>
-<span><span class="co">#&gt;              classical monocyte                          B cell </span></span>
-<span><span class="co">#&gt;                         1030996                          908651 </span></span>
-<span><span class="co">#&gt;                     native cell             natural killer cell </span></span>
-<span><span class="co">#&gt;                          889262                          768755 </span></span>
-<span><span class="co">#&gt;                      macrophage                 oligodendrocyte </span></span>
-<span><span class="co">#&gt;                          721687                          710242</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                             neuron </span></span>
+<span><span class="co">#&gt;                                                            2815336 </span></span>
+<span><span class="co">#&gt;                                               glutamatergic neuron </span></span>
+<span><span class="co">#&gt;                                                            1563446 </span></span>
+<span><span class="co">#&gt;                                    CD4-positive, alpha-beta T cell </span></span>
+<span><span class="co">#&gt;                                                            1243885 </span></span>
+<span><span class="co">#&gt;                                    CD8-positive, alpha-beta T cell </span></span>
+<span><span class="co">#&gt;                                                            1197715 </span></span>
+<span><span class="co">#&gt; L2/3-6 intratelencephalic projecting glutamatergic cortical neuron </span></span>
+<span><span class="co">#&gt;                                                            1123360 </span></span>
+<span><span class="co">#&gt;                                                    oligodendrocyte </span></span>
+<span><span class="co">#&gt;                                                            1063874 </span></span>
+<span><span class="co">#&gt;                                                 classical monocyte </span></span>
+<span><span class="co">#&gt;                                                            1030996 </span></span>
+<span><span class="co">#&gt;                                                        native cell </span></span>
+<span><span class="co">#&gt;                                                            1011949 </span></span>
+<span><span class="co">#&gt;                                                             B cell </span></span>
+<span><span class="co">#&gt;                                                             934060 </span></span>
+<span><span class="co">#&gt;                                                natural killer cell </span></span>
+<span><span class="co">#&gt;                                                             770637</span></span></code></pre></div>
 <p>This shows you that the most abundant cell types are “glutamatergic neuron”, “CD8-positive, alpha-beta T cell”, and “CD4-positive, alpha-beta T cell”.</p>
 <p>Now let’s take a look at the number of unique cell types:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">human_cell_type_counts</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 599</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 610</span></span></code></pre></div>
 <p>That is the total number of different cell types for human.</p>
 <p>All the information in this example can be quickly obtained from the summary table at <code>census$get("census-info")$get("summary_cell_counts")</code>.</p>
 <p>The examples below are more complex and can only be achieved by accessing the cell metadata.</p>
@@ -525,74 +542,78 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">obs_t_cells_df</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                 adipose tissue adrenal gland  blood blood clot</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                        0             0  62499          0</span></span>
-<span><span class="co">#&gt;   breast cancer                                      0             0      0          0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease              0             0      0          0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                                   0             0      0          0</span></span>
-<span><span class="co">#&gt;   clear cell renal carcinoma                         0             0   6548          0</span></span>
-<span><span class="co">#&gt;   COVID-19                                           0             0 819428          0</span></span>
-<span><span class="co">#&gt;   Crohn disease                                      0             0      0          0</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                                    0             0      0          0</span></span>
-<span><span class="co">#&gt;   Down syndrome                                      0             0      0          0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                                0             0      0          0</span></span>
-<span><span class="co">#&gt;   influenza                                          0             0   8871          0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                          0             0      0          0</span></span>
-<span><span class="co">#&gt;   kidney benign neoplasm                             0             0     20          0</span></span>
-<span><span class="co">#&gt;   kidney oncocytoma                                  0             0     16          0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                                0           205      0          0</span></span>
+<span><span class="co">#&gt; disease                                 adrenal gland  blood bone marrow  brain breast</span></span>
+<span><span class="co">#&gt;   breast cancer                                     0      0           0      0   1850</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease             0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                                  0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                        0   6548           0      0      0</span></span>
+<span><span class="co">#&gt;   COVID-19                                          0 819428           0      0      0</span></span>
+<span><span class="co">#&gt;   Crohn disease                                     0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                                   0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   Down syndrome                                     0      0         181      0      0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                               0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   influenza                                         0   8871           0      0      0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                         0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                            0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                                 0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                             205      0           0   3274      0</span></span>
+<span><span class="co">#&gt;   lung large cell carcinoma                         0      0           0      0      0</span></span>
+<span><span class="co">#&gt;   lymphangioleiomyomatosis                          0      0           0      0      0</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                 bone marrow  brain breast  colon kidney  liver</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                     0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   breast cancer                                   0      0   1850      0      0      0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease           0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                                0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   clear cell renal carcinoma                      0      0      0      0  20540      0</span></span>
-<span><span class="co">#&gt;   COVID-19                                        0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   Crohn disease                                   0      0      0  17490      0      0</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                                 0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   Down syndrome                                 181      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                             0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   influenza                                       0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                       0      0      0      0      0      0</span></span>
-<span><span class="co">#&gt;   kidney benign neoplasm                          0      0      0      0     10      0</span></span>
-<span><span class="co">#&gt;   kidney oncocytoma                               0      0      0      0   2408      0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                             0   3274      0      0      0    507</span></span>
+<span><span class="co">#&gt; disease                                  colon kidney  liver   lung lymph node   nose</span></span>
+<span><span class="co">#&gt;   breast cancer                              0      0      0      0          0      0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease      0      0      0   9382          0      0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                           0      0      0      0          0    909</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                 0  20540      0      0         36      0</span></span>
+<span><span class="co">#&gt;   COVID-19                                   0      0      0  30578          0     13</span></span>
+<span><span class="co">#&gt;   Crohn disease                          17490      0      0      0          0      0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                            0      0      0      7          0      0</span></span>
+<span><span class="co">#&gt;   Down syndrome                              0      0      0      0          0      0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                        0      0      0      0       1089      0</span></span>
+<span><span class="co">#&gt;   influenza                                  0      0      0      0          0      0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                  0      0      0   1803          0      0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                     0     10      0      0          0      0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                          0   2303      0      0          0      0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                        0      0    507 215013      24969      0</span></span>
+<span><span class="co">#&gt;   lung large cell carcinoma                  0      0      0   5922          0      0</span></span>
+<span><span class="co">#&gt;   lymphangioleiomyomatosis                   0      0      0    513          0      0</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                   lung lymph node   nose pleural fluid</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                0          0      0             0</span></span>
-<span><span class="co">#&gt;   breast cancer                              0          0      0             0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease   9382          0      0             0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                           0          0    909             0</span></span>
-<span><span class="co">#&gt;   clear cell renal carcinoma                 0         36      0             0</span></span>
-<span><span class="co">#&gt;   COVID-19                               30578          0     13             0</span></span>
-<span><span class="co">#&gt;   Crohn disease                              0          0      0             0</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                            7          0      0             0</span></span>
-<span><span class="co">#&gt;   Down syndrome                              0          0      0             0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                        0       1089      0             0</span></span>
-<span><span class="co">#&gt;   influenza                                  0          0      0             0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease               1803          0      0             0</span></span>
-<span><span class="co">#&gt;   kidney benign neoplasm                     0          0      0             0</span></span>
-<span><span class="co">#&gt;   kidney oncocytoma                          0          0      0             0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                   215013      24969      0         11558</span></span>
+<span><span class="co">#&gt; disease                                 pleural fluid respiratory system saliva</span></span>
+<span><span class="co">#&gt;   breast cancer                                     0                  0      0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease             0                  0      0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                                  0                  0      0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                        0                  0      0</span></span>
+<span><span class="co">#&gt;   COVID-19                                          0                  4     41</span></span>
+<span><span class="co">#&gt;   Crohn disease                                     0                  0      0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                                   0                  0      0</span></span>
+<span><span class="co">#&gt;   Down syndrome                                     0                  0      0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                               0                  0      0</span></span>
+<span><span class="co">#&gt;   influenza                                         0                  0      0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                         0                  0      0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                            0                  0      0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                                 0                  0      0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                           11558                  0      0</span></span>
+<span><span class="co">#&gt;   lung large cell carcinoma                         0                  0      0</span></span>
+<span><span class="co">#&gt;   lymphangioleiomyomatosis                          0                  0      0</span></span>
 <span><span class="co">#&gt;                                        tissue_general</span></span>
-<span><span class="co">#&gt; disease                                 respiratory system saliva small intestine</span></span>
-<span><span class="co">#&gt;   B-cell non-Hodgkin lymphoma                            0      0               0</span></span>
-<span><span class="co">#&gt;   breast cancer                                          0      0               0</span></span>
-<span><span class="co">#&gt;   chronic obstructive pulmonary disease                  0      0               0</span></span>
-<span><span class="co">#&gt;   chronic rhinitis                                       0      0               0</span></span>
-<span><span class="co">#&gt;   clear cell renal carcinoma                             0      0               0</span></span>
-<span><span class="co">#&gt;   COVID-19                                               4     41               0</span></span>
-<span><span class="co">#&gt;   Crohn disease                                          0      0           52029</span></span>
-<span><span class="co">#&gt;   cystic fibrosis                                        0      0               0</span></span>
-<span><span class="co">#&gt;   Down syndrome                                          0      0               0</span></span>
-<span><span class="co">#&gt;   follicular lymphoma                                    0      0               0</span></span>
-<span><span class="co">#&gt;   influenza                                              0      0               0</span></span>
-<span><span class="co">#&gt;   interstitial lung disease                              0      0               0</span></span>
-<span><span class="co">#&gt;   kidney benign neoplasm                                 0      0               0</span></span>
-<span><span class="co">#&gt;   kidney oncocytoma                                      0      0               0</span></span>
-<span><span class="co">#&gt;   lung adenocarcinoma                                    0      0               0</span></span>
-<span><span class="co">#&gt;  [ reached getOption("max.print") -- omitted 10 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt; disease                                 small intestine vasculature</span></span>
+<span><span class="co">#&gt;   breast cancer                                       0           0</span></span>
+<span><span class="co">#&gt;   chronic obstructive pulmonary disease               0           0</span></span>
+<span><span class="co">#&gt;   chronic rhinitis                                    0           0</span></span>
+<span><span class="co">#&gt;   clear cell renal carcinoma                          0           0</span></span>
+<span><span class="co">#&gt;   COVID-19                                            0           0</span></span>
+<span><span class="co">#&gt;   Crohn disease                                   52029           0</span></span>
+<span><span class="co">#&gt;   cystic fibrosis                                     0           0</span></span>
+<span><span class="co">#&gt;   Down syndrome                                       0           0</span></span>
+<span><span class="co">#&gt;   follicular lymphoma                                 0           0</span></span>
+<span><span class="co">#&gt;   influenza                                           0           0</span></span>
+<span><span class="co">#&gt;   interstitial lung disease                           0           0</span></span>
+<span><span class="co">#&gt;   kidney benign neoplasm                              0           0</span></span>
+<span><span class="co">#&gt;   kidney oncocytoma                                   0           0</span></span>
+<span><span class="co">#&gt;   lung adenocarcinoma                                 0           0</span></span>
+<span><span class="co">#&gt;   lung large cell carcinoma                           0           0</span></span>
+<span><span class="co">#&gt;   lymphangioleiomyomatosis                            0           0</span></span>
+<span><span class="co">#&gt;  [ reached getOption("max.print") -- omitted 8 rows ]</span></span></code></pre></div>
 <p>These are the cell counts annotated with the indicated disease across human tissues for “CD8-positive, alpha-beta T cell” or “CD4-positive, alpha-beta T cell”.</p>
 </div>
 </div>
