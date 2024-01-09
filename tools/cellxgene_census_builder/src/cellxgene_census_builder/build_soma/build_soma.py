@@ -1,4 +1,3 @@
-import concurrent.futures
 import gc
 import logging
 from datetime import datetime, timezone
@@ -9,7 +8,7 @@ import tiledbsoma as soma
 from ..build_state import CensusBuildArgs
 from .anndata import AnnDataProxy, open_anndata2
 from .census_summary import create_census_summary
-from .consolidate import submit_consolidate
+from .consolidate import consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -25,7 +24,7 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import EagerIterator, create_process_pool_executor, create_thread_pool_executor, log_on_broken_process_pool
+from .mp import EagerIterator, create_thread_pool_executor
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
@@ -90,31 +89,15 @@ def build(args: CensusBuildArgs) -> int:
         root_collection, experiment_builders, filtered_datasets, args.config.build_tag
     )
 
-    # Step 6 - create and save derived artifacts. Consolidate (do NOT vacuum) in parallel.
-    with create_process_pool_executor(args, max_workers=3) as consolidation_ppe:
-        consolidation_futures = (
-            submit_consolidate(
-                args, root_collection.uri, pool=consolidation_ppe, vacuum=False, exclude=(r".*/X/normalized",)
-            )
-            if args.config.consolidate
-            else []
-        )
-        build_step6_save_derived_data(root_collection, experiment_builders, args)
-        log_on_broken_process_pool(consolidation_ppe)
+    # Step 6 - create and save derived artifacts
+    build_step6_save_derived_data(root_collection, experiment_builders, args)
 
-        # wait for all consolidators to finish before proceeding
-        concurrent.futures.wait(consolidation_futures, return_when=concurrent.futures.ALL_COMPLETED)
-        del consolidation_futures
-
-    # Final step: consolidate and vacuum TileDB data. Some may already be consolidated, but it is fine to do it again.
     # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
     tiledb_soma_1969_work_around(root_collection.uri)
 
     # consolidate TileDB data
     if args.config.consolidate:
-        with create_process_pool_executor(args) as consolidation_ppe:
-            consolidation_futures = submit_consolidate(args, root_collection.uri, pool=consolidation_ppe, vacuum=True)
-            concurrent.futures.wait(consolidation_futures, return_when=concurrent.futures.ALL_COMPLETED)
+        consolidate(args, root_collection.uri)
 
     return 0
 
