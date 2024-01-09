@@ -103,11 +103,12 @@ def process_init(args: CensusBuildArgs) -> None:
 
     env_var_init()
 
-    # these are super noisy!
-    numba_logger = logging.getLogger("numba")
-    numba_logger.setLevel(logging.WARNING)
-    h5py_logger = logging.getLogger("h5py")
-    h5py_logger.setLevel(logging.WARNING)
+    # these are super noisy! Enable only super high verbosity
+    if args.config.verbose <= 2:
+        numba_logger = logging.getLogger("numba")
+        numba_logger.setLevel(logging.WARNING)
+        h5py_logger = logging.getLogger("h5py")
+        h5py_logger.setLevel(logging.WARNING)
 
 
 class ProcessResourceGetter:
