@@ -1,0 +1,110 @@
+---
+title: "Generating citations for Census slices"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Generating citations for Census slices}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 88, max.print = 256)
+```
+
+This notebook demonstrates how to generate a citation string for all datasets contained in a census slice.
+
+**Contents**
+
+1. Requirements
+2. Generating citation strings
+   1. Via cell metadata query
+   2. Via Seurat query
+   3. Via SingleCellExperiment query
+
+⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable `is_primary_data` which is described in the [Census schema](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data).
+
+## Requirements
+
+This notebook requires:
+
+- `cellxgene_census` Python package.
+- Census data release with [schema version](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md) 1.3.0 or greater.
+
+## Generating citation strings
+
+First we open a handle to the Census data. To ensure we open a data release with schema version 1.3.0 or greater, we use `census_version="latest"`
+
+```{r,message=FALSE,warning=FALSE}
+library("tiledb")
+library("cellxgene.census")
+
+census <- open_soma(census_version = "latest")
+census_release_info <- census$get("census_info")$get("summary")$read()$concat()
+as.data.frame(census_release_info)
+```
+
+Then we load the dataset table which contains a column `"citation"` for each dataset included in Census. 
+
+```{r,message=FALSE,warning=FALSE}
+datasets <- census$get("census_info")$get("datasets")$read()$concat()
+datasets <- as.data.frame(datasets)
+head(datasets["citation"])
+```
+
+And now we can use the column `"dataset_id"` present in both the dataset table and the Census cell metadata to create citation strings for any Census slice.
+
+### Via cell metadata query
+
+```{r,message=FALSE,warning=FALSE}
+# Query cell metadata
+cell_metadata <- census$get("census_data")$get("homo_sapiens")$obs$read(
+    value_filter = "tissue == 'cardiac atrium'",
+    column_names = c("dataset_id", "cell_type")
+)
+
+cell_metadata <- as.data.frame(cell_metadata$concat())
+
+# Get a citation string for the slice
+slice_datasets = datasets[datasets$dataset_id  %in% cell_metadata$dataset_id,]
+print(slice_datasets$citation)
+```
+
+### Via Seurat query
+
+```{r,message=FALSE,warning=FALSE}
+# Fetch a Seurat object
+seurat_obj <- get_seurat(
+    census = census,
+    organism = "homo_sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "tissue == 'cardiac atrium'",
+    var_value_filter = "feature_name == 'MYBPC3'",
+    obs_column_names = c("dataset_id", "cell_type")
+)
+
+# Get a citation string for the slice
+slice_datasets = datasets[datasets$dataset_id  %in% seurat_obj[[]]$dataset_id,]
+print(slice_datasets$citation)
+```
+
+### Via SingleCellExperiment query
+
+```{r,message=FALSE,warning=FALSE}
+# Fetch a Seurat object
+sce_obj <- get_single_cell_experiment(
+    census = census,
+    organism = "homo_sapiens",
+    measurement_name = "RNA",
+    obs_value_filter = "tissue == 'cardiac atrium'",
+    var_value_filter = "feature_name == 'MYBPC3'",
+    obs_column_names = c("dataset_id", "cell_type")
+)
+
+# Get a citation string for the slice
+slice_datasets = datasets[datasets$dataset_id  %in% sce_obj$dataset_id,]
+print(slice_datasets$citation)
+```

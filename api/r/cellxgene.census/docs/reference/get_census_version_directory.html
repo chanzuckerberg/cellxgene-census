@@ -38,6 +38,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -86,71 +87,77 @@ metadata.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">get_census_version_directory</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            release_date release_build</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stable                     2023-07-25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> latest                     2023-12-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stable                     2023-12-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> latest                     2024-01-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-05-15                 2023-05-15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-07-25                 2023-07-25</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23                 2023-10-23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-13                 2023-11-13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-20                 2023-11-20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-27                 2023-11-27</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-11                 2023-12-11</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-15                 2023-12-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-18                 2023-12-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-21                 2023-12-21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-25                 2023-12-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2024-01-01                 2024-01-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       soma.uri</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stable     s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> latest     s3://cellxgene-census-public-us-west-2/cell-census/2023-12-11/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stable     s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> latest     s3://cellxgene-census-public-us-west-2/cell-census/2024-01-01/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-05-15 s3://cellxgene-census-public-us-west-2/cell-census/2023-05-15/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-07-25 s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23 s3://cellxgene-census-public-us-west-2/cell-census/2023-10-23/soma/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-13 s3://cellxgene-census-public-us-west-2/cell-census/2023-11-13/soma/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-20 s3://cellxgene-census-public-us-west-2/cell-census/2023-11-20/soma/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-27 s3://cellxgene-census-public-us-west-2/cell-census/2023-11-27/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-11 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-11/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-15 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-18 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-18/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-21 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-21/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-25 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-25/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2024-01-01 s3://cellxgene-census-public-us-west-2/cell-census/2024-01-01/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        soma.relative_uri soma.s3_region</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stable     /cell-census/2023-07-25/soma/      us-west-2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> latest     /cell-census/2023-12-11/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stable     /cell-census/2023-12-15/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> latest     /cell-census/2024-01-01/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-05-15 /cell-census/2023-05-15/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-07-25 /cell-census/2023-07-25/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23 /cell-census/2023-10-23/soma/      us-west-2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-13 /cell-census/2023-11-13/soma/      us-west-2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-20 /cell-census/2023-11-20/soma/      us-west-2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-27 /cell-census/2023-11-27/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-11 /cell-census/2023-12-11/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-15 /cell-census/2023-12-15/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-18 /cell-census/2023-12-18/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-21 /cell-census/2023-12-21/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-25 /cell-census/2023-12-25/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2024-01-01 /cell-census/2024-01-01/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       h5ads.uri</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stable     s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/h5ads/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> latest     s3://cellxgene-census-public-us-west-2/cell-census/2023-12-11/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stable     s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> latest     s3://cellxgene-census-public-us-west-2/cell-census/2024-01-01/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-05-15 s3://cellxgene-census-public-us-west-2/cell-census/2023-05-15/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-07-25 s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23 s3://cellxgene-census-public-us-west-2/cell-census/2023-10-23/h5ads/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-13 s3://cellxgene-census-public-us-west-2/cell-census/2023-11-13/h5ads/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-20 s3://cellxgene-census-public-us-west-2/cell-census/2023-11-20/h5ads/</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-27 s3://cellxgene-census-public-us-west-2/cell-census/2023-11-27/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-11 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-11/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-15 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-18 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-18/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-21 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-21/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-25 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-25/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2024-01-01 s3://cellxgene-census-public-us-west-2/cell-census/2024-01-01/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        h5ads.relative_uri h5ads.s3_region do_not_delete   lts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stable     /cell-census/2023-07-25/h5ads/       us-west-2          TRUE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> latest     /cell-census/2023-12-11/h5ads/       us-west-2         FALSE    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stable     /cell-census/2023-12-15/h5ads/       us-west-2          TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> latest     /cell-census/2024-01-01/h5ads/       us-west-2         FALSE    NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-05-15 /cell-census/2023-05-15/h5ads/       us-west-2          TRUE  TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-07-25 /cell-census/2023-07-25/h5ads/       us-west-2          TRUE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23 /cell-census/2023-10-23/h5ads/       us-west-2          TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-13 /cell-census/2023-11-13/h5ads/       us-west-2         FALSE    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-20 /cell-census/2023-11-20/h5ads/       us-west-2         FALSE    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-27 /cell-census/2023-11-27/h5ads/       us-west-2         FALSE    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23 /cell-census/2023-10-23/h5ads/       us-west-2         FALSE FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-11 /cell-census/2023-12-11/h5ads/       us-west-2         FALSE    NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-15 /cell-census/2023-12-15/h5ads/       us-west-2          TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-18 /cell-census/2023-12-18/h5ads/       us-west-2         FALSE    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-21 /cell-census/2023-12-21/h5ads/       us-west-2         FALSE    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-25 /cell-census/2023-12-25/h5ads/       us-west-2         FALSE    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2024-01-01 /cell-census/2024-01-01/h5ads/       us-west-2         FALSE    NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             alias</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> stable     stable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> latest     latest</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-05-15       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-07-25       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-10-23       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-13       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-20       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-11-27       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-11       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-15       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-18       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-21       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2023-12-25       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2024-01-01       </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
