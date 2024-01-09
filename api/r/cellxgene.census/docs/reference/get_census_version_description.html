@@ -38,6 +38,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -91,15 +92,15 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">get_census_version_description</span><span class="op">(</span><span class="st">"stable"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   release_date release_build</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                 2023-07-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                 2023-12-15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                              soma.uri</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               soma.relative_uri soma.s3_region</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 /cell-census/2023-07-25/soma/      us-west-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 /cell-census/2023-12-15/soma/      us-west-2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                              h5ads.uri</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/h5ads/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/h5ads/</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               h5ads.relative_uri h5ads.s3_region do_not_delete  lts  alias</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 /cell-census/2023-07-25/h5ads/       us-west-2          TRUE TRUE stable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 /cell-census/2023-12-15/h5ads/       us-west-2          TRUE TRUE stable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   census_version</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1         stable</span>
 </code></pre></div>

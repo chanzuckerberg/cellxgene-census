@@ -38,6 +38,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
@@ -100,10 +101,10 @@ is accessed with zero-based indexes since the join id's may be zero.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The stable Census release is currently 2023-07-25. Specify census_version = "2023-07-25" in future calls to open_soma() to ensure data consistency.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The stable Census release is currently 2023-12-15. Specify census_version = "2023-12-15" in future calls to open_soma() to ensure data consistency.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">get_presence_matrix</span><span class="op">(</span><span class="va">census</span>, <span class="st">"Homo sapiens"</span><span class="op">)</span><span class="op">$</span><span class="fu">dim</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in private$check_open_for_read_or_write():</span> Item must be open for read or write. s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in private$check_open_for_read_or_write():</span> Item must be open for read or write. s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -16,9 +16,11 @@ Get started:
 
 ![image](cellxgene_census_docsite_workflow.svg)
 
-## Citing the Census
+## Citing Census
 
-Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
+To cite the project please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
+
+To cite individual studies please refer to the tutorial [Generating citations for Census slices](notebooks/api_demo/census_citation_generation.ipynb).
 
 ## Census Capabilities
 
