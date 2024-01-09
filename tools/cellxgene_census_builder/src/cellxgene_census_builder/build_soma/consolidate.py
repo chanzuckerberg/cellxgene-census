@@ -115,6 +115,8 @@ def _consolidate_array(uri: str, vacuum: bool) -> None:
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.compute_concurrency_level": max(16, cpu_count()),
                     "sm.io_concurrency_level": max(16, cpu_count()),
+                    # once we update to TileDB core 2.19, remove this and replace
+                    # with sm.consolidation.total_buffer_size
                     "sm.consolidation.buffer_size": 1 * 1024**3,
                     "sm.consolidation.mode": mode,
                 }
