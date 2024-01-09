@@ -677,7 +677,7 @@ def validate_X_layers(
             futures = (
                 [
                     ppe.submit(
-                        75_000 * mem_budget_factor,
+                        100_000 * mem_budget_factor,
                         _validate_Xnorm_layer,
                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
                     )
@@ -686,7 +686,7 @@ def validate_X_layers(
                 ]
                 + [
                     ppe.submit(
-                        125_000 * mem_budget_factor,
+                        400_000 * mem_budget_factor,
                         _validate_X_layer_has_unique_coords,
                         (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
                     )
