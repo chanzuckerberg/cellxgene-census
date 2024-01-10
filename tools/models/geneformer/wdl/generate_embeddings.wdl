@@ -2,11 +2,10 @@ version development
 
 workflow scatter_generate_embeddings {
     input {
-        Directory dataset
+        Array[Directory] dataset_shards
         Directory model
         String output_uri
         Int? emb_layer
-        Int parts = 10
 
         String s3_region = "us-west-2"
         String docker
@@ -17,10 +16,10 @@ workflow scatter_generate_embeddings {
         uri = output_uri, s3_region, docker
     }
 
-    scatter (part in range(parts)) {
+    scatter (shard in dataset_shards) {
         call generate_embeddings after init_embeddings_array {
             input:
-            dataset, model, emb_layer, output_uri, s3_region, part, parts, docker
+            dataset = shard, model, emb_layer, output_uri, s3_region, docker
         }
     }
 
@@ -72,10 +71,6 @@ task generate_embeddings {
 
         Int emb_layer = -1  # -1 or 0
 
-        # for scattering over partitions: process only part# of parts
-        Int? part
-        Int parts = 1
-
         String docker
     }
 
@@ -89,7 +84,7 @@ task generate_embeddings {
         export AWS_DEFAULT_REGION='~{s3_region}'
         export TQDM_MININTERVAL=10
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            --emb-layer ~{emb_layer} ~{"--part " + part} --parts ~{parts} --batch-size 10 --tiledbsoma \
+            --emb-layer ~{emb_layer} --batch-size 10 --tiledbsoma \
             '~{model}' '~{dataset}' '~{output_uri}'
     >>>
 

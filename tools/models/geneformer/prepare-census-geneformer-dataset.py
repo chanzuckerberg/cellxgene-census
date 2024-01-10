@@ -2,8 +2,10 @@
 # mypy: ignore-errors
 
 import argparse
+import functools
 import json
 import logging
+import math
 import multiprocessing
 import os
 import subprocess
@@ -20,7 +22,6 @@ from helpers.ontology_mapper import CellSubclassMapper
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(os.path.basename(__file__))
-NPROC = multiprocessing.cpu_count()
 
 
 def main(argv):
@@ -30,49 +31,26 @@ def main(argv):
         logger.error("output directory already exists: " + args.output_dir)
         return 1
 
-    # open human census
+    # select cells
     with cellxgene_census.open_soma(census_version=args.census_version) as census:
-        census_human = census["census_data"]["homo_sapiens"]
-
-        # select the cell id's to include
-        obs_df = select_cells(census_human, args.value_filter, args.percentage_data, args.sampling_column, args.N)
-        coords = np.array(obs_df.index)
-
-        # use GeneformerTokenizer to build dataset of those cells
-        with GeneformerTokenizer(
-            census_human,
-            obs_query=tiledbsoma.AxisQuery(coords=(coords,)),
-            obs_attributes=list(
-                # cell_subclass isn't yet in Census (select_cells() added it to obs_df for us), so
-                # exclude from the experiment axis query
-                it
-                for it in args.obs_columns
-                if it not in ("cell_subclass", "cell_subclass_ontology_term_id")
-            ),
-        ) as tokenizer:
-            logger.info(f"tokenizing {len(coords)} cells...")
-            dataset = tokenizer.build()
-
-    # add back cell_subclass
-    if "cell_subclass_ontology_term_id" in args.obs_columns:
-        dataset = dataset.map(
-            lambda it: {
-                "cell_subclass_ontology_term_id": obs_df.loc[it["soma_joinid"]]["cell_subclass_ontology_term_id"]
-            },
-            num_proc=NPROC,
+        obs_df = select_cells(
+            census["census_data"]["homo_sapiens"], args.value_filter, args.percentage_data, args.sampling_column, args.N
         )
-    if "cell_subclass" in args.obs_columns:
-        dataset = dataset.map(
-            lambda it: {"cell_subclass": obs_df.loc[it["soma_joinid"]]["cell_subclass"]}, num_proc=NPROC
-        )
-    logger.info(str(dataset))
-    if len(dataset):
-        logger.info(dataset[0])
 
-    # write them to output_dir (note: the Dataset tools will have spooled to disk already, so
-    # this should just be copying it to the desired location)
-    logger.info("writing Dataset to " + args.output_dir)
-    dataset.save_to_disk(args.output_dir)
+    logger.info(f"tokenizing {len(obs_df)} cells...")
+    # build dataset (parallelizing across shards, if so configured)
+    # NOTE: originally we made one big Dataset and later used its built-in shard() method, but we
+    # found that didn't use disk I/O efficiently (reading a shard read the whole dataset) so
+    # switched to sharding into separate datasets.
+    tasks = [(obs_df, args.output_dir)]
+    if args.shards > 1:
+        obs_dfs = np.array_split(obs_df, args.shards)
+        digits = math.ceil(math.log10(len(obs_dfs)))
+        tasks = [
+            (obs_dfs[i], os.path.join(args.output_dir, "shard-" + str(i).zfill(digits))) for i in range(len(obs_dfs))
+        ]
+    with multiprocessing.Pool() as pool:
+        pool.map(functools.partial(build_dataset, args.census_version, args.obs_columns), tasks)
 
     logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())
 
@@ -109,8 +87,9 @@ def parse_arguments(argv):
     parser.add_argument(
         "-N", type=int, help="further downsample to no more than N examples per distinct value of sampling_column"
     )
+    parser.add_argument("--shards", type=int, default=1, help="output dataset shards (default: 1)")
     parser.add_argument(
-        "-v", "--census-version", type=str, default="latest", help='Census release to query (default: "latest")'
+        "-v", "--census-version", type=str, default="stable", help='Census release to query (default: "stable")'
     )
     parser.add_argument("output_dir", type=str, help="output directory (must not already exist)")
 
@@ -175,6 +154,45 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
 
     obs_df.set_index("soma_joinid", inplace=True)
     return obs_df
+
+
+def build_dataset(census_version, obs_columns, task):
+    """
+    Given obs_df from select_cells (or subset thereof), build the Geneformer dataset and save to output_dir.
+    """
+    obs_df = task[0]
+    output_dir = task[1]
+
+    # open human census
+    with cellxgene_census.open_soma(census_version=census_version) as census:
+        # use GeneformerTokenizer to build dataset of those cells
+        with GeneformerTokenizer(
+            census["census_data"]["homo_sapiens"],
+            obs_query=tiledbsoma.AxisQuery(coords=(np.array(obs_df.index),)),
+            obs_attributes=list(
+                # cell_subclass isn't yet in Census (select_cells() added it to obs_df for us), so
+                # exclude from the experiment axis query
+                it
+                for it in obs_columns
+                if it not in ("cell_subclass", "cell_subclass_ontology_term_id")
+            ),
+        ) as tokenizer:
+            dataset = tokenizer.build()
+
+    # add back cell_subclass from obs_df
+    def add_cell_subclass(it):
+        ans = {}
+        if "cell_subclass_ontology_term_id" in obs_columns:
+            ans["cell_subclass_ontology_term_id"] = obs_df.loc[it["soma_joinid"]]["cell_subclass_ontology_term_id"]
+        if "cell_subclass" in obs_columns:
+            ans["cell_subclass"] = obs_df.loc[it["soma_joinid"]]["cell_subclass"]
+        return ans
+
+    dataset = dataset.map(add_cell_subclass)
+
+    # save to output_dir
+    dataset.save_to_disk(output_dir)
+    logger.info("saved " + output_dir)
 
 
 if __name__ == "__main__":

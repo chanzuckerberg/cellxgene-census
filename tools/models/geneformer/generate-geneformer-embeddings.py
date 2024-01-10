@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 import geneformer
-from datasets import Dataset, disable_progress_bar
+from datasets import disable_progress_bar
 from transformers import BertConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
@@ -56,7 +56,6 @@ def main(argv):
 
     with tempfile.TemporaryDirectory() as scratch_dir:
         # prepare the dataset, taking only one shard of it if so instructed
-        dataset_path = prepare_dataset(args.dataset, args.part, args.parts, scratch_dir)
         logger.info("Extracting embeddings...")
         extractor = geneformer.EmbExtractor(
             model_type=args.model_type,
@@ -70,7 +69,7 @@ def main(argv):
         #       see https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/emb_extractor.py
         embs_df = extractor.extract_embs(
             model_directory=args.model,
-            input_data_file=dataset_path,
+            input_data_file=args.dataset,
             # the method always writes out a .csv file which we discard (since it also returns the
             # embeddings data frame)
             output_directory=scratch_dir,
@@ -124,8 +123,6 @@ def parse_arguments(argv):
         help="dataset features to copy into output dataframe (comma-separated)",
     )
     parser.add_argument("--batch-size", type=int, default=16, help="batch size")
-    parser.add_argument("--part", type=int, help="process only one shard of the data (zero-based index)")
-    parser.add_argument("--parts", type=int, help="required with --part")
     parser.add_argument(
         "--tiledbsoma",
         action="store_true",
@@ -141,25 +138,8 @@ def parse_arguments(argv):
     if "soma_joinid" not in args.features:
         args.features.append("soma_joinid")
 
-    if args.part is not None:
-        if not (args.part >= 0 and args.parts is not None and args.parts > args.part):
-            parser.error("--part must be nonnegative and less than --parts")
-
     logger.info("arguments: " + str(vars(args)))
     return args
-
-
-def prepare_dataset(dataset_dir, part, parts, spool_dir):
-    dataset = Dataset.load_from_disk(dataset_dir)
-    logger.info(f"dataset (full): {dataset}")
-    if part is None:
-        return dataset_dir
-    dataset = dataset.shard(num_shards=parts, index=part, contiguous=True)
-    # spool the desired part of the dataset (since EmbExtractor takes a directory)
-    logger.info(f"dataset part: {dataset}")
-    part_dir = os.path.join(spool_dir, "dataset_part")
-    dataset.save_to_disk(part_dir)
-    return part_dir
 
 
 if __name__ == "__main__":
