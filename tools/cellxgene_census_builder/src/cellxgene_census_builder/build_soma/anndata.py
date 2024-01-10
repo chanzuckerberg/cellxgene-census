@@ -60,8 +60,7 @@ def _normed_index(idx: Index) -> tuple[Index1D, Index1D]:
 
 class AnnDataProxy:
     """
-    Recommend using `open_anndata2()` or `open_anndata2_filterable()` rather than
-    instantiating this directly.
+    Recommend using `open_anndata2()` rather than instantiating this class directly.
 
     AnnData-like proxy for the version 0.1.0 AnnData H5PY file encoding (aka H5AD).
     Used in lieu of the AnnData class to reduce memory overhead. Semantics very similar
@@ -222,51 +221,38 @@ class AnnDataProxy:
         return obs, var, X
 
 
+# The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter2` for details.
+CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_ontology_term_id")
+CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
+
+
 def open_anndata2(
     base_path: str,
     dataset: Dataset,
     *,
+    include_filter_columns: bool = False,
     obs_column_names: Optional[Tuple[str, ...]] = None,
     var_column_names: Optional[Tuple[str, ...]] = None,
 ) -> AnnDataProxy:
     """
     Open the dataset and return an AnnData-like AnnDataProxy object.
 
-    {obs,var}_column_names, if specified, determine which columns are loaded for the respective dataframes.
-    If not specified, all columns of obs/var are loaded.
+    Args:
+        {obs,var}_column_names: if specified, determine which columns are loaded for the respective dataframes.
+            If not specified, all columns of obs/var are loaded.
+        include_filter_columns: if True, ensure that any obs/var columns required for H5AD filtering are included. If
+            False (default), only load the columsn specified by the user.
     """
+
+    if include_filter_columns:
+        obs_column_names = tuple(set(CXG_OBS_COLUMNS_MINIMUM_READ + (obs_column_names or ())))
+        var_column_names = tuple(set(CXG_VAR_COLUMNS_MINIMUM_READ + (var_column_names or ())))
+
     return AnnDataProxy(
         urlcat(base_path, dataset.dataset_h5ad_path),
         obs_column_names=obs_column_names,
         var_column_names=var_column_names,
     )
-
-
-# The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter2` for details.
-CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_ontology_term_id")
-CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
-
-
-def open_anndata2_filterable(
-    base_path: str,
-    dataset: Dataset,
-    *,
-    obs_column_names: Optional[Tuple[str, ...]] = None,
-    var_column_names: Optional[Tuple[str, ...]] = None,
-) -> AnnDataProxy:
-    """
-    Open the dataset and return an AnnData-like AnnDataProxy object. Identical to `open_anndata2`,
-    except that this function guarantees to include any obs/var column required to implement the
-    filtering in `make_anndata_cell_filter2`.
-
-    {obs,var}_column_names, if specified, determine which columns are loaded for the respective dataframes,
-    in addition to those columns required for filtering. If not specified, the minimum columns needed to
-    implement filtering are loaded..
-    """
-
-    obs_column_names = tuple(set(CXG_OBS_COLUMNS_MINIMUM_READ + (obs_column_names or ())))
-    var_column_names = tuple(set(CXG_VAR_COLUMNS_MINIMUM_READ + (var_column_names or ())))
-    return open_anndata2(base_path, dataset, obs_column_names=obs_column_names, var_column_names=var_column_names)
 
 
 class AnnDataFilterFunction2(Protocol):

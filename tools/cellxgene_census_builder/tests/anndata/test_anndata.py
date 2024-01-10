@@ -4,11 +4,7 @@ from typing import List
 import anndata as ad
 import numpy as np
 import pytest
-from cellxgene_census_builder.build_soma.anndata import (
-    make_anndata_cell_filter2,
-    open_anndata2,
-    open_anndata2_filterable,
-)
+from cellxgene_census_builder.build_soma.anndata import make_anndata_cell_filter2, open_anndata2
 from cellxgene_census_builder.build_soma.datasets import Dataset
 
 from ..conftest import ORGANISMS
@@ -106,7 +102,7 @@ def test_make_anndata_cell_filter_feature_biotype_gene(tmp_path: pathlib.Path, h
 
 def test_make_anndata_cell_filter_assay(tmp_path: pathlib.Path, h5ad_with_assays: str) -> None:
     dataset = Dataset(dataset_id="test", dataset_asset_h5ad_uri="test", dataset_h5ad_path=h5ad_with_assays)
-    adata_with_assays = open_anndata2_filterable(tmp_path.as_posix(), dataset)
+    adata_with_assays = open_anndata2(tmp_path.as_posix(), dataset, include_filter_columns=True)
 
     func = make_anndata_cell_filter2({"assay_ontology_term_ids": ["EFO:1234", "EFO:1235"]})
     filtered_adata_with_assays = func(adata_with_assays)

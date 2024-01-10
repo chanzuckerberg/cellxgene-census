@@ -29,7 +29,7 @@ from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
-from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2_filterable
+from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
@@ -457,7 +457,7 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    unfiltered_ad = open_anndata2_filterable(assets_path, dataset, var_column_names=("_index",))
+    unfiltered_ad = open_anndata2(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
     results: List[AccumulateXResult] = []
     for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
