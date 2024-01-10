@@ -39,17 +39,21 @@ def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List
     }
     with tiledb.open(os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config=tiledb_config) as estimators_array:
         estimators_df = estimators_array.df[features, obs_groups_df.obs_group_joinid.values]
-        # TODO: Determine whether it's reasonable to drop these values, or if we should revisit how they're being
-        #  computed in the first place. If reasonable, this filtering should be done by the cube builder, not here.
-        # This filtering ensures that we will not take of logs of non-positive values, or end up with selm values of 0
-        drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
-        if drop_mask.any():
-            logging.warning(
-                f"dropping {drop_mask.sum()} rows with invalid values ({drop_mask.sum() / len(drop_mask):.2%})"
-            )
-            estimators_df = estimators_df[~drop_mask]
 
-        return cast(pd.DataFrame, estimators_df)
+    # TODO: Determine whether it's reasonable to drop these values, or if we should revisit how they're being
+    #  computed in the first place. If reasonable, this filtering should be done by the cube builder, not here.
+    # This filtering ensures that we will not take of logs of non-positive values, or end up with selm values of 0
+    estimators_df = drop_invalid_data(estimators_df)
+
+    return cast(pd.DataFrame, estimators_df)
+
+
+def drop_invalid_data(estimators_df: pd.DataFrame) -> pd.DataFrame:
+    drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
+    if drop_mask.any():
+        logging.warning(f"dropping {drop_mask.sum()} rows with invalid values ({drop_mask.sum() / len(drop_mask):.2%})")
+        estimators_df = estimators_df[~drop_mask]
+    return estimators_df
 
 
 def compute_all(cube_path: str, query_filter: str, treatment: str, n_threads: int) -> pd.DataFrame:
@@ -138,19 +142,33 @@ def compute_for_feature(
     feature_estimators = estimators[estimators.feature_id == feature][["obs_group_joinid", "mean", "sem"]]
 
     # ensure estimators are available for all obs groups (for when feature had no expression data for some obs groups)
-    feature_estimators = obs_group_joinids.merge(feature_estimators, on="obs_group_joinid", how="left")
-    m = cast(npt.NDArray[np.float32], feature_estimators["mean"].fillna(1e-3).values)
-    sem = cast(npt.NDArray[np.float32], feature_estimators["sem"].fillna(1e-4).values)
+    m, sem = fill_missing_data(feature_estimators, obs_group_joinids)
 
     assert len(m) == len(design)
     assert len(sem) == len(design)
 
     # Transform to log space (alternatively can resample in log space)
+    lm, selm = transform_to_log_space(m, sem)
+
+    return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
+
+
+def transform_to_log_space(
+    m: npt.NDArray[np.float32], sem: npt.NDArray[np.float32]
+) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     lm = np.log(m)
     selm = (np.log(m + sem) - np.log(m - sem)) / 2
     assert (selm > 0).all()
+    return lm, selm
 
-    return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
+
+def fill_missing_data(
+    feature_estimators: pd.DataFrame, obs_group_joinids: pd.DataFrame
+) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
+    feature_estimators = obs_group_joinids.merge(feature_estimators, on="obs_group_joinid", how="left")
+    m = cast(npt.NDArray[np.float32], feature_estimators["mean"].fillna(1e-3).values)
+    sem = cast(npt.NDArray[np.float32], feature_estimators["sem"].fillna(1e-4).values)
+    return m, sem
 
 
 def de_wls(
