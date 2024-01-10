@@ -5,6 +5,7 @@ from typing import Any, Iterator, Optional, Union
 import numpy as np
 import numpy.typing as npt
 import requests
+import urllib3
 from scipy import sparse
 
 
@@ -63,7 +64,13 @@ def array_chunker(
 
 
 def fetch_json(url: str, delay_secs: float = 0.0) -> object:
-    response = requests.get(url)
+    s = requests.Session()
+    retries = urllib3.util.Retry(
+        backoff_factor=1,  # i.e., sleep for [0s, 2s, 4s, 8s, ...]
+        status_forcelist=[500, 502, 503, 504],  # 5XX can occur on CDN failures, so retry
+    )
+    s.mount("https://", requests.adapters.HTTPAdapter(max_retries=retries))
+    response = s.get(url)
     response.raise_for_status()
     time.sleep(delay_secs)
     return response.json()
