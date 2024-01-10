@@ -50,7 +50,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'single-cell-8c64g-runner'
         with:
-          name: coverage-api-${{ matrix.runs-on }}
+          name: coverage-api-${{ matrix.os }}-${{ matrix.python-version }}
           path: ./.coverage*
           retention-days: 3
 
@@ -82,7 +82,7 @@ jobs:
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP ./tools/cellxgene_census_builder/tests/
       - uses: actions/upload-artifact@v4
         with:
-          name: coverage-builder-${{ matrix.runs-on }}
+          name: coverage-builder-${{ matrix.os }}-${{ matrix.python-version }}
           path: ./.coverage*
           retention-days: 3
 
