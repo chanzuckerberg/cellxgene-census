@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             api/**/pyproject.toml
             api/**/requirements*.txt
@@ -47,10 +47,10 @@ jobs:
       - name: Test with pytest (API, experimental)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 --experimental ./api/python/cellxgene_census/tests/experimental
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: matrix.os == 'single-cell-8c64g-runner'
         with:
-          name: coverage
+          name: coverage-api-${{ matrix.runs-on }}
           path: ./.coverage*
           retention-days: 3
 
@@ -68,7 +68,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             tools/**/pyproject.toml
             tools/**/requirements*.txt
@@ -80,9 +80,9 @@ jobs:
       - name: Test with pytest (builder)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP ./tools/cellxgene_census_builder/tests/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-builder-${{ matrix.runs-on }}
           path: ./.coverage*
           retention-days: 3
 
@@ -90,19 +90,20 @@ jobs:
     needs:
       - unit_tests_builder
       - unit_tests_python_api
-    runs-on: single-cell-8c64g-runner
+    runs-on: [self-hosted, Linux]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
-          name: coverage
+          pattern: coverage-*
+          merge-multiple: true
           path: .
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
       - name: install requirements
         run: |
           pip install coverage
