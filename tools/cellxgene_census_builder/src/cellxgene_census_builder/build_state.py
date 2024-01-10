@@ -73,6 +73,9 @@ class CensusBuildConfig:
     dataset_id_blocklist_uri: str = field(
         default="https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt"
     )
+    # User Agent header for all dataset requests from the datasets.cellxgene.cziscience.com route.
+    user_agent_prefix: str = field(default="census-builder-")
+    user_agent_environment: str = field(default="unknown")
     #
     # For testing convenience only
     manifest: str = field(default=None)
