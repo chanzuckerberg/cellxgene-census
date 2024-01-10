@@ -128,7 +128,7 @@ def compute_for_features(
 
         print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
 
-        return result  # type:ignore
+        return result
 
 
 def compute_for_feature(
@@ -137,7 +137,7 @@ def compute_for_feature(
     design: pd.DataFrame,
     estimators: pd.DataFrame,
     feature: str,
-) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
+) -> Tuple[np.float32, np.float32, np.float32]:
     # extract estimators for the specified feature
     feature_estimators = estimators[estimators.feature_id == feature][["obs_group_joinid", "mean", "sem"]]
 
@@ -171,32 +171,41 @@ def fill_missing_data(
     return m, sem
 
 
-def de_wls(
-    X: npt.NDArray[np.float32],
-    y: npt.NDArray[np.float32],
-    n: npt.NDArray[np.float32],
-    v: npt.NDArray[np.float32],
-) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
-    """
-    Perform DE for each gene using Weighted Least Squares (i.e., a weighted Linear Regression model)
-    """
-
+def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.NDArray[np.float32]) -> np.float32:
     # fit WLS using sample_weights
     WLS = LinearRegression()
     WLS.fit(X, y, sample_weight=n)
 
     # note: we have all the other coefficients (i.e. effect size) for the other covariates here as well, but we only
     # want the treatment effect for now
-    treatment_col = 0
-    coef = WLS.coef_[treatment_col]
+    return cast(np.float32, WLS.coef_[0])
 
+
+def de_wls_stats(
+    X: npt.NDArray[np.float32], v: npt.NDArray[np.float32], coef: np.float32
+) -> Tuple[np.float32, np.float32]:
     W = np.diag(1 / v)
 
     beta_var_hat = np.diag(np.linalg.pinv(X.T @ W @ X))
-    se = np.sqrt(beta_var_hat[treatment_col])
+    se = np.sqrt(beta_var_hat[0])
 
     z = coef / se
     pv = stats.norm.sf(np.abs(z)) * 2
+
+    return z, pv
+
+
+def de_wls(
+    X: npt.NDArray[np.float32],
+    y: npt.NDArray[np.float32],
+    n: npt.NDArray[np.float32],
+    v: npt.NDArray[np.float32],
+) -> Tuple[np.float32, np.float32, np.float32]:
+    """
+    Perform DE for each gene using Weighted Least Squares (i.e., a weighted Linear Regression model)
+    """
+    coef = de_wls_fit(X, y, n)
+    z, pv = de_wls_stats(X, v, coef)
 
     return coef, z, pv
 
