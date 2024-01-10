@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import cProfile
 import itertools
 import json
 import logging
@@ -106,19 +107,24 @@ def get_features(cube_path: str) -> List[str]:
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
-    print(f"computing for feature group {feature_group_key}, {features[0]}..{features[-1]}...")
-    estimators = query_estimators(cube_path, obs_groups_df, features)
-    cell_counts = obs_groups_df["n_obs"].values
-    obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
+    with cProfile.Profile() as prof:
+        print(f"computing for feature group {feature_group_key}, {features[0]}..{features[-1]}...")
+        estimators = query_estimators(cube_path, obs_groups_df, features)
+        cell_counts = obs_groups_df["n_obs"].values
+        obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
 
-    result = [
-        (feature, *compute_for_feature(cell_counts, obs_group_joinids, design, estimators, feature))  # type:ignore
-        for feature in features
-    ]
+        result = [
+            (feature, *compute_for_feature(cell_counts, obs_group_joinids, design, estimators, feature))  # type:ignore
+            for feature in features
+        ]
 
-    print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
+        prof.dump_stats(
+            f"/tmp/profile-diffexpr-{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}-{feature_group_key}.prof"
+        )
 
-    return result  # type:ignore
+        print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
+
+        return result  # type:ignore
 
 
 def compute_for_feature(
