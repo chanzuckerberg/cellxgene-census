@@ -90,12 +90,12 @@ jobs:
     needs:
       - unit_tests_builder
       - unit_tests_python_api
-    runs-on: ubuntu-20.04
+    runs-on: single-cell-8c64g-runner
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: coverage
           path: .
