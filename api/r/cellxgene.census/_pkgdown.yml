@@ -58,6 +58,7 @@ articles:
   navbar: "cellxgene.census capabilities"
   contents:
     - census_query_extract
+    - census_citation_generation
     - census_datasets
     - census_dataset_presence
     - census_compute_over_X
