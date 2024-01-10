@@ -49,7 +49,7 @@ def main(argv):
         tasks = [
             (obs_dfs[i], os.path.join(args.output_dir, "shard-" + str(i).zfill(digits))) for i in range(len(obs_dfs))
         ]
-    with multiprocessing.Pool() as pool:
+    with multiprocessing.Pool(processes=4) as pool:  # NOTE: keep processes small due to memory usage
         pool.map(functools.partial(build_dataset, args.census_version, args.obs_columns), tasks)
 
     logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())

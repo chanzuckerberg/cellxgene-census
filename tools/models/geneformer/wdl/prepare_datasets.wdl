@@ -29,13 +29,13 @@ task prepare_census_geneformer_dataset {
     >>>
 
     output {
-        Array[Directory] dataset_shards = if (shards>1) then glob(output_name + "/shard-*") else output_name
+        Directory dataset = output_name
         File stderr = stderr()
     }
 
     runtime {
         cpu: 8
-        memory: "90G"
+        memory: "120G"
         docker: docker
     }
 }

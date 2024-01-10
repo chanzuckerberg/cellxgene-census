@@ -23,12 +23,12 @@ miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
     --s3upload s3://MYBUCKET/geneformer/datasets/2500_per_cell_type/
 ```
 
-And a tokenized dataset for all of Census (371GiB!):
+And a tokenized dataset for all of Census (>300GiB, sharded):
 
 ```bash
 miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
     wdl/prepare_datasets.wdl docker=$DOCKER_TAG \
-    census_version=2023-10-23 output_name=census-2023-10-23 value_filter='is_primary_data==True or is_primary_data==False' \
+    census_version=2023-10-23 output_name=census-2023-10-23 shards=256 value_filter='is_primary_data==True or is_primary_data==False' \
     --s3upload s3://MYBUCKET/geneformer/datasets/census-2023-10-23/
 ```
 
@@ -47,12 +47,11 @@ miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
 Generating cell embeddings (takes 8-12h on up to 256 g5.2xlarge, generates 130GiB `tiledbsoma.SparseNDArray` on S3):
 
 ```bash
-MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 \
-MINIWDL__AWS__SUBMIT_PERIOD=60 \
-miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
+seq 0 255 \
+    | xargs -n 1 printf 'dataset_shards=s3://MYBUCKET/geneformer/datasets/census-2023-10-23/shard-%03d\n' \
+    | MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 MINIWDL__AWS__SUBMIT_PERIOD=60 xargs -n 9999 \ miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
     wdl/generate_embeddings.wdl docker=$DOCKER_TAG \
     emb_layer=0 \
-    dataset=s3://MYBUCKET/geneformer/datasets/census-2023-10-23/dataset/census-2023-10-23 \
     model=s3://MYBUCKET/geneformer/models/2500_per_cell_type_8epochs/model/2500_per_cell_type_8epochs \
     output_uri=s3://MYBUCKET/geneformer/embs/census-2023-10-23 parts=256 \
     --s3upload s3://MYBUCKET/geneformer/embs
