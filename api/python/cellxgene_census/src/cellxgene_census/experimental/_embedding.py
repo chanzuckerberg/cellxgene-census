@@ -65,7 +65,7 @@ def get_embedding(
 
     Args:
         census_version:
-            The Census version tag, e.g., "2023-10-23". Used to verify that the contents of
+            The Census version tag, e.g., "2023-12-15". Used to verify that the contents of
             the embedding contain embedded cells from the same Census version.
         embedding_uri:
             The URI containing the embedding data.

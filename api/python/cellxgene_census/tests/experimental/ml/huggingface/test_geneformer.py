@@ -15,7 +15,7 @@ except ImportError:
     pass
 
 
-CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-10-23"
+CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-12-15"
 
 
 @pytest.mark.experimental
