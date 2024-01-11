@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 import cProfile
+import glob
 import itertools
 import json
 import logging
 import os
+import pstats
 import sys
-from concurrent.futures import ProcessPoolExecutor
-from functools import partial
-from typing import List, Tuple, cast
+import tempfile
+import time
+from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, process
+from functools import partial, wraps, reduce
+from typing import List, Tuple, cast, Optional, Dict, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -32,7 +37,47 @@ CUBE_LOGICAL_DIMS_OBS = [
     "suspension_type",
 ]
 
+fn_cum_time: Dict[str, float] = defaultdict(lambda: 0)
+fn_calls: Dict[str, int] = defaultdict(lambda: 0)
 
+
+def timeit_report(func):
+
+    @wraps(func)
+    def timeit_report_wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+
+        sorted_fn_names = [k for k, _ in sorted(fn_cum_time.items(), key=lambda i: i[1], reverse=True)]
+        for fn_name in sorted_fn_names:
+            print(f'[timing {os.getpid()}] {fn_name}: '
+                  f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
+                  f'calls={fn_calls[fn_name]}')
+
+        return result
+
+    return timeit_report_wrapper
+
+
+def timeit(func):
+    @wraps(func)
+    def timeit_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        exec_time = end_time - start_time
+
+        fn_name = func.__name__
+        fn_cum_time[fn_name] += exec_time
+        fn_calls[fn_name] += 1
+        # print(f'[timing] {fn_name}: exec time={exec_time:.3f} sec; '
+        #       f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
+        #       f'calls={fn_calls[fn_name]}')
+
+        return result
+    return timeit_wrapper
+
+
+@timeit
 def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
     tiledb_config = {
         "soma.init_buffer_bytes": 2**31,
@@ -47,7 +92,7 @@ def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List
 
     return cast(pd.DataFrame, estimators_df)
 
-
+@timeit
 def drop_invalid_data(estimators_df: pd.DataFrame) -> pd.DataFrame:
     drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
     if drop_mask.any():
@@ -56,7 +101,7 @@ def drop_invalid_data(estimators_df: pd.DataFrame) -> pd.DataFrame:
     return estimators_df
 
 
-def compute_all(cube_path: str, query_filter: str, treatment: str, n_threads: int) -> pd.DataFrame:
+def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: int, n_features: Optional[int] = None) -> Tuple[pd.DataFrame, pstats.Stats]:
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
 
@@ -68,27 +113,33 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_threads: in
             obs_groups_df[col] = obs_groups_df[col].cat.codes
 
     # TODO: need canonical list of features efficiently
-    features = get_features(cube_path)[:100]
+    features = get_features(cube_path)
+    if n_features is not None:
+        rng = np.random.default_rng(1024)
+        features = rng.choice(features, size=n_features, replace=False)
 
     # compute each feature group in parallel
-    n_feature_groups = min(len(features), n_threads)
+    n_feature_groups = min(len(features), n_processes)
     feature_groups = [features.tolist() for features in np.array_split(np.array(features), n_feature_groups)]
     print(
-        f"computing for {len(obs_groups_df)} obs groups ({obs_groups_df.n_obs.sum()} cells) and {len(features)} features using {n_feature_groups} processes, {len(features) // n_feature_groups} features/process"
+        f"computing for {len(obs_groups_df)} obs groups ({obs_groups_df.n_obs.sum()} cells) and {n_features} features using {n_feature_groups} processes, {len(features) // n_feature_groups} features/process"
     )
 
     # make treatment variable be in the first column of the design matrix
     variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
     design = pd.get_dummies(obs_groups_df[variables], drop_first=True, dtype=int)
 
-    result_groups = ProcessPoolExecutor(max_workers=n_threads).map(
+    result_groups = ProcessPoolExecutor(max_workers=n_processes).map(
         partial(compute_for_features, cube_path, design, obs_groups_df), feature_groups, range(len(feature_groups))
     )
 
-    # flatten results
-    results = itertools.chain.from_iterable(result_groups)
+    results = list(result_groups)
+    data = itertools.chain.from_iterable([r[0] for r in results]) # flatten results
+    # stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) for r in results])
 
-    return pd.DataFrame(results, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id")
+    # stats.dump_stats(f"/tmp/profile-diffexpr-{n_features}f-{n_processes}p-{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.stat")
+
+    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
 
 
 def get_features(cube_path: str) -> List[str]:
@@ -108,29 +159,30 @@ def get_features(cube_path: str) -> List[str]:
     return cast(List[str], features)
 
 
+@timeit_report
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
-) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
-    with cProfile.Profile() as prof:
-        print(f"computing for feature group {feature_group_key}, {features[0]}..{features[-1]}...")
-        estimators = query_estimators(cube_path, obs_groups_df, features)
-        cell_counts = obs_groups_df["n_obs"].values
-        obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
+) -> Tuple[List[Tuple[str, np.float32, np.float32, np.float32]], str]:
+    # with cProfile.Profile() as prof:
+    print(f"computing for feature group {feature_group_key}, {features[0]}..{features[-1]}...")
+    estimators = query_estimators(cube_path, obs_groups_df, features)
+    cell_counts = obs_groups_df["n_obs"].values
+    obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
 
-        result = [
-            (feature, *compute_for_feature(cell_counts, obs_group_joinids, design, estimators, feature))  # type:ignore
-            for feature in features
-        ]
+    result = [
+        (feature, *compute_for_feature(cell_counts, obs_group_joinids, design, estimators, feature))  # type:ignore
+        for feature in features
+    ]
 
-        prof.dump_stats(
-            f"/tmp/profile-diffexpr-{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}-{feature_group_key}.prof"
-        )
+    f = tempfile.mkstemp()[1]
+    # prof.dump_stats(f)
 
-        print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
+    print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
 
-        return result
+    return result, f
 
 
+@timeit
 def compute_for_feature(
     cell_counts: npt.NDArray[np.float32],
     obs_group_joinids: pd.DataFrame,
@@ -153,6 +205,7 @@ def compute_for_feature(
     return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
 
 
+@timeit
 def transform_to_log_space(
     m: npt.NDArray[np.float32], sem: npt.NDArray[np.float32]
 ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
@@ -162,6 +215,7 @@ def transform_to_log_space(
     return lm, selm
 
 
+@timeit
 def fill_missing_data(
     feature_estimators: pd.DataFrame, obs_group_joinids: pd.DataFrame
 ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
@@ -171,6 +225,7 @@ def fill_missing_data(
     return m, sem
 
 
+@timeit
 def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.NDArray[np.float32]) -> np.float32:
     # fit WLS using sample_weights
     WLS = LinearRegression()
@@ -181,6 +236,7 @@ def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.ND
     return cast(np.float32, WLS.coef_[0])
 
 
+@timeit
 def de_wls_stats(
     X: npt.NDArray[np.float32], v: npt.NDArray[np.float32], coef: np.float32
 ) -> Tuple[np.float32, np.float32]:
@@ -195,6 +251,7 @@ def de_wls_stats(
     return z, pv
 
 
+@timeit
 def de_wls(
     X: npt.NDArray[np.float32],
     y: npt.NDArray[np.float32],
@@ -213,13 +270,14 @@ def de_wls(
 # Script entrypoint
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <csv_output_path>")
+        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <csv_output_path> <n_processes> <n_features>")
         sys.exit(1)
 
-    filter_arg, treatment_arg, cube_path_arg, csv_output_path_arg = sys.argv[1:5]
+    filter_arg, treatment_arg, cube_path_arg, csv_output_path_arg, n_processes, n_features = sys.argv[1:7]
 
-    de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, os.cpu_count() or 1)
+    de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features))
 
     # Output DE result
-    print(de_result)
-    de_result.to_csv(csv_output_path_arg)
+#    print(de_result)
+#    de_result.to_csv(csv_output_path_arg)
+
