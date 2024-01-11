@@ -42,10 +42,15 @@ fn_calls: Dict[str, int] = defaultdict(lambda: 0)
 
 
 def timeit_report(func):
-
     @wraps(func)
     def timeit_report_wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
+
+        with cProfile.Profile() as prof:
+            result = func(*args, **kwargs)
+
+            f = tempfile.mkstemp()[1]
+            prof.dump_stats(f)
+
 
         sorted_fn_names = [k for k, _ in sorted(fn_cum_time.items(), key=lambda i: i[1], reverse=True)]
         for fn_name in sorted_fn_names:
@@ -53,7 +58,7 @@ def timeit_report(func):
                   f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
                   f'calls={fn_calls[fn_name]}')
 
-        return result
+        return result, f
 
     return timeit_report_wrapper
 
@@ -134,10 +139,8 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: 
     )
 
     results = list(result_groups)
-    data = itertools.chain.from_iterable([r[0] for r in results]) # flatten results
-    # stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) for r in results])
-
-    # stats.dump_stats(f"/tmp/profile-diffexpr-{n_features}f-{n_processes}p-{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.stat")
+    data = itertools.chain.from_iterable([r[0] for r in results])  # flatten results
+    stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) for r in results])
 
     return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
 
@@ -162,8 +165,7 @@ def get_features(cube_path: str) -> List[str]:
 @timeit_report
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
-) -> Tuple[List[Tuple[str, np.float32, np.float32, np.float32]], str]:
-    # with cProfile.Profile() as prof:
+) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
     print(f"computing for feature group {feature_group_key}, {features[0]}..{features[-1]}...")
     estimators = query_estimators(cube_path, obs_groups_df, features)
     cell_counts = obs_groups_df["n_obs"].values
@@ -174,12 +176,9 @@ def compute_for_features(
         for feature in features
     ]
 
-    f = tempfile.mkstemp()[1]
-    # prof.dump_stats(f)
-
     print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
 
-    return result, f
+    return result
 
 
 @timeit
@@ -240,15 +239,27 @@ def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.ND
 def de_wls_stats(
     X: npt.NDArray[np.float32], v: npt.NDArray[np.float32], coef: np.float32
 ) -> Tuple[np.float32, np.float32]:
-    W = np.diag(1 / v)
-
-    beta_var_hat = np.diag(np.linalg.pinv(X.T @ W @ X))
+    W = de_wls_stats_diag(v)
+    m = de_wls_stats_matmul(W, X)
+    pinv = np.linalg.pinv(m)
+    beta_var_hat = np.diag(pinv)
     se = np.sqrt(beta_var_hat[0])
 
     z = coef / se
     pv = stats.norm.sf(np.abs(z)) * 2
 
     return z, pv
+
+
+def de_wls_stats_matmul(W, X):
+    m = X.T.__matmul__(W).__matmul__(X)
+    return m
+
+
+def de_wls_stats_diag(v):
+    inv = 1 / v
+    W = np.diag(inv)
+    return W
 
 
 @timeit
