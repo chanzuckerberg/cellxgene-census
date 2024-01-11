@@ -241,7 +241,7 @@ def de_wls_stats(
 ) -> Tuple[np.float32, np.float32]:
     W = de_wls_stats_diag(v)
     m = de_wls_stats_matmul(W, X)
-    pinv = np.linalg.pinv(m)
+    pinv = de_wls_stats_pinv(m)
     beta_var_hat = np.diag(pinv)
     se = np.sqrt(beta_var_hat[0])
 
@@ -251,11 +251,18 @@ def de_wls_stats(
     return z, pv
 
 
+@timeit
+def de_wls_stats_pinv(m):
+    return np.linalg.pinv(m)
+
+
+@timeit
 def de_wls_stats_matmul(W, X):
-    m = X.T.__matmul__(W).__matmul__(X)
+    m = X.T @ W @ X
     return m
 
 
+@timeit
 def de_wls_stats_diag(v):
     inv = 1 / v
     W = np.diag(inv)
