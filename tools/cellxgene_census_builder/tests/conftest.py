@@ -189,22 +189,6 @@ def setup(monkeypatch: MonkeyPatch, census_build_args: CensusBuildArgs) -> None:
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2)
 
 
-def has_aws_credentials() -> bool:
-    """Return true if we have AWS credentials"""
-    import botocore
-
-    try:
-        session = botocore.session.get_session()
-        client = session.create_client("sts")
-        id = client.get_caller_identity()
-        print(id)
-        return True
-    except botocore.exceptions.BotoCoreError as e:
-        print(e)
-
-    return False
-
-
 @pytest.fixture
 def empty_blocklist(tmp_path: pathlib.Path) -> str:
     blocklist_path = tmp_path / "blocklist.txt"
