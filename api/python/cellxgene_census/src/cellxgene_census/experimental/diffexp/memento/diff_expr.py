@@ -44,13 +44,13 @@ fn_calls: Dict[str, int] = defaultdict(lambda: 0)
 def timeit_report(func):
     @wraps(func)
     def timeit_report_wrapper(*args, **kwargs):
+        # return func(*args, **kwargs), None
 
         with cProfile.Profile() as prof:
             result = func(*args, **kwargs)
 
             f = tempfile.mkstemp()[1]
             prof.dump_stats(f)
-
 
         sorted_fn_names = [k for k, _ in sorted(fn_cum_time.items(), key=lambda i: i[1], reverse=True)]
         for fn_name in sorted_fn_names:
@@ -74,9 +74,9 @@ def timeit(func):
         fn_name = func.__name__
         fn_cum_time[fn_name] += exec_time
         fn_calls[fn_name] += 1
-        # print(f'[timing] {fn_name}: exec time={exec_time:.3f} sec; '
-        #       f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
-        #       f'calls={fn_calls[fn_name]}')
+        print(f'[timing] {fn_name}: exec time={exec_time:.3f} sec; '
+              f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
+              f'calls={fn_calls[fn_name]}')
 
         return result
     return timeit_wrapper
@@ -96,6 +96,7 @@ def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List
     estimators_df = drop_invalid_data(estimators_df)
 
     return cast(pd.DataFrame, estimators_df)
+
 
 @timeit
 def drop_invalid_data(estimators_df: pd.DataFrame) -> pd.DataFrame:
@@ -140,7 +141,7 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: 
 
     results = list(result_groups)
     data = itertools.chain.from_iterable([r[0] for r in results])  # flatten results
-    stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) for r in results])
+    stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) if r[1] else pstats.Stats() for r in results])
 
     return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
 
@@ -166,14 +167,15 @@ def get_features(cube_path: str) -> List[str]:
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
-    print(f"computing for feature group {feature_group_key}, {features[0]}..{features[-1]}...")
+    print(f"computing for feature group {feature_group_key}, n={len(features)}, {features[0]}..{features[-1]}...")
     estimators = query_estimators(cube_path, obs_groups_df, features)
+
     cell_counts = obs_groups_df["n_obs"].values
     obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
 
     result = [
-        (feature, *compute_for_feature(cell_counts, obs_group_joinids, design, estimators, feature))  # type:ignore
-        for feature in features
+        (feature_id, *compute_for_feature(cell_counts, design, feature_estimators, obs_group_joinids))  # type:ignore
+        for feature_id, feature_estimators in estimators.groupby('feature_id')
     ]
 
     print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
@@ -184,22 +186,17 @@ def compute_for_features(
 @timeit
 def compute_for_feature(
     cell_counts: npt.NDArray[np.float32],
-    obs_group_joinids: pd.DataFrame,
     design: pd.DataFrame,
     estimators: pd.DataFrame,
-    feature: str,
+    obs_group_joinids: pd.DataFrame
 ) -> Tuple[np.float32, np.float32, np.float32]:
-    # extract estimators for the specified feature
-    feature_estimators = estimators[estimators.feature_id == feature][["obs_group_joinid", "mean", "sem"]]
-
     # ensure estimators are available for all obs groups (for when feature had no expression data for some obs groups)
-    m, sem = fill_missing_data(feature_estimators, obs_group_joinids)
+    estimators = fill_missing_data(obs_group_joinids, estimators)
 
-    assert len(m) == len(design)
-    assert len(sem) == len(design)
+    assert len(estimators) == len(design)
 
     # Transform to log space (alternatively can resample in log space)
-    lm, selm = transform_to_log_space(m, sem)
+    lm, selm = transform_to_log_space(estimators["mean"].values, estimators["sem"].values)
 
     return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
 
@@ -215,13 +212,11 @@ def transform_to_log_space(
 
 
 @timeit
-def fill_missing_data(
-    feature_estimators: pd.DataFrame, obs_group_joinids: pd.DataFrame
-) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
-    feature_estimators = obs_group_joinids.merge(feature_estimators, on="obs_group_joinid", how="left")
-    m = cast(npt.NDArray[np.float32], feature_estimators["mean"].fillna(1e-3).values)
-    sem = cast(npt.NDArray[np.float32], feature_estimators["sem"].fillna(1e-4).values)
-    return m, sem
+def fill_missing_data(obs_group_joinids: pd.DataFrame, feature_estimators: pd.DataFrame) -> pd.DataFrame:
+    feature_estimators = obs_group_joinids.merge(feature_estimators[["obs_group_joinid", "mean", "sem"]], on="obs_group_joinid", how="left", copy=False)
+    feature_estimators["mean"] = feature_estimators["mean"].fillna(1e-3)
+    feature_estimators["sem"] = feature_estimators["sem"].fillna(1e-4)
+    return feature_estimators
 
 
 @timeit
@@ -239,7 +234,7 @@ def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.ND
 def de_wls_stats(
     X: npt.NDArray[np.float32], v: npt.NDArray[np.float32], coef: np.float32
 ) -> Tuple[np.float32, np.float32]:
-    W = de_wls_stats_diag(v)
+    W = de_wls_stats_W(v)
     m = de_wls_stats_matmul(W, X)
     pinv = de_wls_stats_pinv(m)
     beta_var_hat = np.diag(pinv)
@@ -258,15 +253,13 @@ def de_wls_stats_pinv(m):
 
 @timeit
 def de_wls_stats_matmul(W, X):
-    m = X.T @ W @ X
+    m = (X.T * W) @ X
     return m
 
 
 @timeit
-def de_wls_stats_diag(v):
-    inv = 1 / v
-    W = np.diag(inv)
-    return W
+def de_wls_stats_W(v):
+    return (1/v) #.reshape((-1, 1))
 
 
 @timeit
