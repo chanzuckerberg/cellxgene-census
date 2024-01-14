@@ -20,6 +20,7 @@ import pandas as pd
 import scipy.stats as stats
 import tiledb
 from sklearn.linear_model import LinearRegression
+import polars as pl
 
 OBS_GROUPS_ARRAY = "obs_groups"
 ESTIMATORS_ARRAY = "estimators"
@@ -83,23 +84,23 @@ def timeit(func):
 
 
 @timeit
-def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
+def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pl.DataFrame:
     tiledb_config = {
         "soma.init_buffer_bytes": 2**31,
     }
     with tiledb.open(os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config=tiledb_config) as estimators_array:
-        estimators_df = estimators_array.df[features, obs_groups_df.obs_group_joinid.values]
+        estimators_df = pl.DataFrame(estimators_array.df[features, obs_groups_df.obs_group_joinid.values])
 
     # TODO: Determine whether it's reasonable to drop these values, or if we should revisit how they're being
     #  computed in the first place. If reasonable, this filtering should be done by the cube builder, not here.
     # This filtering ensures that we will not take of logs of non-positive values, or end up with selm values of 0
     estimators_df = drop_invalid_data(estimators_df)
 
-    return cast(pd.DataFrame, estimators_df)
+    return cast(pl.DataFrame, estimators_df)
 
 
 @timeit
-def drop_invalid_data(estimators_df: pd.DataFrame) -> pd.DataFrame:
+def drop_invalid_data(estimators_df: pl.DataFrame) -> pl.DataFrame:
     drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
     if drop_mask.any():
         logging.warning(f"dropping {drop_mask.sum()} rows with invalid values ({drop_mask.sum() / len(drop_mask):.2%})")
@@ -175,7 +176,7 @@ def compute_for_features(
 
     result = [
         (feature_id, *compute_for_feature(cell_counts, design, feature_estimators, obs_group_joinids))  # type:ignore
-        for feature_id, feature_estimators in estimators.groupby('feature_id')
+        for feature_id, feature_estimators in estimators.group_by(['feature_id'])
     ]
 
     print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
@@ -196,7 +197,7 @@ def compute_for_feature(
     assert len(estimators) == len(design)
 
     # Transform to log space (alternatively can resample in log space)
-    lm, selm = transform_to_log_space(estimators["mean"].values, estimators["sem"].values)
+    lm, selm = transform_to_log_space(estimators["mean"].to_numpy(), estimators["sem"].to_numpy())
 
     return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
 
@@ -212,11 +213,10 @@ def transform_to_log_space(
 
 
 @timeit
-def fill_missing_data(obs_group_joinids: pd.DataFrame, feature_estimators: pd.DataFrame) -> pd.DataFrame:
-    feature_estimators = obs_group_joinids.merge(feature_estimators[["obs_group_joinid", "mean", "sem"]], on="obs_group_joinid", how="left", copy=False)
-    feature_estimators["mean"] = feature_estimators["mean"].fillna(1e-3)
-    feature_estimators["sem"] = feature_estimators["sem"].fillna(1e-4)
-    return feature_estimators
+def fill_missing_data(obs_group_joinids: pd.DataFrame, feature_estimators: pl.DataFrame) -> pl.DataFrame:
+    feature_estimators = pl.DataFrame(obs_group_joinids).join(feature_estimators[["obs_group_joinid", "mean", "sem"]], on="obs_group_joinid", how="left")
+
+    return feature_estimators.with_columns(feature_estimators["mean"].fill_null(1e-3), feature_estimators["sem"].fill_null(1e-4))
 
 
 @timeit
@@ -284,7 +284,7 @@ if __name__ == "__main__":
         print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <csv_output_path> <n_processes> <n_features>")
         sys.exit(1)
 
-    filter_arg, treatment_arg, cube_path_arg, csv_output_path_arg, n_processes, n_features = sys.argv[1:7]
+    filter_arg, treatment_arg, cube_path_arg, n_processes, n_features = sys.argv[1:6]
 
     de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features))
 
