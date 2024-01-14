@@ -28,11 +28,11 @@ Index1D = slice | npt.NDArray[np.bool_] | npt.NDArray[np.integer[Any]]  # slice,
 Index = Index1D | tuple[Index1D] | tuple[Index1D, Index1D]
 
 
-def _index_index(prev: Index1D, new: Index1D, length: int) -> slice | npt.NDArray[np.int64]:
-    """Index an index"""
+def _slice_index(prev: Index1D, new: Index1D, length: int) -> slice | npt.NDArray[np.int64]:
+    """Slice an index"""
     if isinstance(prev, slice):
         if isinstance(new, slice):
-            # conviently, ranges support indexing!
+            # conveniently, ranges support indexing!
             rng = range(*prev.indices(length))[new]
             assert rng.stop >= 0
             return slice(rng.start, rng.stop, rng.step)
@@ -60,7 +60,7 @@ def _normed_index(idx: Index) -> tuple[Index1D, Index1D]:
 
 class AnnDataProxy:
     """
-    Recommend using `open_anndata2()` rather than instantiating this class directly.
+    Recommend using `open_anndata()` rather than instantiating this class directly.
 
     AnnData-like proxy for the version 0.1.0 AnnData H5PY file encoding (aka H5AD).
     Used in lieu of the AnnData class to reduce memory overhead. Semantics very similar
@@ -97,7 +97,6 @@ class AnnDataProxy:
         var_column_names: Optional[Tuple[str, ...]] = None,
     ):
         self.filename = filename
-        self.is_view = view_of is not None
 
         if view_of is None:
             self._obs, self._var, self._X = self._load_h5ad(obs_column_names, var_column_names)
@@ -112,12 +111,17 @@ class AnnDataProxy:
 
     @property
     def X(self) -> sparse.spmatrix | npt.NDArray[np.integer[Any] | np.floating[Any]]:
-        # Do two separate slices, as the underlying AnnData CS*Dataset
-        # does bad things when you do slicing on both axis simultaneously.
-        # Rely on the fact that we need to be most selective on the obs
-        # dimension, and let scipy.sparse handle the second slice.
-        X = self._X[self._obs_idx][:, self._var_idx]
-        if sparse.isspmatrix(X) and not X.has_canonical_format:
+        # For CS*Dataset, slice first on the major axis, then on the minor, as
+        # the underlying AnnData proxy is not performant when slicing on the minor
+        # axis (or both simultaneously). Let SciPy handle the second axis.
+        if isinstance(self._X, CSRDataset):
+            X = self._X[self._obs_idx][:, self._var_idx]
+        elif isinstance(self._X, CSCDataset):
+            X = self._X[:, self._var_idx][self._obs_idx]
+        else:
+            X = self._X[self._obs_idx, self._var_idx]
+
+        if isinstance(X, sparse.spmatrix) and not X.has_canonical_format:
             X.sum_duplicates()
         return X
 
@@ -150,8 +154,8 @@ class AnnDataProxy:
 
     def __getitem__(self, key: Index) -> "AnnDataProxy":
         odx, vdx = _normed_index(key)
-        odx = _index_index(self._obs_idx, odx, self.n_obs)
-        vdx = _index_index(self._var_idx, vdx, self.n_vars)
+        odx = _slice_index(self._obs_idx, odx, self.n_obs)
+        vdx = _slice_index(self._var_idx, vdx, self.n_vars)
         return AnnDataProxy(self.filename, view_of=self, obs_idx=odx, var_idx=vdx)
 
     def _load_dataframe(self, elem: h5py.Group, column_names: Optional[Tuple[str, ...]]) -> pd.DataFrame:
@@ -221,12 +225,12 @@ class AnnDataProxy:
         return obs, var, X
 
 
-# The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter2` for details.
+# The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter` for details.
 CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_ontology_term_id")
 CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
-def open_anndata2(
+def open_anndata(
     base_path: str,
     dataset: Dataset,
     *,
@@ -260,7 +264,7 @@ class AnnDataFilterFunction2(Protocol):
         ...
 
 
-def make_anndata_cell_filter2(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFunction2:
+def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFunction2:
     """
     Return an anndata sliced/filtered for those cells/genes of interest.
 

@@ -6,7 +6,7 @@ from typing import Iterator, List
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from .anndata import AnnDataProxy, open_anndata2
+from .anndata import AnnDataProxy, open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
@@ -157,7 +157,7 @@ def accumulate_axes(
         adata_iter: Iterator[tuple[Dataset, AnnDataProxy]] = (
             (
                 dataset,
-                open_anndata2(
+                open_anndata(
                     assets_path, dataset, obs_column_names=CXG_OBS_COLUMNS_READ, var_column_names=CXG_VAR_COLUMNS_READ
                 ),
             )

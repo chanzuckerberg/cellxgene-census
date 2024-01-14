@@ -98,7 +98,7 @@ CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modificatio
     "tissue_ontology_term_id",
     "tissue_type",
 ]
-CXG_OBS_COLUMNS_READ: Tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata2()
+CXG_OBS_COLUMNS_READ: Tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata()
     *CXG_OBS_TERM_COLUMNS,
     "organism",
     "organism_ontology_term_id",

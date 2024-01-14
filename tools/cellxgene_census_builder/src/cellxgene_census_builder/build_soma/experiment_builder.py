@@ -29,7 +29,7 @@ from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
-from .anndata import AnnDataFilterSpec, make_anndata_cell_filter2, open_anndata2
+from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
@@ -164,7 +164,7 @@ class ExperimentBuilder:
         ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
     def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
-        anndata_cell_filter = make_anndata_cell_filter2(self.anndata_cell_filter_spec)
+        anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
         return anndata_cell_filter(ad)
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
@@ -372,7 +372,11 @@ class ExperimentBuilder:
         if args.config.multi_process:
             WRITE_NORM_STRIDE = 2**18  # controls TileDB fragment size, which impacts consolidation time
             mem_budget = (
-                int(20 * WRITE_NORM_STRIDE * 4000 * 2) + (3 * 1024**3) + feature_length.nbytes + is_smart_seq.nbytes
+                # (20 bytes per COO X stride X typical-nnz X overhead) + static-allocation + passed-data-size
+                int(20 * WRITE_NORM_STRIDE * 4000 * 2)
+                + (3 * 1024**3)
+                + feature_length.nbytes
+                + is_smart_seq.nbytes
             )
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
@@ -457,7 +461,7 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    unfiltered_ad = open_anndata2(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
+    unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
     results: List[AccumulateXResult] = []
     for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
@@ -471,7 +475,7 @@ def _accumulate_all_X_layers(
 
         assert eb.global_var_joinids is not None
 
-        anndata_cell_filter = make_anndata_cell_filter2(eb.anndata_cell_filter_spec)
+        anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
         ad = anndata_cell_filter(unfiltered_ad)
         if ad.n_obs == 0:
             continue
@@ -567,8 +571,8 @@ def _accumulate_all_X_layers(
 
         # tidy
         del ad, local_var_joinids, obs_stats, var_stats
+        gc.collect()
 
-    gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     log_process_resource_status()
     return results

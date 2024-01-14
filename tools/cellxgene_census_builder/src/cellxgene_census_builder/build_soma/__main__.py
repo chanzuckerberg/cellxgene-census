@@ -28,8 +28,7 @@ def main() -> int:
     process_init(args)
     logging.info(args)
 
-    if args.config.verbose:
-        start_resource_logger()
+    start_resource_logger()
 
     cc = 0
     if cli_args.subcommand == "build":
