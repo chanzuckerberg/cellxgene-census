@@ -286,12 +286,12 @@ def de_wls(
 # Script entrypoint
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <csv_output_path> <n_processes> <n_features>")
+        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <n_processes> <n_features>")
         sys.exit(1)
 
     filter_arg, treatment_arg, cube_path_arg, n_processes, n_features = sys.argv[1:6]
 
-    de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features))
+    de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features) if n_features else None)
 
     # Output DE result
 #    print(de_result)
