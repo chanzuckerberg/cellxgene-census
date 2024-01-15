@@ -104,7 +104,7 @@ def drop_invalid_data(estimators_df: pl.DataFrame) -> pl.DataFrame:
     drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
     if drop_mask.any():
         logging.warning(f"dropping {drop_mask.sum()} rows with invalid values ({drop_mask.sum() / len(drop_mask):.2%})")
-        estimators_df = estimators_df[~drop_mask]
+        estimators_df = estimators_df.filter(~drop_mask)
     return estimators_df
 
 
