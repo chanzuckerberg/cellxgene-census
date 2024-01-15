@@ -14,6 +14,8 @@ from ..util import urlcat
 from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
 
+logger = logging.getLogger(__name__)
+
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
     {
@@ -287,7 +289,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         # cell/feature organism values.
         feature_reference_organisms = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
         if len(feature_reference_organisms) > 1:
-            logging.info(f"H5AD ignored due to multi-organism feature_reference: {ad.filename}")
+            logger.info(f"H5AD ignored due to multi-organism feature_reference: {ad.filename}")
             return ad[0:0]  # ie., drop all cells
 
         #

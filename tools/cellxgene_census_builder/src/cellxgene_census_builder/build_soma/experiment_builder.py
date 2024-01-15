@@ -60,6 +60,8 @@ from .summary_cell_counts import (
 )
 from .util import is_nonnegative_integral
 
+logger = logging.getLogger(__name__)
+
 
 @attrs.define
 class PresenceResult:
@@ -152,7 +154,7 @@ class ExperimentBuilder:
     def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
 
-        logging.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
+        logger.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
         self.experiment_uri = self.experiment.uri
@@ -235,7 +237,7 @@ class ExperimentBuilder:
         gc.collect()
 
     def write_obs_dataframe(self) -> None:
-        logging.info(f"{self.name}: writing obs dataframe")
+        logger.info(f"{self.name}: writing obs dataframe")
         assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
@@ -251,9 +253,9 @@ class ExperimentBuilder:
         )
 
         if obs_df is None or obs_df.empty:
-            logging.info(f"{self.name}: empty obs dataframe")
+            logger.info(f"{self.name}: empty obs dataframe")
         else:
-            logging.debug(f"experiment {self.name} obs = {obs_df.shape}")
+            logger.debug(f"experiment {self.name} obs = {obs_df.shape}")
             assert not np.isnan(obs_df.nnz.to_numpy()).any()  # sanity check
             pa_table = pa.Table.from_pandas(
                 obs_df, preserve_index=False, columns=list(CENSUS_OBS_TABLE_SPEC.field_names())
@@ -261,7 +263,7 @@ class ExperimentBuilder:
             self.experiment.obs.write(pa_table)
 
     def write_var_dataframe(self) -> None:
-        logging.info(f"{self.name}: writing var dataframe")
+        logger.info(f"{self.name}: writing var dataframe")
         assert self.experiment is not None
         _assert_open_for_write(self.experiment)
 
@@ -279,16 +281,16 @@ class ExperimentBuilder:
         )
 
         if var_df is None or var_df.empty:
-            logging.info(f"{self.name}: empty var dataframe")
+            logger.info(f"{self.name}: empty var dataframe")
         else:
-            logging.debug(f"experiment {self.name} var = {var_df.shape}")
+            logger.debug(f"experiment {self.name} var = {var_df.shape}")
             pa_table = pa.Table.from_pandas(
                 var_df, preserve_index=False, columns=list(CENSUS_VAR_TABLE_SPEC.field_names())
             )
             rna_measurement.var.write(pa_table)
 
     def populate_var_axis(self) -> None:
-        logging.info(f"{self.name}: populate var axis")
+        logger.info(f"{self.name}: populate var axis")
 
         # it is possible there is nothing to write
         if self.var_df is not None and len(self.var_df) > 0:
@@ -304,7 +306,7 @@ class ExperimentBuilder:
         """
         Create layers in ms['RNA']/X
         """
-        logging.info(f"{self.name}: create X layers")
+        logger.info(f"{self.name}: create X layers")
 
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]  # type:ignore
         _assert_open_for_write(rna_measurement)
@@ -328,7 +330,7 @@ class ExperimentBuilder:
         Save presence matrix per Experiment
         """
         _assert_open_for_write(self.experiment)
-        logging.info(f"Save presence matrix for {self.name} - start")
+        logger.info(f"Save presence matrix for {self.name} - start")
 
         # SOMA does not currently support arrays with a zero length domain, so special case this corner-case
         # where no data has been read for this experiment.
@@ -356,7 +358,7 @@ class ExperimentBuilder:
             )
             fdpm.write(pa.SparseCOOTensor.from_scipy(pm))
 
-        logging.info(f"Save presence matrix for {self.name} - finish")
+        logger.info(f"Save presence matrix for {self.name} - finish")
         log_process_resource_status()
 
     def write_X_normalized(self, args: CensusBuildArgs) -> None:
@@ -364,7 +366,7 @@ class ExperimentBuilder:
         if self.obs_df is None or self.n_obs == 0:
             return
 
-        logging.info(f"Write X normalized: {self.name} - starting")
+        logger.info(f"Write X normalized: {self.name} - starting")
         is_smart_seq = np.isin(self.obs_df.assay_ontology_term_id.to_numpy(), SMART_SEQ)
         assert self.var_df is not None
         feature_length = self.var_df.feature_length.to_numpy()
@@ -391,13 +393,13 @@ class ExperimentBuilder:
                     log_on_broken_process_pool(pe)
                     # prop exceptions by calling result
                     f.result()
-                    logging.info(f"Write X normalized ({self.name}): {n} of {len(futures)} complete.")
+                    logger.info(f"Write X normalized ({self.name}): {n} of {len(futures)} complete.")
                     log_process_resource_status()
 
         else:
             _write_X_normalized((self.experiment.uri, 0, self.n_obs, feature_length, is_smart_seq))
 
-        logging.info(f"Write X normalized: {self.name} - finished")
+        logger.info(f"Write X normalized: {self.name} - finished")
         log_process_resource_status()
 
 
@@ -460,7 +462,7 @@ def _accumulate_all_X_layers(
 
     This is a helper function for ExperimentBuilder.accumulate_X
     """
-    logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
+    logger.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
     results: List[AccumulateXResult] = []
@@ -482,7 +484,7 @@ def _accumulate_all_X_layers(
 
         # save X['raw']
         layer_name = "raw"
-        logging.info(
+        logger.info(
             f"{eb.name}: saving X layer '{layer_name}' for dataset '{dataset.dataset_id}' "
             f"({progress[0]} of {progress[1]})"
         )
@@ -494,14 +496,14 @@ def _accumulate_all_X_layers(
         var_stats: pd.DataFrame = pd.DataFrame()
 
         for idx in range(0, ad.n_obs, ACCUM_X_STRIDE):
-            logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
+            logger.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
 
             X = ad[idx : idx + ACCUM_X_STRIDE].X
             if isinstance(X, np.ndarray):
                 X = sparse.csr_matrix(X)
 
             if not is_nonnegative_integral(X):
-                logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
+                logger.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
 
             X.eliminate_zeros()
             gc.collect()
@@ -573,7 +575,7 @@ def _accumulate_all_X_layers(
         del ad, local_var_joinids, obs_stats, var_stats
         gc.collect()
 
-    logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
+    logger.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     log_process_resource_status()
     return results
 
@@ -681,7 +683,7 @@ def populate_X_layers(
     Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
     """
     # populate X layers
-    logging.debug("populate_X_layers begin")
+    logger.debug("populate_X_layers begin")
     results: List[AccumulateXResult] = []
     if args.config.multi_process:
         # reserve memory to accumulate the stats
@@ -705,7 +707,7 @@ def populate_X_layers(
                 log_on_broken_process_pool(pe)
                 # propagate exceptions - not expecting any other return values
                 results += f.result()
-                logging.info(f"populate X for dataset {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
+                logger.info(f"populate X for dataset {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
                 log_process_resource_status()
 
     else:
@@ -718,14 +720,14 @@ def populate_X_layers(
     for eb in experiment_builders:
         assert eb.obs_df is None or np.array_equal(eb.obs_df.index.to_numpy(), eb.obs_df.soma_joinid.to_numpy())
 
-    logging.debug("populate_X_layers - begin presence summary")
+    logger.debug("populate_X_layers - begin presence summary")
     for presence, _ in results:
         eb_by_name[presence.eb_name].presence[presence.dataset_soma_joinid] = (
             presence.data,
             presence.cols,
         )
 
-    logging.debug("populate_X_layers - begin axis stats summary")
+    logger.debug("populate_X_layers - begin axis stats summary")
     for _, axis_stats in results:
         eb = eb_by_name[axis_stats.eb_name]
         if eb.obs_df is not None:
@@ -736,7 +738,7 @@ def populate_X_layers(
                 axis_stats.var_stats.columns.to_list(),
             ] += axis_stats.var_stats
 
-    logging.debug("populate_X_layers finish")
+    logger.debug("populate_X_layers finish")
     log_process_resource_status()
 
 
@@ -767,7 +769,7 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
     # Map specific ID -> general ID
     tissue_general_id_map = {id: tissue_mapper.get_high_level_tissue(id) for id in tissue_ids}
     if not all(tissue_general_id_map.values()):
-        logging.error(f"{dataset_id} contains tissue types which could not be generalized.")
+        logger.error(f"{dataset_id} contains tissue types which could not be generalized.")
     obs_df["tissue_general_ontology_term_id"] = obs_df.tissue_ontology_term_id.map(tissue_general_id_map)
 
     # Assign general label
@@ -802,7 +804,7 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
     Read indicated rows from X['raw'], write to X['normalized']
     """
     experiment_uri, obs_joinid_start, n, feature_length, is_smart_seq = args
-    logging.info(f"Write X normalized - starting block {obs_joinid_start}")
+    logger.info(f"Write X normalized - starting block {obs_joinid_start}")
 
     sigma = np.finfo(np.float32).smallest_subnormal
 
@@ -840,7 +842,7 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
                 del d0_index, d0, d1, data
                 gc.collect()
 
-    logging.info(f"Write X normalized - finished block {obs_joinid_start}")
+    logger.info(f"Write X normalized - finished block {obs_joinid_start}")
 
 
 @numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424

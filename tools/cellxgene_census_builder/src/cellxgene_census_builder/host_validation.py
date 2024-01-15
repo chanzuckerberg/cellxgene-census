@@ -8,11 +8,13 @@ import psutil
 from .build_state import CensusBuildArgs, CensusBuildConfig
 from .logging import hr_binary_unit, hr_decimal_unit
 
+logger = logging.getLogger(__name__)
+
 
 def _check(condition: bool, message: str) -> bool:
     """Like assert, but logs"""
     if not condition:
-        logging.critical(message)
+        logger.critical(message)
     return condition
 
 
@@ -29,7 +31,7 @@ def check_physical_memory(min_physical_memory: int) -> bool:
     Check for sufficient physical and virtual memory.
     """
     svmem = psutil.virtual_memory()
-    logging.debug(f"Host: {hr_binary_unit(svmem.total)} memory found")
+    logger.debug(f"Host: {hr_binary_unit(svmem.total)} memory found")
     return _check(
         svmem.total >= min_physical_memory,
         f"Insufficient memory (found {hr_binary_unit(svmem.total)}, " f"require {hr_binary_unit(min_physical_memory)})",
@@ -41,7 +43,7 @@ def check_swap_memory(min_swap_memory: int) -> bool:
     Check for sufficient physical and virtual memory.
     """
     svswap = psutil.swap_memory()
-    logging.debug(f"Host: {hr_binary_unit(svswap.total)} swap found")
+    logger.debug(f"Host: {hr_binary_unit(svswap.total)} swap found")
     return _check(
         svswap.total >= min_swap_memory,
         f"Insufficient swap space (found {hr_binary_unit(svswap.total)}, "
@@ -55,7 +57,7 @@ def check_free_disk(working_dir: Union[str, os.PathLike[str]], min_free_disk_spa
     """
     working_dir_fspath = working_dir.__fspath__() if isinstance(working_dir, os.PathLike) else working_dir
     skdiskusage = psutil.disk_usage(working_dir_fspath)
-    logging.debug(f"Host: {hr_decimal_unit(skdiskusage.free)} free disk space found")
+    logger.debug(f"Host: {hr_decimal_unit(skdiskusage.free)} free disk space found")
     return _check(
         skdiskusage.free >= min_free_disk_space,
         f"Insufficient free disk space (found {hr_decimal_unit(skdiskusage.free)}, "

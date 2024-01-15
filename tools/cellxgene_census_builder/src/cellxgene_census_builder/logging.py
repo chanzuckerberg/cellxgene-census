@@ -9,16 +9,33 @@ from .build_state import CensusBuildArgs
 
 def logging_init_params(verbose: int, handlers: Optional[List[logging.Handler]] = None) -> None:
     """
-    Configure the logger from explicit params
+    Configure the logger defaults with explicit config params
     """
-    level = logging.DEBUG if verbose > 1 else logging.INFO if verbose == 1 else logging.WARNING
+
+    def clamp(n: int, minn: int, maxn: int) -> int:
+        return min(max(n, minn), maxn)
+
+    def get_level(v: int) -> int:
+        levels = [logging.WARNING, logging.INFO, logging.DEBUG]
+        return levels[clamp(v, 0, len(levels) - 1)]
+
     logging.basicConfig(
         format="%(asctime)s %(process)-7s %(levelname)-8s %(message)s",
-        level=level,
+        level=get_level(verbose),
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=handlers,
     )
     logging.captureWarnings(True)
+    logging.getLogger(__package__).setLevel(get_level(verbose + 1))
+
+    # these are super noisy! Enable only at an extra high level of verbosity
+    if verbose < 3:
+        for pkg in ["h5py", "fsspec"]:
+            logging.getLogger(pkg).setLevel(get_level(verbose - 1))
+    # and even higher for numba, which spews...
+    if verbose < 4:
+        for pkg in ["numba"]:
+            logging.getLogger(pkg).setLevel(get_level(verbose - 2))
 
 
 def logging_init(args: CensusBuildArgs) -> None:

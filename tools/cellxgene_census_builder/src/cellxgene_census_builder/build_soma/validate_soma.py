@@ -51,6 +51,8 @@ from .mp import (
     log_on_broken_process_pool,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass  # TODO: use attrs
 class EbInfo:
@@ -224,7 +226,7 @@ def validate_axis_dataframes(
 
     Raises on error.  Returns True on success.
     """
-    logging.debug("validate_axis_dataframes")
+    logger.debug("validate_axis_dataframes")
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
 
@@ -256,14 +258,14 @@ def validate_axis_dataframes(
                 res = future.result()
                 for eb_name, ebi in res.items():
                     eb_info[eb_name].update(ebi)
-                logging.info(f"validate_axis {n} of {len(datasets)} complete.")
+                logger.info(f"validate_axis {n} of {len(datasets)} complete.")
     else:
         for n, dataset in enumerate(datasets, start=1):
             for eb_name, ebi in _validate_axis_dataframes(
                 (assets_path, soma_path, dataset, experiment_specifications)
             ).items():
                 eb_info[eb_name].update(ebi)
-            logging.info(f"validate_axis {n} of {len(datasets)} complete.")
+            logger.info(f"validate_axis {n} of {len(datasets)} complete.")
 
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
@@ -370,14 +372,14 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
       (where presence is defined as having a non-zero value)
     """
     assets_path, soma_path, dataset, experiment_specifications = args
-    logging.info(f"validate X[raw] by contents - starting {dataset.dataset_id}")
+    logger.info(f"validate X[raw] by contents - starting {dataset.dataset_id}")
     unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
             ad = anndata_cell_filter(unfiltered_ad)
-            logging.debug(f"AnnData loaded for {eb.name}:{dataset.dataset_id}")
+            logger.debug(f"AnnData loaded for {eb.name}:{dataset.dataset_id}")
 
             # get the joinids for the obs axis
             obs_df = (
@@ -498,7 +500,7 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
     del unfiltered_ad
     gc.collect()
     log_process_resource_status()
-    logging.info(f"validate X[raw] by contents - finished {dataset.dataset_id}")
+    logger.info(f"validate X[raw] by contents - finished {dataset.dataset_id}")
     return True
 
 
@@ -506,7 +508,7 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
     """Validate that all X layers have no duplicate coordinates"""
     experiment_specification, soma_path, layer_name, row_range_start, row_range_stop = args
     with open_experiment(soma_path, experiment_specification) as exp:
-        logging.info(
+        logger.info(
             f"validate_no_dups_X start, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
         )
         if layer_name not in exp.ms[MEASUREMENT_RNA_NAME].X:
@@ -527,7 +529,7 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
             del offsets
             gc.collect()
 
-        logging.info(
+        logger.info(
             f"validate_no_dups_X finished, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
         )
 
@@ -539,7 +541,7 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
 def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -> bool:
     """Validate that X['normalized'] is correct relative to X['raw']"""
     experiment_specification, soma_path, row_range_start, row_range_stop = args
-    logging.info(
+    logger.info(
         f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
     )
 
@@ -624,7 +626,7 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
     gc.collect()
     log_process_resource_status()
-    logging.info(
+    logger.info(
         f"validate_Xnorm_layer - finish, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
     )
     return True
@@ -643,7 +645,7 @@ def validate_X_layers(
 
     Raises on error.  Returns True on success.
     """
-    logging.info("validate_X_layers start")
+    logger.info("validate_X_layers start")
     avg_row_nnz = 0
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
@@ -651,7 +653,7 @@ def validate_X_layers(
 
             census_obs_df = exp.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
             n_obs = len(census_obs_df)
-            logging.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb_info[eb.name].n_obs}; n_obs = {n_obs}")
+            logger.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb_info[eb.name].n_obs}; n_obs = {n_obs}")
             assert n_obs == eb_info[eb.name].n_obs
 
             census_var_df = (
@@ -706,13 +708,13 @@ def validate_X_layers(
             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
                 log_on_broken_process_pool(ppe)
                 assert future.result()
-                logging.info(f"validate_X_layers {n} of {len(futures)} complete.")
+                logger.info(f"validate_X_layers {n} of {len(futures)} complete.")
                 log_process_resource_status()
 
     else:
         for eb in experiment_specifications:
             for layer_name in CENSUS_X_LAYERS:
-                logging.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
+                logger.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
                 assert _validate_X_layer_has_unique_coords((eb, soma_path, layer_name, 0, n_obs))
         for n, vld in enumerate(
             (
@@ -721,12 +723,12 @@ def validate_X_layers(
             ),
             start=1,
         ):
-            logging.info(f"validate_X {n} of {len(datasets)} complete.")
+            logger.info(f"validate_X {n} of {len(datasets)} complete.")
             assert vld
         for eb in experiment_specifications:
             assert _validate_Xnorm_layer((eb, soma_path, 0, eb_info[eb.name].n_obs))
 
-    logging.info("validate_X_layers finished")
+    logger.info("validate_X_layers finished")
     return True
 
 
@@ -809,7 +811,7 @@ def validate_internal_consistency(
     """
     Internal checks that various computed stats match.
     """
-    logging.info("validate_internal_consistency - cross-checks start")
+    logger.info("validate_internal_consistency - cross-checks start")
     datasets_df: pd.DataFrame = Dataset.to_dataframe(datasets).set_index("soma_joinid")
 
     for eb in experiment_specifications:
@@ -873,7 +875,7 @@ def validate_internal_consistency(
                 ).all(), f"{eb.name}: var.n_measured_obs does not match presence matrix."
                 del tmp
 
-    logging.info("validate_internal_consistency - cross-checks finished")
+    logger.info("validate_internal_consistency - cross-checks finished")
     return True
 
 
@@ -933,7 +935,7 @@ def validate(args: CensusBuildArgs) -> bool:
 
     Will raise if validation fails. Returns True on success.
     """
-    logging.info("Validation start")
+    logger.info("Validation start")
 
     experiment_specifications = make_experiment_specs()
 
@@ -953,5 +955,5 @@ def validate(args: CensusBuildArgs) -> bool:
     if args.config.consolidate:
         assert validate_consolidation(soma_path)
     assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
-    logging.info("Validation finished (success)")
+    logger.info("Validation finished (success)")
     return True

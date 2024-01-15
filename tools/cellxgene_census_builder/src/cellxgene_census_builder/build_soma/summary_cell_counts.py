@@ -15,7 +15,7 @@ def create_census_summary_cell_counts(
     """
     Save per-category counts as the census_summary_cell_counts SOMA dataframe
     """
-    logging.info("Creating census_summary_cell_counts")
+    logger.info("Creating census_summary_cell_counts")
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
         .drop(columns=["dataset_id"])

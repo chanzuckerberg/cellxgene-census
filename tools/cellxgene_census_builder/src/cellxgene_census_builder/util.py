@@ -13,6 +13,8 @@ import psutil
 from .build_state import CensusBuildArgs
 from .logging import logging_init
 
+logger = logging.getLogger(__name__)
+
 
 def urljoin(base: str, url: str) -> str:
     """
@@ -79,7 +81,7 @@ def env_var_init() -> None:
         # In particular, the docs state that >8 threads is not helpful except in extreme circumstances.
         val = str(min(8, max(1, cpu_count() // 2)))
         os.environ["NUMEXPR_MAX_THREADS"] = val
-        logging.info(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
+        logger.info(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
 
     for env_name in [
         "OMP_NUM_THREADS",
@@ -88,7 +90,7 @@ def env_var_init() -> None:
         "VECLIB_MAXIMUM_THREADS",
     ]:
         if env_name not in os.environ:
-            logging.info(f'Setting {env_name} environment variable to "1"')
+            logger.info(f'Setting {env_name} environment variable to "1"')
             os.environ[env_name] = "1"
 
 
@@ -102,13 +104,6 @@ def process_init(args: CensusBuildArgs) -> None:
         multiprocessing.set_start_method("spawn", True)
 
     env_var_init()
-
-    # these are super noisy! Enable only super high verbosity
-    if args.config.verbose <= 2:
-        numba_logger = logging.getLogger("numba")
-        numba_logger.setLevel(logging.WARNING)
-        h5py_logger = logging.getLogger("h5py")
-        h5py_logger.setLevel(logging.WARNING)
 
 
 class ProcessResourceGetter:
@@ -196,7 +191,7 @@ def log_process_resource_status(preface: str = "Resource use:", level: int = log
         me = psutil.Process()
         mem_full_info = me.memory_full_info()
 
-        logging.log(
+        logger.log(
             level,
             f"{preface} pid={me.pid}, threads={_process_resource_getter.thread_count} "
             f"(max={_process_resource_getter.max_thread_count}), "
@@ -211,7 +206,7 @@ def log_system_memory_status(preface: str = "System memory:", level: int = loggi
     mem_used = _system_resource_getter.mem_used
     max_mem_used = _system_resource_getter.max_mem_used
     mem_total = _system_resource_getter.mem_total
-    logging.log(
+    logger.log(
         level,
         f"{preface} mem-used={mem_used} ({100.*mem_used/mem_total:2.1f}%), "
         f"max-mem-used={max_mem_used} ({100.*max_mem_used/mem_total:2.1f}%), "
@@ -228,7 +223,7 @@ def start_resource_logger(log_period_sec: float = 15.0, level: int = logging.INF
 
     t = threading.Thread(target=resource_logger_target, daemon=True, name="Resource Logger")
     t.start()
-    logging.log(level, f"Starting process resource logger with period {log_period_sec}")
+    logger.log(level, f"Starting process resource logger with period {log_period_sec}")
     return t
 
 
