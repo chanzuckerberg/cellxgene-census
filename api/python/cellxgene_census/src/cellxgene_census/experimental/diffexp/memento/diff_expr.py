@@ -19,7 +19,8 @@ import numpy.typing as npt
 import pandas as pd
 import scipy.stats as stats
 import tiledb
-from sklearn.linear_model import LinearRegression
+#from sklearn.linear_model import LinearRegression
+from sklearnex.linear_model import LinearRegression
 import polars as pl
 
 OBS_GROUPS_ARRAY = "obs_groups"
@@ -47,11 +48,15 @@ def timeit_report(func):
     def timeit_report_wrapper(*args, **kwargs):
         # return func(*args, **kwargs), None
 
-        with cProfile.Profile() as prof:
-            result = func(*args, **kwargs)
+        # with cProfile.Profile() as prof:
+        #     result = func(*args, **kwargs)
 
-            f = tempfile.mkstemp()[1]
-            prof.dump_stats(f)
+        #     f = tempfile.mkstemp()[1]
+        #     prof.dump_stats(f)
+
+        result = func(*args, **kwargs)
+
+        f = None
 
         sorted_fn_names = [k for k, _ in sorted(fn_cum_time.items(), key=lambda i: i[1], reverse=True)]
         for fn_name in sorted_fn_names:
