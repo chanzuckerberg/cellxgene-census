@@ -75,9 +75,9 @@ def timeit(func):
         fn_name = func.__name__
         fn_cum_time[fn_name] += exec_time
         fn_calls[fn_name] += 1
-        print(f'[timing] {fn_name}: exec time={exec_time:.3f} sec; '
-              f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
-              f'calls={fn_calls[fn_name]}')
+        # print(f'[timing] {fn_name}: exec time={exec_time:.3f} sec; '
+        #       f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
+        #       f'calls={fn_calls[fn_name]}')
 
         return result
     return timeit_wrapper
