@@ -500,8 +500,7 @@ def _accumulate_all_X_layers(
             if isinstance(X, np.ndarray):
                 X = sparse.csr_matrix(X)
 
-            if not is_nonnegative_integral(X):
-                logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
+            assert is_nonnegative_integral(X), f"{dataset.dataset_id} contains non-integer or negative valued data"
 
             X.eliminate_zeros()
             gc.collect()
