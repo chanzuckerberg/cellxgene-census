@@ -94,8 +94,7 @@ def build_estimators_schema(n_groups: int) -> ArraySchema:
         attrs=[
             Attr(
                 name=estimator_name,
-                # TODO: use float32?
-                dtype="float64",
+                dtype="float32",
                 var=False,
                 nullable=False,
                 filters=FilterList([ByteShuffleFilter(), ZstdFilter(level=5)]),
@@ -112,3 +111,4 @@ def build_estimators_schema(n_groups: int) -> ArraySchema:
 
 OBS_GROUPS_ARRAY = "obs_groups"
 ESTIMATORS_ARRAY = "estimators"
+FEATURE_IDS_FILE = "feature_ids.json"
