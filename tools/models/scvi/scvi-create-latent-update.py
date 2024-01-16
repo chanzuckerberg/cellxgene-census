@@ -4,9 +4,10 @@ import gc
 import cellxgene_census
 import numpy as np
 import pandas as pd
-import scvi
 import tiledbsoma as soma
 import yaml
+
+import scvi
 
 file = "scvi-config.yaml"
 
@@ -59,14 +60,7 @@ if __name__ == "__main__":
         ad,
         model_filename,
     )
-    # Uncomment #1 if you want to do a forward pass with an additional training epoch.
-    # Uncomment #2 if you want to do a forward pass without additional training.
-
-    # vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0)) # 1
-    vae_q.is_trained = True  # 2
     latent = vae_q.get_latent_representation()
-
-    ad.write_h5ad("anndata-full.h5ad", compression="gzip")
 
     del vae_q, ad
     gc.collect()

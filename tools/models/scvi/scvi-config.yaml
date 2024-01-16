@@ -1,6 +1,6 @@
 census:
   organism: 
-    "mus_musculus"
+    "homo_sapiens"
   obs_query: # Use if you want to train on a subset of the model
     null
   obs_query_model: # Required when loading data for model training. Do not change.
@@ -18,20 +18,16 @@ anndata:
 model:    
   filename: "scvi.model"
   n_hidden: 512
-  n_latent: 200
+  n_latent: 50
   n_layers: 1
-  dropout_rate: 0.1
 train:
   max_epochs: 20
-  batch_size: 1048
-  train_size: 0.95
-  early_stopping: True
-  trainer:
-    early_stopping_patience: 2
-    early_stopping_monitor: validation_loss # should be validation_loss - see https://github.com/chanzuckerberg/cellxgene-census/issues/777#issuecomment-1743196837
-    check_val_every_n_epoch: 1
+  batch_size: 1024
+  train_size: 0.9
+  early_stopping: False
   multi_gpu: False
   num_workers: 4
   devices: [0, 1, 2, 3]
 training_plan:
-  lr: 1.0e-4
+  n_epochs_kl_warmup: 5
+  max_kl_weight: 1

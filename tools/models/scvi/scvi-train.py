@@ -1,7 +1,8 @@
 import anndata as ad
-import scvi
 import yaml
 from lightning.pytorch.loggers import TensorBoardLogger
+
+import scvi
 
 file = "scvi-config.yaml"
 
@@ -31,7 +32,7 @@ if __name__ == "__main__":
 
     print("Configure model")
 
-    model = scvi.model.SCVI(adata, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb", encode_covariates=True)
+    model = scvi.model.SCVI(adata, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb", encode_covariates=False)
 
     train_config = config.get("train")
     max_epochs = train_config.get("max_epochs")
@@ -54,6 +55,7 @@ if __name__ == "__main__":
         devices = 1
 
     print("Start training model")
+    print("Training plan:", training_plan_config)
 
     logger = TensorBoardLogger("tb_logs", name="my_model")
 
