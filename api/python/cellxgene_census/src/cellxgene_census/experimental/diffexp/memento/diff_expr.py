@@ -17,10 +17,6 @@ import scipy.stats as stats
 import tiledb
 from .profile import cprofile, timeit, timeit_report
 
-# TODO: conditionally import, depending up host cpu arch
-from sklearnex import patch_sklearn
-patch_sklearn()
-
 from sklearn.linear_model import LinearRegression
 
 OBS_GROUPS_ARRAY = "obs_groups"

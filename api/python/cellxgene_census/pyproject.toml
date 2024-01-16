@@ -45,7 +45,6 @@ experimental = [
     "torchdata==0.6.1",
     "scikit-learn==1.3.1",
     "scikit-misc==0.2.0",
-    "sklearnex==2024.0.1",
     "polars==0.20.4",
     "psutil==5.9.5",
     "datasets~=2.14",
