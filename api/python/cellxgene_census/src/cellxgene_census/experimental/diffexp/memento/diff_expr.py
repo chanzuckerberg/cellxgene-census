@@ -1,27 +1,27 @@
 #!/usr/bin/env python
-import cProfile
-import glob
 import itertools
 import json
 import logging
 import os
 import pstats
 import sys
-import tempfile
-import time
-from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor, process
-from functools import partial, wraps, reduce
-from typing import List, Tuple, cast, Optional, Dict, Any
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial, reduce
+from typing import List, Tuple, cast, Optional
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import polars as pl
 import scipy.stats as stats
 import tiledb
-#from sklearn.linear_model import LinearRegression
-from sklearnex.linear_model import LinearRegression
-import polars as pl
+from .profile import cprofile, timeit, timeit_report
+
+# TODO: conditionally import, depending up host cpu arch
+from sklearnex import patch_sklearn
+patch_sklearn()
+
+from sklearn.linear_model import LinearRegression
 
 OBS_GROUPS_ARRAY = "obs_groups"
 ESTIMATORS_ARRAY = "estimators"
@@ -40,53 +40,6 @@ CUBE_LOGICAL_DIMS_OBS = [
     "suspension_type",
 ]
 
-fn_cum_time: Dict[str, float] = defaultdict(lambda: 0)
-fn_calls: Dict[str, int] = defaultdict(lambda: 0)
-
-
-def timeit_report(func):
-    @wraps(func)
-    def timeit_report_wrapper(*args, **kwargs):
-        # return func(*args, **kwargs), None
-
-        # with cProfile.Profile() as prof:
-        #     result = func(*args, **kwargs)
-
-        #     f = tempfile.mkstemp()[1]
-        #     prof.dump_stats(f)
-
-        result = func(*args, **kwargs)
-
-        f = None
-
-        sorted_fn_names = [k for k, _ in sorted(fn_cum_time.items(), key=lambda i: i[1], reverse=True)]
-        for fn_name in sorted_fn_names:
-            print(f'[timing {os.getpid()}] {fn_name}: '
-                  f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
-                  f'calls={fn_calls[fn_name]}')
-
-        return result, f
-
-    return timeit_report_wrapper
-
-
-def timeit(func):
-    @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        exec_time = end_time - start_time
-
-        fn_name = func.__name__
-        fn_cum_time[fn_name] += exec_time
-        fn_calls[fn_name] += 1
-        # print(f'[timing] {fn_name}: exec time={exec_time:.3f} sec; '
-        #       f'cum_time={fn_cum_time[fn_name]} sec; avg_time={(fn_cum_time[fn_name] / fn_calls[fn_name]):.3f}; '
-        #       f'calls={fn_calls[fn_name]}')
-
-        return result
-    return timeit_wrapper
 
 
 @timeit
@@ -143,10 +96,15 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: 
     )
 
     results = list(result_groups)
-    data = itertools.chain.from_iterable([r[0] for r in results])  # flatten results
-    stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) if r[1] else pstats.Stats() for r in results])
+    assert len(results)
 
-    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
+    if isinstance(results[0], tuple):
+        data = itertools.chain.from_iterable([r[0] for r in results])  # flatten results
+        stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) if r[1] else pstats.Stats() for r in results])
+    else:
+        data = itertools.chain.from_iterable(results)  # flatten results
+
+    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), []
 
 
 def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
@@ -156,13 +114,14 @@ def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
     if n_features is not None:
         # for testing purposes, useful to limit the number of features
         rng = np.random.default_rng(1024)
-        features_ids = rng.choice(feature_ids, size=n_features, replace=False)
+        feature_ids = rng.choice(feature_ids, size=n_features, replace=False)
         
     return feature_ids
 
 
 
-@timeit_report
+# @cprofile
+# @timeit_report
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
