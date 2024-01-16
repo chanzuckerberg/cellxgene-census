@@ -108,3 +108,4 @@ def build_estimators_schema(n_groups: int) -> ArraySchema:
 
 OBS_GROUPS_ARRAY = "obs_groups"
 ESTIMATORS_ARRAY = "estimators"
+FEATURE_IDS_FILE = "feature_ids.json"

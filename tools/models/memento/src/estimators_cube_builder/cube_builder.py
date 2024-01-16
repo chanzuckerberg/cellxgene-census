@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gc
+import json
 import logging
 import multiprocessing
 import os
@@ -24,6 +25,7 @@ from tiledbsoma import SOMATileDBContext
 from .cube_schema import (
     ESTIMATOR_NAMES,
     ESTIMATORS_ARRAY,
+    FEATURE_IDS_FILE,
     OBS_GROUPS_ARRAY,
     OBS_LOGICAL_DIMS,
     build_estimators_schema,
@@ -34,7 +36,7 @@ from .cube_validator import validate_cube
 from .estimators import bin_size_factor, compute_mean, compute_sem, compute_sev, compute_variance, gen_multinomial
 from .mp import create_resource_pool_executor
 
-PROFILE_MODE = bool(os.getenv("PROFILE_MODE", False))  # Run pass 2 in single-process mode with profiling output
+PROFILE_MODE = bool(os.getenv("PROFILE_MODE", False))  # Run Pass 3 in single-process mode with profiling output
 
 # TODO: parameterize constants below
 
@@ -177,11 +179,11 @@ def compute_all_estimators_for_batch_tdb(
         ),
     ) as X:
         X_df = X.read(coords=(soma_dim_0, var_df.index.values)).tables().concat().to_pandas()
-        logging.info(f"Pass 2: Start X batch {batch}, cells={len(soma_dim_0)}, nnz={len(X_df)}")
+        logging.info(f"Pass 3: Start X batch {batch}, cells={len(soma_dim_0)}, nnz={len(X_df)}")
         result = compute_all_estimators_for_batch_pd(X_df, obs_df, var_df)
         if len(result) == 0:
-            logging.warning(f"Pass 2: Batch {batch} had empty result, cells={len(soma_dim_0)}, nnz={len(X_df)}")
-        logging.info(f"Pass 2: End X batch {batch}, cells={len(soma_dim_0)}, nnz={len(X_df)}")
+            logging.warning(f"Pass 3: Batch {batch} had empty result, cells={len(soma_dim_0)}, nnz={len(X_df)}")
+        logging.info(f"Pass 3: End X batch {batch}, cells={len(soma_dim_0)}, nnz={len(X_df)}")
 
         assert all(result.index.value_counts() <= 1), "tiledb batch has repeated cube rows"
 
@@ -245,7 +247,7 @@ def pass_2_compute_estimators(
 
     # Process X by obs groups (i.e. cube rows). This ensures that estimators are computed
     # for all X data contributing to a given obs group aggregation.
-    logging.info("Pass 2: Computing obs groups")
+    logging.info("Pass 3: Computing obs groups")
     obs_grouped = obs_df[OBS_LOGICAL_DIMS].groupby(OBS_LOGICAL_DIMS, observed=True)
     obs_df["obs_group_joinid"] = obs_grouped.ngroup()
     obs_groups_soma_joinids = obs_grouped.groups
@@ -254,13 +256,13 @@ def pass_2_compute_estimators(
     estimators_uri = os.path.join(cube_uri, ESTIMATORS_ARRAY)
 
     if tiledb.array_exists(estimators_uri):
-        logging.info("Pass 2: Resuming from existing estimators cube")
+        logging.info("Pass 3: Resuming from existing estimators cube")
         with tiledb.open(obs_groups_uri, mode="r") as estimators_cube_array:
             existing_obs_group_joinids = (
                 estimators_cube_array.query(attrs=[], dims=["obs_group_joinid"]).df[:].index.drop_duplicates()
             )
     else:
-        logging.info("Pass 2: Creating new estimators cube")
+        logging.info("Pass 3: Creating new estimators cube")
         existing_obs_group_joinids = None
         obs_groups_df = obs_df[["obs_group_joinid"] + OBS_LOGICAL_DIMS].drop_duplicates().set_index("obs_group_joinid")
         obs_categorical_values = build_obs_categorical_values(obs_groups_df)
@@ -275,7 +277,7 @@ def pass_2_compute_estimators(
             obs_groups_df[col] = pd.Categorical(obs_groups_df[col], categories=obs_categorical_values[col])
         tiledb.from_pandas(obs_groups_uri, obs_groups_df, mode="append")
 
-    logging.info("Pass 2: Starting estimators computation")
+    logging.info("Pass 3: Starting estimators computation")
 
     obs_df = obs_df.join(size_factors[["approx_size_factor"]])
 
@@ -287,7 +289,7 @@ def pass_2_compute_estimators(
 
     n_total_cells = query.n_obs
 
-    # For testing/debugging: Run pass 2 without multiprocessing
+    # For testing/debugging: Run Pass 3 without multiprocessing
     if PROFILE_MODE:
         # force numba jit compilation outside of profiling
         gen_multinomial(np.array([1, 1, 1]), 3, 1)
@@ -330,7 +332,7 @@ def pass_2_compute_estimators(
             X_uri = query.experiment.ms[measurement_name].X[layer].uri
 
             logging.info(
-                f"Pass 2: Submitting cells batch {n_batches_submitted}, cells={len(soma_dim_0_batch_)}, "
+                f"Pass 3: Submitting cells batch {n_batches_submitted}, cells={len(soma_dim_0_batch_)}, "
                 f"{100 * n_cells_submitted / n_total_cells:0.1f}%"
             )
 
@@ -353,7 +355,7 @@ def pass_2_compute_estimators(
             if existing_obs_group_joinids is None or group_id not in existing_obs_group_joinids:
                 soma_dim_0_batch.extend(obs_group_soma_joinids)
             else:
-                logging.info(f"Pass 2: Group {group_id} already computed. Skipping computation.")
+                logging.info(f"Pass 3: Group {group_id} already computed. Skipping computation.")
                 continue
 
             # Fetch data for multiple cube rows at once, to reduce X.read() call count
@@ -379,7 +381,7 @@ def pass_2_compute_estimators(
             pct_complete = n_cells_processed / n_total_cells
             est_total_time = elapsed_time / pct_complete
             logging.info(
-                f"Pass 2: Completed {n_batches_submitted} of {len(batch_futures)} batches, "
+                f"Pass 3: Completed {n_batches_submitted} of {len(batch_futures)} batches, "
                 f"batches={100 * n_batches_submitted / len(batch_futures):0.1f}%, "
                 f"cells={100 * n_cells_processed / n_total_cells:0.1f}%, "
                 f"elapsed={elapsed_time}, "
@@ -388,23 +390,23 @@ def pass_2_compute_estimators(
             )
             gc.collect()
 
-        logging.info("Pass 2: Completed")
+        logging.info("Pass 3: Completed")
 
 
 def write_estimators_batch(batch_result: pd.DataFrame, estimators_uri: str) -> None:
     if len(batch_result) > 0:
         batch_result = batch_result.reset_index()
 
-        logging.info("Pass 2: Writing to estimator cube.")
+        logging.info("Pass 3: Writing to estimator cube.")
 
         tiledb.from_pandas(estimators_uri, batch_result, mode="append")
 
     else:
-        logging.warning("Pass 2: Batch had empty result")
+        logging.warning("Pass 3: Batch had empty result")
 
 
 def build(
-    cube_uri: str, experiment_uri: str, measurement_name: str = "RNA", layer: str = "raw", validate: bool = True
+    cube_uri: str, experiment_uri: str, measurement_name: str = "RNA", layer: str = "raw", validate: bool = True, consolidate: bool = True
 ) -> bool:
     # init multiprocessing
     if multiprocessing.get_start_method(True) != "spawn":
@@ -424,38 +426,47 @@ def build(
             measurement_name=measurement_name,
             obs_query=AxisQuery(value_filter=OBS_VALUE_FILTER),
         )
-        logging.info(f"Pass 1: Processing {query.n_obs} cells and {query.n_vars} genes")
+        logging.info(f"Processing {query.n_obs} cells and {query.n_vars} genes")
 
-        obs_size_factors_uri = os.path.join(cube_uri, OBS_SIZE_FACTORS_ARRAY)
-        if not tiledb.array_exists(obs_size_factors_uri):
-            logging.info("Pass 1: Compute Approx Size Factors")
-            size_factors = pass_1_compute_size_factors(query)
+        logging.info("Pass 1: Store Features")
+        with open(os.path.join(cube_uri, FEATURE_IDS_FILE), "w") as f:
+            feature_ids = query.var(column_names=["feature_id"]).concat().to_pandas()["feature_id"].tolist()
+            json.dump(feature_ids, f)
+            logging.info(f"Stored {len(feature_ids)} features in '{FEATURE_IDS_FILE}'")
 
-            size_factors = size_factors.astype({col: "category" for col in OBS_LOGICAL_DIMS})
-            tiledb.from_pandas(obs_size_factors_uri, size_factors.reset_index(), index_col=[0])
-            logging.info("Saved `obs_with_size_factor` TileDB Array")
-        else:
-            # TODO: Can remove caching of size factors; computing this is now fast
-            logging.info("Pass 1: Compute Approx Size Factors (loading from stored data)")
-            size_factors = tiledb.open(obs_size_factors_uri).df[:].set_index("soma_joinid")
+        # obs_size_factors_uri = os.path.join(cube_uri, OBS_SIZE_FACTORS_ARRAY)
+        # if not tiledb.array_exists(obs_size_factors_uri):
+        #     logging.info("Pass 1: Compute Approx Size Factors")
+        #     size_factors = pass_1_compute_size_factors(query)
 
-        logging.info("Pass 2: Compute Estimators")
-        query = exp.axis_query(
-            measurement_name=measurement_name,
-            obs_query=AxisQuery(value_filter=OBS_VALUE_FILTER),
-        )
-        logging.info(f"Pass 2: Processing {query.n_obs} cells and {query.n_vars} genes")
+        #     size_factors = size_factors.astype({col: "category" for col in OBS_LOGICAL_DIMS})
+        #     tiledb.from_pandas(obs_size_factors_uri, size_factors.reset_index(), index_col=[0])
+        #     logging.info("Saved `obs_with_size_factor` TileDB Array")
+        # else:
+        #     # TODO: Can remove caching of size factors; computing this is now fast
+        #     logging.info("Pass 1: Compute Approx Size Factors (loading from stored data)")
+        #     size_factors = tiledb.open(obs_size_factors_uri).df[:].set_index("soma_joinid")
 
-        pass_2_compute_estimators(cube_uri, query, size_factors, measurement_name=measurement_name, layer=layer)
+        # logging.info("Pass 3: Compute Estimators")
+        # query = exp.axis_query(
+        #     measurement_name=measurement_name,
+        #     obs_query=AxisQuery(value_filter=OBS_VALUE_FILTER),
+        # )
+        # logging.info(f"Pass 3: Processing {query.n_obs} cells and {query.n_vars} genes")
+
+        # pass_2_compute_estimators(cube_uri, query, size_factors, measurement_name=measurement_name, layer=layer)
+        
+
 
     if validate:
         logging.info("Validating estimators cube")
         validate_cube(cube_uri, experiment_uri)  # raises exception if invalid
         logging.info("Validation complete")
 
-    logging.info("Consolidating and vacuuming estimators array")
-    tiledb.consolidate(os.path.join(cube_uri, ESTIMATORS_ARRAY))
-    tiledb.vacuum(os.path.join(cube_uri, ESTIMATORS_ARRAY))
+    if consolidate:
+        logging.info("Consolidating and vacuuming estimators array")
+        tiledb.consolidate(os.path.join(cube_uri, ESTIMATORS_ARRAY))
+        tiledb.vacuum(os.path.join(cube_uri, ESTIMATORS_ARRAY))
 
     logging.info("Done building estimators cube")
 
@@ -468,10 +479,11 @@ def build(
 @click.option("--measurement_name", default="RNA")
 @click.option("--layer", default="raw")
 @click.option("--validate/--no-validate", is_flag=True, default=True)
+@click.option("--consolidate/--no-consolidate", is_flag=True, default=True)
 @click.option("--resume", is_flag=True, default=False)
 @click.option("--overwrite", is_flag=True, default=False)
 def build_cli(
-    cube_uri: str, experiment_uri: str, measurement_name: str, layer: str, validate: bool, resume: bool, overwrite: bool
+    cube_uri: str, experiment_uri: str, measurement_name: str, layer: str, validate: bool, resume: bool, overwrite: bool, consolidate: bool
 ) -> None:
     if resume and overwrite:
         raise ValueError("Cannot specify both --resume and --overwrite")
@@ -488,7 +500,7 @@ def build_cli(
             )
             exit(1)
 
-    build(cube_uri, experiment_uri, measurement_name, layer, validate)
+    build(cube_uri, experiment_uri, measurement_name, layer, validate, consolidate)
 
 
 if __name__ == "__main__":
