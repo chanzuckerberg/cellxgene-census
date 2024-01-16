@@ -168,7 +168,9 @@ class AnnDataProxy:
         # else read each user-specified column/index separately, taking care to preserve the
         # original dataframe column ordering
         assert len(column_names) > 0
-        assert elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0"
+        assert (
+            elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0"
+        ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
         column_order = elem.attrs["column-order"]
         column_names_ordered = [c for c in column_order if c in column_names and c != "_index"]
         index: Optional[npt.NDArray[Any]] = None
@@ -202,7 +204,9 @@ class AnnDataProxy:
         file = h5py.File(self.filename, mode="r")
 
         # Known to be compatible with this AnnData file encoding
-        assert file.attrs["encoding-type"] == "anndata" and file.attrs["encoding-version"] == "0.1.0"
+        assert (
+            file.attrs["encoding-type"] == "anndata" and file.attrs["encoding-version"] == "0.1.0"
+        ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
 
         # Verify we are reading the expected CxG schema version.
         schema_version = read_elem(file["uns/schema_version"])
