@@ -91,8 +91,7 @@ def build_estimators_schema(n_groups: int) -> ArraySchema:
         attrs=[
             Attr(
                 name=estimator_name,
-                # TODO: use float32?
-                dtype="float64",
+                dtype="float32",
                 var=False,
                 nullable=False,
                 filters=FilterList([ByteShuffleFilter(), ZstdFilter(level=5)]),
