@@ -261,12 +261,12 @@ def open_anndata(
     )
 
 
-class AnnDataFilterFunction2(Protocol):
+class AnnDataFilterFunction(Protocol):
     def __call__(self, ad: AnnDataProxy) -> AnnDataProxy:
         ...
 
 
-def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFunction2:
+def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFunction:
     """
     Return an anndata sliced/filtered for those cells/genes of interest.
 

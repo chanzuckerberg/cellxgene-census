@@ -10,7 +10,7 @@ import pyarrow as pa
 import pytest
 import tiledb
 import tiledbsoma as soma
-from cellxgene_census_builder.build_soma import build, validate
+from cellxgene_census_builder.build_soma import build
 from cellxgene_census_builder.build_soma.build_soma import build_step1_get_source_datasets
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_soma.globals import (
@@ -45,10 +45,6 @@ def test_base_builder_creation(
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
-
-        # validate the census build
-        return_value = validate(census_build_args)
-        assert return_value is True
 
         # Query the census and do assertions
         with soma.Collection.open(

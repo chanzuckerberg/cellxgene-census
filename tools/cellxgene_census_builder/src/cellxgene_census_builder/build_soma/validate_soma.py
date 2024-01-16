@@ -755,8 +755,12 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
     return True
 
 
-def validate_consolidation(soma_path: str) -> bool:
+def validate_consolidation(args: CensusBuildArgs) -> bool:
     """Verify that obs, var and X layers are all fully consolidated & vacuumed"""
+    if not args.config.consolidate:
+        return True
+
+    soma_path = args.soma_path.as_posix()
 
     def is_empty_tiledb_array(uri: str) -> bool:
         with tiledb.open(uri) as A:
@@ -929,13 +933,13 @@ def validate_soma_bounding_box(
     return True
 
 
-def validate(args: CensusBuildArgs) -> bool:
+def validate_soma(args: CensusBuildArgs) -> bool:
     """
     Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
     """
-    logger.info("Validation start")
+    logger.info("Validation of SOMA objects - start")
 
     experiment_specifications = make_experiment_specs()
 
@@ -952,8 +956,16 @@ def validate(args: CensusBuildArgs) -> bool:
     assert (eb_info := validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args))
     assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
-    if args.config.consolidate:
-        assert validate_consolidation(soma_path)
     assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
-    logger.info("Validation finished (success)")
+
+    logger.info("Validation of SOMA objects - finished")
+    return True
+
+
+def validate(args: CensusBuildArgs) -> bool:
+    """Validate all"""
+    logger.info("Validating correct consolidation and vacuuming - start")
+    validate_soma(args)
+    validate_consolidation(args)
+    logger.info("Validating correct consolidation and vacuuming - complete")
     return True

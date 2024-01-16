@@ -3,12 +3,13 @@ import logging
 from datetime import datetime, timezone
 from typing import Iterator, List
 
+import dask
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
 from .anndata import AnnDataProxy, open_anndata
 from .census_summary import create_census_summary
-from .consolidate import consolidate
+from .consolidate import consolidate, submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -24,10 +25,11 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import EagerIterator, create_thread_pool_executor
+from .mp import EagerIterator, create_thread_pool_executor, default_dask_client
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
+from .validate_soma import validate_consolidation, validate_soma
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +51,7 @@ def prepare_file_system(args: CensusBuildArgs) -> None:
     args.h5ads_path.mkdir(parents=True, exist_ok=False)
 
 
-def build(args: CensusBuildArgs) -> int:
+def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     """
     Approximately, build steps are:
     1. Download manifest and copy/stage all source assets
@@ -65,41 +67,56 @@ def build(args: CensusBuildArgs) -> int:
         Process completion code, 0 on success, non-zero indicating error,
         suitable for providing to sys.exit()
     """
-
     experiment_builders = make_experiment_builders()
 
     prepare_file_system(args)
 
-    # Step 1 - get all source datasets
-    datasets = build_step1_get_source_datasets(args)
+    with default_dask_client(args) as dask_client:
+        # Step 1 - get all source datasets
+        datasets = build_step1_get_source_datasets(args)
 
-    # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-    root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
-    gc.collect()
+        # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
+        root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
 
-    # Step 3 - populate axes
-    filtered_datasets = build_step3_populate_obs_and_var_axes(
-        args.h5ads_path.as_posix(), datasets, experiment_builders, args
-    )
+        # Step 3 - populate axes
+        filtered_datasets = build_step3_populate_obs_and_var_axes(
+            args.h5ads_path.as_posix(), datasets, experiment_builders, args
+        )
 
-    # Step 4 - populate X layers
-    build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
-    gc.collect()
+        # Step 4 - populate X layers
+        build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
+        gc.collect()
 
-    # Step 5- write out dataset manifest and summary information
-    build_step5_save_axis_and_summary_info(
-        root_collection, experiment_builders, filtered_datasets, args.config.build_tag
-    )
+        # Step 5- write out dataset manifest and summary information
+        build_step5_save_axis_and_summary_info(
+            root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+        )
 
-    # Step 6 - create and save derived artifacts
-    build_step6_save_derived_data(root_collection, experiment_builders, args)
+        # Step 6 - create and save derived artifacts
+        build_step6_save_derived_data(root_collection, experiment_builders, args)
 
-    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-    tiledb_soma_1969_work_around(root_collection.uri)
+        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+        tiledb_soma_1969_work_around(root_collection.uri)
 
-    # consolidate TileDB data
-    if args.config.consolidate:
-        consolidate(args, root_collection.uri)
+        # Validation and consolidation are done in parallel, thanks to the TileDB
+        # concurrency model. The only important constraint is that vacuuming _MUST_
+        # be done _after_ validation has completed, to avoid races between readers
+        # and deletion.
+        valcon_futures: List[dask.distributed.Futures] = []
+        if args.config.consolidate:
+            valcon_futures += submit_consolidate(root_collection.uri, pool=dask_client, vacuum=False)
+        if validate:
+            # valcon_futures.append(dask_client.submit(validate_soma, args))
+            # until validate is converted to dask, it creates MP pools internally
+            # so call directly
+            validate_soma(args)
+        dask_client.gather(valcon_futures)
+
+        # Once validated and consolidated, so a second pass with vacuuming, and
+        # then validate it worked correctly
+        if args.config.consolidate:
+            consolidate(args, root_collection.uri)
+            validate_consolidation(args)
 
     return 0
 

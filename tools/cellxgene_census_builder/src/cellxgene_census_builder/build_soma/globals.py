@@ -240,7 +240,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
         "tiledb": {
             "create": {
                 **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
-                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 19}]}},
+                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 13}]}},
             }
         }
     },

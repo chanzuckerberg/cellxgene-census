@@ -2,9 +2,11 @@ import contextlib
 import logging
 import multiprocessing
 import threading
+import time
 import weakref
 from collections import deque
 from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
+from contextlib import contextmanager
 from functools import partial
 from types import TracebackType
 from typing import (
@@ -23,6 +25,8 @@ from typing import (
 )
 
 import attrs
+import dask
+import dask.distributed
 import psutil
 
 from ..build_state import CensusBuildArgs
@@ -378,3 +382,61 @@ def create_resource_pool_executor(
         initializer=process_init,
         initargs=(args,),
     )
+
+
+class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
+    """Pass config to all workers"""
+
+    def __init__(self, args: CensusBuildArgs):
+        self.args = args
+
+    def setup(self, worker: dask.distributed.Worker) -> None:
+        process_init(self.args)
+
+
+def create_dask_client(args: CensusBuildArgs) -> dask.distributed.Client:
+    """Create and return a Dask client."""
+
+    # create a new client
+    assert _mp_config_checks()
+
+    with dask.config.set({"distributed.comm.timeouts.connect": "90s"}):
+        client = dask.distributed.Client(
+            n_workers=cpu_count(),
+            threads_per_worker=2,
+            memory_limit=None,
+            dashboard_address=":8787" if args.config.dashboard else None,
+        )
+        client.register_plugin(SetupDaskWorker(args))
+        logger.debug(f"create_dask_client {client}")
+
+        # Release GIL, allowing the scheduler thread to run. Without this, the scheduler and
+        # worker startup will race, occasionally causing a heartbeat error to be logged on startup.
+        # The only side-effect is to keep logs cleaner.
+        time.sleep(1.0)
+
+        return client
+
+
+@contextmanager
+def default_dask_client(args: CensusBuildArgs) -> dask.distributed.Client:
+    """Reentrant context manager returning the default dask client and closing it on outer context exit"""
+    try:
+        current_client = dask.distributed.Client.current()
+        yield current_client
+        return
+    except ValueError:
+        # Fall through to create a Client
+        pass
+
+    client = create_dask_client(args)
+    try:
+        yield client
+    finally:
+        time.sleep(1.0)
+        try:
+            # client.close(timeout="5m")
+            client.shutdown()
+        except dask.distributed.TimeoutError:
+            # retry?
+            logger.error("Timeout shutting down Dask cluster")

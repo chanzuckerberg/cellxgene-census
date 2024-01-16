@@ -1,3 +1,4 @@
+import os
 import pathlib
 from types import ModuleType
 
@@ -14,8 +15,12 @@ def test_source_assets(tmp_path: pathlib.Path, census_build_args: CensusBuildArg
     (tmp_path / "source").mkdir()
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     for i in range(10):
-        dataset = Dataset(f"dataset_{i}", dataset_asset_h5ad_uri=f"file://{tmp_path}/source/dataset_{i}.h5ad")
-        (tmp_path / "source" / f"dataset_{i}.h5ad").touch()
+        dataset = Dataset(
+            f"dataset_{i}", dataset_asset_h5ad_uri=f"file://{tmp_path}/source/dataset_{i}.h5ad", asset_h5ad_filesize=i
+        )
+        fpath = tmp_path / "source" / f"dataset_{i}.h5ad"
+        fpath.touch()
+        os.truncate(fpath, i)
         datasets.append(dataset)
 
     # Call the function

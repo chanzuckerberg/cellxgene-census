@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 import s3fs
 
 from .build_soma import build as build_a_soma
-from .build_soma import validate as validate_a_soma
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
 from .util import log_process_resource_status, process_init, start_resource_logger, urlcat
 
@@ -54,11 +53,16 @@ def main() -> int:
             do_prebuild_set_defaults,
             do_prebuild_checks,
             do_build_soma,
-            do_validate_soma,
             do_create_reports,
             do_data_copy,
             do_report_copy,
             do_log_copy,
+        ],
+        "test-build": [  # for testing only
+            do_prebuild_set_defaults,
+            do_prebuild_checks,
+            do_build_soma,
+            do_create_reports,
         ],
         "mock-build": [
             do_mock_build,
@@ -71,7 +75,6 @@ def main() -> int:
             do_prebuild_set_defaults,
             do_prebuild_checks,
             do_build_soma,
-            do_validate_soma,
             do_create_reports,
             do_data_copy,
             do_the_release,
@@ -159,16 +162,6 @@ def do_prebuild_checks(args: CensusBuildArgs) -> bool:
 def do_build_soma(args: CensusBuildArgs) -> bool:
     if (cc := build_a_soma(args)) != 0:
         logger.critical(f"Build of census failed with code {cc}.")
-        return False
-
-    return True
-
-
-def do_validate_soma(args: CensusBuildArgs) -> bool:
-    if not validate_a_soma(args):
-        logger.critical("Validation of the census build has failed.")
-        return False
-
     return True
 
 

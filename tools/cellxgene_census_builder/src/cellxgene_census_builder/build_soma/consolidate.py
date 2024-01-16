@@ -1,16 +1,16 @@
 import logging
 import re
-from concurrent.futures import Executor, Future, as_completed
 from typing import List, Optional, Sequence
 
 import attrs
 import tiledb
 import tiledbsoma as soma
+from dask.distributed import Client, Future
 
 from ..build_state import CensusBuildArgs
 from ..util import cpu_count
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
-from .mp import create_process_pool_executor, log_on_broken_process_pool
+from .mp import default_dask_client
 
 logger = logging.getLogger(__name__)
 
@@ -32,24 +32,18 @@ class ConsolidationCandidate:
 
 
 def consolidate(args: CensusBuildArgs, uri: str) -> None:
-    """The old API - consolidate & vacuum everything, and return when done."""
-    with create_process_pool_executor(args) as ppe:
-        futures = submit_consolidate(args, uri, pool=ppe, vacuum=True, exclude=None)
-
-        # Wait for consolidation to complete
-        for future in as_completed(futures):
-            log_on_broken_process_pool(ppe)
-            uri = future.result()
+    """consolidate & vacuum everything, wait for completion"""
+    with default_dask_client(args) as client:
+        client.gather(submit_consolidate(uri, pool=client, vacuum=True, exclude=None))
 
 
 def submit_consolidate(
-    args: CensusBuildArgs,
     uri: str,
-    pool: Executor,
+    pool: Client,
     vacuum: bool,
     include: Optional[Sequence[str]] = None,
     exclude: Optional[Sequence[str]] = None,
-) -> Sequence[Future[str]]:
+) -> Sequence[Future]:
     """
     This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
