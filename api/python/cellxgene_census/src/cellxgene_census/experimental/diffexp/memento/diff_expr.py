@@ -25,6 +25,7 @@ import polars as pl
 
 OBS_GROUPS_ARRAY = "obs_groups"
 ESTIMATORS_ARRAY = "estimators"
+FEATURE_IDS_FILE = "feature_ids.json"
 
 CUBE_LOGICAL_DIMS_OBS = [
     "cell_type_ontology_term_id",
@@ -124,17 +125,13 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: 
         for col in obs_groups_df.select_dtypes(include=["category"]).columns:
             obs_groups_df[col] = obs_groups_df[col].cat.codes
 
-    # TODO: need canonical list of features efficiently
-    features = get_features(cube_path)
-    if n_features is not None:
-        rng = np.random.default_rng(1024)
-        features = rng.choice(features, size=n_features, replace=False)
+    features = get_features(cube_path, n_features)
 
     # compute each feature group in parallel
     n_feature_groups = min(len(features), n_processes)
     feature_groups = [features.tolist() for features in np.array_split(np.array(features), n_feature_groups)]
     print(
-        f"computing for {len(obs_groups_df)} obs groups ({obs_groups_df.n_obs.sum()} cells) and {n_features} features using {n_feature_groups} processes, {len(features) // n_feature_groups} features/process"
+        f"computing for {len(obs_groups_df)} obs groups ({obs_groups_df.n_obs.sum()} cells) and {len(features)} features using {n_feature_groups} processes, {len(features) // n_feature_groups} features/process"
     )
 
     # make treatment variable be in the first column of the design matrix
@@ -152,21 +149,17 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: 
     return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
 
 
-def get_features(cube_path: str) -> List[str]:
-    feature_id_path = os.path.join(cube_path, "feature_ids.json")
-    if os.path.isfile(feature_id_path):
-        with open(feature_id_path) as f:
-            features = json.load(f)
-    else:
-        with tiledb.open(
-            os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config={"soma.init_buffer_bytes": 2**32}
-        ) as estimators_array:
-            features = (
-                estimators_array.query(attrs=[], dims=["feature_id"]).df[:]["feature_id"].drop_duplicates().tolist()
-            )
-            with open(feature_id_path, "w") as f:
-                json.dump(features, f)
-    return cast(List[str], features)
+def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
+    with open(os.path.join(cube_path, FEATURE_IDS_FILE)) as f:
+        feature_ids = json.load(f)
+        
+    if n_features is not None:
+        # for testing purposes, useful to limit the number of features
+        rng = np.random.default_rng(1024)
+        features_ids = rng.choice(feature_ids, size=n_features, replace=False)
+        
+    return feature_ids
+
 
 
 @timeit_report
