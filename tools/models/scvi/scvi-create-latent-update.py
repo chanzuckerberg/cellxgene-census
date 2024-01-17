@@ -61,7 +61,7 @@ if __name__ == "__main__":
         model_filename,
     )
     vae_q.is_trained = True
-    qz_m, qz_v = vae_q.get_latent_representation()
+    qz_m, qz_v = vae_q.get_latent_representation(return_dist=True)
 
     adata.obsm["_scvi_latent_qzm"], adata.obsm["_scvi_latent_qzv"] = qz_m, qz_v
     vae_q.minify_adata(use_latent_qzm_key="_scvi_latent_qzm", use_latent_qzv_key="_scvi_latent_qzv")
