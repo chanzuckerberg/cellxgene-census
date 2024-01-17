@@ -1,6 +1,8 @@
 import logging
+from contextlib import AbstractContextManager
 from functools import cached_property
 from os import PathLike
+from types import TracebackType
 from typing import Any, List, Optional, Protocol, Self, Tuple, TypedDict, cast
 
 import h5py
@@ -60,7 +62,7 @@ def _normed_index(idx: Index) -> tuple[Index1D, Index1D]:
         raise IndexError("Indexing supported on two dimensions only")
 
 
-class AnnDataProxy:
+class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
     """
     Recommend using `open_anndata()` rather than instantiating this class directly.
 
@@ -87,6 +89,7 @@ class AnnDataProxy:
     _obs: pd.DataFrame
     _var: pd.DataFrame
     _X: h5py.Dataset | CSRDataset | CSCDataset
+    _file: Optional[h5py.File]
 
     def __init__(
         self,
@@ -101,15 +104,24 @@ class AnnDataProxy:
         self.filename = filename
 
         if view_of is None:
+            self._file = h5py.File(self.filename, mode="r")
             self._obs, self._var, self._X = self._load_h5ad(obs_column_names, var_column_names)
             self._obs_idx: slice | npt.NDArray[np.int64] = slice(None)
             self._var_idx: slice | npt.NDArray[np.int64] = slice(None)
         else:
+            self._file = None
             self._obs, self._var, self._X = (view_of._obs, view_of._var, view_of._X)
             assert obs_idx is not None
             assert var_idx is not None
             self._obs_idx = obs_idx
             self._var_idx = var_idx
+
+    def __exit__(
+        self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]
+    ) -> None:
+        if self._file:
+            self._file.close()
+        self._file = None
 
     @property
     def X(self) -> sparse.spmatrix | npt.NDArray[np.integer[Any] | np.floating[Any]]:
@@ -200,28 +212,27 @@ class AnnDataProxy:
         This code utilizes the AnnData on-disk spec and several experimental API (as of 0.10.0).
         Spec: https://anndata.readthedocs.io/en/latest/fileformat-prose.html
         """
-
-        file = h5py.File(self.filename, mode="r")
+        assert isinstance(self._file, h5py.File)
 
         # Known to be compatible with this AnnData file encoding
         assert (
-            file.attrs["encoding-type"] == "anndata" and file.attrs["encoding-version"] == "0.1.0"
+            self._file.attrs["encoding-type"] == "anndata" and self._file.attrs["encoding-version"] == "0.1.0"
         ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
 
         # Verify we are reading the expected CxG schema version.
-        schema_version = read_elem(file["uns/schema_version"])
+        schema_version = read_elem(self._file["uns/schema_version"])
         if schema_version != CXG_SCHEMA_VERSION:
             raise ValueError(
                 f"{self.filename} -- incorrect CxG schema version (got {schema_version}, expected {CXG_SCHEMA_VERSION})"
             )
 
-        obs = self._load_dataframe(file["obs"], obs_column_names)
-        if "raw" in file:
-            var = self._load_dataframe(file["raw/var"], var_column_names)
-            X = file["raw/X"]
+        obs = self._load_dataframe(self._file["obs"], obs_column_names)
+        if "raw" in self._file:
+            var = self._load_dataframe(self._file["raw/var"], var_column_names)
+            X = self._file["raw/X"]
         else:
-            var = self._load_dataframe(file["var"], var_column_names)
-            X = file["X"]
+            var = self._load_dataframe(self._file["var"], var_column_names)
+            X = self._file["X"]
 
         if isinstance(X, h5py.Group):
             X = sparse_dataset(X)
@@ -237,9 +248,9 @@ CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
 def open_anndata(
-    base_path: str,
     dataset: Dataset,
     *,
+    base_path: str,
     include_filter_columns: bool = False,
     obs_column_names: Optional[Tuple[str, ...]] = None,
     var_column_names: Optional[Tuple[str, ...]] = None,

@@ -3,6 +3,7 @@ import gc
 import logging
 from contextlib import ExitStack
 from typing import (
+    Any,
     Dict,
     Generator,
     List,
@@ -11,11 +12,12 @@ from typing import (
     Tuple,
     TypedDict,
     Union,
+    cast,
     overload,
 )
 
-import anndata
 import attrs
+import dask
 import numba
 import numpy as np
 import numpy.typing as npt
@@ -39,7 +41,8 @@ from .globals import (
     CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
-    CXG_OBS_TERM_COLUMNS,
+    CXG_OBS_COLUMNS_READ,
+    CXG_VAR_COLUMNS_READ,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
@@ -53,6 +56,7 @@ from .mp import (
     log_on_broken_process_pool,
     n_workers_from_memory_budget,
 )
+from .schema_util import TableSpec
 from .stats import get_obs_stats, get_var_stats
 from .summary_cell_counts import (
     accumulate_summary_counts,
@@ -133,7 +137,6 @@ class ExperimentBuilder:
         self.n_var: int = 0
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
-        self.obs_df_accumulation: List[pd.DataFrame] = []
         self.obs_df: Optional[pd.DataFrame] = None
         self.var_df: Optional[pd.DataFrame] = None
         self.dataset_obs_joinid_start: Dict[str, int] = {}
@@ -164,77 +167,6 @@ class ExperimentBuilder:
 
         # make measurement and add to ms collection
         ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
-
-    def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
-        anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
-        return anndata_cell_filter(ad)
-
-    def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
-        """
-        Build (accumulate) in-memory obs and var.
-
-        Returns: number of cells that make it past the experiment filter.
-        """
-
-        assert len(ad.obs) > 0
-
-        # Narrow columns just to minimize memory footprint. Summary cell counting
-        # requires 'organism', do be careful not to delete that.
-        obs_df = ad.obs[list(CXG_OBS_TERM_COLUMNS) + ["organism"]].reset_index(drop=True).copy()
-
-        obs_df["soma_joinid"] = range(self.n_obs, self.n_obs + len(obs_df))
-        obs_df["dataset_id"] = dataset.dataset_id
-
-        # high-level tissue mapping
-        add_tissue_mapping(obs_df, dataset.dataset_id)
-
-        # add any other computed columns
-        for key in CENSUS_OBS_TABLE_SPEC.field_names():
-            if key not in obs_df:
-                obs_df[key] = np.full(
-                    (len(obs_df),),
-                    np.nan,
-                    dtype=CENSUS_OBS_TABLE_SPEC.field(key).to_pandas_dtype(ignore_dict_type=True),
-                )
-
-        # Accumulate aggregation counts
-        self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
-
-        # drop columns we don't want to write (e.g., organism)
-        obs_df = obs_df[list(CENSUS_OBS_TABLE_SPEC.field_names())]
-
-        # accumulate obs
-        self.obs_df_accumulation.append(obs_df)
-
-        self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs
-
-        # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
-        tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name", "feature_length"]]
-        for key in CENSUS_VAR_TABLE_SPEC.field_names():
-            if key not in tv:
-                tv[key] = np.full(
-                    (len(tv),), 0, dtype=CENSUS_VAR_TABLE_SPEC.field(key).to_pandas_dtype(ignore_dict_type=True)
-                )
-        self.var_df = (
-            pd.concat([self.var_df, tv], ignore_index=True).drop_duplicates() if self.var_df is not None else tv
-        )
-
-        self.n_obs += len(obs_df)
-        self.n_unique_obs += (obs_df.is_primary_data == True).sum()  # noqa: E712
-
-        donors = obs_df.donor_id.unique()
-        self.n_donors += len(donors) - np.isin(donors, DONOR_ID_IGNORE).sum()
-
-        self.n_datasets += 1
-        return len(obs_df)
-
-    def finalize_obs_axes(self) -> None:
-        if not self.obs_df_accumulation:
-            return
-        self.obs_df = pd.concat(self.obs_df_accumulation, ignore_index=True)
-        self.obs_df_accumulation.clear()
-        assert self.n_obs == len(self.obs_df)
-        gc.collect()
 
     def write_obs_dataframe(self) -> None:
         logger.info(f"{self.name}: writing obs dataframe")
@@ -288,19 +220,6 @@ class ExperimentBuilder:
                 var_df, preserve_index=False, columns=list(CENSUS_VAR_TABLE_SPEC.field_names())
             )
             rna_measurement.var.write(pa_table)
-
-    def populate_var_axis(self) -> None:
-        logger.info(f"{self.name}: populate var axis")
-
-        # it is possible there is nothing to write
-        if self.var_df is not None and len(self.var_df) > 0:
-            self.var_df["soma_joinid"] = range(len(self.var_df))
-            self.var_df = self.var_df.set_index("soma_joinid", drop=False)
-
-            self.global_var_joinids = self.var_df[["feature_id", "soma_joinid"]].set_index("feature_id")
-            self.n_var = len(self.var_df)
-        else:
-            self.n_var = 0
 
     def create_X_with_layers(self) -> None:
         """
@@ -403,6 +322,128 @@ class ExperimentBuilder:
         log_process_resource_status()
 
 
+def accumulate_axes_dataframes(
+    base_path: str,
+    datasets: List[Dataset],
+    experiment_builders: List[ExperimentBuilder],
+) -> List[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]]:
+    """
+    Two parallel operations.
+    From all datasets:
+    1. Concat all obs dataframes
+    2. Union all var dataframes
+    """
+
+    def get_obs_and_var(
+        dataset: Dataset, spec: ExperimentSpecification, base_path: str
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        with open_anndata(
+            dataset,
+            base_path=base_path,
+            obs_column_names=CXG_OBS_COLUMNS_READ,
+            var_column_names=CXG_VAR_COLUMNS_READ,
+        ) as adata:
+            filtered_adata = make_anndata_cell_filter(spec.anndata_cell_filter_spec)(adata)
+            logging.debug(f"{dataset.dataset_id}/{spec.name} - found {filtered_adata.n_obs} cells")
+
+            # Skip this dataset if there are not cells after filtering
+            if filtered_adata.n_obs == 0:
+                logger.debug(f"{spec.name} - H5AD has no data after filtering, skipping {dataset.dataset_id}")
+                return pd.DataFrame(), pd.DataFrame()
+
+            obs_df = filtered_adata.obs.copy()
+            obs_df["dataset_id"] = dataset.dataset_id
+
+            var_df = (
+                filtered_adata.var.copy()
+                .rename_axis("feature_id")
+                .reset_index()[["feature_id", "feature_name", "feature_length"]]
+            )
+
+            return obs_df, var_df
+
+    datasets_bag = dask.bag.from_sequence(datasets)
+    df_pairs_per_eb: List[tuple[pd.DataFrame, pd.DataFrame]] = dask.compute(
+        *[
+            datasets_bag.map(
+                get_obs_and_var,
+                spec=eb.specification,
+                base_path=base_path,
+            )
+            for eb in experiment_builders
+        ]
+    )
+
+    return list(
+        zip(
+            experiment_builders,
+            [
+                (
+                    pd.concat(
+                        cast(List[pd.DataFrame], [df_pair[0] for df_pair in df_pairs if not df_pair[0].empty]),
+                        ignore_index=True,
+                        join="inner",
+                    ),
+                    pd.concat(
+                        cast(List[pd.DataFrame], [df_pair[1] for df_pair in df_pairs if not df_pair[1].empty]),
+                        ignore_index=True,
+                        join="inner",
+                    ).drop_duplicates(ignore_index=True),
+                )
+                for df_pairs in df_pairs_per_eb
+            ],
+        )
+    )
+
+
+def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]]) -> None:
+    """
+    Processing steps post-accumulation of all axes dataframes. Includes:
+    * assign soma_joinids
+    * add derived or summary columns
+    * generate summary and/or working data for the experiment_builder
+    """
+
+    def add_placeholder_columns(df: pd.DataFrame, table_spec: TableSpec, default: Any) -> None:
+        for key in table_spec.field_names():
+            if key not in df:
+                df[key] = np.full(
+                    (len(df),),
+                    default,
+                    dtype=table_spec.field(key).to_pandas_dtype(ignore_dict_type=True),
+                )
+
+    def per_dataset_summary_counts(eb: ExperimentBuilder, obs: pd.DataFrame) -> None:
+        for _, obs_slice in obs.groupby("dataset_id"):
+            assert obs_slice.soma_joinid.max() - obs_slice.soma_joinid.min() + 1 == len(obs_slice)
+            eb.census_summary_cell_counts = accumulate_summary_counts(eb.census_summary_cell_counts, obs_slice)
+
+    for eb, (obs, var) in accumulated:
+        obs["soma_joinid"] = range(0, len(obs))
+        var["soma_joinid"] = range(0, len(var))
+
+        add_tissue_mapping(obs)  # add tissue mapping (e.g., tissue_general term)
+
+        # add columns to be completed later, e.g., summary stats such as mean of X
+        add_placeholder_columns(obs, CENSUS_OBS_TABLE_SPEC, default=np.nan)
+        add_placeholder_columns(var, CENSUS_VAR_TABLE_SPEC, default=0)
+
+        # compute intermediate values used later in the build
+        eb.n_datasets = obs.dataset_id.nunique()
+        eb.n_unique_obs = (obs.is_primary_data == True).sum()  # noqa: E712
+        eb.n_donors = obs[~obs.donor_id.isin(DONOR_ID_IGNORE)].groupby("dataset_id").donor_id.nunique().sum()
+        eb.dataset_obs_joinid_start = obs.groupby("dataset_id").soma_joinid.min().to_dict()
+        eb.global_var_joinids = var[["feature_id", "soma_joinid"]].set_index("feature_id")
+
+        # gather per-dataset summary statistics e.g., cell type counts, etc.
+        per_dataset_summary_counts(eb, obs)
+
+        eb.obs_df = obs
+        eb.var_df = var
+        eb.n_obs = len(obs)
+        eb.n_var = len(var)
+
+
 def _get_axis_stats(
     raw_X: Union[sparse.spmatrix, npt.NDArray[np.float32]],
     dataset_obs_joinid_start: int,
@@ -463,7 +504,9 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     logger.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
+    unfiltered_ad = open_anndata(
+        dataset, base_path=assets_path, include_filter_columns=True, var_column_names=("_index",)
+    )
 
     results: List[AccumulateXResult] = []
     for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
@@ -755,7 +798,7 @@ def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> Summa
     }
 
 
-def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
+def add_tissue_mapping(obs_df: pd.DataFrame) -> None:
     """Inplace addition of tissue_general-related columns"""
 
     # UBERON tissue term mapper
@@ -767,8 +810,7 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
 
     # Map specific ID -> general ID
     tissue_general_id_map = {id: tissue_mapper.get_high_level_tissue(id) for id in tissue_ids}
-    if not all(tissue_general_id_map.values()):
-        logger.error(f"{dataset_id} contains tissue types which could not be generalized.")
+    assert all(tissue_general_id_map.values()), "Unable to generalize all tissue types"
     obs_df["tissue_general_ontology_term_id"] = obs_df.tissue_ontology_term_id.map(tissue_general_id_map)
 
     # Assign general label

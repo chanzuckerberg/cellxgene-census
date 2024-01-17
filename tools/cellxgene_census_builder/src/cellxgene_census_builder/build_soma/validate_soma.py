@@ -166,7 +166,7 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
         dataset_id = dataset.dataset_id
-        unfiltered_ad = open_anndata(assets_path, dataset)
+        unfiltered_ad = open_anndata(dataset, base_path=assets_path)
         eb_info: Dict[str, EbInfo] = {}
         for eb in experiment_specifications:
             eb_info[eb.name] = EbInfo()
@@ -373,7 +373,9 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
     """
     assets_path, soma_path, dataset, experiment_specifications = args
     logger.info(f"validate X[raw] by contents - starting {dataset.dataset_id}")
-    unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
+    unfiltered_ad = open_anndata(
+        dataset, base_path=assets_path, include_filter_columns=True, var_column_names=("_index",)
+    )
 
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:

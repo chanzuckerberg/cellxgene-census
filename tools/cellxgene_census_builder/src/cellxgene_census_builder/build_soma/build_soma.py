@@ -1,31 +1,31 @@
 import gc
 import logging
 from datetime import datetime, timezone
-from typing import Iterator, List
+from typing import List, cast
 
 import dask
+import pandas as pd
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from .anndata import AnnDataProxy, open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate, submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
+    accumulate_axes_dataframes,
     populate_X_layers,
+    post_acc_axes_processing,
     reopen_experiment_builders,
 )
 from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
-    CXG_OBS_COLUMNS_READ,
-    CXG_VAR_COLUMNS_READ,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import EagerIterator, create_thread_pool_executor, default_dask_client
+from .mp import default_dask_client
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
@@ -165,52 +165,6 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     return datasets
 
 
-def accumulate_axes(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
-) -> List[Dataset]:
-    filtered_datasets = []
-    N = len(datasets) * len(experiment_builders)
-    n = 0
-
-    with create_thread_pool_executor() as pool:
-        adata_iter: Iterator[tuple[Dataset, AnnDataProxy]] = (
-            (
-                dataset,
-                open_anndata(
-                    assets_path, dataset, obs_column_names=CXG_OBS_COLUMNS_READ, var_column_names=CXG_VAR_COLUMNS_READ
-                ),
-            )
-            for dataset in datasets
-        )
-        if args.config.multi_process:
-            adata_iter = EagerIterator(adata_iter, pool)
-
-        for dataset, ad in adata_iter:
-            dataset_total_cell_count = 0
-            for eb in experiment_builders:
-                n += 1
-                logger.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
-                ad_filtered = eb.filter_anndata_cells(ad)
-
-                if len(ad_filtered.obs) == 0:  # type:ignore
-                    logger.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
-                    continue
-
-                # accumulate `obs` and `var` data
-                dataset_total_cell_count += eb.accumulate_axes(dataset, ad_filtered)
-
-            # dataset passes filter if either experiment includes cells from the dataset
-            if dataset_total_cell_count > 0:
-                filtered_datasets.append(dataset)
-                dataset.dataset_total_cell_count = dataset_total_cell_count
-
-    for eb in experiment_builders:
-        eb.finalize_obs_axes()
-        logger.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
-
-    return filtered_datasets
-
-
 def build_step2_create_root_collection(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
     """
     Create all objects
@@ -230,24 +184,49 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: List
 
 
 def build_step3_populate_obs_and_var_axes(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
+    base_path: str,
+    datasets: List[Dataset],
+    experiment_builders: List[ExperimentBuilder],
+    args: CensusBuildArgs,
 ) -> List[Dataset]:
     """
-    Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built.
+    Method:
+    1. Concat all obs dataframes
+    2. Union all var dataframes
+    3. Calculate derived stats and filter datasets by used/not-used
+    4. Stash in the ExperimentBuilder
+
+    Accumulation is parallelized; summarization is not parallelized -- it is fast enough
+    and benefits from the simplicity.
     """
-    logger.info("Build step 3 - Populate obs and var axes - started")
 
-    filtered_datasets = accumulate_axes(assets_path, datasets, experiment_builders, args)
-    logger.info(f"({len(filtered_datasets)} of {len(datasets)}) datasets suitable for processing.")
+    def count_cells_per_dataset(
+        datasets: List[Dataset],
+        accumulated: List[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]],
+    ) -> None:
+        # per dataset, calculate and date total cell count
+        cells_per_dataset = (
+            pd.concat(obs.value_counts("dataset_id") for _, (obs, _) in accumulated).groupby("dataset_id").sum()
+        )
+        for dataset in datasets:
+            dataset.dataset_total_cell_count += cast(int, cells_per_dataset.get(dataset.dataset_id, default=0))  # type: ignore[arg-type]
 
-    for e in experiment_builders:
-        e.populate_var_axis()
+    logger.info("Build step 3 - accumulate obs and var axes - started")
 
-    assign_dataset_soma_joinids(filtered_datasets)
+    accumulated = accumulate_axes_dataframes(base_path, datasets, experiment_builders)
 
-    logger.info("Build step 3 - Populate obs and var axes - finished")
+    logger.info("Build step 3 - axis accumulation complete")
 
-    return filtered_datasets
+    # Determine which datasets are utilized
+    count_cells_per_dataset(datasets, accumulated)
+    datasets_utilized = list(filter(lambda d: d.dataset_total_cell_count > 0, datasets))
+    assign_dataset_soma_joinids(datasets_utilized)
+
+    # summarize axes, add additional columns, etc - saving result into experiment_builders
+    post_acc_axes_processing(accumulated)
+
+    logger.info("Build step 3 - accumulate obs and var axes - finished")
+    return datasets_utilized
 
 
 def build_step4_populate_X_layers(
