@@ -60,6 +60,7 @@ if __name__ == "__main__":
         adata,
         model_filename,
     )
+    vae_q.is_trained = True
     qz_m, qz_v = vae_q.get_latent_representation()
 
     adata.obsm["_scvi_latent_qzm"], adata.obsm["_scvi_latent_qzv"] = qz_m, qz_v
