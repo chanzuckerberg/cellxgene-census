@@ -11,6 +11,8 @@ from ..util import log_process_resource_status, process_init, start_resource_log
 from .build_soma import build
 from .validate_soma import validate
 
+logger = logging.getLogger(__name__)
+
 
 def main() -> int:
     cli_parser = create_args_parser()
@@ -26,7 +28,7 @@ def main() -> int:
     )
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.working_dir), config=default_config)
     process_init(args)
-    logging.info(args)
+    logger.info(args)
 
     start_resource_logger()
 

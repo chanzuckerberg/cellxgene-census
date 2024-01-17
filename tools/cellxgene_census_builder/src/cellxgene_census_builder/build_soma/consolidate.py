@@ -12,6 +12,8 @@ from ..util import cpu_count
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
 from .mp import create_process_pool_executor, log_on_broken_process_pool
 
+logger = logging.getLogger(__name__)
+
 
 @attrs.define(kw_only=True, frozen=True)
 class ConsolidationCandidate:
@@ -64,10 +66,10 @@ def submit_consolidate(
         for obj in _gather(uri)
         if any(re.fullmatch(i, obj.uri) for i in include) and not any(re.fullmatch(e, obj.uri) for e in exclude)
     ]
-    logging.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
+    logger.info(f"Consolidate: found {len(uris_to_consolidate)} TileDB objects to consolidate")
 
     futures = [pool.submit(_consolidate_tiledb_object, uri, vacuum) for uri in uris_to_consolidate]
-    logging.info(f"Consolidate: {len(futures)} consolidation jobs queued")
+    logger.info(f"Consolidate: {len(futures)} consolidation jobs queued")
     return futures
 
 
@@ -137,13 +139,13 @@ def _consolidate_tiledb_object(obj: ConsolidationCandidate, vacuum: bool) -> str
     assert soma.get_storage_engine() == "tiledb"
 
     try:
-        logging.info(f"Consolidate[vacuum={vacuum}] start, uri={obj.uri}")
+        logger.info(f"Consolidate[vacuum={vacuum}] start, uri={obj.uri}")
         if obj.is_array():
             _consolidate_array(obj.uri, vacuum)
         else:
             _consolidate_group(obj.uri, vacuum)
-        logging.info(f"Consolidate[vacuum={vacuum}] finish, uri={obj.uri}")
+        logger.info(f"Consolidate[vacuum={vacuum}] finish, uri={obj.uri}")
         return obj.uri
     except tiledb.TileDBError as e:
-        logging.error(f"Consolidate[vacuum={vacuum}] error, uri={obj.uri}: {str(e)}")
+        logger.error(f"Consolidate[vacuum={vacuum}] error, uri={obj.uri}: {str(e)}")
         raise

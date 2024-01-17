@@ -10,6 +10,8 @@ from .globals import CENSUS_DATASETS_NAME, CENSUS_DATASETS_TABLE_SPEC
 
 T = TypeVar("T", bound="Dataset")
 
+logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass  # TODO: use attrs
 class Dataset:
@@ -70,7 +72,7 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     """
     Write the Census `census_datasets` dataframe
     """
-    logging.info("Creating dataset_manifest")
+    logger.info("Creating dataset_manifest")
     manifest_df = Dataset.to_dataframe(datasets)
     manifest_df = manifest_df[list(CENSUS_DATASETS_TABLE_SPEC.field_names())]
     if len(manifest_df) == 0:

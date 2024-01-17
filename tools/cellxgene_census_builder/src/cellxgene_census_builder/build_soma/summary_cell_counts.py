@@ -8,6 +8,8 @@ import tiledbsoma as soma
 
 from .globals import CENSUS_SUMMARY_CELL_COUNTS_NAME, CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC
 
+logger = logging.getLogger(__name__)
+
 
 def create_census_summary_cell_counts(
     info_collection: soma.Collection, per_experiment_summary: Sequence[pd.DataFrame]
@@ -15,7 +17,7 @@ def create_census_summary_cell_counts(
     """
     Save per-category counts as the census_summary_cell_counts SOMA dataframe
     """
-    logging.info("Creating census_summary_cell_counts")
+    logger.info("Creating census_summary_cell_counts")
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
         .drop(columns=["dataset_id"])

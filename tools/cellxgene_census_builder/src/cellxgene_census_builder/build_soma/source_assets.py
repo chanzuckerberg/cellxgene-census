@@ -13,6 +13,8 @@ from ..util import cpu_count
 from .datasets import Dataset
 from .mp import create_process_pool_executor
 
+logger = logging.getLogger(__name__)
+
 
 def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
     assets_dir = args.h5ads_path.as_posix()
@@ -20,7 +22,7 @@ def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
     # e.g., "census-builder-prod/1.0.0"
     user_agent = f"{args.config.user_agent_prefix}{args.config.user_agent_environment}/{__version__}"
 
-    logging.info(f"Starting asset staging to {assets_dir}")
+    logger.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
 
     # Fetch datasets largest first, to minimize overall download time
@@ -55,7 +57,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int, user_agent: str
     dataset_file_name = f"{dataset.dataset_id}.h5ad"
     dataset_path = f"{asset_dir}/{dataset_file_name}"
 
-    logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) to {dataset_path}")
+    logger.info(f"Staging {dataset.dataset_id} ({n} of {N}) to {dataset_path}")
 
     sleep_for_secs = 10
     last_error: aiohttp.ClientPayloadError | None = None
@@ -64,7 +66,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int, user_agent: str
             fs.get_file(dataset.dataset_asset_h5ad_uri, dataset_path)
             break
         except aiohttp.ClientPayloadError as e:
-            logging.error(f"Fetch of {dataset.dataset_id} at {dataset_path} failed: {str(e)}")
+            logger.error(f"Fetch of {dataset.dataset_id} at {dataset_path} failed: {str(e)}")
             last_error = e
             time.sleep(2**attempt * sleep_for_secs)
     else:
@@ -79,7 +81,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int, user_agent: str
     f"found size {os.path.getsize(dataset_path)}"
     # TODO: add integrity checksum as well. Waiting on feature request chanzuckerberg/single-cell-data-portal#4392
 
-    logging.info(f"Staging {dataset.dataset_id} ({n} of {N}) complete")
+    logger.info(f"Staging {dataset.dataset_id} ({n} of {N}) complete")
     return dataset_file_name
 
 

@@ -8,11 +8,13 @@ import tiledbsoma as soma
 from .experiment_builder import ExperimentBuilder, get_summary_stats
 from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, CXG_SCHEMA_VERSION
 
+logger = logging.getLogger(__name__)
+
 
 def create_census_summary(
     info_collection: soma.Collection, experiment_builders: Sequence[ExperimentBuilder], build_tag: str
 ) -> None:
-    logging.info("Creating census summary")
+    logger.info("Creating census summary")
 
     summary_stats = get_summary_stats(experiment_builders)
     data = [
