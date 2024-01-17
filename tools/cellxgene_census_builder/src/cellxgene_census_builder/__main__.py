@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import s3fs
 
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
-from .util import log_process_resource_status, process_init, urlcat
+from .util import log_process_resource_status, process_init, start_resource_logger, urlcat
 
 
 def main() -> int:
@@ -90,6 +90,8 @@ def main() -> int:
     if command not in commands:
         logging.critical(f"Unknown command: {command}")
         return 1
+
+    start_resource_logger()
 
     build_steps = commands[command]
     rv = _do_steps(build_steps, build_args, cli_args.test_resume)

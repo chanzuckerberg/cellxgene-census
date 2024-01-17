@@ -2,7 +2,7 @@ exclude: (^doc/)|(.*/venv/)
 default_stages: [commit]
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.12.0
+    rev: 23.12.1
     hooks:
       - id: black-jupyter
         name: black-notebooks
@@ -30,7 +30,7 @@ repos:
         args: [ "--config=./tools/pyproject.toml", "--fix" ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.7.1
+    rev: v1.8.0
     hooks:
       - id: mypy
         name: mypy-cellxgene-census
@@ -57,6 +57,7 @@ repos:
           - typing_extensions
           - types-setuptools
           - types-PyYAML
+          - types-psutil
       - id: mypy
         name: mypy-tools-census-contrib
         files: ^tools/census_contrib

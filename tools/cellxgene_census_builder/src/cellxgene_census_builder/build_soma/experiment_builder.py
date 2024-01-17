@@ -33,6 +33,7 @@ from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
+    CENSUS_OBS_STATS_COLUMNS,
     CENSUS_OBS_TABLE_SPEC,
     CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TABLE_SPEC,
@@ -46,11 +47,9 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .mp import (
-    EagerIterator,
     ResourcePoolProcessExecutor,
     create_process_pool_executor,
     create_resource_pool_executor,
-    create_thread_pool_executor,
     log_on_broken_process_pool,
     n_workers_from_memory_budget,
 )
@@ -59,7 +58,7 @@ from .summary_cell_counts import (
     accumulate_summary_counts,
     init_summary_counts_accumulator,
 )
-from .util import array_chunker, is_nonnegative_integral
+from .util import is_nonnegative_integral
 
 
 @attrs.define
@@ -166,7 +165,7 @@ class ExperimentBuilder:
 
     def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
         anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
-        return anndata_cell_filter(ad, need_X=False)
+        return anndata_cell_filter(ad)
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
         """
@@ -208,8 +207,6 @@ class ExperimentBuilder:
         self.dataset_obs_joinid_start[dataset.dataset_id] = self.n_obs
 
         # Accumulate the union of all var ids/names (for raw and processed), to be later persisted.
-        # NOTE: assumes raw.var is None, OR has same index as var. Currently enforced in open_anndata(),
-        # but may need to evolve this logic if that assumption is not scalable.
         tv = ad.var.rename_axis("feature_id").reset_index()[["feature_id", "feature_name", "feature_length"]]
         for key in CENSUS_VAR_TABLE_SPEC.field_names():
             if key not in tv:
@@ -373,16 +370,22 @@ class ExperimentBuilder:
         feature_length = self.var_df.feature_length.to_numpy()
 
         if args.config.multi_process:
-            STRIDE = 1_000_000  # controls TileDB fragment size, which impacts consolidation time
-            # memory budget: 3 attribute buffers * 3 threads * 100% buffer
-            mem_budget = 3 * 3 * 2 * int(SOMA_TileDB_Context().tiledb_ctx.config()["soma.init_buffer_bytes"])
+            WRITE_NORM_STRIDE = 2**18  # controls TileDB fragment size, which impacts consolidation time
+            mem_budget = (
+                # (20 bytes per COO X stride X typical-nnz X overhead) + static-allocation + passed-data-size
+                int(20 * WRITE_NORM_STRIDE * 4000 * 2)
+                + (3 * 1024**3)
+                + feature_length.nbytes
+                + is_smart_seq.nbytes
+            )
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
                 futures = [
                     pe.submit(
-                        _write_X_normalized, (self.experiment.uri, start_id, STRIDE, feature_length, is_smart_seq)
+                        _write_X_normalized,
+                        (self.experiment.uri, start_id, WRITE_NORM_STRIDE, feature_length, is_smart_seq),
                     )
-                    for start_id in range(0, self.n_obs, STRIDE)
+                    for start_id in range(0, self.n_obs, WRITE_NORM_STRIDE)
                 ]
                 for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
                     log_on_broken_process_pool(pe)
@@ -436,6 +439,10 @@ class AccumXEBParams:
     experiment_uri: str
 
 
+# Read dim0 coords stride
+ACCUM_X_STRIDE = 125_000
+
+
 def _accumulate_all_X_layers(
     assets_path: str,
     dataset: Dataset,
@@ -454,9 +461,7 @@ def _accumulate_all_X_layers(
     This is a helper function for ExperimentBuilder.accumulate_X
     """
     logging.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    gc.collect()
-    _, unfiltered_ad = next(open_anndata(assets_path, [dataset], need_X=True))
-    assert unfiltered_ad.isbacked is False
+    unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
     results: List[AccumulateXResult] = []
     for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
@@ -475,53 +480,80 @@ def _accumulate_all_X_layers(
         if ad.n_obs == 0:
             continue
 
-        # follow CELLxGENE 3.0 schema conventions for raw/X aliasing when only raw counts exist
-        raw_X, raw_var = (ad.X, ad.var) if ad.raw is None else (ad.raw.X, ad.raw.var)
-
-        if not is_nonnegative_integral(raw_X):
-            logging.error(f"{dataset.dataset_id} contains non-integer or negative valued data")
-
-        if isinstance(raw_X, np.ndarray):
-            raw_X = sparse.csr_matrix(raw_X)
-
-        raw_X.eliminate_zeros()
-
         # save X['raw']
         layer_name = "raw"
         logging.info(
             f"{eb.name}: saving X layer '{layer_name}' for dataset '{dataset.dataset_id}' "
             f"({progress[0]} of {progress[1]})"
         )
-        local_var_joinids = raw_var.join(eb.global_var_joinids).soma_joinid.to_numpy()
+        local_var_joinids = ad.var.join(eb.global_var_joinids).soma_joinid.to_numpy()
         assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
 
-        for n, X in enumerate(array_chunker(raw_X), start=1):
-            logging.debug(f"{eb.name}/{layer_name}: X chunk {n} {dataset.dataset_id}")
+        # accumulators
+        obs_stats: pd.DataFrame = pd.DataFrame()
+        var_stats: pd.DataFrame = pd.DataFrame()
+
+        for idx in range(0, ad.n_obs, ACCUM_X_STRIDE):
+            logging.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
+
+            X = ad[idx : idx + ACCUM_X_STRIDE].X
+            if isinstance(X, np.ndarray):
+                X = sparse.csr_matrix(X)
+
+            assert is_nonnegative_integral(X), f"{dataset.dataset_id} contains non-integer or negative valued data"
+
+            X.eliminate_zeros()
+            gc.collect()
+
+            # accumulate obs/var axis stats
+            _obs_stats, _var_stats = _get_axis_stats(X, idx + dataset_obs_joinid_start, local_var_joinids)
+            obs_stats = pd.concat([obs_stats, _obs_stats])
+            var_stats = var_stats.add(_var_stats, fill_value=0).astype(np.int64)
+            del _obs_stats, _var_stats
+            gc.collect()
+
             # remap to match axes joinids
-            row = X.row.astype(np.int64) + dataset_obs_joinid_start
+            X = X.tocoo()
+            row = X.row.astype(np.int64) + idx + dataset_obs_joinid_start
             assert (row >= 0).all()
             col = local_var_joinids[X.col]
             assert (col >= 0).all()
-            X_remap = sparse.coo_matrix((X.data, (row, col)), shape=(eb.n_obs, eb.n_var))
+            data = X.data
+            del X
+            gc.collect()
+
             with soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
-                experiment.ms[ms_name].X[layer_name].write(pa.SparseCOOTensor.from_scipy(X_remap))
+                experiment.ms[ms_name].X[layer_name].write(
+                    pa.Table.from_pydict(
+                        {
+                            "soma_dim_0": row,
+                            "soma_dim_1": col,
+                            "soma_data": data,
+                        }
+                    )
+                )
+
+            del row, col, data
             gc.collect()
 
         # Save presence information by dataset_id
         assert dataset.soma_joinid >= 0  # i.e., it was assigned prior to this step
-        pres_data: npt.NDArray[np.bool_] = raw_X.sum(axis=0) > 0
-        if isinstance(pres_data, np.matrix):
-            pres_data = pres_data.A
-        pres_data = pres_data[0]
-        pres_cols: npt.NDArray[np.int64] = local_var_joinids[np.arange(ad.n_vars, dtype=np.int64)]
-
-        assert pres_data.dtype == bool
-        assert pres_cols.dtype == np.int64
-        assert pres_data.shape == (ad.n_vars,)
-        assert pres_data.shape == pres_cols.shape
         assert ad.n_vars <= eb.n_var
+        obs_stats["n_measured_vars"] = (var_stats.nnz > 0).sum()
+        var_stats["n_measured_obs"] = np.zeros(
+            (len(var_stats),), dtype=CENSUS_VAR_TABLE_SPEC.field("n_measured_obs").to_pandas_dtype()
+        )
+        var_stats.n_measured_obs[var_stats.nnz > 0] = ad.n_obs
 
-        obs_stats, var_stats = _get_axis_stats(raw_X, dataset_obs_joinid_start, local_var_joinids)
+        # sanity check on stats
+        assert len(var_stats) == ad.n_vars
+        assert len(obs_stats) == ad.n_obs
+        assert (
+            var_stats.n_measured_obs[var_stats.n_measured_obs != 0] == ad.n_obs
+        ).all(), f"n_measured_obs mismatch: {eb.name}:{dataset.dataset_id}"
+        assert (
+            obs_stats.n_measured_vars == np.count_nonzero(var_stats.nnz > 0)
+        ).all(), f"n_measured_vars mismatch: {eb.name}:{dataset.dataset_id}"
 
         results.append(
             (
@@ -529,18 +561,19 @@ def _accumulate_all_X_layers(
                     dataset.dataset_id,
                     dataset.soma_joinid,
                     eb.name,
-                    pres_data,
-                    pres_cols,
+                    (var_stats.nnz > 0).to_numpy(),
+                    var_stats.index.to_numpy(),
                 ),
                 AxisStats(eb.name, obs_stats, var_stats),
             )
         )
 
         # tidy
-        del ad, raw_X, raw_var, local_var_joinids, row, col, X_remap, pres_data, pres_cols, obs_stats, var_stats
+        del ad, local_var_joinids, obs_stats, var_stats
+        gc.collect()
 
-    gc.collect()
     logging.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
+    log_process_resource_status()
     return results
 
 
@@ -602,7 +635,22 @@ def _accumulate_X(
 
     if executor is not None:
         return executor.submit(
-            12 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
+            # memory budget:
+            #   X slices: stride * avg_var_nnz * 20 bytes * overhead
+            # + anndata obs/var:  (n_var * 5 cols * 8 + n_obs * 4 * 8) * overhead
+            # + stats space: 5 col * n_obs * 8 bytes * overhead
+            # + working space: fixed value
+            int(
+                (
+                    max(dataset.mean_genes_per_cell, 3000)
+                    * min(ACCUM_X_STRIDE, dataset.dataset_total_cell_count)
+                    * 20
+                    * 8
+                )
+                + (100_000 * 40 + dataset.dataset_total_cell_count * 32) * 8
+                + (dataset.dataset_total_cell_count * 40) * 8
+                + (2 * 1024**3)
+            ),
             _accumulate_all_X_layers,
             assets_path,
             dataset,
@@ -635,7 +683,12 @@ def populate_X_layers(
     logging.debug("populate_X_layers begin")
     results: List[AccumulateXResult] = []
     if args.config.multi_process:
-        with create_resource_pool_executor(args) as pe:
+        # reserve memory to accumulate the stats
+        n_obs = sum(eb.n_obs for eb in experiment_builders)
+        n_stats_per_obs = len(CENSUS_OBS_STATS_COLUMNS) * 8  # all 64 bit stats
+        total_memory_budget = args.config.memory_budget - (n_obs * n_stats_per_obs * 2)
+
+        with create_resource_pool_executor(args, max_resources=total_memory_budget) as pe:
             futures = {
                 _accumulate_X(
                     assets_path,
@@ -760,46 +813,31 @@ def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.ND
             mode="w",
             context=SOMA_TileDB_Context(),
         ) as X_normalized:
-            with create_thread_pool_executor(max_workers=8) as pool:
-                lazy_reader = EagerIterator(
-                    (
-                        (tbl, obs_indices.to_numpy())
-                        for tbl, (obs_indices, _) in X_raw.read(
-                            coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),)
-                        )
-                        .blockwise(axis=0, reindex_disable_on_axis=[1])
-                        .tables()
-                    ),
-                    pool=pool,
-                )
-
-                def _norm_it(
-                    tbl: pa.Table, obs_indices: npt.NDArray[np.int64]
-                ) -> Tuple[
-                    npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float32], npt.NDArray[np.int64]
-                ]:
-                    d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
-                    d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
-                    data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
-                    data = _normalize(d0, d1, data, is_smart_seq[obs_indices], feature_length)
-                    data = _roundHalfToEven(data, keepbits=15)
-                    data[data == 0] = sigma
-                    return d0, d1, data, obs_indices
-
-                lazy_norm_reader = EagerIterator(
-                    (_norm_it(tbl, obs_indices) for tbl, obs_indices in lazy_reader), pool=pool
-                )
-
-                for d0, d1, data, obs_indices in lazy_norm_reader:
-                    X_normalized.write(
-                        pa.Table.from_pydict(
-                            {
-                                "soma_dim_0": obs_indices[d0],
-                                "soma_dim_1": d1,
-                                "soma_data": data,
-                            }
-                        )
+            for tbl, (obs_indices, _) in (
+                X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),))
+                .blockwise(axis=0, size=2**16, reindex_disable_on_axis=[1], eager=False)
+                .tables()
+            ):
+                d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
+                d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
+                data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
+                d0_index = obs_indices.to_numpy()
+                del tbl, obs_indices
+                data = _normalize(d0, d1, data, is_smart_seq[d0_index], feature_length)
+                data = _roundHalfToEven(data, keepbits=15)
+                data[data == 0] = sigma
+                gc.collect()
+                X_normalized.write(
+                    pa.Table.from_pydict(
+                        {
+                            "soma_dim_0": d0_index[d0],
+                            "soma_dim_1": d1,
+                            "soma_data": data,
+                        }
                     )
+                )
+                del d0_index, d0, d1, data
+                gc.collect()
 
     logging.info(f"Write X normalized - finished block {obs_joinid_start}")
 

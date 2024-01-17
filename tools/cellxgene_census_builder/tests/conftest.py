@@ -27,7 +27,9 @@ GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
 NUM_DATASET = 2
 
 
-def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False) -> anndata.AnnData:
+def get_anndata(
+    organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False
+) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
     n_genes = len(gene_ids)
@@ -128,7 +130,7 @@ def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
     datasets = []
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
-            h5ad = get_h5ad(organism, GENE_IDS[i], no_zero_counts=True)
+            h5ad = get_anndata(organism, GENE_IDS[i], no_zero_counts=True)
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(

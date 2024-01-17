@@ -1,12 +1,12 @@
 import gc
 import logging
 from datetime import datetime, timezone
-from typing import List
+from typing import Iterator, List
 
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from .anndata import open_anndata
+from .anndata import AnnDataProxy, open_anndata
 from .census_summary import create_census_summary
 from .consolidate import consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
@@ -19,6 +19,8 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CXG_OBS_COLUMNS_READ,
+    CXG_VAR_COLUMNS_READ,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
@@ -124,15 +126,18 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
     logging.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
-    datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
-    if len(datasets) == 0:
+    all_datasets = load_manifest(args.config.manifest, args.config.dataset_id_blocklist_uri)
+    if len(all_datasets) == 0:
         logging.error("No H5AD files in the manifest (or we can't find the files)")
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
     if args.config.test_first_n is not None and args.config.test_first_n > 0:
         # Process the N smallest datasets
-        datasets = sorted(datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
+        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
+
+    else:
+        datasets = all_datasets
 
     # Stage all files
     stage_source_assets(datasets, args)
@@ -149,7 +154,15 @@ def accumulate_axes(
     n = 0
 
     with create_thread_pool_executor() as pool:
-        adata_iter = open_anndata(assets_path, datasets, need_X=False, backed="r")
+        adata_iter: Iterator[tuple[Dataset, AnnDataProxy]] = (
+            (
+                dataset,
+                open_anndata(
+                    assets_path, dataset, obs_column_names=CXG_OBS_COLUMNS_READ, var_column_names=CXG_VAR_COLUMNS_READ
+                ),
+            )
+            for dataset in datasets
+        )
         if args.config.multi_process:
             adata_iter = EagerIterator(adata_iter, pool)
 

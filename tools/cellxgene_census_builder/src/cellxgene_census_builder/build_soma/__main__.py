@@ -7,7 +7,7 @@ from datetime import datetime
 import attrs
 
 from ..build_state import CensusBuildArgs, CensusBuildConfig
-from ..util import log_process_resource_status, process_init
+from ..util import log_process_resource_status, process_init, start_resource_logger
 from .build_soma import build
 from .validate_soma import validate
 
@@ -27,6 +27,8 @@ def main() -> int:
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.working_dir), config=default_config)
     process_init(args)
     logging.info(args)
+
+    start_resource_logger()
 
     cc = 0
     if cli_args.subcommand == "build":

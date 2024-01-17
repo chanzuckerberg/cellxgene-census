@@ -23,9 +23,10 @@ from typing import (
 )
 
 import attrs
+import psutil
 
 from ..build_state import CensusBuildArgs
-from ..util import cpu_count, process_init
+from ..util import cpu_count, log_system_memory_status, process_init
 
 
 def _mp_config_checks() -> bool:
@@ -50,7 +51,7 @@ def _hard_process_cap(args: CensusBuildArgs, n_proc: int) -> int:
 
 def _default_worker_process_count(args: CensusBuildArgs) -> int:
     """Return the default worker process count, subject to configured limit."""
-    return _hard_process_cap(args, cpu_count() + 2)
+    return _hard_process_cap(args, cpu_count())
 
 
 def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
@@ -59,12 +60,21 @@ def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) 
     return min(n_workers, _default_worker_process_count(args))
 
 
-def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
+def create_process_pool_executor(
+    args: CensusBuildArgs,
+    max_workers: Optional[int] = None,
+    max_tasks_per_child: Optional[int] = None,
+) -> ProcessPoolExecutor:
     assert _mp_config_checks()
     if max_workers is None:
         max_workers = _default_worker_process_count(args)
-    logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
-    return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
+    max_workers = max(1, max_workers)
+    logging.debug(
+        f"create_process_pool_executor [max_workers={max_workers}, max_tasks_per_child={max_tasks_per_child}]"
+    )
+    return ProcessPoolExecutor(
+        max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=max_tasks_per_child
+    )
 
 
 def create_thread_pool_executor(max_workers: Optional[int] = None) -> ThreadPoolExecutor:
@@ -258,7 +268,7 @@ class _Scheduler(threading.Thread):
         else:
             assert not isinstance(result, BaseException)
             wi.future.set_result(result)
-        scheduler._release_resouces(wi)
+        scheduler._release_resources(wi)
 
     def _schedule_work(self, work: _WorkItem[Any]) -> None:
         """must hold lock"""
@@ -274,16 +284,17 @@ class _Scheduler(threading.Thread):
             work.fn, work.args, work.kwargs, callback=_work_item_done, error_callback=_work_item_error
         )
 
-    def _release_resouces(self, wi: _WorkItem[Any]) -> None:
+    def _release_resources(self, wi: _WorkItem[Any]) -> None:
         with self._condition:
             self.resources_in_use -= wi.resources
             self._condition.notify()
 
     def _debug_msg(self, msg: str) -> None:
+        log_system_memory_status()
         logging.debug(
             f"ResourcePoolProcessExecutor: {msg} ["
-            f"free={self.max_resources-self.resources_in_use} "
-            f"in_use={self.resources_in_use} "
+            f"free={self.max_resources-self.resources_in_use} ({100.*(self.max_resources-self.resources_in_use)/self.max_resources:2.1f}%), "
+            f"in-use={self.resources_in_use} ({100.*self.resources_in_use/self.max_resources:2.1f}%), "
             f"unsched={len(self._pending_work)}"
             "]"
         )
@@ -314,6 +325,8 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
             processes=max_workers, initializer=initializer, initargs=initargs, maxtasksperchild=max_tasks_per_child
         )
 
+        self.warn_on_resource_limit = int(psutil.virtual_memory().total / cpu_count())
+
         # create and start scheduler thread
         self.scheduler = _Scheduler(self, max_resources)
         self.scheduler.start()
@@ -323,6 +336,9 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         return self.process_pool._state not in ["RUN", "INIT", "CLOSE"]  # type: ignore[attr-defined]
 
     def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
+        if resources > self.warn_on_resource_limit:
+            logging.debug(f"ResourcePoolProcessExecutor: large job submitted fn={fn}, resources={resources}")
+
         f = Future[_T]()
         self.scheduler.submit(_WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs))
         return f
