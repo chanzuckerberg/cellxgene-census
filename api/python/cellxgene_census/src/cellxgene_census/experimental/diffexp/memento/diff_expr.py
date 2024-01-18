@@ -41,7 +41,7 @@ CUBE_LOGICAL_DIMS_OBS = [
 @timeit
 def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pl.DataFrame:
     tiledb_config = {
-        "soma.init_buffer_bytes": 2**31,
+        "py.init_buffer_bytes": 2**31,
     }
     with tiledb.open(os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config=tiledb_config) as estimators_array:
         estimators_df = pl.DataFrame(estimators_array.df[features, obs_groups_df.obs_group_joinid.values])
@@ -116,8 +116,8 @@ def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
 
 
 
-# @cprofile
-# @timeit_report
+@cprofile
+@timeit_report
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
