@@ -41,11 +41,13 @@ def _slice_index(prev: Index1D, new: Index1D, length: int) -> slice | npt.NDArra
             assert rng.stop >= 0
             return slice(rng.start, rng.stop, rng.step)
         else:
-            return np.arange(*prev.indices(length))[new]
+            idx = np.arange(*prev.indices(length))[new]
+            return idx if len(idx) else slice(0, 0)
     elif isinstance(prev, np.ndarray):
         if prev.dtype == np.bool_:  # a mask
             prev = np.nonzero(prev)[0].astype(np.int64)
-        return cast(npt.NDArray[np.int64], prev[new])
+        idx = cast(npt.NDArray[np.int64], prev[new])
+        return idx if len(idx) else slice(0, 0)
 
     # else confusion
     raise IndexError("Unsupported indexing types")

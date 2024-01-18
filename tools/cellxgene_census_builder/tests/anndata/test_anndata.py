@@ -185,6 +185,12 @@ def test_AnnDataProxy_X_types(census_build_args: CensusBuildArgs, X_conv: str, X
         # exercise multiple slices (slicing views)
         [slice(3), slice(2)],
         [np.array([True, True, True, False]), np.array([True, False, True])],
+        #
+        # empty slices
+        [slice(0, 0, 1)],
+        [np.array([], dtype=np.int64)],
+        [slice(0, 0, 1), np.array([], dtype=np.int64)],
+        [slice(0, 0, 1), np.array([], dtype=np.int64), slice(0, 0)],
     ],
 )
 def test_AnnDataProxy_indexing(census_build_args: CensusBuildArgs, slices: Any) -> None:
