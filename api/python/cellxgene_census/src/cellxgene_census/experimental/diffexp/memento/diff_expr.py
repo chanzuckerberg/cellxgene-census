@@ -74,13 +74,14 @@ def compute_all(
     # compute each feature group in parallel
     n_feature_groups = min(len(features), n_processes)
     feature_groups = [features.tolist() for features in np.array_split(np.array(features), n_feature_groups)]
-    print(
+    logging.debug(
         f"computing for {len(obs_groups_df)} obs groups ({obs_groups_df.n_obs.sum()} cells) and {len(features)} features using {n_feature_groups} processes, {len(features) // n_feature_groups} features/process"
     )
 
     # make treatment variable be in the first column of the design matrix
     variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
     design = pd.get_dummies(obs_groups_df[variables], drop_first=True, dtype=int)
+    logging.debug(f"design shape: {design.shape}")
 
     result_groups = ProcessPoolExecutor(max_workers=n_processes).map(
         partial(compute_for_features, cube_path, design, obs_groups_df[["obs_group_joinid", "n_obs"]]),
@@ -120,7 +121,9 @@ def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
-    print(f"computing for feature group {feature_group_key}, n={len(features)}, {features[0]}..{features[-1]}...")
+    logging.debug(
+        f"computing for feature group {feature_group_key}, n={len(features)}, {features[0]}..{features[-1]}..."
+    )
     estimators = query_estimators(cube_path, obs_groups_df, features)
 
     cell_counts = obs_groups_df["n_obs"].values
@@ -131,7 +134,7 @@ def compute_for_features(
         for feature_id, feature_estimators in estimators.group_by(["feature_id"])
     ]
 
-    print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
+    logging.debug(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
 
     return result
 
@@ -241,9 +244,11 @@ if __name__ == "__main__":
 
     filter_arg, treatment_arg, cube_path_arg, n_processes, n_features = sys.argv[1:6]
 
+    logging.getLogger().setLevel(logging.DEBUG)
+
     de_result = compute_all(
         cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features) if n_features else None
     )
 
     # Output DE result
-    print(de_result)
+    print(de_result[0])
