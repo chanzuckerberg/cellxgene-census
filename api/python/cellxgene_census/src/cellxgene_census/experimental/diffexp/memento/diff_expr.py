@@ -7,7 +7,7 @@ import pstats
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial, reduce
-from typing import List, Tuple, cast, Optional
+from typing import List, Optional, Tuple, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -15,8 +15,6 @@ import pandas as pd
 import polars as pl
 import scipy.stats as stats
 import tiledb
-from .profile import cprofile, timeit, timeit_report
-
 from sklearn.linear_model import LinearRegression
 
 OBS_GROUPS_ARRAY = "obs_groups"
@@ -37,8 +35,7 @@ CUBE_LOGICAL_DIMS_OBS = [
 ]
 
 
-
-@timeit
+# @timeit
 def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pl.DataFrame:
     tiledb_config = {
         "py.init_buffer_bytes": 2**31,
@@ -54,7 +51,7 @@ def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List
     return cast(pl.DataFrame, estimators_df)
 
 
-@timeit
+# @timeit
 def drop_invalid_data(estimators_df: pl.DataFrame) -> pl.DataFrame:
     drop_mask = (estimators_df["sem"] <= 0) | (estimators_df["sem"] >= estimators_df["mean"])
     if drop_mask.any():
@@ -63,16 +60,14 @@ def drop_invalid_data(estimators_df: pl.DataFrame) -> pl.DataFrame:
     return estimators_df
 
 
-def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: int, n_features: Optional[int] = None) -> Tuple[pd.DataFrame, pstats.Stats]:
+def compute_all(
+    cube_path: str, query_filter: str, treatment: str, n_processes: int, n_features: Optional[int] = None
+) -> Tuple[pd.DataFrame, pstats.Stats]:
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
 
         distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
-
-        # convert categorical columns to ints
-        for col in obs_groups_df.select_dtypes(include=["category"]).columns:
-            obs_groups_df[col] = obs_groups_df[col].cat.codes
 
     features = get_features(cube_path, n_features)
 
@@ -88,36 +83,40 @@ def compute_all(cube_path: str, query_filter: str, treatment: str, n_processes: 
     design = pd.get_dummies(obs_groups_df[variables], drop_first=True, dtype=int)
 
     result_groups = ProcessPoolExecutor(max_workers=n_processes).map(
-        partial(compute_for_features, cube_path, design, obs_groups_df), feature_groups, range(len(feature_groups))
+        partial(compute_for_features, cube_path, design, obs_groups_df[["obs_group_joinid", "n_obs"]]),
+        feature_groups,
+        range(len(feature_groups)),
     )
 
     results = list(result_groups)
     assert len(results)
 
-    if isinstance(results[0], tuple):
-        data = itertools.chain.from_iterable([r[0] for r in results])  # flatten results
+    # HACK: handle tuple-typed rests when @cprofile decorator is used on compute_for_features()
+    if isinstance(results[0], tuple):  # type:ignore
+        # flatten results
+        data = itertools.chain.from_iterable([r[0] for r in results])  # type: ignore[unreachable]
         stats = reduce(lambda s1, s2: s1.add(s2), [pstats.Stats(r[1]) if r[1] else pstats.Stats() for r in results])
     else:
         data = itertools.chain.from_iterable(results)  # flatten results
+        stats = pstats.Stats()
 
-    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), []
+    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
 
 
 def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
     with open(os.path.join(cube_path, FEATURE_IDS_FILE)) as f:
         feature_ids = json.load(f)
-        
+
     if n_features is not None:
         # for testing purposes, useful to limit the number of features
         rng = np.random.default_rng(1024)
         feature_ids = rng.choice(feature_ids, size=n_features, replace=False)
-        
-    return feature_ids
+
+    return cast(List[str], feature_ids)
 
 
-
-@cprofile
-@timeit_report
+# @cprofile
+# @timeit_report
 def compute_for_features(
     cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
@@ -129,7 +128,7 @@ def compute_for_features(
 
     result = [
         (feature_id, *compute_for_feature(cell_counts, design, feature_estimators, obs_group_joinids))  # type:ignore
-        for feature_id, feature_estimators in estimators.group_by(['feature_id'])
+        for feature_id, feature_estimators in estimators.group_by(["feature_id"])
     ]
 
     print(f"computed for feature group {feature_group_key}, {features[0]}..{features[-1]}")
@@ -137,12 +136,12 @@ def compute_for_features(
     return result
 
 
-@timeit
+# @timeit
 def compute_for_feature(
     cell_counts: npt.NDArray[np.float32],
     design: pd.DataFrame,
     estimators: pd.DataFrame,
-    obs_group_joinids: pd.DataFrame
+    obs_group_joinids: pd.DataFrame,
 ) -> Tuple[np.float32, np.float32, np.float32]:
     # ensure estimators are available for all obs groups (for when feature had no expression data for some obs groups)
     estimators = fill_missing_data(obs_group_joinids, estimators)
@@ -155,7 +154,7 @@ def compute_for_feature(
     return de_wls(X=design.values, y=lm, n=cell_counts, v=selm**2)
 
 
-@timeit
+# @timeit
 def transform_to_log_space(
     m: npt.NDArray[np.float32], sem: npt.NDArray[np.float32]
 ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
@@ -165,14 +164,18 @@ def transform_to_log_space(
     return lm, selm
 
 
-@timeit
+# @timeit
 def fill_missing_data(obs_group_joinids: pd.DataFrame, feature_estimators: pl.DataFrame) -> pl.DataFrame:
-    feature_estimators = pl.DataFrame(obs_group_joinids).join(feature_estimators[["obs_group_joinid", "mean", "sem"]], on="obs_group_joinid", how="left")
+    feature_estimators = pl.DataFrame(obs_group_joinids).join(
+        feature_estimators[["obs_group_joinid", "mean", "sem"]], on="obs_group_joinid", how="left"
+    )
 
-    return feature_estimators.with_columns(feature_estimators["mean"].fill_null(1e-3), feature_estimators["sem"].fill_null(1e-4))
+    return feature_estimators.with_columns(
+        feature_estimators["mean"].fill_null(1e-3), feature_estimators["sem"].fill_null(1e-4)
+    )
 
 
-@timeit
+# @timeit
 def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.NDArray[np.float32]) -> np.float32:
     # fit WLS using sample_weights
     WLS = LinearRegression()
@@ -183,7 +186,7 @@ def de_wls_fit(X: npt.NDArray[np.float32], y: npt.NDArray[np.float32], n: npt.ND
     return cast(np.float32, WLS.coef_[0])
 
 
-@timeit
+# @timeit
 def de_wls_stats(
     X: npt.NDArray[np.float32], v: npt.NDArray[np.float32], coef: np.float32
 ) -> Tuple[np.float32, np.float32]:
@@ -199,23 +202,22 @@ def de_wls_stats(
     return z, pv
 
 
-@timeit
-def de_wls_stats_pinv(m):
+# @timeit
+def de_wls_stats_pinv(m: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     return np.linalg.pinv(m)
 
 
-@timeit
-def de_wls_stats_matmul(W, X):
-    m = (X.T * W) @ X
-    return m
+# @timeit
+def de_wls_stats_matmul(W: npt.NDArray[np.float32], X: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+    return (X.T * W) @ X
 
 
-@timeit
-def de_wls_stats_W(v):
-    return (1/v) #.reshape((-1, 1))
+# @timeit
+def de_wls_stats_W(v: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+    return 1 / v
 
 
-@timeit
+# @timeit
 def de_wls(
     X: npt.NDArray[np.float32],
     y: npt.NDArray[np.float32],
@@ -239,9 +241,9 @@ if __name__ == "__main__":
 
     filter_arg, treatment_arg, cube_path_arg, n_processes, n_features = sys.argv[1:6]
 
-    de_result = compute_all(cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features) if n_features else None)
+    de_result = compute_all(
+        cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features) if n_features else None
+    )
 
     # Output DE result
-#    print(de_result)
-#    de_result.to_csv(csv_output_path_arg)
-
+    print(de_result)
