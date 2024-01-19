@@ -4,7 +4,11 @@ from tempfile import TemporaryDirectory
 import tiledb
 
 from tools.models.memento.src.estimators_cube_builder.cube_builder import build
-from tools.models.memento.src.estimators_cube_builder.cube_schema import CUBE_LOGICAL_DIMS
+from tools.models.memento.src.estimators_cube_builder.cube_schema import (
+    CUBE_LOGICAL_DIMS,
+    ESTIMATOR_NAMES,
+    OBS_LOGICAL_DIMS,
+)
 
 
 # @pytest.mark.skip(reason="Not ready for prime time")
@@ -36,12 +40,12 @@ def test_cube_builder_regression() -> None:
                 with tiledb.open(
                     path.join(pwd, "fixtures", "estimators-cube-human-tongue-2genes-ae091b2f")
                 ) as expected_cube:
-                    expected_cube_df = expected_cube.df[:].set_index(CUBE_LOGICAL_DIMS).sort_index()
+                    expected_cube_df = expected_cube.df[:].set_index(CUBE_LOGICAL_DIMS).sort_index()[ESTIMATOR_NAMES]
                     actual_cube_df = (
                         actual_obs_groups.df[:]
-                        .set_index("obs_group_joinid")
+                        .set_index("obs_group_joinid")[OBS_LOGICAL_DIMS]
                         .join(actual_estimators.df[:].set_index("obs_group_joinid"))
                         .set_index(CUBE_LOGICAL_DIMS)
-                        .sort_index()
+                        .sort_index()[ESTIMATOR_NAMES]
                     )
                     assert all(actual_cube_df == expected_cube_df)
