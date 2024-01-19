@@ -2,6 +2,7 @@ import os
 import sys
 
 import pyarrow as pa
+import tiledb
 import tiledbsoma as soma
 from somacore import AxisQuery
 
@@ -51,3 +52,8 @@ if __name__ == "__main__":
             var_query=AxisQuery(value_filter=var_value_filter),
         )
         subset_census(query, output_cube_path)
+
+    for array_uri in ["obs", "ms/RNA/var", "ms/RNA/X/raw"]:
+        uri = os.path.join(output_cube_path, array_uri)
+        tiledb.consolidate(uri)
+        tiledb.vacuum(uri)
