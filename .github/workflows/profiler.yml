@@ -1,0 +1,30 @@
+name: Profiler
+
+on:
+  pull_request:
+
+jobs:
+  run_profiler:
+    name: Run Profiler
+    runs-on: ubuntu-latest
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: PushDockerImage
+
+      - name: Run all tests
+        run: |
+          python -m venv profiler_env
+          source profiler_env/bin/activate
+          ./tools/perf_checker/perf_checker.sh
