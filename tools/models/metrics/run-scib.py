@@ -57,6 +57,9 @@ def class_mapper():
     class_dict = {i: mapper.get_label_from_id(mapper.get_top_high_level_term(i)) for i in cell_types}
     return class_dict
 
+class_dict = class_mapper()
+subclass_dict = subclass_mapper()
+
 
 def build_anndata_with_embeddings(
     embedding_uris: dict,
