@@ -9,6 +9,7 @@ import ontology_mapper
 import scanpy as sc
 import scib_metrics
 from cellxgene_census.experimental import get_embedding
+import pickle
 
 warnings.filterwarnings("ignore")
 
@@ -230,3 +231,9 @@ for tissue in tissues:
 
     all_bio[tissue] = metric_bio_results
     all_batch[tissue] = metric_batch_results
+
+with open('metrics_bio.pickle', 'wb') as fp:
+    pickle.dump(all_bio, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+with open('metrics_batch.pickle', 'wb') as fp:
+    pickle.dump(all_batch, fp, protocol=pickle.HIGHEST_PROTOCOL)
