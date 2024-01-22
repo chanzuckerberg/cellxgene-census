@@ -48,7 +48,7 @@ class _SOMAChunk:
     """
 
     obs: pd.DataFrame
-    X: scipy.matrix
+    X: scipy.sparse.spmatrix
     stats: "Stats"
 
     def __len__(self) -> int:
