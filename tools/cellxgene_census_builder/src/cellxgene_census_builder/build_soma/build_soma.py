@@ -110,10 +110,11 @@ def build(args: CensusBuildArgs) -> int:
 
 
 def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: List[Dataset], used_datasets: List[Dataset]) -> None:
-    unused_datasets = [d for d in all_datasets if d.dataset_id not in set(d.dataset_id for d in used_datasets)]
+    used_dataset_ids = set(d.dataset_id for d in used_datasets)
+    unused_datasets = [d for d in all_datasets if d.dataset_id not in used_dataset_ids]
     assert all(d.dataset_total_cell_count == 0 for d in unused_datasets)
     assert all(d.dataset_total_cell_count > 0 for d in used_datasets)
-    assert not (set(d.dataset_id for d in used_datasets) & set(d.dataset_id for d in unused_datasets))
+    assert used_dataset_ids.isdisjoint(set(d.dataset_id for d in unused_datasets))
 
     for d in unused_datasets:
         logger.debug(f"Removing unused H5AD {d.dataset_h5ad_path}")
