@@ -1,0 +1,110 @@
+---
+title: "Access CELLxGENE collaboration embeddings (scVI, Geneformer)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Access CELLxGENE collaboration embeddings (scVI, Geneformer)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+library(ggplot2)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+options(width = 88, max.print = 100)
+```
+
+This notebook demonstrates basic access to CELLxGENE collaboration embeddings of CELLxGENE Discover Census. Currently, embeddings from scVI and a fine-tuned Geneformer model are maintained by CELLxGENE Discover. There are other CELLxGENE-hosted embeddings contributed by the community to CELLxGENE Discover, find out more about these in the [Census model page](https://cellxgene.cziscience.com/census-models).
+
+**Contents**
+
+Querying cells and loading embeddings as:
+
+1. Seurat reductions
+2. Bioconductor SingleCellExperiment reductions
+3. sparseMatrix
+
+## Open Census
+
+```{r,warning=FALSE,message=FALSE}
+library("cellxgene.census")
+census <- open_soma(census_version = "2023-12-15")
+```
+
+## Load embeddings as Seurat reductions
+
+The high-level [`cellxgene.census::get_seurat()`](https://chanzuckerberg.github.io/cellxgene-census/r/reference/get_seurat.html) function can both query the Census and load embeddings into [dimensional reductions](https://satijalab.org/seurat/archive/v3.0/dim_reduction_vignette) of the Seurat object.
+
+Here we will ask for a Seurat object with the expression data for all human cells of `tissue_general` equal to `'central nervous system'`, along with the scVI and geneformer embeddings (`obsm_layers`).
+
+```{r,warning=FALSE,message=FALSE}
+library("Seurat")
+
+seurat_obj <- get_seurat(
+  census, 
+  organism = "homo_sapiens",
+  obs_value_filter = "tissue_general == 'central nervous system'",
+  obs_column_names = c("cell_type"),
+  obsm_layers = c("scvi","geneformer")
+)
+```
+
+With the embeddings stored as dimensional reductions on `seurat_obj`, we can take a quick look at the scVI embeddings in a 2D scatter plot via UMAP, colored by the Census `cell_type` annotations.
+
+```{r,warning=FALSE,message=FALSE,fig.width=7,fig.height=4}
+seurat_obj <- RunUMAP(
+  seurat_obj, 
+  reduction = "scvi",
+  dims=1:ncol(Embeddings(seurat_obj, "scvi"))
+)
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "cell_type") +
+  theme(legend.text = element_text(size = 8))
+```
+
+## Load embeddings as SingleCellExperiment reductions
+
+Similarly, [`cellxgene.census::get_single_cell_experiment()`](https://chanzuckerberg.github.io/cellxgene-census/r/reference/get_single_cell_experiment.html) can query the Census and store embeddings as dimensionality reduction results on a Bioconductor `SingleCellExperiment` object. 
+
+```{r,warning=FALSE,message=FALSE}
+library("SingleCellExperiment")
+sce_obj <- get_single_cell_experiment(
+  census, 
+  organism = "homo_sapiens",
+  obs_value_filter = "tissue_general == 'central nervous system'",
+  obs_column_names = c("cell_type"),
+  obsm_layers = c("scvi","geneformer")
+)
+```
+
+Then, we can view a UMAP of the Geneformer embeddings colored by `cell_type`.
+
+```{r,warning=FALSE,message=FALSE,fig.width=7,fig.height=4}
+sce_obj <- scater::runUMAP(sce_obj, dimred = "geneformer")
+scater::plotReducedDim(sce_obj, dimred = "UMAP", colour_by = "cell_type")
+```
+
+## Load embeddings as `sparseMatrix`
+
+Lastly, we can use a [SOMAExperimentAxisQuery](https://single-cell-data.github.io/TileDB-SOMA/reference/SOMAExperimentAxisQuery.html#method-read-) for lower-level access to the embeddings' numerical data. This can be more performant for some use cases that don't need the other features of Seurat or SingleCellExperiment.
+
+```{r,warning=FALSE,message=FALSE}
+query <- census$get("census_data")$get("homo_sapiens")$axis_query(
+  "RNA", obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue == 'tongue'")
+)
+embeddings <- query$to_sparse_matrix("obsm", "geneformer")
+str(embeddings)
+```
+
+Each row of the embeddings `sparseMatrix` provides the fine-tuned Geneformer model's 512-dimensional embedding vector for a cell, with the cell `soma_joinid`s in the row names. With different arguments, [`SOMAExperimentAxisQuery$to_sparse_matrix()`](https://single-cell-data.github.io/TileDB-SOMA/reference/SOMAExperimentAxisQuery.html#method-SOMAExperimentAxisQuery-to_sparse_matrix) can also be read the scVI embeddings or the expression data.
+
+Still lower-level access is available through [`SOMAExperimentAxisQuery$read()`](https://single-cell-data.github.io/TileDB-SOMA/reference/SOMAExperimentAxisQuery.html#method-read-), which streams Arrow tables. And other methods on `SOMAExperimentAxisQuery` can fetch metadata like `cell_type`:
+
+```{r}
+head(as.data.frame(query$obs(column_names = c("soma_joinid","cell_type"))$concat()))
+```
+
+The `SOMAExperimentAxisQuery` loads only what you ask for from the Census, unlike the high-level `get_seurat()` and `get_single_cell_experiment()` functions, which eagerly populate those objects based on your query.
+
+```{r}
+census$close()
+```

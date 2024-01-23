@@ -1,4 +1,6 @@
-<span style="background-color: #F6DDCC; color; font-size: 18px"> 🚨 A **normalized layer**, plus cell and gene **pre-calculated stats** are now available!  Find out more [here.](articles/2023/20231012-normalized_layer_precalc_stats.md)</span>
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: we’ve created a **centralized hub of models and embeddings** using Census data. [Check it out](https://cellxgene.cziscience.com/census-models)!
+
+ </span>
 
 # CZ CELLxGENE Discover Census
 
@@ -14,9 +16,11 @@ Get started:
 
 ![image](cellxgene_census_docsite_workflow.svg)
 
-## Citing the Census
+## Citing Census
 
-Please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
+To cite the project please follow the [citation guidelines](https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications) offered by CZ CELLxGENE Discover.
+
+To cite individual studies please refer to the tutorial [Generating citations for Census slices](notebooks/api_demo/census_citation_generation.ipynb).
 
 ## Census Capabilities
 

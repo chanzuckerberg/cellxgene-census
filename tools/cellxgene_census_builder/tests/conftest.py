@@ -27,7 +27,9 @@ GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
 NUM_DATASET = 2
 
 
-def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False) -> anndata.AnnData:
+def get_anndata(
+    organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False
+) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
     n_genes = len(gene_ids)
@@ -67,6 +69,8 @@ def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_c
             "sex": "test",
             "tissue": "test",
             "organism": "test",
+            "tissue_type": "test",
+            "observation_joinid": "test",
         },
         index=["1", "2", "3", "4"],
     )
@@ -80,6 +84,7 @@ def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_c
             "feature_is_filtered": False,
             "feature_name": "ERCC-00002 (spike-in control)",
             "feature_reference": organism.organism_ontology_term_id,
+            "feature_length": 1000,
         },
         index=feature_id,
     )
@@ -95,7 +100,7 @@ def get_h5ad(organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_c
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
     # Need to carefully set the corpora schema versions in order for tests to pass.
-    uns["schema_version"] = "3.1.0"  # type: ignore
+    uns["schema_version"] = "4.0.0"  # type: ignore
 
     return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
@@ -125,13 +130,14 @@ def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
     datasets = []
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
-            h5ad = get_h5ad(organism, GENE_IDS[i], no_zero_counts=True)
+            h5ad = get_anndata(organism, GENE_IDS[i], no_zero_counts=True)
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(
                 Dataset(
                     dataset_id=f"{organism.name}_{i}",
                     dataset_title=f"title_{organism.name}",
+                    citation="citation",
                     collection_id=f"id_{organism.name}",
                     collection_name=f"collection_{organism.name}",
                     dataset_asset_h5ad_uri="mock",
@@ -183,22 +189,6 @@ def setup(monkeypatch: MonkeyPatch, census_build_args: CensusBuildArgs) -> None:
     process_init(census_build_args)
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_0"], "tile", 2)
     monkeypatch.setitem(CENSUS_X_LAYERS_PLATFORM_CONFIG["raw"]["tiledb"]["create"]["dims"]["soma_dim_1"], "tile", 2)
-
-
-def has_aws_credentials() -> bool:
-    """Return true if we have AWS credentials"""
-    import botocore
-
-    try:
-        session = botocore.session.get_session()
-        client = session.create_client("sts")
-        id = client.get_caller_identity()
-        print(id)
-        return True
-    except botocore.exceptions.BotoCoreError as e:
-        print(e)
-
-    return False
 
 
 @pytest.fixture

@@ -4,19 +4,14 @@ import scipy.sparse as sparse
 import tiledbsoma as soma
 
 import cellxgene_census
+from cellxgene_census import get_default_soma_context
 from cellxgene_census.experimental.util import X_sparse_iter
 
 
 @pytest.fixture
 def small_mem_context() -> soma.SOMATileDBContext:
     """used to keep memory usage smaller for GHA runners."""
-    cfg = {
-        "tiledb_config": {
-            "soma.init_buffer_bytes": 32 * 1024**2,
-            "vfs.s3.no_sign_request": True,
-        },
-    }
-    return soma.SOMATileDBContext().replace(**cfg)
+    return get_default_soma_context(tiledb_config={"soma.init_buffer_bytes": 32 * 1024**2})
 
 
 @pytest.mark.experimental

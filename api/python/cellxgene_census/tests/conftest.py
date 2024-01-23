@@ -1,6 +1,8 @@
 import pytest
 import tiledbsoma as soma
 
+from cellxgene_census import get_default_soma_context
+
 TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
 
 
@@ -46,10 +48,4 @@ def pytest_configure(config: pytest.Config) -> None:
 @pytest.fixture
 def small_mem_context() -> soma.SOMATileDBContext:
     """used to keep memory usage smaller for GHA runners."""
-    cfg = {
-        "tiledb_config": {
-            "soma.init_buffer_bytes": 32 * 1024**2,
-            "vfs.s3.no_sign_request": True,
-        },
-    }
-    return soma.SOMATileDBContext().replace(**cfg)
+    return get_default_soma_context(tiledb_config={"soma.init_buffer_bytes": 32 * 1024**2})

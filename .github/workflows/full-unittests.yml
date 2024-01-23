@@ -1,0 +1,121 @@
+name: cellxgene_census package full unit tests
+
+# Run all unit tests, including those that are too expensive to run frequently.
+# This workflow requires a very large capacity runner, e.g., 1+TiB RAM, which is
+# currently available through self-hosted runners. These runners have no swap,
+# so an OOM will cause the workflow to fail with OOMKilled (exit code 137).
+#
+# By default, will install from `main` and run the latest acceptance tests in `main`.
+#
+#   gh workflow run full-unittests.yml
+#
+# You can run it against a branch with:
+#
+#   gh workflow run full-unittests.yml --ref _branch_name_
+#
+# The python (not R) job supports installing a specific `tiledbsoma` version, allowing
+# the test to run with any tiledbsoma version, including branches from the TileDB-SOMA
+# repo. For example, to test against the head of main, do:
+#
+#   gh workflow run full-unittests.yml \
+#      -f 'tiledbsoma_python_dependency=git+https://github.com/single-cell-data/TileDB-SOMA.git#egg=tiledbsoma&subdirectory=apis/python/'
+
+on:
+  schedule:
+    - cron: "0 1 * * 6" # every Saturday night, 1AM UTC
+
+  workflow_dispatch: # used for debugging or manual validation of a branch
+    inputs:
+      tiledbsoma_python_dependency:
+        # Accepts any package spec that pip understand, e.g.,
+        #   tiledbsoma==1.0
+        #   git+https://github.com/single-cell-data/TileDB-SOMA.git#egg=tiledbsoma&subdirectory=apis/python/
+        #   git+https://github.com/single-cell-data/TileDB-SOMA.git@release-1.6#egg=tiledbsoma&subdirectory=apis/python/
+        # or whatever...
+        description: "tiledbsoma package specified as pip requirement"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  py_unit_tests:
+    runs-on: single-cell-1tb-runner
+    timeout-minutes: 1440 # 24 hour timeout
+    strategy:
+      fail-fast: false # prevent this job from killing other jobs
+    steps:
+      - name: log system state
+        run: |
+          free
+          echo ---------
+          df -kh
+          echo ---------
+          lscpu
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+          cache: 'pip'
+          cache-dependency-path: |
+            api/**/pyproject.toml
+            api/**/requirements*.txt
+
+      - name: install python dependencies (including experimental)
+        run: |
+          python -m pip install -U pip setuptools setuptools_scm wheel
+          pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
+          pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          pip install './api/python/cellxgene_census/[experimental]'
+
+      - name: install tiledbsoma version override
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
+        run: |
+          # Due to a bug in the tiledbsoma setup, this must be installed editable, ie., `-e`.
+          # Filed as single-cell-data/TileDB-SOMA#1991
+          # PR https://github.com/single-cell-data/TileDB-SOMA/pull/1937 will resolve the
+          # issue and allow removal of `-e`
+          pip install -e '${{ github.event.inputs.tiledbsoma_python_dependency }}'
+
+      - name: pytest (--expensive --experimental)
+        run: |
+          echo '--------- tiledbsoma.show_package_version():'
+          python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
+          echo '--------- PIP package versions:'
+          pip freeze
+
+          PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
+
+  r_unit_tests:
+    runs-on: single-cell-1tb-runner
+    timeout-minutes: 1440 # 24 hour timeout
+    strategy:
+      fail-fast: false # prevent this job from killing other jobs
+    steps:
+      - name: log system state
+        run: |
+          free
+          echo ---------
+          df -kh
+          echo ---------
+          lscpu
+
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          extra-repositories: https://tiledb-inc.r-universe.dev, https://cloud.r-project.org, https://chanzuckerberg.r-universe.dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: ./api/r/cellxgene.census
+          extra-packages: any::rcmdcheck, any::remotes
+          cache: true
+
+      - name: testthat
+        run: |
+          Rscript -e 'remotes::install_local("./api/r/cellxgene.census")'
+          Rscript -e 'library("tiledbsoma"); tiledbsoma::show_package_versions()'
+          Rscript -e 'library("testthat"); library("cellxgene.census"); test_dir("./api/r/cellxgene.census/tests/")'
+          Rscript -e 'library("cellxgene.census"); library(testthat); test_file("./api/r/cellxgene.census/tests/testthat/acceptance-tests.R")'

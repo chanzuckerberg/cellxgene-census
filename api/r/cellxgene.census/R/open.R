@@ -57,7 +57,7 @@ resolve_census_locator <- function(census_version, uri, mirror) {
       "Unsupported provider for this mirror; try upgrading cellxgene.census package." = (mirror_info$provider %in% SUPPORTED_PROVIDERS)
     )
     if ("relative_uri" %in% names(description) && length(description$relative_uri) > 0) {
-      uri <- file.path(mirror_info$base_uri, relative_uri, fsep = "/")
+      uri <- file.path(mirror_info$base_uri, description$relative_uri, fsep = "/")
     } else {
       # release.json not yet updated for mirrors
       uri <- description$soma.uri

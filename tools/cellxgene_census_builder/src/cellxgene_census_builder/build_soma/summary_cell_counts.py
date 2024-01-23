@@ -6,10 +6,9 @@ import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .globals import CENSUS_SUMMARY_CELL_COUNTS_COLUMNS, CENSUS_SUMMARY_CELL_COUNTS_NAME
-from .util import (
-    anndata_ordered_bool_issue_853_workaround,
-)
+from .globals import CENSUS_SUMMARY_CELL_COUNTS_NAME, CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC
+
+logger = logging.getLogger(__name__)
 
 
 def create_census_summary_cell_counts(
@@ -18,7 +17,7 @@ def create_census_summary_cell_counts(
     """
     Save per-category counts as the census_summary_cell_counts SOMA dataframe
     """
-    logging.info("Creating census_summary_cell_counts")
+    logger.info("Creating census_summary_cell_counts")
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
         .drop(columns=["dataset_id"])
@@ -26,14 +25,13 @@ def create_census_summary_cell_counts(
         .agg({"unique_cell_count": "sum", "total_cell_count": "sum", "label": "first"})
     )
     df["soma_joinid"] = df.index.astype(np.int64)
+    df = CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC.recategoricalize(df)
 
-    df = anndata_ordered_bool_issue_853_workaround(df)
+    schema = CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC.to_arrow_schema(df)
 
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(
-        CENSUS_SUMMARY_CELL_COUNTS_NAME,
-        schema=pa.Schema.from_pandas(df, preserve_index=False),
-        index_column_names=["soma_joinid"],
+        CENSUS_SUMMARY_CELL_COUNTS_NAME, schema=schema, index_column_names=["soma_joinid"]
     ) as cell_counts:
         cell_counts.write(pa.Table.from_pandas(df, preserve_index=False))
 
@@ -43,8 +41,8 @@ def init_summary_counts_accumulator() -> pd.DataFrame:
         data={
             "dataset_id": pd.Series([], dtype=str),
             **{
-                name: pd.Series([], dtype=arrow_type.to_pandas_dtype())
-                for name, arrow_type in CENSUS_SUMMARY_CELL_COUNTS_COLUMNS.items()
+                field.name: pd.Series([], dtype=field.to_pandas_dtype(ignore_dict_type=True))  # type: ignore[arg-type]
+                for field in CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC.fields
             },
         }
     )
@@ -99,6 +97,7 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
                 columns="is_primary_data",
                 index=["organism", "ontology_term_id", "label"],
                 fill_value=0,
+                aggfunc="sum",  # noop: each element is unique. Necessary to prevent cast from int to float by default aggfunc (mean)
             )
         )
         if True not in counts:

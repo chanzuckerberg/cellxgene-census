@@ -6,7 +6,7 @@ import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
 
-from .globals import CENSUS_OBS_STATS_COLUMNS, CENSUS_VAR_STATS_COLUMNS
+from .globals import CENSUS_OBS_TABLE_SPEC, CENSUS_VAR_TABLE_SPEC
 
 
 def get_obs_stats(
@@ -23,15 +23,16 @@ def get_obs_stats(
         raw_mean_nnz = raw_sum / nnz
     raw_mean_nnz[~np.isfinite(raw_mean_nnz)] = 0.0
     raw_variance_nnz = _var(raw_X, axis=1, ddof=1)
-    n_measured_vars = np.full((raw_X.shape[0],), (raw_X.sum(axis=0, dtype=np.float64) > 0).sum(), dtype=np.int64)
 
     return pd.DataFrame(
         data={
-            "raw_sum": raw_sum.astype(CENSUS_OBS_STATS_COLUMNS["raw_sum"].to_pandas_dtype()),
-            "nnz": nnz.astype(CENSUS_OBS_STATS_COLUMNS["nnz"].to_pandas_dtype()),
-            "raw_mean_nnz": raw_mean_nnz.astype(CENSUS_OBS_STATS_COLUMNS["raw_mean_nnz"].to_pandas_dtype()),
-            "raw_variance_nnz": raw_variance_nnz.astype(CENSUS_OBS_STATS_COLUMNS["raw_variance_nnz"].to_pandas_dtype()),
-            "n_measured_vars": n_measured_vars.astype(CENSUS_OBS_STATS_COLUMNS["n_measured_vars"].to_pandas_dtype()),
+            "raw_sum": raw_sum.astype(CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()),
+            "nnz": nnz.astype(CENSUS_OBS_TABLE_SPEC.field("nnz").to_pandas_dtype()),
+            "raw_mean_nnz": raw_mean_nnz.astype(CENSUS_OBS_TABLE_SPEC.field("raw_mean_nnz").to_pandas_dtype()),
+            "raw_variance_nnz": raw_variance_nnz.astype(
+                CENSUS_OBS_TABLE_SPEC.field("raw_variance_nnz").to_pandas_dtype()
+            ),
+            "n_measured_vars": -1,  # placeholder - actual stat calculated from presence matrix
         }
     )
 
@@ -48,12 +49,9 @@ def get_var_stats(
     else:
         raise NotImplementedError(f"get_var_stats: unsupported array type {type(raw_X)}")
 
-    n_measured_obs = raw_X.shape[0] * (raw_X.sum(axis=0, dtype=np.float64) > 0).A1
-
     return pd.DataFrame(
         data={
-            "nnz": nnz.astype(CENSUS_VAR_STATS_COLUMNS["nnz"].to_pandas_dtype()),
-            "n_measured_obs": n_measured_obs.astype(CENSUS_VAR_STATS_COLUMNS["n_measured_obs"].to_pandas_dtype()),
+            "nnz": nnz.astype(CENSUS_VAR_TABLE_SPEC.field("nnz").to_pandas_dtype()),
         }
     )
 

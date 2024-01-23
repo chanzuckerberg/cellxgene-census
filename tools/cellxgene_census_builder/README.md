@@ -10,6 +10,8 @@ build package.
 Please see the top-level [README](../../README.md) for more information on the Census and
 using the Census data.
 
+*NOTE:* this package currently requires Python 3.11, and is only tested on Linux.
+
 ## Overview
 
 This package contains sub-modules, each of which automate elements of the Census build and release process.
@@ -19,7 +21,7 @@ with standard defaults.
 The top-level build can be invoked as follows:
 
 - Create a working directory, e.g., `census-build` or equivalent.
-- If any configuration defaults need to be overridden, create a `config.yaml` in the working directory containing the default overrides. _NOTE:_ by default you do not need to create a `config.yaml` file -- the defaults are appropriate to build the full Census.
+- If any configuration defaults need to be overridden, create a `config.yaml` in the working directory containing the default overrides. *NOTE:* by default you do not need to create a `config.yaml` file -- the defaults are appropriate to build the full Census.
 - Run the build as `python -m cellxgene_census_builder your-working_dir`
 
 This will perform four steps (more will be added the future):
@@ -55,7 +57,7 @@ You will need:
 
 - Linux - known to work on Ubuntu 20 and 22, and should work fine on most other (modern) Linux distros
 - Docker - [primary installation instructions](https://docs.docker.com/engine/install/ubuntu/#installation-methods) and [important post-install configuration](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-- Python 3.9+
+- Python 3.11
 
 ### Build & run
 
@@ -66,7 +68,7 @@ cd tools/cellxgene_census_builder
 make image
 ```
 
-To use the container to build the _full_ census, with default options, pick a working directory (e.g., /tmp/census-build), and:
+To use the container to build the *full* census, with default options, pick a working directory (e.g., /tmp/census-build), and:
 
 ```shell
 mkdir /tmp/census-build
@@ -141,7 +143,7 @@ b) creating a smaller "Census" from a user-provided list of files (a "manifest")
 
 #### Mode (a) - creating the full Census from the entire CELLxGENE (public) corpus:
 
-- On a large-memory machine with _ample_ free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
+- On a large-memory machine with *ample* free (local) disk (eg, 3/4 TB or more) and swap (1 TB or more)
 - To create a Census at `<census_path>`, execute:
   > $ python -m cellxgene_census_builder -mp --max-workers 12 <census_path> build
 - Tips:

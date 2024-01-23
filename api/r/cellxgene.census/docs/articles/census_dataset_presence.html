@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Genes measured in each cell (dataset presence matrix)">
 <meta property="og:description" content="cellxgene.census">
@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,9 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
+    <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
     <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
     <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
@@ -58,9 +61,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
     <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
     <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
     <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
   </div>
 </li>
       </ul>
@@ -82,9 +87,7 @@
   </div>
 </nav><div class="container template-article">
 
-
-
-<script src="census_dataset_presence_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+<div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Genes measured in each cell (dataset presence matrix)</h1>
             
@@ -132,71 +135,78 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">datasets_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">datasets_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    soma_joinid                        collection_id</span></span>
-<span><span class="co">#&gt; 1            0 e2c257e7-6f79-487c-b81c-39451cd4ab3c</span></span>
-<span><span class="co">#&gt; 2            1 e2c257e7-6f79-487c-b81c-39451cd4ab3c</span></span>
-<span><span class="co">#&gt; 3            2 e2c257e7-6f79-487c-b81c-39451cd4ab3c</span></span>
-<span><span class="co">#&gt; 4            3 f7cecffa-00b4-4560-a29a-8ad626b8ee08</span></span>
-<span><span class="co">#&gt; 5            4 3f50314f-bdc9-40c6-8e4a-b0901ebfbe4c</span></span>
-<span><span class="co">#&gt; 6            5 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 7            6 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 8            7 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 9            8 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 10           9 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 11          10 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 12          11 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt;                                                                                                                             collection_name</span></span>
-<span><span class="co">#&gt; 1                                                                      Spatial multiomics map of trophoblast development in early pregnancy</span></span>
-<span><span class="co">#&gt; 2                                                                      Spatial multiomics map of trophoblast development in early pregnancy</span></span>
-<span><span class="co">#&gt; 3                                                                      Spatial multiomics map of trophoblast development in early pregnancy</span></span>
-<span><span class="co">#&gt; 4                                       Mapping single-cell transcriptomes in the intra-tumoral and associated territories of kidney cancer</span></span>
-<span><span class="co">#&gt; 5  Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
-<span><span class="co">#&gt; 6                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 7                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 8                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 9                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 10                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 11                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 12                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt;                 collection_doi                           dataset_id</span></span>
-<span><span class="co">#&gt; 1   10.1038/s41586-023-05869-0 f171db61-e57e-4535-a06a-35d8b6ef8f2b</span></span>
-<span><span class="co">#&gt; 2   10.1038/s41586-023-05869-0 ecf2e08e-2032-4a9e-b466-b65b395f4a02</span></span>
-<span><span class="co">#&gt; 3   10.1038/s41586-023-05869-0 74cff64f-9da9-4b2a-9b3b-8a04a1598040</span></span>
-<span><span class="co">#&gt; 4  10.1016/j.ccell.2022.11.001 5af90777-6760-4003-9dba-8f945fec6fdf</span></span>
-<span><span class="co">#&gt; 5  10.1016/j.ccell.2021.03.007 bd65a70f-b274-4133-b9dd-0d1431b6af34</span></span>
-<span><span class="co">#&gt; 6      10.1126/science.abl4896 ff45e623-7f5f-46e3-b47d-56be0341f66b</span></span>
-<span><span class="co">#&gt; 7      10.1126/science.abl4896 f01bdd17-4902-40f5-86e3-240d66dd2587</span></span>
-<span><span class="co">#&gt; 8      10.1126/science.abl4896 e6a11140-2545-46bc-929e-da243eed2cae</span></span>
-<span><span class="co">#&gt; 9      10.1126/science.abl4896 e5c63d94-593c-4338-a489-e1048599e751</span></span>
-<span><span class="co">#&gt; 10     10.1126/science.abl4896 d8732da6-8d1d-42d9-b625-f2416c30054b</span></span>
-<span><span class="co">#&gt; 11     10.1126/science.abl4896 d77ec7d6-ef2e-49d6-9e79-05b7f8881484</span></span>
-<span><span class="co">#&gt; 12     10.1126/science.abl4896 cee11228-9f0b-4e57-afe2-cfe15ee56312</span></span>
-<span><span class="co">#&gt;                                                                                                                               dataset_title</span></span>
-<span><span class="co">#&gt; 1                                                                                                                    donor_p13_trophoblasts</span></span>
-<span><span class="co">#&gt; 2                                                                                                                   All donors trophoblasts</span></span>
-<span><span class="co">#&gt; 3                                                                                                      All donors all cell states (in vivo)</span></span>
-<span><span class="co">#&gt; 4                                                                      Single-cell transcriptomic datasets of Renal cell carcinoma patients</span></span>
-<span><span class="co">#&gt; 5  Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
-<span><span class="co">#&gt; 6                                                                                                                 Tabula Sapiens - Pancreas</span></span>
-<span><span class="co">#&gt; 7                                                                                                           Tabula Sapiens - Salivary_Gland</span></span>
-<span><span class="co">#&gt; 8                                                                                                                    Tabula Sapiens - Heart</span></span>
-<span><span class="co">#&gt; 9                                                                                                                  Tabula Sapiens - Bladder</span></span>
-<span><span class="co">#&gt; 10                                                                                                                 Tabula Sapiens - Trachea</span></span>
-<span><span class="co">#&gt; 11                                                                                                                Tabula Sapiens - Prostate</span></span>
-<span><span class="co">#&gt; 12                                                                                                                  Tabula Sapiens - Spleen</span></span>
+<span><span class="co">#&gt; 1            0 4dca242c-d302-4dba-a68f-4c61e7bad553</span></span>
+<span><span class="co">#&gt; 2            1 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 3            2 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 4            3 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 5            4 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 6            5 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 7            6 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 8            7 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 9            8 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 10           9 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 11          10 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt;                                                                       collection_name</span></span>
+<span><span class="co">#&gt; 1                Comparative transcriptomics reveals human-specific cortical features</span></span>
+<span><span class="co">#&gt; 2  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 3  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 4  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 5  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 6  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 7  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 8  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 9  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 10 Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 11 Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt;             collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 1  10.1126/science.ade9516 2bdd3a2c-2ff4-4314-adf3-8a06b797a33a</span></span>
+<span><span class="co">#&gt; 2  10.1126/science.adf6812 f5b0810c-1664-4a62-ad06-be1d9964aa8b</span></span>
+<span><span class="co">#&gt; 3  10.1126/science.adf6812 e4ddac12-f48f-4455-8e8d-c2a48a683437</span></span>
+<span><span class="co">#&gt; 4  10.1126/science.adf6812 e2808a6e-e2ea-41b9-b38c-4a08f1677f02</span></span>
+<span><span class="co">#&gt; 5  10.1126/science.adf6812 d01c9dff-abd1-4825-bf30-2eb2ba74597e</span></span>
+<span><span class="co">#&gt; 6  10.1126/science.adf6812 c3aa4f95-7a18-4a7d-8dd8-ca324d714363</span></span>
+<span><span class="co">#&gt; 7  10.1126/science.adf6812 be401db3-d732-408a-b0c4-71af0458b8ab</span></span>
+<span><span class="co">#&gt; 8  10.1126/science.adf6812 a5d5c529-8a1f-40b5-bda3-35208970070d</span></span>
+<span><span class="co">#&gt; 9  10.1126/science.adf6812 9c63201d-bfd9-41a8-bbbc-18d947556f3d</span></span>
+<span><span class="co">#&gt; 10 10.1126/science.adf6812 93cb76aa-a84b-4a92-8e6c-66a914e26d4c</span></span>
+<span><span class="co">#&gt; 11 10.1126/science.adf6812 8d1dd010-5cbc-43fb-83f8-e0de8e8517da</span></span>
+<span><span class="co">#&gt;                      dataset_version_id</span></span>
+<span><span class="co">#&gt; 1  7eb7f2fd-fd74-4c99-863c-97836415652e</span></span>
+<span><span class="co">#&gt; 2  d4427196-7876-4bdd-a929-ae4d177ec776</span></span>
+<span><span class="co">#&gt; 3  3280113b-7148-4a3e-98d4-015f443aab8a</span></span>
+<span><span class="co">#&gt; 4  dc092185-3b8e-4fcb-ae21-1dc106d683ac</span></span>
+<span><span class="co">#&gt; 5  c4959ded-83dc-4442-aac7-9a59bdb47801</span></span>
+<span><span class="co">#&gt; 6  0476ef54-aefe-4754-b0e9-d9fcd75adff4</span></span>
+<span><span class="co">#&gt; 7  ee027704-72aa-4195-a467-0754db1ed65d</span></span>
+<span><span class="co">#&gt; 8  d47c0742-cea2-46c1-9e72-4d479214041c</span></span>
+<span><span class="co">#&gt; 9  8b09695a-1426-4867-961e-c40a1fbcc2da</span></span>
+<span><span class="co">#&gt; 10 98ad7381-f464-4f49-b850-5321b4f98be6</span></span>
+<span><span class="co">#&gt; 11 c56683d2-452a-45dc-b402-35397e27e325</span></span>
+<span><span class="co">#&gt;                                           dataset_title</span></span>
+<span><span class="co">#&gt; 1                               Human: Great apes study</span></span>
+<span><span class="co">#&gt; 2                       Dissection: Angular gyrus (AnG)</span></span>
+<span><span class="co">#&gt; 3                Supercluster: CGE-derived interneurons</span></span>
+<span><span class="co">#&gt; 4               Dissection: Primary auditory cortex(A1)</span></span>
+<span><span class="co">#&gt; 5  Supercluster: Deep layer (non-IT) excitatory neurons</span></span>
+<span><span class="co">#&gt; 6        Supercluster: IT-projecting excitatory neurons</span></span>
+<span><span class="co">#&gt; 7           Dissection: Anterior cingulate cortex (ACC)</span></span>
+<span><span class="co">#&gt; 8               Human Multiple Cortical Areas SMART-seq</span></span>
+<span><span class="co">#&gt; 9                Supercluster: MGE-derived interneurons</span></span>
+<span><span class="co">#&gt; 10        Dissection: Primary somatosensory cortex (S1)</span></span>
+<span><span class="co">#&gt; 11                Dissection: Primary visual cortex(V1)</span></span>
 <span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 1  f171db61-e57e-4535-a06a-35d8b6ef8f2b.h5ad                    31497</span></span>
-<span><span class="co">#&gt; 2  ecf2e08e-2032-4a9e-b466-b65b395f4a02.h5ad                    67070</span></span>
-<span><span class="co">#&gt; 3  74cff64f-9da9-4b2a-9b3b-8a04a1598040.h5ad                   286326</span></span>
-<span><span class="co">#&gt; 4  5af90777-6760-4003-9dba-8f945fec6fdf.h5ad                   270855</span></span>
-<span><span class="co">#&gt; 5  bd65a70f-b274-4133-b9dd-0d1431b6af34.h5ad                   167283</span></span>
-<span><span class="co">#&gt; 6  ff45e623-7f5f-46e3-b47d-56be0341f66b.h5ad                    13497</span></span>
-<span><span class="co">#&gt; 7  f01bdd17-4902-40f5-86e3-240d66dd2587.h5ad                    27199</span></span>
-<span><span class="co">#&gt; 8  e6a11140-2545-46bc-929e-da243eed2cae.h5ad                    11505</span></span>
-<span><span class="co">#&gt; 9  e5c63d94-593c-4338-a489-e1048599e751.h5ad                    24583</span></span>
-<span><span class="co">#&gt; 10 d8732da6-8d1d-42d9-b625-f2416c30054b.h5ad                     9522</span></span>
-<span><span class="co">#&gt; 11 d77ec7d6-ef2e-49d6-9e79-05b7f8881484.h5ad                    16375</span></span>
-<span><span class="co">#&gt; 12 cee11228-9f0b-4e57-afe2-cfe15ee56312.h5ad                    34004</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 581 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  2bdd3a2c-2ff4-4314-adf3-8a06b797a33a.h5ad                   156285</span></span>
+<span><span class="co">#&gt; 2  f5b0810c-1664-4a62-ad06-be1d9964aa8b.h5ad                   110752</span></span>
+<span><span class="co">#&gt; 3  e4ddac12-f48f-4455-8e8d-c2a48a683437.h5ad                   129495</span></span>
+<span><span class="co">#&gt; 4  e2808a6e-e2ea-41b9-b38c-4a08f1677f02.h5ad                   139054</span></span>
+<span><span class="co">#&gt; 5  d01c9dff-abd1-4825-bf30-2eb2ba74597e.h5ad                    92969</span></span>
+<span><span class="co">#&gt; 6  c3aa4f95-7a18-4a7d-8dd8-ca324d714363.h5ad                   638941</span></span>
+<span><span class="co">#&gt; 7  be401db3-d732-408a-b0c4-71af0458b8ab.h5ad                   135462</span></span>
+<span><span class="co">#&gt; 8  a5d5c529-8a1f-40b5-bda3-35208970070d.h5ad                    49417</span></span>
+<span><span class="co">#&gt; 9  9c63201d-bfd9-41a8-bbbc-18d947556f3d.h5ad                   185477</span></span>
+<span><span class="co">#&gt; 10 93cb76aa-a84b-4a92-8e6c-66a914e26d4c.h5ad                   153159</span></span>
+<span><span class="co">#&gt; 11 8d1dd010-5cbc-43fb-83f8-e0de8e8517da.h5ad                   241077</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 640 rows ]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fetching-the-dataset-presence-matrix">Fetching the dataset presence matrix<a class="anchor" aria-label="anchor" href="#fetching-the-dataset-presence-matrix"></a>
@@ -211,33 +221,24 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human_rna</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    soma_joinid      feature_id feature_name feature_length</span></span>
-<span><span class="co">#&gt; 1            0 ENSG00000121410         A1BG           3999</span></span>
-<span><span class="co">#&gt; 2            1 ENSG00000268895     A1BG-AS1           3374</span></span>
-<span><span class="co">#&gt; 3            2 ENSG00000148584         A1CF           9603</span></span>
-<span><span class="co">#&gt; 4            3 ENSG00000175899          A2M           6318</span></span>
-<span><span class="co">#&gt; 5            4 ENSG00000245105      A2M-AS1           2948</span></span>
-<span><span class="co">#&gt; 6            5 ENSG00000166535        A2ML1           7156</span></span>
-<span><span class="co">#&gt; 7            6 ENSG00000256661    A2ML1-AS1            452</span></span>
-<span><span class="co">#&gt; 8            7 ENSG00000184389      A3GALT2           1023</span></span>
-<span><span class="co">#&gt; 9            8 ENSG00000128274       A4GALT           3358</span></span>
-<span><span class="co">#&gt; 10           9 ENSG00000118017        A4GNT           1779</span></span>
-<span><span class="co">#&gt; 11          10 ENSG00000094914         AAAS           4727</span></span>
-<span><span class="co">#&gt; 12          11 ENSG00000081760         AACS          16039</span></span>
-<span><span class="co">#&gt; 13          12 ENSG00000114771        AADAC           1632</span></span>
-<span><span class="co">#&gt; 14          13 ENSG00000197953      AADACL2           5071</span></span>
-<span><span class="co">#&gt; 15          14 ENSG00000242908  AADACL2-AS1            635</span></span>
-<span><span class="co">#&gt; 16          15 ENSG00000188984      AADACL3           4055</span></span>
-<span><span class="co">#&gt; 17          16 ENSG00000204518      AADACL4           2027</span></span>
-<span><span class="co">#&gt; 18          17 ENSG00000109576        AADAT           2970</span></span>
-<span><span class="co">#&gt; 19          18 ENSG00000158122       PRXL2C           3098</span></span>
-<span><span class="co">#&gt; 20          19 ENSG00000103591        AAGAB           4138</span></span>
-<span><span class="co">#&gt; 21          20 ENSG00000115977         AAK1          24843</span></span>
-<span><span class="co">#&gt; 22          21 ENSG00000087884        AAMDC           1943</span></span>
-<span><span class="co">#&gt; 23          22 ENSG00000127837         AAMP           3055</span></span>
-<span><span class="co">#&gt; 24          23 ENSG00000129673        AANAT           2156</span></span>
-<span><span class="co">#&gt; 25          24 ENSG00000131043         AAR2           7291</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 60639 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt;    soma_joinid      feature_id feature_name feature_length      nnz n_measured_obs</span></span>
+<span><span class="co">#&gt; 1            0 ENSG00000233576      HTR3C2P           1057    69370       19581263</span></span>
+<span><span class="co">#&gt; 2            1 ENSG00000121410         A1BG           3999  5640476       62641311</span></span>
+<span><span class="co">#&gt; 3            2 ENSG00000268895     A1BG-AS1           3374  3071864       61946057</span></span>
+<span><span class="co">#&gt; 4            3 ENSG00000148584         A1CF           9603   734347       58195911</span></span>
+<span><span class="co">#&gt; 5            4 ENSG00000175899          A2M           6318  7894261       62704378</span></span>
+<span><span class="co">#&gt; 6            5 ENSG00000245105      A2M-AS1           2948  1637794       62086816</span></span>
+<span><span class="co">#&gt; 7            6 ENSG00000166535        A2ML1           7156  2156616       60911688</span></span>
+<span><span class="co">#&gt; 8            7 ENSG00000256069        A2MP1           4657   835384       23554778</span></span>
+<span><span class="co">#&gt; 9            8 ENSG00000184389      A3GALT2           1023   439067       53780311</span></span>
+<span><span class="co">#&gt; 10           9 ENSG00000128274       A4GALT           3358  2432348       62706770</span></span>
+<span><span class="co">#&gt; 11          10 ENSG00000118017        A4GNT           1779    52430       56117399</span></span>
+<span><span class="co">#&gt; 12          11 ENSG00000265544         AA06            632   220755       22545140</span></span>
+<span><span class="co">#&gt; 13          12 ENSG00000081760         AACS          16039 11280800       62842909</span></span>
+<span><span class="co">#&gt; 14          13 ENSG00000250420       AACSP1           3380   211588       22831831</span></span>
+<span><span class="co">#&gt; 15          14 ENSG00000114771        AADAC           1632   552258       54941618</span></span>
+<span><span class="co">#&gt; 16          15 ENSG00000188984      AADACL3           4055    24626       43074608</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 60648 rows ]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="identifying-genes-measured-in-a-specific-dataset">Identifying genes measured in a specific dataset<a class="anchor" aria-label="anchor" href="#identifying-genes-measured-in-a-specific-dataset"></a>
@@ -283,71 +284,78 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co"># From the datasets dataframe, slice out the datasets which have a joinid in the list</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">datasets_df</span><span class="op">[</span><span class="va">dataset_joinids</span>, <span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    soma_joinid                        collection_id</span></span>
-<span><span class="co">#&gt; 5            4 3f50314f-bdc9-40c6-8e4a-b0901ebfbe4c</span></span>
-<span><span class="co">#&gt; 6            5 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 7            6 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 8            7 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 9            8 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 11          10 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 12          11 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 14          13 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 15          14 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 19          18 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 20          19 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
-<span><span class="co">#&gt; 21          20 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 63          62 3f50314f-bdc9-40c6-8e4a-b0901ebfbe4c</span></span>
+<span><span class="co">#&gt; 64          63 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 65          64 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 66          65 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 67          66 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 69          68 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 70          69 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 72          71 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 73          72 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 77          76 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 78          77 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
 <span><span class="co">#&gt;                                                                                                                             collection_name</span></span>
-<span><span class="co">#&gt; 5  Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
-<span><span class="co">#&gt; 6                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 7                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 8                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 9                                                                                                                            Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 11                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 12                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 14                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 15                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 19                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 20                                                                                                                           Tabula Sapiens</span></span>
-<span><span class="co">#&gt; 21                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 63 Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
+<span><span class="co">#&gt; 64                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 65                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 66                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 67                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 69                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 70                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 72                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 73                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 77                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 78                                                                                                                           Tabula Sapiens</span></span>
 <span><span class="co">#&gt;                 collection_doi                           dataset_id</span></span>
-<span><span class="co">#&gt; 5  10.1016/j.ccell.2021.03.007 bd65a70f-b274-4133-b9dd-0d1431b6af34</span></span>
-<span><span class="co">#&gt; 6      10.1126/science.abl4896 ff45e623-7f5f-46e3-b47d-56be0341f66b</span></span>
-<span><span class="co">#&gt; 7      10.1126/science.abl4896 f01bdd17-4902-40f5-86e3-240d66dd2587</span></span>
-<span><span class="co">#&gt; 8      10.1126/science.abl4896 e6a11140-2545-46bc-929e-da243eed2cae</span></span>
-<span><span class="co">#&gt; 9      10.1126/science.abl4896 e5c63d94-593c-4338-a489-e1048599e751</span></span>
-<span><span class="co">#&gt; 11     10.1126/science.abl4896 d77ec7d6-ef2e-49d6-9e79-05b7f8881484</span></span>
-<span><span class="co">#&gt; 12     10.1126/science.abl4896 cee11228-9f0b-4e57-afe2-cfe15ee56312</span></span>
-<span><span class="co">#&gt; 14     10.1126/science.abl4896 a2d4d33e-4c62-4361-b80a-9be53d2e50e8</span></span>
-<span><span class="co">#&gt; 15     10.1126/science.abl4896 a0754256-f44b-4c4a-962c-a552e47d3fdc</span></span>
-<span><span class="co">#&gt; 19     10.1126/science.abl4896 6d41668c-168c-4500-b06a-4674ccf3e19d</span></span>
-<span><span class="co">#&gt; 20     10.1126/science.abl4896 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c</span></span>
-<span><span class="co">#&gt; 21     10.1126/science.abl4896 55cf0ea3-9d2b-4294-871e-bb4b49a79fc7</span></span>
+<span><span class="co">#&gt; 63 10.1016/j.ccell.2021.03.007 bd65a70f-b274-4133-b9dd-0d1431b6af34</span></span>
+<span><span class="co">#&gt; 64     10.1126/science.abl4896 ff45e623-7f5f-46e3-b47d-56be0341f66b</span></span>
+<span><span class="co">#&gt; 65     10.1126/science.abl4896 f01bdd17-4902-40f5-86e3-240d66dd2587</span></span>
+<span><span class="co">#&gt; 66     10.1126/science.abl4896 e6a11140-2545-46bc-929e-da243eed2cae</span></span>
+<span><span class="co">#&gt; 67     10.1126/science.abl4896 e5c63d94-593c-4338-a489-e1048599e751</span></span>
+<span><span class="co">#&gt; 69     10.1126/science.abl4896 d77ec7d6-ef2e-49d6-9e79-05b7f8881484</span></span>
+<span><span class="co">#&gt; 70     10.1126/science.abl4896 cee11228-9f0b-4e57-afe2-cfe15ee56312</span></span>
+<span><span class="co">#&gt; 72     10.1126/science.abl4896 a2d4d33e-4c62-4361-b80a-9be53d2e50e8</span></span>
+<span><span class="co">#&gt; 73     10.1126/science.abl4896 a0754256-f44b-4c4a-962c-a552e47d3fdc</span></span>
+<span><span class="co">#&gt; 77     10.1126/science.abl4896 6d41668c-168c-4500-b06a-4674ccf3e19d</span></span>
+<span><span class="co">#&gt; 78     10.1126/science.abl4896 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c</span></span>
+<span><span class="co">#&gt;                      dataset_version_id</span></span>
+<span><span class="co">#&gt; 63 71815674-a8cf-4add-95dd-c5d5d1631597</span></span>
+<span><span class="co">#&gt; 64 0b29f4ce-5e72-4356-b74b-b54714979234</span></span>
+<span><span class="co">#&gt; 65 bd13c169-af97-4d8f-ba45-7588808c2e48</span></span>
+<span><span class="co">#&gt; 66 47615a3d-0a9f-4a78-88ef-5cce2a84637d</span></span>
+<span><span class="co">#&gt; 67 ac7714f0-dce2-40ba-9912-324de6c9a77f</span></span>
+<span><span class="co">#&gt; 69 c7679ec2-652d-437a-bded-3ec2344829e4</span></span>
+<span><span class="co">#&gt; 70 f89fa18f-c32b-4bae-9511-1a4d18f200e1</span></span>
+<span><span class="co">#&gt; 72 37ada0d2-9970-4ff2-8bcd-41e80ab6e081</span></span>
+<span><span class="co">#&gt; 73 1cda78aa-f0d9-4d50-96bf-8bc309318802</span></span>
+<span><span class="co">#&gt; 77 5297a910-453f-4e3f-af16-e18fd5a79090</span></span>
+<span><span class="co">#&gt; 78 b783b036-c837-4290-a07d-f6b79a301f59</span></span>
 <span><span class="co">#&gt;                                                                                                                               dataset_title</span></span>
-<span><span class="co">#&gt; 5  Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
-<span><span class="co">#&gt; 6                                                                                                                 Tabula Sapiens - Pancreas</span></span>
-<span><span class="co">#&gt; 7                                                                                                           Tabula Sapiens - Salivary_Gland</span></span>
-<span><span class="co">#&gt; 8                                                                                                                    Tabula Sapiens - Heart</span></span>
-<span><span class="co">#&gt; 9                                                                                                                  Tabula Sapiens - Bladder</span></span>
-<span><span class="co">#&gt; 11                                                                                                                Tabula Sapiens - Prostate</span></span>
-<span><span class="co">#&gt; 12                                                                                                                  Tabula Sapiens - Spleen</span></span>
-<span><span class="co">#&gt; 14                                                                                                             Tabula Sapiens - Vasculature</span></span>
-<span><span class="co">#&gt; 15                                                                                                                     Tabula Sapiens - Eye</span></span>
-<span><span class="co">#&gt; 19                                                                                                                   Tabula Sapiens - Liver</span></span>
-<span><span class="co">#&gt; 20                                                                                                                     Tabula Sapiens - Fat</span></span>
-<span><span class="co">#&gt; 21                                                                                                                  Tabula Sapiens - Tongue</span></span>
+<span><span class="co">#&gt; 63 Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
+<span><span class="co">#&gt; 64                                                                                                                Tabula Sapiens - Pancreas</span></span>
+<span><span class="co">#&gt; 65                                                                                                          Tabula Sapiens - Salivary_Gland</span></span>
+<span><span class="co">#&gt; 66                                                                                                                   Tabula Sapiens - Heart</span></span>
+<span><span class="co">#&gt; 67                                                                                                                 Tabula Sapiens - Bladder</span></span>
+<span><span class="co">#&gt; 69                                                                                                                Tabula Sapiens - Prostate</span></span>
+<span><span class="co">#&gt; 70                                                                                                                  Tabula Sapiens - Spleen</span></span>
+<span><span class="co">#&gt; 72                                                                                                             Tabula Sapiens - Vasculature</span></span>
+<span><span class="co">#&gt; 73                                                                                                                     Tabula Sapiens - Eye</span></span>
+<span><span class="co">#&gt; 77                                                                                                                   Tabula Sapiens - Liver</span></span>
+<span><span class="co">#&gt; 78                                                                                                                     Tabula Sapiens - Fat</span></span>
 <span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 5  bd65a70f-b274-4133-b9dd-0d1431b6af34.h5ad                   167283</span></span>
-<span><span class="co">#&gt; 6  ff45e623-7f5f-46e3-b47d-56be0341f66b.h5ad                    13497</span></span>
-<span><span class="co">#&gt; 7  f01bdd17-4902-40f5-86e3-240d66dd2587.h5ad                    27199</span></span>
-<span><span class="co">#&gt; 8  e6a11140-2545-46bc-929e-da243eed2cae.h5ad                    11505</span></span>
-<span><span class="co">#&gt; 9  e5c63d94-593c-4338-a489-e1048599e751.h5ad                    24583</span></span>
-<span><span class="co">#&gt; 11 d77ec7d6-ef2e-49d6-9e79-05b7f8881484.h5ad                    16375</span></span>
-<span><span class="co">#&gt; 12 cee11228-9f0b-4e57-afe2-cfe15ee56312.h5ad                    34004</span></span>
-<span><span class="co">#&gt; 14 a2d4d33e-4c62-4361-b80a-9be53d2e50e8.h5ad                    16037</span></span>
-<span><span class="co">#&gt; 15 a0754256-f44b-4c4a-962c-a552e47d3fdc.h5ad                    10650</span></span>
-<span><span class="co">#&gt; 19 6d41668c-168c-4500-b06a-4674ccf3e19d.h5ad                     5007</span></span>
-<span><span class="co">#&gt; 20 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c.h5ad                    20263</span></span>
-<span><span class="co">#&gt; 21 55cf0ea3-9d2b-4294-871e-bb4b49a79fc7.h5ad                    15020</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 30 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt; 63 bd65a70f-b274-4133-b9dd-0d1431b6af34.h5ad                   167283</span></span>
+<span><span class="co">#&gt; 64 ff45e623-7f5f-46e3-b47d-56be0341f66b.h5ad                    13497</span></span>
+<span><span class="co">#&gt; 65 f01bdd17-4902-40f5-86e3-240d66dd2587.h5ad                    27199</span></span>
+<span><span class="co">#&gt; 66 e6a11140-2545-46bc-929e-da243eed2cae.h5ad                    11505</span></span>
+<span><span class="co">#&gt; 67 e5c63d94-593c-4338-a489-e1048599e751.h5ad                    24583</span></span>
+<span><span class="co">#&gt; 69 d77ec7d6-ef2e-49d6-9e79-05b7f8881484.h5ad                    16375</span></span>
+<span><span class="co">#&gt; 70 cee11228-9f0b-4e57-afe2-cfe15ee56312.h5ad                    34004</span></span>
+<span><span class="co">#&gt; 72 a2d4d33e-4c62-4361-b80a-9be53d2e50e8.h5ad                    16037</span></span>
+<span><span class="co">#&gt; 73 a0754256-f44b-4c4a-962c-a552e47d3fdc.h5ad                    10650</span></span>
+<span><span class="co">#&gt; 77 6d41668c-168c-4500-b06a-4674ccf3e19d.h5ad                     5007</span></span>
+<span><span class="co">#&gt; 78 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c.h5ad                    20263</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 31 rows ]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="identifying-all-genes-measured-in-a-dataset">Identifying all genes measured in a dataset<a class="anchor" aria-label="anchor" href="#identifying-all-genes-measured-in-a-dataset"></a>
@@ -363,33 +371,24 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">var_joinids</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">genes_measured</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">[</span><span class="va">var_joinids</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    soma_joinid      feature_id feature_name feature_length</span></span>
-<span><span class="co">#&gt; 1            0 ENSG00000121410         A1BG           3999</span></span>
-<span><span class="co">#&gt; 2            1 ENSG00000268895     A1BG-AS1           3374</span></span>
-<span><span class="co">#&gt; 3            2 ENSG00000148584         A1CF           9603</span></span>
-<span><span class="co">#&gt; 4            3 ENSG00000175899          A2M           6318</span></span>
-<span><span class="co">#&gt; 5            4 ENSG00000245105      A2M-AS1           2948</span></span>
-<span><span class="co">#&gt; 6            5 ENSG00000166535        A2ML1           7156</span></span>
-<span><span class="co">#&gt; 8            7 ENSG00000184389      A3GALT2           1023</span></span>
-<span><span class="co">#&gt; 9            8 ENSG00000128274       A4GALT           3358</span></span>
-<span><span class="co">#&gt; 10           9 ENSG00000118017        A4GNT           1779</span></span>
-<span><span class="co">#&gt; 11          10 ENSG00000094914         AAAS           4727</span></span>
-<span><span class="co">#&gt; 12          11 ENSG00000081760         AACS          16039</span></span>
-<span><span class="co">#&gt; 13          12 ENSG00000114771        AADAC           1632</span></span>
-<span><span class="co">#&gt; 14          13 ENSG00000197953      AADACL2           5071</span></span>
-<span><span class="co">#&gt; 16          15 ENSG00000188984      AADACL3           4055</span></span>
-<span><span class="co">#&gt; 17          16 ENSG00000204518      AADACL4           2027</span></span>
-<span><span class="co">#&gt; 18          17 ENSG00000109576        AADAT           2970</span></span>
-<span><span class="co">#&gt; 19          18 ENSG00000158122       PRXL2C           3098</span></span>
-<span><span class="co">#&gt; 20          19 ENSG00000103591        AAGAB           4138</span></span>
-<span><span class="co">#&gt; 21          20 ENSG00000115977         AAK1          24843</span></span>
-<span><span class="co">#&gt; 22          21 ENSG00000087884        AAMDC           1943</span></span>
-<span><span class="co">#&gt; 23          22 ENSG00000127837         AAMP           3055</span></span>
-<span><span class="co">#&gt; 24          23 ENSG00000129673        AANAT           2156</span></span>
-<span><span class="co">#&gt; 25          24 ENSG00000131043         AAR2           7291</span></span>
-<span><span class="co">#&gt; 26          25 ENSG00000205002         AARD           2404</span></span>
-<span><span class="co">#&gt; 27          26 ENSG00000090861        AARS1          10248</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 27185 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt;    soma_joinid      feature_id feature_name feature_length      nnz n_measured_obs</span></span>
+<span><span class="co">#&gt; 1            0 ENSG00000233576      HTR3C2P           1057    69370       19581263</span></span>
+<span><span class="co">#&gt; 2            1 ENSG00000121410         A1BG           3999  5640476       62641311</span></span>
+<span><span class="co">#&gt; 3            2 ENSG00000268895     A1BG-AS1           3374  3071864       61946057</span></span>
+<span><span class="co">#&gt; 4            3 ENSG00000148584         A1CF           9603   734347       58195911</span></span>
+<span><span class="co">#&gt; 5            4 ENSG00000175899          A2M           6318  7894261       62704378</span></span>
+<span><span class="co">#&gt; 6            5 ENSG00000245105      A2M-AS1           2948  1637794       62086816</span></span>
+<span><span class="co">#&gt; 9            8 ENSG00000184389      A3GALT2           1023   439067       53780311</span></span>
+<span><span class="co">#&gt; 10           9 ENSG00000128274       A4GALT           3358  2432348       62706770</span></span>
+<span><span class="co">#&gt; 12          11 ENSG00000265544         AA06            632   220755       22545140</span></span>
+<span><span class="co">#&gt; 14          13 ENSG00000250420       AACSP1           3380   211588       22831831</span></span>
+<span><span class="co">#&gt; 16          15 ENSG00000188984      AADACL3           4055    24626       43074608</span></span>
+<span><span class="co">#&gt; 18          17 ENSG00000240602      AADACP1           2012    29491       23133490</span></span>
+<span><span class="co">#&gt; 19          18 ENSG00000109576        AADAT           2970  4524608       61559099</span></span>
+<span><span class="co">#&gt; 20          19 ENSG00000158122       PRXL2C           3098  5424472       55618144</span></span>
+<span><span class="co">#&gt; 21          20 ENSG00000103591        AAGAB           4138 12427442       62843055</span></span>
+<span><span class="co">#&gt; 22          21 ENSG00000115977         AAK1          24843 29280566       62664775</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 27195 rows ]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>

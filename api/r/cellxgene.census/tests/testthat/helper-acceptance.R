@@ -35,7 +35,7 @@ test_seurat <- function(get_seurat_args) {
   expect_true(ncol(this_seurat) > 0)
 }
 
-# Tests that the object is SingleCellExpiremnt and is a non-empty
+# Tests that the object is SingleCellExperiment and is a non-empty
 test_sce <- function(get_sce_args) {
   this_sce <- do.call(get_single_cell_experiment, get_sce_args)
   expect_true(is(this_sce, "SingleCellExperiment"))

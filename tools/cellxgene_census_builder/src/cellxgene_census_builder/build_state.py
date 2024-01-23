@@ -52,15 +52,11 @@ class CensusBuildConfig:
     # Only set to a smaller number if you want to not use all available RAM.
     memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
     #
-    # 'max_worker_processes' sets a limit on the number of worker processes. On high-CPU boxes,
-    # this limit is needed to avoid exceeding the VM map kernel limit (vm.max_map_count). On Ubuntu 22.04,
-    # the default value is 65536. This kernel limitation becomes an issue due to excess thread allocation
-    # by TileDB-SOMA: https://github.com/single-cell-data/TileDB-SOMA/issues/1550. Currently, the per-process
-    # TileDB context allocates approximately 650 threads (and VM maps) per worker process, as currently
-    # utilized by the Census builder. This hard-cap can be increased when this issue is resolved, but
-    # should not be removed (with sufficient number of worker processes, it will always be possible to
-    # trip over this limit). The default of 96 was chosen as:  (96+1) * 650 == 63050, which is < 65536.
-    max_worker_processes: int = field(converter=int, default=96)
+    # 'max_worker_processes' sets a limit on the number of worker processes to avoid running into
+    # the max VM map kernel limit and other hard resource limits. The value specified here was
+    # determined by empirical testing on 128 and 192 CPU boxes (e.g., r6a.48xlarge, r6i.32xlarge,
+    # etc) using the default kernel config for Ubuntu 22.04
+    max_worker_processes: int = field(converter=int, default=192)
     #
     # Host minimum resource validation
     host_validation_disable: int = field(
@@ -77,6 +73,9 @@ class CensusBuildConfig:
     dataset_id_blocklist_uri: str = field(
         default="https://raw.githubusercontent.com/chanzuckerberg/cellxgene-census/main/tools/cellxgene_census_builder/dataset_blocklist.txt"
     )
+    # User Agent header for all dataset requests from the datasets.cellxgene.cziscience.com route.
+    user_agent_prefix: str = field(default="census-builder-")
+    user_agent_environment: str = field(default="unknown")
     #
     # For testing convenience only
     manifest: str = field(default=None)

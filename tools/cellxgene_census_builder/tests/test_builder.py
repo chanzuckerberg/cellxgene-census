@@ -26,7 +26,7 @@ from cellxgene_census_builder.build_state import CensusBuildArgs
 
 
 @pytest.mark.parametrize(
-    "census_build_args", [dict(multi_process=False, consolidate=True, build_tag="test_tag", verbose=1)], indirect=True
+    "census_build_args", [dict(multi_process=False, consolidate=True, build_tag="test_tag", verbose=0)], indirect=True
 )
 def test_base_builder_creation(
     datasets: List[Dataset],
@@ -38,7 +38,7 @@ def test_base_builder_creation(
     """
     with patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"), patch(
         "cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets
-    ), patch("cellxgene_census_builder.build_soma.consolidate._run"), patch(
+    ), patch("cellxgene_census_builder.build_soma.consolidate.submit_consolidate", return_value=list()), patch(
         "cellxgene_census_builder.build_soma.validate_soma.validate_consolidation", return_value=True
     ):
         return_value = build(census_build_args)

@@ -96,12 +96,28 @@ with cellxgene_census.open_soma() as census:
     )
 ```
 
-If a local copy of the Census data exists, users can access it by providing the path to the `soma/` folder.
+If a **local copy** of the Census data exists, users can access it by providing the path to the `soma/` folder.
 
 ``` python
 import cellxgene_census
 
 with cellxgene_census.open_soma(uri="local/path/to/soma/") as census:
+   ...
+```
+
+If a copy of the Census data exists in a **private S3 bucket**, users can access it by providing the URI `soma/`
+folder in the S3 bucket. This will also require customizing TileDB configuration options to specify the
+bucket's AWS region and that signed requests should be used for S3 API calls. This can be done as follows:
+
+``` python
+import cellxgene_census
+
+uri = "s3://my-private-data-bucket/cell-census/2023-07-25/soma/"
+
+tiledb_config={"vfs.s3.no_sign_request": "false",
+               "vfs.s3.region": "us-east-1"}
+
+with cellxgene_census.open_soma(uri=uri, tiledb_config=tiledb_config) as census:
    ...
 ```
 
@@ -112,17 +128,11 @@ The Census API provides convenience wrappers for TileDB-SOMA to access the Censu
 For example, in Python users can create an iterator for the cell metadata Data Frame as follows:
 
 ``` python
-config = {
-    "vfs.s3.region": "us-west-2",
-    "vfs.s3.no_sign_request": "true",
-    "py.init_buffer_bytes": 1 * 1024**3,
-    "soma.init_buffer_bytes": 1 * 1024**3,
-}
-
-ctx = tiledbsoma.options.SOMATileDBContext()
-ctx = ctx.replace(tiledb_config=config)
+import cellxgene_census
+import tiledbsoma
 
 uri = "s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/"
+ctx = cellxgene_census.get_default_soma_context()
 
 with tiledbsoma.open(uri, context=ctx) as census:
     cell_metadata = census["census_data"]["homo_sapiens"].obs.read(

@@ -10,6 +10,8 @@ from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION
 from .util import fetch_json
 
+logger = logging.getLogger(__name__)
+
 CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 
 
@@ -26,13 +28,13 @@ def parse_manifest_file(manifest_fp: io.TextIOBase) -> List[Dataset]:
 def dedup_datasets(datasets: List[Dataset]) -> List[Dataset]:
     ds = {d.dataset_id: d for d in datasets}
     if len(ds) != len(datasets):
-        logging.warning("Dataset manifest contained DUPLICATES, which will be ignored.")
+        logger.warning("Dataset manifest contained DUPLICATES, which will be ignored.")
         return list(ds.values())
     return datasets
 
 
 def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
-    logging.info("Loading manifest from file")
+    logger.info("Loading manifest from file")
     all_datasets = parse_manifest_file(manifest_fp)
     datasets = [
         d
@@ -40,7 +42,7 @@ def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
         if d.dataset_asset_h5ad_uri.endswith(".h5ad") and os.path.exists(d.dataset_asset_h5ad_uri)
     ]
     if len(datasets) != len(all_datasets):
-        logging.warning("Manifest contained records which are not H5AD files or which are not accessible - ignoring")
+        logger.warning("Manifest contained records which are not H5AD files or which are not accessible - ignoring")
     return datasets
 
 
@@ -51,7 +53,7 @@ def null_to_empty_str(val: str | None) -> str:
 
 
 def load_manifest_from_CxG() -> List[Dataset]:
-    logging.info("Loading manifest from CELLxGENE data portal...")
+    logger.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
     datasets = fetch_json(f"{CXG_BASE_URI}curation/v1/datasets?schema_version={CXG_SCHEMA_VERSION}")
@@ -65,18 +67,18 @@ def load_manifest_from_CxG() -> List[Dataset]:
 
         if schema_version != CXG_SCHEMA_VERSION:
             msg = f"Manifest fetch: dataset {dataset_id} contains unsupported schema version {schema_version}."
-            logging.error(msg)
+            logger.error(msg)
             raise RuntimeError(msg)
 
         assets = dataset.get("assets", [])
         assets_h5ad = [a for a in assets if a["filetype"] == "H5AD"]
         if not assets_h5ad:
             msg = f"Manifest fetch: unable to find H5AD asset for dataset id {dataset_id} - this should never happen and is likely an upstream bug"
-            logging.error(msg)
+            logger.error(msg)
             raise RuntimeError(msg)
         if len(assets_h5ad) > 1:
             msg = f"Manifest fetch: dataset id {dataset_id} has more than one H5AD asset - this should never happen and is likely an upstream bug"
-            logging.error(msg)
+            logger.error(msg)
             raise RuntimeError(msg)
         asset_h5ad_uri = assets_h5ad[0]["url"]
         asset_h5ad_filesize = assets_h5ad[0]["filesize"]
@@ -85,16 +87,19 @@ def load_manifest_from_CxG() -> List[Dataset]:
             dataset_id=dataset_id,
             dataset_asset_h5ad_uri=asset_h5ad_uri,
             dataset_title=null_to_empty_str(dataset["title"]),
+            citation=dataset["citation"],
             collection_id=dataset["collection_id"],
             collection_name=null_to_empty_str(dataset["collection_name"]),
             collection_doi=null_to_empty_str(dataset["collection_doi"]),
             asset_h5ad_filesize=asset_h5ad_filesize,
             schema_version=schema_version,
             dataset_version_id=null_to_empty_str(dataset["dataset_version_id"]),
+            cell_count=dataset["cell_count"],
+            mean_genes_per_cell=dataset["mean_genes_per_cell"],
         )
         response.append(d)
 
-    logging.info(f"Found {len(datasets)} datasets")
+    logger.info(f"Found {len(datasets)} datasets")
 
     return response
 
@@ -103,7 +108,7 @@ def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
     blocked_dataset_ids: Set[str] = set()
     if not dataset_id_blocklist_uri:
         msg = "No dataset blocklist specified - builder is misconfigured"
-        logging.error(msg)
+        logger.error(msg)
         raise ValueError(msg)
 
     with fsspec.open(dataset_id_blocklist_uri, "rt") as fp:
@@ -114,7 +119,7 @@ def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
                 continue
             blocked_dataset_ids.add(line)
 
-        logging.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
+        logger.info(f"Dataset blocklist found, containing {len(blocked_dataset_ids)} ids.")
 
     return blocked_dataset_ids
 
@@ -126,7 +131,7 @@ def apply_blocklist(datasets: List[Dataset], dataset_id_blocklist_uri: str | Non
 
     except FileNotFoundError:
         # Blocklist may not exist, so just skip the filtering in this case
-        logging.error("No dataset blocklist found")
+        logger.error("No dataset blocklist found")
         raise
 
 
@@ -149,5 +154,5 @@ def load_manifest(
 
     datasets = apply_blocklist(datasets, dataset_id_blocklist_uri)
     datasets = dedup_datasets(datasets)
-    logging.info(f"After blocklist and dedup, will load {len(datasets)} datasets.")
+    logger.info(f"After blocklist and dedup, will load {len(datasets)} datasets.")
     return datasets

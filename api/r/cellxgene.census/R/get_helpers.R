@@ -34,6 +34,7 @@ get_presence_matrix <- function(census, organism, measurement_name = "RNA") {
 #' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
 #' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
 #' @param obs_column_names Columns to fetch for the `obs` data frame.
+#' @param obsm_layers Names of arrays in obsm to add as the cell embeddings; pass FALSE to suppress loading in any dimensional reductions.
 #' @param var_value_filter Same as `obs_value_filter` but for `var`.
 #' @param var_coords Same as `obs_coords` but for `var`.
 #' @param var_column_names Columns to fetch for the `var` data frame.
@@ -65,6 +66,7 @@ get_seurat <- function(
     obs_value_filter = NULL,
     obs_coords = NULL,
     obs_column_names = NULL,
+    obsm_layers = FALSE,
     var_value_filter = NULL,
     var_coords = NULL,
     var_column_names = NULL,
@@ -83,6 +85,7 @@ get_seurat <- function(
   return(expt_query$to_seurat(
     X_layers = X_layers,
     obs_column_names = obs_column_names,
+    obsm_layers = obsm_layers,
     var_column_names = var_column_names,
     var_index = var_index
   ))
@@ -104,6 +107,7 @@ get_seurat <- function(
 #' @param obs_value_filter A SOMA `value_filter` across columns in the `obs` dataframe, expressed as string.
 #' @param obs_coords A set of coordinates on the obs dataframe index, expressed in any type or format supported by SOMADataFrame's read() method.
 #' @param obs_column_names Columns to fetch for the `obs` data frame.
+#' @param obsm_layers Names of arrays in obsm to add as the cell embeddings; pass FALSE to suppress loading in any dimensional reductions.
 #' @param var_value_filter Same as `obs_value_filter` but for `var`.
 #' @param var_coords Same as `obs_coords` but for `var`.
 #' @param var_column_names Columns to fetch for the `var` data frame.
@@ -135,6 +139,7 @@ get_single_cell_experiment <- function(
     obs_value_filter = NULL,
     obs_coords = NULL,
     obs_column_names = NULL,
+    obsm_layers = FALSE,
     var_value_filter = NULL,
     var_coords = NULL,
     var_column_names = NULL,
@@ -153,6 +158,7 @@ get_single_cell_experiment <- function(
   return(expt_query$to_single_cell_experiment(
     X_layers = X_layers,
     obs_column_names = obs_column_names,
+    obsm_layers = obsm_layers,
     var_column_names = var_column_names,
     var_index = var_index
   ))
