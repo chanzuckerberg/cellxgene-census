@@ -1,0 +1,17 @@
+census:
+  version:
+    2023-12-15
+  organism: 
+    "homo_sapiens"
+embeddings:
+  hosted:
+    scgpt:
+      uri: "s3://cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-1/"
+    uce:
+      uri: "s3://cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-2/"
+  collaboration:
+    [scvi, geneformer]
+metrics:
+  tissues:
+    ["adipose tissue", "spinal cord"]
+
