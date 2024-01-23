@@ -46,7 +46,9 @@ if __name__ == "__main__":
     embeddings_raw = embedding_config.get("raw") or dict()
 
     # All embedding names
-    embs = list(embedding_uris_community.keys()) + embedding_names_census + embeddings_raw.keys()
+    embs = list(embedding_uris_community.keys()) + embedding_names_census + list(embeddings_raw.keys())
+
+    print("Embeddings to use: ", embs)
 
     census = cellxgene_census.open_soma(census_version=census_version)
 
