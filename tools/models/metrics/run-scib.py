@@ -21,7 +21,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
 
     census_config = config.get("census")
-    embedding_config = config.get("embedding")
+    embedding_config = config.get("embeddings")
     metrics_config = config.get("metrics")
 
     census_version = census_config.get("version")
