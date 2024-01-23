@@ -10,13 +10,15 @@ import ontology_mapper
 import scanpy as sc
 import scib_metrics
 import yaml
+import sys
 from cellxgene_census.experimental import get_embedding
 
 warnings.filterwarnings("ignore")
 
-file = "scib-metrics-config.yaml"
-
 if __name__ == "__main__":
+
+    file = sys.argv[1] or "scib-metrics-config.yaml"
+
     with open(file) as f:
         config = yaml.safe_load(f)
 
@@ -27,7 +29,7 @@ if __name__ == "__main__":
     census_version = census_config.get("version")
     experiment_name = census_config.get("organism")
 
-    embedding_uris_community = embedding_config.get("hosted")
+    embedding_uris_community = embedding_config.get("hosted") or dict()
 
     # These are embeddings contributed by the community hosted in S3
     # embedding_uris_community = {
@@ -36,9 +38,9 @@ if __name__ == "__main__":
     # }
 
     # These are embeddings included in the Census data
-    embedding_names_census = embedding_config.get("collaboration")
+    embedding_names_census = embedding_config.get("collaboration") or dict()
 
-    embeddings_raw = embedding_config.get("raw")
+    embeddings_raw = embedding_config.get("raw") or dict()
 
     # All embedding names
     embs = list(embedding_uris_community.keys()) + embedding_names_census
