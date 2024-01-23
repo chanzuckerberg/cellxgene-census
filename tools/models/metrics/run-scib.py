@@ -17,7 +17,10 @@ warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
 
-    file = sys.argv[1] or "scib-metrics-config.yaml"
+    try:
+        file = sys.argv[1]
+    except IndexError:
+        file = "scib-metrics-config.yaml"
 
     with open(file) as f:
         config = yaml.safe_load(f)
@@ -43,7 +46,7 @@ if __name__ == "__main__":
     embeddings_raw = embedding_config.get("raw") or dict()
 
     # All embedding names
-    embs = list(embedding_uris_community.keys()) + embedding_names_census
+    embs = list(embedding_uris_community.keys()) + embedding_names_census + embeddings_raw.keys()
 
     census = cellxgene_census.open_soma(census_version=census_version)
 
