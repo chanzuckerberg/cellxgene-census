@@ -80,8 +80,8 @@ def compute_all(
 
     # make treatment variable be in the first column of the design matrix
     variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
-    design = pd.get_dummies(obs_groups_df[variables], drop_first=True, dtype=int)
-    logging.debug(f"design shape: {design.shape}")
+    design = pd.get_dummies(obs_groups_df[variables].astype(str), drop_first=True, dtype=int)
+    assert design.shape[1] == obs_groups_df[variables].nunique().sum() - len(variables)
 
     result_groups = ProcessPoolExecutor(max_workers=n_processes).map(
         partial(compute_for_features, cube_path, design, obs_groups_df[["obs_group_joinid", "n_obs"]]),
