@@ -110,14 +110,18 @@ if __name__ == "__main__":
                 column_names=column_names,
             )
 
+            obs_idx = ad.obs["soma_joinid"].to_numpy()
+
             for key, val in embedding_uris.items():
                 print("Getting community embedding:", key)
                 embedding_uri = val["uri"]
-                ad.obsm[key] = get_embedding(census_version, embedding_uri, ad.obs["soma_joinid"].to_numpy())
+                ad.obsm[key] = get_embedding(census_version, embedding_uri, obs_idx)
 
+            # For these, we need to extract the right cells via soma_joinid
             for key, val in embeddings_raw.items():
                 print("Getting raw embedding:", key)
-                ad.obsm[key] = np.load(val["uri"])
+                emb = np.load(val["uri"])
+                ad.obsm[key] = emb[obs_idx]
 
         # Embeddings with missing data contain all NaN,
         # so we must find the intersection of non-NaN rows in the fetched embeddings
