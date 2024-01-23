@@ -1,6 +1,6 @@
 census:
   version:
-    2023-12-15
+    "2023-12-15"
   organism: 
     "homo_sapiens"
 embeddings:

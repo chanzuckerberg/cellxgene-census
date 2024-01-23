@@ -38,6 +38,8 @@ if __name__ == "__main__":
     # These are embeddings included in the Census data
     embedding_names_census = embedding_config.get("collaboration")
 
+    embeddings_raw = embedding_config.get("raw")
+
     # All embedding names
     embs = list(embedding_uris_community.keys()) + embedding_names_census
 
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     def build_anndata_with_embeddings(
         embedding_uris: dict,
         embedding_names: List[str],
-        embeddings_raw: dict[str, str],
+        embeddings_raw: dict,
         coords: List[int] = None,
         obs_value_filter: str = None,
         column_names=dict,
@@ -106,7 +108,7 @@ if __name__ == "__main__":
                 column_names=column_names,
             )
 
-            for key, val in embeddings_raw.items():
+            for key, val in embedding_uris.items():
                 print("Getting community embedding:", key)
                 embedding_uri = val["uri"]
                 ad.obsm[key] = get_embedding(census_version, embedding_uri, ad.obs["soma_joinid"].to_numpy())
@@ -146,6 +148,7 @@ if __name__ == "__main__":
         adata_metrics = build_anndata_with_embeddings(
             embedding_uris=embedding_uris_community,
             embedding_names=embedding_names_census,
+            embeddings_raw=embeddings_raw,
             obs_value_filter=f"tissue_general == '{tissue}' and is_primary_data == True",
             census_version=census_version,
             experiment_name="homo_sapiens",
