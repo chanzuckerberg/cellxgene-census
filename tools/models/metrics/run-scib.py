@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 except Exception:
                     # Assume it's a TileDBSoma URI
                     with soma.open(val["uri"]) as emb:
-                        ad.obsm[key] = emb.read(coords=(obs_idx,)).coos((len(obs_idx), emb.shape[1])).concat().to_scipy().todense()
+                        ad.obsm[key] = emb.read(coords=(obs_idx,)).coos().concat().to_scipy().tocsr()[obs_idx, :].todense()
 
         # Embeddings with missing data contain all NaN,
         # so we must find the intersection of non-NaN rows in the fetched embeddings
