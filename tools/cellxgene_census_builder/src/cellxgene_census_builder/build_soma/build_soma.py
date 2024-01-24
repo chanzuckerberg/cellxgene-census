@@ -110,6 +110,7 @@ def build(args: CensusBuildArgs) -> int:
 
 
 def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: List[Dataset], used_datasets: List[Dataset]) -> None:
+    """Remove any staged H5AD not used to build the SOMA object, ie. those which do not contribute at least one cell to the Census"""
     used_dataset_ids = set(d.dataset_id for d in used_datasets)
     unused_datasets = [d for d in all_datasets if d.dataset_id not in used_dataset_ids]
     assert all(d.dataset_total_cell_count == 0 for d in unused_datasets)
