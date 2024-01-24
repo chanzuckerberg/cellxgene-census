@@ -1,6 +1,7 @@
 import datetime
 import itertools
 import pickle
+import sys
 import warnings
 from typing import List
 
@@ -9,15 +10,13 @@ import numpy as np
 import ontology_mapper
 import scanpy as sc
 import scib_metrics
-import yaml
-import sys
-from cellxgene_census.experimental import get_embedding
 import tiledbsoma as soma
+import yaml
+from cellxgene_census.experimental import get_embedding
 
 warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
-
     try:
         file = sys.argv[1]
     except IndexError:
@@ -134,7 +133,9 @@ if __name__ == "__main__":
                 except Exception:
                     # Assume it's a TileDBSoma URI
                     with soma.open(val["uri"]) as emb:
-                        ad.obsm[key] = emb.read(coords=(obs_idx,)).coos().concat().to_scipy().tocsr()[obs_idx, :].todense()
+                        ad.obsm[key] = np.asarray(
+                            emb.read(coords=(obs_idx,)).coos().concat().to_scipy().tocsr()[obs_idx, :].todense()
+                        )
 
         # Embeddings with missing data contain all NaN,
         # so we must find the intersection of non-NaN rows in the fetched embeddings
