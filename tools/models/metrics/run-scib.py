@@ -12,6 +12,7 @@ import scib_metrics
 import yaml
 import sys
 from cellxgene_census.experimental import get_embedding
+import tiledbsoma as soma
 
 warnings.filterwarnings("ignore")
 
@@ -125,8 +126,15 @@ if __name__ == "__main__":
             # For these, we need to extract the right cells via soma_joinid
             for key, val in embeddings_raw.items():
                 print("Getting raw embedding:", key)
-                emb = np.load(val["uri"])
-                ad.obsm[key] = emb[obs_idx]
+                # Alternative approach: set type in the config file
+                try:
+                    # Assume it's a numpy ndarray
+                    emb = np.load(val["uri"])
+                    ad.obsm[key] = emb[obs_idx]
+                except Exception:
+                    # Assume it's a TileDBSoma URI
+                    with soma.open(val["uri"]) as emb:
+                        ad.obsm[key] = emb.read(coords=(obs_idx,)).coos((len(obs_idx), emb.shape[1])).concat().to_scipy().todense()
 
         # Embeddings with missing data contain all NaN,
         # so we must find the intersection of non-NaN rows in the fetched embeddings
