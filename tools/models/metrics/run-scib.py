@@ -8,6 +8,7 @@ from typing import List
 import cellxgene_census
 import numpy as np
 import ontology_mapper
+import pandas as pd
 import scanpy as sc
 import scib_metrics
 import tiledbsoma as soma
@@ -115,12 +116,12 @@ if __name__ == "__main__":
                 column_names=column_names,
             )
 
-            obs_idx = ad.obs["soma_joinid"].to_numpy()
+            obs_soma_joinids = ad.obs["soma_joinid"].to_numpy()
 
             for key, val in embedding_uris.items():
                 print("Getting community embedding:", key)
                 embedding_uri = val["uri"]
-                ad.obsm[key] = get_embedding(census_version, embedding_uri, obs_idx)
+                ad.obsm[key] = get_embedding(census_version, embedding_uri, obs_soma_joinids)
 
             # For these, we need to extract the right cells via soma_joinid
             for key, val in embeddings_raw.items():
@@ -129,13 +130,23 @@ if __name__ == "__main__":
                 try:
                     # Assume it's a numpy ndarray
                     emb = np.load(val["uri"])
-                    ad.obsm[key] = emb[obs_idx]
+                    ad.obsm[key] = emb[obs_soma_joinids]
                 except Exception:
                     # Assume it's a TileDBSoma URI
-                    with soma.open(val["uri"]) as emb:
-                        ad.obsm[key] = np.asarray(
-                            emb.read(coords=(obs_idx,)).coos().concat().to_scipy().tocsr()[obs_idx, :].todense()
-                        )
+                    with soma.open(val["uri"]) as E:
+                        embedding_shape = (len(obs_soma_joinids), E.shape[1])
+                        embedding = np.full(embedding_shape, np.NaN, dtype=np.float32, order="C")
+
+                        obs_indexer = pd.Index(obs_soma_joinids)
+                        for tbl in E.read(coords=(obs_soma_joinids,)).tables():
+                            obs_idx = obs_indexer.get_indexer(tbl.column("soma_dim_0").to_numpy())  # type: ignore[no-untyped-call]
+                            feat_idx = tbl.column("soma_dim_1").to_numpy()
+                            emb = tbl.column("soma_data")
+
+                            indices = obs_idx * E.shape[1] + feat_idx
+                            np.put(embedding.reshape(-1), indices, emb)
+
+                        ad.obsm[key] = embedding
 
         # Embeddings with missing data contain all NaN,
         # so we must find the intersection of non-NaN rows in the fetched embeddings
