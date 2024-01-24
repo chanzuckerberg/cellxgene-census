@@ -130,7 +130,10 @@ if __name__ == "__main__":
                 try:
                     # Assume it's a numpy ndarray
                     emb = np.load(val["uri"])
-                    ad.obsm[key] = emb[obs_soma_joinids]
+                    emb_idx = np.load(val["idx"])
+                    obs_indexer = pd.Index(emb_idx)
+                    idx = obs_indexer.get_indexer(obs_soma_joinids)
+                    ad.obsm[key] = emb[idx]
                 except Exception:
                     # Assume it's a TileDBSoma URI
                     with soma.open(val["uri"]) as E:
