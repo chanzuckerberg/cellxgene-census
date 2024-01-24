@@ -1,7 +1,8 @@
-import concurrent.futures
 import gc
+import itertools
 import logging
 from contextlib import ExitStack
+from functools import reduce
 from typing import (
     Any,
     Dict,
@@ -13,7 +14,6 @@ from typing import (
     TypedDict,
     Union,
     cast,
-    overload,
 )
 
 import attrs
@@ -25,17 +25,17 @@ import pandas as pd
 import pyarrow as pa
 import somacore
 import tiledbsoma as soma
+from dask.delayed import Delayed
 from scipy import sparse
 from somacore.options import OpenMode
 from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
-from .anndata import AnnDataFilterSpec, make_anndata_cell_filter, open_anndata
+from .anndata import AnnDataFilterSpec, AnnDataProxy, open_anndata
 from .datasets import Dataset
 from .globals import (
     CENSUS_OBS_PLATFORM_CONFIG,
-    CENSUS_OBS_STATS_COLUMNS,
     CENSUS_OBS_TABLE_SPEC,
     CENSUS_VAR_PLATFORM_CONFIG,
     CENSUS_VAR_TABLE_SPEC,
@@ -48,13 +48,6 @@ from .globals import (
     MEASUREMENT_RNA_NAME,
     SMART_SEQ,
     SOMA_TileDB_Context,
-)
-from .mp import (
-    ResourcePoolProcessExecutor,
-    create_process_pool_executor,
-    create_resource_pool_executor,
-    log_on_broken_process_pool,
-    n_workers_from_memory_budget,
 )
 from .schema_util import TableSpec
 from .stats import get_obs_stats, get_var_stats
@@ -139,7 +132,8 @@ class ExperimentBuilder:
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
         self.obs_df: Optional[pd.DataFrame] = None
         self.var_df: Optional[pd.DataFrame] = None
-        self.dataset_obs_joinid_start: Dict[str, int] = {}
+        self.dataset_obs_joinid_start: Dict[str, int] = {}  # starting joinid per dataset_id
+        self.dataset_n_obs: Dict[str, int] = {}  # n_obs per dataset_id
         self.census_summary_cell_counts: pd.DataFrame = init_summary_counts_accumulator()
         self.experiment: Optional[soma.Experiment] = None  # initialized in create()
         self.experiment_uri: Optional[str] = None  # initialized in create()
@@ -280,47 +274,6 @@ class ExperimentBuilder:
         logger.info(f"Save presence matrix for {self.name} - finish")
         log_process_resource_status()
 
-    def write_X_normalized(self, args: CensusBuildArgs) -> None:
-        assert self.experiment is not None
-        if self.obs_df is None or self.n_obs == 0:
-            return
-
-        logger.info(f"Write X normalized: {self.name} - starting")
-        is_smart_seq = np.isin(self.obs_df.assay_ontology_term_id.to_numpy(), SMART_SEQ)
-        assert self.var_df is not None
-        feature_length = self.var_df.feature_length.to_numpy()
-
-        if args.config.multi_process:
-            WRITE_NORM_STRIDE = 2**18  # controls TileDB fragment size, which impacts consolidation time
-            mem_budget = (
-                # (20 bytes per COO X stride X typical-nnz X overhead) + static-allocation + passed-data-size
-                int(20 * WRITE_NORM_STRIDE * 4000 * 2)
-                + (3 * 1024**3)
-                + feature_length.nbytes
-                + is_smart_seq.nbytes
-            )
-            n_workers = n_workers_from_memory_budget(args, mem_budget)
-            with create_process_pool_executor(args, max_workers=n_workers) as pe:
-                futures = [
-                    pe.submit(
-                        _write_X_normalized,
-                        (self.experiment.uri, start_id, WRITE_NORM_STRIDE, feature_length, is_smart_seq),
-                    )
-                    for start_id in range(0, self.n_obs, WRITE_NORM_STRIDE)
-                ]
-                for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
-                    log_on_broken_process_pool(pe)
-                    # prop exceptions by calling result
-                    f.result()
-                    logger.info(f"Write X normalized ({self.name}): {n} of {len(futures)} complete.")
-                    log_process_resource_status()
-
-        else:
-            _write_X_normalized((self.experiment.uri, 0, self.n_obs, feature_length, is_smart_seq))
-
-        logger.info(f"Write X normalized: {self.name} - finished")
-        log_process_resource_status()
-
 
 def accumulate_axes_dataframes(
     base_path: str,
@@ -340,22 +293,22 @@ def accumulate_axes_dataframes(
         with open_anndata(
             dataset,
             base_path=base_path,
+            filter_spec=spec.anndata_cell_filter_spec,
             obs_column_names=CXG_OBS_COLUMNS_READ,
             var_column_names=CXG_VAR_COLUMNS_READ,
         ) as adata:
-            filtered_adata = make_anndata_cell_filter(spec.anndata_cell_filter_spec)(adata)
-            logging.debug(f"{dataset.dataset_id}/{spec.name} - found {filtered_adata.n_obs} cells")
+            logging.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
 
             # Skip this dataset if there are not cells after filtering
-            if filtered_adata.n_obs == 0:
+            if adata.n_obs == 0:
                 logger.debug(f"{spec.name} - H5AD has no data after filtering, skipping {dataset.dataset_id}")
                 return pd.DataFrame(), pd.DataFrame()
 
-            obs_df = filtered_adata.obs.copy()
+            obs_df = adata.obs.copy()
             obs_df["dataset_id"] = dataset.dataset_id
 
             var_df = (
-                filtered_adata.var.copy()
+                adata.var.copy()
                 .rename_axis("feature_id")
                 .reset_index()[["feature_id", "feature_name", "feature_length"]]
             )
@@ -379,15 +332,9 @@ def accumulate_axes_dataframes(
             experiment_builders,
             [
                 (
+                    pd.concat(cast(List[pd.DataFrame], [df_pair[0] for df_pair in df_pairs]), ignore_index=True),
                     pd.concat(
-                        cast(List[pd.DataFrame], [df_pair[0] for df_pair in df_pairs if not df_pair[0].empty]),
-                        ignore_index=True,
-                        join="inner",
-                    ),
-                    pd.concat(
-                        cast(List[pd.DataFrame], [df_pair[1] for df_pair in df_pairs if not df_pair[1].empty]),
-                        ignore_index=True,
-                        join="inner",
+                        cast(List[pd.DataFrame], [df_pair[1] for df_pair in df_pairs]), ignore_index=True
                     ).drop_duplicates(ignore_index=True),
                 )
                 for df_pairs in df_pairs_per_eb
@@ -419,6 +366,13 @@ def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd
             eb.census_summary_cell_counts = accumulate_summary_counts(eb.census_summary_cell_counts, obs_slice)
 
     for eb, (obs, var) in accumulated:
+        if not len(obs):
+            eb.obs_df = None
+            eb.var_df = None
+            eb.n_obs = 0
+            eb.n_var = 0
+            continue
+
         obs["soma_joinid"] = range(0, len(obs))
         var["soma_joinid"] = range(0, len(var))
 
@@ -432,12 +386,16 @@ def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd
         eb.n_datasets = obs.dataset_id.nunique()
         eb.n_unique_obs = (obs.is_primary_data == True).sum()  # noqa: E712
         eb.n_donors = obs[~obs.donor_id.isin(DONOR_ID_IGNORE)].groupby("dataset_id").donor_id.nunique().sum()
-        eb.dataset_obs_joinid_start = obs.groupby("dataset_id").soma_joinid.min().to_dict()
         eb.global_var_joinids = var[["feature_id", "soma_joinid"]].set_index("feature_id")
+
+        grouped_by_id = obs.groupby("dataset_id").soma_joinid.agg(["min", "count"])
+        eb.dataset_obs_joinid_start = grouped_by_id["min"].to_dict()
+        eb.dataset_n_obs = grouped_by_id["count"].to_dict()
 
         # gather per-dataset summary statistics e.g., cell type counts, etc.
         per_dataset_summary_counts(eb, obs)
 
+        # save results in the ExperimentBuilder
         eb.obs_df = obs
         eb.var_df = var
         eb.n_obs = len(obs)
@@ -467,252 +425,260 @@ def _get_axis_stats(
     return (obs_stats, var_stats)
 
 
-@attrs.define(frozen=True)
-class AccumXEBParams:
-    """The ExperimentBuilder params/info we want to pass to our worker
-    processes. Do not just send an ExperimentBuilder as it is a huge
-    object that takes forever to pickle.
-    """
+class XReduction(TypedDict):
+    """Information accumulated/reduced from each AnnData X read"""
 
-    name: str
-    n_obs: int
-    n_var: int
-    anndata_cell_filter_spec: AnnDataFilterSpec
-    global_var_joinids: Optional[pd.DataFrame]
-    experiment_uri: str
+    obs_stats: pd.DataFrame
+    var_stats: pd.DataFrame
+    presence: List[PresenceResult]
 
 
-# Read dim0 coords stride
-ACCUM_X_STRIDE = 125_000
+def reduce_X_stats_chunk(results: Sequence[XReduction]) -> XReduction:
+    """Reduce multiple XReduction objects into one"""
+    results = list(results)
+    assert len(results)
+    if len(results) == 1:
+        return results[0].copy()
+    else:
+        return {
+            "obs_stats": pd.concat([r["obs_stats"] for r in results]),
+            "var_stats": reduce(
+                lambda a, b: a.add(b, fill_value=0).astype(np.int64),
+                (r["var_stats"] for r in results),
+            ),
+            "presence": list(itertools.chain(*[r["presence"] for r in results])),
+        }
 
 
-def _accumulate_all_X_layers(
-    assets_path: str,
-    dataset: Dataset,
-    experiment_builders: List[AccumXEBParams],
-    dataset_obs_joinid_starts: List[Union[None, int]],
-    ms_name: str,
-    progress: Tuple[int, int],
-) -> AccumulateXResults:
-    """
-    For this dataset, save all X layer information for each Experiment. This currently
-    includes:
-        X['raw'] - raw counts
+def compute_X_file_stats(
+    xreduction: XReduction, n_obs: int, dataset_id: str, dataset_soma_joinid: int, eb_name: str
+) -> Sequence[XReduction]:
+    """Add file-stats to XReduction."""
+    res = xreduction.copy()
 
-    Also accumulates presence information per dataset.
+    # we should only be called once per dataset
+    assert len(res["presence"]) == 0
 
-    This is a helper function for ExperimentBuilder.accumulate_X
-    """
-    logger.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    unfiltered_ad = open_anndata(
-        dataset, base_path=assets_path, include_filter_columns=True, var_column_names=("_index",)
+    obs_stats = res["obs_stats"]
+    var_stats = res["var_stats"]
+    obs_stats["n_measured_vars"] = (var_stats.nnz > 0).sum()
+    var_stats.n_measured_obs[var_stats.nnz > 0] = n_obs
+    res["presence"].append(
+        PresenceResult(
+            dataset_id,
+            dataset_soma_joinid,
+            eb_name,
+            (var_stats.nnz > 0).to_numpy(),
+            var_stats.index.to_numpy(),
+        ),
     )
+    return (res,)
 
-    results: List[AccumulateXResult] = []
-    for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
-        if dataset_obs_joinid_start is None:
-            # this dataset has no data for this experiment
-            continue
 
+# Controls chunking of the X array processsing.
+#   REDUCE_X_MAJOR_STRIDE: the stride size, in rows, for individual dask tasks (i.e., parallel work)
+#   REDUCE_X_MINOR_STRIDE: the stride size, in rows, used in each task for reducing X. Drives peak memory use and
+#       TileDB fragment size.
+#
+# Candidate optimization: minor stride would be better if computed from the avg # of genes per cell,
+# rather than being a fixed number of rows, as each dataset has different X density. Would potentially
+# reduce variation in memory used.
+#
+REDUCE_X_MAJOR_STRIDE = 2_500_000
+REDUCE_X_MINOR_STRIDE = 500_000
+
+
+def dispatch_X_chunk(
+    dataset_id: str,
+    experiment_uri: str,
+    adata: AnnDataProxy,
+    row_start: int,
+    n_rows: int,
+    dataset_obs_joinid_start: int,
+    global_var_joinids: pd.DataFrame,
+) -> XReduction:
+    logger.info(f"start reading {adata.filename}, {row_start}")
+
+    # result accumulator
+    result: XReduction = {
+        "obs_stats": pd.DataFrame(),
+        "var_stats": pd.DataFrame(),
+        "presence": [],
+    }
+
+    # Index the AnnData var coordinates into SOMA space
+    local_var_joinids = adata.var.join(global_var_joinids).soma_joinid.to_numpy()
+    assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset_id}"
+
+    _is_smart_seq = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), SMART_SEQ)
+    if _is_smart_seq.any():
+        is_smart_seq: Optional[npt.NDArray[np.bool_]] = _is_smart_seq
+        feature_length = adata.var.feature_length.to_numpy()
+    else:
+        is_smart_seq = None
+        feature_length = None
+
+    sigma = np.finfo(np.float32).smallest_subnormal
+
+    # Helper functions
+
+    def tocoo(
+        X: sparse.csr_matrix | sparse.csc_matrix,
+    ) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int32 | np.int64], npt.NDArray[np.float32]]:
+        X = X.tocoo()
+        return X.row.astype(np.int64), X.col, X.data.astype(np.float32)
+
+    def save_raw(X_raw: soma.SparseNDArray, X: sparse.spmatrix, idx: int) -> None:
+        xI, xJ, xD = tocoo(X)
+        xI += idx + dataset_obs_joinid_start
+        xJ = local_var_joinids[xJ]
+        X_raw.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
+
+    def save_normalized(X_normalized: soma.SparseNDArray, X: sparse.spmatrix, idx: int) -> None:
+        # CAUTION: mutates X in place
+        if is_smart_seq is not None:
+            X[is_smart_seq[idx : idx + REDUCE_X_MINOR_STRIDE], :] /= feature_length
+        X = X.multiply(1.0 / X.sum(axis=1).A)
+        xI, xJ, xD = tocoo(X)
+        xI += idx + dataset_obs_joinid_start
+        xJ = local_var_joinids[xJ]
+        _roundHalfToEven(xD, keepbits=15)
+        xD[xD == 0] = sigma
+        X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
+
+    with soma.open(experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
+        X_raw = experiment.ms[MEASUREMENT_RNA_NAME].X["raw"]
+        X_normalized = experiment.ms[MEASUREMENT_RNA_NAME].X["normalized"]
+
+        for idx in range(row_start, min(row_start + n_rows, adata.n_obs), REDUCE_X_MINOR_STRIDE):
+            logger.info(f"processing X {adata.filename}, {row_start}, chunk {idx//REDUCE_X_MINOR_STRIDE}")
+
+            # get the chunk
+            X = adata[idx : idx + REDUCE_X_MINOR_STRIDE].X
+            if isinstance(X, np.ndarray):
+                X = sparse.csr_matrix(X)
+            # force CSR, as this is compat with TileDB global order for the Census (i.e., supports
+            # fragment concat)
+            X = X.tocsr()
+            X.eliminate_zeros()  # in-place operation
+            assert is_nonnegative_integral(X), "Found non-integer or negative valued data in X chunk"
+            chunk_obs_joinid_start = idx + dataset_obs_joinid_start
+            gc.collect()
+
+            # Accumulate various statistics and summary information
+            _obs_stats, _var_stats = _get_axis_stats(X, chunk_obs_joinid_start, local_var_joinids)
+            result = reduce_X_stats_chunk(
+                [
+                    result,
+                    {
+                        "obs_stats": _obs_stats,
+                        "var_stats": _var_stats,
+                        "presence": [],  # this is handled in the file reducer
+                    },
+                ]
+            )
+            del _obs_stats, _var_stats
+            gc.collect()
+
+            # Save raw layer
+            X_nnz = X.nnz
+            save_raw(X_raw, X, idx)
+            gc.collect()
+
+            # save normalized layer
+            save_normalized(X_normalized, X, idx)
+            assert X.nnz == X_nnz
+
+            del X
+            gc.collect()
+
+    logger.info(f"finished reading {adata.filename}, {row_start}")
+    return result
+
+
+def reduce_X_matrices(
+    base_path: str,
+    datasets: List[Dataset],
+    experiment_builders: List[ExperimentBuilder],
+) -> Dict[str, Delayed]:
+    """Create Dask delayed that will save and reduce all X data"""
+
+    def read_and_dispatch_partial_h5ad(
+        dataset_id: str,
+        dataset_h5ad_path: str,
+        experiment_uri: str,
+        row_start: int,
+        n_rows: int,
+        dataset_obs_joinid_start: int,
+        filter_spec: AnnDataFilterSpec,
+        global_var_joinids: pd.DataFrame,
+    ) -> XReduction:
+        return dispatch_X_chunk(
+            dataset_id,
+            experiment_uri,
+            open_anndata(
+                dataset_h5ad_path,
+                filter_spec=filter_spec,
+                base_path=base_path,
+                var_column_names=("_index", "feature_length"),
+            ),
+            row_start,
+            n_rows,
+            dataset_obs_joinid_start,
+            global_var_joinids,
+        )
+
+    per_eb_results = {}
+    for eb in experiment_builders:
         if eb.n_var == 0:
             # edge case for test builds that have no data for an entire experiment (organism)
             continue
 
         assert eb.global_var_joinids is not None
+        global_var_joinids = dask.delayed(eb.global_var_joinids)
 
-        anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
-        ad = anndata_cell_filter(unfiltered_ad)
-        if ad.n_obs == 0:
-            continue
+        all_datasets = []
+        for d in datasets:
+            dataset_obs_joinid_start = eb.dataset_obs_joinid_start.get(d.dataset_id, None)
+            if dataset_obs_joinid_start is None:
+                # this dataset has no data for this experiment
+                continue
 
-        # save X['raw']
-        layer_name = "raw"
-        logger.info(
-            f"{eb.name}: saving X layer '{layer_name}' for dataset '{dataset.dataset_id}' "
-            f"({progress[0]} of {progress[1]})"
-        )
-        local_var_joinids = ad.var.join(eb.global_var_joinids).soma_joinid.to_numpy()
-        assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset.dataset_id}"
-
-        # accumulators
-        obs_stats: pd.DataFrame = pd.DataFrame()
-        var_stats: pd.DataFrame = pd.DataFrame()
-
-        for idx in range(0, ad.n_obs, ACCUM_X_STRIDE):
-            logger.debug(f"{eb.name}/{layer_name}: X chunk {idx//ACCUM_X_STRIDE + 1} {dataset.dataset_id}")
-
-            X = ad[idx : idx + ACCUM_X_STRIDE].X
-            if isinstance(X, np.ndarray):
-                X = sparse.csr_matrix(X)
-
-            assert is_nonnegative_integral(X), f"{dataset.dataset_id} contains non-integer or negative valued data"
-
-            X.eliminate_zeros()
-            gc.collect()
-
-            # accumulate obs/var axis stats
-            _obs_stats, _var_stats = _get_axis_stats(X, idx + dataset_obs_joinid_start, local_var_joinids)
-            obs_stats = pd.concat([obs_stats, _obs_stats])
-            var_stats = var_stats.add(_var_stats, fill_value=0).astype(np.int64)
-            del _obs_stats, _var_stats
-            gc.collect()
-
-            # remap to match axes joinids
-            X = X.tocoo()
-            row = X.row.astype(np.int64) + idx + dataset_obs_joinid_start
-            assert (row >= 0).all()
-            col = local_var_joinids[X.col]
-            assert (col >= 0).all()
-            data = X.data
-            del X
-            gc.collect()
-
-            with soma.Experiment.open(eb.experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
-                experiment.ms[ms_name].X[layer_name].write(
-                    pa.Table.from_pydict(
-                        {
-                            "soma_dim_0": row,
-                            "soma_dim_1": col,
-                            "soma_data": data,
-                        }
+            if d.dataset_id in eb.dataset_n_obs:
+                # chunk up the dataset by MAJOR_STRIDE, put all chunks in a bag, and
+                # process each chunk, followed by adding per-dataset stats.
+                read_file_chunks = [
+                    (
+                        d.dataset_id,
+                        d.dataset_h5ad_path,
+                        eb.experiment_uri,
+                        chunk,
+                        REDUCE_X_MAJOR_STRIDE,
+                        dataset_obs_joinid_start,
+                        eb.specification.anndata_cell_filter_spec,
                     )
+                    for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_STRIDE)
+                ]
+                b = dask.bag.from_sequence(read_file_chunks).starmap(
+                    read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids
                 )
-
-            del row, col, data
-            gc.collect()
-
-        # Save presence information by dataset_id
-        assert dataset.soma_joinid >= 0  # i.e., it was assigned prior to this step
-        assert ad.n_vars <= eb.n_var
-        obs_stats["n_measured_vars"] = (var_stats.nnz > 0).sum()
-        var_stats["n_measured_obs"] = np.zeros(
-            (len(var_stats),), dtype=CENSUS_VAR_TABLE_SPEC.field("n_measured_obs").to_pandas_dtype()
-        )
-        var_stats.n_measured_obs[var_stats.nnz > 0] = ad.n_obs
-
-        # sanity check on stats
-        assert len(var_stats) == ad.n_vars
-        assert len(obs_stats) == ad.n_obs
-        assert (
-            var_stats.n_measured_obs[var_stats.n_measured_obs != 0] == ad.n_obs
-        ).all(), f"n_measured_obs mismatch: {eb.name}:{dataset.dataset_id}"
-        assert (
-            obs_stats.n_measured_vars == np.count_nonzero(var_stats.nnz > 0)
-        ).all(), f"n_measured_vars mismatch: {eb.name}:{dataset.dataset_id}"
-
-        results.append(
-            (
-                PresenceResult(
-                    dataset.dataset_id,
-                    dataset.soma_joinid,
-                    eb.name,
-                    (var_stats.nnz > 0).to_numpy(),
-                    var_stats.index.to_numpy(),
-                ),
-                AxisStats(eb.name, obs_stats, var_stats),
-            )
-        )
-
-        # tidy
-        del ad, local_var_joinids, obs_stats, var_stats
-        gc.collect()
-
-    logger.debug(f"Saving X layer for dataset - finish {dataset.dataset_id} ({progress[0]} of {progress[1]})")
-    log_process_resource_status()
-    return results
-
-
-@overload
-def _accumulate_X(
-    assets_path: str,
-    dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
-) -> AccumulateXResults:
-    ...
-
-
-@overload
-def _accumulate_X(
-    assets_path: str,
-    dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
-    executor: Optional[ResourcePoolProcessExecutor],
-) -> concurrent.futures.Future[AccumulateXResults]:
-    ...
-
-
-def _accumulate_X(
-    assets_path: str,
-    dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
-    executor: Optional[ResourcePoolProcessExecutor] = None,
-) -> Union[concurrent.futures.Future[AccumulateXResults], AccumulateXResults]:
-    """
-    Save X layer data for a single AnnData, for all Experiments. Return a future if
-    executor is specified, otherwise immediately do the work.
-    """
-
-    # build params to pass to child workers - this avoids pickling unecessary
-    # data (or data that can't be pickled)
-    eb_params = []
-    for eb in experiment_builders:
-        # sanity checks
-        assert eb.dataset_obs_joinid_start is not None
-        assert eb.n_var == 0 or eb.global_var_joinids is not None
-        assert eb.experiment_uri is not None
-        eb_params.append(
-            AccumXEBParams(
-                name=eb.name,
-                n_obs=eb.n_obs,
-                n_var=eb.n_var,
-                anndata_cell_filter_spec=eb.anndata_cell_filter_spec,
-                global_var_joinids=eb.global_var_joinids,
-                experiment_uri=eb.experiment_uri,
-            )
-        )
-
-    dataset_obs_joinid_starts = [
-        eb.dataset_obs_joinid_start.get(dataset.dataset_id, None) for eb in experiment_builders
-    ]
-
-    if executor is not None:
-        return executor.submit(
-            # memory budget:
-            #   X slices: stride * avg_var_nnz * 20 bytes * overhead
-            # + anndata obs/var:  (n_var * 5 cols * 8 + n_obs * 4 * 8) * overhead
-            # + stats space: 5 col * n_obs * 8 bytes * overhead
-            # + working space: fixed value
-            int(
-                (
-                    max(dataset.mean_genes_per_cell, 3000)
-                    * min(ACCUM_X_STRIDE, dataset.dataset_total_cell_count)
-                    * 20
-                    * 8
+                i = b.reduction(reduce_X_stats_chunk, reduce_X_stats_chunk)
+                d = dask.delayed(compute_X_file_stats)(
+                    i,
+                    n_obs=eb.dataset_n_obs[d.dataset_id],
+                    dataset_id=d.dataset_id,
+                    dataset_soma_joinid=d.soma_joinid,
+                    eb_name=eb.name,
                 )
-                + (100_000 * 40 + dataset.dataset_total_cell_count * 32) * 8
-                + (dataset.dataset_total_cell_count * 40) * 8
-                + (2 * 1024**3)
-            ),
-            _accumulate_all_X_layers,
-            assets_path,
-            dataset,
-            eb_params,
-            dataset_obs_joinid_starts,
-            MEASUREMENT_RNA_NAME,
-            progress,
+                all_datasets.append(d)
+
+        # Reduce all datasets to the experiment results
+        per_eb_results[eb.name] = dask.bag.from_delayed(all_datasets).reduction(
+            reduce_X_stats_chunk, reduce_X_stats_chunk
         )
-    else:
-        return _accumulate_all_X_layers(
-            assets_path,
-            dataset,
-            eb_params,
-            dataset_obs_joinid_starts,
-            MEASUREMENT_RNA_NAME,
-            progress,
-        )
+
+    (per_eb_results,) = dask.optimize(per_eb_results)
+    return per_eb_results
 
 
 def populate_X_layers(
@@ -721,67 +687,29 @@ def populate_X_layers(
     experiment_builders: List[ExperimentBuilder],
     args: CensusBuildArgs,
 ) -> None:
-    """
-    Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
-    """
-    # populate X layers
-    logger.debug("populate_X_layers begin")
-    results: List[AccumulateXResult] = []
-    if args.config.multi_process:
-        # reserve memory to accumulate the stats
-        n_obs = sum(eb.n_obs for eb in experiment_builders)
-        n_stats_per_obs = len(CENSUS_OBS_STATS_COLUMNS) * 8  # all 64 bit stats
-        total_memory_budget = args.config.memory_budget - (n_obs * n_stats_per_obs * 2)
+    grph = reduce_X_matrices(assets_path, datasets, experiment_builders)
+    result: Dict[str, XReduction]
+    (result,) = cast(tuple[Dict[str, XReduction]], dask.compute(grph))
 
-        with create_resource_pool_executor(args, max_resources=total_memory_budget) as pe:
-            futures = {
-                _accumulate_X(
-                    assets_path,
-                    dataset,
-                    experiment_builders,
-                    progress=(n, len(datasets)),
-                    executor=pe,
-                ): dataset
-                for n, dataset in enumerate(datasets, start=1)
-            }
-
-            for n, f in enumerate(concurrent.futures.as_completed(futures), start=1):
-                log_on_broken_process_pool(pe)
-                # propagate exceptions - not expecting any other return values
-                results += f.result()
-                logger.info(f"populate X for dataset {futures[f].dataset_id} ({n} of {len(futures)}) complete.")
-                log_process_resource_status()
-
-    else:
-        for n, dataset in enumerate(datasets, start=1):
-            results += _accumulate_X(assets_path, dataset, experiment_builders, progress=(n, len(datasets)))
-
-    eb_by_name = {e.name: e for e in experiment_builders}
-
-    # sanity check
     for eb in experiment_builders:
-        assert eb.obs_df is None or np.array_equal(eb.obs_df.index.to_numpy(), eb.obs_df.soma_joinid.to_numpy())
+        if eb.name not in result:
+            continue
 
-    logger.debug("populate_X_layers - begin presence summary")
-    for presence, _ in results:
-        eb_by_name[presence.eb_name].presence[presence.dataset_soma_joinid] = (
-            presence.data,
-            presence.cols,
-        )
+        eb_summary: XReduction = result[eb.name]
+        assert isinstance(eb.obs_df, pd.DataFrame)
+        eb.obs_df.update(eb_summary["obs_stats"])
+        assert isinstance(eb.var_df, pd.DataFrame)
+        eb.var_df.loc[
+            eb_summary["var_stats"].index.to_numpy(),
+            eb_summary["var_stats"].columns.to_list(),
+        ] += eb_summary["var_stats"]
 
-    logger.debug("populate_X_layers - begin axis stats summary")
-    for _, axis_stats in results:
-        eb = eb_by_name[axis_stats.eb_name]
-        if eb.obs_df is not None:
-            eb.obs_df.update(axis_stats.obs_stats)
-        if eb.var_df is not None:
-            eb.var_df.loc[
-                axis_stats.var_stats.index.to_numpy(),
-                axis_stats.var_stats.columns.to_list(),
-            ] += axis_stats.var_stats
-
-    logger.debug("populate_X_layers finish")
-    log_process_resource_status()
+        for presence in eb_summary["presence"]:
+            assert presence.eb_name == eb.name
+            eb.presence[presence.dataset_soma_joinid] = (
+                presence.data,
+                presence.cols,
+            )
 
 
 class SummaryStats(TypedDict):
@@ -836,75 +764,6 @@ def reopen_experiment_builders(
 
         for eb in experiment_builders:
             yield eb
-
-
-def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.NDArray[np.bool_]]) -> None:
-    """
-    Helper for ExperimentBuilder.write_X_normalized.
-
-    Read indicated rows from X['raw'], write to X['normalized']
-    """
-    experiment_uri, obs_joinid_start, n, feature_length, is_smart_seq = args
-    logger.info(f"Write X normalized - starting block {obs_joinid_start}")
-
-    sigma = np.finfo(np.float32).smallest_subnormal
-
-    with soma.open(
-        urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "raw"), mode="r", context=SOMA_TileDB_Context()
-    ) as X_raw:
-        with soma.open(
-            urlcat(experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X", "normalized"),
-            mode="w",
-            context=SOMA_TileDB_Context(),
-        ) as X_normalized:
-            for tbl, (obs_indices, _) in (
-                X_raw.read(coords=(slice(obs_joinid_start, obs_joinid_start + n - 1),))
-                .blockwise(axis=0, size=2**16, reindex_disable_on_axis=[1], eager=False)
-                .tables()
-            ):
-                d0: npt.NDArray[np.int64] = tbl["soma_dim_0"].to_numpy()
-                d1: npt.NDArray[np.int64] = tbl["soma_dim_1"].to_numpy()
-                data: npt.NDArray[np.float32] = tbl["soma_data"].to_numpy()
-                d0_index = obs_indices.to_numpy()
-                del tbl, obs_indices
-                data = _normalize(d0, d1, data, is_smart_seq[d0_index], feature_length)
-                data = _roundHalfToEven(data, keepbits=15)
-                data[data == 0] = sigma
-                gc.collect()
-                X_normalized.write(
-                    pa.Table.from_pydict(
-                        {
-                            "soma_dim_0": d0_index[d0],
-                            "soma_dim_1": d1,
-                            "soma_data": data,
-                        }
-                    )
-                )
-                del d0_index, d0, d1, data
-                gc.collect()
-
-    logger.info(f"Write X normalized - finished block {obs_joinid_start}")
-
-
-@numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
-def _normalize(
-    d0: npt.NDArray[np.int64],
-    d1: npt.NDArray[np.int64],
-    data: npt.NDArray[np.float32],
-    is_smart_seq: npt.NDArray[np.bool_],
-    feature_length: npt.NDArray[np.float32],
-) -> npt.NDArray[np.float32]:
-    # normalize and sum COO data along rows (assertion: will have full rows (along axis 0))
-    norm_data = np.where(is_smart_seq[d0], data / feature_length[d1], data)
-    row_sum = np.zeros((d0.max() + 1,), dtype=np.float64)
-    for i in range(len(d0)):
-        row_sum[d0[i]] += norm_data[i]
-
-    result = np.empty_like(data)
-    for i in range(len(d0)):
-        result[i] = norm_data[i] / row_sum[d0[i]]
-
-    return result
 
 
 @numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424

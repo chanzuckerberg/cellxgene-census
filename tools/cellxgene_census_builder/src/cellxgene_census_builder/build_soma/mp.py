@@ -5,8 +5,7 @@ import threading
 import time
 import weakref
 from collections import deque
-from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
-from contextlib import contextmanager
+from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from functools import partial
 from types import TracebackType
 from typing import (
@@ -14,7 +13,6 @@ from typing import (
     Callable,
     Generic,
     Iterable,
-    Iterator,
     Literal,
     Mapping,
     Optional,
@@ -110,53 +108,8 @@ def log_on_broken_process_pool(ppe: Union[ProcessPoolExecutor, "ResourcePoolProc
     return
 
 
-# TODO: when the builder is updated to cellxgene_census 1.3+, we can pull
-# EagerIterator out of the experimental.util package. Until then, it is hard to keep
-# it DRY.
-
 _T = TypeVar("_T")
 _P = ParamSpec("_P")
-
-
-class EagerIterator(Iterator[_T]):
-    def __init__(
-        self,
-        iterator: Iterator[_T],
-        pool: Optional[Executor] = None,
-    ):
-        super().__init__()
-        self.iterator = iterator
-        self._pool = pool or ThreadPoolExecutor()
-        self._own_pool = pool is None
-        self._future: Optional[Future[_T]] = None
-        self._fetch_next()
-
-    def _fetch_next(self) -> None:
-        self._future = self._pool.submit(self.iterator.__next__)
-        logger.debug("EagerIterator: fetching next iterator element, eagerly")
-
-    def __next__(self) -> _T:
-        try:
-            assert self._future
-            res = self._future.result()
-            self._fetch_next()
-            return res
-        except StopIteration:
-            self._cleanup()
-            raise
-
-    def _cleanup(self) -> None:
-        logger.debug("EagerIterator: cleaning up eager iterator")
-        if self._own_pool:
-            self._pool.shutdown()
-
-    def __del__(self) -> None:
-        # Ensure the threadpool is cleaned up in the case where the
-        # iterator is not exhausted. For more information on __del__:
-        # https://docs.python.org/3/reference/datamodel.html#object.__del__
-        self._cleanup()
-        super_del = getattr(super(), "__del__", lambda: None)
-        super_del()
 
 
 @attrs.define
@@ -394,21 +347,31 @@ class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
         process_init(self.args)
 
 
-def create_dask_client(args: CensusBuildArgs) -> dask.distributed.Client:
+def create_dask_client(
+    args: CensusBuildArgs,
+    *,
+    n_workers: Optional[int] = None,
+    threads_per_worker: Optional[int] = None,
+    memory_limit: str | float | int | None = "auto",
+) -> dask.distributed.Client:
     """Create and return a Dask client."""
 
     # create a new client
     assert _mp_config_checks()
 
-    with dask.config.set({"distributed.comm.timeouts.connect": "90s"}):
+    n_workers = max(1, n_workers or cpu_count())
+    with dask.config.set({"distributed.comm.timeouts": {"connect": "120s", "tcp": "120s"}}):
         client = dask.distributed.Client(
-            n_workers=cpu_count(),
-            threads_per_worker=2,
-            memory_limit=None,
+            n_workers=n_workers,
+            threads_per_worker=threads_per_worker,
+            memory_limit=memory_limit,
             dashboard_address=":8787" if args.config.dashboard else None,
         )
         client.register_plugin(SetupDaskWorker(args))
-        logger.debug(f"create_dask_client {client}")
+        logger.info(f"Dask client created: {client}")
+        logger.info(f"Dask client using cluster: {client.cluster}")
+        if args.config.dashboard:
+            logger.info(f"Dashboard link: {client.dashboard_link}")
 
         # Release GIL, allowing the scheduler thread to run. Without this, the scheduler and
         # worker startup will race, occasionally causing a heartbeat error to be logged on startup.
@@ -416,27 +379,3 @@ def create_dask_client(args: CensusBuildArgs) -> dask.distributed.Client:
         time.sleep(1.0)
 
         return client
-
-
-@contextmanager
-def default_dask_client(args: CensusBuildArgs) -> dask.distributed.Client:
-    """Reentrant context manager returning the default dask client and closing it on outer context exit"""
-    try:
-        current_client = dask.distributed.Client.current()
-        yield current_client
-        return
-    except ValueError:
-        # Fall through to create a Client
-        pass
-
-    client = create_dask_client(args)
-    try:
-        yield client
-    finally:
-        time.sleep(1.0)
-        try:
-            # client.close(timeout="5m")
-            client.shutdown()
-        except dask.distributed.TimeoutError:
-            # retry?
-            logger.error("Timeout shutting down Dask cluster")

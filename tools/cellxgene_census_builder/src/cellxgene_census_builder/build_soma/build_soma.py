@@ -1,4 +1,3 @@
-import gc
 import logging
 from datetime import datetime, timezone
 from typing import List, cast
@@ -8,8 +7,9 @@ import pandas as pd
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
+from ..util import cpu_count
 from .census_summary import create_census_summary
-from .consolidate import consolidate, submit_consolidate
+from .consolidate import consolidate, start_async_consolidation, stop_async_consolidation, submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -25,7 +25,7 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import default_dask_client
+from .mp import create_dask_client
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
@@ -71,7 +71,7 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
     prepare_file_system(args)
 
-    with default_dask_client(args) as dask_client:
+    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=2):
         # Step 1 - get all source datasets
         datasets = build_step1_get_source_datasets(args)
 
@@ -83,21 +83,28 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
+    # Constraining parallelism is critical at this step, as each worker utilizes 64GiB+ of buffer and will
+    # create ~ncores threads during the write phase (this code assumes hosts with 8GiB/core).
+    n_workers = max(1, cpu_count() // 16)
+    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as dask_client:
+        if args.config.consolidate:
+            consolidator = start_async_consolidation(dask_client, root_collection.uri)
+
         # Step 4 - populate X layers
         build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
-        gc.collect()
 
-        # Step 5- write out dataset manifest and summary information
-        build_step5_save_axis_and_summary_info(
-            root_collection, experiment_builders, filtered_datasets, args.config.build_tag
-        )
+        if consolidator:
+            stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
 
-        # Step 6 - create and save derived artifacts
-        build_step6_save_derived_data(root_collection, experiment_builders, args)
+    # Step 5- write out dataset manifest and summary information
+    build_step5_save_axis_and_summary_info(
+        root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+    )
 
-        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-        tiledb_soma_1969_work_around(root_collection.uri)
+    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+    tiledb_soma_1969_work_around(root_collection.uri)
 
+    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=None) as dask_client:
         # Validation and consolidation are done in parallel, thanks to the TileDB
         # concurrency model. The only important constraint is that vacuuming _MUST_
         # be done _after_ validation has completed, to avoid races between readers
@@ -110,7 +117,8 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             # until validate is converted to dask, it creates MP pools internally
             # so call directly
             validate_soma(args)
-        dask_client.gather(valcon_futures)
+        if valcon_futures:
+            dask_client.gather(valcon_futures)
 
         # Once validated and consolidated, so a second pass with vacuuming, and
         # then validate it worked correctly
@@ -206,7 +214,9 @@ def build_step3_populate_obs_and_var_axes(
     ) -> None:
         # per dataset, calculate and date total cell count
         cells_per_dataset = (
-            pd.concat(obs.value_counts("dataset_id") for _, (obs, _) in accumulated).groupby("dataset_id").sum()
+            pd.concat(obs.value_counts("dataset_id") for _, (obs, _) in accumulated if len(obs))
+            .groupby("dataset_id")
+            .sum()
         )
         for dataset in datasets:
             dataset.dataset_total_cell_count += cast(int, cells_per_dataset.get(dataset.dataset_id, default=0))  # type: ignore[arg-type]
@@ -272,22 +282,6 @@ def build_step5_save_axis_and_summary_info(
     logger.info("Build step 5 - Save axis and summary info - finished")
 
 
-def build_step6_save_derived_data(
-    root_collection: soma.Collection, experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
-) -> None:
-    logger.info("Build step 6 - Creating derived objects - started")
-
-    for eb in reopen_experiment_builders(experiment_builders):
-        eb.write_X_normalized(args)
-
-        # TODO: to simplify code at some build time expense, we could move
-        # feature presence matrix building into this step, and build from
-        # X['raw'] rather than building from source H5AD.
-
-    logger.info("Build step 6 - Creating derived objects - finished")
-    return
-
-
 def tiledb_soma_1969_work_around(census_uri: str) -> None:
     """See single-cell-data/TileDB-SOMA#1969 and other issues related. Remove any inserted bounding box metadata"""
 
@@ -317,4 +311,5 @@ def tiledb_soma_1969_work_around(census_uri: str) -> None:
         logger.info(f"tiledb_soma_1969_work_around: deleting bounding box from {uri}")
         with soma.open(uri, mode="w") as A:
             for key in bbox_metadata_keys:
-                del A.metadata[key]
+                if key in A.metadata:
+                    del A.metadata[key]

@@ -29,6 +29,10 @@ def main() -> int:
         }
     )
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.working_dir), config=default_config)
+    # enable the dashboard depending on verbosity level
+    if args.config.verbose:
+        args.config.dashboard = True
+
     process_init(args)
     logger.info(args)
 

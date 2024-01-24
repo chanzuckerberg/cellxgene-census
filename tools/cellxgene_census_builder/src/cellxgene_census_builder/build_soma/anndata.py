@@ -250,12 +250,13 @@ CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
 def open_anndata(
-    dataset: Dataset,
+    dataset: str | Dataset,
     *,
-    base_path: str,
+    base_path: Optional[str] = None,
     include_filter_columns: bool = False,
     obs_column_names: Optional[Tuple[str, ...]] = None,
     var_column_names: Optional[Tuple[str, ...]] = None,
+    filter_spec: Optional[AnnDataFilterSpec] = None,
 ) -> AnnDataProxy:
     """
     Open the dataset and return an AnnData-like AnnDataProxy object.
@@ -267,15 +268,19 @@ def open_anndata(
             False (default), only load the columsn specified by the user.
     """
 
+    h5ad_path = dataset.dataset_h5ad_path if isinstance(dataset, Dataset) else dataset
+    h5ad_path = urlcat(base_path, h5ad_path) if base_path is not None else h5ad_path
+
+    include_filter_columns = include_filter_columns or (filter_spec is not None)
     if include_filter_columns:
         obs_column_names = tuple(set(CXG_OBS_COLUMNS_MINIMUM_READ + (obs_column_names or ())))
         var_column_names = tuple(set(CXG_VAR_COLUMNS_MINIMUM_READ + (var_column_names or ())))
 
-    return AnnDataProxy(
-        urlcat(base_path, dataset.dataset_h5ad_path),
-        obs_column_names=obs_column_names,
-        var_column_names=var_column_names,
-    )
+    adata = AnnDataProxy(h5ad_path, obs_column_names=obs_column_names, var_column_names=var_column_names)
+    if filter_spec is not None:
+        adata = make_anndata_cell_filter(filter_spec)(adata)
+
+    return adata
 
 
 class AnnDataFilterFunction(Protocol):

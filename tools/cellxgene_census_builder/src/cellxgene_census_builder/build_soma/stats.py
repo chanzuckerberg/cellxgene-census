@@ -32,7 +32,7 @@ def get_obs_stats(
             "raw_variance_nnz": raw_variance_nnz.astype(
                 CENSUS_OBS_TABLE_SPEC.field("raw_variance_nnz").to_pandas_dtype()
             ),
-            "n_measured_vars": -1,  # placeholder - actual stat calculated from presence matrix
+            "n_measured_vars": -1,  # placeholder
         }
     )
 
@@ -52,6 +52,7 @@ def get_var_stats(
     return pd.DataFrame(
         data={
             "nnz": nnz.astype(CENSUS_VAR_TABLE_SPEC.field("nnz").to_pandas_dtype()),
+            "n_measured_obs": 0,  # placeholder
         }
     )
 
