@@ -57,14 +57,21 @@ if __name__ == "__main__":
         scvi_dataset.obs["dataset_id"].astype(str) + "_" + scvi_dataset.obs["donor_id"].astype(str)
     )
 
+    model_config = config.get("model")
+    n_hidden = model_config.get("n_hidden")
+    n_latent = model_config.get("n_latent")
+    n_layers = model_config.get("n_layers")
+    dropout_rate = model_config.get("dropout_rate")
+    output_filename = model_config.get("filename")
+
     scvi_v2.MrVI.setup_anndata(scvi_dataset, sample_key="sample", batch_key="nuisance", labels_key="cell_type")
     mrvi_model = scvi_v2.MrVI(scvi_dataset, **model_kwargs)
 
-    logger = TensorBoardLogger("tb_logs", name="my_model")
+    logger = TensorBoardLogger("mrvi_tb_logs", name="mrvi_50_epochs")
 
     mrvi_model.train(max_epochs=50, batch_size=4096, use_gpu=True, accelerator="gpu", devices=1, **train_kwargs)
 
-    mrvi_model.save(filename)
+    mrvi_model.save(output_filename)
 
     # # Get z representation
     # adata.obsm["X_mrvi_z"] = mrvi_model.get_latent_representation(give_z=True)
