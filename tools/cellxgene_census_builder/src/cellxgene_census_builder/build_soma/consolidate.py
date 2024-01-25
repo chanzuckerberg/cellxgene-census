@@ -20,6 +20,7 @@ class ConsolidationCandidate:
     uri: str
     soma_type: str
     n_columns: int
+    n_fragments: int  # zero if Group
 
     def is_array(self) -> bool:
         return self.soma_type in [
@@ -97,9 +98,13 @@ def list_uris_to_consolidate(
         if type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
             uris += list_uris_to_consolidate(soma_obj)
             n_columns = 0
+            n_fragments = 0
         else:
             n_columns = len(soma_obj.schema)
-        uris.append(ConsolidationCandidate(uri=soma_obj.uri, soma_type=type, n_columns=n_columns))
+            n_fragments = len(tiledb.array_fragments(soma_obj.uri))
+        uris.append(
+            ConsolidationCandidate(uri=soma_obj.uri, soma_type=type, n_columns=n_columns, n_fragments=n_fragments)
+        )
 
     return uris
 
@@ -158,7 +163,7 @@ def _consolidate_tiledb_object(obj: ConsolidationCandidate, vacuum: bool) -> str
 
 
 def start_async_consolidation(
-    client: dask.distributed.Client, uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 10.0
+    client: dask.distributed.Client, uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 7.0
 ) -> Future:
     """
     Start an async consolidation process that will safely work alongside writers.
@@ -179,20 +184,27 @@ def _async_consolidator(uri: str, fragment_count_threshold: int, polling_period_
     dask.distributed.secede()  # don't consume a worker slot
 
     while True:
-        # Arrays are the only time consuming consolidation step, so focus on them
-        candidates = [c for c in _gather(uri) if c.is_array()]
-        for candidate in candidates:
-            # stop if asked
-            if consolidation_stop_flag.get():
-                logger.info(f"Async consolidator - stopping for {uri}")
-                return
+        # stop if asked
+        if consolidation_stop_flag.get():
+            logger.info(f"Async consolidator - stopping for {uri}")
+            return
 
-            n_fragments = len(tiledb.array_fragments(candidate.uri))
-            if n_fragments > fragment_count_threshold:
-                logger.info(f"Async consolidator: fragments={n_fragments}, uri={candidate.uri}")
-                _consolidate_tiledb_object(candidate, vacuum=True)
-
-        time.sleep(polling_period_sec)
+        # Arrays are the only resource intensive consolidation step. Prioritize the array
+        # with the largest number of fragments (as a weak proxy for work required to consolidate).
+        #
+        candidates = list(
+            sorted(
+                (c for c in _gather(uri) if c.is_array() and c.n_fragments > 1),
+                key=lambda c: c.n_fragments,
+                reverse=True,
+            )
+        )
+        if candidates:
+            c = candidates.pop()
+            logger.info(f"Async consolidator: fragments={c.n_fragments}, uri={c.uri}")
+            _consolidate_tiledb_object(c, vacuum=True)
+        else:
+            time.sleep(polling_period_sec)
 
 
 def stop_async_consolidation(fs: Future) -> None:
