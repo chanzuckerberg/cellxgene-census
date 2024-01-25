@@ -25,8 +25,9 @@ if __name__ == "__main__":
 
     train_kwargs = {
         "early_stopping": True,
-        "plan_kwargs": {"lr": 1e-3, "n_epochs_kl_warmup": 20},
     }
+
+    plan_kwargs = {"lr": 1e-3, "n_epochs_kl_warmup": 20}
 
     model_kwargs = {
         "n_latent": 100,
@@ -69,7 +70,7 @@ if __name__ == "__main__":
 
     logger = TensorBoardLogger("mrvi_tb_logs", name="mrvi_50_epochs")
 
-    mrvi_model.train(max_epochs=50, batch_size=4096, use_gpu=True, accelerator="gpu", devices=1, **train_kwargs)
+    mrvi_model.train(max_epochs=50, batch_size=4096, use_gpu=True, plan_kwargs=plan_kwargs, **train_kwargs)
 
     mrvi_model.save(output_filename)
 
