@@ -121,7 +121,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         obs: soma.DataFrame,
         X: soma.SparseNDArray,
         obs_column_names: Sequence[str],
-        obs_joinids_chunked: npt.NDArray[np.int64],  # 2D
+        obs_joinids_chunked: List[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
         shuffle_rng: Optional[Generator] = None,
     ):
@@ -133,7 +133,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
 
     @staticmethod
     def _maybe_local_shuffle_obs_joinids(
-        obs_joinids_chunked: npt.NDArray[np.int64], shuffle_rng: Optional[Generator] = None
+        obs_joinids_chunked: List[npt.NDArray[np.int64]], shuffle_rng: Optional[Generator] = None
     ) -> Iterator[npt.NDArray[np.int64]]:
         return (
             shuffle_rng.permutation(obs_joinid_chunk) if shuffle_rng else obs_joinid_chunk
@@ -223,7 +223,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         obs: soma.DataFrame,
         X: soma.SparseNDArray,
         obs_column_names: Sequence[str],
-        obs_joinids_chunked: npt.NDArray[np.int64],  # 2D
+        obs_joinids_chunked: List[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
         batch_size: int,
         encoders: Dict[str, LabelEncoder],
@@ -504,14 +504,20 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     @staticmethod
     def _subset_ids_to_partition(
         ids_chunked: List[npt.NDArray[np.int64]], partition_index: int, num_partitions: int
-    ) -> npt.NDArray[np.int64]:  # 2D NDArray
+    ) -> List[npt.NDArray[np.int64]]:
         """Returns a single partition of the obs_joinids_chunked (a 2D ndarray), based upon the current process's distributed rank and world
         size."""
 
         # subset to a single partition
         # typing does not reflect that is actually a List of 2D NDArrays
-        partitions: List[npt.NDArray[np.int64]] = np.array_split(np.array(ids_chunked), num_partitions)
-        partition = partitions[partition_index]
+        # Note: This causes the following warning:
+        # `VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of
+        # lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you
+        # must specify 'dtype=object' when creating the ndarray.`
+
+        # split ids_chunked in to num_partitions partitions
+        partition_indices = np.array_split(range(len(ids_chunked)), num_partitions)
+        partition = [ids_chunked[i] for i in partition_indices[partition_index]]
 
         if pytorch_logger.isEnabledFor(logging.DEBUG) and len(partition) > 0:
             pytorch_logger.debug(
@@ -567,7 +573,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             dist_partition=dist.get_rank() if dist.is_initialized() else 0,
             num_dist_partitions=dist.get_world_size() if dist.is_initialized() else 1,
         )
-        obs_joinids_chunked_partition: npt.NDArray[np.int64] = self._subset_ids_to_partition(
+        obs_joinids_chunked_partition: List[npt.NDArray[np.int64]] = self._subset_ids_to_partition(
             obs_joinids_chunked, partition, partitions
         )
 
