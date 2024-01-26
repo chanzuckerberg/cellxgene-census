@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from typing import List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
 
 import attrs
 import dask.distributed
@@ -109,8 +109,13 @@ def list_uris_to_consolidate(
     return uris
 
 
-def _consolidate_array(obj: ConsolidationCandidate, vacuum: bool) -> None:
-    modes = ["fragment_meta", "array_meta", "commits", "fragments"]
+def _consolidate_array(
+    obj: ConsolidationCandidate,
+    vacuum: bool,
+    consolidation_modes: Optional[List[str]] = None,
+    consolidation_config: Optional[Dict[str, str]] = None,
+) -> None:
+    modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
     for mode in modes:
         # Once we update to TileDB core 2.19, remove this and replace with
@@ -125,10 +130,11 @@ def _consolidate_array(obj: ConsolidationCandidate, vacuum: bool) -> None:
             config=tiledb.Config(
                 {
                     **DEFAULT_TILEDB_CONFIG,
+                    "sm.consolidation.mode": mode,
                     # once we update to TileDB core 2.19, remove this and replace
                     # with sm.consolidation.total_buffer_size
                     "sm.consolidation.buffer_size": buffer_size,
-                    "sm.consolidation.mode": mode,
+                    **(consolidation_config or {}),
                 }
             ),
         )
@@ -144,16 +150,23 @@ def _consolidate_group(obj: ConsolidationCandidate, vacuum: bool) -> None:
         tiledb.Group.vacuum_metadata(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG}))
 
 
-def _consolidate_tiledb_object(obj: ConsolidationCandidate, vacuum: bool) -> str:
+def _consolidate_tiledb_object(
+    obj: ConsolidationCandidate,
+    vacuum: bool,
+    consolidation_modes: Optional[List[str]] = None,
+    consolidation_config: Optional[Dict[str, str]] = None,
+) -> str:
     assert soma.get_storage_engine() == "tiledb"
 
     try:
         logger.info(f"Consolidate[vacuum={vacuum}] start, uri={obj.uri}")
         consolidate_start_time = time.perf_counter()
         if obj.is_array():
-            _consolidate_array(obj, vacuum)
+            _consolidate_array(
+                obj, vacuum=vacuum, consolidation_modes=consolidation_modes, consolidation_config=consolidation_config
+            )
         else:
-            _consolidate_group(obj, vacuum)
+            _consolidate_group(obj, vacuum=vacuum)
         consolidate_time = time.perf_counter() - consolidate_start_time
         logger.info(f"Consolidate[vacuum={vacuum}] finish, {consolidate_time:.2f} seconds, uri={obj.uri}")
         return obj.uri
@@ -190,7 +203,7 @@ def _async_consolidator(uri: str, fragment_count_threshold: int, polling_period_
             return
 
         # Arrays are the only resource intensive consolidation step. Prioritize the array
-        # with the largest number of fragments (as a weak proxy for work required to consolidate).
+        # with the largest number of fragments (a weak proxy for work required to consolidate).
         #
         candidates = list(
             sorted(
@@ -202,7 +215,12 @@ def _async_consolidator(uri: str, fragment_count_threshold: int, polling_period_
         if candidates:
             c = candidates.pop()
             logger.info(f"Async consolidator: fragments={c.n_fragments}, uri={c.uri}")
-            _consolidate_tiledb_object(c, vacuum=True)
+            _consolidate_tiledb_object(
+                c,
+                vacuum=True,
+                consolidation_modes=["fragments"],
+                consolidation_config={"sm.consolidation.step_min_frags": "4", "sm.consolidation.step_max_frags": "16"},
+            )
         else:
             time.sleep(polling_period_sec)
 

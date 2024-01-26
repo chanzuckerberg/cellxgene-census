@@ -111,7 +111,7 @@ def pcopyfile(from_url: str, to_path: str, exist_ok: bool = True, block_size: in
             for attempt in range(4):
                 try:
                     return (blk_off, read_block(f, blk_off, blk_len))
-                except aiohttp.ClientPayloadError as e:
+                except (aiohttp.ClientPayloadError, ConnectionError) as e:
                     logger.error(f"Fetch of {from_url} failed: {str(e)}")
                     last_error = e
                     time.sleep(2**attempt * sleep_for_secs)

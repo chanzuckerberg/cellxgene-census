@@ -575,10 +575,11 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
         assert (feature_length > 0).any()
         assert X_raw.shape[1] == n_cols
 
+        # Smallish, else will fail in scipy due to int32 overflow during coordinate broadcasting
+        # For more info: https://github.com/scipy/scipy/issues/13155
         ROW_SLICE_SIZE = 25_000
-        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (
-            2**31 - 1
-        )  # else, will fail in scipy due to int32 overflow during coordinate broadcasting
+        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (2**31 - 1)
+
         for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
             raw = (
                 X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))

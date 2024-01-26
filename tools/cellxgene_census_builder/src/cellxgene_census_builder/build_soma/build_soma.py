@@ -87,29 +87,36 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
     # Constraining parallelism is critical at this step, as each worker utilizes 64GiB+ of buffer and will
     # create ~ncores threads during the write phase (this code assumes hosts with 8GiB/core).
-    n_workers = max(1, cpu_count() // 16)
+    n_workers = max(1, cpu_count() // 16) + 2
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as dask_client:
-        if args.config.consolidate:
-            consolidator = start_async_consolidation(dask_client, root_collection.uri)
+        try:
+            if args.config.consolidate:
+                consolidator = start_async_consolidation(dask_client, root_collection.uri)
 
-        # Step 4 - populate X layers
-        build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
+            # Step 4 - populate X layers
+            build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
 
-        if consolidator:
-            stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
+            # Prune datasets that we will not use, and do not want to include in the build
+            prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
 
-    # Prune datasets that we will not use, and do not want to include in the build
-    prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+            # Step 5- write out dataset manifest and summary information
+            build_step5_save_axis_and_summary_info(
+                root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+            )
 
-    # Step 5- write out dataset manifest and summary information
-    build_step5_save_axis_and_summary_info(
-        root_collection, experiment_builders, filtered_datasets, args.config.build_tag
-    )
+        finally:
+            if consolidator:
+                stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
+                del consolidator
 
-    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-    tiledb_soma_1969_work_around(root_collection.uri)
+        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+        tiledb_soma_1969_work_around(root_collection.uri)
 
-    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=None) as dask_client:
+        # XXX indented while commented
+        # with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=None) as dask_client:
+
+        # XXX TODO: scale cluster up once we move validation into Dask
+
         # Validation and consolidation are done in parallel, thanks to the TileDB
         # concurrency model. The only important constraint is that vacuuming _MUST_
         # be done _after_ validation has completed, to avoid races between readers

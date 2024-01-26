@@ -480,10 +480,6 @@ def compute_X_file_stats(
 #   REDUCE_X_MINOR_STRIDE: the stride size, in rows, used in each task for reducing X. Drives peak memory use and
 #       TileDB fragment size.
 #
-# Candidate optimization: minor stride would be better if computed from the avg # of genes per cell,
-# rather than being a fixed number of rows, as each dataset has different X density. Would potentially
-# reduce variation in memory used.
-#
 REDUCE_X_MAJOR_STRIDE = 2_500_000
 REDUCE_X_MINOR_STRIDE = 500_000
 
@@ -498,6 +494,8 @@ def dispatch_X_chunk(
     global_var_joinids: pd.DataFrame,
 ) -> XReduction:
     logger.info(f"start reading {adata.filename}, {row_start}")
+
+    minor_stride = REDUCE_X_MINOR_STRIDE  # In principle, could scale this by average nnz per row
 
     # result accumulator
     result: XReduction = {
@@ -522,75 +520,82 @@ def dispatch_X_chunk(
 
     # Helper functions
 
-    def tocoo(
+    def getijd(
         X: sparse.csr_matrix | sparse.csc_matrix,
     ) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int32 | np.int64], npt.NDArray[np.float32]]:
         X = X.tocoo()
         return X.row.astype(np.int64), X.col, X.data.astype(np.float32)
 
     def save_raw(X_raw: soma.SparseNDArray, X: sparse.spmatrix, idx: int) -> None:
-        xI, xJ, xD = tocoo(X)
+        xI, xJ, xD = getijd(X)
         xI += idx + dataset_obs_joinid_start
         xJ = local_var_joinids[xJ]
         X_raw.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
 
     def save_normalized(X_normalized: soma.SparseNDArray, X: sparse.spmatrix, idx: int) -> None:
-        # CAUTION: mutates X in place
         if is_smart_seq is not None:
-            X[is_smart_seq[idx : idx + REDUCE_X_MINOR_STRIDE], :] /= feature_length
+            # This is a work-around for scipy csr_matrix defect https://github.com/scipy/scipy/issues/13155
+            # If the slice requires an index int64 dtype, it will fail. Work around by performing smaller
+            # incremental operations. In the end, this should result in the same outcome as:
+            #    X[is_smart_seq[idx : idx + minor_stride], :] /= feature_length
+            #
+            X = X.copy()
+            mask = is_smart_seq[idx : idx + minor_stride]
+            step = max(1, (2**31 - 1) // X.shape[1])
+            for i in range(0, X.shape[0], step):
+                X[mask[i : i + step], :] /= feature_length
+
+        X = X.tocoo()
         X = X.multiply(1.0 / X.sum(axis=1).A)
-        xI, xJ, xD = tocoo(X)
+        xI, xJ, xD = getijd(X)
         xI += idx + dataset_obs_joinid_start
         xJ = local_var_joinids[xJ]
         _roundHalfToEven(xD, keepbits=15)
         xD[xD == 0] = sigma
         X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
 
-    with soma.open(experiment_uri, "w", context=SOMA_TileDB_Context()) as experiment:
-        X_raw = experiment.ms[MEASUREMENT_RNA_NAME].X["raw"]
-        X_normalized = experiment.ms[MEASUREMENT_RNA_NAME].X["normalized"]
+    path_to_X = (experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X")
+    for idx in range(row_start, min(row_start + n_rows, adata.n_obs), minor_stride):
+        logger.info(f"processing X {adata.filename}, {row_start}, chunk {idx//minor_stride}")
 
-        for idx in range(row_start, min(row_start + n_rows, adata.n_obs), REDUCE_X_MINOR_STRIDE):
-            logger.info(f"processing X {adata.filename}, {row_start}, chunk {idx//REDUCE_X_MINOR_STRIDE}")
+        # get the chunk
+        X = adata[idx : idx + minor_stride].X
+        if isinstance(X, np.ndarray):
+            X = sparse.csr_matrix(X)
+        # force CSR - other code assumes this format (e.g., to allow indexing)
+        X = X.tocsr()
+        X.eliminate_zeros()  # in-place operation
+        assert is_nonnegative_integral(X), "Found non-integer or negative valued data in X chunk"
+        chunk_obs_joinid_start = idx + dataset_obs_joinid_start
+        gc.collect()
 
-            # get the chunk
-            X = adata[idx : idx + REDUCE_X_MINOR_STRIDE].X
-            if isinstance(X, np.ndarray):
-                X = sparse.csr_matrix(X)
-            # force CSR, as this is compat with TileDB global order for the Census (i.e., supports
-            # fragment concat)
-            X = X.tocsr()
-            X.eliminate_zeros()  # in-place operation
-            assert is_nonnegative_integral(X), "Found non-integer or negative valued data in X chunk"
-            chunk_obs_joinid_start = idx + dataset_obs_joinid_start
-            gc.collect()
+        # Accumulate various statistics and summary information
+        _obs_stats, _var_stats = _get_axis_stats(X, chunk_obs_joinid_start, local_var_joinids)
+        result = reduce_X_stats_chunk(
+            [
+                result,
+                {
+                    "obs_stats": _obs_stats,
+                    "var_stats": _var_stats,
+                    "presence": [],  # this is handled in the file reducer
+                },
+            ]
+        )
+        del _obs_stats, _var_stats
+        gc.collect()
 
-            # Accumulate various statistics and summary information
-            _obs_stats, _var_stats = _get_axis_stats(X, chunk_obs_joinid_start, local_var_joinids)
-            result = reduce_X_stats_chunk(
-                [
-                    result,
-                    {
-                        "obs_stats": _obs_stats,
-                        "var_stats": _var_stats,
-                        "presence": [],  # this is handled in the file reducer
-                    },
-                ]
-            )
-            del _obs_stats, _var_stats
-            gc.collect()
-
-            # Save raw layer
-            X_nnz = X.nnz
+        # Save raw layer
+        with soma.open(urlcat(*path_to_X, "raw"), mode="w", context=SOMA_TileDB_Context()) as X_raw:
             save_raw(X_raw, X, idx)
-            gc.collect()
+        del X_raw
 
-            # save normalized layer
+        # save normalized layer
+        with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
             save_normalized(X_normalized, X, idx)
-            assert X.nnz == X_nnz
+        del X_normalized
 
-            del X
-            gc.collect()
+        del X
+        gc.collect()
 
     logger.info(f"finished reading {adata.filename}, {row_start}")
     return result
