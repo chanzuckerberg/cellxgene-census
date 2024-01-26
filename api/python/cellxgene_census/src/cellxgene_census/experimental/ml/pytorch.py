@@ -510,12 +510,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         # subset to a single partition
         # typing does not reflect that is actually a List of 2D NDArrays
-        # Note: This causes the following warning:
-        # `VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of
-        # lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you
-        # must specify 'dtype=object' when creating the ndarray.`
-
-        # split ids_chunked in to num_partitions partitions
         partition_indices = np.array_split(range(len(ids_chunked)), num_partitions)
         partition = [ids_chunked[i] for i in partition_indices[partition_index]]
 
