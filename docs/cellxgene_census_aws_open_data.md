@@ -77,7 +77,7 @@ aws s3 sync --no-sign-request s3://cellxgene-census-public-us-west-2/cell-census
 And to download the TileDB files:
 
 ```bash
-aws s3 sync --no-sign-request s3:/cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/ ./soma/
+aws s3 sync --no-sign-request s3://cellxgene-census-public-us-west-2/cell-census/2023-07-25/soma/ ./soma/
 ```
 
 ### CELLxGENE Census API (Python and R)
