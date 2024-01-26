@@ -20,7 +20,6 @@ from attr import define
 from numpy.random import Generator
 from scipy import sparse
 from sklearn.preprocessing import LabelEncoder
-from somacore.query import _fast_csr
 from torch import Tensor
 from torch import distributed as dist
 from torch.utils.data import DataLoader
@@ -145,7 +144,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         pytorch_logger.debug("Retrieving next SOMA chunk...")
         start_time = time()
 
-        # If no more batches to iterate through, raise StopIteration, as all iterators do when at end
+        # If no more chunks to iterate through, raise StopIteration, as all iterators do when at end
         obs_joinids_chunk = next(self.obs_joinids_chunks_iter)
 
         obs_batch = (
@@ -166,8 +165,14 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         # reorder obs rows to match obs_joinids_chunk ordering, which may be shuffled
         obs_batch = obs_batch.reindex(obs_joinids_chunk, copy=False)
 
-        # note: order of rows in returned CSR matches the order of the requested obs_joinids, so no need to reindex
-        X_batch = _fast_csr.read_scipy_csr(self.X, pa.array(obs_joinids_chunk), pa.array(self.var_joinids))
+        # note: the `blockwise` call is employed for its ability to reindex the axes of the sparse matrix,
+        # but the blockwise iteration feature is not used (block_size is set to retrieve the chunk as a single block)
+        scipy_iter = (
+            self.X.read(coords=(obs_joinids_chunk, self.var_joinids))
+            .blockwise(axis=0, size=len(obs_joinids_chunk), eager=False)
+            .scipy(compress=True)
+        )
+        X_batch, _ = next(scipy_iter)
         assert obs_batch.shape[0] == X_batch.shape[0]
 
         stats = Stats()
@@ -505,7 +510,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         # subset to a single partition
         # typing does not reflect that is actually a List of 2D NDArrays
-        partitions: List[npt.NDArray[np.int64]] = np.array_split(np.array(ids_chunked, dtype=object), num_partitions)
+        partitions: List[npt.NDArray[np.int64]] = np.array_split(np.array(ids_chunked), num_partitions)
         partition = partitions[partition_index]
 
         if pytorch_logger.isEnabledFor(logging.DEBUG) and len(partition) > 0:
