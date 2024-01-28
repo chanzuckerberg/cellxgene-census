@@ -11,15 +11,21 @@ workflow scatter_generate_embeddings {
         String docker
     }
 
+    # work around any tooling that might try to verify pre-existence of the output URI when
+    # launching the workflow:
+    String output_uri2 = sub(output_uri, "s3_//", "s3://")
+
+    # create the output TileDB array
     call init_embeddings_array {
         input:
-        uri = output_uri, s3_region, docker
+        uri = output_uri2, s3_region, docker
     }
 
+    # generate each shard's embeddings and write them into the above-created array
     scatter (shard in dataset_shards) {
         call generate_embeddings after init_embeddings_array {
             input:
-            dataset = shard, model, emb_layer, output_uri, s3_region, docker
+            dataset = shard, output_uri = output_uri2, model, emb_layer, s3_region, docker
         }
     }
 
@@ -93,6 +99,8 @@ task generate_embeddings {
         cpu: 8
         memory: "30G"
         gpu: true
+        acceleratorCount: 1
+        acceleratorType: "nvidia-tesla-a10g"
         docker: docker
         # for robustness to sporadic errors e.g.
         # https://github.com/pytorch/pytorch/issues/21819

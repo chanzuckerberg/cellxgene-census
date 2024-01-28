@@ -8,6 +8,7 @@ import sys
 import tempfile
 
 import geneformer
+import torch
 from datasets import disable_progress_bar
 from transformers import BertConfig
 
@@ -17,6 +18,7 @@ disable_progress_bar()
 
 
 def main(argv):
+    assert torch.cuda.is_available(), "CUDA is not available"
     args = parse_arguments(argv)
 
     tiledbsoma_context = None

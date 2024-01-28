@@ -49,10 +49,10 @@ Generating cell embeddings (takes 8-12h on up to 256 g5.2xlarge, generates 130Gi
 ```bash
 seq 0 255 \
     | xargs -n 1 printf 'dataset_shards=s3://MYBUCKET/geneformer/datasets/census-2023-10-23/shard-%03d\n' \
-    | MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 MINIWDL__AWS__SUBMIT_PERIOD=60 xargs -n 9999 \ miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
+    | MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 MINIWDL__AWS__SUBMIT_PERIOD=60 xargs -n 9999 miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
     wdl/generate_embeddings.wdl docker=$DOCKER_TAG \
     emb_layer=0 \
     model=s3://MYBUCKET/geneformer/models/2500_per_cell_type_8epochs/model/2500_per_cell_type_8epochs \
-    output_uri=s3://MYBUCKET/geneformer/embs/census-2023-10-23 parts=256 \
+    output_uri=s3://MYBUCKET/geneformer/embs/census-2023-10-23 \
     --s3upload s3://MYBUCKET/geneformer/embs
 ```
