@@ -1,5 +1,7 @@
 import gc
 import logging
+import os
+import pathlib
 from datetime import datetime, timezone
 from typing import Iterator, List
 
@@ -82,6 +84,9 @@ def build(args: CensusBuildArgs) -> int:
         args.h5ads_path.as_posix(), datasets, experiment_builders, args
     )
 
+    # Prune datasets that we will not use, and do not want to include in the build
+    prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+
     # Step 4 - populate X layers
     build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
     gc.collect()
@@ -102,6 +107,19 @@ def build(args: CensusBuildArgs) -> int:
         consolidate(args, root_collection.uri)
 
     return 0
+
+
+def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: List[Dataset], used_datasets: List[Dataset]) -> None:
+    """Remove any staged H5AD not used to build the SOMA object, ie. those which do not contribute at least one cell to the Census"""
+    used_dataset_ids = set(d.dataset_id for d in used_datasets)
+    unused_datasets = [d for d in all_datasets if d.dataset_id not in used_dataset_ids]
+    assert all(d.dataset_total_cell_count == 0 for d in unused_datasets)
+    assert all(d.dataset_total_cell_count > 0 for d in used_datasets)
+    assert used_dataset_ids.isdisjoint(set(d.dataset_id for d in unused_datasets))
+
+    for d in unused_datasets:
+        logger.debug(f"Removing unused H5AD {d.dataset_h5ad_path}")
+        os.remove(assets_path / d.dataset_h5ad_path)
 
 
 def populate_root_collection(root_collection: soma.Collection) -> soma.Collection:
