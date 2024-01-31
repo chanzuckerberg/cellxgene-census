@@ -420,12 +420,13 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_e
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
     setup or real DataLoader multiprocessing."""
 
-    with (
-        patch("torch.utils.data.get_worker_info") as mock_get_worker_info,
-        patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized,
-        patch("cellxgene_census.experimental.ml.pytorch.dist.get_rank") as mock_dist_get_rank,
-        patch("cellxgene_census.experimental.ml.pytorch.dist.get_world_size") as mock_dist_get_world_size,
-    ):
+    with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
+    ) as mock_dist_is_initialized, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
+    ) as mock_dist_get_rank, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
+    ) as mock_dist_get_world_size:
         mock_get_worker_info.return_value = WorkerInfo(id=1, num_workers=2, seed=1234)
         mock_dist_is_initialized.return_value = True
         mock_dist_get_rank.return_value = 1

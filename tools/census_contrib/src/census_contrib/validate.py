@@ -80,13 +80,9 @@ def validate_embedding(config: Config, uri: str) -> None:
         counted_embeddings = 0
         with concurrent.futures.ThreadPoolExecutor() as tp:
             for tbl, _ in EagerIterator(
-                (
-                    A.read(result_order="row-major")
-                    .blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1])
-                    .tables()
-                    if has_blockwise_iterator()
-                    else blockwise_axis0_tables(A, result_order="row-major", size=size, reindex_disable_on_axis=[0, 1])
-                ),
+                A.read(result_order="row-major").blockwise(axis=0, size=size, reindex_disable_on_axis=[0, 1]).tables()
+                if has_blockwise_iterator()
+                else blockwise_axis0_tables(A, result_order="row-major", size=size, reindex_disable_on_axis=[0, 1]),
                 pool=tp,
             ):
                 logger.debug(f"Read table, length {len(tbl)}")
