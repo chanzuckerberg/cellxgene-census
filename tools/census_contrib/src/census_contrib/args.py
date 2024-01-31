@@ -13,9 +13,9 @@ class CommonArgs(Tap):  # type: ignore[misc]
     verbose: int = 0  # Logging level
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
     skip_storage_version_check: bool = False  # Skip TileDB storage equivalence check
-    census_uri: Optional[str] = (
-        None  # override Census URI. If not specified, will look up using metadata `census_version` field.
-    )
+    census_uri: Optional[
+        str
+    ] = None  # override Census URI. If not specified, will look up using metadata `census_version` field.
 
     def configure(self) -> None:
         super().configure()

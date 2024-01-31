@@ -585,7 +585,8 @@ def _accumulate_X(
     dataset: Dataset,
     experiment_builders: List["ExperimentBuilder"],
     progress: Tuple[int, int],
-) -> AccumulateXResults: ...
+) -> AccumulateXResults:
+    ...
 
 
 @overload
@@ -595,7 +596,8 @@ def _accumulate_X(
     experiment_builders: List["ExperimentBuilder"],
     progress: Tuple[int, int],
     executor: Optional[ResourcePoolProcessExecutor],
-) -> concurrent.futures.Future[AccumulateXResults]: ...
+) -> concurrent.futures.Future[AccumulateXResults]:
+    ...
 
 
 def _accumulate_X(
