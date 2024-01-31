@@ -10,12 +10,12 @@ FROM nvcr.io/nvidia/cuda:11.8.0-runtime-ubuntu22.04
 ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.4.4
 ARG GENEFORMER_VERSION=8df5dc1
 
-RUN apt update && apt install -y build-essential python3-pip python3-venv git-lfs pigz
+RUN apt update && apt install -y build-essential python3-pip python3-venv git-lfs pigz libcurl4-openssl-dev
 RUN git lfs install
 
 ENV GIT_SSL_NO_VERIFY=true
 RUN pip install --upgrade pip setuptools setuptools_scm
-RUN pip install torch --index-url https://download.pytorch.org/whl/cu118
+RUN pip install torch torchdata --index-url https://download.pytorch.org/whl/cu118
 RUN pip install owlready2 boto3 transformers[torch]
 # workaround for unknown problem blocking `import geneformer`:
 #   https://github.com/microsoft/TaskMatrix/issues/116#issuecomment-1565431850
@@ -30,7 +30,7 @@ RUN git clone --recursive https://huggingface.co/ctheodoris/Geneformer \
 RUN pip install -e Geneformer
 
 # smoke test
-RUN python3 -c 'import geneformer; import cellxgene_census; cellxgene_census.open_soma()'
+RUN python3 -c 'import geneformer; import cellxgene_census; from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer; cellxgene_census.open_soma()'
 
 # prepare a venv with pinned tiledbsoma ${EMBEDDINGS_TILEDBSOMA_VERSION}, which our embeddings
 # generation step will use to output a TileDB array compatible with the Census embeddings curator.

@@ -32,7 +32,12 @@ def main(argv):
         return 1
 
     # select cells
-    with cellxgene_census.open_soma(census_version=args.census_version) as census:
+    if "://" in args.census_version:
+        census_uri = args.census_version
+    else:
+        census_uri = cellxgene_census.get_census_version_description(census_uri)["soma"]["uri"]
+        logger.info(f"resolved census version {args.census_version} to {census_uri}")
+    with cellxgene_census.open_soma(uri=census_uri) as census:
         obs_df = select_cells(
             census["census_data"]["homo_sapiens"], args.value_filter, args.percentage_data, args.sampling_column, args.N
         )
@@ -50,7 +55,7 @@ def main(argv):
             (obs_dfs[i], os.path.join(args.output_dir, "shard-" + str(i).zfill(digits))) for i in range(len(obs_dfs))
         ]
     with multiprocessing.Pool(processes=4) as pool:  # NOTE: keep processes small due to memory usage
-        pool.map(functools.partial(build_dataset, args.census_version, args.obs_columns), tasks)
+        pool.map(functools.partial(build_dataset, census_uri, args.obs_columns), tasks)
 
     logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())
 
@@ -89,7 +94,7 @@ def parse_arguments(argv):
     )
     parser.add_argument("--shards", type=int, default=1, help="output dataset shards (default: 1)")
     parser.add_argument(
-        "-v", "--census-version", type=str, default="stable", help='Census release to query (default: "stable")'
+        "-v", "--census-version", type=str, default="stable", help='Census release or URI to query (default: "stable")'
     )
     parser.add_argument("output_dir", type=str, help="output directory (must not already exist)")
 
@@ -156,7 +161,7 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     return obs_df
 
 
-def build_dataset(census_version, obs_columns, task):
+def build_dataset(census_uri, obs_columns, task):
     """
     Given obs_df from select_cells (or subset thereof), build the Geneformer dataset and save to output_dir.
     """
@@ -164,7 +169,7 @@ def build_dataset(census_version, obs_columns, task):
     output_dir = task[1]
 
     # open human census
-    with cellxgene_census.open_soma(census_version=census_version) as census:
+    with cellxgene_census.open_soma(uri=census_uri) as census:
         # use GeneformerTokenizer to build dataset of those cells
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],

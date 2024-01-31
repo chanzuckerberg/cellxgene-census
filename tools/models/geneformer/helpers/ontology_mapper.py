@@ -202,7 +202,7 @@ class OntologyMapper(ABC):
 
 class CellMapper(OntologyMapper):
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
-    CXG_CL_ONTOLOGY_URL = "https://github.com/obophenotype/cell-ontology/releases/download/v2023-07-20/cl.owl"
+    CXG_CL_ONTOLOGY_URL = os.path.join(os.path.dirname(__file__), "cl.v2023-07-20.owl")
     # Only look up ancestors under Cell
     ROOT_NODE = "CL_0000000"
 
@@ -237,7 +237,7 @@ class CellMapper(OntologyMapper):
 
 class TissueMapper(OntologyMapper):
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
-    CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
+    CXG_UBERON_ONTOLOGY_URL = os.path.join(os.path.dirname(__file__), "uberon.v2023-07-20.owl")
 
     # Only look up ancestors under anatomical entity
     ROOT_NODE = "UBERON_0001062"
