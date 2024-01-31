@@ -106,36 +106,12 @@ def compute_all_estimators_for_gene(
 ) -> pd.Series[float]:
     """Computes all estimators for a given {<dim1>, ..., <dimN>, gene} group of expression values"""
 
-    # TODO: https://github.com/chanzuckerberg/cellxgene-census/issues/942 will update this code to compute
-    #  `sum` and `sumsq` statistics in place of `sem`. Neither of these statistics (mean, sum, sumsq) require
-    #  having a dense representation of the expression data. So this call to dense_gene_data() can be removed (or
-    #  only run conditionally if ever we desire to compute the other estimators that depend upon a dense
-    #  representation).
-    data_dense, X_dense, size_factors_dense = dense_gene_data(gene_group_rows, size_factors_for_obs_group)
-
-    # Note: the X_csc sparse matrix is created from a dense representation to ensure the coordinates of the sparse
-    # data correctly align with size_factors array
-    X_csc, X_sparse = sparse_gene_data(data_dense)
-
+    size_factors_for_obs_group
     estimators: Dict[str, Any] = {}
-    if "nnz" in ESTIMATOR_NAMES:
-        estimators["nnz"] = gene_group_rows.shape[0]
-    if "min" in ESTIMATOR_NAMES:
-        estimators["min"] = X_sparse.min()
-    if "max" in ESTIMATOR_NAMES:
-        estimators["max"] = X_sparse.max()
-    if "sum" in ESTIMATOR_NAMES:
-        estimators["sum"] = X_sparse.sum()
-    if "mean" in ESTIMATOR_NAMES:
-        estimators["mean"] = compute_mean(X_dense, size_factors_dense)
-    if "sem" in ESTIMATOR_NAMES:
-        estimators["sem"] = compute_sem(X_dense, size_factors_dense)
-    if "var" in ESTIMATOR_NAMES:
-        estimators["var"] = compute_variance(X_csc, Q, size_factors_dense, group_name=gene_group_name)
-    if "sev" in ESTIMATOR_NAMES or "selv" in ESTIMATOR_NAMES:
-        estimators["sev"], estimators["selv"] = compute_sev(
-            X_csc, Q, size_factors_dense, num_boot=500, group_name=gene_group_name
-        )
+    estimators["sum"] = gene_group_rows.soma_data.sum()
+    estimators["sumsq"] = (gene_group_rows.soma_data**2).sum()
+    estimators["size_factor"] = size_factors_for_obs_group.approx_size_factor.sum()
+    estimators["n_obs"] = len(gene_group_rows)
 
     # order matters for estimators
     return pd.Series(data=[estimators[n] for n in ESTIMATOR_NAMES], dtype=np.float64)
