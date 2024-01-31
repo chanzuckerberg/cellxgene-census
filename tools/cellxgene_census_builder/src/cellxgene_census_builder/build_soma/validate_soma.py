@@ -619,10 +619,10 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
-            ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
+            ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
             assert np.allclose(
                 norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
-            ), f"{experiment_specification.name}: normalized layer does not match raw contents"
+            ), f"{experiment_specification.name}: normalized layer does not match raw contents, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
 
             del norm_csr, raw_csr
             gc.collect()

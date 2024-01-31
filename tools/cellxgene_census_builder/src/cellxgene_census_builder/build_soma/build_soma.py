@@ -4,14 +4,14 @@ import pathlib
 from datetime import datetime, timezone
 from typing import List, cast
 
-import dask
 import pandas as pd
+import psutil
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
 from ..util import cpu_count
 from .census_summary import create_census_summary
-from .consolidate import consolidate, start_async_consolidation, stop_async_consolidation, submit_consolidate
+from .consolidate import consolidate, start_async_consolidation, stop_async_consolidation
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -85,13 +85,17 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
-    # Constraining parallelism is critical at this step, as each worker utilizes 64GiB+ of buffer and will
-    # create ~ncores threads during the write phase (this code assumes hosts with 8GiB/core).
-    n_workers = max(1, cpu_count() // 16) + 2
-    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as dask_client:
+    # Constraining parallelism is critical at this step, as each worker utilizes 48-64GiB+ of buffer and will
+    # create O(ncores) threads during the write phase.
+    MEM_BUDGET = 96 * 1024**3
+    total_memory = psutil.virtual_memory().total
+    n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
+    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0):
         try:
             if args.config.consolidate:
-                consolidator = start_async_consolidation(dask_client, root_collection.uri)
+                consolidator = start_async_consolidation(root_collection.uri)
+            else:
+                consolidator = None
 
             # Step 4 - populate X layers
             build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
@@ -109,34 +113,17 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
                 stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
                 del consolidator
 
-        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-        tiledb_soma_1969_work_around(root_collection.uri)
+    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+    tiledb_soma_1969_work_around(root_collection.uri)
 
-        # XXX indented while commented
-        # with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=None) as dask_client:
+    # TODO: consolidation and validation can be done in parallel.
 
-        # XXX TODO: scale cluster up once we move validation into Dask
+    if args.config.consolidate:
+        consolidate(args, root_collection.uri)
 
-        # Validation and consolidation are done in parallel, thanks to the TileDB
-        # concurrency model. The only important constraint is that vacuuming _MUST_
-        # be done _after_ validation has completed, to avoid races between readers
-        # and deletion.
-        valcon_futures: List[dask.distributed.Futures] = []
-        if args.config.consolidate:
-            valcon_futures += submit_consolidate(root_collection.uri, pool=dask_client, vacuum=False)
-        if validate:
-            # valcon_futures.append(dask_client.submit(validate_soma, args))
-            # until validate is converted to dask, it creates MP pools internally
-            # so call directly
-            validate_soma(args)
-        if valcon_futures:
-            dask_client.gather(valcon_futures)
-
-        # Once validated and consolidated, so a second pass with vacuuming, and
-        # then validate it worked correctly
-        if args.config.consolidate:
-            consolidate(args, root_collection.uri)
-            validate_consolidation(args)
+    if validate:
+        validate_soma(args)
+        validate_consolidation(args)
 
     return 0
 
@@ -184,12 +171,20 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
-    if args.config.test_first_n is not None and args.config.test_first_n > 0:
-        # Process the N smallest datasets
-        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
+    if args.config.test_first_n is not None and abs(args.config.test_first_n) > 0:
+        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)
+        if args.config.test_first_n > 0:
+            # Process the N smallest datasets
+            datasets = datasets[: args.config.test_first_n]
+        else:
+            # Process the N largest datasets
+            datasets = datasets[args.config.test_first_n :]
 
     else:
-        datasets = all_datasets
+        # TODO: it is unclear if this shuffle has any material impact
+        sorted_by_size = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)
+        datasets = [sorted_by_size[-i // 2] if i % 2 else sorted_by_size[i // 2] for i in range(len(sorted_by_size))]
+        assert set(d.dataset_id for d in all_datasets) == set(d.dataset_id for d in datasets)
 
     # Stage all files
     stage_source_assets(datasets, args)

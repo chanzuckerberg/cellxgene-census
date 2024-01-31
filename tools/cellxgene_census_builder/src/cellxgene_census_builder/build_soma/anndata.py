@@ -174,6 +174,20 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
         vdx = _slice_index(self._var_idx, vdx, self.n_vars)
         return AnnDataProxy(self.filename, view_of=self, obs_idx=odx, var_idx=vdx)
 
+    def get_estimated_density(self) -> float:
+        """
+        Return an estimated density for the H5AD, based upon the full file density.
+        This is NOT the density for any given slice.
+
+        Approach: divide the whole file nnz by the product of the shape.
+        """
+        nnz: int
+        if isinstance(self._X, (CSRDataset, CSCDataset)):
+            nnz = self._X.group["data"].size
+        else:
+            nnz = self._X.size
+        return nnz / (self.n_obs * self.n_vars)
+
     def _load_dataframe(self, elem: h5py.Group, column_names: Optional[Tuple[str, ...]]) -> pd.DataFrame:
         # if reading all, just use the built-in
         if not column_names:

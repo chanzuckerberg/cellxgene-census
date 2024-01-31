@@ -1,6 +1,7 @@
 import gc
 import itertools
 import logging
+import math
 from contextlib import ExitStack
 from functools import reduce
 from typing import (
@@ -441,7 +442,7 @@ def reduce_X_stats_chunk(results: Sequence[XReduction]) -> XReduction:
         return results[0].copy()
     else:
         return {
-            "obs_stats": pd.concat([r["obs_stats"] for r in results]),
+            "obs_stats": pd.concat([r["obs_stats"] for r in results], verify_integrity=True),
             "var_stats": reduce(
                 lambda a, b: a.add(b, fill_value=0).astype(np.int64),
                 (r["var_stats"] for r in results),
@@ -456,8 +457,9 @@ def compute_X_file_stats(
     """Add file-stats to XReduction."""
     res = xreduction.copy()
 
-    # we should only be called once per dataset
-    assert len(res["presence"]) == 0
+    assert len(res["presence"]) == 0  # should only be called once per dataset
+    assert res["obs_stats"].index.is_unique  # should only have one value per cell
+    assert len(res["obs_stats"]) == n_obs
 
     obs_stats = res["obs_stats"]
     var_stats = res["var_stats"]
@@ -475,13 +477,20 @@ def compute_X_file_stats(
     return (res,)
 
 
-# Controls chunking of the X array processsing.
-#   REDUCE_X_MAJOR_STRIDE: the stride size, in rows, for individual dask tasks (i.e., parallel work)
-#   REDUCE_X_MINOR_STRIDE: the stride size, in rows, used in each task for reducing X. Drives peak memory use and
-#       TileDB fragment size.
+# Controls chunking of the X array processsing:
+#   REDUCE_X_MAJOR_ROW_STRIDE: the max stride size, in rows, for individual parallel work (Dask tasks). Primarily
+#     affects available parallelism for very large datasets, and max processing time for any given task.
+#   REDUCE_X_MINOR_NNZ_STRIDE: the max stride size, in values, used to reduce major chunks of X. Drives peak memory use and
+#     TileDB fragment size.
 #
-REDUCE_X_MAJOR_STRIDE = 2_500_000
-REDUCE_X_MINOR_STRIDE = 500_000
+# A side-effect of these parameters is the number and size of TileDB fragments created. As fragment count
+# increases, consolidation time increases non-linearly.
+#
+# TODO: when https://github.com/single-cell-data/TileDB-SOMA/issues/2054 is implemented, write each major stride
+# as a single fragment. This would allow a much smaller minor stride, without causing fragment count to increase.
+#
+REDUCE_X_MAJOR_ROW_STRIDE: int = 2_000_000
+REDUCE_X_MINOR_NNZ_STRIDE: int = 2**31
 
 
 def dispatch_X_chunk(
@@ -494,8 +503,6 @@ def dispatch_X_chunk(
     global_var_joinids: pd.DataFrame,
 ) -> XReduction:
     logger.info(f"start reading {adata.filename}, {row_start}")
-
-    minor_stride = REDUCE_X_MINOR_STRIDE  # In principle, could scale this by average nnz per row
 
     # result accumulator
     result: XReduction = {
@@ -516,9 +523,11 @@ def dispatch_X_chunk(
         is_smart_seq = None
         feature_length = None
 
-    sigma = np.finfo(np.float32).smallest_subnormal
+    minor_stride = max(1, int(REDUCE_X_MINOR_NNZ_STRIDE // (adata.get_estimated_density() * adata.n_vars)))
+    minor_stride = min(minor_stride, n_rows)
 
     # Helper functions
+    sigma = np.finfo(np.float32).smallest_subnormal
 
     def getijd(
         X: sparse.csr_matrix | sparse.csc_matrix,
@@ -526,51 +535,34 @@ def dispatch_X_chunk(
         X = X.tocoo()
         return X.row.astype(np.int64), X.col, X.data.astype(np.float32)
 
-    def save_raw(X_raw: soma.SparseNDArray, X: sparse.spmatrix, idx: int) -> None:
-        xI, xJ, xD = getijd(X)
-        xI += idx + dataset_obs_joinid_start
-        xJ = local_var_joinids[xJ]
-        X_raw.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
-
-    def save_normalized(X_normalized: soma.SparseNDArray, X: sparse.spmatrix, idx: int) -> None:
-        if is_smart_seq is not None:
-            # This is a work-around for scipy csr_matrix defect https://github.com/scipy/scipy/issues/13155
-            # If the slice requires an index int64 dtype, it will fail. Work around by performing smaller
-            # incremental operations. In the end, this should result in the same outcome as:
-            #    X[is_smart_seq[idx : idx + minor_stride], :] /= feature_length
-            #
-            X = X.copy()
-            mask = is_smart_seq[idx : idx + minor_stride]
-            step = max(1, (2**31 - 1) // X.shape[1])
-            for i in range(0, X.shape[0], step):
-                X[mask[i : i + step], :] /= feature_length
-
-        X = X.tocoo()
-        X = X.multiply(1.0 / X.sum(axis=1).A)
-        xI, xJ, xD = getijd(X)
-        xI += idx + dataset_obs_joinid_start
-        xJ = local_var_joinids[xJ]
-        _roundHalfToEven(xD, keepbits=15)
-        xD[xD == 0] = sigma
-        X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
-
     path_to_X = (experiment_uri, "ms", MEASUREMENT_RNA_NAME, "X")
-    for idx in range(row_start, min(row_start + n_rows, adata.n_obs), minor_stride):
-        logger.info(f"processing X {adata.filename}, {row_start}, chunk {idx//minor_stride}")
+    end_idx = min(row_start + n_rows, adata.n_obs)
+    n_chunks = math.ceil((end_idx - row_start) / minor_stride + 0.5)
+    for idx in range(row_start, end_idx, minor_stride):
+        logger.info(f"processing X {adata.filename}, {row_start}, chunk {(idx-row_start)//minor_stride} of {n_chunks}")
 
         # get the chunk
-        X = adata[idx : idx + minor_stride].X
+        adata_chunk = adata[idx : min(idx + minor_stride, end_idx)]
+        n_obs, n_vars = adata_chunk.n_obs, adata_chunk.n_vars
+        assert n_obs <= n_rows and n_obs <= minor_stride
+        X = adata_chunk.X
+        del adata_chunk
+
+        # clean up X
         if isinstance(X, np.ndarray):
             X = sparse.csr_matrix(X)
         # force CSR - other code assumes this format (e.g., to allow indexing)
         X = X.tocsr()
         X.eliminate_zeros()  # in-place operation
+        assert X.shape == (n_obs, n_vars)
         assert is_nonnegative_integral(X), "Found non-integer or negative valued data in X chunk"
-        chunk_obs_joinid_start = idx + dataset_obs_joinid_start
         gc.collect()
 
         # Accumulate various statistics and summary information
+        chunk_obs_joinid_start = idx + dataset_obs_joinid_start
         _obs_stats, _var_stats = _get_axis_stats(X, chunk_obs_joinid_start, local_var_joinids)
+        assert len(_obs_stats) == n_obs
+        assert len(_var_stats) == n_vars
         result = reduce_X_stats_chunk(
             [
                 result,
@@ -584,17 +576,34 @@ def dispatch_X_chunk(
         del _obs_stats, _var_stats
         gc.collect()
 
-        # Save raw layer
-        with soma.open(urlcat(*path_to_X, "raw"), mode="w", context=SOMA_TileDB_Context()) as X_raw:
-            save_raw(X_raw, X, idx)
-        del X_raw
-
-        # save normalized layer
-        with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
-            save_normalized(X_normalized, X, idx)
-        del X_normalized
-
+        xI, xJ, xD = getijd(X)
+        assert n_obs == X.shape[0]
         del X
+        gc.collect()
+
+        if is_smart_seq is not None:
+            assert feature_length is not None
+            smart_seq_mask = is_smart_seq[idx : idx + minor_stride]
+            xNormD = np.where(smart_seq_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
+            xNormD = _divide_by_row_sum(n_obs, xI, xNormD)  # in-place operation
+        else:
+            xNormD = _divide_by_row_sum(n_obs, xI, xD.copy())  # in-place operation
+        _roundHalfToEven(xNormD, keepbits=15)  # in-place operation
+        xNormD[xNormD == 0] = sigma
+
+        # reindex coordinates
+        xI += idx + dataset_obs_joinid_start
+        xJ = local_var_joinids[xJ]
+
+        # and save to respective layer
+        with soma.open(urlcat(*path_to_X, "raw"), mode="w", context=SOMA_TileDB_Context()) as X_raw:
+            X_raw.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xD}))
+        del xD
+        gc.collect()
+        with soma.open(urlcat(*path_to_X, "normalized"), mode="w", context=SOMA_TileDB_Context()) as X_normalized:
+            X_normalized.write(pa.Table.from_pydict({"soma_dim_0": xI, "soma_dim_1": xJ, "soma_data": xNormD}))
+
+        del xI, xJ, xNormD
         gc.collect()
 
     logger.info(f"finished reading {adata.filename}, {row_start}")
@@ -658,11 +667,11 @@ def reduce_X_matrices(
                         d.dataset_h5ad_path,
                         eb.experiment_uri,
                         chunk,
-                        REDUCE_X_MAJOR_STRIDE,
+                        REDUCE_X_MAJOR_ROW_STRIDE,
                         dataset_obs_joinid_start,
                         eb.specification.anndata_cell_filter_spec,
                     )
-                    for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_STRIDE)
+                    for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_ROW_STRIDE)
                 ]
                 b = dask.bag.from_sequence(read_file_chunks).starmap(
                     read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids
@@ -769,6 +778,25 @@ def reopen_experiment_builders(
 
         for eb in experiment_builders:
             yield eb
+
+
+@numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
+def _divide_by_row_sum(
+    n_rows: int,
+    d0: npt.NDArray[np.int64],
+    data: npt.NDArray[np.float32],
+) -> npt.NDArray[np.float32]:
+    """
+    IMPORTANT: in-place operation. Divide each value by the sum of the row.
+    """
+    row_sum = np.zeros((n_rows,), dtype=np.float64)
+    for i in range(len(d0)):
+        row_sum[d0[i]] += data[i]
+
+    for i in range(len(d0)):
+        data[i] = data[i] / row_sum[d0[i]]
+
+    return data
 
 
 @numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424

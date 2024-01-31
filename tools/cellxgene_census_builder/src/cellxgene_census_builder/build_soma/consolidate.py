@@ -1,16 +1,18 @@
+import concurrent.futures
 import logging
 import re
+import threading
 import time
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Literal, Optional, Sequence
 
 import attrs
 import dask.distributed
 import tiledb
 import tiledbsoma as soma
-from dask.distributed import Client, Future
 
 from ..build_state import CensusBuildArgs
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
+from .mp import create_process_pool_executor, log_on_broken_process_pool
 
 logger = logging.getLogger(__name__)
 
@@ -33,19 +35,24 @@ class ConsolidationCandidate:
         return not self.is_array()
 
 
-def consolidate(_: CensusBuildArgs, uri: str) -> None:
-    """consolidate & vacuum everything, wait for completion"""
-    client = dask.distributed.Client.current()
-    client.gather(submit_consolidate(uri, pool=client, vacuum=True, exclude=None))
+def consolidate(args: CensusBuildArgs, uri: str) -> None:
+    """The old API - consolidate & vacuum everything, and return when done."""
+    with create_process_pool_executor(args) as ppe:
+        futures = submit_consolidate(uri, pool=ppe, vacuum=True, exclude=None)
+
+        # Wait for consolidation to complete
+        for future in concurrent.futures.as_completed(futures):
+            log_on_broken_process_pool(ppe)
+            uri = future.result()
 
 
 def submit_consolidate(
     uri: str,
-    pool: Client,
+    pool: dask.distributed.Client | concurrent.futures.ProcessPoolExecutor,
     vacuum: bool,
     include: Optional[Sequence[str]] = None,
     exclude: Optional[Sequence[str]] = None,
-) -> Sequence[Future]:
+) -> Sequence[dask.distributed.Future]:
     """
     This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
@@ -122,8 +129,8 @@ def _consolidate_array(
         # sm.consolidation.total_buffer_size
         #
         # Heuristic based on the fact that our sparse nd arrays (X/*) are both large and
-        # have small number of columns. If a low-column count, use bigger buffers.
-        buffer_size = 1 * 1024**3 if obj.n_columns > 3 else 4 * 1024**3
+        # have small number of columns. If a low-cardinatlity column count, use bigger buffers.
+        buffer_size = 1 * 1024**3 if obj.n_columns > 3 else 8 * 1024**3
 
         tiledb.consolidate(
             uri,
@@ -175,9 +182,18 @@ def _consolidate_tiledb_object(
         raise
 
 
+StopFlag = Dict[Literal["stop"], bool]
+
+
+@attrs.define(frozen=True, kw_only=True)
+class AsyncConsolidator:
+    stop_request: StopFlag
+    thread: threading.Thread
+
+
 def start_async_consolidation(
-    client: dask.distributed.Client, uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 7.0
-) -> Future:
+    uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 7.0
+) -> AsyncConsolidator:
     """
     Start an async consolidation process that will safely work alongside writers.
     Intended use is background process during writing of X layers, to reduce total
@@ -187,24 +203,34 @@ def start_async_consolidation(
     """
     assert fragment_count_threshold > 1
     assert polling_period_sec > 0.0
-    return client.submit(_async_consolidator, uri, fragment_count_threshold, polling_period_sec)
+
+    stop_request: StopFlag = {"stop": False}
+    t = threading.Thread(
+        target=_async_consolidator,
+        args=(uri, fragment_count_threshold, polling_period_sec, stop_request),
+        daemon=True,
+        name="Async consolidator",
+    )
+    t.start()
+    return AsyncConsolidator(thread=t, stop_request=stop_request)
 
 
-def _async_consolidator(uri: str, fragment_count_threshold: int, polling_period_sec: float) -> None:
+def stop_async_consolidation(ac: AsyncConsolidator) -> None:
+    """Stop the async consolidator. Will block until it is done."""
+    logger.info("Async consolidator: asking for stop")
+    ac.stop_request["stop"] = True
+    ac.thread.join()
+
+
+def _async_consolidator(
+    uri: str, fragment_count_threshold: int, polling_period_sec: float, stop_request: StopFlag
+) -> None:
+    """Inner loop of async/incremental consolidator."""
+
     logger.info(f"Async consolidator - starting for {uri}")
-    consolidation_stop_flag = dask.distributed.Variable("consolidation-manager-stop")
-    consolidation_stop_flag.set(False)
-    dask.distributed.secede()  # don't consume a worker slot
-
-    while True:
-        # stop if asked
-        if consolidation_stop_flag.get():
-            logger.info(f"Async consolidator - stopping for {uri}")
-            return
-
+    while not stop_request["stop"]:
         # Arrays are the only resource intensive consolidation step. Prioritize the array
-        # with the largest number of fragments (a weak proxy for work required to consolidate).
-        #
+        # with the largest number of fragments.
         candidates = list(
             sorted(
                 (c for c in _gather(uri) if c.is_array() and c.n_fragments > 1),
@@ -212,21 +238,25 @@ def _async_consolidator(uri: str, fragment_count_threshold: int, polling_period_
                 reverse=True,
             )
         )
-        if candidates:
-            c = candidates.pop()
+
+        start_time = time.perf_counter()
+        for c in candidates:
+            if stop_request["stop"]:
+                break  # type: ignore[unreachable]
+
             logger.info(f"Async consolidator: fragments={c.n_fragments}, uri={c.uri}")
             _consolidate_tiledb_object(
                 c,
                 vacuum=True,
                 consolidation_modes=["fragments"],
-                consolidation_config={"sm.consolidation.step_min_frags": "4", "sm.consolidation.step_max_frags": "16"},
+                consolidation_config={
+                    "sm.consolidation.step_min_frags": "2",
+                    "sm.consolidation.step_max_frags": "8",
+                    "sm.consolidation.max_fragment_size": str(2 * 1024**3),
+                },
             )
         else:
-            time.sleep(polling_period_sec)
+            if (time.perf_counter() - start_time) < polling_period_sec:
+                time.sleep(polling_period_sec)
 
-
-def stop_async_consolidation(fs: Future) -> None:
-    logger.info("Async consolidator: asking for stop")
-    consolidation_stop_flag = dask.distributed.Variable("consolidation-manager-stop", client=fs.client)
-    consolidation_stop_flag.set(True)
-    dask.distributed.wait([fs])
+    logger.info(f"Async consolidator - stopping for {uri}")
