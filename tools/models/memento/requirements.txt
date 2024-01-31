@@ -1,6 +1,6 @@
-pandas~=2.1.0
-pyarrow~=14.0.0
+pandas
+pyarrow
 tiledbsoma~=1.6.0
-click~=8.1.0
-numpy~=1.24.0
-psutil~=5.9.0
+click
+numpy
+psutil
