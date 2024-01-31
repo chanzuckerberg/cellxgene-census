@@ -2,6 +2,7 @@
 Manage the configuration and dynamic build state for the Census build.
 
 """
+
 import functools
 import io
 import os
