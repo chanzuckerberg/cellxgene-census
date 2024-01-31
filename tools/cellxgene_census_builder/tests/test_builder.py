@@ -36,12 +36,18 @@ def test_base_builder_creation(
     """
     Runs the builder, queries the census and performs a set of base assertions.
     """
-    with patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"), patch(
-        "cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets
-    ), patch("cellxgene_census_builder.build_soma.consolidate.consolidate", return_value=None), patch(
-        "cellxgene_census_builder.build_soma.validate_soma.validate_consolidation", return_value=True
+    with patch(
+        "cellxgene_census_builder.build_soma.build_soma.prepare_file_system",
     ), patch(
-        "cellxgene_census_builder.build_soma.consolidate.start_async_consolidation", return_value=None
+        "cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets",
+        return_value=datasets,
+    ), patch(
+        "cellxgene_census_builder.build_soma.build_soma.consolidate",
+    ), patch(
+        "cellxgene_census_builder.build_soma.build_soma.validate_consolidation",
+        return_value=True,
+    ), patch(
+        "cellxgene_census_builder.build_soma.build_soma.start_async_consolidation",
     ):
         return_value = build(census_build_args)
 
