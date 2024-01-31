@@ -48,6 +48,7 @@ dependencies= [
     "pyyaml==6.0.1",
     "numba==0.57",
     "dask==2023.12.1",
+    "distributed==2023.12.1",
 ]
 
 [project.urls]
