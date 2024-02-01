@@ -35,14 +35,47 @@ CUBE_LOGICAL_DIMS_OBS = [
 ]
 
 
+def compute_memento_estimators_from_precomputed_stats(estimators_df: pl.DataFrame) -> pl.DataFrame:
+    # mean: (X.sum() + 1) / (size_factors.sum() + 1))
+    # sem: (X.std() * np.sqrt(n_obs)) / size_factors.sum())
+    n_obs = estimators_df["n_obs"].to_numpy()
+    expr_sum = estimators_df["sum"].to_numpy()
+    expr_sumsq = estimators_df["sumsq"].to_numpy()
+    size_factors = estimators_df["size_factor"].to_numpy()
+    mean = (expr_sum + 1) / (size_factors + 1)
+    var = expr_sumsq / n_obs - (expr_sum / n_obs) ** 2
+    var[var < 0] = 0  # ensure variances are non-negative
+    sem = np.sqrt(var) * np.sqrt(n_obs) / size_factors
+
+    estimators_df = estimators_df.with_columns(pl.Series("mean", mean))
+    estimators_df = estimators_df.with_columns(pl.Series("sem", sem))
+    return estimators_df
+
+
 # @timeit
-def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pl.DataFrame:
+def query_estimators(
+    cube_path: str,
+    obs_groups_df: pd.DataFrame,
+    obs_group_joinid_agg_series: pd.Series,
+    obs_groups_df_agg_indexer: pd.Series,
+    features: List[str],
+) -> pl.DataFrame:
     tiledb_config = {
         "py.init_buffer_bytes": 2**31,
     }
     with tiledb.open(os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config=tiledb_config) as estimators_array:
-        estimators_df = pl.DataFrame(estimators_array.df[features, obs_groups_df.obs_group_joinid.values])
+        estimators_df = estimators_array.df[features, obs_groups_df.obs_group_joinid.values]
 
+        estimators_df["name"] = obs_group_joinid_agg_series[estimators_df["obs_group_joinid"]].values
+        estimators_df = estimators_df.groupby(["feature_id", "name"]).sum().reset_index()
+        estimators_df["obs_group_joinid"] = obs_groups_df_agg_indexer[estimators_df["name"].values].values.astype(
+            np.uint32
+        )
+        del estimators_df["name"]
+
+        estimators_df = pl.DataFrame(estimators_df)
+
+    estimators_df = compute_memento_estimators_from_precomputed_stats(estimators_df)
     # TODO: Determine whether it's reasonable to drop these values, or if we should revisit how they're being
     #  computed in the first place. If reasonable, this filtering should be done by the cube builder, not here.
     # This filtering ensures that we will not take of logs of non-positive values, or end up with selm values of 0
@@ -61,10 +94,19 @@ def drop_invalid_data(estimators_df: pl.DataFrame) -> pl.DataFrame:
 
 
 def compute_all(
-    cube_path: str, query_filter: str, treatment: str, n_processes: int, n_features: Optional[int] = None
+    cube_path: str,
+    query_filter: str,
+    treatment: str,
+    n_processes: int,
+    n_features: Optional[int] = None,
+    covariates: Optional[List[str]] = ["dataset_id"],
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
+        if covariates:
+            obs_groups_df = obs_groups_df[covariates + [treatment, "obs_group_joinid", "n_obs"]]
+        else:
+            covariates = CUBE_LOGICAL_DIMS_OBS
 
         distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
@@ -79,12 +121,33 @@ def compute_all(
     )
 
     # make treatment variable be in the first column of the design matrix
-    variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
-    design = pd.get_dummies(obs_groups_df[variables].astype(str), drop_first=True, dtype=int)
-    assert design.shape[1] == obs_groups_df[variables].nunique().sum() - len(variables)
+    variables = [treatment] + [covariate for covariate in covariates if covariate != treatment]
+
+    agg_dict = {i: "first" for i in variables}
+    agg_dict["n_obs"] = "sum"
+    obs_group_joinid_agg_series = obs_groups_df.groupby("obs_group_joinid").apply(
+        lambda x: "_".join(x[variables].values.flatten())
+    )
+    obs_groups_df_agg = obs_groups_df.groupby(variables, observed=True).agg(agg_dict)
+    obs_groups_df_agg["obs_group_joinid"] = range(len(obs_groups_df_agg))
+    obs_groups_df_agg["obs_group_joinid"] = obs_groups_df_agg["obs_group_joinid"].astype(np.uint32)
+    obs_groups_df_agg_indexer = pd.Series(
+        index=obs_groups_df_agg.index.map(lambda x: "_".join(x)), data=range(len(obs_groups_df_agg))
+    )
+
+    design = pd.get_dummies(obs_groups_df_agg[variables].astype(str), drop_first=True, dtype=int)
+    assert design.shape[1] == obs_groups_df_agg[variables].nunique().sum() - len(variables)
 
     result_groups = ProcessPoolExecutor(max_workers=n_processes).map(
-        partial(compute_for_features, cube_path, design, obs_groups_df[["obs_group_joinid", "n_obs"]]),
+        partial(
+            compute_for_features,
+            cube_path,
+            design,
+            obs_groups_df[["obs_group_joinid", "n_obs"]],
+            obs_groups_df_agg[["obs_group_joinid", "n_obs"]],
+            obs_groups_df_agg_indexer,
+            obs_group_joinid_agg_series,
+        ),
         feature_groups,
         range(len(feature_groups)),
     )
@@ -101,7 +164,9 @@ def compute_all(
         data = itertools.chain.from_iterable(results)  # flatten results
         stats = pstats.Stats()
 
-    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
+    results = pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id")
+    results.sort_values("coef", ascending=False, inplace=True)
+    return results, stats
 
 
 def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
@@ -119,15 +184,24 @@ def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
 # @cprofile
 # @timeit_report
 def compute_for_features(
-    cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
+    cube_path: str,
+    design: pd.DataFrame,
+    obs_groups_df: pd.DataFrame,
+    obs_groups_df_agg: pd.DataFrame,
+    obs_groups_df_agg_indexer: pd.Series,
+    obs_group_joinid_agg_series: pd.Series,
+    features: List[str],
+    feature_group_key: int,
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
     logging.debug(
         f"computing for feature group {feature_group_key}, n={len(features)}, {features[0]}..{features[-1]}..."
     )
-    estimators = query_estimators(cube_path, obs_groups_df, features)
+    estimators = query_estimators(
+        cube_path, obs_groups_df, obs_group_joinid_agg_series, obs_groups_df_agg_indexer, features
+    )
 
-    cell_counts = obs_groups_df["n_obs"].values
-    obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
+    cell_counts = obs_groups_df_agg["n_obs"].values
+    obs_group_joinids = obs_groups_df_agg[["obs_group_joinid"]]
 
     result = [
         (feature_id, *compute_for_feature(cell_counts, design, feature_estimators, obs_group_joinids))  # type:ignore
