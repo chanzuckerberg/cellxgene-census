@@ -87,6 +87,9 @@
   </div>
 </nav><div class="container template-article">
 
+
+
+
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Integrating multi-dataset slices of data with Seurat</h1>
@@ -102,23 +105,35 @@
 THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/analysis_demo/comp_bio_data_integration_scvi.ipynb
 
 -->
-<p>The Census contains data from multiple studies providing an opportunity to perform inter-dataset analysis. To this end integration of data has to be performed first to account for batch effects.</p>
-<p>This notebook provides a demonstration for integrating two Census datasets using <a href="https://satijalab.org/seurat/articles/integration_introduction.html" class="external-link"><code>Seurat</code></a>. <strong>The goal is not to provide an exhaustive guide on proper integration, but to showcase what information in the Census can inform data integration.</strong></p>
+<p>The Census contains data from multiple studies providing an
+opportunity to perform inter-dataset analysis. To this end integration
+of data has to be performed first to account for batch effects.</p>
+<p>This notebook provides a demonstration for integrating two Census
+datasets using <a href="https://satijalab.org/seurat/articles/integration_introduction.html" class="external-link"><code>Seurat</code></a>.
+<strong>The goal is not to provide an exhaustive guide on proper
+integration, but to showcase what information in the Census can inform
+data integration.</strong></p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
-<li>Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2).</li>
+<li>Finding and fetching data from mouse liver (10X Genomics and
+Smart-Seq2).</li>
 <li>Gene-length normalization of Smart-Seq2 data.</li>
 <li>Integration with <code>Seurat</code>.
 <ol style="list-style-type: decimal">
 <li>Inspecting data prior to integration.</li>
 <li>Integration across datasets using <code>dataset_id</code>.</li>
-<li>Integration across datasets using <code>dataset_id</code> and controlling for batch using <code>donor_id</code>.</li>
-<li>Integration across datasets using <code>dataset_id</code> and controlling for batch using <code>donor_id</code> + <code>assay_ontology_term_id</code> + <code>suspension_type</code>. .</li>
+<li>Integration across datasets using <code>dataset_id</code> and
+controlling for batch using <code>donor_id</code>.</li>
+<li>Integration across datasets using <code>dataset_id</code> and
+controlling for batch using <code>donor_id</code> +
+<code>assay_ontology_term_id</code> + <code>suspension_type</code>.
+.</li>
 </ol>
 </li>
 </ol>
 <div class="section level2">
-<h2 id="finding-and-fetching-data-from-mouse-liver-10x-genomics-and-smart-seq2">Finding and fetching data from mouse liver (10X Genomics and Smart-Seq2)<a class="anchor" aria-label="anchor" href="#finding-and-fetching-data-from-mouse-liver-10x-genomics-and-smart-seq2"></a>
+<h2 id="finding-and-fetching-data-from-mouse-liver-10x-genomics-and-smart-seq2">Finding and fetching data from mouse liver (10X Genomics and
+Smart-Seq2)<a class="anchor" aria-label="anchor" href="#finding-and-fetching-data-from-mouse-liver-10x-genomics-and-smart-seq2"></a>
 </h2>
 <p>Let’s load all packages needed for this notebook.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -127,8 +142,12 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <p>Now we can open the Census.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>In this notebook we will use Tabula Muris Senis data from the liver as it contains cells from both 10X Genomics and Smart-Seq2 technologies.</p>
-<p>Let’s query the <code>datasets</code> table of the Census by filtering on <code>collection_name</code> for “Tabula Muris Senis” and <code>dataset_title</code> for “liver”.</p>
+<p>In this notebook we will use Tabula Muris Senis data from the liver
+as it contains cells from both 10X Genomics and Smart-Seq2
+technologies.</p>
+<p>Let’s query the <code>datasets</code> table of the Census by
+filtering on <code>collection_name</code> for “Tabula Muris Senis” and
+<code>dataset_title</code> for “liver”.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span></span>
 <span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census_datasets</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"collection_name == 'Tabula Muris Senis'"</span><span class="op">)</span></span>
@@ -151,7 +170,8 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
 <span><span class="co">#&gt; 15 4546e757-34d0-4d17-be06-538318925fcd.h5ad                     2859</span></span>
 <span><span class="co">#&gt; 36 6202a243-b713-4e12-9ced-c387f8483dea.h5ad                     7294</span></span></code></pre></div>
-<p>Now we can use the values from <code>dataset_id</code> to query and load a Seurat object with all the cells from those datasets.</p>
+<p>Now we can use the values from <code>dataset_id</code> to query and
+load a Seurat object with all the cells from those datasets.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tabula_muris_liver_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"4546e757-34d0-4d17-be06-538318925fcd"</span>, <span class="st">"6202a243-b713-4e12-9ced-c387f8483dea"</span><span class="op">)</span></span>
 <span></span>
@@ -160,7 +180,8 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span>  organism <span class="op">=</span> <span class="st">"Mus musculus"</span>,</span>
 <span>  obs_value_filter <span class="op">=</span> <span class="st">"dataset_id %in% tabula_muris_liver_ids"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>We can check the cell counts for both 10X Genomics and Smart-Seq2 data by looking at <code>assay</code> in the metadata.</p>
+<p>We can check the cell counts for both 10X Genomics and Smart-Seq2
+data by looking at <code>assay</code> in the metadata.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">assay</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -171,13 +192,16 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <h2 id="gene-length-normalization-of-smart-seq2-data-">Gene-length normalization of Smart-Seq2 data.<a class="anchor" aria-label="anchor" href="#gene-length-normalization-of-smart-seq2-data-"></a>
 </h2>
 <p>Smart-seq2 read counts have to be normalized by gene length.</p>
-<p>Lets first get the gene lengths from <code>var.feature_length</code>.</p>
+<p>Lets first get the gene lengths from
+<code>var.feature_length</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">smart_seq_gene_lengths</span> <span class="op">&lt;-</span> <span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">feature_length</span></span></code></pre></div>
-<p>Now we can use those to normalize Smart-seq data. So let’s split the object by assay.</p>
+<p>Now we can use those to normalize Smart-seq data. So let’s split the
+object by assay.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seurat_obj.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/SplitObject.html" class="external-link">SplitObject</a></span><span class="op">(</span><span class="va">seurat_obj</span>, split.by <span class="op">=</span> <span class="st">"assay"</span><span class="op">)</span></span></code></pre></div>
-<p>An normalize the Smart-seq slice using the gene lengths and merge them back into a single object.</p>
+<p>An normalize the Smart-seq slice using the gene lengths and merge
+them back into a single object.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seurat_obj.list</span><span class="op">[[</span><span class="st">"Smart-seq2"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"RNA"</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">seurat_obj.list</span><span class="op">[[</span><span class="st">"Smart-seq2"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"RNA"</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">counts</span> <span class="op">/</span> <span class="va">smart_seq_gene_lengths</span></span>
 <span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">seurat_obj.list</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="va">seurat_obj.list</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -186,11 +210,14 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <h2 id="integration-with-seurat">Integration with Seurat<a class="anchor" aria-label="anchor" href="#integration-with-seurat"></a>
 </h2>
 <p>Here we will use the native integration capabilities of Seurat.</p>
-<p><strong>For comprehensive usage and best practices of Seurat intergation please refer to the <a href="https://satijalab.org/seurat/articles/integration_introduction.html" class="external-link">doc site</a> of <code>Seurat</code>.</strong></p>
+<p><strong>For comprehensive usage and best practices of Seurat
+intergation please refer to the <a href="https://satijalab.org/seurat/articles/integration_introduction.html" class="external-link">doc
+site</a> of <code>Seurat</code>.</strong></p>
 <div class="section level3">
 <h3 id="inspecting-data-prior-to-integration">Inspecting data prior to integration<a class="anchor" aria-label="anchor" href="#inspecting-data-prior-to-integration"></a>
 </h3>
-<p>Let’s take a look at the strength of batch effects in our data. For that we will perform embedding visualization via UMAP.</p>
+<p>Let’s take a look at the strength of batch effects in our data. For
+that we will perform embedding visualization via UMAP.</p>
 <p>Let’s do basic data normalization and variable gene selection</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/SCTransform.html" class="external-link">SCTransform</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span></span>
@@ -209,21 +236,37 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seurat_obj</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"cell_type"</span><span class="op">)</span></span>
 <span><span class="va">p2</span></span></code></pre></div>
 <p><img src="comp_bio_data_integration_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;"></p>
-<p>You can see that <strong>batch effects are strong</strong> as cells cluster primarily by <code>assay</code> and then by <code>cell_type</code>. Properly integrated embedding would in principle cluster primarily by <code>cell_type</code>, <code>assay</code> should at best randomly distributed.</p>
+<p>You can see that <strong>batch effects are strong</strong> as cells
+cluster primarily by <code>assay</code> and then by
+<code>cell_type</code>. Properly integrated embedding would in principle
+cluster primarily by <code>cell_type</code>, <code>assay</code> should
+at best randomly distributed.</p>
 </div>
 <div class="section level3">
 <h3 id="data-integration-with-seurat">Data integration with Seurat<a class="anchor" aria-label="anchor" href="#data-integration-with-seurat"></a>
 </h3>
-<p>Whenever you query and fetch Census data from multiple datasets then integration needs to be performed as evidenced by the batch effects we observed.</p>
-<p><strong>The paramaters for Seurat used in this notebook were selected to the model run quickly.</strong> For best practices on integration of single-cell data using <a href="https://satijalab.org/seurat/index.html" class="external-link"><code>Seurat</code></a> please refer to their documentation page.</p>
-<p>seurat_d reading the article <a href="https://www.biorxiv.org/content/10.1101/2022.03.10.483747v1" class="external-link">An integrated cell atlas of the human lung in health and disease</a> by Sikkema et al. whom perfomed integration of 43 datasets from Lung.</p>
-<p>Here we focus on the metadata from the Census that can be as batch information for integration.</p>
+<p>Whenever you query and fetch Census data from multiple datasets then
+integration needs to be performed as evidenced by the batch effects we
+observed.</p>
+<p><strong>The paramaters for Seurat used in this notebook were selected
+to the model run quickly.</strong> For best practices on integration of
+single-cell data using <a href="https://satijalab.org/seurat/index.html" class="external-link"><code>Seurat</code></a>
+please refer to their documentation page.</p>
+<p>seurat_d reading the article <a href="https://www.biorxiv.org/content/10.1101/2022.03.10.483747v1" class="external-link">An
+integrated cell atlas of the human lung in health and disease</a> by
+Sikkema et al. whom perfomed integration of 43 datasets from Lung.</p>
+<p>Here we focus on the metadata from the Census that can be as batch
+information for integration.</p>
 <div class="section level4">
 <h4 id="integration-across-datasets-using-dataset_id">Integration across datasets using <code>dataset_id</code><a class="anchor" aria-label="anchor" href="#integration-across-datasets-using-dataset_id"></a>
 </h4>
-<p>All cells in the Census are annotated with the dataset they come from in <code>"dataset_id"</code>. This is a great place to start for integration.</p>
-<p>So let’s run a Seurat integration pipeline. First we define our model with batch set as <code>dataset_id</code>.</p>
-<p>Firs normalize and select variable genes seperated by our batch key <code>dataset_id</code></p>
+<p>All cells in the Census are annotated with the dataset they come from
+in <code>"dataset_id"</code>. This is a great place to start for
+integration.</p>
+<p>So let’s run a Seurat integration pipeline. First we define our model
+with batch set as <code>dataset_id</code>.</p>
+<p>Firs normalize and select variable genes seperated by our batch key
+<code>dataset_id</code></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># split the dataset into a list of two seurat objects for each dataset</span></span>
 <span><span class="va">seurat_obj.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/SplitObject.html" class="external-link">SplitObject</a></span><span class="op">(</span><span class="va">seurat_obj</span>, split.by <span class="op">=</span> <span class="st">"dataset_id"</span><span class="op">)</span></span>
@@ -240,7 +283,8 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <code class="sourceCode R"><span><span class="va">seurat_obj.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/PrepSCTIntegration.html" class="external-link">PrepSCTIntegration</a></span><span class="op">(</span><span class="va">seurat_obj.list</span>, anchor.features <span class="op">=</span> <span class="va">features</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.anchors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindIntegrationAnchors.html" class="external-link">FindIntegrationAnchors</a></span><span class="op">(</span>object.list <span class="op">=</span> <span class="va">seurat_obj.list</span>, anchor.features <span class="op">=</span> <span class="va">features</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span></code></pre></div>
-<p>Let’s inspect the results by doing normalization and then UMAP visulization.</p>
+<p>Let’s inspect the results by doing normalization and then UMAP
+visulization.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
 <span></span>
@@ -259,14 +303,24 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"cell_type"</span><span class="op">)</span></span>
 <span><span class="va">p2</span></span></code></pre></div>
 <p><img src="comp_bio_data_integration_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;"></p>
-<p>Great! You can see that the clustering is no longer mainly driven by assay, albeit still contributing to it.</p>
-<p>Great! You can see that the clustering is no longer mainly driven by assay, albeit still contributing to it.</p>
+<p>Great! You can see that the clustering is no longer mainly driven by
+assay, albeit still contributing to it.</p>
+<p>Great! You can see that the clustering is no longer mainly driven by
+assay, albeit still contributing to it.</p>
 </div>
 <div class="section level4">
-<h4 id="integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id">Integration across datasets using <code>dataset_id</code> and controlling for batch using <code>donor_id</code><a class="anchor" aria-label="anchor" href="#integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id"></a>
+<h4 id="integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id">Integration across datasets using <code>dataset_id</code> and
+controlling for batch using <code>donor_id</code><a class="anchor" aria-label="anchor" href="#integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id"></a>
 </h4>
-<p>Similar to <code>dataset_id</code>, all cells in Census are annotated with <code>donor_id</code>. The definition of <code>donor_id</code> depends on the dataset and it is left to the discretion of data curators. However it is still rich in information and can be used as a batch variable during integration.</p>
-<p>Because <code>donor_id</code> is not guaranteed to be unique across all cells of the Census, we strongly recommend concatenating <code>dataset_id</code> and <code>donor_id</code> and use that as the batch separator for Seurat</p>
+<p>Similar to <code>dataset_id</code>, all cells in Census are annotated
+with <code>donor_id</code>. The definition of <code>donor_id</code>
+depends on the dataset and it is left to the discretion of data
+curators. However it is still rich in information and can be used as a
+batch variable during integration.</p>
+<p>Because <code>donor_id</code> is not guaranteed to be unique across
+all cells of the Census, we strongly recommend concatenating
+<code>dataset_id</code> and <code>donor_id</code> and use that as the
+batch separator for Seurat</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># split the dataset into a list of two seurat objects for each dataset</span></span>
 <span><span class="va">seurat_obj.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/SplitObject.html" class="external-link">SplitObject</a></span><span class="op">(</span><span class="va">seurat_obj</span>, split.by <span class="op">=</span> <span class="st">"dataset_id"</span><span class="op">)</span></span>
@@ -310,20 +364,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 14:49:10 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 14:49:10 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 14:49:10 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 14:49:10 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 12:37:07 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 12:37:07 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 12:37:07 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 12:37:07 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 14:49:12 Writing NN index file to temp file /tmp/RtmpRa88jI/file926122f23120</span></span>
-<span><span class="co">#&gt; 14:49:12 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 14:49:16 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 14:49:16 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 14:49:17 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
-<span><span class="co">#&gt; 14:49:17 Commencing optimization for 200 epochs, with 409958 positive edges</span></span>
-<span><span class="co">#&gt; 14:49:21 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 12:37:08 Writing NN index file to temp file /var/folders/5p/gtl_p3v92dg2tv2qsy0m8n6c0000gq/T//RtmpAtlyQ6/file148ad7332bf72</span></span>
+<span><span class="co">#&gt; 12:37:08 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 12:37:10 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 12:37:10 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 12:37:11 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 12:37:11 Commencing optimization for 200 epochs, with 410296 positive edges</span></span>
+<span><span class="co">#&gt; 12:37:15 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
@@ -335,14 +389,26 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"cell_type"</span><span class="op">)</span></span>
 <span><span class="va">p2</span></span></code></pre></div>
 <p><img src="comp_bio_data_integration_files/figure-html/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;"></p>
-<p>As you can see using <code>dataset_id</code> and <code>donor_id</code> as batch the cells now mostly cluster by cell type.</p>
+<p>As you can see using <code>dataset_id</code> and
+<code>donor_id</code> as batch the cells now mostly cluster by cell
+type.</p>
 </div>
 <div class="section level4">
-<h4 id="integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id-assay_ontology_term_id-suspension_type-">Integration across datasets using <code>dataset_id</code> and controlling for batch using <code>donor_id</code> + <code>assay_ontology_term_id</code> + <code>suspension_type</code>.<a class="anchor" aria-label="anchor" href="#integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id-assay_ontology_term_id-suspension_type-"></a>
+<h4 id="integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id-assay_ontology_term_id-suspension_type-">Integration across datasets using <code>dataset_id</code> and
+controlling for batch using <code>donor_id</code> +
+<code>assay_ontology_term_id</code> + <code>suspension_type</code>.<a class="anchor" aria-label="anchor" href="#integration-across-datasets-using-dataset_id-and-controlling-for-batch-using-donor_id-assay_ontology_term_id-suspension_type-"></a>
 </h4>
-<p>In some cases one dataset may contain multiple assay types and/or multiple suspension types (cell vs nucleus), and for those it is important to consider these metadata as batches.</p>
-<p>Therefore, the most comprehensive definition of batch in the Census can be accomplished by combining the cell metadata of <code>dataset_id</code>, <code>donor_id</code>, <code>assay_ontology_term_id</code> and <code>suspension_type</code>, the latter will encode the <code>EFO</code> ids for assay types.</p>
-<p>In our example, the two datasets that we used only contain cells from one assay each, and one suspension type for all of them. Thus it would not make a difference to include these metadata as part of batch.</p>
+<p>In some cases one dataset may contain multiple assay types and/or
+multiple suspension types (cell vs nucleus), and for those it is
+important to consider these metadata as batches.</p>
+<p>Therefore, the most comprehensive definition of batch in the Census
+can be accomplished by combining the cell metadata of
+<code>dataset_id</code>, <code>donor_id</code>,
+<code>assay_ontology_term_id</code> and <code>suspension_type</code>,
+the latter will encode the <code>EFO</code> ids for assay types.</p>
+<p>In our example, the two datasets that we used only contain cells from
+one assay each, and one suspension type for all of them. Thus it would
+not make a difference to include these metadata as part of batch.</p>
 <p>This how the implementation would look line</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># EXAMPLE, DON'T RUN.</span></span>

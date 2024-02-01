@@ -1,4 +1,4 @@
-pandoc: '2.5'
+pandoc: 3.1.8
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
@@ -12,5 +12,5 @@ articles:
   comp_bio_data_integration: comp_bio_data_integration.html
   comp_bio_normalizing_full_gene_sequencing: comp_bio_normalizing_full_gene_sequencing.html
   comp_bio_summarize_axis_query: comp_bio_summarize_axis_query.html
-last_built: 2024-01-08T22:03Z
+last_built: 2024-02-01T20:00Z
 
