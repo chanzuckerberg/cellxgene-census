@@ -27,10 +27,9 @@ jobs:
 
     steps:
       - name: install tooling
+        if: matrix.os == 'single-cell-8c64g-runner'
         run: |
-          if [ {{matrix.os}} != "macos-latest" ]; then
-            sudo apt-get update && sudo apt-get install jq
-          fi
+          sudo apt-get update && sudo apt-get install jq
 
       - name: get latest release with tag
         id: latestrelease
