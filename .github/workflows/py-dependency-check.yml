@@ -29,7 +29,7 @@ jobs:
       - name: install tooling
         if: matrix.os == 'single-cell-8c64g-runner'
         run: |
-          sudo apt-get update && sudo apt-get install jq
+          sudo apt-get update && sudo apt-get install -y jq
 
       - name: get latest release with tag
         id: latestrelease
