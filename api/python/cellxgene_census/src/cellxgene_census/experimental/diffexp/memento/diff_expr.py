@@ -98,7 +98,6 @@ def compute_all(
     query_filter: str,
     treatment: str,
     n_processes: int,
-    n_features: Optional[int] = None,
     covariates: Optional[List[str]] = ["dataset_id"],
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
@@ -111,7 +110,7 @@ def compute_all(
         distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
 
-    features = get_features(cube_path, n_features)
+    features = get_features(cube_path, None)
 
     # compute each feature group in parallel
     n_feature_groups = min(len(features), n_processes)
@@ -313,15 +312,15 @@ def de_wls(
 # Script entrypoint
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <n_processes> <n_features>")
+        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <n_processes> <covariates>")
         sys.exit(1)
 
-    filter_arg, treatment_arg, cube_path_arg, n_processes, n_features = sys.argv[1:6]
+    filter_arg, treatment_arg, cube_path_arg, n_processes, covariates = sys.argv[1:6]
 
     logging.getLogger().setLevel(logging.DEBUG)
 
     de_result = compute_all(
-        cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features) if n_features else None
+        cube_path_arg, filter_arg, treatment_arg, int(n_processes), covariates.split(",") if covariates else None
     )
 
     # Output DE result
