@@ -46,7 +46,7 @@ experimental = [
     "scikit-learn~=1.0",
     "scikit-misc~=0.3",
     "psutil~=5.0",
-    "datasets~=2.16",
+    "datasets~=2.0",
     "tdigest~=0.5",
     # Not expressible in pyproject.toml:
     #"git+https://huggingface.co/ctheodoris/Geneformer",
