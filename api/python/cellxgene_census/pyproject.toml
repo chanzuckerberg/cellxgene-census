@@ -41,13 +41,13 @@ dependencies= [
 
 [project.optional-dependencies]
 experimental = [
-    "torch==2.0.1",
-    "torchdata==0.6.1",
-    "scikit-learn==1.3.1",
-    "scikit-misc==0.2.0",
-    "psutil==5.9.5",
+    "torch~=2.0",
+    "torchdata~=0.7",
+    "scikit-learn~=1.0",
+    "scikit-misc>=0.2",  # scikit-misc 0.3 dropped Python 3.8 support
+    "psutil~=5.0",
     "datasets~=2.0",
-    "tdigest>=0.5",
+    "tdigest~=0.5",
     # Not expressible in pyproject.toml:
     #"git+https://huggingface.co/ctheodoris/Geneformer",
     # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
