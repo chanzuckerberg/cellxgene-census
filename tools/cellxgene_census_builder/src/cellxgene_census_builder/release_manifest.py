@@ -1,6 +1,7 @@
 """
 Tools to manage the release.json manifest file.
 """
+
 import json
 from typing import Dict, Optional, Union, cast
 
