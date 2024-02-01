@@ -26,6 +26,10 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
+      - name: install tooling
+        run: |
+          sudo apt-get update && sudo apt-get install jq
+
       - name: get latest release with tag
         id: latestrelease
         run: |
