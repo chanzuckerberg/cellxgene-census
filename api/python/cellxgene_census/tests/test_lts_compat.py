@@ -1,5 +1,5 @@
 """
-Compatibility tests between the installed verison of cellxgene-census and
+Compatibility tests between the installed verison of cellxgene_census and
 a named LTS release. Primarilly intended to be driven by a periodic GHA.
 
 Where there are known and accepted incompatibilities, use `pytest.skip`
