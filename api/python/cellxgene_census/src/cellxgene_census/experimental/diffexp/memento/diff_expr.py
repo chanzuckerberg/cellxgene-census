@@ -62,10 +62,17 @@ def query_estimators(
     }
     with tiledb.open(os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config=tiledb_config) as estimators_array:
         estimators_df = estimators_array.df[features, obs_groups_df.obs_group_joinid.values]
-        estimators_df["obs_group_joinid"] = estimators_df.merge(obs_groups_df, on="obs_group_joinid")[
-            "selected_vars_group_joinid"
-        ]
-        estimators_df = estimators_df.groupby(["feature_id", "obs_group_joinid"]).sum().reset_index()
+        estimators_df = (
+            estimators_df.merge(
+                obs_groups_df[["obs_group_joinid", "selected_vars_group_joinid"]], on="obs_group_joinid"
+            )
+            .groupby(["feature_id", "selected_vars_group_joinid"])
+            .sum()
+            .reset_index()
+        )
+        estimators_df["obs_group_joinid"] = estimators_df["selected_vars_group_joinid"].astype("uint32")
+        del estimators_df["selected_vars_group_joinid"]
+        print(estimators_df.dtypes)
         estimators_df = pl.DataFrame(estimators_df)
 
     estimators_df = compute_memento_estimators_from_precomputed_stats(estimators_df)
