@@ -1,11 +1,11 @@
 name: Python dependency checks
 
-# This workflow is intended to check that the latest release of the `cellxgene_census` package
+# This workflow is intended to check that the latest release of the `cellxgene-census` package
 # continues to function correctly using the latest upstream dependencies.
 #
 # Method:
 # 1. Check out the repo at the latest release tag
-# 2. Install latest cellxgene_census package from pypi
+# 2. Install latest cellxgene-census package from pypi
 # 3. Verify versions match
 # 4. Run tests from the repo
 
@@ -60,14 +60,14 @@ jobs:
           python -m pip install -U pip setuptools wheel
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -U -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
-          pip install -U cellxgene_census[experimental]
+          pip install -U cellxgene-census[experimental]
 
           # dump pip config for logs
           pip freeze
 
           LATEST_RELEASE_TAG=$(echo "${{ steps.latestrelease.outputs.releasetag }}" | sed 's/^.//')
           echo LATEST_RELEASE_TAG="$LATEST_RELEASE_TAG"
-          LATEST_PYPI_RELEASE=$(pip freeze | grep cellxgene_census | sed 's/^.*\=\=//')
+          LATEST_PYPI_RELEASE=$(pip freeze | grep cellxgene-census | sed 's/^.*\=\=//')
           echo LATEST_PYPI_RELEASE="$LATEST_PYPI_RELEASE"
           if [ "$LATEST_PYPI_RELEASE" != "$LATEST_RELEASE_TAG" ]; then
             echo Github and PyPi latest release tags do not match.

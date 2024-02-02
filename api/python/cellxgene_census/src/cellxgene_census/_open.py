@@ -48,7 +48,7 @@ def _assert_mirror_supported(mirror: CensusMirror) -> None:
     """
     if mirror["provider"] not in get_args(Provider):
         raise ValueError(
-            f"Unsupported mirror provider: {mirror['provider']}. Try upgrading the cellxgene_census package to the latest version."
+            f"Unsupported mirror provider: {mirror['provider']}. Try upgrading the cellxgene-census package to the latest version."
         )
 
 
