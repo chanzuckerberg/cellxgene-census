@@ -2,7 +2,7 @@ import logging
 import os
 import pathlib
 from datetime import datetime, timezone
-from typing import List, cast
+from typing import List, TypeVar, cast
 
 import pandas as pd
 import psutil
@@ -181,9 +181,29 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
             datasets = datasets[args.config.test_first_n :]
 
     else:
-        # TODO: it is unclear if this shuffle has any material impact
-        sorted_by_size = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)
-        datasets = [sorted_by_size[-i // 2] if i % 2 else sorted_by_size[i // 2] for i in range(len(sorted_by_size))]
+        # TODO: it is unclear if this shuffle has material impact. Needs more benchmarking.
+        T = TypeVar("T")
+
+        def shuffle(items: List[T], step: int) -> List[T]:
+            """
+            Shuffle (interleave) from each end of the list. Step param controls
+            bias of selection from front and back, i.e., if if step==2, every other
+            item will be selected from end of list, if step==3, every third item
+            will come from the end of the list.
+
+            Expected use: reorder a sorted list (e.g by size) so that it ends up as (for step==2):
+            [largest, smallest, second-largest, second-smallest, third-largest, ...]
+            """
+            assert step > 0
+            r = []
+            for i in range(len(items)):
+                if i % step == 0:
+                    r.append(items[-i // step - 1])
+                else:
+                    r.append(items[(step - 1) * (i // step) + (i % step) - 1])
+            return r
+
+        datasets = shuffle(sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize), step=8)
         assert set(d.dataset_id for d in all_datasets) == set(d.dataset_id for d in datasets)
 
     # Stage all files
