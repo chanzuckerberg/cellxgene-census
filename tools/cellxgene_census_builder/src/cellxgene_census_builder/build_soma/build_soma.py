@@ -33,6 +33,7 @@ from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty
 from .validate_soma import validate_consolidation, validate_soma
 
+T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
@@ -182,8 +183,6 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
 
     else:
         # TODO: it is unclear if this shuffle has material impact. Needs more benchmarking.
-        T = TypeVar("T")
-
         def shuffle(items: List[T], step: int) -> List[T]:
             """
             Shuffle (interleave) from each end of the list. Step param controls
@@ -203,7 +202,9 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
                     r.append(items[(step - 1) * (i // step) + (i % step) - 1])
             return r
 
-        datasets = shuffle(sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize), step=8)
+        # Nothing magical about a step of 16, other than the observation that our dataset
+        # distribution has many more small datasets than large.
+        datasets = shuffle(sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize), step=16)
         assert set(d.dataset_id for d in all_datasets) == set(d.dataset_id for d in datasets)
 
     # Stage all files
