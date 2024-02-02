@@ -72,7 +72,6 @@ def query_estimators(
         )
         estimators_df["obs_group_joinid"] = estimators_df["selected_vars_group_joinid"].astype("uint32")
         del estimators_df["selected_vars_group_joinid"]
-        print(estimators_df.dtypes)
         estimators_df = pl.DataFrame(estimators_df)
 
     estimators_df = compute_memento_estimators_from_precomputed_stats(estimators_df)
@@ -187,7 +186,6 @@ def compute_for_features(
         f"computing for feature group {feature_group_key}, n={len(features)}, {features[0]}..{features[-1]}..."
     )
     estimators = query_estimators(cube_path, obs_groups_df, features)
-    estimators = estimators.with_columns(estimators["obs_group_joinid"].cast(pl.UInt32))
     cell_counts = selected_vars_groups_df["n_obs"].values
     obs_group_joinids = selected_vars_groups_df[["obs_group_joinid"]]
 
