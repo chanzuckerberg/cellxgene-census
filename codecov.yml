@@ -1,5 +1,3 @@
-ignore: 
-  "**/_remote_module_non_scriptable.py"
 coverage:
   status:
     project: off
