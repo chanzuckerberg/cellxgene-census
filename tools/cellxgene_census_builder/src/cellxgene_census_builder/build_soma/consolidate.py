@@ -125,22 +125,13 @@ def _consolidate_array(
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
     for mode in modes:
-        # Once we update to TileDB core 2.19, remove this and replace with
-        # sm.consolidation.total_buffer_size
-        #
-        # Heuristic based on the fact that our sparse nd arrays (X/*) are both large and
-        # have small number of columns. If a low-cardinatlity column count, use bigger buffers.
-        buffer_size = 1 * 1024**3 if obj.n_columns > 3 else 8 * 1024**3
-
         tiledb.consolidate(
             uri,
             config=tiledb.Config(
                 {
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.consolidation.mode": mode,
-                    # once we update to TileDB core 2.19, remove this and replace
-                    # with sm.consolidation.total_buffer_size
-                    "sm.consolidation.buffer_size": buffer_size,
+                    "sm.consolidation.total_buffer_size": 32 * 1024**3,
                     **(consolidation_config or {}),
                 }
             ),
