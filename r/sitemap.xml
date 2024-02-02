@@ -13,6 +13,9 @@
     <loc>/articles/census_access_maintained_embeddings.html</loc>
   </url>
   <url>
+    <loc>/articles/census_axis_query.html</loc>
+  </url>
+  <url>
     <loc>/articles/census_citation_generation.html</loc>
   </url>
   <url>
@@ -50,6 +53,12 @@
   </url>
   <url>
     <loc>/reference/download_source_h5ad.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_census_mirror.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_census_mirror_directory.html</loc>
   </url>
   <url>
     <loc>/reference/get_census_version_description.html</loc>

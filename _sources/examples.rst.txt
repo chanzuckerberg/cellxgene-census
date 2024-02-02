@@ -43,7 +43,7 @@ Exploring human biology with Census embeddings.
     
     notebooks/analysis_demo/comp_bio_embedding_exploration.ipynb
 
-Uderstanding Census data
+Understanding Census data
 ----------
 
 Gain a better understanding on the nature of the Census data and how it's organized.

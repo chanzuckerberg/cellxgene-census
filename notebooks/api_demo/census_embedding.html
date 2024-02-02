@@ -169,7 +169,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
@@ -312,7 +312,12 @@ AxisArrays with keys: scgpt
 </section>
 <section id="Storage-format">
 <h2>Storage format<a class="headerlink" href="#Storage-format" title="Permalink to this heading">¶</a></h2>
-<p>Each embedding is encoded as a SOMA SparseNDArray, where: * dimension 0 (<code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code>) encodes the cell (obs) <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value * dimension 1 (<code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code>) encodes the embedding feature, and is in the range [0, N) where N is the number of featues in the embedding * data (<code class="docutils literal notranslate"><span class="pre">soma_data</span></code>) is float32</p>
+<p>Each embedding is encoded as a SOMA SparseNDArray, where:</p>
+<ul class="simple">
+<li><p>dimension 0 (<code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code>) encodes the cell (obs) <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value</p></li>
+<li><p>dimension 1 (<code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code>) encodes the embedding feature, and is in the range [0, N) where N is the number of featues in the embedding</p></li>
+<li><p>data (<code class="docutils literal notranslate"><span class="pre">soma_data</span></code>) is float32</p></li>
+</ul>
 <p>⚠️ <strong>IMPORTANT:</strong> CELLxGENE-hosted embeddings may embed a subset of the cells in any given Census version. If a cell has an embedding, it will be explicitly stored in the sparse array, <em>even if the embedding value is zero</em>. In other words, missing array values values imply that the cell was not embedded, whereas zero valued embeddings are explicitly stored. Put another way, the <code class="docutils literal notranslate"><span class="pre">nnz</span></code> of the embedding array indicate the number of embedded cells, not the number of non-zero values.</p>
 <p>The first axis of the embedding array will have the same shape as the corresponding <code class="docutils literal notranslate"><span class="pre">obs</span></code> DataFrame for the Census build and experiment. The second axis of the embedding will have a shape (0, N) where N is the number of features in the embedding.</p>
 <p>Embedding values, while stored as a float32, are precision reduced. Currently they are equivalent to a bfloat16, i.e., have 8 bits of exponent and 7 bits of mantissa.</p>
@@ -358,8 +363,8 @@ AxisArrays with keys: scgpt
 <h3>Load an embedding into an AnnData <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot<a class="headerlink" href="#Load-an-embedding-into-an-AnnData-obsm-slot" title="Permalink to this heading">¶</a></h3>
 <p>There are two main ways to load hosted embeddings into an AnnData.</p>
 <ol class="arabic simple">
-<li><p>Via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code>, followed by merging embbedings.</p></li>
-<li><p>With a lazy query via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>, followed by merging embbedings.</p></li>
+<li><p>Via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code>, followed by merging embeddings.</p></li>
+<li><p>With a lazy query via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>, followed by merging embeddings.</p></li>
 </ol>
 <section id="AnnData-embeddings-via-cellxgene_census.get_anndata()">
 <h4>AnnData embeddings via cellxgene_census.get_anndata()<a class="headerlink" href="#AnnData-embeddings-via-cellxgene_census.get_anndata()" title="Permalink to this heading">¶</a></h4>
@@ -385,7 +390,7 @@ AxisArrays with keys: scgpt
 </pre></div>
 </div>
 </div>
-<p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. To learn more use <code class="docutils literal notranslate"><span class="pre">help(get_embedding</span></code>.</p>
+<p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. To learn more use <code class="docutils literal notranslate"><span class="pre">help(get_embedding)</span></code>.</p>
 <p>Then we can take a quick look at the embeddings in a 2D scatter plot via UMAP.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -401,7 +406,7 @@ AxisArrays with keys: scgpt
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_api_demo_census_embedding_13_0.png" src="../../_images/notebooks_api_demo_census_embedding_13_0.png" />
+<img alt="../../_images/notebooks_api_demo_census_embedding_14_0.png" src="../../_images/notebooks_api_demo_census_embedding_14_0.png" />
 </div>
 </div>
 </section>
@@ -459,7 +464,7 @@ AxisArrays with keys: scgpt
 </pre></div>
 </div>
 </div>
-<p>An finally add the embedding matrix via <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> for the cells of the query using the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values.</p>
+<p>And finally add the embedding matrix via <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> for the cells of the query using the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -472,7 +477,7 @@ AxisArrays with keys: scgpt
 </pre></div>
 </div>
 </div>
-<p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. To learn more use <code class="docutils literal notranslate"><span class="pre">help(get_embedding</span></code>.</p>
+<p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. To learn more use <code class="docutils literal notranslate"><span class="pre">help(get_embedding)</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>

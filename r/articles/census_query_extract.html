@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,6 +87,9 @@
   </div>
 </nav><div class="container template-article">
 
+
+
+
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Querying and fetching the single-cell data and cell/gene metadata</h1>
@@ -102,7 +105,11 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
 -->
-<p>This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames, <a href="https://satijalab.org/seurat/" class="external-link">Seurat</a> assays, and <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a> objects.</p>
+<p>This tutorial showcases the easiest ways to query the expression data
+and cell/gene metadata from the Census, and load them into R data
+frames, <a href="https://satijalab.org/seurat/" class="external-link">Seurat</a> assays, and
+<a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a>
+objects.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Opening the census.</li>
@@ -114,33 +121,48 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="opening-the-census">Opening the census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
 </h2>
-<p>The <code>cellxgene.census</code> R package contains a convenient API to open any version of the Census (by default, the newest stable version).</p>
+<p>The <code>cellxgene.census</code> R package contains a convenient API
+to open any version of the Census (by default, the newest stable
+version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
 <span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>You can learn more about the <code>cellxgene.census</code> methods by accessing their corresponding documentation, for example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
+<p>You can learn more about the <code>cellxgene.census</code> methods by
+accessing their corresponding documentation, for example
+<code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="querying-cell-metadata-obs">Querying cell metadata (obs)<a class="anchor" aria-label="anchor" href="#querying-cell-metadata-obs"></a>
 </h2>
-<p>The human gene metadata of the Census, for RNA assays, is located at <code>census$get("census_data")$get("homo_sapiens")$obs</code>. This is a <code>SOMADataFrame</code> and as such it can be materialized as an R data frame (tibble) using <code>as.data.frame(obs$read()$concat())</code>.</p>
-<p>The mouse cell metadata is at <code>census$get("census_data")$get("mus_musculus").obs</code>.</p>
-<p>For slicing the cell metadata there are two relevant arguments that can be passed through <code>read():</code></p>
+<p>The human gene metadata of the Census, for RNA assays, is located at
+<code>census$get("census_data")$get("homo_sapiens")$obs</code>. This is
+a <code>SOMADataFrame</code> and as such it can be materialized as an R
+data frame (tibble) using
+<code>as.data.frame(obs$read()$concat())</code>.</p>
+<p>The mouse cell metadata is at
+<code>census$get("census_data")$get("mus_musculus").obs</code>.</p>
+<p>For slicing the cell metadata there are two relevant arguments that
+can be passed through <code>read():</code></p>
 <ul>
 <li>
-<code>column_names</code> — character vector indicating what metadata columns to fetch.</li>
+<code>column_names</code> — character vector indicating what
+metadata columns to fetch.</li>
 <li>
-<code>value_filter</code> — R expression with selection conditions to fetch rows.
+<code>value_filter</code> — R expression with selection conditions
+to fetch rows.
 <ul>
 <li>Expressions are one or more comparisons</li>
-<li>Comparisons are one of <code>&lt;column&gt; &lt;op&gt; &lt;value&gt;</code> or <code>&lt;column&gt; &lt;op&gt; &lt;column&gt;</code>
+<li>Comparisons are one of
+<code>&lt;column&gt; &lt;op&gt; &lt;value&gt;</code> or
+<code>&lt;column&gt; &lt;op&gt; &lt;column&gt;</code>
 </li>
 <li>Expressions can combine comparisons using &amp;&amp; or ||</li>
 <li>op is one of &lt; | &gt; | &lt;= | &gt;= | == | != or %in%</li>
 </ul>
 </li>
 </ul>
-<p>To learn what metadata columns are available for fetching and filtering we can directly look at the keys of the cell metadata.</p>
+<p>To learn what metadata columns are available for fetching and
+filtering we can directly look at the keys of the cell metadata.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "soma_joinid"                             </span></span>
@@ -169,17 +191,27 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; [24] "raw_mean_nnz"                            </span></span>
 <span><span class="co">#&gt; [25] "raw_variance_nnz"                        </span></span>
 <span><span class="co">#&gt; [26] "n_measured_vars"</span></span></code></pre></div>
-<p><code>soma_joinid</code> is a special <code>SOMADataFrame</code> column that is used for join operations. The definition for all other columns can be found at the <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a>.</p>
-<p>All of these can be used to fetch specific columns or specific rows matching a condition. For the latter we need to know the values we are looking for <em>a priori</em>.</p>
-<p>For example let’s see what are the possible values available for <code>sex</code>. To this we can load all cell metadata but fetching only for the column <code>sex</code>.</p>
+<p><code>soma_joinid</code> is a special <code>SOMADataFrame</code>
+column that is used for join operations. The definition for all other
+columns can be found at the <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census
+schema</a>.</p>
+<p>All of these can be used to fetch specific columns or specific rows
+matching a condition. For the latter we need to know the values we are
+looking for <em>a priori</em>.</p>
+<p>For example let’s see what are the possible values available for
+<code>sex</code>. To this we can load all cell metadata but fetching
+only for the column <code>sex</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             sex</span></span>
 <span><span class="co">#&gt; 1          male</span></span>
 <span><span class="co">#&gt; 224      female</span></span>
 <span><span class="co">#&gt; 3747640 unknown</span></span></code></pre></div>
-<p>As you can see there are only three different values for sex, that is <code>"male"</code>, <code>"female"</code> and <code>"unknown"</code>.</p>
-<p>With this information we can fetch all cell metatadata for a specific sex value, for example <code>"unknown"</code>.</p>
+<p>As you can see there are only three different values for sex, that is
+<code>"male"</code>, <code>"female"</code> and
+<code>"unknown"</code>.</p>
+<p>With this information we can fetch all cell metatadata for a specific
+sex value, for example <code>"unknown"</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"sex == 'unknown'"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   soma_joinid                           dataset_id     assay assay_ontology_term_id</span></span>
@@ -253,7 +285,11 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; 8     935  608     1.537829         4.868418           31602</span></span>
 <span><span class="co">#&gt; 9     735  485     1.515464         6.213087           31602</span></span>
 <span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 3301779 rows ]</span></span></code></pre></div>
-<p>You can use both <code>column_names</code> and <code>value_filter</code> to perform specific queries. For example let’s fetch the <code>disease</code> column for the <code>cell_type</code> <code>"B cell"</code> in the <code>tissue_general</code> <code>"lung"</code>.</p>
+<p>You can use both <code>column_names</code> and
+<code>value_filter</code> to perform specific queries. For example let’s
+fetch the <code>disease</code> column for the <code>cell_type</code>
+<code>"B cell"</code> in the <code>tissue_general</code>
+<code>"lung"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cell_metadata_b_cell</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung'"</span>,</span>
@@ -286,15 +322,24 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="querying-gene-metadata-var">Querying gene metadata (var)<a class="anchor" aria-label="anchor" href="#querying-gene-metadata-var"></a>
 </h2>
-<p>The human gene metadata of the Census is located at <code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>. Similarly to the cell metadata, it is a <code>SOMADataFrame</code> and thus we can also use its method <code>read()</code>.</p>
-<p>The mouse gene metadata is at <code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var</code>.</p>
-<p>Let’s take a look at the metadata available for column selection and row filtering.</p>
+<p>The human gene metadata of the Census is located at
+<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>.
+Similarly to the cell metadata, it is a <code>SOMADataFrame</code> and
+thus we can also use its method <code>read()</code>.</p>
+<p>The mouse gene metadata is at
+<code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var</code>.</p>
+<p>Let’s take a look at the metadata available for column selection and
+row filtering.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length" "nnz"           </span></span>
 <span><span class="co">#&gt; [6] "n_measured_obs"</span></span></code></pre></div>
-<p>With the exception of soma_joinid these columns are defined in the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a>. Similarly to the cell metadata, we can use the same operations to learn and fetch gene metadata.</p>
-<p>For example, to get the <code>feature_name</code> and <code>feature_length</code> of the genes <code>"ENSG00000161798"</code> and <code>"ENSG00000188229"</code> we can do the following.</p>
+<p>With the exception of soma_joinid these columns are defined in the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census
+schema</a>. Similarly to the cell metadata, we can use the same
+operations to learn and fetch gene metadata.</p>
+<p>For example, to get the <code>feature_name</code> and
+<code>feature_length</code> of the genes <code>"ENSG00000161798"</code>
+and <code>"ENSG00000188229"</code> we can do the following.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
@@ -309,23 +354,37 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <div class="section level2">
 <h2 id="querying-expression-data-as-seurat">Querying expression data as <code>Seurat</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-seurat"></a>
 </h2>
-<p>A convenient way to query and fetch expression data is to use the <code>get_seurat</code> method of the <code>cellxgene.census</code> API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
-<p>The method will return a <a href="https://satijalab.org/seurat/" class="external-link"><code>Seurat</code> object</a>, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
+<p>A convenient way to query and fetch expression data is to use the
+<code>get_seurat</code> method of the <code>cellxgene.census</code> API.
+This is a method that combines the column selection and value filtering
+we described above to obtain slices of the expression data based on
+metadata queries.</p>
+<p>The method will return a <a href="https://satijalab.org/seurat/" class="external-link"><code>Seurat</code> object</a>, it
+takes as an input a census object, the string for an organism, and for
+both cell and gene metadata we can specify filters and column selection
+as described above but with the following arguments:</p>
 <ul>
 <li>
-<code>obs_column_names</code> — character vector indicating the columns to select for cell metadata.</li>
+<code>obs_column_names</code> — character vector indicating the
+columns to select for cell metadata.</li>
 <li>
-<code>obs_value_filter</code> — expression with selection conditions to fetch cells meeting a criteria.</li>
+<code>obs_value_filter</code> — expression with selection conditions
+to fetch cells meeting a criteria.</li>
 <li>
-<code>var_column_names</code> — character vector indicating the columns to select for gene metadata.</li>
+<code>var_column_names</code> — character vector indicating the
+columns to select for gene metadata.</li>
 <li>
-<code>var_value_filter</code> — expression with selection conditions to fetch genes meeting a criteria.</li>
+<code>var_value_filter</code> — expression with selection conditions
+to fetch genes meeting a criteria.</li>
 </ul>
 <p>For example if we want to fetch the expression data for:</p>
 <ul>
-<li>Genes <code>"ENSG00000161798"</code> and <code>"ENSG00000188229"</code>.</li>
-<li>All <code>"B cells"</code> of <code>"lung"</code> with <code>"COVID-19"</code>.</li>
-<li>With all gene metadata and adding <code>sex</code> cell metadata.</li>
+<li>Genes <code>"ENSG00000161798"</code> and
+<code>"ENSG00000188229"</code>.</li>
+<li>All <code>"B cells"</code> of <code>"lung"</code> with
+<code>"COVID-19"</code>.</li>
+<li>With all gene metadata and adding <code>sex</code> cell
+metadata.</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://satijalab.org/seurat" class="external-link">"Seurat"</a></span><span class="op">)</span></span>
@@ -362,13 +421,19 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt;                 feature_name feature_length      nnz n_measured_obs</span></span>
 <span><span class="co">#&gt; ENSG00000161798         AQP5           1884  1029069       58250439</span></span>
 <span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037 21416107       62655002</span></span></code></pre></div>
-<p>For a full description refer to <code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
+<p>For a full description refer to
+<code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="querying-expression-data-as-singlecellexperiment">Querying expression data as <code>SingleCellExperiment</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-singlecellexperiment"></a>
 </h2>
-<p>Similarly to the previous section, there is a <code>get_single_cell_experiment</code> method in the <code>cellxgene.census</code> API. It behaves exactly the same as <code>get_seurat</code> but it returns a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link"><code>SingleCellExperiment</code> object</a>.</p>
-<p>For example, to repeat the same query we can simply do the following.</p>
+<p>Similarly to the previous section, there is a
+<code>get_single_cell_experiment</code> method in the
+<code>cellxgene.census</code> API. It behaves exactly the same as
+<code>get_seurat</code> but it returns a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link"><code>SingleCellExperiment</code>
+object</a>.</p>
+<p>For example, to repeat the same query we can simply do the
+following.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span>
 <span></span>
@@ -408,14 +473,19 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt;                  &lt;character&gt;      &lt;integer&gt; &lt;integer&gt;      &lt;integer&gt;</span></span>
 <span><span class="co">#&gt; ENSG00000161798         AQP5           1884   1029069       58250439</span></span>
 <span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037  21416107       62655002</span></span></code></pre></div>
-<p>For a full description refer to <code><a href="../reference/get_single_cell_experiment.html">?cellxgene.census::get_single_cell_experiment</a></code>.</p>
+<p>For a full description refer to
+<code><a href="../reference/get_single_cell_experiment.html">?cellxgene.census::get_single_cell_experiment</a></code>.</p>
 <div class="section level3">
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
-<p>After use, the census object should be closed to release memory and other resources.</p>
+<p>After use, the census object should be closed to release memory and
+other resources.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
+<p>This also closes all SOMA objects accessed via the top-level
+<code>census</code>. Closing can be automated using
+<code>on.exit(census$close(), add = TRUE)</code> immediately after
+<code>census &lt;- open_soma()</code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

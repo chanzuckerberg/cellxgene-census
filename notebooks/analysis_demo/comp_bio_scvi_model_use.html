@@ -165,7 +165,7 @@
 <li class="toctree-l3"><a class="reference internal" href="comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
@@ -297,7 +297,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>aws<span class="w"> </span>s3<span class="w"> </span>sync<span class="w"> </span>s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/<span class="w"> </span><span class="m">2023</span>-12-15-scvi-homo-sapiens/scvi.model/
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>aws<span class="w"> </span>s3<span class="w"> </span>cp<span class="w"> </span>--no-sign-request<span class="w">  </span>--no-progress<span class="w"> </span>--only-show-errors<span class="w"> </span>s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/model.pt<span class="w"> </span><span class="m">2023</span>-12-15-scvi-homo-sapiens/scvi.model/
 </pre></div>
 </div>
 </div>

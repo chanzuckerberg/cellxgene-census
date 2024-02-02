@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,6 +87,9 @@
   </div>
 </nav><div class="container template-article">
 
+
+
+
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Generating citations for Census slices</h1>
@@ -98,7 +101,8 @@
 
     
     
-<p>This notebook demonstrates how to generate a citation string for all datasets contained in a census slice.</p>
+<p>This notebook demonstrates how to generate a citation string for all
+datasets contained in a census slice.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Requirements</li>
@@ -110,7 +114,11 @@
 </ol>
 </li>
 </ol>
-<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code>is_primary_data</code> which is described in the <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data" class="external-link">Census schema</a>.</p>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present
+across multiple datasets. Duplicate cells can be filtered in or out
+using the cell metadata variable <code>is_primary_data</code> which is
+described in the <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data" class="external-link">Census
+schema</a>.</p>
 <div class="section level2">
 <h2 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h2>
@@ -118,13 +126,16 @@
 <ul>
 <li>
 <code>cellxgene_census</code> Python package.</li>
-<li>Census data release with <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md" class="external-link">schema version</a> 1.3.0 or greater.</li>
+<li>Census data release with <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md" class="external-link">schema
+version</a> 1.3.0 or greater.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="generating-citation-strings">Generating citation strings<a class="anchor" aria-label="anchor" href="#generating-citation-strings"></a>
 </h2>
-<p>First we open a handle to the Census data. To ensure we open a data release with schema version 1.3.0 or greater, we use <code>census_version="latest"</code></p>
+<p>First we open a handle to the Census data. To ensure we open a data
+release with schema version 1.3.0 or greater, we use
+<code>census_version="latest"</code></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/TileDB-Inc/TileDB-R" class="external-link">"tiledb"</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
@@ -134,25 +145,28 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census_release_info</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   soma_joinid                      label      value</span></span>
 <span><span class="co">#&gt; 1           0      census_schema_version      1.3.0</span></span>
-<span><span class="co">#&gt; 2           1          census_build_date 2024-01-01</span></span>
+<span><span class="co">#&gt; 2           1          census_build_date 2024-01-29</span></span>
 <span><span class="co">#&gt; 3           2     dataset_schema_version      4.0.0</span></span>
-<span><span class="co">#&gt; 4           3           total_cell_count   75694072</span></span>
-<span><span class="co">#&gt; 5           4          unique_cell_count   45846761</span></span>
-<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      16292</span></span>
-<span><span class="co">#&gt; 7           6 number_donors_mus_musculus       2153</span></span></code></pre></div>
-<p>Then we load the dataset table which contains a column <code>"citation"</code> for each dataset included in Census.</p>
+<span><span class="co">#&gt; 4           3           total_cell_count   77402692</span></span>
+<span><span class="co">#&gt; 5           4          unique_cell_count   46712014</span></span>
+<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      16507</span></span>
+<span><span class="co">#&gt; 7           6 number_donors_mus_musculus       2244</span></span></code></pre></div>
+<p>Then we load the dataset table which contains a column
+<code>"citation"</code> for each dataset included in Census.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">datasets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">datasets</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">datasets</span><span class="op">[</span><span class="st">"citation"</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                citation</span></span>
-<span><span class="co">#&gt; 1                                                Dataset Version: https://datasets.cellxgene.cziscience.com/4fb3f166-6526-4a3d-b87f-b1cdc545b0f1.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/a0c84e3f-a5ca-4481-b3a5-ccfda0a81ecc</span></span>
-<span><span class="co">#&gt; 2                                                Dataset Version: https://datasets.cellxgene.cziscience.com/9edb54c2-3fe0-4a7a-bd62-a98e98299c5d.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/a0c84e3f-a5ca-4481-b3a5-ccfda0a81ecc</span></span>
-<span><span class="co">#&gt; 3                                                Dataset Version: https://datasets.cellxgene.cziscience.com/0f88d425-2e51-4ecf-903a-921255537466.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/a0c84e3f-a5ca-4481-b3a5-ccfda0a81ecc</span></span>
-<span><span class="co">#&gt; 4                                                Dataset Version: https://datasets.cellxgene.cziscience.com/55c48748-ab69-457b-b9da-1858559f24f4.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/a0c84e3f-a5ca-4481-b3a5-ccfda0a81ecc</span></span>
-<span><span class="co">#&gt; 5 Publication: https://doi.org/10.1002/ctm2.1356 Dataset Version: https://datasets.cellxgene.cziscience.com/0574142b-eeb5-41e4-8d69-b613fd63e67b.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/7dd599c5-d25d-40c0-b1a6-8789791ca808</span></span>
-<span><span class="co">#&gt; 6 Publication: https://doi.org/10.1002/ctm2.1356 Dataset Version: https://datasets.cellxgene.cziscience.com/507380ee-ba43-4f9a-a5c6-aea27ddb48cb.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/7dd599c5-d25d-40c0-b1a6-8789791ca808</span></span></code></pre></div>
-<p>And now we can use the column <code>"dataset_id"</code> present in both the dataset table and the Census cell metadata to create citation strings for any Census slice.</p>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                         citation</span></span>
+<span><span class="co">#&gt; 1 Publication: https://doi.org/10.1038/s41586-022-04518-2 Dataset Version: https://datasets.cellxgene.cziscience.com/b7ce3bcd-1a96-4fcb-869e-669e9a6ec9a2.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/fe0e718d-2ee9-42cc-894b-0b490f437dfd</span></span>
+<span><span class="co">#&gt; 2 Publication: https://doi.org/10.1038/s41586-022-04518-2 Dataset Version: https://datasets.cellxgene.cziscience.com/d4f2c841-1bbc-44a8-a541-edcb5181abd9.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/fe0e718d-2ee9-42cc-894b-0b490f437dfd</span></span>
+<span><span class="co">#&gt; 3 Publication: https://doi.org/10.1038/s41586-022-04518-2 Dataset Version: https://datasets.cellxgene.cziscience.com/099e304d-5c2f-4c6e-91d8-f7cd1e5fddc7.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/fe0e718d-2ee9-42cc-894b-0b490f437dfd</span></span>
+<span><span class="co">#&gt; 4 Publication: https://doi.org/10.1038/s41586-022-04518-2 Dataset Version: https://datasets.cellxgene.cziscience.com/a0683b57-ad68-453f-aa82-6aab1843ecd3.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/fe0e718d-2ee9-42cc-894b-0b490f437dfd</span></span>
+<span><span class="co">#&gt; 5 Publication: https://doi.org/10.1038/s41586-022-04518-2 Dataset Version: https://datasets.cellxgene.cziscience.com/65cd1005-80a8-42ce-b854-1bd9cdd30938.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/fe0e718d-2ee9-42cc-894b-0b490f437dfd</span></span>
+<span><span class="co">#&gt; 6 Publication: https://doi.org/10.1038/s41586-022-04518-2 Dataset Version: https://datasets.cellxgene.cziscience.com/6e1d8f47-1cef-4f0f-bccf-020e2a9fd928.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/fe0e718d-2ee9-42cc-894b-0b490f437dfd</span></span></code></pre></div>
+<p>And now we can use the column <code>"dataset_id"</code> present in
+both the dataset table and the Census cell metadata to create citation
+strings for any Census slice.</p>
 <div class="section level3">
 <h3 id="via-cell-metadata-query">Via cell metadata query<a class="anchor" aria-label="anchor" href="#via-cell-metadata-query"></a>
 </h3>

@@ -165,7 +165,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#uderstanding-census-data">Uderstanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
@@ -289,7 +289,7 @@ AxisArrays with keys: scvi, geneformer
 <p>Each embedding is encoded as a SOMA SparseNDArray under <code class="docutils literal notranslate"><span class="pre">obsm</span></code> of an organism’s SOMA Experiment, where:</p>
 <ul class="simple">
 <li><p>dimension 0 (<code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code>) encodes the cell (obs) <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value</p></li>
-<li><p>dimension 1 (<code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code>) encodes the embedding feature, and is in the range [0, N) where N is the number of featues in the embedding</p></li>
+<li><p>dimension 1 (<code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code>) encodes the embedding feature, and is in the range [0, N) where N is the number of features in the embedding</p></li>
 <li><p>data (<code class="docutils literal notranslate"><span class="pre">soma_data</span></code>) is float32</p></li>
 </ul>
 <p>The first axis of the embedding array will have the same shape as the corresponding <code class="docutils literal notranslate"><span class="pre">obs</span></code> DataFrame for the Census build and experiment. The second axis of the embedding will have a shape (0, N) where N is the number of features in the embedding.</p>
@@ -483,10 +483,10 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 <p>And now we can access any of the following:</p>
 <ul class="simple">
 <li><p>Expression data via the method <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>.</p></li>
-<li><p>Cell and gene metadata via the mehtods <code class="docutils literal notranslate"><span class="pre">query.obs()</span></code> and <code class="docutils literal notranslate"><span class="pre">query.var()</span></code>, respectively.</p></li>
+<li><p>Cell and gene metadata via the methods <code class="docutils literal notranslate"><span class="pre">query.obs()</span></code> and <code class="docutils literal notranslate"><span class="pre">query.var()</span></code>, respectively.</p></li>
 <li><p>The cell embeddings via the method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code>.</p></li>
 </ul>
-<p>The method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code> returns a reader class <code class="docutils literal notranslate"><span class="pre">soma.SparseNDArrayRead</span></code>, which in turns can return different types of iterators. In this case we will use a <code class="docutils literal notranslate"><span class="pre">blockwise.scipy()</span></code> iterator that guarantees full re-indexed rows in scipy sparse csr format.</p>
+<p>The method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code> returns a reader class <code class="docutils literal notranslate"><span class="pre">soma.SparseNDArrayRead</span></code>, which in turn can return different types of iterators. In this case we will use a <code class="docutils literal notranslate"><span class="pre">blockwise.scipy()</span></code> iterator that guarantees full re-indexed rows in scipy sparse csr format.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -510,7 +510,7 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </pre></div>
 </div>
 </div>
-<p>An now we have an sparse matrix with the embedding data.</p>
+<p>And now we have an sparse matrix with the embedding data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
