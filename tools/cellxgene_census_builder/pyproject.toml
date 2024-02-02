@@ -32,10 +32,10 @@ dependencies= [
     "numpy==1.23.5",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # IMPORTANT: the tiledbsoma version lag that used in cellxgene-census package.
-    "tiledbsoma==1.6.1",
-    "cellxgene-census==1.9.1",
+    "tiledbsoma==1.7.0",
+    "cellxgene-census==1.10.0",
     "scipy==1.12.0",
-    "fsspec==2023.12.2",
+    "fsspec[http]==2023.12.2",
     "s3fs==2023.12.2",
     "requests==2.31.0",
     "aiohttp==3.9.3",
@@ -46,7 +46,7 @@ dependencies= [
     "attrs==23.2.0",
     "psutil==5.9.8",
     "pyyaml==6.0.1",
-    "numba==0.57",
+    "numba==0.58.1",
     "dask==2024.1.1",
     "distributed==2024.1.1",
 ]
