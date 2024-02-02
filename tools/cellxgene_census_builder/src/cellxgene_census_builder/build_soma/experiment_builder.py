@@ -478,12 +478,12 @@ def compute_X_file_stats(
 
 
 # Controls chunking of the X array processsing:
-#   REDUCE_X_MAJOR_ROW_STRIDE: the max stride size, in rows, for individual parallel work (Dask tasks). Primarily
-#     affects available parallelism for very large datasets, and max processing time for any given task.
-#   REDUCE_X_MINOR_NNZ_STRIDE: the max stride size, in values, used to reduce major chunks of X. Drives peak memory use and
-#     TileDB fragment size.
+#   REDUCE_X_MAJOR_ROW_STRIDE: the max row stride for individual tasks. Primarily affects available parallelism
+#       by splitting very large datasets into multiple tasks.
+#   REDUCE_X_MINOR_NNZ_STRIDE: the max nnz (value) stride used in reducing X. Drives peak memory use and TileDB
+#       fragment size.
 #
-# A side-effect of these parameters is the number and size of TileDB fragments created. As fragment count
+# An important side-effect of these parameters is the number and size of TileDB fragments created. As fragment count
 # increases, consolidation time increases non-linearly.
 #
 # TODO: when https://github.com/single-cell-data/TileDB-SOMA/issues/2054 is implemented, write each major stride
@@ -610,12 +610,16 @@ def dispatch_X_chunk(
     return result
 
 
-def reduce_X_matrices(
+def _reduce_X_matrices(
     base_path: str,
     datasets: List[Dataset],
     experiment_builders: List[ExperimentBuilder],
 ) -> Dict[str, Delayed]:
-    """Create Dask delayed that will save and reduce all X data"""
+    """
+    Helper function for populate_X_layers. Create Dask delayed that will save and reduce all X data.
+
+    This function does not perform the compute - it just creates the graph. Caller must dispatch the graph.
+    """
 
     def read_and_dispatch_partial_h5ad(
         dataset_id: str,
@@ -701,7 +705,11 @@ def populate_X_layers(
     experiment_builders: List[ExperimentBuilder],
     args: CensusBuildArgs,
 ) -> None:
-    grph = reduce_X_matrices(assets_path, datasets, experiment_builders)
+    """
+    Process X layers for all datasets. Includes saving raw/normalized SOMA arrays,
+    and reducing obs/var axis stats from X data.
+    """
+    grph = _reduce_X_matrices(assets_path, datasets, experiment_builders)
     result: Dict[str, XReduction]
     (result,) = cast(tuple[Dict[str, XReduction]], dask.compute(grph))
 
