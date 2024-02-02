@@ -106,12 +106,11 @@ def compute_all_estimators_for_gene(
 ) -> pd.Series[float]:
     """Computes all estimators for a given {<dim1>, ..., <dimN>, gene} group of expression values"""
 
-    size_factors_for_obs_group
     estimators: Dict[str, Any] = {}
     estimators["sum"] = gene_group_rows.soma_data.sum()
     estimators["sumsq"] = (gene_group_rows.soma_data**2).sum()
     estimators["size_factor"] = size_factors_for_obs_group.approx_size_factor.sum()
-    estimators["n_obs"] = len(gene_group_rows)
+    estimators["n_obs"] = size_factors_for_obs_group.shape[0]
 
     # order matters for estimators
     return pd.Series(data=[estimators[n] for n in ESTIMATOR_NAMES], dtype=np.float64)
