@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     logger = TensorBoardLogger("mrvi_tb_logs", name="mrvi_50_epochs")
 
-    mrvi_model.train(max_epochs=50, batch_size=4096, use_gpu=True, plan_kwargs=plan_kwargs, **train_kwargs)
+    mrvi_model.train(max_epochs=50, batch_size=4096, plan_kwargs=plan_kwargs, **train_kwargs)
 
     mrvi_model.save(output_filename)
 
