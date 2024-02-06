@@ -1,156 +1,97 @@
-import itertools
-from typing import Dict
+from os import path
+from typing import Any, Dict
 
+import numpy as np
 import pandas as pd
 import pytest
 
 from cellxgene_census.experimental.diffexp.memento import diff_expr
-from cellxgene_census.experimental.diffexp.memento.diff_expr import CUBE_LOGICAL_DIMS_OBS
 
 
-@pytest.fixture(scope="function")
-def estimators_df(dim_counts: Dict[str, int]) -> pd.DataFrame:
-    """Create a dummy estimators DataFrame, with all combinations of variables."""
-    columns = CUBE_LOGICAL_DIMS_OBS + ["feature_id"]
-    dim_counts_full = {var: 1 for var in columns}
-    dim_counts_full.update(dim_counts or {})
-    dim_values = {var: [f"{var}_{chr(ord('a') + i)}" for i in range(n)] for var, n in dim_counts_full.items()}
+class TestDiffExprRealDataset:
+    """
+    This class contains regression tests that run on realistic datasets.
 
-    rows = list(itertools.product(*dim_values.values()))
-    estimators = pd.DataFrame(data=rows, columns=columns).astype("str")
+    Since this class is intended to be serve as a regression test suite
+    using real data, it is strongly recommended that the functions under
+    test are all PUBLIC functions. Private functions are best encapsulated
+    in separate class.
+    """
 
-    for c, estimator in enumerate(["n_obs", "mean", "sem", "var", "selv"], start=1):
-        estimators[estimator] = range(1, len(estimators) + 1)
-        estimators[estimator] *= c
+    @pytest.fixture(scope="class", params=["test_case_1", "test_case_2"])
+    def test_cases_for_compute_all_fn(self, request: Any) -> Dict[str, Any]:
+        """
+        Fixture that generates test cases for function
+        calls to `compute_all` given a test case name.
 
-    return estimators
+        This fixture returns a tuple `(diff_exp_query, expected_result)`
+        such that `diff_exp_query` encapsulates the differential expression
+        query that will be executed by `compute_all()`.
 
+        `expected_result` is a datastructure containing the pertinent parts of
+        the return value of `compute_all()`.
+        """
+        # TODO: Figure out a common location to store estimator cube fixtures so that it is
+        # explicitly clear that both the differential expression API and differential expression cube builder
+        # components use it for testing
+        pwd = path.dirname(__file__)
+        estimator_cube_path = path.join(
+            pwd, "../../../../../../../tools/models/memento/tests/fixtures/estimators-cube-expected/"
+        )
 
-@pytest.mark.skip("Update test to work with compute_hypothesis_test()")
-@pytest.mark.parametrize("dim_counts", [{"feature_id": 3, "cell_type_ontology_term_id": 3}])
-def test__setup__too_many_treatment_values__fails(estimators_df: pd.DataFrame) -> None:
-    with pytest.raises(AssertionError, match="treatment must have exactly 2 distinct values"):
-        pass
-        # diff_expr.compute_hypothesis_test( ... )
+        test_cases = {
+            "test_case_1": {
+                "diff_exp_query": {
+                    "cube_path": estimator_cube_path,
+                    "query_filter": "tissue_general_ontology_term_id in ['UBERON:0001723'] and sex_ontology_term_id in ['PATO:0000383', 'PATO:0000384']",
+                    "treatment": "sex_ontology_term_id",
+                    "num_sampled_genes": 2,
+                },
+                "expected_diff_exp_result": [
+                    ("ENSG00000000419", -0.111612, -1.895204, 0.058065),
+                    ("ENSG00000002330", 0.229054, 4.085651, 0.000044),
+                ],
+            },
+            "test_case_2": {
+                "diff_exp_query": {
+                    "cube_path": estimator_cube_path,
+                    "query_filter": "tissue_general_ontology_term_id in ['UBERON:0001723'] and cell_type_ontology_term_id in ['CL:0000066', 'CL:0000057']",
+                    "treatment": "cell_type_ontology_term_id",
+                    "num_sampled_genes": 2,
+                },
+                "expected_diff_exp_result": [
+                    ("ENSG00000000419", 0.868715, 6.048411, 1.462810e-09),
+                    ("ENSG00000002330", 0.834346, 5.218739, 1.801458e-07),
+                ],
+            },
+        }
 
+        return test_cases[request.param]
 
-# TODO: Update test to work with load_data()
-@pytest.mark.skip("Update test to work with load_data()")
-@pytest.mark.parametrize(
-    "dim_counts", [{"feature_id": 3, "cell_type_ontology_term_id": 2, "dataset_id": 3, "assay_ontology_term_id": 2}]
-)
-def test_setup(estimators_df: pd.DataFrame) -> None:
-    cell_counts, design, mean, se_mean = diff_expr.load_data("", estimators_df, "cell_type_ontology_term_id", [])
+    def test_diff_exp_query_basic(self, test_cases_for_compute_all_fn: Any) -> None:
+        # Arrange
+        estimator_cube_path = test_cases_for_compute_all_fn["diff_exp_query"]["cube_path"]
+        query_filter = test_cases_for_compute_all_fn["diff_exp_query"]["query_filter"]
+        treatment = test_cases_for_compute_all_fn["diff_exp_query"]["treatment"]
+        num_sampled_genes = test_cases_for_compute_all_fn["diff_exp_query"]["num_sampled_genes"]
 
-    # Note: Uncomment below code block to retrieve new expected values, if test data changes.
-    # Manually verify before replacing expected values below!
+        # Act
+        observed_diff_exp_result_df, _ = diff_expr.compute_all(
+            cube_path=estimator_cube_path,
+            query_filter=query_filter,
+            treatment=treatment,
+            n_features=num_sampled_genes,
+            n_processes=1,
+        )
 
-    # print(list(cell_counts))
-    # print(features)
-    # print(design.to_dict(orient="records"))
-    # print(mean.to_dict(orient="records"))
-    # print(se_mean.to_dict(orient="records"))
+        observed_diff_exp_result_df = observed_diff_exp_result_df.reset_index().set_index("feature_id").sort_index()
 
-    assert list(cell_counts) == [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]
-    assert design.to_dict(orient="records") == [
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 0,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 0,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 0,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 1,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 0,
-            "dataset_id_dataset_id_b": 1,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 0,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 0,
-            "dataset_id_dataset_id_b": 1,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 1,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 0,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 1,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 0,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 0,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 1,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 1,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 1,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 0,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 1,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 1,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 1,
-            "dataset_id_dataset_id_b": 1,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 0,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 1,
-            "dataset_id_dataset_id_b": 1,
-            "dataset_id_dataset_id_c": 0,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 1,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 1,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 1,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 0,
-        },
-        {
-            "cell_type_ontology_term_id_cell_type_ontology_term_id_b": 1,
-            "dataset_id_dataset_id_b": 0,
-            "dataset_id_dataset_id_c": 1,
-            "assay_ontology_term_id_assay_ontology_term_id_b": 1,
-        },
-    ]
-    assert mean.to_dict(orient="records") == [
-        {"feature_id_a": 2.0, "feature_id_b": 4.0, "feature_id_c": 6.0},
-        {"feature_id_a": 8.0, "feature_id_b": 10.0, "feature_id_c": 12.0},
-        {"feature_id_a": 14.0, "feature_id_b": 16.0, "feature_id_c": 18.0},
-        {"feature_id_a": 20.0, "feature_id_b": 22.0, "feature_id_c": 24.0},
-        {"feature_id_a": 26.0, "feature_id_b": 28.0, "feature_id_c": 30.0},
-        {"feature_id_a": 32.0, "feature_id_b": 34.0, "feature_id_c": 36.0},
-        {"feature_id_a": 38.0, "feature_id_b": 40.0, "feature_id_c": 42.0},
-        {"feature_id_a": 44.0, "feature_id_b": 46.0, "feature_id_c": 48.0},
-        {"feature_id_a": 50.0, "feature_id_b": 52.0, "feature_id_c": 54.0},
-        {"feature_id_a": 56.0, "feature_id_b": 58.0, "feature_id_c": 60.0},
-        {"feature_id_a": 62.0, "feature_id_b": 64.0, "feature_id_c": 66.0},
-        {"feature_id_a": 68.0, "feature_id_b": 70.0, "feature_id_c": 72.0},
-    ]
-    assert se_mean.to_dict(orient="records") == [
-        {"feature_id_a": 3.0, "feature_id_b": 6.0, "feature_id_c": 9.0},
-        {"feature_id_a": 12.0, "feature_id_b": 15.0, "feature_id_c": 18.0},
-        {"feature_id_a": 21.0, "feature_id_b": 24.0, "feature_id_c": 27.0},
-        {"feature_id_a": 30.0, "feature_id_b": 33.0, "feature_id_c": 36.0},
-        {"feature_id_a": 39.0, "feature_id_b": 42.0, "feature_id_c": 45.0},
-        {"feature_id_a": 48.0, "feature_id_b": 51.0, "feature_id_c": 54.0},
-        {"feature_id_a": 57.0, "feature_id_b": 60.0, "feature_id_c": 63.0},
-        {"feature_id_a": 66.0, "feature_id_b": 69.0, "feature_id_c": 72.0},
-        {"feature_id_a": 75.0, "feature_id_b": 78.0, "feature_id_c": 81.0},
-        {"feature_id_a": 84.0, "feature_id_b": 87.0, "feature_id_c": 90.0},
-        {"feature_id_a": 93.0, "feature_id_b": 96.0, "feature_id_c": 99.0},
-        {"feature_id_a": 102.0, "feature_id_b": 105.0, "feature_id_c": 108.0},
-    ]
+        expected_data = test_cases_for_compute_all_fn["expected_diff_exp_result"]
+        expected_diff_exp_result_df = (
+            pd.DataFrame(expected_data, columns=["feature_id", "coef", "z", "pval"])
+            .set_index("feature_id")
+            .sort_index()
+        )
+
+        # Assert
+        assert np.allclose(observed_diff_exp_result_df.values, expected_diff_exp_result_df.values, atol=1e-07)
