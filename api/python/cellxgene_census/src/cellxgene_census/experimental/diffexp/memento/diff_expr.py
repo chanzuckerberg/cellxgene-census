@@ -170,9 +170,12 @@ def compute_all(
         data = itertools.chain.from_iterable(results)  # flatten results
         stats = pstats.Stats()
 
-    results = pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id")
-    results.sort_values("z", ascending=False, inplace=True)
-    return results, stats
+    return (
+        pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False)
+        .set_index("feature_id")
+        .sort_values("z", ascending=False, inplace=False),
+        stats,
+    )
 
 
 def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
