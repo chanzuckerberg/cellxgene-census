@@ -33,7 +33,7 @@ from .cube_schema import (
     build_obs_groups_schema,
 )
 from .cube_validator import validate_cube
-from .estimators import bin_size_factor, compute_mean, compute_sem, compute_sev, compute_variance, gen_multinomial
+from .estimators import bin_size_factor, gen_multinomial
 from .mp import create_resource_pool_executor
 
 PROFILE_MODE = bool(os.getenv("PROFILE_MODE", False))  # Run Step 3 in single-process mode with profiling output
@@ -114,29 +114,6 @@ def compute_all_estimators_for_gene(
 
     # order matters for estimators
     return pd.Series(data=[estimators[n] for n in ESTIMATOR_NAMES], dtype=np.float64)
-
-
-def sparse_gene_data(data_dense: pd.DataFrame) -> Tuple[scipy.sparse.csc_matrix, npt.NDArray[np.float32]]:
-    data_sparse = data_dense[data_dense.soma_data.notna()]
-    X_sparse = data_sparse.soma_data.to_numpy()
-    X_csc = scipy.sparse.coo_array(
-        (X_sparse, (data_sparse.index, np.zeros(len(data_sparse), dtype=int))), shape=(len(data_dense), 1)
-    ).tocsc()
-    return X_csc, X_sparse
-
-
-def dense_gene_data(
-    gene_group_rows: pd.DataFrame, size_factors_for_obs_group: pd.DataFrame
-) -> Tuple[pd.DataFrame, npt.NDArray[np.float32], npt.NDArray[np.float64]]:
-    data_dense = pd.concat(
-        [size_factors_for_obs_group, gene_group_rows.soma_data], axis=1, copy=False
-    ).soma_data.reset_index()
-
-    X_dense = data_dense.soma_data.to_numpy()
-    X_dense = np.nan_to_num(X_dense)
-    size_factors_dense = size_factors_for_obs_group.approx_size_factor.to_numpy()
-
-    return data_dense, X_dense, size_factors_dense
 
 
 def compute_all_estimators_for_batch_tdb(

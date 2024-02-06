@@ -36,8 +36,21 @@ CUBE_LOGICAL_DIMS_OBS = [
 
 
 def compute_memento_estimators_from_precomputed_stats(estimators_df: pl.DataFrame) -> pl.DataFrame:
-    # mean: (X.sum() + 1) / (size_factors.sum() + 1))
-    # sem: (X.std() * np.sqrt(n_obs)) / size_factors.sum())
+    """
+    Computes the mean and standard error of the mean (SEM) for each feature in the estimators DataFrame.
+
+    This function takes a DataFrame containing precomputed statistics for each feature, including the number of observations,
+    sum, sum of squares, and size factor. It calculates the mean and SEM for each feature based on these statistics.
+
+    Parameters:
+    estimators_df (pl.DataFrame): A DataFrame containing the precomputed statistics for each feature. Must include
+                                  columns 'n_obs', 'sum', 'sumsq', and 'size_factor'.
+
+    Returns:
+    pl.DataFrame: A DataFrame with the original columns from `estimators_df` plus two new columns:
+                  'mean' - the mean expression level for each feature.
+                  'sem' - the standard error of the mean for each feature.
+    """
     n_obs = estimators_df["n_obs"].to_numpy()
     expr_sum = estimators_df["sum"].to_numpy()
     expr_sumsq = estimators_df["sumsq"].to_numpy()
@@ -120,11 +133,12 @@ def compute_all(
 
     # make treatment variable be in the first column of the design matrix
     variables = [treatment] + [covariate for covariate in covariates if covariate != treatment]
+    selected_vars_groups_groupby = obs_groups_df.groupby(variables, observed=True)
 
     agg_dict = {i: "first" for i in variables}
     agg_dict["n_obs"] = "sum"
-    selected_vars_groups_groupby = obs_groups_df.groupby(variables, observed=True)
     selected_vars_groups_df = selected_vars_groups_groupby.agg(agg_dict)
+
     obs_groups_df["selected_vars_group_joinid"] = selected_vars_groups_groupby.ngroup().astype("uint32")
     selected_vars_groups_df["obs_group_joinid"] = np.arange(len(selected_vars_groups_df), dtype="uint32")
 
@@ -156,7 +170,7 @@ def compute_all(
         stats = pstats.Stats()
 
     results = pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id")
-    results.sort_values("coef", ascending=False, inplace=True)
+    results.sort_values("z", ascending=False, inplace=True)
     return results, stats
 
 
