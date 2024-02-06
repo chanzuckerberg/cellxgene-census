@@ -36,8 +36,7 @@ CUBE_LOGICAL_DIMS = ["feature_id"] + OBS_LOGICAL_DIMS
 
 ESTIMATORS_TILEDB_DIMS = ["feature_id", "obs_group_joinid"]
 
-# ESTIMATOR_NAMES = ["nnz", "min", "max", "sum", "mean", "sem", "var", "sev", "selv"]
-ESTIMATOR_NAMES = ["mean", "sem"]
+ESTIMATOR_NAMES = ["sum", "sumsq", "size_factor", "n_obs"]
 
 
 def build_obs_categorical_values(obs_groups: pd.DataFrame) -> Dict[str, Enumeration]:
