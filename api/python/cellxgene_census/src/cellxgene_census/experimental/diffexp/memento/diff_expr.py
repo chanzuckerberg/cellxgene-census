@@ -110,12 +110,12 @@ def compute_all(
     query_filter: str,
     treatment: str,
     n_processes: int,
-    covariates: Optional[str] = None,
+    covariates_str: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
-    if covariates is None:
+    if covariates_str is None:
         covariates = ["dataset_id"]
     else:
-        covariates = covariates.split(",")
+        covariates = covariates_str.split(",")
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
         if covariates:
