@@ -11,7 +11,7 @@ Usage instructions:
 4. `git clone git@github.com:chanzuckerberg/cellxgene-census.git`
 5. Setup a virtualenv and `pip install -r tools/models/memento/requirements.txt`.
 6. Download the Census to local filesystem: `sudo aws s3 --no-sign-request sync s3://cellxgene-data-public/cell-census/<CENSUS_VERSION>/soma/ <LOCAL_PATH_TO_CENSUS_SOMA>`
-6. To run: `python -O -m estimators_cube_builder --cube-uri <LOCAL_PATH_TO_CUBE>/ --experiment-uri <LOCAL_PATH_TO_CENSUS_SOMA>/census_data/homo_sapiens --overwrite --validate --consolidate 2>&1 | tee build-cube.log`.
+7. To run: `python -O -m estimators_cube_builder --cube-uri <LOCAL_PATH_TO_CUBE>/ --experiment-uri <LOCAL_PATH_TO_CENSUS_SOMA>/census_data/homo_sapiens --overwrite --validate --consolidate 2>&1 | tee build-cube.log`.
 
 For further performance, the local Census path can be on a volume mounted on SSD drive. E.g.:
 
@@ -24,5 +24,6 @@ sudo mount /dev/nvme1n2 /mnt/census
 To inspect the results of the cube, see `estimators_cube_builder/cube-adhoc-query.ipynb`.
 
 Notes:
-* The scripts makes use of Python's multiprocessing to parallelize the estimator computations. The amount of memory used per sub-process and overall on the instance will be impacted by the constants `MIN_BATCH_SIZE`, `MAX_CELLS`, and `MAX_WORKERS`. The `MAX_CELLS` is the upper limit of cells that worker processes will be allowed to process at a given time (enforced by `ResourcePoolProcessExecutor`). This effectively controls the peak memory usage to avoid using swap space, which would negatively impact performance. However, if this causes the worker process count to be less than the CPU count, the CPUs will be underutilized. This can be rectified by decreasing the MIN_BATCH_SIZE, which will reduce the memory used per process and allow more workers processes to run in parallel.
-* The script takes ~17 hours to run in the default configuration on the `r6id.24xlarge` instance size.
+
+- The scripts makes use of Python's multiprocessing to parallelize the estimator computations. The amount of memory used per sub-process and overall on the instance will be impacted by the constants `MIN_BATCH_SIZE`, `MAX_CELLS`, and `MAX_WORKERS`. The `MAX_CELLS` is the upper limit of cells that worker processes will be allowed to process at a given time (enforced by `ResourcePoolProcessExecutor`). This effectively controls the peak memory usage to avoid using swap space, which would negatively impact performance. However, if this causes the worker process count to be less than the CPU count, the CPUs will be underutilized. This can be rectified by decreasing the MIN_BATCH_SIZE, which will reduce the memory used per process and allow more workers processes to run in parallel.
+- The script takes ~17 hours to run in the default configuration on the `r6id.24xlarge` instance size.
