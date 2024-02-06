@@ -110,8 +110,9 @@ def compute_all(
     query_filter: str,
     treatment: str,
     n_processes: int,
-    covariates: Optional[List[str]] = ["dataset_id"],
+    covariates: Optional[List[str]] = ("dataset_id",),
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
+    covariates = list(covariates)
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
         if covariates:
@@ -321,7 +322,7 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
 
     de_result = compute_all(
-        cube_path_arg, filter_arg, treatment_arg, int(n_processes), covariates.split(",") if covariates else None
+        cube_path_arg, filter_arg, treatment_arg, int(n_processes), tuple(covariates.split(",")) if covariates else None
     )
 
     # Output DE result
