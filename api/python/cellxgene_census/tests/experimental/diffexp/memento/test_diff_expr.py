@@ -4,7 +4,6 @@ from typing import Dict
 import pandas as pd
 import pytest
 
-from cellxgene_census.experimental.diffexp.memento import diff_expr
 from cellxgene_census.experimental.diffexp.memento.diff_expr import CUBE_LOGICAL_DIMS_OBS
 
 
