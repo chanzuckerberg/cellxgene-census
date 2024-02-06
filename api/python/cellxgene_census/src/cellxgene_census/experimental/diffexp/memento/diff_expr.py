@@ -35,14 +35,59 @@ CUBE_LOGICAL_DIMS_OBS = [
 ]
 
 
+def compute_memento_estimators_from_precomputed_stats(estimators_df: pl.DataFrame) -> pl.DataFrame:
+    """
+    Computes the mean and standard error of the mean (SEM) for each feature in the estimators DataFrame.
+
+    This function takes a DataFrame containing precomputed statistics for each feature, including the number of observations,
+    sum, sum of squares, and size factor. It calculates the mean and SEM for each feature based on these statistics.
+
+    Parameters:
+    estimators_df (pl.DataFrame): A DataFrame containing the precomputed statistics for each feature. Must include
+                                  columns 'n_obs', 'sum', 'sumsq', and 'size_factor'.
+
+    Returns:
+    pl.DataFrame: A DataFrame with the original columns from `estimators_df` plus two new columns:
+                  'mean' - the mean expression level for each feature.
+                  'sem' - the standard error of the mean for each feature.
+    """
+    n_obs = estimators_df["n_obs"].to_numpy()
+    expr_sum = estimators_df["sum"].to_numpy()
+    expr_sumsq = estimators_df["sumsq"].to_numpy()
+    size_factors = estimators_df["size_factor"].to_numpy()
+    mean = (expr_sum + 1) / (size_factors + 1)
+    var = expr_sumsq / n_obs - (expr_sum / n_obs) ** 2
+    var[var < 0] = 0  # ensure variances are non-negative
+    sem = np.sqrt(var) * np.sqrt(n_obs) / size_factors
+
+    estimators_df = estimators_df.with_columns([pl.Series("mean", mean), pl.Series("sem", sem)])
+    return estimators_df
+
+
 # @timeit
-def query_estimators(cube_path: str, obs_groups_df: pd.DataFrame, features: List[str]) -> pl.DataFrame:
+def query_estimators(
+    cube_path: str,
+    obs_groups_df: pd.DataFrame,
+    features: List[str],
+) -> pl.DataFrame:
     tiledb_config = {
         "py.init_buffer_bytes": 2**31,
     }
     with tiledb.open(os.path.join(cube_path, ESTIMATORS_ARRAY), "r", config=tiledb_config) as estimators_array:
-        estimators_df = pl.DataFrame(estimators_array.df[features, obs_groups_df.obs_group_joinid.values])
+        estimators_df = estimators_array.df[features, obs_groups_df.obs_group_joinid.values]
+        estimators_df = (
+            estimators_df.merge(
+                obs_groups_df[["obs_group_joinid", "selected_vars_group_joinid"]], on="obs_group_joinid"
+            )
+            .groupby(["feature_id", "selected_vars_group_joinid"])
+            .sum()
+            .reset_index()
+        )
+        estimators_df["obs_group_joinid"] = estimators_df["selected_vars_group_joinid"].astype("uint32")
+        del estimators_df["selected_vars_group_joinid"]
+        estimators_df = pl.DataFrame(estimators_df)
 
+    estimators_df = compute_memento_estimators_from_precomputed_stats(estimators_df)
     # TODO: Determine whether it's reasonable to drop these values, or if we should revisit how they're being
     #  computed in the first place. If reasonable, this filtering should be done by the cube builder, not here.
     # This filtering ensures that we will not take of logs of non-positive values, or end up with selm values of 0
@@ -61,15 +106,27 @@ def drop_invalid_data(estimators_df: pl.DataFrame) -> pl.DataFrame:
 
 
 def compute_all(
-    cube_path: str, query_filter: str, treatment: str, n_processes: int, n_features: Optional[int] = None
+    cube_path: str,
+    query_filter: str,
+    treatment: str,
+    n_processes: int,
+    covariates_str: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
+    if covariates_str is None:
+        covariates = ["dataset_id"]
+    else:
+        covariates = covariates_str.split(",")
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
+        if covariates:
+            obs_groups_df = obs_groups_df[covariates + [treatment, "obs_group_joinid", "n_obs"]]
+        else:
+            covariates = CUBE_LOGICAL_DIMS_OBS
 
         distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
 
-    features = get_features(cube_path, n_features)
+    features = get_features(cube_path, None)
 
     # compute each feature group in parallel
     n_feature_groups = min(len(features), n_processes)
@@ -79,12 +136,27 @@ def compute_all(
     )
 
     # make treatment variable be in the first column of the design matrix
-    variables = [treatment] + [covariate for covariate in CUBE_LOGICAL_DIMS_OBS if covariate != treatment]
-    design = pd.get_dummies(obs_groups_df[variables].astype(str), drop_first=True, dtype=int)
-    assert design.shape[1] == obs_groups_df[variables].nunique().sum() - len(variables)
+    variables = [treatment] + [covariate for covariate in covariates if covariate != treatment]
+    selected_vars_groups_groupby = obs_groups_df.groupby(variables, observed=True)
+
+    agg_dict = {i: "first" for i in variables}
+    agg_dict["n_obs"] = "sum"
+    selected_vars_groups_df = selected_vars_groups_groupby.agg(agg_dict)
+
+    obs_groups_df["selected_vars_group_joinid"] = selected_vars_groups_groupby.ngroup().astype("uint32")
+    selected_vars_groups_df["obs_group_joinid"] = np.arange(len(selected_vars_groups_df), dtype="uint32")
+
+    design = pd.get_dummies(selected_vars_groups_df[variables].astype(str), drop_first=True, dtype=int)
+    assert design.shape[1] == selected_vars_groups_df[variables].nunique().sum() - len(variables)
 
     result_groups = ProcessPoolExecutor(max_workers=n_processes).map(
-        partial(compute_for_features, cube_path, design, obs_groups_df[["obs_group_joinid", "n_obs"]]),
+        partial(
+            compute_for_features,
+            cube_path,
+            design,
+            obs_groups_df[["obs_group_joinid", "selected_vars_group_joinid", "n_obs"]],
+            selected_vars_groups_df[["obs_group_joinid", "n_obs"]],
+        ),
         feature_groups,
         range(len(feature_groups)),
     )
@@ -101,7 +173,12 @@ def compute_all(
         data = itertools.chain.from_iterable(results)  # flatten results
         stats = pstats.Stats()
 
-    return pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False).set_index("feature_id"), stats
+    return (
+        pd.DataFrame(data, columns=["feature_id", "coef", "z", "pval"], copy=False)
+        .set_index("feature_id")
+        .sort_values("z", ascending=False, inplace=False),
+        stats,
+    )
 
 
 def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
@@ -119,15 +196,19 @@ def get_features(cube_path: str, n_features: Optional[int] = None) -> List[str]:
 # @cprofile
 # @timeit_report
 def compute_for_features(
-    cube_path: str, design: pd.DataFrame, obs_groups_df: pd.DataFrame, features: List[str], feature_group_key: int
+    cube_path: str,
+    design: pd.DataFrame,
+    obs_groups_df: pd.DataFrame,
+    selected_vars_groups_df: pd.DataFrame,
+    features: List[str],
+    feature_group_key: int,
 ) -> List[Tuple[str, np.float32, np.float32, np.float32]]:
     logging.debug(
         f"computing for feature group {feature_group_key}, n={len(features)}, {features[0]}..{features[-1]}..."
     )
     estimators = query_estimators(cube_path, obs_groups_df, features)
-
-    cell_counts = obs_groups_df["n_obs"].values
-    obs_group_joinids = obs_groups_df[["obs_group_joinid"]]
+    cell_counts = selected_vars_groups_df["n_obs"].values
+    obs_group_joinids = selected_vars_groups_df[["obs_group_joinid"]]
 
     result = [
         (feature_id, *compute_for_feature(cell_counts, design, feature_estimators, obs_group_joinids))  # type:ignore
@@ -239,15 +320,15 @@ def de_wls(
 # Script entrypoint
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <n_processes> <n_features>")
+        print("Usage: python diff_expr.py <filter> <treatment> <cube_path> <n_processes> <covariates>")
         sys.exit(1)
 
-    filter_arg, treatment_arg, cube_path_arg, n_processes, n_features = sys.argv[1:6]
+    filter_arg, treatment_arg, cube_path_arg, n_processes, covariates = sys.argv[1:6]
 
     logging.getLogger().setLevel(logging.DEBUG)
 
     de_result = compute_all(
-        cube_path_arg, filter_arg, treatment_arg, int(n_processes), int(n_features) if n_features else None
+        cube_path_arg, filter_arg, treatment_arg, int(n_processes), covariates if covariates else None
     )
 
     # Output DE result
