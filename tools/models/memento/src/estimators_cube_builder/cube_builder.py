@@ -13,10 +13,8 @@ from typing import Any, Dict, List, Tuple, cast
 
 import click
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
-import scipy.sparse
 import tiledb
 import tiledbsoma as soma
 from somacore import AxisQuery, ExperimentAxisQuery

@@ -3,7 +3,6 @@ from typing import Tuple, cast
 
 import numpy as np
 import numpy.typing as npt
-import scipy.sparse as sparse
 import scipy.stats as stats
 from numba import njit
 from numpy import random
