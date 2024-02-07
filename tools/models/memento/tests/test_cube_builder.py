@@ -15,13 +15,13 @@ def test_cube_builder_regression() -> None:
     cd tools/models/memento/
 
     python tests/fixtures/census_fixture.py \
-    s3://cellxgene-data-public/cell-census/2023-10-23/soma/census_data/homo_sapiens \
+    s3://cellxgene-data-public/cell-census/2023-10-30/soma/census_data/homo_sapiens \
     "is_primary_data == True and tissue_general in ['tongue']" \
     "feature_id in ['ENSG00000000419', 'ENSG00000002330']" \
     tests/fixtures/census-homo-sapiens-small
 
-    python -m estimators_cube_builder \
-    --experiment-uri tests/fixtures/human-tongue-2genes \
+    python -m src.estimators_cube_builder.cube_builder \
+    --experiment-uri tests/fixtures/census-homo-sapiens-small \
     --cube-uri tests/fixtures/estimators-cube-expected
     """
 
