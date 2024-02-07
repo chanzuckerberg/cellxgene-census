@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 from cellxgene_census.experimental.diffexp.memento import diff_expr
-from cellxgene_census.experimental.diffexp.memento.diff_expr import CUBE_LOGICAL_DIMS_OBS
 
 
 class TestDiffExprRealDataset:
@@ -46,7 +45,6 @@ class TestDiffExprRealDataset:
                     "cube_path": estimator_cube_path,
                     "query_filter": "tissue_general_ontology_term_id in ['UBERON:0001723'] and sex_ontology_term_id in ['PATO:0000383', 'PATO:0000384']",
                     "treatment": "sex_ontology_term_id",
-                    "num_sampled_genes": 2,
                 },
                 "expected_diff_exp_result": [
                     ("ENSG00000000419", -0.111612, -1.895204, 0.058065),
@@ -58,7 +56,6 @@ class TestDiffExprRealDataset:
                     "cube_path": estimator_cube_path,
                     "query_filter": "tissue_general_ontology_term_id in ['UBERON:0001723'] and cell_type_ontology_term_id in ['CL:0000066', 'CL:0000057']",
                     "treatment": "cell_type_ontology_term_id",
-                    "num_sampled_genes": 2,
                 },
                 "expected_diff_exp_result": [
                     ("ENSG00000000419", 0.868715, 6.048411, 1.462810e-09),
@@ -74,18 +71,17 @@ class TestDiffExprRealDataset:
         estimator_cube_path = test_cases_for_compute_all_fn["diff_exp_query"]["cube_path"]
         query_filter = test_cases_for_compute_all_fn["diff_exp_query"]["query_filter"]
         treatment = test_cases_for_compute_all_fn["diff_exp_query"]["treatment"]
-        num_sampled_genes = test_cases_for_compute_all_fn["diff_exp_query"]["num_sampled_genes"]
 
         # Act
         observed_diff_exp_result_df, _ = diff_expr.compute_all(
             cube_path=estimator_cube_path,
             query_filter=query_filter,
             treatment=treatment,
-            n_features=num_sampled_genes,
             n_processes=1,
         )
 
         observed_diff_exp_result_df = observed_diff_exp_result_df.reset_index().set_index("feature_id").sort_index()
+        print(f"observed_diff_exp_df:\n{observed_diff_exp_result_df}")
 
         expected_data = test_cases_for_compute_all_fn["expected_diff_exp_result"]
         expected_diff_exp_result_df = (
@@ -93,6 +89,8 @@ class TestDiffExprRealDataset:
             .set_index("feature_id")
             .sort_index()
         )
+
+        print(f"expected_diff_exp_df:\n{expected_diff_exp_result_df}")
 
         # Assert
         assert np.allclose(observed_diff_exp_result_df.values, expected_diff_exp_result_df.values, atol=1e-07)
