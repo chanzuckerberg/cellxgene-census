@@ -1,8 +1,7 @@
 import anndata as ad
+import scvi
 import yaml
 from lightning.pytorch.loggers import TensorBoardLogger
-
-import scvi
 
 file = "scvi-config.yaml"
 
