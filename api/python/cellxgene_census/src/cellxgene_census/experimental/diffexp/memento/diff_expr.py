@@ -112,16 +112,16 @@ def compute_all(
     n_processes: int,
     covariates_str: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
+    default_covariates = CUBE_LOGICAL_DIMS_OBS
+
     if covariates_str is None:
-        covariates = ["dataset_id"]
+        covariates = default_covariates
     else:
         covariates = covariates_str.split(",")
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
-        if covariates:
+        if covariates != default_covariates:
             obs_groups_df = obs_groups_df[covariates + [treatment, "obs_group_joinid", "n_obs"]]
-        else:
-            covariates = CUBE_LOGICAL_DIMS_OBS
 
         distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"

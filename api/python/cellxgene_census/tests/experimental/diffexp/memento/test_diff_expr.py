@@ -81,7 +81,6 @@ class TestDiffExprRealDataset:
         )
 
         observed_diff_exp_result_df = observed_diff_exp_result_df.reset_index().set_index("feature_id").sort_index()
-        print(f"observed_diff_exp_df:\n{observed_diff_exp_result_df}")
 
         expected_data = test_cases_for_compute_all_fn["expected_diff_exp_result"]
         expected_diff_exp_result_df = (
@@ -89,8 +88,6 @@ class TestDiffExprRealDataset:
             .set_index("feature_id")
             .sort_index()
         )
-
-        print(f"expected_diff_exp_df:\n{expected_diff_exp_result_df}")
 
         # Assert
         assert np.allclose(observed_diff_exp_result_df.values, expected_diff_exp_result_df.values, atol=1e-07)
