@@ -4,10 +4,9 @@ import gc
 import cellxgene_census
 import numpy as np
 import pandas as pd
+import scvi
 import tiledbsoma as soma
 import yaml
-
-import scvi
 
 file = "scvi-config.yaml"
 
