@@ -14,7 +14,7 @@ if __name__ == "__main__":
     with open(file) as f:
         config = yaml.safe_load(f)
 
-    census = cellxgene_census.open_soma(census_version="latest")
+    census = cellxgene_census.open_soma(census_version="2023-12-15")
 
     census_config = config.get("census")
     experiment_name = census_config.get("organism")
@@ -39,10 +39,10 @@ if __name__ == "__main__":
     ad_filename = adata_config.get("model_filename")
 
     print("Converting to AnnData")
-    ad = query.to_anndata(X_name="raw")
-    ad.obs["batch"] = functools.reduce(lambda a, b: a + b, [ad.obs[c].astype(str) for c in batch_key])
+    adata = query.to_anndata(X_name="raw")
+    adata.obs["batch"] = functools.reduce(lambda a, b: a + b, [adata.obs[c].astype(str) for c in batch_key])
 
-    ad.var.set_index("feature_id", inplace=True)
+    adata.var.set_index("feature_id", inplace=True)
 
     idx = query.obs(column_names=["soma_joinid"]).concat().to_pandas().index.to_numpy()
 
@@ -53,26 +53,24 @@ if __name__ == "__main__":
     model_filename = model_config.get("filename")
     n_latent = model_config.get("n_latent")
 
-    scvi.model.SCVI.prepare_query_anndata(ad, model_filename)
+    scvi.model.SCVI.prepare_query_anndata(adata, model_filename)
 
     vae_q = scvi.model.SCVI.load_query_data(
-        ad,
+        adata,
         model_filename,
     )
-    # Uncomment #1 if you want to do a forward pass with an additional training epoch.
-    # Uncomment #2 if you want to do a forward pass without additional training.
+    vae_q.is_trained = True
+    qz_m, qz_v = vae_q.get_latent_representation(return_dist=True)
 
-    # vae_q.train(max_epochs=1, plan_kwargs=dict(weight_decay=0.0)) # 1
-    vae_q.is_trained = True  # 2
-    latent = vae_q.get_latent_representation()
+    adata.obsm["_scvi_latent_qzm"], adata.obsm["_scvi_latent_qzv"] = qz_m, qz_v
+    vae_q.minify_adata(use_latent_qzm_key="_scvi_latent_qzm", use_latent_qzv_key="_scvi_latent_qzv")
+    vae_q.save("final_scvi_optimized", save_anndata=True)
 
-    ad.write_h5ad("anndata-full.h5ad", compression="gzip")
-
-    del vae_q, ad
+    del vae_q, adata, qz_v
     gc.collect()
 
     with open("latent-idx.npy", "wb") as f:
         np.save(f, idx)
 
     with open("latent.npy", "wb") as f:
-        np.save(f, latent)
+        np.save(f, qz_m)
