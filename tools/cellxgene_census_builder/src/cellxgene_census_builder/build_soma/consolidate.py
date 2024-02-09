@@ -183,7 +183,7 @@ class AsyncConsolidator:
 
 
 def start_async_consolidation(
-    uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 7.0
+    uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 15.0
 ) -> AsyncConsolidator:
     """
     Start an async consolidation process that will safely work alongside writers.

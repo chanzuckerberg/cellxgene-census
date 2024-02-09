@@ -86,9 +86,8 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
-    # Constraining parallelism is critical at this step, as each worker utilizes 48-64GiB+ of buffer and will
-    # create O(ncores) threads during the write phase.
-    MEM_BUDGET = 96 * 1024**3
+    # Constraining parallelism is critical at this step, as each worker utilizes ~96-128GiB+ of buffer
+    MEM_BUDGET = 128 * 1024**3
     total_memory = psutil.virtual_memory().total
     n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0):

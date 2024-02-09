@@ -29,7 +29,7 @@ dependencies= [
     "pyarrow==15.0.0",
     "pandas[performance]==2.2.0",
     "anndata==0.10.5.post1",
-    "numpy==1.23.5",
+    "numpy==1.24.4",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # IMPORTANT: the tiledbsoma version lag that used in cellxgene-census package.
     "tiledbsoma==1.7.0",
