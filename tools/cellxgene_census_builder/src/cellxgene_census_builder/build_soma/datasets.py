@@ -84,4 +84,4 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     with info_collection.add_new_dataframe(
         CENSUS_DATASETS_NAME, schema=schema, index_column_names=["soma_joinid"]
     ) as manifest:
-        manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False))
+        manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False, schema=schema))
