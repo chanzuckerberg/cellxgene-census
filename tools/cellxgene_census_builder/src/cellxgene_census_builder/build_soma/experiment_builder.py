@@ -348,14 +348,12 @@ def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd
     * generate summary and/or working data for the experiment_builder
     """
 
-    def add_placeholder_columns(df: pd.DataFrame, table_spec: TableSpec, default: Any) -> None:
+    def add_placeholder_columns(df: pd.DataFrame, table_spec: TableSpec, default: Dict[npt.DTypeLike, Any]) -> None:
         for key in table_spec.field_names():
             if key not in df:
-                df[key] = np.full(
-                    (len(df),),
-                    default,
-                    dtype=table_spec.field(key).to_pandas_dtype(ignore_dict_type=True),
-                )
+                dtype = table_spec.field(key).to_pandas_dtype(ignore_dict_type=True)
+                fill_value = default[dtype]
+                df[key] = np.full((len(df),), fill_value, dtype=dtype)
 
     def per_dataset_summary_counts(eb: ExperimentBuilder, obs: pd.DataFrame) -> None:
         for _, obs_slice in obs.groupby("dataset_id"):
@@ -376,8 +374,10 @@ def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd
         add_tissue_mapping(obs)  # add tissue mapping (e.g., tissue_general term)
 
         # add columns to be completed later, e.g., summary stats such as mean of X
-        add_placeholder_columns(obs, CENSUS_OBS_TABLE_SPEC, default=np.nan)
-        add_placeholder_columns(var, CENSUS_VAR_TABLE_SPEC, default=0)
+        add_placeholder_columns(
+            obs, CENSUS_OBS_TABLE_SPEC, default={np.int64: np.iinfo(np.int64).min, np.float64: np.nan}
+        )
+        add_placeholder_columns(var, CENSUS_VAR_TABLE_SPEC, default={np.int64: 0})
 
         # compute intermediate values used later in the build
         eb.n_datasets = obs.dataset_id.nunique()
