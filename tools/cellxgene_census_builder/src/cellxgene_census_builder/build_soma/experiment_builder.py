@@ -255,9 +255,7 @@ class ExperimentBuilder:
         else:
             logger.debug(f"experiment {self.name} obs = {obs_df.shape}")
             assert not np.isnan(obs_df.nnz.to_numpy()).any()  # sanity check
-            pa_table = pa.Table.from_pandas(
-                obs_df, preserve_index=False, columns=list(CENSUS_OBS_TABLE_SPEC.field_names())
-            )
+            pa_table = pa.Table.from_pandas(obs_df, preserve_index=False, schema=obs_schema)
             self.experiment.obs.write(pa_table)
 
     def write_var_dataframe(self) -> None:
@@ -282,9 +280,7 @@ class ExperimentBuilder:
             logger.info(f"{self.name}: empty var dataframe")
         else:
             logger.debug(f"experiment {self.name} var = {var_df.shape}")
-            pa_table = pa.Table.from_pandas(
-                var_df, preserve_index=False, columns=list(CENSUS_VAR_TABLE_SPEC.field_names())
-            )
+            pa_table = pa.Table.from_pandas(var_df, preserve_index=False, schema=var_schema)
             rna_measurement.var.write(pa_table)
 
     def populate_var_axis(self) -> None:
