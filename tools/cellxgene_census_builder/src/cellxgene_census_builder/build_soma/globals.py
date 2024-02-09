@@ -77,6 +77,10 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 # NOTE: a few additional columns are added (they are not defined in the CXG schema),
 # eg., dataset_id, tissue_general, etc.
 #
+# IMPORTANT: for any `obs` column, use Arrow `large_string` and `large_binary`, rather
+# than `string` or `binary`. There is no at-rest difference (TileDB-SOMA encodes both as large),
+# but the in-memory Arrow Array indices for string/binary can overflow as cell counts increase.
+#
 CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modification.
     "assay",
     "assay_ontology_term_id",
