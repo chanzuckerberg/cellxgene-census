@@ -191,11 +191,9 @@ class ExperimentBuilder:
         # add any other computed columns
         for key in CENSUS_OBS_TABLE_SPEC.field_names():
             if key not in obs_df:
-                obs_df[key] = np.full(
-                    (len(obs_df),),
-                    np.nan,
-                    dtype=CENSUS_OBS_TABLE_SPEC.field(key).to_pandas_dtype(ignore_dict_type=True),
-                )
+                dtype = CENSUS_OBS_TABLE_SPEC.field(key).to_pandas_dtype(ignore_dict_type=True)
+                fill = np.iinfo(dtype).min if np.issubdtype(dtype, np.integer) else np.nan
+                obs_df[key] = np.full((len(obs_df),), fill, dtype=dtype)
 
         # Accumulate aggregation counts
         self.census_summary_cell_counts = accumulate_summary_counts(self.census_summary_cell_counts, obs_df)
@@ -545,7 +543,7 @@ def _accumulate_all_X_layers(
         var_stats["n_measured_obs"] = np.zeros(
             (len(var_stats),), dtype=CENSUS_VAR_TABLE_SPEC.field("n_measured_obs").to_pandas_dtype()
         )
-        var_stats.n_measured_obs[var_stats.nnz > 0] = ad.n_obs
+        var_stats.loc[var_stats.nnz > 0, "n_measured_obs"] = ad.n_obs
 
         # sanity check on stats
         assert len(var_stats) == ad.n_vars
@@ -730,6 +728,7 @@ def populate_X_layers(
     for _, axis_stats in results:
         eb = eb_by_name[axis_stats.eb_name]
         if eb.obs_df is not None:
+            # https://github.com/pandas-dev/pandas/issues/57124
             eb.obs_df.update(axis_stats.obs_stats)
         if eb.var_df is not None:
             eb.var_df.loc[

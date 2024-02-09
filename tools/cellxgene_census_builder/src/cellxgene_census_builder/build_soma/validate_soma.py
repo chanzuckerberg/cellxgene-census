@@ -869,6 +869,7 @@ def validate_internal_consistency(
                 # Assertion 3 - var.n_measured_obs is consistent with presence matrix
                 tmp = datasets_df.set_index("dataset_id")
                 tmp["obs_counts_by_dataset"] = 0
+                # https://github.com/pandas-dev/pandas/issues/57124
                 tmp.update(obs.value_counts(subset="dataset_id").rename("obs_counts_by_dataset"))
                 assert (
                     var.n_measured_obs == (tmp.obs_counts_by_dataset.to_numpy() * presence)
