@@ -410,7 +410,9 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
             assert ad.n_vars == var_joinid_in_adata.sum()
 
             # var/col reindexer
-            var_index = ad.var.join(var_df.set_index("feature_id")).set_index("soma_joinid").index
+            var_index = soma.tiledbsoma_build_index(
+                ad.var.join(var_df.set_index("feature_id")).soma_joinid.to_numpy(), context=exp.context
+            )
             var_df = var_df[["soma_joinid"]]  # save some memory
 
             presence_accumulator = np.zeros((len(var_df),), dtype=np.bool_)
@@ -425,8 +427,10 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
                 del X_raw
 
                 # positionally re-index
-                cols_by_position = var_index.get_indexer(X_raw_var_joinids)  # type: ignore[no-untyped-call]
-                rows_by_position = pd.Index(obs_joinids_split).get_indexer(X_raw_obs_joinids)
+                cols_by_position = var_index.get_indexer(X_raw_var_joinids)
+                rows_by_position = soma.tiledbsoma_build_index(obs_joinids_split, context=exp.context).get_indexer(
+                    X_raw_obs_joinids
+                )
                 del X_raw_obs_joinids
 
                 expected_X = ad[idx : idx + STRIDE].X
