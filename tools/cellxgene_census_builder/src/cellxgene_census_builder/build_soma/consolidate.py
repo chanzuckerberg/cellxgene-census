@@ -241,8 +241,9 @@ def _async_consolidator(
                 vacuum=True,
                 consolidation_modes=["fragments"],
                 consolidation_config={
+                    "sm.consolidation.steps": "8",
                     "sm.consolidation.step_min_frags": "2",
-                    "sm.consolidation.step_max_frags": "8",
+                    "sm.consolidation.step_max_frags": "16",
                     "sm.consolidation.max_fragment_size": str(2 * 1024**3),
                 },
             )
