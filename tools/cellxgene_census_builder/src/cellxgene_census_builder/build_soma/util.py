@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Any, Iterator, Optional, Union
+from typing import Any, List, TypeVar, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -8,59 +8,7 @@ import requests
 import urllib3
 from scipy import sparse
 
-
-def array_chunker(
-    arr: Union[npt.NDArray[Any], sparse.spmatrix],
-    nnz_chunk_size: Optional[int] = 256 * 1024**2,  # goal (~2.4GiB for a 32-bit COO)
-) -> Iterator[sparse.coo_matrix]:
-    """
-    Return the array as multiple chunks, each a coo_matrix.
-    The slicing is always done by row (for ndarray and csr_matrix) or by column (for csc_matrix),
-    and will never split a row (or column) into two separate slices.
-
-    Args:
-        arr:
-            The array to slice (either a numpy ndarray, a scipy.sparse csr_matrix or csc_matrix).
-        nnz_chunk_size:
-            Approximate number of elements in each chunk.
-
-    Returns:
-        An iterator containing the chunks.
-
-    Raises:
-        NotImplementedError: If the matrix type is not supported.
-    """
-
-    if isinstance(arr, sparse.csr_matrix) or isinstance(arr, sparse.csr_array):
-        avg_nnz_per_row = arr.nnz // arr.shape[0]
-        row_chunk_size = max(1, round(nnz_chunk_size / avg_nnz_per_row))
-        for row_idx in range(0, arr.shape[0], row_chunk_size):
-            slc = arr[row_idx : row_idx + row_chunk_size, :].tocoo()
-            slc.resize(arr.shape)
-            slc.row += row_idx
-            yield slc
-        return
-
-    if isinstance(arr, sparse.csc_matrix) or isinstance(arr, sparse.csc_array):
-        avg_nnz_per_col = arr.nnz // arr.shape[1]
-        col_chunk_size = max(1, round(nnz_chunk_size / avg_nnz_per_col))
-        for col_idx in range(0, arr.shape[1], col_chunk_size):
-            slc = arr[:, col_idx : col_idx + col_chunk_size].tocoo()
-            slc.resize(arr.shape)
-            slc.col += col_idx
-            yield slc
-        return
-
-    if isinstance(arr, np.ndarray):
-        row_chunk_size = max(1, nnz_chunk_size // arr.shape[1])  # type: ignore
-        for row_idx in range(0, arr.shape[0], row_chunk_size):
-            slc = sparse.coo_matrix(arr[row_idx : row_idx + row_chunk_size, :])
-            slc.resize(arr.shape)
-            slc.row += row_idx
-            yield slc
-        return
-
-    raise NotImplementedError("array_chunker: unsupported array type")
+T = TypeVar("T")
 
 
 def fetch_json(url: str, delay_secs: float = 0.0) -> object:
@@ -120,3 +68,26 @@ def is_git_repo_dirty() -> bool:
     repo = git.repo.base.Repo(search_parent_directories=True)
     is_dirty: bool = repo.is_dirty()
     return is_dirty
+
+
+def shuffle(items: List[T], step: int) -> List[T]:
+    """
+    Shuffle (interleave) from each end of the list. Step param controls
+    bias of selection from front and back, i.e., if if step==2, every other
+    item will be selected from end of list, if step==3, every third item
+    will come from the end of the list.
+
+    Expected use: reorder a sorted list (e.g by size) so that it ends up as (for step==2):
+    [largest, smallest, second-largest, second-smallest, third-largest, ...]
+
+    It is possible that a random shuffle (e.g., reservoir) would be better for the
+    build use case (see build_soma step 1), but that is TBD.
+    """
+    assert step > 0
+    r = []
+    for i in range(len(items)):
+        if i % step == 0:
+            r.append(items[-i // step - 1])
+        else:
+            r.append(items[(step - 1) * (i // step) + (i % step) - 1])
+    return r

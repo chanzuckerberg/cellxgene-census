@@ -5,7 +5,7 @@ import logging
 import os
 import pathlib
 import time
-from typing import Any, List, cast
+from typing import Any, List
 
 import aiohttp
 import dask
@@ -22,50 +22,54 @@ logger = logging.getLogger(__name__)
 
 
 def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
-    """NOTE: non-pure -- modifies Datasets in place."""
+    """NOTE: non-pure -- modifies Datasets argument in place."""
     assets_dir = args.h5ads_path
 
     # e.g., "census-builder-prod/1.0.0"
     user_agent = f"{args.config.user_agent_prefix}{args.config.user_agent_environment}/{__version__}"
+    HTTP_GET_TIMEOUT_SEC = 2 * 60 * 60  # just a very big timeout
 
     logger.info(f"Starting asset staging to {assets_dir}")
     assert os.path.isdir(assets_dir)
 
-    def copy_file(args: tuple[str, str]) -> int:
-        """copy from->to, return bytes read"""
-        from_path, to_path = args
-        HTTP_GET_TIMEOUT_SEC = 2 * 60 * 60  # just a very big timeout
-        storage_options = {
-            "timeout": aiohttp.ClientTimeout(total=HTTP_GET_TIMEOUT_SEC, connect=None),
-            "headers": {"User-Agent": user_agent},
-        }
-        return pcopyfile(from_path, to_path, exist_ok=True, **storage_options)
-
     for dataset in datasets:
         dataset.dataset_h5ad_path = f"{dataset.dataset_id}.h5ad"
 
-    bytes_read = (
-        dask.bag.from_sequence(
-            (d.dataset_asset_h5ad_uri, (assets_dir / d.dataset_h5ad_path).as_posix()) for d in datasets
-        )
-        .map(copy_file)
-        .compute()
-    )
+    bytes_read = dask.bag.from_delayed(
+        [
+            dask.delayed(
+                (
+                    (
+                        d,
+                        pcopyfile(
+                            d.dataset_asset_h5ad_uri,
+                            (assets_dir / d.dataset_h5ad_path).as_posix(),
+                            exist_ok=True,
+                            timeout=aiohttp.ClientTimeout(total=HTTP_GET_TIMEOUT_SEC, connect=None),
+                            headers={"User-Agent": user_agent},
+                        ),
+                    ),
+                ),
+            )
+            for d in datasets
+        ]
+    ).compute()
 
-    for d, n_bytes in zip(datasets, bytes_read):
+    for d, n_bytes in bytes_read:
         # Confirm expected number of bytes.
         # TODO: add integrity checksum as well (blocked on chanzuckerberg/single-cell-data-portal#4392)
         actual_fsize = os.path.getsize(assets_dir / d.dataset_h5ad_path)
         if d.asset_h5ad_filesize == -1:  # i.e. no prior expectation of size
             d.asset_h5ad_filesize = n_bytes
-        assert (
-            d.asset_h5ad_filesize == n_bytes == actual_fsize
-        ), f"Error reading {d.dataset_id}: got {actual_fsize} bytes, expected {d.asset_h5ad_filesize}"
+        if not (d.asset_h5ad_filesize == n_bytes == actual_fsize):
+            raise ValueError(
+                f"Error reading {d.dataset_id}: got {actual_fsize} bytes, expected {d.asset_h5ad_filesize}"
+            )
 
-    return
 
-
-def pcopyfile(from_url: str, to_path: str, exist_ok: bool = True, block_size: int = 64 * 2**20, **kwargs: Any) -> int:
+def pcopyfile(
+    from_url: str, to_path: str, exist_ok: bool = True, block_size: int = 64 * 2**20, **kwargs: Any
+) -> Delayed[int]:
     """
     Parallel copy of file from_url->to_path. Assumes support for block fetches, a la
     HTTP, S3, etc. Blocks fetched in parallel in no guaranteed order.
@@ -102,9 +106,8 @@ def pcopyfile(from_url: str, to_path: str, exist_ok: bool = True, block_size: in
             (OpenFile(fs, path, compression=compression), offset, length) for offset, length in zip(offsets, lengths)
         )
 
-    def _read_a_block(args: tuple[OpenFile, int, int]) -> tuple[int, bytes]:
+    def _read_a_block(filelike: OpenFile, blk_off: int, blk_len: int) -> tuple[int, bytes]:
         # read block into memory
-        filelike, blk_off, blk_len = args
         with copy.copy(filelike) as f:
             sleep_for_secs = 3
             last_error: aiohttp.ClientPayloadError | None = None
@@ -119,11 +122,8 @@ def pcopyfile(from_url: str, to_path: str, exist_ok: bool = True, block_size: in
                 assert last_error is not None
                 raise last_error
 
-    def copy_block(args: tuple[int, Delayed], outfile_name: str) -> int:
+    def copy_block(block_offset: int, block_data: Delayed, outfile_name: str) -> int:
         # write block to file
-        block_offset, block_data = args
-
-        # write block to out file
         with open(outfile_name, "rb+") as outfile:
             outfile.seek(block_offset)
             cnt = outfile.write(block_data)
@@ -132,10 +132,14 @@ def pcopyfile(from_url: str, to_path: str, exist_ok: bool = True, block_size: in
         return cnt
 
     delayed_copy_blocks = (
-        get_file_blocks(from_url, blocksize=block_size).map(_read_a_block).map(copy_block, outfile_name=to_path)
+        dask.delayed(get_file_blocks)(from_url, blocksize=block_size)
+        .starmap(_read_a_block)
+        .starmap(copy_block, outfile_name=to_path)
     )
 
-    total_bytes_written = cast(int, sum(delayed_copy_blocks.compute()))
-    logger.debug(f"Copy complete, url={from_url}, bytes={total_bytes_written}")
+    @dask.delayed  # type: ignore[misc]
+    def _logit(bytes_read: int) -> int:
+        logger.debug(f"Copy complete, url={from_url}, bytes={bytes_read}")
+        return bytes_read
 
-    return total_bytes_written
+    return _logit(dask.delayed(sum)(delayed_copy_blocks))

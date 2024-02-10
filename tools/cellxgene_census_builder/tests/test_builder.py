@@ -44,7 +44,7 @@ def test_base_builder_creation(
     ), patch(
         "cellxgene_census_builder.build_soma.build_soma.consolidate",
     ), patch(
-        "cellxgene_census_builder.build_soma.build_soma.validate_consolidation",
+        "cellxgene_census_builder.build_soma.build_soma.go_validate",
         return_value=True,
     ), patch(
         "cellxgene_census_builder.build_soma.build_soma.start_async_consolidation",

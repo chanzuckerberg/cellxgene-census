@@ -376,6 +376,6 @@ def create_dask_client(
         # Release GIL, allowing the scheduler thread to run. Without this, the scheduler and
         # worker startup will race, occasionally causing a heartbeat error to be logged on startup.
         # The only side-effect is to keep logs cleaner.
-        time.sleep(1.0)
+        time.sleep(0.1)
 
         return client

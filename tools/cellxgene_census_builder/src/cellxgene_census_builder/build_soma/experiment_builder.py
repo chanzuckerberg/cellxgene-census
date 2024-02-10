@@ -473,17 +473,21 @@ def compute_X_file_stats(
     return (res,)
 
 
-# Controls chunking of the X array processsing:
+# Controls partitioning/chunking of the X array processsing:
 #   REDUCE_X_MAJOR_ROW_STRIDE: the max row stride for individual tasks. Primarily affects available parallelism
 #       by splitting very large datasets into multiple tasks.
 #   REDUCE_X_MINOR_NNZ_STRIDE: the max nnz (value) stride used in reducing X. Drives peak memory use and TileDB
 #       fragment size.
 #
 # An important side-effect of these parameters is the number and size of TileDB fragments created. As fragment count
-# increases, consolidation time increases non-linearly.
+# increases, consolidation time increases non-linearly. Therefore, there is a significant tradeoff between per-task
+# memory use and number of fragments. These values are currently tuned for (very roughly) 128GiB/task as a maximum
+# memory budget for full populated "chunks".
 #
 # TODO: when https://github.com/single-cell-data/TileDB-SOMA/issues/2054 is implemented, write each major stride
 # as a single fragment. This would allow a much smaller minor stride, without causing fragment count to increase.
+#
+# See also: MEMORY_BUDGET in the `build_soma.build()` function
 #
 REDUCE_X_MAJOR_ROW_STRIDE: int = 2_000_000
 REDUCE_X_MINOR_NNZ_STRIDE: int = 2**31

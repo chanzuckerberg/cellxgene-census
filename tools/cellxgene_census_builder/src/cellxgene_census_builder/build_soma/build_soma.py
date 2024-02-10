@@ -2,7 +2,7 @@ import logging
 import os
 import pathlib
 from datetime import datetime, timezone
-from typing import List, TypeVar, cast
+from typing import List, cast
 
 import pandas as pd
 import psutil
@@ -30,10 +30,9 @@ from .manifest import load_manifest
 from .mp import create_dask_client
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, is_git_repo_dirty
-from .validate_soma import validate_consolidation, validate_soma
+from .util import get_git_commit_sha, is_git_repo_dirty, shuffle
+from .validate_soma import validate as go_validate
 
-T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
@@ -58,11 +57,12 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     """
     Approximately, build steps are:
     1. Download manifest and copy/stage all source assets
-    2. Read all H5AD and create axis dataframe (serial)
-        * write obs/var dataframes
-        * accumulate overall shape of X
-    3. Read all H5AD assets again, write X layer (parallel)
-    4. Optional: validate
+    2. Create top-level collections per experiment
+    3. Read (parallel) all H5AD and create axis dataframe (serial). Accumulate overall shape of X
+    4. Read (parallel) all H5AD assets again, write X layers. Accumulate X summary stats, presence, etc.
+    5. Write axis dataframes and summary information
+    6. Consolidate
+    7. Validate
 
     Returns
     -------
@@ -86,7 +86,13 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
-    # Constraining parallelism is critical at this step, as each worker utilizes ~96-128GiB+ of buffer
+    # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
+    # process the X array (partitions are large to reduce TileDB fragment count).
+    #
+    # TODO: when global order writes are supported, processing of much smaller slices will be
+    # possible, and this budget should drop considerably. When that is implemented, n_workers should be
+    # be much larger (eg., use default value of #CPUs or some such).
+    # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
     MEM_BUDGET = 128 * 1024**3
     total_memory = psutil.virtual_memory().total
     n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
@@ -116,20 +122,23 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
     tiledb_soma_1969_work_around(root_collection.uri)
 
-    # TODO: consolidation and validation can be done in parallel.
+    # TODO: consolidation and validation can be done in parallel. Goal: do this work
+    # when refactoring validation to use Dask.
 
     if args.config.consolidate:
         consolidate(args, root_collection.uri)
 
     if validate:
-        validate_soma(args)
-        validate_consolidation(args)
+        go_validate(args)
 
     return 0
 
 
 def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: List[Dataset], used_datasets: List[Dataset]) -> None:
-    """Remove any staged H5AD not used to build the SOMA object, ie. those which do not contribute at least one cell to the Census"""
+    """
+    Remove any staged H5AD not used to build the SOMA object, ie. those which do not contribute
+    at least one cell to the Census.
+    """
     used_dataset_ids = set(d.dataset_id for d in used_datasets)
     unused_datasets = [d for d in all_datasets if d.dataset_id not in used_dataset_ids]
     assert all(d.dataset_total_cell_count == 0 for d in unused_datasets)
@@ -181,28 +190,10 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
             datasets = datasets[args.config.test_first_n :]
 
     else:
+        # Shuffle datasets by size.
         # TODO: it is unclear if this shuffle has material impact. Needs more benchmarking.
-        def shuffle(items: List[T], step: int) -> List[T]:
-            """
-            Shuffle (interleave) from each end of the list. Step param controls
-            bias of selection from front and back, i.e., if if step==2, every other
-            item will be selected from end of list, if step==3, every third item
-            will come from the end of the list.
-
-            Expected use: reorder a sorted list (e.g by size) so that it ends up as (for step==2):
-            [largest, smallest, second-largest, second-smallest, third-largest, ...]
-            """
-            assert step > 0
-            r = []
-            for i in range(len(items)):
-                if i % step == 0:
-                    r.append(items[-i // step - 1])
-                else:
-                    r.append(items[(step - 1) * (i // step) + (i % step) - 1])
-            return r
-
-        # Nothing magical about a step of 16, other than the observation that our dataset
-        # distribution has many more small datasets than large.
+        # Nothing magical about a step of 16, other than the observation that the dataset
+        # distribution is disproportionately populated by small datasets.
         datasets = shuffle(sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize), step=16)
         assert set(d.dataset_id for d in all_datasets) == set(d.dataset_id for d in datasets)
 
