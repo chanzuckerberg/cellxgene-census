@@ -33,7 +33,7 @@ dependencies= [
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
     # IMPORTANT: the tiledbsoma version lag that used in cellxgene-census package.
     "tiledbsoma==1.7.0",
-    "cellxgene-census==1.10.1",
+    "cellxgene-census==1.10.2",
     "scipy==1.12.0",
     "fsspec[http]==2024.2.0",
     "s3fs==2024.2.0",
