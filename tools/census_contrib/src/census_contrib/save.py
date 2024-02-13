@@ -58,13 +58,13 @@ def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float
     return platform_config
 
 
-def create_obsm_like_array(
+def create_sparse_array(
     uri: Union[str, Path],
     value_range: Tuple[float, float],  # closed, i.e., inclusive [min, max]
     shape: Tuple[int, int],
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.SparseNDArray:
-    """Create and return opened array. Can be used as a context manager."""
+    """Create and return opened sparse nd array. Can be used as a context manager."""
     array_path: str = Path(uri).as_posix()
     return soma.SparseNDArray.create(
         array_path,

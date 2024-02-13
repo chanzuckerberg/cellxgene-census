@@ -47,7 +47,7 @@ class EmbeddingMetadata:
     DOI: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     additional_information: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
     model_link: str = field(default="", converter=none_or_str, validator=validators.instance_of(str))
-    data_type: str = field(validator=validators.in_(("obs_embedding",)))
+    data_type: str = field(validator=validators.in_(("obs_embedding", "var_embedding")))
     census_version: str = field(validator=validators.instance_of(str))
     experiment_name: str = field(validator=validators.instance_of(str))
     measurement_name: str = field(validator=validators.instance_of(str))

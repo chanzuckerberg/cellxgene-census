@@ -13,7 +13,7 @@ import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .census_util import get_census_obs_uri_region, get_obs_soma_joinids
+from .census_util import get_census_obs_uri_region, get_axis_soma_joinids
 from .config import Config
 from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
@@ -25,8 +25,9 @@ Multiple implementations of embedding validation. All require metadata as well t
 it matches the embedding. Tests performed:
 
 1. Embedding shape must be (O, M), where O is the domain of the associated Census experiment
-obs dataframe, and M is user defined (e.g., for a 2D UMAP, M would be 2).
-2. All dim0 values in the embedding must be a legal obs soma_joinid in the corresponding Census experiment
+axis (obs or var) dataframe, and M is user defined (e.g., for a 2D UMAP, M would be 2).
+2. All dim0 values in the embedding must be a legal soma_joinid in the corresponding Census 
+experiment axis
 3. An embedding must have at least one (1) cell embedded
 4. Embedding data type must be float32 and coordinates must be int64
 5. Storage format version must match associated Census
@@ -53,11 +54,11 @@ def validate_compatible_tiledb_storage_format(uri: str, config: Config) -> None:
 
 def validate_embedding(config: Config, uri: str) -> None:
     """
-    Validate an embedding saved as a SOMASparseNDArray, e.g., obsm-like. Raises on invalid
+    Validate an embedding saved as a SOMASparseNDArray, e.g., obsm/varm-like. Raises on invalid
     """
     logger.info(f"Validating {uri}")
     metadata = config.metadata
-    obs_joinids, _ = get_obs_soma_joinids(config)
+    axis_joinids, _ = get_axis_soma_joinids(config)
 
     with soma.open(uri, context=soma_context()) as A:
         shape = A.shape
@@ -89,7 +90,7 @@ def validate_embedding(config: Config, uri: str) -> None:
                 i = tbl.column("soma_dim_0")
                 j = tbl.column("soma_dim_1")
 
-                _in_all = tp.submit(isin_all, i, obs_joinids)
+                _in_all = tp.submit(isin_all, i, axis_joinids)
                 _in_range = tp.submit(is_in_range_all, j, 0, metadata.n_features - 1)
 
                 # Keep count of dim0 coordinates seen
@@ -100,9 +101,9 @@ def validate_embedding(config: Config, uri: str) -> None:
                 if not no_dups:
                     raise ValueError("Embedding must not contain duplicate coordinates")
 
-                # verify all dim0 values are legit obs soma_joinid values
+                # verify all dim0 values are legit soma_joinid values
                 if not _in_all.result():
-                    raise ValueError("Embedding contains joinids not present in experiment obs")
+                    raise ValueError("Embedding contains joinids not present in experiment axis")
 
                 # Verify all dim1 values are in expected domain
                 if not _in_range.result():
@@ -115,13 +116,13 @@ def validate_embedding(config: Config, uri: str) -> None:
 
 
 def _validate_shape(shape: Tuple[int, ...], config: Config) -> None:
-    _, obs_shape = get_obs_soma_joinids(config)
+    _, axis_shape = get_axis_soma_joinids(config)
 
     if len(shape) != 2:
         raise ValueError("Embedding must be 2D")
 
-    if shape[0] != obs_shape[0]:
-        raise ValueError(f"Shapes differ: embedding {shape[0]},  obs shape {obs_shape[0]}.")
+    if shape[0] != axis_shape[0]:
+        raise ValueError(f"Shapes differ: embedding {shape[0]},  axis shape {axis_shape[0]}.")
 
     if shape[1] != config.metadata.n_features:
         raise ValueError(

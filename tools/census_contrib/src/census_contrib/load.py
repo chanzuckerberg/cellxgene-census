@@ -11,7 +11,7 @@ import pyarrow as pa
 import tiledbsoma as soma
 from typing_extensions import Self
 
-from .census_util import get_obs_soma_joinids
+from .census_util import get_axis_soma_joinids
 from .config import Config
 from .util import blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
@@ -32,8 +32,7 @@ class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["Embedding
         return self
 
     @abstractproperty
-    def type(self) -> pa.DataType:
-        ...
+    def type(self) -> pa.DataType: ...
 
     @abstractproperty
     def domains(self) -> EmbeddingIJDDomains:
@@ -126,19 +125,19 @@ class NPYIJDPipe(EmbeddingIJDPipe):
         self.joinids_sort = np.argsort(self.joinids)
         self.embeddings = np.load(self.embeddings_uri, mmap_mode="r")
 
-        self.n_obs = len(self.joinids)
+        self.n_embeddings = len(self.joinids)
         self.n_features = self.embeddings.shape[1]
-        if self.n_obs != self.embeddings.shape[0]:
+        if self.n_embeddings != self.embeddings.shape[0]:
             raise ValueError("Embedding NPY and joinid files do not have compatible shape")
 
         if self.embeddings.dtype != np.float32:
             raise ValueError("Embedding NPY must be float32")
 
-        # step through n_obs in blocks
+        # step through n_embeddings in blocks
         self.step_size = blocksize(self.n_features)
-        self._steps = (i for i in range(0, self.n_obs, self.step_size))
+        self._steps = (i for i in range(0, self.n_embeddings, self.step_size))
 
-        logger.info(f"NPYIJDPipe - found n_obs={self.n_obs}, embeddings shape {self.embeddings.shape}")
+        logger.info(f"NPYIJDPipe - found n_embeddings={self.n_embeddings}, embeddings shape {self.embeddings.shape}")
         return self
 
     def __exit__(self, *_: Any) -> None:
@@ -147,13 +146,13 @@ class NPYIJDPipe(EmbeddingIJDPipe):
     def __next__(self) -> pa.Table:
         next_step = next(self._steps)
         pnts = self.joinids_sort[next_step : next_step + self.step_size]
-        n_obs = len(pnts)
+        n_embeddings = len(pnts)
 
-        i = np.empty((n_obs, self.n_features), dtype=np.int64)
+        i = np.empty((n_embeddings, self.n_features), dtype=np.int64)
         i.T[:] = self.joinids[pnts]
         i = i.ravel()
 
-        j = np.empty((n_obs, self.n_features), dtype=np.int64)
+        j = np.empty((n_embeddings, self.n_features), dtype=np.int64)
         j[:] = np.arange(self.n_features)
         j = j.ravel()
 
@@ -198,45 +197,45 @@ class NPYIJDPipe(EmbeddingIJDPipe):
 
 
 class TestDataIJDPipe(EmbeddingIJDPipe):
-    def __init__(self, n_obs: int, n_features: int, config: Config):
+    def __init__(self, n_embeddings: int, n_features: int, config: Config):
         rng = np.random.default_rng(seed=0)
         self._scale = 2.0
         self._offset = -0.1
 
-        all_obs, obs_shape = get_obs_soma_joinids(config)
-        if n_obs == len(all_obs):
-            obs_joinids = all_obs
+        axis_all_joinids, axis_shape = get_axis_soma_joinids(config)
+        if n_embeddings == len(axis_all_joinids):
+            axis_joinids = axis_all_joinids
         else:
-            obs_joinids = rng.choice(all_obs, n_obs, replace=False)
-        obs_joinids = np.sort(obs_joinids)
+            axis_joinids = rng.choice(axis_all_joinids, n_embeddings, replace=False)
+        axis_joinids = np.sort(axis_joinids)
 
-        self.n_obs = n_obs
+        self.n_embeddings = n_embeddings
         self.n_features = n_features
-        self.obs_joinids = obs_joinids
+        self.axis_joinids = axis_joinids
         self.rng = rng
-        self.obs_shape = obs_shape
+        self.axis_shape = axis_shape
 
-        # step through n_obs in blocks
+        # step through n_embeddings in blocks
         self.step_size = 2**20
-        self._steps = (i for i in range(0, len(obs_joinids), self.step_size))
+        self._steps = (i for i in range(0, len(axis_joinids), self.step_size))
 
     def __exit__(self, *_: Any) -> None:
         pass
 
     def __next__(self) -> pa.Table:
         next_step = next(self._steps)
-        next_block = self.obs_joinids[next_step : next_step + self.step_size]
-        n_obs = len(next_block)
+        next_block = self.axis_joinids[next_step : next_step + self.step_size]
+        n_embeddings = len(next_block)
 
-        i = np.empty((n_obs, self.n_features), dtype=np.int64)
+        i = np.empty((n_embeddings, self.n_features), dtype=np.int64)
         i.T[:] = next_block
         i = i.ravel()
 
-        j = np.empty((n_obs, self.n_features), dtype=np.int64)
+        j = np.empty((n_embeddings, self.n_features), dtype=np.int64)
         j[:] = np.arange(self.n_features)
         j = j.ravel()
 
-        d = self._scale * self.rng.random((n_obs * self.n_features), dtype=np.float32) + self._offset
+        d = self._scale * self.rng.random((n_embeddings * self.n_features), dtype=np.float32) + self._offset
 
         return pa.Table.from_pydict({"i": i, "j": j, "d": d})
 
@@ -246,18 +245,18 @@ class TestDataIJDPipe(EmbeddingIJDPipe):
 
     @property
     def domains(self) -> EmbeddingIJDDomains:
-        if self.n_obs == 0:
+        if self.n_embeddings == 0:
             return {"i": (None, None), "j": (None, None), "d": (None, None)}
 
         return {
-            "i": (0, self.obs_shape[0] - 1),
+            "i": (0, self.axis_shape[0] - 1),
             "j": (0, self.n_features - 1),
             "d": (self._offset, self._scale + self._offset),
         }
 
 
-def test_embedding(n_obs: int, n_features: int, config: Config) -> EmbeddingIJDPipe:
-    return TestDataIJDPipe(n_obs, n_features, config)
+def test_embedding(n_embeddings: int, n_features: int, config: Config) -> EmbeddingIJDPipe:
+    return TestDataIJDPipe(n_embeddings, n_features, config)
 
 
 def soma_ingest(soma_path: Path, _: Config) -> EmbeddingIJDPipe:
