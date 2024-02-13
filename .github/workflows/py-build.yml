@@ -33,7 +33,7 @@ jobs:
         working-directory: api/python/cellxgene_census/
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: api/python/cellxgene_census/dist/*
 
@@ -54,7 +54,7 @@ jobs:
           python-version: "3.11"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ secrets.AWS_PROD_ROLE_TO_ASSUME }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Install deps
         run: |
