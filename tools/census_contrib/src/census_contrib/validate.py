@@ -13,7 +13,7 @@ import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .census_util import get_census_obs_uri_region, get_axis_soma_joinids
+from .census_util import get_axis_soma_joinids, get_census_obs_uri_region
 from .config import Config
 from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
