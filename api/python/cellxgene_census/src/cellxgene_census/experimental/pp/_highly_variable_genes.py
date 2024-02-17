@@ -290,7 +290,7 @@ def highly_variable_genes(
         `scanpy.pp.highly_variable_genes`
 
     Raises:
-        ValueError: if the flavor paramater is not `seurat_v3`.
+        ValueError: if the flavor parameter is not `seurat_v3`.
 
 
     Examples:
@@ -347,10 +347,8 @@ def get_highly_variable_genes(
     batch_key_func: Optional[Callable[..., Any]] = None,
 ) -> pd.DataFrame:
     """
-    Convenience wrapper
-
     Convience wrapper around ``soma.Experiment`` query and ``highly_variable_genes`` function, to build and
-     execute a query, and annotate the query result genes (``var`` dataframe) based upon variability.
+    execute a query, and annotate the query result genes (``var`` dataframe) based upon variability.
 
     See ``highly_variable_genes`` for more information on this function.
 

@@ -708,8 +708,7 @@ def experiment_dataloader(
 
     Raises:
         ValueError: if any of the ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params
-        are passed as keyword arguments.
-
+            are passed as keyword arguments.
 
     Lifecycle:
         experimental

@@ -146,13 +146,13 @@ def open_soma(
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
         tiledb_config:
-            A dictionary of TileDB configuration parameters that will be used to open the SOMA object.  Optional,
-            defaults to None.  If specified, the parameters will override the default settings specified by
-           ``get_default_soma_context().tiledb_config``.  Only one of the ``tiledb_config and ``context`` params
+            A dictionary of TileDB configuration parameters that will be used to open the SOMA object. Optional,
+            defaults to ``None``. If specified, the parameters will override the default settings specified by
+            ``get_default_soma_context().tiledb_config``. Only one of the ``tiledb_config and ``context`` params
             can be specified.
         context:
-            A custom :class:`SOMATileDBContext` that will be used to open the SOMA object.
-            Optional, defaults to None.  Only one of the ``tiledb_config and ``context`` params can be specified.
+            A custom :class:`tiledbsoma.SOMATileDBContext` that will be used to open the SOMA object.
+            Optional, defaults to ``None``.  Only one of the ``tiledb_config`` and ``context`` params can be specified.
 
     Returns:
         A SOMA Collection object containing the top-level census.

@@ -29,7 +29,7 @@ def get_anndata(
     column_names: Optional[soma.AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
-    Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
+    Convenience wrapper around ``soma.Experiment`` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
 
     Args:
