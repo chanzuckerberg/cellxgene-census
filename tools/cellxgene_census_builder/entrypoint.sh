@@ -1,11 +1,19 @@
 #!/bin/bash
 
 # Log tiledbsoma package versions
-python3 -c 'import tiledbsoma; print(tiledbsoma.show_package_versions())'
+python3 -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
 
 # Log pip freeze 
+echo "---- pip freeze ----"
 pip freeze
 
+# Log system config
+echo "---- sysctl ----"
+sysctl vm.max_map_count
+sysctl kernel.pid_max
+sysctl kernel.threads-max
+
+echo "----"
 python3 -m cellxgene_census_builder .
 BUILDER_STATUS=$?
 # On error, log dmesg tail to aid troubleshooting
