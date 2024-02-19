@@ -23,9 +23,12 @@ from typing import (
 )
 
 import attrs
+import psutil
 
 from ..build_state import CensusBuildArgs
-from ..util import cpu_count, process_init
+from ..util import cpu_count, log_system_memory_status, process_init
+
+logger = logging.getLogger(__name__)
 
 
 def _mp_config_checks() -> bool:
@@ -50,7 +53,7 @@ def _hard_process_cap(args: CensusBuildArgs, n_proc: int) -> int:
 
 def _default_worker_process_count(args: CensusBuildArgs) -> int:
     """Return the default worker process count, subject to configured limit."""
-    return _hard_process_cap(args, cpu_count() + 2)
+    return _hard_process_cap(args, cpu_count())
 
 
 def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
@@ -59,17 +62,24 @@ def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) 
     return min(n_workers, _default_worker_process_count(args))
 
 
-def create_process_pool_executor(args: CensusBuildArgs, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
+def create_process_pool_executor(
+    args: CensusBuildArgs,
+    max_workers: Optional[int] = None,
+    max_tasks_per_child: Optional[int] = None,
+) -> ProcessPoolExecutor:
     assert _mp_config_checks()
     if max_workers is None:
         max_workers = _default_worker_process_count(args)
-    logging.debug(f"create_process_pool_executor [max_workers={max_workers}]")
-    return ProcessPoolExecutor(max_workers=max_workers, initializer=process_init, initargs=(args,))
+    max_workers = max(1, max_workers)
+    logger.debug(f"create_process_pool_executor [max_workers={max_workers}, max_tasks_per_child={max_tasks_per_child}]")
+    return ProcessPoolExecutor(
+        max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=max_tasks_per_child
+    )
 
 
 def create_thread_pool_executor(max_workers: Optional[int] = None) -> ThreadPoolExecutor:
     assert _mp_config_checks()
-    logging.debug(f"create_thread_pool_executor [max_workers={max_workers}]")
+    logger.debug(f"create_thread_pool_executor [max_workers={max_workers}]")
     return ThreadPoolExecutor(max_workers=max_workers)
 
 
@@ -91,7 +101,7 @@ def log_on_broken_process_pool(ppe: Union[ProcessPoolExecutor, "ResourcePoolProc
     """
 
     if ppe._broken:
-        logging.critical(f"Process pool broken and may fail or hang: {ppe._broken}")
+        logger.critical(f"Process pool broken and may fail or hang: {ppe._broken}")
 
     return
 
@@ -119,7 +129,7 @@ class EagerIterator(Iterator[_T]):
 
     def _fetch_next(self) -> None:
         self._future = self._pool.submit(self.iterator.__next__)
-        logging.debug("EagerIterator: fetching next iterator element, eagerly")
+        logger.debug("EagerIterator: fetching next iterator element, eagerly")
 
     def __next__(self) -> _T:
         try:
@@ -132,7 +142,7 @@ class EagerIterator(Iterator[_T]):
             raise
 
     def _cleanup(self) -> None:
-        logging.debug("EagerIterator: cleaning up eager iterator")
+        logger.debug("EagerIterator: cleaning up eager iterator")
         if self._own_pool:
             self._pool.shutdown()
 
@@ -258,7 +268,7 @@ class _Scheduler(threading.Thread):
         else:
             assert not isinstance(result, BaseException)
             wi.future.set_result(result)
-        scheduler._release_resouces(wi)
+        scheduler._release_resources(wi)
 
     def _schedule_work(self, work: _WorkItem[Any]) -> None:
         """must hold lock"""
@@ -274,16 +284,17 @@ class _Scheduler(threading.Thread):
             work.fn, work.args, work.kwargs, callback=_work_item_done, error_callback=_work_item_error
         )
 
-    def _release_resouces(self, wi: _WorkItem[Any]) -> None:
+    def _release_resources(self, wi: _WorkItem[Any]) -> None:
         with self._condition:
             self.resources_in_use -= wi.resources
             self._condition.notify()
 
     def _debug_msg(self, msg: str) -> None:
-        logging.debug(
+        log_system_memory_status()
+        logger.debug(
             f"ResourcePoolProcessExecutor: {msg} ["
-            f"free={self.max_resources-self.resources_in_use} "
-            f"in_use={self.resources_in_use} "
+            f"free={self.max_resources-self.resources_in_use} ({100.*(self.max_resources-self.resources_in_use)/self.max_resources:2.1f}%), "
+            f"in-use={self.resources_in_use} ({100.*self.resources_in_use/self.max_resources:2.1f}%), "
             f"unsched={len(self._pending_work)}"
             "]"
         )
@@ -304,7 +315,7 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         _mp_config_checks()
 
         super().__init__()
-        logging.debug(f"ResourcePoolProcessExecutor: starting process pool with args ({args} {kwargs})")
+        logger.debug(f"ResourcePoolProcessExecutor: starting process pool with args ({args} {kwargs})")
 
         max_workers = kwargs.pop("max_workers", None)
         initializer = kwargs.pop("initializer", None)
@@ -313,6 +324,8 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         self.process_pool: multiprocessing.pool.Pool = multiprocessing.Pool(
             processes=max_workers, initializer=initializer, initargs=initargs, maxtasksperchild=max_tasks_per_child
         )
+
+        self.warn_on_resource_limit = int(psutil.virtual_memory().total / cpu_count())
 
         # create and start scheduler thread
         self.scheduler = _Scheduler(self, max_resources)
@@ -323,6 +336,9 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         return self.process_pool._state not in ["RUN", "INIT", "CLOSE"]  # type: ignore[attr-defined]
 
     def submit(self, resources: int, fn: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> Future[_T]:
+        if resources > self.warn_on_resource_limit:
+            logger.debug(f"ResourcePoolProcessExecutor: large job submitted fn={fn}, resources={resources}")
+
         f = Future[_T]()
         self.scheduler.submit(_WorkItem[_T](resources=resources, future=f, fn=fn, args=args, kwargs=kwargs))
         return f
@@ -354,7 +370,7 @@ def create_resource_pool_executor(
         # not strictly necessary, but helps avoid leaks by turning over sub-processes
         max_tasks_per_child = 10
 
-    logging.debug(f"create_resource_pool_executor [max_workers={max_workers}, max_resources={max_resources}]")
+    logger.debug(f"create_resource_pool_executor [max_workers={max_workers}, max_resources={max_resources}]")
     return ResourcePoolProcessExecutor(
         max_resources=max_resources,
         max_workers=max_workers,

@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cellxgene_census"
+name = "cellxgene-census"
 dynamic = ["version"]
 description = "API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit https://github.com/chanzuckerberg/cellxgene-census/"
 authors = [
@@ -31,9 +31,9 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma~=1.6.0",
+    "tiledbsoma~=1.7.0",
     "anndata",
-    "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
+    "numpy>=1.21",
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
@@ -41,12 +41,12 @@ dependencies= [
 
 [project.optional-dependencies]
 experimental = [
-    "torch==2.0.1",
-    "torchdata==0.6.1",
-    "scikit-learn==1.3.1",
-    "scikit-misc==0.2.0",
-    "psutil==5.9.5",
-    "datasets~=2.14",
+    "torch~=2.0",
+    "torchdata~=0.7",
+    "scikit-learn~=1.0",
+    "scikit-misc>=0.2",  # scikit-misc 0.3 dropped Python 3.8 support
+    "psutil~=5.0",
+    "datasets~=2.0",
     "tdigest~=0.5",
     # Not expressible in pyproject.toml:
     #"git+https://huggingface.co/ctheodoris/Geneformer",

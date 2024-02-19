@@ -1,0 +1,7 @@
+[run]
+relative_files = True
+
+[report]
+omit =
+    # torch-generated JIT files
+    _remote_module_non_scriptable.py

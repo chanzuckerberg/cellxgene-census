@@ -98,8 +98,9 @@ def get_embedding(
 
     """
 
-    if isinstance(obs_soma_joinids, (pa.Array, pa.ChunkedArray)):
+    if isinstance(obs_soma_joinids, (pa.Array, pa.ChunkedArray, pd.Series)):
         obs_soma_joinids = obs_soma_joinids.to_numpy()
+    assert isinstance(obs_soma_joinids, np.ndarray)
     if obs_soma_joinids.dtype != np.int64:
         raise TypeError("obs_soma_joinids must be array of int64")
 
@@ -132,9 +133,9 @@ def get_embedding(
         embedding_shape = (len(obs_soma_joinids), E.shape[1])
         embedding = np.full(embedding_shape, np.NaN, dtype=np.float32, order="C")
 
-        obs_indexer = pd.Index(obs_soma_joinids)
+        obs_indexer = soma.tiledbsoma_build_index(obs_soma_joinids, context=E.context)
         for tbl in E.read(coords=(obs_soma_joinids,)).tables():
-            obs_idx = obs_indexer.get_indexer(tbl.column("soma_dim_0").to_numpy())  # type: ignore[no-untyped-call]
+            obs_idx = obs_indexer.get_indexer(tbl.column("soma_dim_0").to_numpy())
             feat_idx = tbl.column("soma_dim_1").to_numpy()
             emb = tbl.column("soma_data")
 

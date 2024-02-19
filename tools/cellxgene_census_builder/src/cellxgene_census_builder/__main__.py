@@ -8,8 +8,12 @@ from urllib.parse import urlparse
 
 import s3fs
 
+from .build_soma import build as build_a_soma
+from .build_soma import validate as validate_a_soma
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
-from .util import log_process_resource_status, process_init, urlcat
+from .util import log_process_resource_status, process_init, start_resource_logger, urlcat
+
+logger = logging.getLogger(__name__)
 
 
 def main() -> int:
@@ -18,7 +22,7 @@ def main() -> int:
 
     working_dir = pathlib.PosixPath(cli_args.working_dir)
     if not working_dir.is_dir():
-        logging.critical("Census builder: unable to find working directory - exiting.")
+        logger.critical("Census builder: unable to find working directory - exiting.")
         return 1
 
     if (working_dir / CENSUS_BUILD_CONFIG).is_file():
@@ -28,7 +32,7 @@ def main() -> int:
 
     if not cli_args.test_resume:
         if (working_dir / CENSUS_BUILD_STATE).exists():
-            logging.critical("Found pre-existing census build in working directory - aborting census build.")
+            logger.critical("Found pre-existing census build in working directory - aborting census build.")
             return 1
         build_state = CensusBuildState()
     else:
@@ -80,7 +84,7 @@ def main() -> int:
     # The build command is set via the CENSUS_BUILD_COMMAND environment variable.
     command = os.getenv("CENSUS_BUILD_COMMAND")
     if command is None:
-        logging.critical("A census command must be specified in the CENSUS_BUILD_COMMAND environment variable.")
+        logger.critical("A census command must be specified in the CENSUS_BUILD_COMMAND environment variable.")
         return 1
 
     # Used for testing.
@@ -88,8 +92,10 @@ def main() -> int:
         return 0
 
     if command not in commands:
-        logging.critical(f"Unknown command: {command}")
+        logger.critical(f"Unknown command: {command}")
         return 1
+
+    start_resource_logger()
 
     build_steps = commands[command]
     rv = _do_steps(build_steps, build_args, cli_args.test_resume)
@@ -106,20 +112,20 @@ def _do_steps(
         for n, build_step in enumerate(build_steps, start=1):
             step_n_of = f"Build step {build_step.__name__} [{n} of {len(build_steps)}]"
             if skip_completed_steps and args.state.get(build_step.__name__):
-                logging.info(f"{step_n_of}: already complete, skipping.")
+                logger.info(f"{step_n_of}: already complete, skipping.")
                 continue
 
-            logging.info(f"{step_n_of}: start")
+            logger.info(f"{step_n_of}: start")
             if not build_step(args):
-                logging.critical(f"{step_n_of}: failed, aborting build.")
+                logger.critical(f"{step_n_of}: failed, aborting build.")
                 return 1
 
             args.state[build_step.__name__] = True
             args.state.commit(args.working_dir / CENSUS_BUILD_STATE)
-            logging.info(f"{step_n_of}: complete")
+            logger.info(f"{step_n_of}: complete")
 
     except Exception:
-        logging.critical("Caught exception, exiting", exc_info=True)
+        logger.critical("Caught exception, exiting", exc_info=True)
         return 1
 
     log_process_resource_status(level=logging.INFO)
@@ -144,27 +150,23 @@ def do_prebuild_checks(args: CensusBuildArgs) -> bool:
     assert build_tag is not None
     s3path = urlcat(args.config.cellxgene_census_S3_path, build_tag)
     if s3fs.S3FileSystem(anon=False).exists(s3path):
-        logging.error(f"Build tag {build_tag} already exists at {s3path}.")
+        logger.error(f"Build tag {build_tag} already exists at {s3path}.")
         return False
 
     return True
 
 
 def do_build_soma(args: CensusBuildArgs) -> bool:
-    from .build_soma import build as build_a_soma
-
     if (cc := build_a_soma(args)) != 0:
-        logging.critical(f"Build of census failed with code {cc}.")
+        logger.critical(f"Build of census failed with code {cc}.")
         return False
 
     return True
 
 
 def do_validate_soma(args: CensusBuildArgs) -> bool:
-    from .build_soma import validate as validate_a_soma
-
     if not validate_a_soma(args):
-        logging.critical("Validation of the census build has failed.")
+        logger.critical("Validation of the census build has failed.")
         return False
 
     return True
@@ -176,11 +178,11 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
     reports_dir = args.working_dir / args.config.reports_dir
     reports_dir.mkdir(parents=True, exist_ok=True)
 
-    logging.info("Creating summary report")
+    logger.info("Creating summary report")
     with open(reports_dir / f"census-summary-{args.build_tag}.txt", mode="w") as f:
         display_summary(uri=args.soma_path.as_posix(), file=f)
 
-    logging.info("Creating diff report (new build vs 'latest')")
+    logger.info("Creating diff report (new build vs 'latest')")
     with open(reports_dir / f"census-diff-{args.build_tag}.txt", mode="w") as f:
         display_diff(uri=args.soma_path.as_posix(), previous_census_version="latest", file=f)
 

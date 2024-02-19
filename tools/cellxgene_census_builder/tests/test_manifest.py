@@ -83,6 +83,8 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                     },
                 ],
                 "dataset_version_id": "dataset_id_1",
+                "cell_count": 10,
+                "mean_genes_per_cell": 99.9,
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -94,6 +96,8 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "schema_version": "4.0.0",
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
                 "dataset_version_id": "dataset_id_2",
+                "cell_count": 11,
+                "mean_genes_per_cell": 109.1,
             },
         ]
 
@@ -125,6 +129,8 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
                 "schema_version": "4.0.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
+                "cell_count": 10,
+                "mean_genes_per_cell": 99.9,
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -136,6 +142,8 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
                 "schema_version": "2.0.0",  # Old schema version
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
                 "dataset_version_id": "dataset_id_2",
+                "cell_count": 10,
+                "mean_genes_per_cell": 99.9,
             },
         ]
 
@@ -166,6 +174,8 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
                 "schema_version": "4.0.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
+                "cell_count": 10,
+                "mean_genes_per_cell": 99.9,
             },
             {
                 "dataset_id": "dataset_id_2",
@@ -177,6 +187,8 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
                 "schema_version": "4.0.0",
                 "assets": [],
                 "dataset_version_id": "dataset_id_2",
+                "cell_count": 10,
+                "mean_genes_per_cell": 99.9,
             },
         ]
 

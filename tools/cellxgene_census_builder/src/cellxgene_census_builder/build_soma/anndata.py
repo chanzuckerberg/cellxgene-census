@@ -1,14 +1,20 @@
 import logging
-from typing import Any, Iterator, List, Optional, Protocol, Tuple, TypedDict, Union
+from functools import cached_property
+from os import PathLike
+from typing import Any, List, Optional, Protocol, Self, Tuple, TypedDict, cast
 
-import anndata
+import h5py
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import scipy.sparse as sparse
+from anndata.experimental import CSCDataset, CSRDataset, read_elem, sparse_dataset
 
 from ..util import urlcat
 from .datasets import Dataset
 from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
+
+logger = logging.getLogger(__name__)
 
 AnnDataFilterSpec = TypedDict(
     "AnnDataFilterSpec",
@@ -19,95 +25,248 @@ AnnDataFilterSpec = TypedDict(
 )
 
 
-def open_anndata(
-    base_path: str, datasets: Union[List[Dataset], Dataset], need_X: Optional[bool] = True, *args: Any, **kwargs: Any
-) -> Iterator[Tuple[Dataset, anndata.AnnData]]:
-    """
-    Generator to open anndata in a given mode, and filter out those H5ADs which do not match our base
-    criteria for inclusion in the census.
+# Indexing types
+Index1D = slice | npt.NDArray[np.bool_] | npt.NDArray[np.integer[Any]]  # slice, mask, or points
+Index = Index1D | tuple[Index1D] | tuple[Index1D, Index1D]
 
-    Will localize non-local (eg s3) URIs to accomadate AnnData/H5PY requirement for a local file.
 
-    Apply criteria to filter out H5ADs we don't want or can't process.  Also apply a set of normalization
-    remainder of code expects, such as final/raw feature equivalence.
-    """
-    if not isinstance(datasets, list):
-        datasets = [datasets]
-
-    for h5ad in datasets:
-        path = urlcat(base_path, h5ad.dataset_h5ad_path)
-        logging.debug(f"open_anndata: {path}")
-        ad = anndata.read_h5ad(path, *args, **kwargs)
-
-        # These are schema versions this code is known to work with. This is a
-        # sanity check, which would be better implemented via a unit test at
-        # some point in the future.
-        assert CXG_SCHEMA_VERSION in ["4.0.0"]
-
-        if h5ad.schema_version == "":
-            h5ad.schema_version = get_cellxgene_schema_version(ad)
-        if h5ad.schema_version != CXG_SCHEMA_VERSION:
-            msg = f"H5AD {h5ad.dataset_h5ad_path} has unsupported schema version {h5ad.schema_version}, expected {CXG_SCHEMA_VERSION}"
-            logging.error(msg)
-            raise RuntimeError(msg)
-
-        # Multi-organism datasets - any dataset with 2+ feature_reference organisms is ignored,
-        # exclusive of values in FEATURE_REFERENCE_IGNORE. See also, cell filter for mismatched
-        # cell/feature organism values.
-        feature_reference_organisms = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
-        if len(feature_reference_organisms) > 1:
-            logging.info(f"H5AD ignored due to multi-organism feature_reference: {h5ad.dataset_id}")
-            continue
-
-        # Schema 3.0 disallows cell filtering, but DOES allow feature/gene filtering.
-        # The "census" specification requires that any filtered features be added back to
-        # the final layer.
-        #
-        # NOTE: As currently defined, the Census only includes raw counts. Most H5ADs
-        # contain multiple X layers, plus a number of other matrices (obsm, etc). These
-        # other objects use substantial memory (and have other overhead when the AnnData
-        # is sliced in the filtering step).
-        #
-        # To minimize that overhead, this code drops all AnnData fileds unused by the
-        # Census, following the CXG 3 conventions: use raw if present, else X.
-        #
-        if ad.raw is not None:
-            X = ad.raw.X
-            missing_from_var = ad.raw.var.index.difference(ad.var.index)
-            if len(missing_from_var) > 0:
-                raw_var = ad.raw.var.loc[missing_from_var].copy()
-                raw_var["feature_is_filtered"] = True
-                # TODO - these should be looked up in the ontology
-                raw_var["feature_name"] = "unknown"
-                raw_var["feature_reference"] = "unknown"
-                raw_var["feature_length"] = 0
-                var = pd.concat([ad.var, raw_var])
-            else:
-                var = ad.raw.var
-
+def _slice_index(prev: Index1D, new: Index1D, length: int) -> slice | npt.NDArray[np.int64]:
+    """Slice an index"""
+    if isinstance(prev, slice):
+        if isinstance(new, slice):
+            # conveniently, ranges support indexing!
+            rng = range(*prev.indices(length))[new]
+            assert rng.stop >= 0
+            return slice(rng.start, rng.stop, rng.step)
         else:
-            X = ad.X
-            var = ad.var
+            return np.arange(*prev.indices(length))[new]
+    elif isinstance(prev, np.ndarray):
+        if prev.dtype == np.bool_:  # a mask
+            prev = np.nonzero(prev)[0].astype(np.int64)
+        return cast(npt.NDArray[np.int64], prev[new])
 
-        if need_X and isinstance(X, (sparse.csr_matrix, sparse.csc_matrix)) and not X.has_canonical_format:
-            logging.warning(f"H5AD with non-canonical X matrix at {path}")
+    # else confusion
+    raise IndexError("Unsupported indexing types")
+
+
+def _normed_index(idx: Index) -> tuple[Index1D, Index1D]:
+    if not isinstance(idx, tuple):
+        return idx, slice(None)
+    elif len(idx) == 1:
+        return idx[0], slice(None)
+    elif len(idx) == 2:
+        return idx
+    else:
+        raise IndexError("Indexing supported on two dimensions only")
+
+
+class AnnDataProxy:
+    """
+    Recommend using `open_anndata()` rather than instantiating this class directly.
+
+    AnnData-like proxy for the version 0.1.0 AnnData H5PY file encoding (aka H5AD).
+    Used in lieu of the AnnData class to reduce memory overhead. Semantics very similar
+    to anndata.read_h5ad(backed="r"), but with the following optimizations:
+
+    * opening and indexing does not materialize X (including repeated indexing,
+      which is an operation where AnnData always materializes X)
+    * opening only materializes obs/var, never obsm/varm/obsp/varp (which in many
+      datasets is very large and memory-intensive)
+    * only one copy of the base obs/var data is maintained. All views are defined
+      only by an index (either a Python range, or a numpy point index array)
+
+    This effectively:
+    * removes the overhead of reading unused slots such as obsm/varm/obsp/varp
+    * removes the overhead when you need to index a view (where AnnData materializes)
+
+    In the future, if we need additional slots accessible, we may need to add sub-proxies
+    for uns, obs*, var*, etc. But at the moment, the Builder has no use for these so they
+    are omitted.
+    """
+
+    _obs: pd.DataFrame
+    _var: pd.DataFrame
+    _X: h5py.Dataset | CSRDataset | CSCDataset
+
+    def __init__(
+        self,
+        filename: str | PathLike[str],
+        *,
+        view_of: Self | None = None,
+        obs_idx: slice | npt.NDArray[np.int64] | None = None,
+        var_idx: slice | npt.NDArray[np.int64] | None = None,
+        obs_column_names: Optional[Tuple[str, ...]] = None,
+        var_column_names: Optional[Tuple[str, ...]] = None,
+    ):
+        self.filename = filename
+
+        if view_of is None:
+            self._obs, self._var, self._X = self._load_h5ad(obs_column_names, var_column_names)
+            self._obs_idx: slice | npt.NDArray[np.int64] = slice(None)
+            self._var_idx: slice | npt.NDArray[np.int64] = slice(None)
+        else:
+            self._obs, self._var, self._X = (view_of._obs, view_of._var, view_of._X)
+            assert obs_idx is not None
+            assert var_idx is not None
+            self._obs_idx = obs_idx
+            self._var_idx = var_idx
+
+    @property
+    def X(self) -> sparse.spmatrix | npt.NDArray[np.integer[Any] | np.floating[Any]]:
+        # For CS*Dataset, slice first on the major axis, then on the minor, as
+        # the underlying AnnData proxy is not performant when slicing on the minor
+        # axis (or both simultaneously). Let SciPy handle the second axis.
+        if isinstance(self._X, CSRDataset):
+            X = self._X[self._obs_idx][:, self._var_idx]
+        elif isinstance(self._X, CSCDataset):
+            X = self._X[:, self._var_idx][self._obs_idx]
+        else:
+            X = self._X[self._obs_idx, self._var_idx]
+
+        if isinstance(X, sparse.spmatrix) and not X.has_canonical_format:
             X.sum_duplicates()
+        return X
 
+    @cached_property
+    def obs(self) -> pd.DataFrame:
+        return self._obs.iloc[self._obs_idx]
+
+    @cached_property
+    def var(self) -> pd.DataFrame:
+        return self._var.iloc[self._var_idx]
+
+    @property
+    def n_obs(self) -> int:
+        if isinstance(self._obs_idx, slice):
+            return len(range(*self._obs_idx.indices(len(self._obs.index))))
+        return len(self.obs)
+
+    @property
+    def n_vars(self) -> int:
+        if isinstance(self._var_idx, slice):
+            return len(range(*self._var_idx.indices(len(self._var.index))))
+        return len(self.var)
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        return self.n_obs, self.n_vars
+
+    def __len__(self) -> int:
+        return self.shape[0]
+
+    def __getitem__(self, key: Index) -> "AnnDataProxy":
+        odx, vdx = _normed_index(key)
+        odx = _slice_index(self._obs_idx, odx, self.n_obs)
+        vdx = _slice_index(self._var_idx, vdx, self.n_vars)
+        return AnnDataProxy(self.filename, view_of=self, obs_idx=odx, var_idx=vdx)
+
+    def _load_dataframe(self, elem: h5py.Group, column_names: Optional[Tuple[str, ...]]) -> pd.DataFrame:
+        # if reading all, just use the built-in
+        if not column_names:
+            return cast(pd.DataFrame, read_elem(elem))
+
+        # else read each user-specified column/index separately, taking care to preserve the
+        # original dataframe column ordering
+        assert len(column_names) > 0
         assert (
-            not isinstance(X, (sparse.csr_matrix, sparse.csc_matrix)) or X.has_canonical_format
-        ), f"Found H5AD with non-canonical X matrix in {path}"
+            elem.attrs["encoding-type"] == "dataframe" and elem.attrs["encoding-version"] == "0.2.0"
+        ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
+        column_order = elem.attrs["column-order"]
+        column_names_ordered = [c for c in column_order if c in column_names and c != "_index"]
+        index: Optional[npt.NDArray[Any]] = None
+        if "_index" in column_names:
+            index_col_name = elem.attrs["_index"]
+            index = read_elem(elem[index_col_name])
+        return pd.DataFrame({c: read_elem(elem[c]) for c in column_names_ordered}, index=index)
 
-        ad = anndata.AnnData(X=X if need_X else None, obs=ad.obs, var=var, raw=None, uns=ad.uns)
-        assert not need_X or ad.X.shape == (len(ad.obs), len(ad.var))
+    def _load_h5ad(
+        self, obs_column_names: Optional[Tuple[str, ...]], var_column_names: Optional[Tuple[str, ...]]
+    ) -> tuple[pd.DataFrame, pd.DataFrame, CSRDataset | CSCDataset | h5py.Dataset]:
+        """
+        A memory optimization to prevent reading unnecessary data from the H5AD. This includes
+        skipping:
+            * obsm/varm/obsp/varp
+            * unused obs/var columns
+            * reading both raw and !raw
 
-        # TODO: In principle, we could look up missing feature_name, but for now, just assert they exist
-        assert ((ad.var.feature_name != "") & (ad.var.feature_name != None)).all()  # noqa: E711
+        Could be done with AnnData, at the expense of time & space to to read unused slots.
 
-        yield (h5ad, ad)
+        Semantics are equivalent of doing:
+
+            adata = anndata.read_h5ad(filename, backed="r")
+            var, X = (adata.raw.var, adata.raw.X) if adata.raw else (adata.var, adata.X)
+            return adata.obs, var, X
+
+        This code utilizes the AnnData on-disk spec and several experimental API (as of 0.10.0).
+        Spec: https://anndata.readthedocs.io/en/latest/fileformat-prose.html
+        """
+
+        file = h5py.File(self.filename, mode="r")
+
+        # Known to be compatible with this AnnData file encoding
+        assert (
+            file.attrs["encoding-type"] == "anndata" and file.attrs["encoding-version"] == "0.1.0"
+        ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
+
+        # Verify we are reading the expected CxG schema version.
+        schema_version = read_elem(file["uns/schema_version"])
+        if schema_version != CXG_SCHEMA_VERSION:
+            raise ValueError(
+                f"{self.filename} -- incorrect CxG schema version (got {schema_version}, expected {CXG_SCHEMA_VERSION})"
+            )
+
+        obs = self._load_dataframe(file["obs"], obs_column_names)
+        if "raw" in file:
+            var = self._load_dataframe(file["raw/var"], var_column_names)
+            X = file["raw/X"]
+        else:
+            var = self._load_dataframe(file["var"], var_column_names)
+            X = file["X"]
+
+        if isinstance(X, h5py.Group):
+            X = sparse_dataset(X)
+
+        assert isinstance(obs, pd.DataFrame)
+        assert isinstance(var, pd.DataFrame)
+        return obs, var, X
+
+
+# The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter` for details.
+CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_ontology_term_id")
+CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
+
+
+def open_anndata(
+    base_path: str,
+    dataset: Dataset,
+    *,
+    include_filter_columns: bool = False,
+    obs_column_names: Optional[Tuple[str, ...]] = None,
+    var_column_names: Optional[Tuple[str, ...]] = None,
+) -> AnnDataProxy:
+    """
+    Open the dataset and return an AnnData-like AnnDataProxy object.
+
+    Args:
+        {obs,var}_column_names: if specified, determine which columns are loaded for the respective dataframes.
+            If not specified, all columns of obs/var are loaded.
+        include_filter_columns: if True, ensure that any obs/var columns required for H5AD filtering are included. If
+            False (default), only load the columsn specified by the user.
+    """
+
+    if include_filter_columns:
+        obs_column_names = tuple(set(CXG_OBS_COLUMNS_MINIMUM_READ + (obs_column_names or ())))
+        var_column_names = tuple(set(CXG_VAR_COLUMNS_MINIMUM_READ + (var_column_names or ())))
+
+    return AnnDataProxy(
+        urlcat(base_path, dataset.dataset_h5ad_path),
+        obs_column_names=obs_column_names,
+        var_column_names=var_column_names,
+    )
 
 
 class AnnDataFilterFunction(Protocol):
-    def __call__(self, ad: anndata.AnnData, need_X: Optional[bool] = True) -> anndata.AnnData:
+    def __call__(self, ad: AnnDataProxy) -> AnnDataProxy:
         ...
 
 
@@ -124,10 +283,22 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     var filter:
     * genes only  (var.feature_biotype == 'gene')
     """
+
     organism_ontology_term_id = filter_spec.get("organism_ontology_term_id", None)
     assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids", None)
 
-    def _filter(ad: anndata.AnnData, need_X: Optional[bool] = True) -> anndata.AnnData:
+    def _filter(ad: AnnDataProxy) -> AnnDataProxy:
+        # Multi-organism datasets are dropped - any dataset with 2+ feature_reference organisms is ignored,
+        # exclusive of values in FEATURE_REFERENCE_IGNORE. See also, cell filter for mismatched
+        # cell/feature organism values.
+        feature_reference_organisms = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
+        if len(feature_reference_organisms) > 1:
+            logger.info(f"H5AD ignored due to multi-organism feature_reference: {ad.filename}")
+            return ad[0:0]  # ie., drop all cells
+
+        #
+        # Filter cells per Census schema
+        #
         obs_mask = ~(  # noqa: E712
             ad.obs.tissue_ontology_term_id.str.endswith(" (organoid)")
             | ad.obs.tissue_ontology_term_id.str.endswith(" (cell culture)")
@@ -140,41 +311,18 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
 
         # multi-organism dataset cell filter - exclude any cells where organism != feature_reference
         feature_references = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
-        assert len(feature_references) == 1  # else there is a bug in open_anndata
+        assert len(feature_references) == 1  # else there is a bug in the test above
         feature_reference_organism_ontology_id = feature_references.pop()
         obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == feature_reference_organism_ontology_id)
 
-        # This does NOT slice raw on the var axis.
-        # See https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.raw.html
-        ad = ad[obs_mask, (ad.var.feature_biotype == "gene")]
+        #
+        # Filter features per Census schema
+        #
+        var_mask = ad.var.feature_biotype == "gene"
 
-        obs = ad.obs
-        var = ad.var
-        var.index.rename("feature_id", inplace=True)
-        X = ad.X if need_X else None
-        assert ad.raw is None
-
-        # This discards all other ancillary state, eg, obsm/varm/....
-        ad = anndata.AnnData(X=X, obs=obs, var=var)
-
-        assert (
-            X is None or isinstance(X, np.ndarray) or X.has_canonical_format
-        ), "Found H5AD with non-canonical X matrix"
-
-        assert X is None or np.all(X.sum(axis=1) > 0), "H5AD contains a cell with only zero valued counts"
-        return ad
+        return ad[
+            slice(None) if obs_mask.all() else obs_mask.to_numpy(),
+            slice(None) if var_mask.all() else var_mask.to_numpy(),
+        ]
 
     return _filter
-
-
-def get_cellxgene_schema_version(ad: anndata.AnnData) -> str:
-    # cellxgene >=2.0
-    if "schema_version" in ad.uns:
-        # not sure why this is a nested array
-        return str(ad.uns["schema_version"])
-
-    # cellxgene 1.X
-    if "version" in ad.uns:
-        return str(ad.uns["version"]["corpora_schema_version"])
-
-    return ""

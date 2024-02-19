@@ -10,6 +10,7 @@ appropriately large host.
 
 See README.md for historical data.
 """
+
 from typing import Any, Dict, Iterator, Optional, Tuple
 
 import pyarrow as pa

@@ -83,6 +83,7 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
             assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
 
+@pytest.mark.experimental
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
 def test_meanvar_nnz_only_batches_fails(matrix: sparse.coo_matrix) -> None:
     n_batches = 10

@@ -7,6 +7,8 @@ from typing import Union
 
 from .logging import logging_init_params
 
+logger = logging.getLogger(__name__)
+
 
 def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: bool = False) -> None:
     """Copy (sync) local directory to S3.
@@ -51,7 +53,7 @@ def _sync_to_S3(from_path: str, to_path: str, delete: bool = False, dryrun: bool
             print(proc.returncode)
             if proc.stdout is not None:
                 for line in proc.stdout:
-                    logging.info(line)
+                    logger.info(line)
 
         returncode = proc.returncode
         if returncode:
@@ -62,7 +64,7 @@ def _sync_to_S3(from_path: str, to_path: str, delete: bool = False, dryrun: bool
 
 
 def _log_it(msg: str, dryrun: bool) -> None:
-    logging.info(f"{'(dryrun) ' if dryrun else ''}{msg}")
+    logger.info(f"{'(dryrun) ' if dryrun else ''}{msg}")
 
 
 def main() -> int:

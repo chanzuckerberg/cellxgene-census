@@ -142,6 +142,7 @@ def test_mean_variance_nnz_only(
                 assert np.allclose(variance, va, atol=1e-5, rtol=1e-2, equal_nan=True)
 
 
+@pytest.mark.experimental
 def test_mean_variance_no_flags() -> None:
     with pytest.raises(ValueError):
         pp.mean_variance(soma.AxisQuery(), calculate_mean=False, calculate_variance=False)
@@ -157,6 +158,7 @@ def test_mean_variance_empty_query(experiment_name: str, small_mem_context: soma
                 pp.mean_variance(query, calculate_mean=True, calculate_variance=True)
 
 
+@pytest.mark.experimental
 def test_mean_variance_wrong_axis() -> None:
     with pytest.raises(ValueError):
         pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True, axis=2)

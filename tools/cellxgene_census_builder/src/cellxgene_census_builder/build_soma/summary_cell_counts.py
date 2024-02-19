@@ -8,6 +8,8 @@ import tiledbsoma as soma
 
 from .globals import CENSUS_SUMMARY_CELL_COUNTS_NAME, CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC
 
+logger = logging.getLogger(__name__)
+
 
 def create_census_summary_cell_counts(
     info_collection: soma.Collection, per_experiment_summary: Sequence[pd.DataFrame]
@@ -15,7 +17,7 @@ def create_census_summary_cell_counts(
     """
     Save per-category counts as the census_summary_cell_counts SOMA dataframe
     """
-    logging.info("Creating census_summary_cell_counts")
+    logger.info("Creating census_summary_cell_counts")
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
         .drop(columns=["dataset_id"])
@@ -31,7 +33,7 @@ def create_census_summary_cell_counts(
     with info_collection.add_new_dataframe(
         CENSUS_SUMMARY_CELL_COUNTS_NAME, schema=schema, index_column_names=["soma_joinid"]
     ) as cell_counts:
-        cell_counts.write(pa.Table.from_pandas(df, preserve_index=False))
+        cell_counts.write(pa.Table.from_pandas(df, preserve_index=False, schema=schema))
 
 
 def init_summary_counts_accumulator() -> pd.DataFrame:
@@ -95,6 +97,7 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
                 columns="is_primary_data",
                 index=["organism", "ontology_term_id", "label"],
                 fill_value=0,
+                observed=True,
                 aggfunc="sum",  # noop: each element is unique. Necessary to prevent cast from int to float by default aggfunc (mean)
             )
         )
