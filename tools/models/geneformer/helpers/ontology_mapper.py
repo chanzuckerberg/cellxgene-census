@@ -418,7 +418,6 @@ class CellClassMapper(CellMapper):
     # List of cell classes, ORDER MATTERS. If for a given cell type there are multiple cell classes associated
     # then `self.get_top_high_level_term()` returns the one that appears first in th this list
     CELL_CLASS = [
-        "CL_0002494",  # cardiocyte
         "CL_0002320",  # connective tissue cell
         "CL_0000473",  # defensive cell
         "CL_0000066",  # epithelial cell

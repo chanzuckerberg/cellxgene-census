@@ -55,10 +55,16 @@ class CensusBuildConfig:
     memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
     #
     # 'max_worker_processes' sets a limit on the number of worker processes to avoid running into
-    # the max VM map kernel limit and other hard resource limits. The value specified here was
-    # determined by empirical testing on 128 and 192 CPU boxes (e.g., r6a.48xlarge, r6i.32xlarge,
-    # etc) using the default kernel config for Ubuntu 22.04
-    max_worker_processes: int = field(converter=int, default=192)
+    # the max VM map kernel limit and other hard resource limits.
+    #
+    # The current value is significantly reduced to accomadate excessive thread use in TileDBSOMA
+    # 1.7. https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    #
+    # Previously this value was 192, and worked fine on hosts with CPU count up to 192 using
+    # the default AWS Linux 2 and Ubuntu 22 kernel default config. This should be raised once
+    # TileDB has reduced thread allocation. See also the DEFAULT_TILEDB_CONFIG in globals.py
+    # which also hard-caps threads to a reduced number for the same reason.
+    max_worker_processes: int = field(converter=int, default=64)
     #
     # Host minimum resource validation
     host_validation_disable: int = field(

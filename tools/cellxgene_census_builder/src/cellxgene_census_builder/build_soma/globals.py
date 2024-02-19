@@ -2,7 +2,6 @@ import functools
 from typing import Any, List, Set, Tuple, Union
 
 import pyarrow as pa
-import tiledb
 import tiledbsoma as soma
 
 from ..util import cpu_count
@@ -302,11 +301,12 @@ DEFAULT_TILEDB_CONFIG = {
     "soma.init_buffer_bytes": 1 * 1024**3,
     "sm.mem.reader.sparse_global_order.ratio_array_data": 0.3,
     #
-    # Concurrency levels are capped for high-CPU boxes. Left unchecked, some
-    # of the largest host configs can bump into Linux kernel thread limits,
-    # without any real benefit to overall performance.
-    "sm.compute_concurrency_level": min(cpu_count(), 128),
-    "sm.io_concurrency_level": min(cpu_count(), 128),
+    # Concurrency levels are capped for high-CPU boxes. Left unchecked,
+    # the default configs will hit kernel limits on high-CPU boxes. This
+    # cap can be raised when TiledB-SOMA is more thread frugal. See for
+    # example: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    "sm.compute_concurrency_level": min(cpu_count(), 32),
+    "sm.io_concurrency_level": min(cpu_count(), 32),
 }
 
 
@@ -317,9 +317,4 @@ Singletons used throughout the package
 
 @functools.cache
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
-    return soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx(), timestamp=None)
-
-
-@functools.cache
-def TileDB_Ctx() -> tiledb.Ctx:
-    return tiledb.Ctx(DEFAULT_TILEDB_CONFIG)
+    return soma.options.SOMATileDBContext(tiledb_config=DEFAULT_TILEDB_CONFIG, timestamp=None)
