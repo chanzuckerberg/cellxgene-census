@@ -84,10 +84,10 @@ def _open_soma(
 
 def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
     """Return a :class:``tiledbsoma.SOMATileDBContext` with sensible defaults that can be further customized by the
-    user.  The customized context can then be passed to :func:``cellxgene_census.open_soma`` with the ``context``
+    user. The customized context can then be passed to :func:``cellxgene_census.open_soma`` with the ``context``
     argument or to :meth:`somacore.SOMAObject.open`` with the ``context`` argument, such as
     :meth:`tiledbsoma.Experiment.open`. Use the :meth:`tiledbsoma.SOMATileDBContext.replace` method on the returned
-    object to customizeits settings further.
+    object to customize its settings further.
 
     Args:
         tiledb_config:

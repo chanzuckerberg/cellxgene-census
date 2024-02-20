@@ -353,7 +353,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                  [2417,    0,    3]], dtype=torch.int64))
 
     The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse
-    :class:`torch.Tensor`.  If the model supports use of sparse :class:`torch.Tensor`s, this will reduce memory usage.
+    :class:`torch.Tensor`. If the model supports use of sparse :class:`torch.Tensor`s, this will reduce memory usage.
 
     The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
     element is always the ``soma_joinid`` of the ``obs`` :class:`pandas.DataFrame` (or, equiavalently, the
