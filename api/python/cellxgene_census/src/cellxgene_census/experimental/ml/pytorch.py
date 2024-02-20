@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Optional, Sequence  # noqa
+from typing import Any, Optional, Sequence
 
 import numpy as np
 import numpy.typing as npt

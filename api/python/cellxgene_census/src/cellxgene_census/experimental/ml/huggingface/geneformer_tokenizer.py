@@ -1,5 +1,5 @@
 import pickle
-from typing import Any, Optional, Sequence  # noqa
+from typing import Any, Optional, Sequence
 
 import numpy as np
 import numpy.typing as npt

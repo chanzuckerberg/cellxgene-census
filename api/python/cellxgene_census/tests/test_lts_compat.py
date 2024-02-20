@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Iterator
-from typing import Literal, Sequence, Union, get_args  # noqa
+from typing import Literal, Sequence, Union, get_args
 
 import pyarrow as pa
 import pytest

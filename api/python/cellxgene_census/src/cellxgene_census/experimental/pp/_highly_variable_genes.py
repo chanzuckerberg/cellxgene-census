@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from concurrent import futures
-from typing import Any, Callable, Sequence, cast  # noqa
+from typing import Any, Callable, Sequence, cast
 
 import numpy as np
 import pandas as pd

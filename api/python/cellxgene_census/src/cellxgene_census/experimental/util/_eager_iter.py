@@ -4,7 +4,7 @@ from collections import deque
 from collections.abc import Iterator
 from concurrent import futures
 from concurrent.futures import Future
-from typing import Deque, Optional, TypeVar  # noqa: UP035
+from typing import Deque, Optional, TypeVar
 
 util_logger = logging.getLogger("cellxgene_census.experimental.util")
 
@@ -64,7 +64,7 @@ class _EagerBufferedIterator(Iterator[_T]):
         self.max_pending = max_pending
         self._pool = pool or futures.ThreadPoolExecutor()
         self._own_pool = pool is None
-        self._pending_results: Deque[futures.Future[_T]] = deque()  # noqa: UP006
+        self._pending_results: Deque[futures.Future[_T]] = deque()
         self._lock = threading.Lock()
         self._begin_next()
 

@@ -72,7 +72,7 @@ root = "../../.."
 src = ["api/python/cellxgene_census/src"]
 line-length = 120
 extend-include = ["*.ipynb"]
-target-version = "py39"
+target-version = "py38"
 
 [tool.ruff.format]
 docstring-code-format = true

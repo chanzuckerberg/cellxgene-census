@@ -1,6 +1,6 @@
 import pathlib
 import sys
-from typing import Callable, Optional, Sequence, Union  # noqa
+from typing import Callable, Optional, Sequence, Union
 from unittest.mock import patch
 
 import numpy as np
