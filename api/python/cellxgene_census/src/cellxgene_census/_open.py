@@ -83,10 +83,11 @@ def _open_soma(
 
 
 def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
-    """Return a ``SOMATileDBContext`` with sensible defaults that can be further customized by the user.  The customized
-    context can then be passed to ``open_soma(context=...)`` or a ``SOMAObject.open(context=...)`` method,
-    such as ``tiledbsoma.Experiment.open()``.  Use the ``replace()`` method on the returned object to customize its
-    settings further.
+    """Return a :class:``tiledbsoma.SOMATileDBContext` with sensible defaults that can be further customized by the
+    user. The customized context can then be passed to :func:``cellxgene_census.open_soma`` with the ``context``
+    argument or to :meth:`somacore.SOMAObject.open`` with the ``context`` argument, such as
+    :meth:`tiledbsoma.Experiment.open`. Use the :meth:`tiledbsoma.SOMATileDBContext.replace` method on the returned
+    object to customize its settings further.
 
     Args:
         tiledb_config:
@@ -94,7 +95,7 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
             defaults. If not specified, the default configuration will be returned.
 
     Returns:
-        A ``SOMATileDBContext`` object with sensible defaults.
+        A :class:``tiledbsoma.SOMATileDBContext` object with sensible defaults.
 
     Examples:
 
@@ -138,7 +139,7 @@ def open_soma(
 
     Args:
         census_version:
-            The version of the Census, e.g. "latest" or "stable". Defaults to "stable".
+            The version of the Census, e.g. ``"latest"`` or ``"stable"``. Defaults to ``"stable"``.
         mirror:
             The mirror used to retrieve the Census. If not specified, a suitable mirror
             will be chosen automatically.
@@ -146,16 +147,16 @@ def open_soma(
             The URI containing the Census SOMA objects. If specified, will take precedence
             over ``census_version`` parameter.
         tiledb_config:
-            A dictionary of TileDB configuration parameters that will be used to open the SOMA object.  Optional,
-            defaults to None.  If specified, the parameters will override the default settings specified by
-           ``get_default_soma_context().tiledb_config``.  Only one of the ``tiledb_config and ``context`` params
+            A dictionary of TileDB configuration parameters that will be used to open the SOMA object. Optional,
+            defaults to ``None``. If specified, the parameters will override the default settings specified by
+            ``get_default_soma_context().tiledb_config``. Only one of the ``tiledb_config and ``context`` params
             can be specified.
         context:
-            A custom :class:`SOMATileDBContext` that will be used to open the SOMA object.
-            Optional, defaults to None.  Only one of the ``tiledb_config and ``context`` params can be specified.
+            A custom :class:`tiledbsoma.SOMATileDBContext` that will be used to open the SOMA object.
+            Optional, defaults to ``None``. Only one of the ``tiledb_config`` and ``context`` params can be specified.
 
     Returns:
-        A SOMA Collection object containing the top-level census.
+        A :class:`tiledbsoma.Collection` object containing the top-level census.
         It can be used as a context manager, which will automatically close upon exit.
 
     Raises:
@@ -265,13 +266,14 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS
         dataset_id:
             The ``dataset_id`` of interest.
         census_version:
-            The census version. Defaults to `stable`.
+            The census version. Defaults to ``"stable"``.
 
     Returns:
-        A :py:obj:`CensusLocator` object that contains the URI and optional S3 region for the source H5AD.
+        A :class:`cellxgene_census._release_directory.CensusLocator` object that contains the URI and optional S3 region
+        for the source H5AD.
 
     Raises:
-        KeyError: if either `dataset_id` or `census_version` do not exist.
+        KeyError: if either ``dataset_id`` or ``census_version`` do not exist.
 
     Lifecycle:
         maturing
@@ -306,15 +308,14 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
 
     Args:
         dataset_id
-            Fetch the source (original) H5AD associated with this `dataset_id`.
+            Fetch the source (original) H5AD associated with this ``dataset_id``.
         to_path:
-            The file name where the downloaded H5AD will be written.  Must not already exist.
+            The file name where the downloaded H5AD will be written. Must not already exist.
         census_version:
-            The census version name. Defaults to `stable`.
+            The census version name. Defaults to ``"stable"``.
 
     Raises:
-        ValueError: if the path already exists (i.e., will not overwrite
-            an existing file), or is not a file.
+        ValueError: if the path already exists (i.e., will not overwrite an existing file), or is not a file.
 
     Lifecycle:
         maturing

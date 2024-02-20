@@ -113,7 +113,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         ``CensusVersionDescription`` - a dictionary containing a description of the release.
 
     Raises:
-        ValueError: if unknown census_version value.
+        ValueError: if unknown ``census_version`` value.
 
     Lifecycle:
         maturing
@@ -141,30 +141,35 @@ def get_census_version_directory(
     *, lts: Optional[bool] = None, retracted: Optional[bool] = False
 ) -> Dict[CensusVersionName, CensusVersionDescription]:
     """
-    Get the directory of Census versions currently available, optionally filtering by specified flags. If a filtering
-    flag is not specified, Census versions will not be filtered by that flag. Defaults to including both "long-term
-    stable" (LTS) and weekly Census versions, and excluding retracted versions.
+    Get the directory of Census versions currently available, optionally filtering by specified
+    flags. If a filtering flag is not specified, Census versions will not be filtered by that flag.
+    Defaults to including both "long-term stable" (LTS) and weekly Census versions, and excluding
+    retracted versions.
 
-    Params:
-        lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no
-         filtering is performed based on this flag. Defaults to None, which includes both LTS and non-LTS (weekly)
-         versions.
-        retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no
-         filtering is performed based on this flag. Defaults to False, which excludes retracted releases in the result.
+    Args:
+        lts:
+            A filtering flag to either include or exclude long-term stable releases in the result.
+            If ``None``, no filtering is performed based on this flag. Defaults to ``None``, which
+            includes both LTS and non-LTS (weekly) versions.
+        retracted:
+            A filtering flag to either include or exclude retracted releases in the result. If
+            ``None``, no filtering is performed based on this flag. Defaults to ``False``, which
+            excludes retracted releases in the result.
 
     Returns:
-        A dictionary that contains Census version names and their corresponding descriptions. Census versions are
-        always named by their release date (``YYYY-MM-DD``) but may also have aliases. If an alias is specified,
-        the Census version will appear multiple times in the dictionary, once under it's release date name,
-        and again for each alias. Aliases may be: "stable", "latest", or "V#". The "stable" alias is used for the
-        most recent LTS release, the "latest" alias is used for the most recent weekly release, and the "V#" aliases
+        A dictionary that contains Census version names and their corresponding descriptions. Census
+        versions are always named by their release date (``YYYY-MM-DD``) but may also have aliases.
+        If an alias is specified, the Census version will appear multiple times in the dictionary,
+        once under it's release date name, and again for each alias. Aliases may be: ``"stable"``,
+        ``"latest"``, or ``"V#"``. The ``"stable"`` alias is used for the most recent LTS release,
+        the ``"latest"`` alias is used for the most recent weekly release, and the ``"V#"`` aliases
         are used to identify LTS releases by a sequentially incrementing version number.
 
     Lifecycle:
         maturing
 
     See Also:
-        :func:`get_census_version_description`: get description by census_version_name.
+        :func:`get_census_version_description`: get description by ``census_version``.
 
     Examples:
         Get all LTS and weekly versions, but exclude retracted LTS versions:
