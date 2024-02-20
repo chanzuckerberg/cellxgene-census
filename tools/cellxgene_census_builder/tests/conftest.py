@@ -69,7 +69,7 @@ def get_anndata(
             "sex": "test",
             "tissue": "test",
             "organism": "test",
-            "tissue_type": "test",
+            "tissue_type": "tissue",
             "observation_joinid": "test",
         },
         index=["1", "2", "3", "4"],
