@@ -73,8 +73,8 @@ strict = true
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.ruff]
-select = ["E", "F", "B", "I"]
-ignore = ["E501", "E402", "C408", ]
+lint.select = ["E", "F", "B", "I"]
+lint.ignore = ["E501", "E402", "C408", ]
 line-length = 120
 target-version = "py311"
 

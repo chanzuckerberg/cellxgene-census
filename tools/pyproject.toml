@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 120
-target_version = ['py310']
+target_version = ['py311']
 
 [tool.mypy]
 show_error_codes = true
@@ -15,7 +15,7 @@ ignore_errors = true
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I"]
