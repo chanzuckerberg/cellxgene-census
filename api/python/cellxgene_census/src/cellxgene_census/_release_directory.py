@@ -20,12 +20,36 @@ CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-
 
 
 class CensusLocator(TypedDict):
+    """A locator for a Census resource.
+
+    Args:
+        uri:
+            [deprecated: only used in census < 1.6.0] absolute resource URI.
+        relative_uri:
+            resource URI (relative)
+        s3_region:
+            [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
+    """
+
     uri: str
     relative_uri: str
     s3_region: Optional[str]
 
 
 class CensusVersionRetraction(TypedDict):
+    """A retraction of a Census version.
+
+    Args:
+        date:
+            the date of retraction
+        reason:
+            the reason for retraction
+        info_url:
+            a permalink to more information
+        replaced_by:
+            the census version that replaces this one
+    """
+
     date: str
     reason: Optional[str]
     info_url: Optional[str]
@@ -72,6 +96,17 @@ CensusMirrorName = str  # name of the mirror
 
 
 class CensusMirror(TypedDict):
+    """A mirror for a Census resource.
+
+    Args:
+        provider:
+            the provider of the mirror
+        base_uri:
+            base URI for the mirror location, e.g. s3://cellxgene-data-public/
+        region:
+            # region of the bucket or resource
+    """
+
     provider: Provider
     base_uri: str
     region: Optional[str]
@@ -86,6 +121,17 @@ It is obtained by resolving a relative location against a specified mirror.
 
 
 class ResolvedCensusLocator(TypedDict):
+    """A resolved locator for a Census resource.
+
+    Args:
+        uri:
+            resource URI (absolute)
+        region:
+            if an S3 URI, has optional region
+        provider:
+            the provider of the resource
+    """
+
     uri: str
     region: Optional[str]
     provider: str
