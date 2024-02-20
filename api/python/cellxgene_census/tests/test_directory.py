@@ -5,7 +5,10 @@ import requests_mock as rm
 import s3fs
 
 import cellxgene_census
-from cellxgene_census._release_directory import CELL_CENSUS_MIRRORS_DIRECTORY_URL, CELL_CENSUS_RELEASE_DIRECTORY_URL
+from cellxgene_census._release_directory import (
+    CELL_CENSUS_MIRRORS_DIRECTORY_URL,
+    CELL_CENSUS_RELEASE_DIRECTORY_URL,
+)
 
 # This test fixture contains 3 releases: 1 "latest" and 2 "LTS". Of the "LTS" releases, one is aliased to "stable"
 # and one is "retracted", and both are aliased with "V#" aliases. The ordering of the releases is
@@ -41,7 +44,10 @@ DIRECTORY_JSON = {
             "uri": "s3://cellxgene-data-public/cell-census/2022-09-01/soma/",
             "s3_region": "us-west-2",
         },
-        "h5ads": {"uri": "s3://cellxgene-data-public/cell-census/2022-09-01/h5ads/", "s3_region": "us-west-2"},
+        "h5ads": {
+            "uri": "s3://cellxgene-data-public/cell-census/2022-09-01/h5ads/",
+            "s3_region": "us-west-2",
+        },
     },
     # Ordered the latest release to be last, to verify it is explicitly sorted
     "2022-11-01": {
@@ -69,7 +75,11 @@ DIRECTORY_JSON = {
 
 MIRRORS_JSON = {
     "default": "AWS-S3-us-west-2",
-    "AWS-S3-us-west-2": {"provider": "S3", "base_uri": "s3://cellxgene-data-public/", "region": "us-west-2"},
+    "AWS-S3-us-west-2": {
+        "provider": "S3",
+        "base_uri": "s3://cellxgene-data-public/",
+        "region": "us-west-2",
+    },
 }
 
 

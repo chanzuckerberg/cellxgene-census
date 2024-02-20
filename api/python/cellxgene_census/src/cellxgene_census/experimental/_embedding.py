@@ -2,14 +2,12 @@
 #
 # Licensed under the MIT License.
 
-"""
-Methods to support simplifed access to community contributed embeddings.
-"""
+"""Methods to support simplifed access to community contributed embeddings."""
 from __future__ import annotations
 
 import json
 import warnings
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -21,11 +19,8 @@ from .._open import get_default_soma_context, open_soma
 from .._release_directory import get_census_version_directory
 
 
-def get_embedding_metadata(
-    embedding_uri: str, context: Optional[soma.options.SOMATileDBContext] = None
-) -> Dict[str, Any]:
-    """
-    Read embedding metadata and return as a Python dict.
+def get_embedding_metadata(embedding_uri: str, context: soma.options.SOMATileDBContext | None = None) -> dict[str, Any]:
+    """Read embedding metadata and return as a Python dict.
 
     Args:
         embedding_uri:
@@ -41,7 +36,6 @@ def get_embedding_metadata(
         >>> get_experiment_metadata(uri)
 
     """
-
     # Allow the user to override context for exceptional cases (e.g. the aws region)
     context = context or get_default_soma_context()
 
@@ -56,11 +50,10 @@ def get_embedding_metadata(
 def get_embedding(
     census_version: str,
     embedding_uri: str,
-    obs_soma_joinids: Union[npt.NDArray[np.int64], pa.Array],
-    context: Optional[soma.options.SOMATileDBContext] = None,
+    obs_soma_joinids: npt.NDArray[np.int64] | pa.Array,
+    context: soma.options.SOMATileDBContext | None = None,
 ) -> npt.NDArray[np.float32]:
-    """
-    Read cell (obs) embeddings and return as a dense :class:`numpy.ndarray`. Any cells without
+    """Read cell (obs) embeddings and return as a dense :class:`numpy.ndarray`. Any cells without
     an embedding will return NaN values.
 
     Args:
@@ -98,7 +91,6 @@ def get_embedding(
             dtype=float32)
 
     """
-
     if isinstance(obs_soma_joinids, (pa.Array, pa.ChunkedArray, pd.Series)):
         obs_soma_joinids = obs_soma_joinids.to_numpy()
     assert isinstance(obs_soma_joinids, np.ndarray)

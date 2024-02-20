@@ -8,8 +8,7 @@ from tiledbsoma import Experiment, ExperimentAxisQuery
 
 
 class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
-    """
-    Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery
+    """Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery
     results into a Hugging Face Dataset in which each item represents one cell.
     Subclasses implement the `cell_item()` method to process each row of an X layer
     into a Dataset item, and may also override `__init__()` and context `__enter__()`
@@ -41,8 +40,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         block_size: Optional[int] = None,
         **kwargs: Any,
     ):
-        """
-        Initialize the CellDatasetBuilder to process the results of a Census
+        """Initialize the CellDatasetBuilder to process the results of a Census
         ExperimentAxisQuery.
 
         - `experiment`: Census Experiment to be queried.
@@ -58,8 +56,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         self.block_size = block_size
 
     def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
-        """
-        Build the dataset from query results
+        """Build the dataset from query results.
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
@@ -76,8 +73,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
 
     @abstractmethod
     def cell_item(self, cell_joinid: int, Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
-        """
-        Abstract method to process the X row for one cell into a Dataset item.
+        """Abstract method to process the X row for one cell into a Dataset item.
 
         - `cell_joinid`: The cell `soma_joinid`.
         - `Xrow`: The `X` row for this cell. This csr_matrix has a single row 0, equal
@@ -87,9 +83,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
 
 
 class _DatasetGeneratorPickleHack:
-    """
-    SEE: https://github.com/huggingface/datasets/issues/6194
-    """
+    """SEE: https://github.com/huggingface/datasets/issues/6194."""
 
     def __init__(self, generator: Any, generator_id: Optional[str] = None) -> None:
         self.generator = generator

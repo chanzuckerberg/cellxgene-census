@@ -1,22 +1,6 @@
 exclude: (^doc/)|(.*/venv/)
 default_stages: [commit]
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black-jupyter
-        name: black-notebooks
-        files: ^api/python/notebooks
-        args: ["--config", "./api/python/notebooks/pyproject.toml"]
-      - id: black
-        name: black-cellxgene-census
-        files: ^api/python/cellxgene_census
-        args: ["--config", "./api/python/cellxgene_census/pyproject.toml"]
-      - id: black
-        name: black-tools
-        files: ^tools
-        args: ["--config", "./tools/pyproject.toml"]
-
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.2.2
     hooks:
@@ -102,12 +86,6 @@ repos:
           - pandas-stubs
           - typing_extensions
           - types-PyYAML
-
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.1
-    hooks:
-      - id: nbqa-black
-        files: ^api/python/notebooks
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.39.0

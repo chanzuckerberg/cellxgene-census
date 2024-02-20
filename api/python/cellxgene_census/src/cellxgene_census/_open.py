@@ -2,7 +2,7 @@
 #
 # Licensed under the MIT License.
 
-"""Open census and related datasets
+"""Open census and related datasets.
 
 Contains methods to open publicly hosted versions of Census object and access its source datasets.
 """
@@ -41,8 +41,7 @@ api_logger.addHandler(logging.StreamHandler())
 
 
 def _assert_mirror_supported(mirror: CensusMirror) -> None:
-    """
-    Verifies if the mirror is supported by this version of the census API.
+    """Verifies if the mirror is supported by this version of the census API.
     This method provides a proper error message in case an old version of the census
     tries to connect to an unsupported mirror.
     """
@@ -65,12 +64,10 @@ def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> Res
 
 
 def _open_soma(
-    locator: ResolvedCensusLocator, context: Optional[soma.options.SOMATileDBContext] = None
+    locator: ResolvedCensusLocator,
+    context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
-    """
-    Private. Merge config defaults and return open census as a soma Collection/context.
-    """
-
+    """Private. Merge config defaults and return open census as a soma Collection/context."""
     # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
     context = context or get_default_soma_context()
 
@@ -98,7 +95,6 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
         A :class:``tiledbsoma.SOMATileDBContext` object with sensible defaults.
 
     Examples:
-
         To reduce the amount of memory used by TileDB-SOMA I/O operations:
 
         .. highlight:: python
@@ -122,7 +118,6 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
     Lifecycle:
         experimental
     """
-
     tiledb_config = dict(DEFAULT_TILEDB_CONFIGURATION, **(tiledb_config or {}))
     return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
 
@@ -209,7 +204,6 @@ def open_soma(
         >>> with cellxgene_census.open_soma(tiledb_config={"py.init_buffer_bytes": 128 * 1024**2}) as census:
                 ...
     """
-
     if tiledb_config is not None and context is not None:
         raise ValueError("Only one of tiledb_config and context can be specified.")
 
