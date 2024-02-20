@@ -113,7 +113,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
         ``CensusVersionDescription`` - a dictionary containing a description of the release.
 
     Raises:
-        ValueError: if unknown census_version value.
+        ValueError: if unknown ``census_version`` value.
 
     Lifecycle:
         maturing
@@ -160,16 +160,16 @@ def get_census_version_directory(
         A dictionary that contains Census version names and their corresponding descriptions. Census
         versions are always named by their release date (``YYYY-MM-DD``) but may also have aliases.
         If an alias is specified, the Census version will appear multiple times in the dictionary,
-        once under it's release date name, and again for each alias. Aliases may be: "stable",
-        "latest", or "V#". The "stable" alias is used for the most recent LTS release, the "latest"
-        alias is used for the most recent weekly release, and the "V#" aliases are used to identify
-        LTS releases by a sequentially incrementing version number.
+        once under it's release date name, and again for each alias. Aliases may be: ``"stable"``,
+        ``"latest"``, or ``"V#"``. The ``"stable"`` alias is used for the most recent LTS release,
+        the ``"latest"`` alias is used for the most recent weekly release, and the ``"V#"`` aliases
+        are used to identify LTS releases by a sequentially incrementing version number.
 
     Lifecycle:
         maturing
 
     See Also:
-        :func:`get_census_version_description`: get description by census_version_name.
+        :func:`get_census_version_description`: get description by ``census_version``.
 
     Examples:
         Get all LTS and weekly versions, but exclude retracted LTS versions:

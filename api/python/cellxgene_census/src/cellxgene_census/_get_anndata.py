@@ -29,20 +29,20 @@ def get_anndata(
     column_names: Optional[soma.AxisColumnNames] = None,
 ) -> anndata.AnnData:
     """
-    Convenience wrapper around ``soma.Experiment`` query, to build and execute a query,
+    Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
 
     Args:
         census:
-            The census object, usually returned by :func:`cellxgene_census.open_soma()`.
+            The census object, usually returned by :func:`open_soma`.
         organism:
-            The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+            The organism to query, usually one of ``"Homo sapiens`` or ``"Mus musculus"``.
         measurement_name:
-            The measurement object to query. Defaults to `RNA`.
+            The measurement object to query. Defaults to ``"RNA"``.
         X_name:
-            The ``X`` layer to query. Defaults to `raw`.
+            The ``X`` layer to query. Defaults to ``"raw"``.
         X_layers:
-            Additional layers to add to ``anndata.AnnData.layers``.
+            Additional layers to add to :attr:``anndata.AnnData.layers``.
         obs_value_filter:
             Value filter for the ``obs`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
