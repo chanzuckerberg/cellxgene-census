@@ -26,6 +26,7 @@ jobs:
 
       - name: Install deps
         run: |
+          sudo apt-get install -y docker-buildx-plugin
           python -m pip install -U pip setuptools build
 
       - name: Build
