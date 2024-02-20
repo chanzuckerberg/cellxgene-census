@@ -2,7 +2,7 @@ exclude: (^doc/)|(.*/venv/)
 default_stages: [commit]
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.2.0
     hooks:
       - id: black-jupyter
         name: black-notebooks
@@ -18,7 +18,7 @@ repos:
         args: ["--config", "./tools/pyproject.toml"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.15
+    rev: v0.2.2
     hooks:
       - id: ruff
         name: ruff-cellxgene-census

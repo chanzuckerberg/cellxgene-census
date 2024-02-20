@@ -88,10 +88,12 @@ markers = [
 ]
 
 [tool.ruff]
-select = ["E", "F", "B", "I"]
-ignore = ["E501", "E402", "C408", ]
 line-length = 120
 target-version = "py39"
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+select = ["E", "F", "B", "I"]
+ignore = ["E501", "E402", "C408", ]
+
+[tool.ruff.lint.isort]
 known-first-party =["cellxgene_census"]
