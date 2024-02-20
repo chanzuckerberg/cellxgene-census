@@ -281,7 +281,10 @@ def test_hvg_user_defined_batch_key_func(
             raise AssertionError("should never be called without a batch key")
 
     else:
-        keys = set(batch_key)
+        if isinstance(batch_key, str):
+            keys = set([batch_key])  # noqa: C405
+        else:
+            keys = set(batch_key)
 
         def batch_key_func(srs: pd.Series[Any]) -> str:
             assert set(srs.keys()) == keys
