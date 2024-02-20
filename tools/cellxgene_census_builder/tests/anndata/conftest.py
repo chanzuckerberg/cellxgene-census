@@ -102,8 +102,8 @@ def h5ad_simple(tmp_path: pathlib.Path) -> str:
 @pytest.fixture
 def h5ad_with_organoids_and_cell_culture(tmp_path: pathlib.Path) -> str:
     adata = get_anndata(ORGANISMS[0], no_zero_counts=True)
-    adata.obs.at["1", "tissue_ontology_term_id"] = "CL:0000192 (organoid)"
-    adata.obs.at["2", "tissue_ontology_term_id"] = "CL:0000192 (cell culture)"
+    adata.obs.at["1", "tissue_type"] = "organoid"
+    adata.obs.at["2", "tissue_type"] = "cell culture"
 
     path = "with_organoids_and_cell_culture.h5ad"
     adata.write_h5ad(tmp_path / path)

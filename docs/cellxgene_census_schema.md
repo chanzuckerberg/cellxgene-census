@@ -263,7 +263,7 @@ Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read count
 
 #### Sample types
 
-Only observations (cells) from primary tissue MUST be included in the Census. Thus observations with a [`tissue_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#tissue_ontology_term_id) value of  "ontology\_term\_id (organoid)" or "ontology\_term\_id (cell line)" MUST NOT be included.
+Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a [`tissue_type`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#tissue_type) value equal to "tissue" MUST be included; other values of `tissue_type` MUST NOT be included.
 
 #### Repeated data
 
