@@ -238,6 +238,7 @@ if __name__ == "__main__":
             "embedding": [],
             "batch_label": [],
             "silhouette_batch": [],
+            "ilisi_knn_batch": [],
         }
 
         for bio_label, emb in itertools.product(bio_labels, embs):
@@ -280,6 +281,14 @@ if __name__ == "__main__":
                 chunk_size=512,
             )
             metric_batch_results["silhouette_batch"].append(this_metric)
+
+            ilisi_metric = scib_metrics.ilisi_knn(
+                X=adata_metrics.obsp[emb + "_connectivities"],
+                batches=adata_metrics.obs[batch_label],
+                scale=True,
+            )
+
+            metric_batch_results["ilisi_knn_batch"].append(ilisi_metric)
 
         all_bio[tissue] = metric_bio_results
         all_batch[tissue] = metric_batch_results
