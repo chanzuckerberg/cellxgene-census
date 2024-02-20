@@ -460,7 +460,7 @@ def _accumulate_all_X_layers(
     unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
     results: List[AccumulateXResult] = []
-    for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
+    for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts, strict=False):
         if dataset_obs_joinid_start is None:
             # this dataset has no data for this experiment
             continue
