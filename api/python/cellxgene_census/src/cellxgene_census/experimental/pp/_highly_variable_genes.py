@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Sequence
 from concurrent import futures
-from typing import Any, Callable, cast
+from typing import Any, Callable, Sequence, cast  # noqa
 
 import numpy as np
 import pandas as pd

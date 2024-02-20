@@ -1,12 +1,12 @@
 import gc
 import logging
 import os
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Optional
+from typing import Any, Optional, Sequence  # noqa
 
 import numpy as np
 import numpy.typing as npt

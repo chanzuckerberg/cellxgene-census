@@ -6,8 +6,7 @@
 
 Methods to retrieve slices of the census as AnnData objects.
 """
-from collections.abc import Sequence
-from typing import Optional
+from typing import Optional, Sequence  # noqa
 
 import anndata
 import tiledbsoma as soma

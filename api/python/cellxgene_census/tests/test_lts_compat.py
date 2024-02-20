@@ -8,8 +8,8 @@ to codify them.
 from __future__ import annotations
 
 from collections import deque
-from collections.abc import Iterator, Sequence
-from typing import Literal, Union, get_args
+from collections.abc import Iterator
+from typing import Literal, Sequence, Union, get_args  # noqa
 
 import pyarrow as pa
 import pytest
