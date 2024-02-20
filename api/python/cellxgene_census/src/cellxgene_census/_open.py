@@ -2,14 +2,14 @@
 #
 # Licensed under the MIT License.
 
-"""Open census and related datasets
+"""Open census and related datasets.
 
 Contains methods to open publicly hosted versions of Census object and access its source datasets.
 """
 import logging
 import os.path
 import urllib.parse
-from typing import Any, Dict, Optional, get_args
+from typing import Any, Optional, get_args
 
 import s3fs
 import tiledbsoma as soma
@@ -26,7 +26,7 @@ from ._util import _uri_join
 
 DEFAULT_CENSUS_VERSION = "stable"
 
-DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
+DEFAULT_TILEDB_CONFIGURATION: dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
@@ -41,8 +41,8 @@ api_logger.addHandler(logging.StreamHandler())
 
 
 def _assert_mirror_supported(mirror: CensusMirror) -> None:
-    """
-    Verifies if the mirror is supported by this version of the census API.
+    """Verifies if the mirror is supported by this version of the census API.
+
     This method provides a proper error message in case an old version of the census
     tries to connect to an unsupported mirror.
     """
@@ -67,10 +67,7 @@ def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> Res
 def _open_soma(
     locator: ResolvedCensusLocator, context: Optional[soma.options.SOMATileDBContext] = None
 ) -> soma.Collection:
-    """
-    Private. Merge config defaults and return open census as a soma Collection/context.
-    """
-
+    """Private. Merge config defaults and return open census as a soma Collection/context."""
     # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
     context = context or get_default_soma_context()
 
@@ -82,12 +79,12 @@ def _open_soma(
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
-    """Return a :class:``tiledbsoma.SOMATileDBContext` with sensible defaults that can be further customized by the
-    user. The customized context can then be passed to :func:``cellxgene_census.open_soma`` with the ``context``
-    argument or to :meth:`somacore.SOMAObject.open`` with the ``context`` argument, such as
-    :meth:`tiledbsoma.Experiment.open`. Use the :meth:`tiledbsoma.SOMATileDBContext.replace` method on the returned
-    object to customize its settings further.
+def get_default_soma_context(tiledb_config: Optional[dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
+    """Return a :class:``tiledbsoma.SOMATileDBContext` with sensible defaults.
+
+    The customized context can then be passed to :func:``cellxgene_census.open_soma`` with the ``context`` argument or
+    to :meth:`somacore.SOMAObject.open`` with the ``context`` argument, such a :meth:`tiledbsoma.Experiment.open`. Use
+    the :meth:`tiledbsoma.SOMATileDBContext.replace` method on the returned object to customize its settings further.
 
     Args:
         tiledb_config:
@@ -98,15 +95,14 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
         A :class:``tiledbsoma.SOMATileDBContext` object with sensible defaults.
 
     Examples:
-
         To reduce the amount of memory used by TileDB-SOMA I/O operations:
 
         .. highlight:: python
         .. code-block:: python
 
             ctx = cellxgene_census.get_default_soma_context(
-                tiledb_config={"py.init_buffer_bytes": 128 * 1024**2,
-                               "soma.init_buffer_bytes": 128 * 1024**2})
+                tiledb_config={"py.init_buffer_bytes": 128 * 1024**2, "soma.init_buffer_bytes": 128 * 1024**2}
+            )
             c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
 
         To access a copy of the Census located in a private bucket that is located in a different S3 region, use:
@@ -115,14 +111,13 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
         .. code-block:: python
 
             ctx = cellxgene_census.get_default_soma_context(
-                tiledb_config={"vfs.s3.no_sign_request": "false",
-                               "vfs.s3.region": "us-east-1"})
+                tiledb_config={"vfs.s3.no_sign_request": "false", "vfs.s3.region": "us-east-1"}
+            )
             c = census.open_soma(uri="s3://my-private-bucket/census/soma", context=ctx)
 
     Lifecycle:
         experimental
     """
-
     tiledb_config = dict(DEFAULT_TILEDB_CONFIGURATION, **(tiledb_config or {}))
     return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
 
@@ -132,7 +127,7 @@ def open_soma(
     census_version: Optional[str] = DEFAULT_CENSUS_VERSION,
     mirror: Optional[str] = None,
     uri: Optional[str] = None,
-    tiledb_config: Optional[Dict[str, Any]] = None,
+    tiledb_config: Optional[dict[str, Any]] = None,
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> soma.Collection:
     """Open the Census by version or URI.
@@ -209,7 +204,6 @@ def open_soma(
         >>> with cellxgene_census.open_soma(tiledb_config={"py.init_buffer_bytes": 128 * 1024**2}) as census:
                 ...
     """
-
     if tiledb_config is not None and context is not None:
         raise ValueError("Only one of tiledb_config and context can be specified.")
 
@@ -259,8 +253,9 @@ def open_soma(
 
 
 def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> CensusLocator:
-    """Open the named version of the census, and return the URI for the ``dataset_id``. This
-    does not guarantee that the H5AD exists or is accessible to the user.
+    """Open the named version of the census, and return the URI for the ``dataset_id``.
+
+    This does not guarantee that the H5AD exists or is accessible to the user.
 
     Args:
         dataset_id:
@@ -303,8 +298,7 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS
 
 
 def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> None:
-    """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
-    file name.
+    """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified file name.
 
     Args:
         dataset_id

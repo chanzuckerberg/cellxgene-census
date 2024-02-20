@@ -203,7 +203,8 @@ class CensusBuildArgs:
     working_dir: pathlib.PosixPath = field(validator=validators.instance_of(pathlib.PosixPath))
     config: CensusBuildConfig = field(validator=validators.instance_of(CensusBuildConfig))
     state: CensusBuildState = field(
-        factory=CensusBuildState, validator=validators.instance_of(CensusBuildState)  # default: empty state
+        factory=CensusBuildState,
+        validator=validators.instance_of(CensusBuildState),  # default: empty state
     )
 
     @property

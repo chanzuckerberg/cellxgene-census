@@ -1,6 +1,7 @@
 import pathlib
 import sys
-from typing import Callable, List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import Callable, Optional, Union
 from unittest.mock import patch
 
 import numpy as np
@@ -37,7 +38,8 @@ def pytorch_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
 
 def pytorch_seq_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
     """A sparse matrix where the values of each col are the obs_range values. Useful for checking the
-    X values are being returned in the correct order."""
+    X values are being returned in the correct order.
+    """
     data = np.vstack([list(obs_range)] * len(var_range)).flatten()
     rows = np.vstack([list(obs_range)] * len(var_range)).flatten()
     cols = np.column_stack([list(var_range)] * len(obs_range)).flatten()
@@ -45,17 +47,17 @@ def pytorch_seq_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
 
 
 @pytest.fixture
-def X_layer_names() -> List[str]:
+def X_layer_names() -> list[str]:
     return ["raw"]
 
 
 @pytest.fixture
-def obsp_layer_names() -> Optional[List[str]]:
+def obsp_layer_names() -> Optional[list[str]]:
     return None
 
 
 @pytest.fixture
-def varp_layer_names() -> Optional[List[str]]:
+def varp_layer_names() -> Optional[list[str]]:
     return None
 
 
@@ -366,8 +368,8 @@ def test_encoders(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> None:
     """Tests the ExperimentDataPipe provides all data, as collected from multiple processes that are managed by a
-    PyTorch DataLoader with multiple workers configured."""
-
+    PyTorch DataLoader with multiple workers configured.
+    """
     dp = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
@@ -389,8 +391,8 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
 def test_distributed__returns_data_partition_for_rank(soma_experiment: Experiment) -> None:
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
-    using mocks to avoid having to do real PyTorch distributed setup."""
-
+    using mocks to avoid having to do real PyTorch distributed setup.
+    """
     with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
         "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
     ) as mock_dist_get_rank, patch(
@@ -418,8 +420,8 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
 def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_experiment: Experiment) -> None:
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode and
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
-    setup or real DataLoader multiprocessing."""
-
+    setup or real DataLoader multiprocessing.
+    """
     with patch("torch.utils.data.get_worker_info") as mock_get_worker_info, patch(
         "cellxgene_census.experimental.ml.pytorch.dist.is_initialized"
     ) as mock_dist_is_initialized, patch(
@@ -461,9 +463,8 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eag
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
-    torch_data = [row for row in dl]
 
-    row = torch_data[0]
+    row = next(iter(dl))
     assert row[0].to_dense().tolist() == [0, 1, 0]
     assert row[1].tolist() == [0, 0]
 
@@ -484,9 +485,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
-    torch_data = [row for row in dl]
-
-    batch = torch_data[0]
+    batch = next(iter(dl))
     assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
     assert batch[1].tolist() == [[0, 0], [1, 1], [2, 2]]
 

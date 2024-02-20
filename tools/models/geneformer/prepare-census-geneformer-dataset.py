@@ -152,8 +152,7 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     mapper = CellSubclassMapper(map_orphans_to_class=True)
     obs_df["cell_subclass_ontology_term_id"] = obs_df["cell_type_ontology_term_id"].map(
         # if CellSubclassMapper doesn't find a subclass, just use the cell type itself
-        lambda it: mapper.get_top_high_level_term(it)
-        or it
+        lambda it: mapper.get_top_high_level_term(it) or it
     )
     obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
     subclass_counts = Counter(obs_df["cell_subclass"])

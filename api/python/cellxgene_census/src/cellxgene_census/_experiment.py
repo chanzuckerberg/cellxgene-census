@@ -2,8 +2,7 @@
 #
 # Licensed under the MIT License.
 
-"""
-Experiments handler.
+"""Experiments handler.
 
 Contains methods to retrieve SOMA Experiments.
 """
@@ -15,6 +14,7 @@ import tiledbsoma as soma
 
 def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
     """Given a census :class:`tiledbsoma.Collection`, return the experiment for the named organism.
+
     Organism matching is somewhat flexible, attempting to map from human-friendly
     names to the underlying collection element name.
 
@@ -34,7 +34,6 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
         maturing
 
     Examples:
-
         >>> human = get_experiment(census, "homo sapiens")
 
         >>> human = get_experiment(census, "Homo sapiens")

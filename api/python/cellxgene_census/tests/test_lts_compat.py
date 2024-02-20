@@ -1,5 +1,4 @@
-"""
-Compatibility tests between the installed verison of cellxgene-census and
+"""Compatibility tests between the installed verison of cellxgene-census and
 a named LTS release. Primarilly intended to be driven by a periodic GHA.
 
 Where there are known and accepted incompatibilities, use `pytest.skip`
@@ -9,7 +8,8 @@ to codify them.
 from __future__ import annotations
 
 from collections import deque
-from typing import Iterator, Literal, Optional, Sequence, Union, get_args
+from collections.abc import Iterator, Sequence
+from typing import Literal, Union, get_args
 
 import pyarrow as pa
 import pytest
@@ -28,7 +28,7 @@ SOMATypes = Union[
 
 
 def walk_census(
-    census: soma.Collection, filter_types: Optional[Sequence[SOMATypeNames]] = None
+    census: soma.Collection, filter_types: Sequence[SOMATypeNames] | None = None
 ) -> Iterator[tuple[str, SOMATypes]]:
     assert census.soma_type == "SOMACollection"
     filter_types = filter_types or get_args(SOMATypeNames)
@@ -46,10 +46,7 @@ def walk_census(
 
 @pytest.mark.lts_compat_check
 def test_open(census_version: str) -> None:
-    """
-    Verify we can open and walk the collections, get metadata and read schema on non-collections
-    """
-
+    """Verify we can open and walk the collections, get metadata and read schema on non-collections"""
     with cellxgene_census.open_soma(census_version=census_version) as census:
         for name, item in walk_census(census):
             assert name
@@ -60,9 +57,7 @@ def test_open(census_version: str) -> None:
 
 @pytest.mark.lts_compat_check
 def test_read_dataframe(census_version: str) -> None:
-    """
-    Verify we can read at least one row of dataframes
-    """
+    """Verify we can read at least one row of dataframes"""
     with cellxgene_census.open_soma(census_version=census_version) as census:
         for name, sdf in walk_census(census, filter_types=["SOMADataFrame"]):
             assert name
@@ -75,9 +70,7 @@ def test_read_dataframe(census_version: str) -> None:
 
 @pytest.mark.lts_compat_check
 def test_read_arrays(census_version: str) -> None:
-    """
-    Verify we can read from NDArray
-    """
+    """Verify we can read from NDArray"""
     with cellxgene_census.open_soma(census_version=census_version) as census:
         for name, sarr in walk_census(census, filter_types=["SOMASparseNDArray", "SOMADenseNDArray"]):
             assert name

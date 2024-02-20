@@ -1,5 +1,4 @@
-"""
-An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at `CELLxGENE Discover`_.
+"""An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at `CELLxGENE Discover`_.
 
 The API is built on the `tiledbsoma` SOMA API, and provides a number of helper functions including:
 

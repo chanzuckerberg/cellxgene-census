@@ -385,9 +385,7 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
 
 @pytest.mark.live_corpus
 def test_can_open_with_anonymous_access() -> None:
-    """
-    With anonymous access, `open_soma` must be able to access the census even with bogus credentials
-    """
+    """With anonymous access, `open_soma` must be able to access the census even with bogus credentials"""
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     with cellxgene_census.open_soma(census_version="latest") as census:

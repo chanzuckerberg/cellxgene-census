@@ -1,9 +1,10 @@
 import logging
 import threading
 from collections import deque
+from collections.abc import Iterator
 from concurrent import futures
 from concurrent.futures import Future
-from typing import Deque, Iterator, Optional, TypeVar
+from typing import Deque, Optional, TypeVar
 
 util_logger = logging.getLogger("cellxgene_census.experimental.util")
 

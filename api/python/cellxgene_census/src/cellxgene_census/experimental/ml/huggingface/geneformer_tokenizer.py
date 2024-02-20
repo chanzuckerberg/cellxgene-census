@@ -1,5 +1,6 @@
 import pickle
-from typing import Any, Dict, Optional, Sequence, Set
+from collections.abc import Sequence
+from typing import Any, Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -10,9 +11,7 @@ from .cell_dataset_builder import CellDatasetBuilder
 
 
 class GeneformerTokenizer(CellDatasetBuilder):
-    """
-    Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
-    cell in CELLxGENE Census ExperimentAxisQuery results (human).
+    """Generate a Hugging Face `Dataset` containing Geneformer token sequences for each cell in CELLxGENE Census ExperimentAxisQuery results (human).
 
     This class requires the Geneformer package to be installed separately with:
     `pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1`
@@ -43,7 +42,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     - and the specified `obs_column_names` (cell metadata from the experiment obs dataframe)
     """
 
-    obs_column_names: Set[str]
+    obs_column_names: set[str]
     max_input_tokens: int
 
     # set of gene soma_joinids corresponding to genes modeled by Geneformer:
@@ -62,15 +61,25 @@ class GeneformerTokenizer(CellDatasetBuilder):
         gene_median_file: str = "",
         **kwargs: Any,
     ) -> None:
-        """
-        - `experiment`: Census Experiment to query
-        - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
-        - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
-           of each Dataset item
-        - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
-        - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
-          Ensembl human gene IDs onto Geneformer token numbers and median expression values.
-          By default, these will be loaded from the Geneformer package.
+        """Tokenizer for Geneformer.
+
+        Args:
+            experiment:
+                Census Experiment to query.
+            obs_query:
+                obs AxisQuery defining the set of Census cells to process (default all).
+            obs_column_names:
+                obs dataframe columns (cell metadata) to propagate into attributes of each Dataset item.
+            max_input_tokens:
+                maximum length of Geneformer input token sequence (default 2048).
+            token_dictionary_file:
+                pickle file supplying the mapping of Ensembl human gene IDs onto Geneformer token numbers, by default
+                this will be loaded from the Geneformer package.
+            gene_median_file:
+                pickle file supplying the median expression values for each gene, by default this will be loaded from
+                the Geneformer package.
+            **kwargs:
+                Additional arguments to pass to the base class.
         """
         if obs_attributes:  # old name of obs_column_names
             obs_column_names = obs_attributes
@@ -88,10 +97,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
     def _load_geneformer_data(
         self, experiment: tiledbsoma.Experiment, token_dictionary_file: str, gene_median_file: str
     ) -> None:
-        """
-        Load (1) the experiment's genes dataframe and (2) Geneformer's static data
-        files for gene tokens and median expression; then, intersect them to compute
-        self.model_gene_{ids,tokens,medians}
+        """Load Geneformer data.
+
+        Load (1) the experiment's genes dataframe and (2) Geneformer's static data files for gene tokens and median
+        expression; then, intersect them to compute self.model_gene_{ids,tokens,medians}
         """
         # TODO: this work could be reused for all queries on this experiment
 
@@ -152,11 +161,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self.obs_df = self.obs(column_names=obs_column_names).concat().to_pandas().set_index("soma_joinid")
         return self
 
-    def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
-        """
-        Given the expression vector for one cell, compute the Dataset item providing
-        the Geneformer inputs (token sequence and metadata).
-        """
+    def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> dict[str, Any]:
+        """Given the expression vector for one cell, compute the Dataset item providing the Geneformer inputs (token sequence and metadata)."""
         # project cell_Xrow onto model_gene_ids and normalize by row sum.
         # notice we divide by the total count of the complete row (not only of the projected
         # values); this follows Geneformer's internal tokenizer.

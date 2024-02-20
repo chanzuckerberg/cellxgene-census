@@ -22,7 +22,6 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     """This is called for every test"""
-
     # Configure census_version if used
     census_version = metafunc.config.option.census_version
     if "census_version" in metafunc.fixturenames:
@@ -30,8 +29,7 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
 
 
 def pytest_configure(config: pytest.Config) -> None:
-    """
-    Exclude tests marked with any of the TEST_MARKERS_SKIPPED_BY_DEFAULT values, unless the corresponding explicit
+    """Exclude tests marked with any of the TEST_MARKERS_SKIPPED_BY_DEFAULT values, unless the corresponding explicit
     flag is specified by the user.
     """
     excluded_markexprs = []
@@ -47,5 +45,5 @@ def pytest_configure(config: pytest.Config) -> None:
 
 @pytest.fixture
 def small_mem_context() -> soma.SOMATileDBContext:
-    """used to keep memory usage smaller for GHA runners."""
+    """Used to keep memory usage smaller for GHA runners."""
     return get_default_soma_context(tiledb_config={"soma.init_buffer_bytes": 32 * 1024**2})

@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 import pytest
 import tiledbsoma as soma
@@ -86,7 +84,7 @@ def test_get_anndata_x_layer(census: soma.Collection, layer: str) -> None:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("layers", [["raw", "normalized"], ["normalized", "raw"]])
-def test_get_anndata_two_layers(census: soma.Collection, layers: List[str]) -> None:
+def test_get_anndata_two_layers(census: soma.Collection, layers: list[str]) -> None:
     with census:
         ad_primary_layer_in_X = cellxgene_census.get_anndata(
             census,
@@ -171,7 +169,7 @@ def test_get_anndata_obsm_one_layer(census: soma.Collection, obsm_layer: str) ->
 @pytest.mark.skip(reason="Enable when obsm is available in a live Census distribution.")
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("obsm_layers", [["scvi", "geneformer"]])
-def test_get_anndata_obsm_two_layers(census: soma.Collection, obsm_layers: List[str]) -> None:
+def test_get_anndata_obsm_two_layers(census: soma.Collection, obsm_layers: list[str]) -> None:
     with census:
         ad = cellxgene_census.get_anndata(
             census,

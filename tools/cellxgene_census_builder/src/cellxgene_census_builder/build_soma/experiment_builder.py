@@ -369,10 +369,7 @@ class ExperimentBuilder:
             WRITE_NORM_STRIDE = 2**18  # controls TileDB fragment size, which impacts consolidation time
             mem_budget = (
                 # (20 bytes per COO X stride X typical-nnz X overhead) + static-allocation + passed-data-size
-                int(20 * WRITE_NORM_STRIDE * 4000 * 2)
-                + (3 * 1024**3)
-                + feature_length.nbytes
-                + is_smart_seq.nbytes
+                int(20 * WRITE_NORM_STRIDE * 4000 * 2) + (3 * 1024**3) + feature_length.nbytes + is_smart_seq.nbytes
             )
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:

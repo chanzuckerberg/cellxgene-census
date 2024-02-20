@@ -21,8 +21,7 @@ CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-12-15"
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
-    """
-    Test that GeneformerTokenizer produces the same token sequences as the original
+    """Test that GeneformerTokenizer produces the same token sequences as the original
     geneformer.TranscriptomeTokenizer (modulo a small tolerance on Spearman rank correlation)
     """
     # causes deterministic selection of roughly 1,000 cells:

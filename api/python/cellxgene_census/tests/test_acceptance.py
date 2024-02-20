@@ -1,5 +1,4 @@
-"""
-Acceptance tests for the Census.
+"""Acceptance tests for the Census.
 
 NOTE: those marked `expensive` are not run in the CI as they are, well, expensive...
 
@@ -11,7 +10,8 @@ appropriately large host.
 See README.md for historical data.
 """
 
-from typing import Any, Dict, Iterator, Optional, Tuple
+from collections.abc import Iterator
+from typing import Any, Optional
 
 import pyarrow as pa
 import pytest
@@ -21,7 +21,7 @@ import cellxgene_census
 from cellxgene_census._open import DEFAULT_TILEDB_CONFIGURATION
 
 
-def make_context(census_version: str, config: Optional[Dict[str, Any]] = None) -> soma.SOMATileDBContext:
+def make_context(census_version: str, config: Optional[dict[str, Any]] = None) -> soma.SOMATileDBContext:
     config = config or {}
     version = cellxgene_census.get_census_version_description(census_version)
     s3_region = version["soma"].get("s3_region", "us-west-2")
@@ -52,8 +52,7 @@ def test_load_axes(organism: str) -> None:
 
 
 def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2) -> bool:
-    """
-    Utility that verifies that the value is an iterator of pa.Table.
+    """Utility that verifies that the value is an iterator of pa.Table.
 
     Will only call __next__ as many times as the `stop_after` param specifies,
     or will read until end of iteration of it is None.
@@ -78,9 +77,8 @@ def table_iter_is_ok(tbl_iter: Iterator[pa.Table], stop_after: Optional[int] = 2
         pytest.param(None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
     ],
 )
-def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_config: Optional[Dict[str, Any]]) -> None:
+def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_config: Optional[dict[str, Any]]) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
-
     # ctx_config=None open census with a small (default) TileDB buffer size, which reduces
     # memory use, and makes it feasible to run in a GHA.
     ctx_config = ctx_config or {}
@@ -101,9 +99,8 @@ def test_incremental_read_obs(organism: str, stop_after: Optional[int], ctx_conf
         pytest.param(None, DEFAULT_TILEDB_CONFIGURATION, marks=pytest.mark.expensive),
     ],
 )
-def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_config: Optional[Dict[str, Any]]) -> None:
+def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_config: Optional[dict[str, Any]]) -> None:
     """Verify that var can be read incrementally, i.e., in chunks"""
-
     # ctx_config=None open census with a small (default) TileDB buffer size, which reduces
     # memory use, and makes it feasible to run in a GHA.
     ctx_config = ctx_config or {}
@@ -144,11 +141,10 @@ def test_incremental_read_var(organism: str, stop_after: Optional[int], ctx_conf
 def test_incremental_read_X(
     organism: str,
     stop_after: Optional[int],
-    ctx_config: Optional[Dict[str, Any]],
-    coords: Optional[Tuple[slice, slice]],
+    ctx_config: Optional[dict[str, Any]],
+    coords: Optional[tuple[slice, slice]],
 ) -> None:
     """Verify that obs, var and X[raw] can be read incrementally, i.e., in chunks"""
-
     ctx_config = ctx_config or {}
     context = make_context("latest", ctx_config)
     with cellxgene_census.open_soma(census_version="latest", context=context) as census:
@@ -262,7 +258,7 @@ def test_get_anndata(
     organism: str,
     obs_value_filter: Optional[str],
     obs_coords: Optional[slice],
-    ctx_config: Optional[Dict[str, Any]],
+    ctx_config: Optional[dict[str, Any]],
 ) -> None:
     """Verify query and read into AnnData"""
     ctx_config = ctx_config or {}

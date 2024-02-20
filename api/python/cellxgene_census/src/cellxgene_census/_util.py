@@ -2,9 +2,7 @@ import urllib.parse
 
 
 def _uri_join(base: str, url: str) -> str:
-    """
-    like urllib.parse.urljoin, but doesn't get confused by S3://
-    """
+    """Like urllib.parse.urljoin, but doesn't get confused by S3://."""
     p_url = urllib.parse.urlparse(url)
     if p_url.netloc:
         return url

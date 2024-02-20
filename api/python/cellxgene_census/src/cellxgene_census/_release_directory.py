@@ -2,13 +2,12 @@
 #
 # Licensed under the MIT License.
 
-"""Versioning of Census builds
+"""Versioning of Census builds.
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
-import typing
 from collections import OrderedDict
-from typing import Dict, Literal, Optional, Union, cast
+from typing import Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import NotRequired, TypedDict
@@ -18,37 +17,35 @@ The following types describe the expected directory of Census builds, used
 to bootstrap all data location requests.
 """
 CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
-CensusLocator = TypedDict(
-    "CensusLocator",
-    {
-        "uri": str,  # [deprecated: only used in census < 1.6.0] absolute resource URI.
-        "relative_uri": str,  # resource URI (relative)
-        "s3_region": Optional[str],  # [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
-    },
-)
-CensusVersionRetraction = TypedDict(
-    "CensusVersionRetraction",
-    {
-        "date": str,  # the date of retraction
-        "reason": Optional[str],  # the reason for retraction
-        "info_url": Optional[str],  # a permalink to more information
-        "replaced_by": Optional[str],  # the census version that replaces this one
-    },
-)
+
+
+class CensusLocator(TypedDict):
+    uri: str
+    relative_uri: str
+    s3_region: Optional[str]
+
+
+class CensusVersionRetraction(TypedDict):
+    date: str
+    reason: Optional[str]
+    info_url: Optional[str]
+    replaced_by: Optional[str]
+
+
 ReleaseFlag = Literal["lts", "retracted"]
-ReleaseFlags = Dict[ReleaseFlag, bool]
-CensusVersionDescription = TypedDict(
-    "CensusVersionDescription",
-    {
-        "release_date": Optional[str],  # date of release (deprecated)
-        "release_build": str,  # date of build
-        "soma": CensusLocator,  # SOMA objects locator
-        "h5ads": CensusLocator,  # source H5ADs locator
-        "flags": NotRequired[ReleaseFlags],  # flags for the release
-        "retraction": NotRequired[CensusVersionRetraction],  # if retracted, details of the retraction
-    },
-)
-CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
+ReleaseFlags = dict[ReleaseFlag, bool]
+
+
+class CensusVersionDescription(TypedDict):
+    release_date: Optional[str]
+    release_build: str
+    soma: CensusLocator
+    h5ads: CensusLocator
+    flags: NotRequired[ReleaseFlags]
+    retraction: NotRequired[CensusVersionRetraction]
+
+
+CensusDirectory = dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 """
 A provider identifies a storage medium for the Census, which can either be a cloud provider or a local file.
@@ -72,29 +69,26 @@ in the mirrors.json file, and looks like this:
 
 """
 CensusMirrorName = str  # name of the mirror
-CensusMirror = TypedDict(
-    "CensusMirror",
-    {
-        "provider": Provider,  # provider of the mirror.
-        "base_uri": str,  # base URI for the mirror location, e.g. s3://cellxgene-data-public/
-        "region": Optional[str],  # region of the bucket or resource
-    },
-)
 
-CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
+
+class CensusMirror(TypedDict):
+    provider: Provider
+    base_uri: str
+    region: Optional[str]
+
+
+CensusMirrors = dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
 
 """
 A `ResolvedCensusLocator` represent an absolute location of a Census resource, including the provider info.
 It is obtained by resolving a relative location against a specified mirror.
 """
-ResolvedCensusLocator = TypedDict(
-    "ResolvedCensusLocator",
-    {
-        "uri": str,  # resource URI (absolute)
-        "region": Optional[str],  # if an S3 URI, has optional region
-        "provider": str,  # Provider
-    },
-)
+
+
+class ResolvedCensusLocator(TypedDict):
+    uri: str
+    region: Optional[str]
+    provider: str
 
 
 # URL for the default top-level directory of all public data
@@ -139,12 +133,11 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 
 def get_census_version_directory(
     *, lts: Optional[bool] = None, retracted: Optional[bool] = False
-) -> Dict[CensusVersionName, CensusVersionDescription]:
-    """
-    Get the directory of Census versions currently available, optionally filtering by specified
-    flags. If a filtering flag is not specified, Census versions will not be filtered by that flag.
-    Defaults to including both "long-term stable" (LTS) and weekly Census versions, and excluding
-    retracted versions.
+) -> dict[CensusVersionName, CensusVersionDescription]:
+    """Get the directory of Census versions currently available, optionally filtering by specified flags.
+
+    If a filtering flag is not specified, Census versions will not be filtered by that flag. Defaults to including both
+    "long-term stable" (LTS) and weekly Census versions, and excluding retracted versions.
 
     Args:
         lts:
@@ -297,7 +290,7 @@ def get_census_version_directory(
 
     directory: CensusDirectory = cast(CensusDirectory, response.json())
     directory_out: CensusDirectory = {}
-    aliases: typing.Set[CensusVersionName] = set()
+    aliases: set[CensusVersionName] = set()
 
     # Resolve all aliases for easier use
     for census_version_name in list(directory.keys()):
@@ -325,11 +318,9 @@ def get_census_version_directory(
         census_version_description = cast(CensusVersionDescription, directory_value)
         release_flags = cast(ReleaseFlags, {"lts": lts, "retracted": retracted})
         admitted = all(
-            [
-                census_version_description.get("flags", {}).get(flag_name, False) == release_flags[flag_name]
-                for flag_name, flag_value in release_flags.items()
-                if flag_value is not None
-            ]
+            census_version_description.get("flags", {}).get(flag_name, False) == release_flags[flag_name]
+            for flag_name, flag_value in release_flags.items()
+            if flag_value is not None
         )
         if not admitted:
             continue
@@ -337,7 +328,7 @@ def get_census_version_directory(
         directory_out[census_version_name] = census_version_description.copy()
 
     # Cast is safe, as we have removed all aliases
-    unordered_directory = cast(Dict[CensusVersionName, CensusVersionDescription], directory_out)
+    unordered_directory = cast(dict[CensusVersionName, CensusVersionDescription], directory_out)
 
     # Sort by aliases and release date, descending
     aliased_releases = [(k, v) for k, v in unordered_directory.items() if k in aliases]
@@ -353,9 +344,8 @@ def get_census_version_directory(
     return ordered_directory
 
 
-def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
-    """
-    Get the directory of Census mirrors currently available.
+def get_census_mirror_directory() -> dict[CensusMirrorName, CensusMirror]:
+    """Get the directory of Census mirrors currently available.
 
     Returns:
         A dictionary that contains mirror names and their corresponding info,
@@ -366,7 +356,7 @@ def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
     """
     mirrors = _get_census_mirrors()
     del mirrors["default"]
-    return cast(Dict[CensusMirrorName, CensusMirror], mirrors)
+    return cast(dict[CensusMirrorName, CensusMirror], mirrors)
 
 
 def _get_census_mirrors() -> CensusMirrors:

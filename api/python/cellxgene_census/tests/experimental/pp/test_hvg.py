@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -73,17 +73,16 @@ def test_hvg_vs_scanpy(
     obs_value_filter: str,
     version: str,
     experiment_name: str,
-    batch_key: Optional[Union[str, tuple[str], list[str]]],
+    batch_key: str | tuple[str] | list[str] | None,
     span: float,
     small_mem_context: soma.SOMATileDBContext,
 ) -> None:
     """Compare results with ScanPy on a couple of simple tests."""
-
-    kwargs: Dict[str, Any] = dict(
-        n_top_genes=n_top_genes,
-        batch_key=batch_key,
-        flavor="seurat_v3",
-    )
+    kwargs: dict[str, Any] = {
+        "n_top_genes": n_top_genes,
+        "batch_key": batch_key,
+        "flavor": "seurat_v3",
+    }
     if span is not None:
         kwargs["span"] = span
 
@@ -220,7 +219,7 @@ def test_get_highly_variable_genes(
     obs_value_filter: str,
     batch_key: str,
     small_mem_context: soma.SOMATileDBContext,
-    obs_coords: Optional[slice],
+    obs_coords: slice | None,
 ) -> None:
     with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
         hvg = get_highly_variable_genes(
@@ -274,7 +273,7 @@ def test_max_loess_jitter_error(small_mem_context: soma.SOMATileDBContext) -> No
 )
 def test_hvg_user_defined_batch_key_func(
     small_mem_context: soma.SOMATileDBContext,
-    batch_key: Union[None, str, list[str]],
+    batch_key: list[str] | str | None,
 ) -> None:
     if batch_key is None:
 
@@ -282,10 +281,7 @@ def test_hvg_user_defined_batch_key_func(
             raise AssertionError("should never be called without a batch key")
 
     else:
-        if isinstance(batch_key, str):
-            keys = set([batch_key])
-        else:
-            keys = set(batch_key)
+        keys = set(batch_key)
 
         def batch_key_func(srs: pd.Series[Any]) -> str:
             assert set(srs.keys()) == keys

@@ -2,11 +2,12 @@
 #
 # Licensed under the MIT License.
 
-"""Get slice as AnnData
+"""Get slice as AnnData.
 
 Methods to retrieve slices of the census as AnnData objects.
 """
-from typing import Optional, Sequence
+from collections.abc import Sequence
+from typing import Optional
 
 import anndata
 import tiledbsoma as soma
@@ -28,9 +29,9 @@ def get_anndata(
     var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[soma.AxisColumnNames] = None,
 ) -> anndata.AnnData:
-    """
-    Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
-    and return it as an :class:`anndata.AnnData` object.
+    """Convenience wrapper around :class:`tiledbsoma.Experiment` query.
+
+    Builds, executes, and returns a query as an :class:`anndata.AnnData` object.
 
     Args:
         census:
