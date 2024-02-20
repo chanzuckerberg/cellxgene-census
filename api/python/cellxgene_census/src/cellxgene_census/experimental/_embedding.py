@@ -31,8 +31,8 @@ def get_embedding_metadata(
         embedding_uri:
             The embedding URI
         context:
-            A custom :class:`SOMATileDBContext` which will be used to open the SOMA object.
-            Optional, defaults to None.
+            A custom :class:`tiledbsoma.SOMATileDBContext` which will be used to open the SOMA object. Optional,
+            defaults to ``None``.
 
     Returns:
         A Python dictionary containing metadata describing the embedding.
@@ -60,25 +60,26 @@ def get_embedding(
     context: Optional[soma.options.SOMATileDBContext] = None,
 ) -> npt.NDArray[np.float32]:
     """
-    Read cell (obs) embeddings and return as a dense NumPy ndarray. Any cells without
+    Read cell (obs) embeddings and return as a dense :class:`numpy.ndarray`. Any cells without
     an embedding will return NaN values.
 
     Args:
         census_version:
-            The Census version tag, e.g., "2023-12-15". Used to verify that the contents of
+            The Census version tag, e.g., ``"2023-12-15"``. Used to verify that the contents of
             the embedding contain embedded cells from the same Census version.
         embedding_uri:
             The URI containing the embedding data.
         obs_soma_joinids:
             The slice of the embedding to fetch and return.
         context:
-            A custom :class:`SOMATileDBContext` which will be used to open the SOMA object.
-            Optional, defaults to None.
+            A custom :class:`tiledbsoma.SOMATileDBContext` which will be used to open the SOMA object.
+            Optional, defaults to ``None``.
 
     Returns:
         A :class:`numpy.ndarray` containing the embeddings. Embeddings are positionally
-        indexed by the obs_soma_joinids. In other words, the cell identified by
-        `obs_soma_joinids[i]` corresponds to the `ith` position in the returned ndarray.
+        indexed by the ``obs_soma_joinids``. In other words, the cell identified by
+        ``obs_soma_joinids[i]`` corresponds to the ``ith`` position in the returned
+        :class:`numpy.ndarray`.
 
     Raises:
         ValueError: if the Census and embedding are mismatched.
