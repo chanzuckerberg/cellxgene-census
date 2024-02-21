@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def urljoin(base: str, url: str) -> str:
-    """Like urllib.parse.urljoin, but doesn't get confused by S3://."""
+    """Like urllib.parse.urljoin, but doesn't get confused by s3://."""
     p_url = urllib.parse.urlparse(url)
     if p_url.netloc:
         return url
