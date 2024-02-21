@@ -657,8 +657,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     @property
     def obs_encoders(self) -> Encoders:
         """Returns a dictionary of :class:`sklearn.preprocessing.LabelEncoder` objects, keyed on ``obs`` column names,
-        which were used to encode the ``obs`` column values. These encoders can be used to decode the encoded values as
-        follows.
+        which were used to encode the ``obs`` column values.
+
+        These encoders can be used to decode the encoded values as follows:
 
         >>> exp_data_pipe.obs_encoders["<obs_attr_name>"].inverse_transform(encoded_values)
 
