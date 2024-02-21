@@ -54,17 +54,17 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: install python 3.11 dev packages
+        run: |
+          sudo apt-get install -y python3.11-dev python3.11-full
+
       - uses: actions/setup-python@v5
         with:
           python-version: 3.11
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             api/**/pyproject.toml
             api/**/requirements*.txt
-
-      - name: install python dev packages
-        run: |
-          sudo apt-get install -y python3.11-dev
 
       - name: install python dependencies (including experimental)
         run: |
