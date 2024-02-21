@@ -64,10 +64,10 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Install latest docker buildx
+      - name: Install up-to-date docker buildx
         run: |
-          # https://docs.docker.com/engine/install/ubuntu/
-          set -x
+          # In lieu of having docker buildx plugin installed on our base runner image,
+          # install it manually. https://docs.docker.com/engine/install/ubuntu/
 
           for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
             sudo apt-get remove $pkg || echo "${pkg} not installed"
