@@ -70,10 +70,7 @@ jobs:
           set -x
 
           for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
-            $(dpkg --status $pkg &> /dev/null)
-            if [[ $? -eq 0 ]]; then
-              sudo apt-get remove $pkg
-            fi
+            sudo apt-get remove $pkg || echo "${pkg} not installed"
           done
 
           sudo apt-get update
