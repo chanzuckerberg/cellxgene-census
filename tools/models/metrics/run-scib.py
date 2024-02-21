@@ -211,6 +211,7 @@ if __name__ == "__main__":
         for emb_name in embs:
             print(datetime.datetime.now(), "Getting neighbors", emb_name)
             sc.pp.neighbors(adata_metrics, use_rep=emb_name, key_added=emb_name)
+            sc.pp.neighbors(adata_metrics, n_neighbors=90, use_rep=emb_name, key_added=emb_name + "_90")
             sc.tl.umap(adata_metrics, neighbors_key=emb_name)
             adata_metrics.obsm["X_umap_" + emb_name] = adata_metrics.obsm["X_umap"].copy()
             del adata_metrics.obsm["X_umap"]
@@ -283,7 +284,7 @@ if __name__ == "__main__":
             metric_batch_results["silhouette_batch"].append(this_metric)
 
             ilisi_metric = scib_metrics.ilisi_knn(
-                X=adata_metrics.obsp["distances"],
+                X=adata_metrics.obsp[f"{emb}_90_distances"],
                 batches=adata_metrics.obs[batch_label],
                 scale=True,
             )
