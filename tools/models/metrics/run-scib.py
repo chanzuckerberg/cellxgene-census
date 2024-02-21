@@ -283,7 +283,7 @@ if __name__ == "__main__":
             metric_batch_results["silhouette_batch"].append(this_metric)
 
             ilisi_metric = scib_metrics.ilisi_knn(
-                X=adata_metrics.obsp[emb + "_connectivities"],
+                X=adata_metrics.obsp["distances"],
                 batches=adata_metrics.obs[batch_label],
                 scale=True,
             )
