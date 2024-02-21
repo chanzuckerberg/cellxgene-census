@@ -23,13 +23,22 @@ def open_census(census_version: str | None, census_uri: str | None) -> soma.Coll
 
 
 @functools.cache
-def get_obs_soma_joinids(config: Config) -> tuple[npt.NDArray[np.int64], tuple[int, ...]]:
-    """Return experiment obs soma_joind values and obs shape appropriate for the
-    Census version specified in the metadata.
+def get_axis_soma_joinids(config: Config) -> tuple[npt.NDArray[np.int64], tuple[int, ...]]:
+    """Return experiment axis (obs, var) soma_joind values and axis shape appropriate for the
+    Census version specified in the metadata and the axis specified in embedding metadata.
     """
+    axis: str = config.metadata.data_type
+    assert axis in [
+        "obs_embedding",
+        "var_embedding",
+    ], "Unknown embedding type - must be one of obs_embedding or var_embedding"
+
     with open_census(census_uri=config.args.census_uri, census_version=config.metadata.census_version) as census:
         exp = census["census_data"][config.metadata.experiment_name]
-        tbl = exp.obs.read(column_names=["soma_joinid"]).concat()
+        if axis == "obs_embedding":
+            tbl = exp.obs.read(column_names=["soma_joinid"]).concat()
+        else:
+            tbl = exp.ms["RNA"].var.read(column_names=["soma_joinid"]).concat()
 
         joinids = cast(npt.NDArray[np.int64], tbl.column("soma_joinid").to_numpy())
         return joinids, (joinids.max() + 1,)
