@@ -61,7 +61,6 @@ def build(args: CensusBuildArgs) -> int:
     4. Optional: validate
 
     Returns:
-    -------
     int
         Process completion code, 0 on success, non-zero indicating error,
         suitable for providing to sys.exit()
