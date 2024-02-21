@@ -3,6 +3,9 @@ label_feature: cell_subclass
 # Specific labels to exclude from training and evaluation
 label_blocklist:
   - native cell
+  - abnormal cell
+  - animal cell
+  - eukaryotic cell
 # Also exclude labels with too few examples
 label_min_examples: 10
 # Fraction of the input Dataset to hold out for evaluation

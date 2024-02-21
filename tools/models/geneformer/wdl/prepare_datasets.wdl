@@ -9,6 +9,7 @@ task prepare_census_geneformer_dataset {
         Int N = 0
         String sampling_column = "cell_subclass"
         String census_version = "stable"
+        Int shards = 1
 
         String docker
     }
@@ -23,6 +24,7 @@ task prepare_census_geneformer_dataset {
             -c '~{sep(",",obs_columns)}' \
             --value-filter '~{value_filter}' -N ~{N} --sampling-column '~{sampling_column}' \
             -v ~{census_version} \
+            --shards ~{shards} \
             ~{output_name}
     >>>
 
@@ -33,7 +35,7 @@ task prepare_census_geneformer_dataset {
 
     runtime {
         cpu: 8
-        memory: "90G"
+        memory: "120G"
         docker: docker
     }
 }
