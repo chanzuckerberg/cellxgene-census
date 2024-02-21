@@ -25,11 +25,11 @@ class CensusLocator(TypedDict):
 
     Args:
         uri:
-            [deprecated: only used in census < 1.6.0] absolute resource URI.
+            Absolute resource URI (deprecated: only used in census < 1.6.0).
         relative_uri:
-            resource URI (relative)
+            Resource URI (relative).
         s3_region:
-            [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
+             If an S3 URI, has optional region (deprecated: only used in census < 1.6.0).
     """
 
     uri: str
@@ -42,13 +42,13 @@ class CensusVersionRetraction(TypedDict):
 
     Args:
         date:
-            the date of retraction
+            The date of retraction.
         reason:
-            the reason for retraction
+            The reason for retraction.
         info_url:
-            a permalink to more information
+            A permalink to more information.
         replaced_by:
-            the census version that replaces this one
+            The census version that replaces this one.
     """
 
     date: str
@@ -66,17 +66,17 @@ class CensusVersionDescription(TypedDict):
 
     Args:
         release_date:
-            the date of the release (deprecated).
+            The date of the release (deprecated).
         release_build:
-            date of build.
+            Date of build.
         soma:
             SOMA objects locator.
         h5ads:
-            source H5ADs locator.
+            Source H5ADs locator.
         flags:
-            flags for the release.
+            Flags for the release.
         retraction:
-            if retracted, details of the retraction.
+            If retracted, details of the retraction.
     """
 
     release_date: Optional[str]
@@ -120,11 +120,11 @@ class CensusMirror(TypedDict):
 
     Args:
         provider:
-            provider of the mirror.
+            Provider of the mirror.
         base_uri:
-            base URI for the mirror location, e.g. s3://cellxgene-data-public/.
+            Base URI for the mirror location, e.g. s3://cellxgene-data-public/.
         region:
-            region of the bucket or resource
+            Region of the bucket or resource.
     """
 
     provider: Provider
@@ -143,11 +143,11 @@ class ResolvedCensusLocator(TypedDict):
 
     Args:
         uri:
-            resource URI (absolute)
+            Resource URI (absolute).
         region:
-            if an S3 URI, has optional region
+            If an S3 URI, has optional region.
         provider:
-            provider
+            Provider.
     """
 
     uri: str
