@@ -67,7 +67,7 @@ def get_anndata(organism: Organism, gene_ids: list[str] | None = None, no_zero_c
             "sex": "test",
             "tissue": "test",
             "organism": "test",
-            "tissue_type": "test",
+            "tissue_type": "tissue",
             "observation_joinid": "test",
         },
         index=["1", "2", "3", "4"],

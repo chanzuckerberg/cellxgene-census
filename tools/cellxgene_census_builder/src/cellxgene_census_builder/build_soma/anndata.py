@@ -227,7 +227,7 @@ class AnnDataProxy:
 
 
 # The minimum columns required to be able to filter an H5AD.  See `make_anndata_cell_filter` for details.
-CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_ontology_term_id")
+CXG_OBS_COLUMNS_MINIMUM_READ = ("assay_ontology_term_id", "organism_ontology_term_id", "tissue_type")
 CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
@@ -290,11 +290,7 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
         #
         # Filter cells per Census schema
         #
-        obs_mask = ~(
-            ad.obs.tissue_ontology_term_id.str.endswith(" (organoid)")
-            | ad.obs.tissue_ontology_term_id.str.endswith(" (cell culture)")
-        )
-
+        obs_mask = ad.obs.tissue_type == "tissue"
         if organism_ontology_term_id is not None:
             obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
         if assay_ontology_term_ids is not None:
