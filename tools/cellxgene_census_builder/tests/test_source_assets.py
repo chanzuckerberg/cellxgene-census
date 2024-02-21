@@ -7,9 +7,7 @@ from cellxgene_census_builder.build_state import CensusBuildArgs
 
 
 def test_source_assets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:
-    """
-    `source_assets` should copy the datasets from their `dataset_asset_h5ad_uri` to the specified `assets_dir`
-    """
+    """`source_assets` should copy the datasets from their `dataset_asset_h5ad_uri` to the specified `assets_dir`"""
     datasets = []
     (tmp_path / "source").mkdir()
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)

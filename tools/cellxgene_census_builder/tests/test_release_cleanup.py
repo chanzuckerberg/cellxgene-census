@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, Type
+from typing import Any
 from unittest import mock
 
 import pytest
+
 from cellxgene_census_builder.release_cleanup import remove_releases_older_than
 from cellxgene_census_builder.release_manifest import CensusReleaseManifest, CensusVersionName
 
@@ -96,27 +97,26 @@ RELEASE_MANIFEST: CensusReleaseManifest = {
 @pytest.mark.parametrize(
     "release_manifest,remove_kwargs,expected_delete_tags",
     [
-        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),
-        (RELEASE_MANIFEST, dict(days=9, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),
-        (RELEASE_MANIFEST, dict(days=99, census_base_url=S3_URI), (TAG_100D_OLD,)),
-        (RELEASE_MANIFEST, dict(days=999, census_base_url=S3_URI), ()),
-        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),
+        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),  # noqa: C408
+        (RELEASE_MANIFEST, dict(days=9, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),  # noqa: C408
+        (RELEASE_MANIFEST, dict(days=99, census_base_url=S3_URI), (TAG_100D_OLD,)),  # noqa: C408
+        (RELEASE_MANIFEST, dict(days=999, census_base_url=S3_URI), ()),  # noqa: C408
+        (RELEASE_MANIFEST, dict(days=0, census_base_url=S3_URI), (TAG_10D_OLD, TAG_100D_OLD)),  # noqa: C408
         (
             {**RELEASE_MANIFEST, "latest": TAG_10D_OLD},
-            dict(days=0, census_base_url=S3_URI),
+            {"days": 0, "census_base_url": S3_URI},
             (TAG_NOW, TAG_100D_OLD),
         ),
-        ({**RELEASE_MANIFEST, "latest": TAG_10D_OLD}, dict(days=9, census_base_url=S3_URI), (TAG_100D_OLD,)),
+        ({**RELEASE_MANIFEST, "latest": TAG_10D_OLD}, dict(days=9, census_base_url=S3_URI), (TAG_100D_OLD,)),  # noqa: C408
     ],
 )
 def test_remove_releases_older_than(
     release_manifest: CensusReleaseManifest,
-    remove_kwargs: Dict[str, Any],
+    remove_kwargs: dict[str, Any],
     dryrun: bool,
     expected_delete_tags: list[CensusVersionName],
 ) -> None:
     """Test the expected happy paths."""
-
     expected_delete_calls = [mock.call(f"{S3_URI}{tag}/", recursive=True) for tag in expected_delete_tags]
     expected_new_manifest = release_manifest.copy()
     for tag in expected_delete_tags:
@@ -159,7 +159,7 @@ def test_remove_releases_older_than(
     "release_manifest,remove_kwargs,expected_error",
     [
         # base path check
-        (RELEASE_MANIFEST, dict(days=0, census_base_url="s3://not/the/right/path/", dryrun=False), ValueError),
+        (RELEASE_MANIFEST, {"days": 0, "census_base_url": "s3://not/the/right/path/", "dryrun": False}, ValueError),
         # check that soma/h5ads are in the same 'directory'
         (
             {
@@ -170,13 +170,13 @@ def test_remove_releases_older_than(
                     "h5ads": {"uri": f"{S3_URI}{TAG_NOW}/h5ads/oops/"},
                 },
             },
-            dict(days=0, census_base_url=S3_URI, dryrun=False),
+            {"days": 0, "census_base_url": S3_URI, "dryrun": False},
             ValueError,
         ),
     ],
 )
 def test_remove_releases_older_than_sanity_checks(
-    release_manifest: CensusReleaseManifest, remove_kwargs: Dict[str, Any], expected_error: Type[Exception]
+    release_manifest: CensusReleaseManifest, remove_kwargs: dict[str, Any], expected_error: type[Exception]
 ) -> None:
     """Test the expected sanity/error checks"""
     with (

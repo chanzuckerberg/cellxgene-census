@@ -1,8 +1,9 @@
 import datetime
-from typing import Type, cast
+from typing import cast
 from unittest import mock
 
 import pytest
+
 from cellxgene_census_builder.build_state import CensusBuildConfig
 from cellxgene_census_builder.release_manifest import (
     CENSUS_AWS_REGION,
@@ -131,7 +132,7 @@ def test_validate_release_manifest(release_manifest: CensusReleaseManifest) -> N
     ],
 )
 def test_validate_release_manifest_errors(
-    release_manifest: CensusReleaseManifest, expected_error: Type[BaseException]
+    release_manifest: CensusReleaseManifest, expected_error: type[BaseException]
 ) -> None:
     with pytest.raises(expected_error):
         validate_release_manifest(TEST_CENSUS_BASE_URL, release_manifest, live_corpus_check=False)

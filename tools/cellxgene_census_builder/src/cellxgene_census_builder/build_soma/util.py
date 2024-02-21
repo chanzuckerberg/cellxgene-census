@@ -1,6 +1,7 @@
 import os
 import time
-from typing import Any, Iterator, Optional, Union
+from collections.abc import Iterator
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -10,11 +11,10 @@ from scipy import sparse
 
 
 def array_chunker(
-    arr: Union[npt.NDArray[Any], sparse.spmatrix],
-    nnz_chunk_size: Optional[int] = 256 * 1024**2,  # goal (~2.4GiB for a 32-bit COO)
+    arr: npt.NDArray[Any] | sparse.spmatrix,
+    nnz_chunk_size: int | None = 256 * 1024**2,  # goal (~2.4GiB for a 32-bit COO)
 ) -> Iterator[sparse.coo_matrix]:
-    """
-    Return the array as multiple chunks, each a coo_matrix.
+    """Return the array as multiple chunks, each a coo_matrix.
     The slicing is always done by row (for ndarray and csr_matrix) or by column (for csc_matrix),
     and will never split a row (or column) into two separate slices.
 
@@ -30,7 +30,6 @@ def array_chunker(
     Raises:
         NotImplementedError: If the matrix type is not supported.
     """
-
     if isinstance(arr, sparse.csr_matrix) or isinstance(arr, sparse.csr_array):
         avg_nnz_per_row = arr.nnz // arr.shape[0]
         row_chunk_size = max(1, round(nnz_chunk_size / avg_nnz_per_row))
@@ -76,9 +75,8 @@ def fetch_json(url: str, delay_secs: float = 0.0) -> object:
     return response.json()
 
 
-def is_nonnegative_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix]) -> bool:
-    """
-    Return true if the matrix/array contains only positive integral values,
+def is_nonnegative_integral(X: npt.NDArray[np.floating[Any]] | sparse.spmatrix) -> bool:
+    """Return true if the matrix/array contains only positive integral values,
     False otherwise.
     """
     data = X if isinstance(X, np.ndarray) else X.data
@@ -92,9 +90,7 @@ def is_nonnegative_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmat
 
 
 def get_git_commit_sha() -> str:
-    """
-    Returns the git commit SHA for the current repo
-    """
+    """Returns the git commit SHA for the current repo."""
     # Try to get the git commit SHA from the COMMIT_SHA env variable
     commit_sha_var = os.getenv("COMMIT_SHA")
     if commit_sha_var is not None:
@@ -110,9 +106,7 @@ def get_git_commit_sha() -> str:
 
 
 def is_git_repo_dirty() -> bool:
-    """
-    Returns True if the git repo is dirty, i.e. there are uncommitted changes
-    """
+    """Returns True if the git repo is dirty, i.e. there are uncommitted changes."""
     import git  # Scoped import - this requires the git executable to exist on the machine
 
     # work around https://github.com/gitpython-developers/GitPython/issues/1349

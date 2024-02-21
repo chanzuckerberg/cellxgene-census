@@ -59,12 +59,24 @@ ignore = [
     "D101",
     # Missing docstring in public method TODO: enable
     "D102",
+    # Missing docstring in public function TODO: enable
+    "D103",
     # First line should end with a period, question mark, or exclamation point TODO: enable
     "D415",
 ]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
 
 [tool.mypy]
 show_error_codes = true

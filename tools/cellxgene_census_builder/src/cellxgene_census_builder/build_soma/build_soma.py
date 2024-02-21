@@ -2,8 +2,8 @@ import gc
 import logging
 import os
 import pathlib
-from datetime import datetime, timezone
-from typing import Iterator, List
+from collections.abc import Iterator
+from datetime import UTC, datetime
 
 import tiledbsoma as soma
 
@@ -35,9 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 def prepare_file_system(args: CensusBuildArgs) -> None:
-    """
-    Prepares the file system for the builder run
-    """
+    """Prepares the file system for the builder run."""
     # Don't clobber an existing census build
     if args.soma_path.exists() or args.h5ads_path.exists():
         raise Exception("Census build path already exists - aborting build")
@@ -52,7 +50,8 @@ def prepare_file_system(args: CensusBuildArgs) -> None:
 
 
 def build(args: CensusBuildArgs) -> int:
-    """
+    """Build.
+
     Approximately, build steps are:
     1. Download manifest and copy/stage all source assets
     2. Read all H5AD and create axis dataframe (serial)
@@ -61,13 +60,12 @@ def build(args: CensusBuildArgs) -> int:
     3. Read all H5AD assets again, write X layer (parallel)
     4. Optional: validate
 
-    Returns
+    Returns:
     -------
     int
         Process completion code, 0 on success, non-zero indicating error,
         suitable for providing to sys.exit()
     """
-
     experiment_builders = make_experiment_builders()
 
     prepare_file_system(args)
@@ -109,13 +107,13 @@ def build(args: CensusBuildArgs) -> int:
     return 0
 
 
-def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: List[Dataset], used_datasets: List[Dataset]) -> None:
-    """Remove any staged H5AD not used to build the SOMA object, ie. those which do not contribute at least one cell to the Census"""
-    used_dataset_ids = set(d.dataset_id for d in used_datasets)
+def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: list[Dataset], used_datasets: list[Dataset]) -> None:
+    """Remove any staged H5AD not used to build the SOMA object, ie. those which do not contribute at least one cell to the Census."""
+    used_dataset_ids = set(d.dataset_id for d in used_datasets)  # noqa: C401
     unused_datasets = [d for d in all_datasets if d.dataset_id not in used_dataset_ids]
     assert all(d.dataset_total_cell_count == 0 for d in unused_datasets)
     assert all(d.dataset_total_cell_count > 0 for d in used_datasets)
-    assert used_dataset_ids.isdisjoint(set(d.dataset_id for d in unused_datasets))
+    assert used_dataset_ids.isdisjoint(set(d.dataset_id for d in unused_datasets))  # noqa: C401
 
     for d in unused_datasets:
         logger.debug(f"Removing unused H5AD {d.dataset_h5ad_path}")
@@ -123,14 +121,12 @@ def prune_unused_datasets(assets_path: pathlib.Path, all_datasets: List[Dataset]
 
 
 def populate_root_collection(root_collection: soma.Collection) -> soma.Collection:
-    """
-    Create the root SOMA collection for the Census.
+    """Create the root SOMA collection for the Census.
 
     Returns the root collection.
     """
-
     # Set root metadata for the experiment
-    root_collection.metadata["created_on"] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
+    root_collection.metadata["created_on"] = datetime.now(tz=UTC).isoformat(timespec="seconds")
 
     sha = get_git_commit_sha()
     root_collection.metadata["git_commit_sha"] = sha
@@ -142,7 +138,7 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     return root_collection
 
 
-def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
+def build_step1_get_source_datasets(args: CensusBuildArgs) -> list[Dataset]:
     logger.info("Build step 1 - get source assets - started")
 
     # Load manifest defining the datasets
@@ -167,8 +163,8 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> List[Dataset]:
 
 
 def accumulate_axes(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
-) -> List[Dataset]:
+    assets_path: str, datasets: list[Dataset], experiment_builders: list[ExperimentBuilder], args: CensusBuildArgs
+) -> list[Dataset]:
     filtered_datasets = []
     N = len(datasets) * len(experiment_builders)
     n = 0
@@ -212,9 +208,8 @@ def accumulate_axes(
     return filtered_datasets
 
 
-def build_step2_create_root_collection(soma_path: str, experiment_builders: List[ExperimentBuilder]) -> soma.Collection:
-    """
-    Create all objects
+def build_step2_create_root_collection(soma_path: str, experiment_builders: list[ExperimentBuilder]) -> soma.Collection:
+    """Create all objects.
 
     Returns: the root collection.
     """
@@ -231,11 +226,9 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: List
 
 
 def build_step3_populate_obs_and_var_axes(
-    assets_path: str, datasets: List[Dataset], experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
-) -> List[Dataset]:
-    """
-    Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built.
-    """
+    assets_path: str, datasets: list[Dataset], experiment_builders: list[ExperimentBuilder], args: CensusBuildArgs
+) -> list[Dataset]:
+    """Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built."""
     logger.info("Build step 3 - Populate obs and var axes - started")
 
     filtered_datasets = accumulate_axes(assets_path, datasets, experiment_builders, args)
@@ -253,13 +246,11 @@ def build_step3_populate_obs_and_var_axes(
 
 def build_step4_populate_X_layers(
     assets_path: str,
-    filtered_datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
+    filtered_datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
     args: CensusBuildArgs,
 ) -> None:
-    """
-    Populate X layers.
-    """
+    """Populate X layers."""
     logger.info("Build step 4 - Populate X layers - started")
 
     # Process all X data
@@ -276,8 +267,8 @@ def build_step4_populate_X_layers(
 
 def build_step5_save_axis_and_summary_info(
     root_collection: soma.Collection,
-    experiment_builders: List[ExperimentBuilder],
-    filtered_datasets: List[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+    filtered_datasets: list[Dataset],
     build_tag: str,
 ) -> None:
     logger.info("Build step 5 - Save axis and summary info - started")
@@ -295,7 +286,7 @@ def build_step5_save_axis_and_summary_info(
 
 
 def build_step6_save_derived_data(
-    root_collection: soma.Collection, experiment_builders: List[ExperimentBuilder], args: CensusBuildArgs
+    root_collection: soma.Collection, experiment_builders: list[ExperimentBuilder], args: CensusBuildArgs
 ) -> None:
     logger.info("Build step 6 - Creating derived objects - started")
 
@@ -311,8 +302,7 @@ def build_step6_save_derived_data(
 
 
 def tiledb_soma_1969_work_around(census_uri: str) -> None:
-    """See single-cell-data/TileDB-SOMA#1969 and other issues related. Remove any inserted bounding box metadata"""
-
+    """See single-cell-data/TileDB-SOMA#1969 and other issues related. Remove any inserted bounding box metadata."""
     bbox_metadata_keys = [
         "soma_dim_0_domain_lower",
         "soma_dim_0_domain_upper",
@@ -320,7 +310,7 @@ def tiledb_soma_1969_work_around(census_uri: str) -> None:
         "soma_dim_1_domain_upper",
     ]
 
-    def _walk_tree(C: soma.Collection) -> List[str]:
+    def _walk_tree(C: soma.Collection) -> list[str]:
         assert C.soma_type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]
         uris = []
         for soma_obj in C.values():

@@ -1,21 +1,21 @@
 import pathlib
-from typing import Any, List
+from typing import Any
 
 import anndata as ad
 import numpy as np
 import numpy.typing as npt
 import pytest
+from scipy import sparse
+
 from cellxgene_census_builder.build_soma.anndata import AnnDataProxy, make_anndata_cell_filter, open_anndata
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_state import CensusBuildArgs
-from scipy import sparse
 
 from ..conftest import ORGANISMS, get_anndata
 
 
-def test_open_anndata(datasets: List[Dataset]) -> None:
-    """
-    `open_anndata` should open the h5ads for each of the dataset in the argument,
+def test_open_anndata(datasets: list[Dataset]) -> None:
+    """`open_anndata` should open the h5ads for each of the dataset in the argument,
     and yield both the dataset and the corresponding AnnData object.
     This test does not involve additional filtering steps.
     The `datasets` used here have no raw layer.
@@ -31,11 +31,9 @@ def test_open_anndata(datasets: List[Dataset]) -> None:
 
 
 def test_open_anndata_filters_out_datasets_with_mixed_feature_reference(
-    datasets_with_mixed_feature_reference: List[Dataset],
+    datasets_with_mixed_feature_reference: list[Dataset],
 ) -> None:
-    """
-    Datasets with a "mixed" feature_reference will not be included by the filter pipeline
-    """
+    """Datasets with a "mixed" feature_reference will not be included by the filter pipeline"""
     ad_filter = make_anndata_cell_filter({})
     result = [ad_filter(open_anndata(".", d)) for d in datasets_with_mixed_feature_reference]
     assert all(len(ad) == 0 for ad in result)
@@ -43,11 +41,9 @@ def test_open_anndata_filters_out_datasets_with_mixed_feature_reference(
 
 def test_open_anndata_filters_out_wrong_schema_version_datasets(
     caplog: pytest.LogCaptureFixture,
-    datasets_with_incorrect_schema_version: List[Dataset],
+    datasets_with_incorrect_schema_version: list[Dataset],
 ) -> None:
-    """
-    Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`
-    """
+    """Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`"""
     for dataset in datasets_with_incorrect_schema_version:
         with pytest.raises(ValueError, match="incorrect CxG schema version"):
             _ = open_anndata(".", dataset)
@@ -148,7 +144,7 @@ def test_AnnDataProxy_X_types(census_build_args: CensusBuildArgs, X_conv: str, X
     assert isinstance(adata[0:2].X, X_type)
 
     def _toarray(a: npt.NDArray[np.float32] | sparse.spmatrix) -> npt.NDArray[np.float32]:
-        if isinstance(a, (sparse.csc_matrix, sparse.csr_matrix)):
+        if isinstance(a, (sparse.csc_matrix, sparse.csr_matrix)):  # noqa: UP038
             return a.toarray()  # type: ignore[no-any-return]
         else:
             return a

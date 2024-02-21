@@ -151,9 +151,7 @@ def make_trainer(config, model, train_dataset, test_dataset):
 
 
 def count_label_errors(eval):
-    """
-    Count the label errors & error rate in the model's predictions.
-    """
+    """Count the label errors & error rate in the model's predictions."""
     pred_labels = eval.predictions.argmax(-1)
     true_labels = eval.label_ids
     assert len(pred_labels) == len(true_labels)

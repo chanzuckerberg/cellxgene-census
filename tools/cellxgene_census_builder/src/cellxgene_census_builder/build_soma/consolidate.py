@@ -1,7 +1,7 @@
 import logging
 import re
+from collections.abc import Sequence
 from concurrent.futures import Executor, Future, as_completed
-from typing import List, Optional, Sequence
 
 import attrs
 import tiledb
@@ -47,11 +47,10 @@ def submit_consolidate(
     uri: str,
     pool: Executor,
     vacuum: bool,
-    include: Optional[Sequence[str]] = None,
-    exclude: Optional[Sequence[str]] = None,
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
 ) -> Sequence[Future[str]]:
-    """
-    This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
+    """This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
 
     Will vacuum if requested. Excludes any object URI matching a regex in the exclude list.
@@ -73,7 +72,7 @@ def submit_consolidate(
     return futures
 
 
-def _gather(uri: str) -> List[ConsolidationCandidate]:
+def _gather(uri: str) -> list[ConsolidationCandidate]:
     # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
         uris_to_consolidate = list_uris_to_consolidate(census)
@@ -82,10 +81,8 @@ def _gather(uri: str) -> List[ConsolidationCandidate]:
 
 def list_uris_to_consolidate(
     collection: soma.Collection,
-) -> List[ConsolidationCandidate]:
-    """
-    Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed.
-    """
+) -> list[ConsolidationCandidate]:
+    """Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed."""
     uris = []
     for soma_obj in collection.values():
         type = soma_obj.soma_type

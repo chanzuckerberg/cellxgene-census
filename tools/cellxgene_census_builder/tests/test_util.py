@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
+from scipy.sparse import coo_matrix, csr_matrix, triu
+
 from cellxgene_census_builder.build_soma.util import array_chunker, is_nonnegative_integral
 from cellxgene_census_builder.util import urlcat, urljoin
-from scipy.sparse import coo_matrix, csr_matrix, triu
 
 
 def test_is_nonnegative_integral() -> None:

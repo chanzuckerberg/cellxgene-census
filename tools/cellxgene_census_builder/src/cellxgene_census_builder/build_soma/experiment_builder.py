@@ -1,16 +1,11 @@
 import concurrent.futures
 import gc
 import logging
+from collections.abc import Generator, Sequence
 from contextlib import ExitStack
 from typing import (
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
+    Self,
     TypedDict,
-    Union,
     overload,
 )
 
@@ -25,7 +20,6 @@ import somacore
 import tiledbsoma as soma
 from scipy import sparse
 from somacore.options import OpenMode
-from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
@@ -80,11 +74,11 @@ class AxisStats:
     var_stats: pd.DataFrame
 
 
-AccumulateXResult = Tuple[PresenceResult, AxisStats]
+AccumulateXResult = tuple[PresenceResult, AxisStats]
 AccumulateXResults = Sequence[AccumulateXResult]
 
 
-def _assert_open_for_write(obj: Optional[somacore.SOMAObject]) -> None:
+def _assert_open_for_write(obj: somacore.SOMAObject | None) -> None:
     assert obj is not None
     assert obj.exists(obj.uri)
     assert obj.mode == "w"
@@ -93,8 +87,7 @@ def _assert_open_for_write(obj: Optional[somacore.SOMAObject]) -> None:
 
 @attrs.define(frozen=True)
 class ExperimentSpecification:
-    """
-    Declarative "specification" of a SOMA experiment. This is a read-only
+    """Declarative "specification" of a SOMA experiment. This is a read-only
     specification, independent of the datasets used to build the census.
 
     Parameters:
@@ -119,8 +112,7 @@ class ExperimentSpecification:
 
 
 class ExperimentBuilder:
-    """
-    Class that embodies the operators and state to build an Experiment.
+    """Class that embodies the operators and state to build an Experiment.
     The creation and driving of these objects is done by the main loop.
     """
 
@@ -133,15 +125,15 @@ class ExperimentBuilder:
         self.n_var: int = 0
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
-        self.obs_df_accumulation: List[pd.DataFrame] = []
-        self.obs_df: Optional[pd.DataFrame] = None
-        self.var_df: Optional[pd.DataFrame] = None
-        self.dataset_obs_joinid_start: Dict[str, int] = {}
+        self.obs_df_accumulation: list[pd.DataFrame] = []
+        self.obs_df: pd.DataFrame | None = None
+        self.var_df: pd.DataFrame | None = None
+        self.dataset_obs_joinid_start: dict[str, int] = {}
         self.census_summary_cell_counts: pd.DataFrame = init_summary_counts_accumulator()
-        self.experiment: Optional[soma.Experiment] = None  # initialized in create()
-        self.experiment_uri: Optional[str] = None  # initialized in create()
-        self.global_var_joinids: Optional[pd.DataFrame] = None
-        self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
+        self.experiment: soma.Experiment | None = None  # initialized in create()
+        self.experiment_uri: str | None = None  # initialized in create()
+        self.global_var_joinids: pd.DataFrame | None = None
+        self.presence: dict[int, tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
 
     @property
     def name(self) -> str:
@@ -153,7 +145,6 @@ class ExperimentBuilder:
 
     def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
-
         logger.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
@@ -165,17 +156,15 @@ class ExperimentBuilder:
         # make measurement and add to ms collection
         ms.add_new_collection(MEASUREMENT_RNA_NAME, soma.Measurement)
 
-    def filter_anndata_cells(self, ad: anndata.AnnData) -> Union[None, anndata.AnnData]:
+    def filter_anndata_cells(self, ad: anndata.AnnData) -> None | anndata.AnnData:
         anndata_cell_filter = make_anndata_cell_filter(self.anndata_cell_filter_spec)
         return anndata_cell_filter(ad)
 
     def accumulate_axes(self, dataset: Dataset, ad: anndata.AnnData) -> int:
-        """
-        Build (accumulate) in-memory obs and var.
+        """Build (accumulate) in-memory obs and var.
 
         Returns: number of cells that make it past the experiment filter.
         """
-
         assert len(ad.obs) > 0
 
         # Narrow columns just to minimize memory footprint. Summary cell counting
@@ -297,9 +286,7 @@ class ExperimentBuilder:
             self.n_var = 0
 
     def create_X_with_layers(self) -> None:
-        """
-        Create layers in ms['RNA']/X
-        """
+        """Create layers in ms['RNA']/X."""
         logger.info(f"{self.name}: create X layers")
 
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]  # type:ignore
@@ -319,10 +306,8 @@ class ExperimentBuilder:
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
 
-    def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
-        """
-        Save presence matrix per Experiment
-        """
+    def populate_presence_matrix(self, datasets: list[Dataset]) -> None:
+        """Save presence matrix per Experiment."""
         _assert_open_for_write(self.experiment)
         logger.info(f"Save presence matrix for {self.name} - start")
 
@@ -369,10 +354,7 @@ class ExperimentBuilder:
             WRITE_NORM_STRIDE = 2**18  # controls TileDB fragment size, which impacts consolidation time
             mem_budget = (
                 # (20 bytes per COO X stride X typical-nnz X overhead) + static-allocation + passed-data-size
-                int(20 * WRITE_NORM_STRIDE * 4000 * 2)
-                + (3 * 1024**3)
-                + feature_length.nbytes
-                + is_smart_seq.nbytes
+                int(20 * WRITE_NORM_STRIDE * 4000 * 2) + (3 * 1024**3) + feature_length.nbytes + is_smart_seq.nbytes
             )
             n_workers = n_workers_from_memory_budget(args, mem_budget)
             with create_process_pool_executor(args, max_workers=n_workers) as pe:
@@ -398,12 +380,11 @@ class ExperimentBuilder:
 
 
 def _get_axis_stats(
-    raw_X: Union[sparse.spmatrix, npt.NDArray[np.float32]],
+    raw_X: sparse.spmatrix | npt.NDArray[np.float32],
     dataset_obs_joinid_start: int,
     local_var_joinids: npt.NDArray[np.int64],
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Generate obs and var summary stats, e.g., raw_sum, etc.
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Generate obs and var summary stats, e.g., raw_sum, etc.
 
     Return tuple of (obs_stats_df, var_stats_df), both indexed by soma_joinid.
     """
@@ -431,7 +412,7 @@ class AccumXEBParams:
     n_obs: int
     n_var: int
     anndata_cell_filter_spec: AnnDataFilterSpec
-    global_var_joinids: Optional[pd.DataFrame]
+    global_var_joinids: pd.DataFrame | None
     experiment_uri: str
 
 
@@ -442,14 +423,14 @@ ACCUM_X_STRIDE = 125_000
 def _accumulate_all_X_layers(
     assets_path: str,
     dataset: Dataset,
-    experiment_builders: List[AccumXEBParams],
-    dataset_obs_joinid_starts: List[Union[None, int]],
+    experiment_builders: list[AccumXEBParams],
+    dataset_obs_joinid_starts: list[None | int],
     ms_name: str,
-    progress: Tuple[int, int],
+    progress: tuple[int, int],
 ) -> AccumulateXResults:
-    """
-    For this dataset, save all X layer information for each Experiment. This currently
-    includes:
+    """For this dataset, save all X layer information for each Experiment.
+
+    This currently includes:
         X['raw'] - raw counts
 
     Also accumulates presence information per dataset.
@@ -459,8 +440,8 @@ def _accumulate_all_X_layers(
     logger.info(f"Saving X layer for dataset - start {dataset.dataset_id} ({progress[0]} of {progress[1]})")
     unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
 
-    results: List[AccumulateXResult] = []
-    for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts):
+    results: list[AccumulateXResult] = []
+    for eb, dataset_obs_joinid_start in zip(experiment_builders, dataset_obs_joinid_starts, strict=False):
         if dataset_obs_joinid_start is None:
             # this dataset has no data for this experiment
             continue
@@ -577,8 +558,8 @@ def _accumulate_all_X_layers(
 def _accumulate_X(
     assets_path: str,
     dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
+    experiment_builders: list["ExperimentBuilder"],
+    progress: tuple[int, int],
 ) -> AccumulateXResults:
     ...
 
@@ -587,9 +568,9 @@ def _accumulate_X(
 def _accumulate_X(
     assets_path: str,
     dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
-    executor: Optional[ResourcePoolProcessExecutor],
+    experiment_builders: list["ExperimentBuilder"],
+    progress: tuple[int, int],
+    executor: ResourcePoolProcessExecutor | None,
 ) -> concurrent.futures.Future[AccumulateXResults]:
     ...
 
@@ -597,15 +578,13 @@ def _accumulate_X(
 def _accumulate_X(
     assets_path: str,
     dataset: Dataset,
-    experiment_builders: List["ExperimentBuilder"],
-    progress: Tuple[int, int],
-    executor: Optional[ResourcePoolProcessExecutor] = None,
-) -> Union[concurrent.futures.Future[AccumulateXResults], AccumulateXResults]:
-    """
-    Save X layer data for a single AnnData, for all Experiments. Return a future if
+    experiment_builders: list["ExperimentBuilder"],
+    progress: tuple[int, int],
+    executor: ResourcePoolProcessExecutor | None = None,
+) -> concurrent.futures.Future[AccumulateXResults] | AccumulateXResults:
+    """Save X layer data for a single AnnData, for all Experiments. Return a future if
     executor is specified, otherwise immediately do the work.
     """
-
     # build params to pass to child workers - this avoids pickling unecessary
     # data (or data that can't be pickled)
     eb_params = []
@@ -668,16 +647,14 @@ def _accumulate_X(
 
 def populate_X_layers(
     assets_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
+    datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
     args: CensusBuildArgs,
 ) -> None:
-    """
-    Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing.
-    """
+    """Do all X layer processing for all Experiments. Also accumulate presence matrix data for later writing."""
     # populate X layers
     logger.debug("populate_X_layers begin")
-    results: List[AccumulateXResult] = []
+    results: list[AccumulateXResult] = []
     if args.config.multi_process:
         # reserve memory to accumulate the stats
         n_obs = sum(eb.n_obs for eb in experiment_builders)
@@ -739,7 +716,7 @@ def populate_X_layers(
 class SummaryStats(TypedDict):
     total_cell_count: int
     unique_cell_count: int
-    number_donors: Dict[str, int]
+    number_donors: dict[str, int]
 
 
 def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> SummaryStats:
@@ -751,8 +728,7 @@ def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> Summa
 
 
 def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
-    """Inplace addition of tissue_general-related columns"""
-
+    """Inplace addition of tissue_general-related column."""
     # UBERON tissue term mapper
     from .tissue_mapper import TissueMapper  # type: ignore
 
@@ -774,10 +750,9 @@ def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
 
 
 def reopen_experiment_builders(
-    experiment_builders: List[ExperimentBuilder], mode: OpenMode = "w"
+    experiment_builders: list[ExperimentBuilder], mode: OpenMode = "w"
 ) -> Generator[ExperimentBuilder, None, None]:
-    """
-    Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use
+    """Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use
     the experiment for writing, without having to explicitly close it.
     """
     with ExitStack() as experiments_stack:
@@ -791,9 +766,8 @@ def reopen_experiment_builders(
             yield eb
 
 
-def _write_X_normalized(args: Tuple[str, int, int, npt.NDArray[np.int64], npt.NDArray[np.bool_]]) -> None:
-    """
-    Helper for ExperimentBuilder.write_X_normalized.
+def _write_X_normalized(args: tuple[str, int, int, npt.NDArray[np.int64], npt.NDArray[np.bool_]]) -> None:
+    """Helper for ExperimentBuilder.write_X_normalized.
 
     Read indicated rows from X['raw'], write to X['normalized']
     """
@@ -862,8 +836,7 @@ def _normalize(
 
 @numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np.float32]:
-    """
-    Generate reduced precision floating point array, with round half to even.
+    """Generate reduced precision floating point array, with round half to even.
     IMPORANT: In-place operation.
 
     Ref: https://gmd.copernicus.org/articles/14/377/2021/gmd-14-377-2021.html
