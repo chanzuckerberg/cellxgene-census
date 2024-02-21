@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from concurrent import futures
-from typing import Any, Generator, Tuple
+from typing import Any, Generator
 
 import numpy as np
 import numpy.typing as npt
@@ -21,8 +21,7 @@ def mean_variance(
     ddof: int = 1,
     nnz_only: bool = False,
 ) -> pd.DataFrame:
-    """
-    Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations are done in an accumulative
+    """Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations are done in an accumulative
     chunked fashion. For the mean and variance calculations, the total number of elements (N) is, by default, the
     corresponding dimension size: for column-wise calculations (``axis = 0``) N is number of rows, for row-wise
     calculations (``axis = 1``) N is number of columns. For metrics calculated only on nnz (explicitly stored) values of
@@ -54,7 +53,6 @@ def mean_variance(
     Lifecycle:
         experimental
     """
-
     if axis not in (0, 1):
         raise ValueError("axis must be 0 or 1")
 
@@ -70,9 +68,12 @@ def mean_variance(
     n_batches = 1
     n_samples = np.array([n_dim_1], dtype=np.int64)
 
-    idx = pd.Index(data=query.obs_joinids() if axis == 1 else query.var_joinids(), name="soma_joinid")
+    idx = pd.Index(
+        data=query.obs_joinids() if axis == 1 else query.var_joinids(),
+        name="soma_joinid",
+    )
 
-    def iterate() -> Generator[Tuple[npt.NDArray[np.int64], Any], None, None]:
+    def iterate() -> Generator[tuple[npt.NDArray[np.int64], Any], None, None]:
         with futures.ThreadPoolExecutor(max_workers=1) as pool:  # Note: _EagerIterator only supports one thread
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
                 dim = idx.get_indexer(arrow_tbl[f"soma_dim_{1-axis}"].to_numpy())

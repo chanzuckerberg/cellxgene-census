@@ -31,7 +31,7 @@ def main(argv):
         aws_region = "us-west-2"
         try:
             aws_region = boto3.Session().region_name
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
         tiledbsoma_context = tiledbsoma.options.SOMATileDBContext(
             tiledb_ctx=tiledb.Ctx(

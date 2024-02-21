@@ -5,7 +5,7 @@ import shutil
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import numpy as np
 import pyarrow as pa
@@ -163,9 +163,8 @@ def ingest(config: Config) -> None:
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
-def validate_contrib_embedding(uri: Union[str, Path], config: Config, skip_storage_version_check: bool = False) -> None:
-    """
-    Validate embedding where embedding metadata is encoded in the array.
+def validate_contrib_embedding(uri: str | Path, config: Config, skip_storage_version_check: bool = False) -> None:
+    """Validate embedding where embedding metadata is encoded in the array.
 
     Raises upon invalid result
     """
@@ -187,10 +186,10 @@ def load_qc_anndata(
     config: Config,
     embedding: Path,
     obs_value_filter: str,
-    obs_columns: List[str],
+    obs_columns: list[str],
     emb_name: str,
-) -> Optional[sc.AnnData]:
-    """Returns None if the value filter excludes all cells"""
+) -> sc.AnnData | None:
+    """Returns None if the value filter excludes all cells."""
     if "soma_joinid" not in obs_columns:
         obs_columns = ["soma_joinid"] + obs_columns
 
@@ -243,7 +242,7 @@ def create_qc_plots(config: Config, embedding: Path) -> None:
     sc._settings.settings.autoshow = False
     sc._settings.settings.figdir = (config.args.cwd / "figures").as_posix()
 
-    def make_random_palette(n_colors: int) -> List[str]:
+    def make_random_palette(n_colors: int) -> list[str]:
         rng = np.random.default_rng()
         colors = rng.integers(0, 0xFFFFFF, size=n_colors, dtype=np.uint32)
         return [f"#{c:06X}" for c in colors]
@@ -274,7 +273,7 @@ def create_qc_plots(config: Config, embedding: Path) -> None:
         logger.info(f"Saving UMAP plots for {k}")
         for color_by in color_by_columns:
             n_categories = len(adata.obs[color_by].astype(str).astype("category").cat.categories)
-            plot_color_kwargs: Dict[str, Any] = dict(color=color_by)
+            plot_color_kwargs: dict[str, Any] = {"color": color_by}
             # scanpy does a good job until category counts > 102
             if n_categories > len(sc.plotting.palettes.default_102):
                 plot_color_kwargs["palette"] = make_random_palette(n_categories)
@@ -282,8 +281,8 @@ def create_qc_plots(config: Config, embedding: Path) -> None:
 
 
 def inject_embedding_into_census_build(config: Config, embedding_src_path: Path) -> None:
-    """
-    Inject an existing embedding (ingested via this tool) into its corresponding Census build.
+    """Inject an existing embedding (ingested via this tool) into its corresponding Census build.
+
     Presumed workflow:
         * build census
         * create embedding(s)

@@ -7,7 +7,7 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, TypeVar, Union
+from typing import Any, Self, TypeVar
 
 import numpy as np
 import numpy.typing as npt
@@ -16,7 +16,6 @@ import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
 from scipy import sparse
-from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
@@ -56,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass  # TODO: use attrs
 class EbInfo:
-    """Class used to collect information about axis (for validation code)"""
+    """Class used to collect information about axis (for validation code)."""
 
     n_obs: int = 0
     vars: set[str] = dataclasses.field(default_factory=set)
@@ -78,9 +77,8 @@ def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experime
     return soma.Experiment.open(urlcat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
 
 
-def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: List[ExperimentSpecification]) -> bool:
-    """
-    Validate all objects present and contain expected metadata.
+def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
+    """Validate all objects present and contain expected metadata.
 
     soma_path
         +-- census_info: soma.Collection
@@ -91,7 +89,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
         |   +-- homo_sapiens: soma.Experiment
         |   +-- mus_musculus: soma.Experiment
     """
-
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         assert soma.Collection.exists(census.uri)
         assert datetime.fromisoformat(census.metadata["created_on"])
@@ -161,13 +158,13 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: L
     return True
 
 
-def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> Dict[str, EbInfo]:
+def _validate_axis_dataframes(args: tuple[str, str, Dataset, list[ExperimentSpecification]]) -> dict[str, EbInfo]:
     assets_path, soma_path, dataset, experiment_specifications = args
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
         dataset_id = dataset.dataset_id
         unfiltered_ad = open_anndata(assets_path, dataset)
-        eb_info: Dict[str, EbInfo] = {}
+        eb_info: dict[str, EbInfo] = {}
         for eb in experiment_specifications:
             eb_info[eb.name] = EbInfo()
             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
@@ -217,14 +214,13 @@ def _validate_axis_dataframes(args: Tuple[str, str, Dataset, List[ExperimentSpec
 def validate_axis_dataframes(
     assets_path: str,
     soma_path: str,
-    datasets: List[Dataset],
-    experiment_specifications: List[ExperimentSpecification],
+    datasets: list[Dataset],
+    experiment_specifications: list[ExperimentSpecification],
     args: CensusBuildArgs,
-) -> Dict[str, EbInfo]:
-    """ "
-    Validate axis dataframes: schema, shape, contents
+) -> dict[str, EbInfo]:
+    """Validate axis dataframes: schema, shape, contents.
 
-    Raises on error.  Returns True on success.
+    Raises on error. Returns True on success.
     """
     logger.debug("validate_axis_dataframes")
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
@@ -303,15 +299,14 @@ def validate_axis_dataframes(
 def _validate_X_obs_axis_stats(
     eb: ExperimentSpecification, dataset: Dataset, census_obs: pd.DataFrame, expected_X: sparse.spmatrix
 ) -> bool:
-    """
-    Helper function for _validate_X_layers_contents_by_dataset
+    """Helper function for _validate_X_layers_contents_by_dataset.
 
     Checks that the computed X stats, as stored in obs and var, are correct.
     """
     TypeVar("T", bound=npt.NBitBase)
 
-    def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int = 1) -> Any:  # cough, cough
-        """Helper: variance over sparse matrices"""
+    def var(X: sparse.csc_matrix | sparse.csr_matrix, axis: int = 0, ddof: int = 1) -> Any:  # cough, cough
+        """Helper: variance over sparse matrices."""
         if isinstance(X, np.ndarray):
             return np.var(X, axis=axis, ddof=ddof)
 
@@ -328,7 +323,7 @@ def _validate_X_obs_axis_stats(
         return v
 
     # various datasets have explicit zeros, which are not stored in the Census
-    if isinstance(expected_X, (sparse.sparray, sparse.spmatrix)):
+    if isinstance(expected_X, (sparse.sparray, sparse.spmatrix)):  # noqa: UP038
         expected_X.eliminate_zeros()
 
     # obs.raw_sum
@@ -360,9 +355,8 @@ def _validate_X_obs_axis_stats(
     return True
 
 
-def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[ExperimentSpecification]]) -> bool:
-    """
-    Validate that a single dataset is correctly represented in the census. Intended to be
+def _validate_Xraw_contents_by_dataset(args: tuple[str, str, Dataset, list[ExperimentSpecification]]) -> bool:
+    """Validate that a single dataset is correctly represented in the census. Intended to be
     dispatched from validate_X_layers.
 
     Currently, implements the following tests:
@@ -508,8 +502,8 @@ def _validate_Xraw_contents_by_dataset(args: Tuple[str, str, Dataset, List[Exper
     return True
 
 
-def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str, str, int, int]) -> bool:
-    """Validate that all X layers have no duplicate coordinates"""
+def _validate_X_layer_has_unique_coords(args: tuple[ExperimentSpecification, str, str, int, int]) -> bool:
+    """Validate that all X layers have no duplicate coordinates."""
     experiment_specification, soma_path, layer_name, row_range_start, row_range_stop = args
     with open_experiment(soma_path, experiment_specification) as exp:
         logger.info(
@@ -542,8 +536,8 @@ def _validate_X_layer_has_unique_coords(args: Tuple[ExperimentSpecification, str
     return True
 
 
-def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -> bool:
-    """Validate that X['normalized'] is correct relative to X['raw']"""
+def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -> bool:
+    """Validate that X['normalized'] is correct relative to X['raw']."""
     experiment_specification, soma_path, row_range_start, row_range_stop = args
     logger.info(
         f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
@@ -639,15 +633,14 @@ def _validate_Xnorm_layer(args: Tuple[ExperimentSpecification, str, int, int]) -
 def validate_X_layers(
     assets_path: str,
     soma_path: str,
-    datasets: List[Dataset],
-    experiment_specifications: List[ExperimentSpecification],
-    eb_info: Dict[str, EbInfo],
+    datasets: list[Dataset],
+    experiment_specifications: list[ExperimentSpecification],
+    eb_info: dict[str, EbInfo],
     args: CensusBuildArgs,
 ) -> bool:
-    """ "
-    Validate all X layers: schema, shape, contents
+    """Validate all X layers: schema, shape, contents.
 
-    Raises on error.  Returns True on success.
+    Raises on error. Returns True on success.
     """
     logger.info("validate_X_layers start")
     avg_row_nnz = 0
@@ -736,7 +729,7 @@ def validate_X_layers(
     return True
 
 
-def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]:
+def load_datasets_from_census(assets_path: str, soma_path: str) -> list[Dataset]:
     # Datasets are pulled from the census datasets manifest, validating the SOMA
     # census against the snapshot assets.
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
@@ -749,7 +742,7 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> List[Dataset]
         return datasets
 
 
-def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> bool:
+def validate_manifest_contents(assets_path: str, datasets: list[Dataset]) -> bool:
     """Confirm contents of manifest are correct."""
     for d in datasets:
         p = pathlib.Path(urlcat(assets_path, d.dataset_h5ad_path))
@@ -760,7 +753,7 @@ def validate_manifest_contents(assets_path: str, datasets: List[Dataset]) -> boo
 
 
 def validate_consolidation(soma_path: str) -> bool:
-    """Verify that obs, var and X layers are all fully consolidated & vacuumed"""
+    """Verify that obs, var and X layers are all fully consolidated & vacuumed."""
 
     def is_empty_tiledb_array(uri: str) -> bool:
         with tiledb.open(uri) as A:
@@ -779,7 +772,7 @@ def validate_consolidation(soma_path: str) -> bool:
 
 
 def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
-    """Verify that the entire census is a single directory tree"""
+    """Verify that the entire census is a single directory tree."""
     assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
     assert os.path.exists(soma_path), f"Unable to find SOMA path, expecting {soma_path}"
     assert os.path.exists(assets_path), f"Unable to find assets path, expecting {assets_path}"
@@ -788,8 +781,8 @@ def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
 
 
 def validate_relative_path(soma_path: str) -> bool:
-    """
-    Verify the census objects are stored in the same relative path
+    """Verify the census objects are stored in the same relative path.
+
     :param soma_path:
     :return:
     """
@@ -810,11 +803,9 @@ def validate_relative_path(soma_path: str) -> bool:
 
 
 def validate_internal_consistency(
-    soma_path: str, experiment_specifications: List[ExperimentSpecification], datasets: List[Dataset]
+    soma_path: str, experiment_specifications: list[ExperimentSpecification], datasets: list[Dataset]
 ) -> bool:
-    """
-    Internal checks that various computed stats match.
-    """
+    """Internal checks that various computed stats match."""
     logger.info("validate_internal_consistency - cross-checks start")
     datasets_df: pd.DataFrame = Dataset.to_dataframe(datasets).set_index("soma_joinid")
 
@@ -885,17 +876,16 @@ def validate_internal_consistency(
 
 
 def validate_soma_bounding_box(
-    soma_path: str, experiment_specifications: List[ExperimentSpecification], eb_info: Dict[str, EbInfo]
+    soma_path: str, experiment_specifications: list[ExperimentSpecification], eb_info: dict[str, EbInfo]
 ) -> bool:
-    """
-    Verify that single-cell-data/TileDB-SOMA#1969 is not affecting our results.
+    """Verify that single-cell-data/TileDB-SOMA#1969 is not affecting our results.
 
     Verification is:
         * shape is set correctly
         * no sparse arrays contain the bounding box in metadata
     """
 
-    def get_sparse_arrays(C: soma.Collection) -> List[soma.SparseNDArray]:
+    def get_sparse_arrays(C: soma.Collection) -> list[soma.SparseNDArray]:
         uris = []
         for soma_obj in C.values():
             type = soma_obj.soma_type
@@ -935,8 +925,7 @@ def validate_soma_bounding_box(
 
 
 def validate(args: CensusBuildArgs) -> bool:
-    """
-    Validate that the "census" matches the datasets and experiment builder spec.
+    """Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
     """

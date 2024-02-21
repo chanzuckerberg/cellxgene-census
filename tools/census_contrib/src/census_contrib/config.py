@@ -11,5 +11,5 @@ if TYPE_CHECKING:
 
 @attrs.define(kw_only=True, frozen=True)
 class Config:
-    args: "Arguments"
-    metadata: "EmbeddingMetadata"
+    args: Arguments
+    metadata: EmbeddingMetadata

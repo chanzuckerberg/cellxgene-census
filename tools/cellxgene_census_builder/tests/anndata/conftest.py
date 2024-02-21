@@ -1,7 +1,7 @@
 import pathlib
-from typing import List
 
 import pytest
+
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_state import CensusBuildArgs
 
@@ -9,7 +9,7 @@ from ..conftest import ORGANISMS, get_anndata
 
 
 @pytest.fixture
-def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
 
@@ -36,7 +36,7 @@ def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) ->
 
 
 @pytest.fixture
-def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
 
@@ -65,7 +65,7 @@ def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> List[D
 
 
 @pytest.fixture
-def datasets_with_incorrect_schema_version(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets_with_incorrect_schema_version(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
 

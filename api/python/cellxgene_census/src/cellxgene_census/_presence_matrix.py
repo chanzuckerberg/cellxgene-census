@@ -2,7 +2,7 @@
 #
 # Licensed under the MIT License.
 
-"""Presence matrix methods
+"""Presence matrix methods.
 
 Methods to retrieve the feature dataset presence matrix.
 """
@@ -44,7 +44,6 @@ def get_presence_matrix(
         <321x60554 sparse array of type '<class 'numpy.uint8'>'
         with 6441269 stored elements in Compressed Sparse Row format>
     """
-
     exp = _get_experiment(census, organism)
     presence = exp.ms[measurement_name]["feature_dataset_presence_matrix"]
     return presence.read((slice(None),)).coos().concat().to_scipy().tocsr()

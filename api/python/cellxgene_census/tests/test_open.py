@@ -67,7 +67,9 @@ def test_open_soma_with_customized_tiledb_config(latest_locator: CensusLocator) 
 
 
 @pytest.mark.live_corpus
-def test_open_soma_with_customized_plain_soma_context(latest_locator: CensusLocator) -> None:
+def test_open_soma_with_customized_plain_soma_context(
+    latest_locator: CensusLocator,
+) -> None:
     soma_init_buffer_bytes = "221000"
     timestamp_ms = int(time.time() * 1000) - 10  # don't use exactly current time, as that is the default
     cfg = {
@@ -88,7 +90,9 @@ def test_open_soma_with_customized_plain_soma_context(latest_locator: CensusLoca
 
 
 @pytest.mark.live_corpus
-def test_open_soma_with_customized_default_soma_context(latest_locator: CensusLocator) -> None:
+def test_open_soma_with_customized_default_soma_context(
+    latest_locator: CensusLocator,
+) -> None:
     soma_init_buffer_bytes = "221000"
 
     timestamp_ms = int(time.time() * 1000) - 10  # don't use exactly current time, as that is the default
@@ -113,21 +117,31 @@ def test_open_soma_uri_with_custom_s3_region() -> None:
 
     with patch("cellxgene_census._open.soma.open") as m:
         cellxgene_census.open_soma(
-            uri="s3://bucket/cell-census/2022-11-01/soma/", tiledb_config={"vfs.s3.region": "region-1"}
+            uri="s3://bucket/cell-census/2022-11-01/soma/",
+            tiledb_config={"vfs.s3.region": "region-1"},
         )
 
         m.assert_called_once_with(
-            "s3://bucket/cell-census/2022-11-01/soma/", mode="r", soma_type=soma.Collection, context=ANY
+            "s3://bucket/cell-census/2022-11-01/soma/",
+            mode="r",
+            soma_type=soma.Collection,
+            context=ANY,
         )
         assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "region-1"
 
 
-def test_open_soma_census_version_always_uses_mirror_s3_region(requests_mock: rm.Mocker) -> None:
+def test_open_soma_census_version_always_uses_mirror_s3_region(
+    requests_mock: rm.Mocker,
+) -> None:
     assert get_default_soma_context().tiledb_config["vfs.s3.region"] != "mirror-region-1", "test pre-condition"
 
     mock_mirrors = {
         "default": "test-mirror",
-        "test-mirror": {"provider": "S3", "base_uri": "s3://mirror-bucket/", "region": "mirror-region-1"},
+        "test-mirror": {
+            "provider": "S3",
+            "base_uri": "s3://mirror-bucket/",
+            "region": "mirror-region-1",
+        },
     }
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
@@ -147,7 +161,10 @@ def test_open_soma_census_version_always_uses_mirror_s3_region(requests_mock: rm
         cellxgene_census.open_soma(census_version="latest")
 
         m.assert_called_once_with(
-            "s3://mirror-bucket/cell-census/2022-11-01/soma/", mode="r", soma_type=soma.Collection, context=ANY
+            "s3://mirror-bucket/cell-census/2022-11-01/soma/",
+            mode="r",
+            soma_type=soma.Collection,
+            context=ANY,
         )
         assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "mirror-region-1"
 
@@ -156,7 +173,10 @@ def test_open_soma_census_version_always_uses_mirror_s3_region(requests_mock: rm
         cellxgene_census.open_soma(census_version="latest", tiledb_config={"vfs.s3.region": "region-2"})
 
         m.assert_called_once_with(
-            "s3://mirror-bucket/cell-census/2022-11-01/soma/", mode="r", soma_type=soma.Collection, context=ANY
+            "s3://mirror-bucket/cell-census/2022-11-01/soma/",
+            mode="r",
+            soma_type=soma.Collection,
+            context=ANY,
         )
         assert m.call_args[1]["context"].tiledb_config["vfs.s3.region"] == "mirror-region-1"
 
@@ -190,8 +210,16 @@ def test_open_soma_errors(requests_mock: rm.Mocker) -> None:
 def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     mock_mirrors = {
         "default": "test-mirror",
-        "test-mirror": {"provider": "S3", "base_uri": "s3://mirror-bucket-1/", "region": "region-1"},
-        "test-mirror-2": {"provider": "S3", "base_uri": "s3://mirror-bucket-2/", "region": "region-2"},
+        "test-mirror": {
+            "provider": "S3",
+            "base_uri": "s3://mirror-bucket-1/",
+            "region": "region-1",
+        },
+        "test-mirror-2": {
+            "provider": "S3",
+            "base_uri": "s3://mirror-bucket-2/",
+            "region": "region-2",
+        },
     }
     requests_mock.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, json=mock_mirrors)
 
@@ -219,14 +247,24 @@ def test_open_soma_uses_correct_mirror(requests_mock: rm.Mocker) -> None:
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma()
         m.assert_called_once_with(
-            {"uri": "s3://mirror-bucket-1/cell-census/2022-11-01/soma/", "region": "region-1", "provider": "S3"}, None
+            {
+                "uri": "s3://mirror-bucket-1/cell-census/2022-11-01/soma/",
+                "region": "region-1",
+                "provider": "S3",
+            },
+            None,
         )
 
     # Verify that the correct mirror is used if a mirror parameter is specified
     with patch("cellxgene_census._open._open_soma") as m:
         cellxgene_census.open_soma(mirror="test-mirror-2")
         m.assert_called_once_with(
-            {"uri": "s3://mirror-bucket-2/cell-census/2022-11-01/soma/", "region": "region-2", "provider": "S3"}, None
+            {
+                "uri": "s3://mirror-bucket-2/cell-census/2022-11-01/soma/",
+                "region": "region-2",
+                "provider": "S3",
+            },
+            None,
         )
 
     # Verify that an error is raised if a non existing mirror is specified
@@ -379,7 +417,10 @@ def test_opening_census_without_anon_access_fails_with_bogus_creds() -> None:
     os.environ["AWS_ACCESS_KEY_ID"] = "fake_id"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_key"
     # Passing an empty context
-    with pytest.raises(tiledb.TileDBError, match=r"The AWS Access Key Id you provided does not exist in our records"):
+    with pytest.raises(
+        tiledb.TileDBError,
+        match=r"The AWS Access Key Id you provided does not exist in our records",
+    ):
         cellxgene_census.open_soma(census_version="latest", context=soma.SOMATileDBContext())
 
 
@@ -397,7 +438,10 @@ def test_can_open_with_anonymous_access() -> None:
 
 def test_get_default_soma_context_tiledb_config_overrides() -> None:
     context = get_default_soma_context(
-        tiledb_config={"nondefault.config.option": "true", "vfs.s3.no_sign_request": "false"}
+        tiledb_config={
+            "nondefault.config.option": "true",
+            "vfs.s3.no_sign_request": "false",
+        }
     )
     assert context.tiledb_config["nondefault.config.option"] == "true", "adds new option"
     assert context.tiledb_config["vfs.s3.no_sign_request"] == "false", "overrides existing default"

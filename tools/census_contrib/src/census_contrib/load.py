@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractproperty
+from collections.abc import Iterator
 from contextlib import AbstractContextManager
 from pathlib import Path
-from typing import Any, Dict, Iterator, Literal, Tuple, Union
+from typing import Any, Literal
 
 import numpy as np
 import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
-from typing_extensions import Self
+from typing_extensions import Self  # noqa
 
 from .census_util import get_axis_soma_joinids
 from .config import Config
@@ -19,12 +20,11 @@ logger = get_logger()
 
 
 EmbeddingTableIterator = Iterator[pa.Table]
-EmbeddingIJDDomains = Dict[Literal["i", "j", "d"], Union[Tuple[float, float], Tuple[None, None]]]
+EmbeddingIJDDomains = dict[Literal["i", "j", "d"], tuple[float, float] | tuple[None, None]]
 
 
 class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["EmbeddingIJDPipe"], metaclass=ABCMeta):
-    """
-    Returns pa.Table with i, j, and d columns (i.e., COO), in row-major/C sorted order.
+    """Returns pa.Table with i, j, and d columns (i.e., COO), in row-major/C sorted order.
     Must not have dups.
     """
 
@@ -37,7 +37,7 @@ class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["Embedding
 
     @abstractproperty
     def domains(self) -> EmbeddingIJDDomains:
-        """Return domains of i, j, and d"""
+        """Return domains of i, j, and d."""
 
 
 class SOMAIJDPipe(EmbeddingIJDPipe):
@@ -80,7 +80,7 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
 
     @property
     def domains(self) -> EmbeddingIJDDomains:
-        """Return the domains of i, j and d"""
+        """Return the domains of i, j and d."""
         logger.debug("SOMAIJDPipe - scanning for domains")
 
         _domains: EmbeddingIJDDomains = {"i": (None, None), "j": (None, None), "d": (None, None)}
@@ -108,7 +108,8 @@ class SOMAIJDPipe(EmbeddingIJDPipe):
 
 
 class NPYIJDPipe(EmbeddingIJDPipe):
-    """
+    """NPYIJDPipe.
+
     Basic approach:
     1. load joinid 1d array as npy or txt
     2. argsort joinid array as there is no requirement it is 0..n
@@ -167,7 +168,7 @@ class NPYIJDPipe(EmbeddingIJDPipe):
 
     @property
     def domains(self) -> EmbeddingIJDDomains:
-        """Return the domains of i, j and d"""
+        """Return the domains of i, j and d."""
         logger.debug("NPYIJDPipe - scanning for domains")
 
         min_max = pa.compute.min_max(pa.array(self.embeddings.ravel()))

@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 import pandas as pd
 import pyarrow as pa

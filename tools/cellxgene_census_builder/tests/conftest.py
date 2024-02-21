@@ -1,5 +1,4 @@
 import pathlib
-from typing import List, Optional
 
 import anndata
 import attrs
@@ -7,13 +6,14 @@ import numpy as np
 import pandas as pd
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from scipy import sparse
+
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_soma.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
 from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
 from cellxgene_census_builder.util import process_init
-from scipy import sparse
 
 
 @attrs.define(frozen=True)
@@ -27,9 +27,7 @@ GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
 NUM_DATASET = 2
 
 
-def get_anndata(
-    organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False
-) -> anndata.AnnData:
+def get_anndata(organism: Organism, gene_ids: list[str] | None = None, no_zero_counts: bool = False) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
     n_genes = len(gene_ids)
@@ -124,7 +122,7 @@ def census_build_args(request: pytest.FixtureRequest, tmp_path: pathlib.Path) ->
 
 
 @pytest.fixture
-def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
     datasets = []

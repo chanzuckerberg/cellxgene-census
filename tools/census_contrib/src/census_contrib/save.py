@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
-from typing import Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -51,7 +50,7 @@ PLATFORM_CONFIG_TEMPLATE: PlatformConfig = {
 }
 
 
-def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float]) -> PlatformConfig:
+def make_platform_config(shape: tuple[int, int], value_range: tuple[float, float]) -> PlatformConfig:
     platform_config = copy.deepcopy(PLATFORM_CONFIG_TEMPLATE)
     tdb_schema = platform_config["tiledb"]["create"]
     tdb_schema["dims"]["soma_dim_1"]["tile"] = shape[1]
@@ -59,10 +58,10 @@ def make_platform_config(shape: Tuple[int, int], value_range: Tuple[float, float
 
 
 def create_sparse_array(
-    uri: Union[str, Path],
-    value_range: Tuple[float, float],  # closed, i.e., inclusive [min, max]
-    shape: Tuple[int, int],
-    context: Optional[soma.options.SOMATileDBContext] = None,
+    uri: str | Path,
+    value_range: tuple[float, float],  # closed, i.e., inclusive [min, max]
+    shape: tuple[int, int],
+    context: soma.options.SOMATileDBContext | None = None,
 ) -> soma.SparseNDArray:
     """Create and return opened sparse nd array. Can be used as a context manager."""
     array_path: str = Path(uri).as_posix()
@@ -84,8 +83,7 @@ def reduce_float_precision(tbl: pa.Table, sig_bits: int = 7) -> pa.Table:
 
 
 def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np.float32]:
-    """
-    Generate reduced precision floating point array, with round half to even.
+    """Generate reduced precision floating point array, with round half to even.
 
     IMPORANT: In-place operation.
 
@@ -107,7 +105,7 @@ def roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np
     return a
 
 
-def _consolidate_tiledb_object(uri: Union[str, Path], modes: Tuple[str, ...]) -> None:
+def _consolidate_tiledb_object(uri: str | Path, modes: tuple[str, ...]) -> None:
     import tiledb
 
     path: str = Path(uri).as_posix()
@@ -135,11 +133,11 @@ def _consolidate_tiledb_object(uri: Union[str, Path], modes: Tuple[str, ...]) ->
     logger.info(f"Consolidate/vacuum: end uri={path}")
 
 
-def consolidate_array(uri: Union[str, Path]) -> None:
+def consolidate_array(uri: str | Path) -> None:
     _consolidate_tiledb_object(uri, ("fragment_meta", "array_meta", "fragments", "commits"))
 
 
-def consolidate_group(uri: Union[str, Path]) -> None:
+def consolidate_group(uri: str | Path) -> None:
     # TODO: There is a bug in TileDB-Py that prevents consolidation of
     # group metadata. Skipping this step for now - remove this work-around
     # when the bug is fixed. As of 0.23.0, it is not yet fixed.
