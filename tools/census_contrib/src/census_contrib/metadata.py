@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import pathlib
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, cast
 
 import attrs
 import cattrs
@@ -11,7 +11,7 @@ import cattrs.preconf.pyyaml
 import cellxgene_census
 import requests
 from attrs import field, validators
-from typing_extensions import Self
+from typing_extensions import Self  # noqa
 
 from .args import Arguments
 from .census_util import open_census
@@ -20,7 +20,7 @@ from .util import get_logger
 logger = get_logger()
 
 
-def none_or_str(v: Optional[str]) -> str:
+def none_or_str(v: str | None) -> str:
     return "" if v is None else v
 
 
@@ -37,7 +37,7 @@ class EmbeddingMetadata:
     title: str = field(validator=validators.instance_of(str))
     description: str = field(validator=validators.instance_of(str))
     primary_contact: Contact = field(validator=validators.instance_of(Contact))
-    additional_contacts: Tuple[Contact, ...] = field(
+    additional_contacts: tuple[Contact, ...] = field(
         factory=tuple,
         validator=validators.deep_iterable(
             validators.instance_of(Contact),
@@ -56,7 +56,7 @@ class EmbeddingMetadata:
     submission_date: datetime.date = field(validator=validators.instance_of(datetime.date))
 
     @classmethod
-    def from_dict(cls, md: Dict[str, Any]) -> Self:
+    def from_dict(cls, md: dict[str, Any]) -> Self:
         return cast(Self, cattrs.structure_attrs_fromdict(md, cls))
 
     @classmethod
@@ -75,8 +75,8 @@ class EmbeddingMetadata:
             cattrs.preconf.json.make_converter(forbid_extra_keys=True, prefer_attrib_converters=True).loads(data, cls),
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        return cast(Dict[str, Any], cattrs.unstructure(self))
+    def to_dict(self) -> dict[str, Any]:
+        return cast(dict[str, Any], cattrs.unstructure(self))
 
     def to_json(self) -> str:
         return cast(str, cattrs.preconf.json.make_converter().dumps(self))
@@ -85,7 +85,7 @@ class EmbeddingMetadata:
         return cast(str, cattrs.preconf.pyyaml.make_converter().dumps(self))
 
 
-def load_metadata(path: Union[str, pathlib.Path]) -> EmbeddingMetadata:
+def load_metadata(path: str | pathlib.Path) -> EmbeddingMetadata:
     metadata_path = pathlib.PosixPath(path)
     if not metadata_path.is_file():
         raise ValueError("--metadata: file does not exist")
@@ -109,7 +109,8 @@ def load_metadata(path: Union[str, pathlib.Path]) -> EmbeddingMetadata:
 
 
 def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> EmbeddingMetadata:
-    """
+    """Validate the metadata.
+
     Checks to perform on metadata:
     1. Census version must be an LTS version (implies existence)
     2. Census version, experiment and measurement must exist
@@ -118,7 +119,6 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
     5. Title must have length < 128 characters
     6. Description must have length < 2048 characters
     """
-
     if not metadata.id:
         raise ValueError("metadata is missing 'id' (accession)")
 
@@ -144,8 +144,7 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
 
 
 def validate_census_info(args: Arguments, metadata: EmbeddingMetadata) -> None:
-    """Errors / exists upon failure"""
-
+    """Errors / exists upon failure."""
     if not args.census_uri:  # ie. if no override of census
         releases = cellxgene_census.get_census_version_directory()
 
@@ -171,8 +170,7 @@ def validate_census_info(args: Arguments, metadata: EmbeddingMetadata) -> None:
 
 
 def validate_doi(metadata: EmbeddingMetadata) -> None:
-    """Errors / exists upon failure"""
-
+    """Errors / exists upon failure."""
     # 3. DOI must validate if specified
     if not metadata.DOI:
         return
@@ -188,8 +186,7 @@ def validate_doi(metadata: EmbeddingMetadata) -> None:
 
 
 def validate_urls(metadata: EmbeddingMetadata) -> None:
-    """Errors / exits upon failure"""
-
+    """Errors / exits upon failure."""
     # 4. All supplied URLs must resolve
     for fld_name, url in [(f, getattr(metadata, f, "")) for f in ("model_link",)]:
         if url:

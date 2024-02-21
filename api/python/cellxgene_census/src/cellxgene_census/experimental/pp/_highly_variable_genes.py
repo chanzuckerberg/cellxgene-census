@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from concurrent import futures
-from typing import Any, Callable, Optional, Sequence, Union, cast
+from typing import Any, Callable, Sequence, cast
 
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ from ._online import CountsAccumulator, MeanVarianceAccumulator
 Acknowledgements: ScanPy highly variable genes implementation (scanpy.pp.highly_variable_genes), in turn
 based upon the original implementation in Seurat V3.
 
-Ref: 
+Ref:
 * https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html#scanpy.pp.highly_variable_genes
 * github.com/scverse/scanpy
 
@@ -39,12 +39,10 @@ Notes:
 
 def _get_batch_index(
     query: soma.ExperimentAxisQuery,
-    batch_key: Union[str, Sequence[str]],
-    batch_key_func: Optional[Callable[..., Any]] = None,
+    batch_key: str | Sequence[str],
+    batch_key_func: Callable[..., Any] | None = None,
 ) -> pd.Series[Any]:
-    """
-    Return categorical series representing the batch key, with codes that index the key.
-    """
+    """Return categorical series representing the batch key, with codes that index the key."""
     if isinstance(batch_key, str):
         batch_key = [batch_key]
     batch_key = list(batch_key)
@@ -73,12 +71,12 @@ def _get_batch_index(
 
 def _highly_variable_genes_seurat_v3(
     query: soma.ExperimentAxisQuery,
-    batch_key: Optional[Union[str, Sequence[str]]] = None,
-    n_top_genes: int = 1000,
+    batch_key: str | Sequence[str] | None = None,
+    n_top_genes: int = 1_000,
     layer: str = "raw",
     span: float = 0.3,
     max_loess_jitter: float = 1e-6,
-    batch_key_func: Optional[Callable[..., Any]] = None,
+    batch_key_func: Callable[..., Any] | None = None,
 ) -> pd.DataFrame:
     try:
         import skmisc.loess
@@ -231,16 +229,15 @@ def _highly_variable_genes_seurat_v3(
 
 def highly_variable_genes(
     query: soma.ExperimentAxisQuery,
-    n_top_genes: int = 1000,
+    n_top_genes: int = 1_000,
     layer: str = "raw",
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
-    batch_key: Optional[Union[str, Sequence[str]]] = None,
+    batch_key: str | Sequence[str] | None = None,
     max_loess_jitter: float = 1e-6,
-    batch_key_func: Optional[Callable[..., Any]] = None,
+    batch_key_func: Callable[..., Any] | None = None,
 ) -> pd.DataFrame:
-    """
-    Identify and annotate highly variable genes contained in the query results.
+    """Identify and annotate highly variable genes contained in the query results.
     The API is modelled on ScanPy `scanpy.pp.highly_variable_genes` API.
     Results returned will mimic ScanPy results. The only `flavor` available
     is the Seurat V3 method, which assumes count data in the X layer.
@@ -282,7 +279,6 @@ def highly_variable_genes(
 
 
     Examples:
-
         Fetch :class:`pandas.DataFrame` containing var annotations for the query selection, using ``"dataset_id"`` as
         ``batch_key``.
 
@@ -322,19 +318,18 @@ def get_highly_variable_genes(
     organism: str,
     measurement_name: str = "RNA",
     X_name: str = "raw",
-    obs_value_filter: Optional[str] = None,
-    obs_coords: Optional[SparseDFCoord] = None,
-    var_value_filter: Optional[str] = None,
-    var_coords: Optional[SparseDFCoord] = None,
-    n_top_genes: int = 1000,
+    obs_value_filter: str | None = None,
+    obs_coords: SparseDFCoord | None = None,
+    var_value_filter: str | None = None,
+    var_coords: SparseDFCoord | None = None,
+    n_top_genes: int = 1_000,
     flavor: Literal["seurat_v3"] = "seurat_v3",
     span: float = 0.3,
-    batch_key: Optional[Union[str, Sequence[str]]] = None,
+    batch_key: str | Sequence[str] | None = None,
     max_loess_jitter: float = 1e-6,
-    batch_key_func: Optional[Callable[..., Any]] = None,
+    batch_key_func: Callable[..., Any] | None = None,
 ) -> pd.DataFrame:
-    """
-    Convience wrapper around :class:`tiledbsoma.Experiment` query and
+    """Convience wrapper around :class:`tiledbsoma.Experiment` query and
     :func:`cellxgene_census.experimental.pp.highly_variable_genes` function, to build and execute a query, and annotate
     the query result genes (``var`` dataframe) based upon variability.
 
@@ -387,7 +382,6 @@ def get_highly_variable_genes(
         :func:`cellxgene_census.experimental.pp.highly_variable_genes`
 
     Examples:
-
         Fetch a :class:`pandas.DataFrame` containing var annotations for a subset of the cells matching the
         ``obs_value_filter`:
 

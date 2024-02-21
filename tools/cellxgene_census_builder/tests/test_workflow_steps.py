@@ -1,8 +1,9 @@
 import pathlib
-from typing import Callable
+from collections.abc import Callable
 from unittest import mock
 
 import pytest
+
 from cellxgene_census_builder.__main__ import do_data_copy, do_log_copy, do_report_copy, do_the_release
 from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
 from cellxgene_census_builder.release_manifest import CensusVersionDescription

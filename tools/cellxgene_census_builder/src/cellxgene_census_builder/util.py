@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def urljoin(base: str, url: str) -> str:
-    """
-    like urllib.parse.urljoin, but doesn't get confused by S3://
-    """
+    """Like urllib.parse.urljoin, but doesn't get confused by s3://."""
     p_url = urllib.parse.urlparse(url)
     if p_url.netloc:
         return url
@@ -38,15 +36,15 @@ def urljoin(base: str, url: str) -> str:
 
 
 def urlcat(base: str, *paths: str) -> str:
-    """
-    Concat one or more paths, separated with '/'. Similar to urllib.parse.urljoin,
+    """Concat one or more paths, separated with '/'.
+
+    Similar to urllib.parse.urljoin,
     but doesn't get confused by S3:// and other "non-standard" protocols (treats
-    them as if they are same as http: or file:)
+    them as if they are same as http: or file:).
 
     Similar to urllib.parse.urljoin except it takes an iterator, and
     assumes the container_uri is a 'directory'/container, ie, ends in '/'.
     """
-
     url = base
     for p in paths:
         url = url if url.endswith("/") else url + "/"
@@ -55,13 +53,11 @@ def urlcat(base: str, *paths: str) -> str:
 
 
 def env_var_init() -> None:
-    """
-    Set environment variables as needed by dependencies, etc.
+    """Set environment variables as needed by dependencies, etc.
 
     This controls thread allocation for worker (child) processes. It is executed too
     late to influence __init__ time thread pool allocations for the main process.
     """
-
     # Each of these control thread-pool allocation for commonly used packages that
     # may be pulled into our environment, and which have import-time pool allocation.
     # Most do import time thread pool allocation equal to host CPU count, which can
@@ -95,9 +91,7 @@ def env_var_init() -> None:
 
 
 def process_init(args: CensusBuildArgs) -> None:
-    """
-    Called on every process start to configure global package/module behavior.
-    """
+    """Called on every process start to configure global package/module behavior."""
     logging_init(args)
 
     if multiprocessing.get_start_method(True) != "spawn":
@@ -107,9 +101,9 @@ def process_init(args: CensusBuildArgs) -> None:
 
 
 class ProcessResourceGetter:
-    """
-    Access to process resource state, primary for diagnostic/debugging purposes. Currently
-    provides current and high water mark for:
+    """Access to process resource state, primary for diagnostic/debugging purposes.
+
+    Currently provides current and high water mark for:
     * thread count
     * mmaps
     * major page faults
@@ -160,9 +154,9 @@ class ProcessResourceGetter:
 
 
 class SystemResourceGetter:
-    """
-    Access to system resource state, primary for diagnostic/debugging purposes. Currently
-    provides current and high water mark for:
+    """Access to system resource state, primary for diagnostic/debugging purposes.
+
+    Currently provides current and high water mark for:
     * memory total
     * memory available
 
@@ -186,7 +180,7 @@ _system_resource_getter = SystemResourceGetter()
 
 
 def log_process_resource_status(preface: str = "Resource use:", level: int = logging.DEBUG) -> None:
-    """Print current and historical max of thread and (memory) map counts"""
+    """Print current and historical max of thread and (memory) map counts."""
     if platform.system() == "Linux":
         me = psutil.Process()
         mem_full_info = me.memory_full_info()
@@ -228,10 +222,9 @@ def start_resource_logger(log_period_sec: float = 15.0, level: int = logging.INF
 
 
 def cpu_count() -> int:
-    """
+    """This function exists to always return a default of `1` when os.cpu_count returns None.
+
     os.cpu_count() returns None if "undetermined" number of CPUs.
-    This function exists to always return a default of `1` when
-    os.cpu_count returns None.
     """
     cpu_count = os.cpu_count()
     if os.cpu_count() is None:

@@ -1,6 +1,6 @@
 import argparse
 import sys
-from typing import Optional, TextIO
+from typing import TextIO
 
 import cellxgene_census
 import pandas as pd
@@ -16,9 +16,9 @@ pd.options.display.show_dimensions = False  # type: ignore[assignment] # boolean
 
 def display_summary(
     *,
-    census_version: Optional[str] = "latest",
-    uri: Optional[str] = None,
-    file: Optional[TextIO] = None,
+    census_version: str | None = "latest",
+    uri: str | None = None,
+    file: TextIO | None = None,
 ) -> int:
     census = cellxgene_census.open_soma(census_version=census_version, uri=uri)
 
@@ -50,11 +50,11 @@ def display_summary(
 
 
 def display_diff(
-    census_version: Optional[str] = "latest",
-    uri: Optional[str] = None,
-    previous_census_version: Optional[str] = None,
-    previous_uri: Optional[str] = None,
-    file: Optional[TextIO] = None,
+    census_version: str | None = "latest",
+    uri: str | None = None,
+    previous_census_version: str | None = None,
+    previous_uri: str | None = None,
+    file: TextIO | None = None,
 ) -> int:
     census = cellxgene_census.open_soma(census_version=census_version, uri=uri)
     previous_census = cellxgene_census.open_soma(census_version=previous_census_version, uri=previous_uri)

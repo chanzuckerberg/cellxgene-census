@@ -2,8 +2,7 @@
 #
 # Licensed under the MIT License.
 
-"""
-Experiments handler.
+"""Experiments handler.
 
 Contains methods to retrieve SOMA Experiments.
 """
@@ -34,7 +33,6 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
         maturing
 
     Examples:
-
         >>> human = get_experiment(census, "homo sapiens")
 
         >>> human = get_experiment(census, "Homo sapiens")

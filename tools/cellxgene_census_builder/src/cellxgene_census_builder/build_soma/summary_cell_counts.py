@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 def create_census_summary_cell_counts(
     info_collection: soma.Collection, per_experiment_summary: Sequence[pd.DataFrame]
 ) -> None:
-    """
-    Save per-category counts as the census_summary_cell_counts SOMA dataframe
-    """
+    """Save per-category counts as the census_summary_cell_counts SOMA dataframe."""
     logger.info("Creating census_summary_cell_counts")
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
@@ -49,9 +47,7 @@ def init_summary_counts_accumulator() -> pd.DataFrame:
 
 
 def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add summary counts to the census_summary_cell_counts dataframe
-    """
+    """Add summary counts to the census_summary_cell_counts dataframe."""
     assert "dataset_id" in obs_df
 
     if len(obs_df) == 0:

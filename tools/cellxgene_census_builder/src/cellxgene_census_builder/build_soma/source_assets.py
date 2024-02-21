@@ -2,7 +2,7 @@ import logging
 import os
 import time
 import urllib.parse
-from typing import List, Tuple, cast
+from typing import cast
 
 import aiohttp
 import fsspec
@@ -16,7 +16,7 @@ from .mp import create_process_pool_executor
 logger = logging.getLogger(__name__)
 
 
-def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
+def stage_source_assets(datasets: list[Dataset], args: CensusBuildArgs) -> None:
     assets_dir = args.h5ads_path.as_posix()
 
     # e.g., "census-builder-prod/1.0.0"
@@ -85,7 +85,7 @@ def _copy_file(n: int, dataset: Dataset, asset_dir: str, N: int, user_agent: str
     return dataset_file_name
 
 
-def copy_file(args: Tuple[int, Dataset, str, int, str]) -> str:
+def copy_file(args: tuple[int, Dataset, str, int, str]) -> str:
     return _copy_file(*args)
 
 
