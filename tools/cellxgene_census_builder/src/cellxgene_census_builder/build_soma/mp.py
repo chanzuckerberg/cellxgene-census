@@ -5,19 +5,15 @@ import threading
 import time
 import weakref
 from collections import deque
+from collections.abc import Callable, Iterable, Mapping
 from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from functools import partial
 from types import TracebackType
 from typing import (
     Any,
-    Callable,
     Generic,
-    Iterable,
     Literal,
-    Mapping,
-    Optional,
     ParamSpec,
-    Tuple,
     TypeVar,
     Union,
 )
@@ -43,8 +39,7 @@ def _mp_config_checks() -> bool:
 
 
 def _hard_process_cap(args: CensusBuildArgs, n_proc: int) -> int:
-    """
-    Enforce the configured worker process limit.
+    """Enforce the configured worker process limit.
 
     NOTE: logic below only enforces this limit in cases using the default worker count,
     as there are special cases where we want higher limits, due to special knowledge that we
@@ -59,15 +54,15 @@ def _default_worker_process_count(args: CensusBuildArgs) -> int:
 
 
 def n_workers_from_memory_budget(args: CensusBuildArgs, per_worker_budget: int) -> int:
-    """Trivial helper to estimate appropriate number of fixed-memory-budget workers from total memory available"""
+    """Trivial helper to estimate appropriate number of fixed-memory-budget workers from total memory available."""
     n_workers: int = int(args.config.memory_budget // per_worker_budget)
     return min(n_workers, _default_worker_process_count(args))
 
 
 def create_process_pool_executor(
     args: CensusBuildArgs,
-    max_workers: Optional[int] = None,
-    max_tasks_per_child: Optional[int] = None,
+    max_workers: int | None = None,
+    max_tasks_per_child: int | None = None,
 ) -> ProcessPoolExecutor:
     assert _mp_config_checks()
     if max_workers is None:
@@ -79,15 +74,14 @@ def create_process_pool_executor(
     )
 
 
-def create_thread_pool_executor(max_workers: Optional[int] = None) -> ThreadPoolExecutor:
+def create_thread_pool_executor(max_workers: int | None = None) -> ThreadPoolExecutor:
     assert _mp_config_checks()
     logger.debug(f"create_thread_pool_executor [max_workers={max_workers}]")
     return ThreadPoolExecutor(max_workers=max_workers)
 
 
 def log_on_broken_process_pool(ppe: Union[ProcessPoolExecutor, "ResourcePoolProcessExecutor"]) -> None:
-    """
-    There are a number of conditions where the Process Pool can be broken,
+    """There are a number of conditions where the Process Pool can be broken,
     such that it will hang in a shutdown. This will cause the context __exit__
     to hang indefinitely, as it calls ProcessPoolExecutor.shutdown with
     `wait=True`.
@@ -101,7 +95,6 @@ def log_on_broken_process_pool(ppe: Union[ProcessPoolExecutor, "ResourcePoolProc
     Caution: uses ProcessPoolExecutor internal API, as this state is not
     otherwise visible.
     """
-
     if ppe._broken:
         logger.critical(f"Process pool broken and may fail or hang: {ppe._broken}")
 
@@ -121,7 +114,7 @@ class _WorkItem(Generic[_T]):
     kwargs: Mapping[str, Any]
 
 
-_MightBeWork = Tuple[bool, Optional[_WorkItem[Any]]]
+_MightBeWork = tuple[bool, _WorkItem[Any] | None]
 _SchedulerMethod = Literal["best-fit", "first-fit"]
 
 
@@ -159,8 +152,7 @@ class _Scheduler(threading.Thread):
         return f
 
     def _get_work(self) -> _MightBeWork:
-        """
-        Get next work item to schedule.
+        """Get next work item to schedule.
 
         IMPORTANT: caller MUST own scheduler _condition lock to call this.
 
@@ -173,7 +165,6 @@ class _Scheduler(threading.Thread):
 
         def _get_next_work() -> int | None:
             """Return index of "best" work item to scheudle, or None if work is unavailable."""
-
             # Best fit: return the largest resource consumer that fits in available space
             max_available_resources = self.max_resources - self.resources_in_use
             candidate_work = filter(lambda v: v[1].resources <= max_available_resources, enumerate(self._pending_work))
@@ -228,7 +219,7 @@ class _Scheduler(threading.Thread):
         scheduler._release_resources(wi)
 
     def _schedule_work(self, work: _WorkItem[Any]) -> None:
-        """must hold lock"""
+        """Must hold lock."""
         executor = self.executor_ref()
         if executor is None:
             # can happen if the ResourcePoolExecutor was collected
@@ -258,8 +249,7 @@ class _Scheduler(threading.Thread):
 
 
 class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoolProcessExecutor"]):
-    """
-    Provides a ProcessPoolExecutor-like API, scheduling based upon static "resource" reservation
+    """Provides a ProcessPoolExecutor-like API, scheduling based upon static "resource" reservation
     requests. A "resource" is any shared capacity or resource, expressed as an integer
     value. Class holds a queue of "work items", scheduling them into an actual ProcessPoolExecutor
     when sufficient resources are available.
@@ -305,7 +295,7 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
         self.process_pool.close()
 
     def __exit__(
-        self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
     ) -> None:
         self.shutdown(wait=True)
         return None
@@ -313,9 +303,9 @@ class ResourcePoolProcessExecutor(contextlib.AbstractContextManager["ResourcePoo
 
 def create_resource_pool_executor(
     args: CensusBuildArgs,
-    max_resources: Optional[int] = None,
-    max_workers: Optional[int] = None,
-    max_tasks_per_child: Optional[int] = None,
+    max_resources: int | None = None,
+    max_workers: int | None = None,
+    max_tasks_per_child: int | None = None,
 ) -> ResourcePoolProcessExecutor:
     assert _mp_config_checks()
 
@@ -338,7 +328,7 @@ def create_resource_pool_executor(
 
 
 class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
-    """Pass config to all workers"""
+    """Pass config to all workers."""
 
     def __init__(self, args: CensusBuildArgs):
         self.args = args
@@ -350,12 +340,11 @@ class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
 def create_dask_client(
     args: CensusBuildArgs,
     *,
-    n_workers: Optional[int] = None,
-    threads_per_worker: Optional[int] = None,
+    n_workers: int | None = None,
+    threads_per_worker: int | None = None,
     memory_limit: str | float | int | None = "auto",
 ) -> dask.distributed.Client:
     """Create and return a Dask client."""
-
     # create a new client
     assert _mp_config_checks()
 

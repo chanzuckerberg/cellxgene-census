@@ -1,7 +1,6 @@
 import os
 import pathlib
 from types import ModuleType
-from typing import List
 from unittest.mock import patch
 
 import numpy as np
@@ -10,6 +9,7 @@ import pyarrow as pa
 import pytest
 import tiledb
 import tiledbsoma as soma
+
 from cellxgene_census_builder.build_soma import build
 from cellxgene_census_builder.build_soma.build_soma import build_step1_get_source_datasets
 from cellxgene_census_builder.build_soma.datasets import Dataset
@@ -26,26 +26,22 @@ from cellxgene_census_builder.build_state import CensusBuildArgs
 
 
 @pytest.mark.parametrize(
-    "census_build_args", [dict(multi_process=False, consolidate=True, build_tag="test_tag", verbose=0)], indirect=True
+    "census_build_args",
+    [{"multi_process": False, "consolidate": True, "build_tag": "test_tag", "verbose": 0}],
+    indirect=True,
 )
 def test_base_builder_creation(
-    datasets: List[Dataset],
+    datasets: list[Dataset],
     census_build_args: CensusBuildArgs,
     setup: None,
 ) -> None:
     """
     Runs the builder, queries the census and performs a set of base assertions.
     """
-    with patch(
-        "cellxgene_census_builder.build_soma.build_soma.prepare_file_system",
-    ), patch(
-        "cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets",
-        return_value=datasets,
-    ), patch(
-        "cellxgene_census_builder.build_soma.build_soma.consolidate",
-    ), patch(
-        "cellxgene_census_builder.build_soma.build_soma.go_validate",
-        return_value=True,
+    with patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"), patch(
+        "cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets
+    ), patch("cellxgene_census_builder.build_soma.build_soma.consolidate"), patch(
+        "cellxgene_census_builder.build_soma.build_soma.go_validate", return_value=True
     ), patch(
         "cellxgene_census_builder.build_soma.build_soma.start_async_consolidation",
     ):
@@ -127,8 +123,7 @@ def test_base_builder_creation(
 
 
 def test_unicode_support(tmp_path: pathlib.Path) -> None:
-    """
-    Regression test that unicode is supported correctly in tiledbsoma.
+    """Regression test that unicode is supported correctly in tiledbsoma.
     This test is not strictly necessary, but it validates the requirements that Census
     support unicode in DataFrame columns.
     """
@@ -147,7 +142,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [dict(manifest=True, verbose=2, build_tag="build_tag", multi_process=True, max_worker_processes=2)],
+    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "multi_process": True, "max_worker_processes": 2}],
     indirect=True,
 )
 def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:

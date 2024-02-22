@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Any, List, TypeVar, Union
+from typing import Any, TypeVar
 
 import numpy as np
 import numpy.typing as npt
@@ -24,9 +24,8 @@ def fetch_json(url: str, delay_secs: float = 0.0) -> object:
     return response.json()
 
 
-def is_nonnegative_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmatrix]) -> bool:
-    """
-    Return true if the matrix/array contains only positive integral values,
+def is_nonnegative_integral(X: npt.NDArray[np.floating[Any]] | sparse.spmatrix) -> bool:
+    """Return true if the matrix/array contains only positive integral values,
     False otherwise.
     """
     data = X if isinstance(X, np.ndarray) else X.data
@@ -40,9 +39,7 @@ def is_nonnegative_integral(X: Union[npt.NDArray[np.floating[Any]], sparse.spmat
 
 
 def get_git_commit_sha() -> str:
-    """
-    Returns the git commit SHA for the current repo
-    """
+    """Returns the git commit SHA for the current repo."""
     # Try to get the git commit SHA from the COMMIT_SHA env variable
     commit_sha_var = os.getenv("COMMIT_SHA")
     if commit_sha_var is not None:
@@ -58,9 +55,7 @@ def get_git_commit_sha() -> str:
 
 
 def is_git_repo_dirty() -> bool:
-    """
-    Returns True if the git repo is dirty, i.e. there are uncommitted changes
-    """
+    """Returns True if the git repo is dirty, i.e. there are uncommitted changes."""
     import git  # Scoped import - this requires the git executable to exist on the machine
 
     # work around https://github.com/gitpython-developers/GitPython/issues/1349
@@ -70,9 +65,8 @@ def is_git_repo_dirty() -> bool:
     return is_dirty
 
 
-def shuffle(items: List[T], step: int) -> List[T]:
-    """
-    Shuffle (interleave) from each end of the list. Step param controls
+def shuffle(items: list[T], step: int) -> list[T]:
+    """Shuffle (interleave) from each end of the list. Step param controls
     bias of selection from front and back, i.e., if if step==2, every other
     item will be selected from end of list, if step==3, every third item
     will come from the end of the list.

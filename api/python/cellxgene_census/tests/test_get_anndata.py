@@ -21,7 +21,13 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
             obs_value_filter="tissue_general == 'vasculature'",
             var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
             column_names={
-                "obs": ["soma_joinid", "cell_type", "tissue", "tissue_general", "assay"],
+                "obs": [
+                    "soma_joinid",
+                    "cell_type",
+                    "tissue",
+                    "tissue_general",
+                    "assay",
+                ],
                 "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
             },
         )
@@ -37,7 +43,10 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
 def test_get_anndata_coords(census: soma.Collection) -> None:
     with census:
         ad = cellxgene_census.get_anndata(
-            census, organism="Mus musculus", obs_coords=slice(1000), var_coords=slice(2000)
+            census,
+            organism="Mus musculus",
+            obs_coords=slice(1000),
+            var_coords=slice(2000),
         )
 
     assert ad is not None

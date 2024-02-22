@@ -3,7 +3,7 @@ import logging
 import os
 import pathlib
 import sys
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 from urllib.parse import urlparse
 
 import s3fs
@@ -108,9 +108,7 @@ def main() -> int:
 def _do_steps(
     build_steps: Sequence[Callable[[CensusBuildArgs], bool]], args: CensusBuildArgs, skip_completed_steps: bool = False
 ) -> int:
-    """
-    Performs a series of steps as specified by the `build_steps` argument.
-    """
+    """Performs a series of steps as specified by the `build_steps` argument."""
     try:
         for n, build_step in enumerate(build_steps, start=1):
             step_n_of = f"Build step {build_step.__name__} [{n} of {len(build_steps)}]"
@@ -127,7 +125,7 @@ def _do_steps(
             args.state.commit(args.working_dir / CENSUS_BUILD_STATE)
             logger.info(f"{step_n_of}: complete")
 
-    except Exception:
+    except Exception:  # noqa: BLE001
         logger.critical("Caught exception, exiting", exc_info=True)
         return 1
 
@@ -183,7 +181,7 @@ def do_create_reports(args: CensusBuildArgs) -> bool:
 
 
 def do_mock_build(args: CensusBuildArgs) -> bool:
-    """Mock build. Used for testing"""
+    """Mock build. Used for testing."""
     args.soma_path.mkdir(parents=True, exist_ok=False)
     args.h5ads_path.mkdir(parents=True, exist_ok=False)
     with open(f"{args.soma_path}/test.soma", "w") as f:
@@ -195,7 +193,7 @@ def do_mock_build(args: CensusBuildArgs) -> bool:
 
 
 def do_data_copy(args: CensusBuildArgs) -> bool:
-    """Copy data to S3, in preparation for a release"""
+    """Copy data to S3, in preparation for a release."""
     from .data_copy import sync_to_S3
 
     sync_to_S3(
@@ -207,10 +205,7 @@ def do_data_copy(args: CensusBuildArgs) -> bool:
 
 
 def do_the_release(args: CensusBuildArgs) -> bool:
-    """
-    Perform the release by publishing changes to the release.json file. Respects `dryrun` flag.
-    """
-
+    """Perform the release by publishing changes to the release.json file. Respects `dryrun` flag."""
     from .release_manifest import CensusVersionDescription, make_a_release
 
     parsed_url = urlparse(args.config.cellxgene_census_S3_path)
@@ -251,7 +246,7 @@ def do_report_copy(args: CensusBuildArgs) -> bool:
 
 
 def do_old_release_cleanup(args: CensusBuildArgs) -> bool:
-    """Clean up old releases"""
+    """Clean up old releases."""
     from .release_cleanup import remove_releases_older_than
 
     remove_releases_older_than(
@@ -263,7 +258,7 @@ def do_old_release_cleanup(args: CensusBuildArgs) -> bool:
 
 
 def do_log_copy(args: CensusBuildArgs) -> bool:
-    """Copy logs to S3 for posterity.  Should be the final step, to capture full output of build"""
+    """Copy logs to S3 for posterity.  Should be the final step, to capture full output of build."""
     from .data_copy import sync_to_S3
 
     sync_to_S3(
@@ -275,7 +270,7 @@ def do_log_copy(args: CensusBuildArgs) -> bool:
 
 
 def do_sync_release_file_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
-    """Copy release.json to replica S3 bucket"""
+    """Copy release.json to replica S3 bucket."""
     from .data_copy import sync_to_S3_remote
 
     source_key = urlcat(args.config.cellxgene_census_S3_path, args.build_tag, "release.json")
@@ -290,8 +285,7 @@ def do_sync_release_file_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
 
 
 def do_sync_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
-    """
-    Sync data to replica S3 bucket. Syncs everything and deletes anything
+    """Sync data to replica S3 bucket. Syncs everything and deletes anything
     in the replica bucket that is not in the primary bucket.
     """
     from .data_copy import sync_to_S3_remote

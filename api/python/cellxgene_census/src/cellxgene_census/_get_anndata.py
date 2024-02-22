@@ -2,7 +2,7 @@
 #
 # Licensed under the MIT License.
 
-"""Get slice as AnnData
+"""Get slice as AnnData.
 
 Methods to retrieve slices of the census as AnnData objects.
 """
@@ -28,8 +28,7 @@ def get_anndata(
     var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[soma.AxisColumnNames] = None,
 ) -> anndata.AnnData:
-    """
-    Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
+    """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
 
     Args:
@@ -81,4 +80,9 @@ def get_anndata(
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
         var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
-        return query.to_anndata(X_name=X_name, column_names=column_names, X_layers=X_layers, obsm_layers=obsm_layers)
+        return query.to_anndata(
+            X_name=X_name,
+            column_names=column_names,
+            X_layers=X_layers,
+            obsm_layers=obsm_layers,
+        )

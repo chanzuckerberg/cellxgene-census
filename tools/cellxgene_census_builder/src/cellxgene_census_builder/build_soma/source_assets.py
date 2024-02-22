@@ -5,7 +5,7 @@ import logging
 import os
 import pathlib
 import time
-from typing import Any, List
+from typing import Any
 
 import aiohttp
 import dask
@@ -21,7 +21,7 @@ from .datasets import Dataset
 logger = logging.getLogger(__name__)
 
 
-def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
+def stage_source_assets(datasets: list[Dataset], args: CensusBuildArgs) -> None:
     """NOTE: non-pure -- modifies Datasets argument in place."""
     assets_dir = args.h5ads_path
 
@@ -70,8 +70,7 @@ def stage_source_assets(datasets: List[Dataset], args: CensusBuildArgs) -> None:
 def pcopyfile(
     from_url: str, to_path: str, exist_ok: bool = True, block_size: int = 64 * 2**20, **kwargs: Any
 ) -> Delayed[int]:
-    """
-    Parallel copy of file from_url->to_path. Assumes support for block fetches, a la
+    """Parallel copy of file from_url->to_path. Assumes support for block fetches, a la
     HTTP, S3, etc. Blocks fetched in parallel in no guaranteed order.
 
     Uses fsspec under the covers. Any additional kwargs are passed to the fsspec session setup,
@@ -103,7 +102,8 @@ def pcopyfile(
         compression = infer_compression(path)
 
         return dask.bag.from_sequence(
-            (OpenFile(fs, path, compression=compression), offset, length) for offset, length in zip(offsets, lengths)
+            (OpenFile(fs, path, compression=compression), offset, length)
+            for offset, length in zip(offsets, lengths, strict=False)
         )
 
     def _read_a_block(filelike: OpenFile, blk_off: int, blk_len: int) -> tuple[int, bytes]:

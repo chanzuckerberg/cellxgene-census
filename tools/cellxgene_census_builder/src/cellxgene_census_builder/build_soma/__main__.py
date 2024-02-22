@@ -1,6 +1,4 @@
-"""
-Dev/test CLI for the build_soma package. This is not used for builds.
-"""
+"""Dev/test CLI for the build_soma package. This is not used for builds."""
 
 import argparse
 import logging

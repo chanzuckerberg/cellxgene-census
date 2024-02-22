@@ -1,19 +1,16 @@
-"""
-Manage the configuration and dynamic build state for the Census build.
-
-"""
+"""Manage the configuration and dynamic build state for the Census build."""
 
 import functools
 import io
 import os
 import pathlib
+from collections.abc import Iterator, Mapping
 from datetime import datetime
-from typing import Any, Iterator, Mapping, Union
+from typing import Any, Self
 
 import psutil
 import yaml
 from attrs import define, field, fields, validators
-from typing_extensions import Self
 
 """
 Defaults for Census configuration.
@@ -90,8 +87,8 @@ class CensusBuildConfig:
     test_first_n: int = field(converter=int, default=0)
 
     @classmethod
-    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
-        if isinstance(file, (str, os.PathLike)):
+    def load(cls, file: str | os.PathLike[str] | io.TextIOBase) -> Self:
+        if isinstance(file, str | os.PathLike):
             with open(file) as f:
                 user_config = yaml.safe_load(f)
         else:
@@ -118,7 +115,7 @@ class CensusBuildConfig:
 
 
 class Namespace(Mapping[str, Any]):
-    """Readonly namespace"""
+    """Readonly namespace."""
 
     def __init__(self, **kwargs: Any):
         self._state = dict(kwargs)
@@ -155,7 +152,7 @@ class Namespace(Mapping[str, Any]):
 
 
 class MutableNamespace(Namespace):
-    """Mutable namespace"""
+    """Mutable namespace."""
 
     def __setitem__(self, key: str, value: Any) -> None:
         if not isinstance(key, str):
@@ -178,8 +175,8 @@ class CensusBuildState(MutableNamespace):
         self.__dirty_keys.add(key)
 
     @classmethod
-    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
-        if isinstance(file, (str, os.PathLike)):
+    def load(cls, file: str | os.PathLike[str] | io.TextIOBase) -> Self:
+        if isinstance(file, str | os.PathLike):
             with open(file) as state_log:
                 documents = list(yaml.safe_load_all(state_log))
         else:
@@ -189,7 +186,7 @@ class CensusBuildState(MutableNamespace):
         state.__dirty_keys.clear()
         return state
 
-    def commit(self, file: Union[str, os.PathLike[str]]) -> None:
+    def commit(self, file: str | os.PathLike[str]) -> None:
         # append dirty elements (atomic on Posix)
         if self.__dirty_keys:
             dirty = {k: self[k] for k in self.__dirty_keys}
@@ -204,7 +201,8 @@ class CensusBuildArgs:
     working_dir: pathlib.PosixPath = field(validator=validators.instance_of(pathlib.PosixPath))
     config: CensusBuildConfig = field(validator=validators.instance_of(CensusBuildConfig))
     state: CensusBuildState = field(
-        factory=CensusBuildState, validator=validators.instance_of(CensusBuildState)  # default: empty state
+        factory=CensusBuildState,
+        validator=validators.instance_of(CensusBuildState),  # default: empty state
     )
 
     @property

@@ -13,7 +13,6 @@ def get_obs_stats(
     raw_X: sparse.csr_matrix | sparse.csc_matrix,
 ) -> pd.DataFrame:
     """Compute summary stats for obs axis, and return as a dataframe."""
-
     if not isinstance(raw_X, sparse.csr_matrix) and not isinstance(raw_X, sparse.csc_matrix):
         raise NotImplementedError(f"get_obs_stats: unsupported type {type(raw_X)}")
 
@@ -67,9 +66,9 @@ def get_var_stats(
     nopython=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _var_ndarray(data: npt.NDArray[np.float32], ddof: int) -> float:
-    """
-    Return variance of an ndarray. Computed as variance of shifted distribution,
-    https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    """Return variance of an ndarray.
+
+    Computed as variance of shifted distribution, https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance.
     """
     n = len(data)
     if n < 2:

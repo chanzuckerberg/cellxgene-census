@@ -1,12 +1,10 @@
-"""
-Tools to manage the release.json manifest file.
-"""
+"""Tools to manage the release.json manifest file."""
 
 import json
-from typing import Dict, Optional, Union, cast
+from typing import NotRequired, cast
 
 import s3fs
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 from .util import urlcat
 
@@ -15,27 +13,25 @@ The release.json schema is a semi-public format, used by all end-user packages.
 """
 
 CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
-CensusLocator = TypedDict(
-    "CensusLocator",
-    {
-        "uri": str,  # resource URI
-        "relative_uri": str,  # relative URI
-        "s3_region": Optional[str],  # if an S3 URI, has optional region
-    },
-)
-CensusVersionDescription = TypedDict(
-    "CensusVersionDescription",
-    {
-        "release_date": Optional[str],  # date of release (deprecated)
-        "release_build": str,  # date of build
-        "soma": CensusLocator,  # SOMA objects locator
-        "h5ads": CensusLocator,  # source H5ADs locator
-        "do_not_delete": Optional[bool],  # if set, prevents automated deletion
-        "flags": NotRequired[Dict[str, bool]],  # flags for the release
-        "retraction": NotRequired[Dict[str, str]],  # if retracted, details of the retraction
-    },
-)
-CensusReleaseManifest = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
+
+
+class CensusLocator(TypedDict):
+    uri: str
+    relative_uri: str
+    s3_region: str | None
+
+
+class CensusVersionDescription(TypedDict):
+    release_date: str | None
+    release_build: str
+    soma: CensusLocator
+    h5ads: CensusLocator
+    do_not_delete: bool | None
+    flags: NotRequired[dict[str, bool]]
+    retraction: NotRequired[dict[str, str]]
+
+
+CensusReleaseManifest = dict[CensusVersionName, CensusVersionName | CensusVersionDescription]
 
 CENSUS_AWS_REGION = "us-west-2"
 CENSUS_RELEASE_FILE = "release.json"
@@ -47,8 +43,7 @@ REQUIRED_TAGS = [
 
 
 def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusReleaseManifest:
-    """
-    Fetch the census release manifest.
+    """Fetch the census release manifest.
 
     Args:
         census_base_url:
@@ -65,9 +60,7 @@ def get_release_manifest(census_base_url: str, s3_anon: bool = False) -> CensusR
 def commit_release_manifest(
     census_base_url: str, release_manifest: CensusReleaseManifest, dryrun: bool = False
 ) -> None:
-    """
-    Write a new release manifest to the Census.
-    """
+    """Write a new release manifest to the Census."""
     # Out of an abundance of caution, validate the contents
     validate_release_manifest(census_base_url, release_manifest)
     if not dryrun:
@@ -166,10 +159,7 @@ def make_a_release(
     make_latest: bool,
     dryrun: bool = False,
 ) -> None:
-    """
-    Make a release and optionally alias release as `latest`
-    """
-
+    """Make a release and optionally alias release as `latest`."""
     manifest = get_release_manifest(census_base_url)
     if rls_tag in manifest:
         raise ValueError(f"Release version {rls_tag} is already in the release manifest")

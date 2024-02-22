@@ -1,5 +1,5 @@
 import functools
-from typing import Any, List, Set, Tuple, Union
+from typing import Any
 
 import pyarrow as pa
 import tiledbsoma as soma
@@ -101,13 +101,13 @@ CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modificatio
     "tissue_ontology_term_id",
     "tissue_type",
 ]
-CXG_OBS_COLUMNS_READ: Tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata()
+CXG_OBS_COLUMNS_READ: tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata()
     *CXG_OBS_TERM_COLUMNS,
     "organism",
     "organism_ontology_term_id",
 )
 CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
-CENSUS_OBS_FIELDS: List[Union[FieldSpec, Tuple[str, pa.DataType]]] = [
+CENSUS_OBS_FIELDS: list[FieldSpec | tuple[str, pa.DataType]] = [
     ("soma_joinid", pa.int64()),
     FieldSpec(name="dataset_id", type=pa.large_string(), is_dictionary=True),
     FieldSpec(name="assay", type=pa.large_string(), is_dictionary=True),
@@ -158,7 +158,7 @@ _AllOtherObsAttrs = [
     if f.name not in (_DictLikeObsAttrs + _NumericObsAttrs + ["soma_joinid"])
 ]
 # Dict filter varies depending on whether we are using dictionary types in the schema
-_DictLikeFilter: List[Any] = (
+_DictLikeFilter: list[Any] = (
     [{"_type": "ZstdFilter", "level": 19}]
     if USE_ARROW_DICTIONARY
     else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
@@ -181,7 +181,7 @@ CENSUS_OBS_PLATFORM_CONFIG = {
     }
 }
 
-CXG_VAR_COLUMNS_READ: Tuple[str, ...] = (
+CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "_index",
     "feature_name",
     "feature_length",
@@ -290,7 +290,7 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 
 # Feature_reference values which are ignored (not considered) in
 # multi-organism filtering. Currently the null set.
-FEATURE_REFERENCE_IGNORE: Set[str] = set()
+FEATURE_REFERENCE_IGNORE: set[str] = set()
 
 
 # The default configuration for TileDB contexts used in the builder.

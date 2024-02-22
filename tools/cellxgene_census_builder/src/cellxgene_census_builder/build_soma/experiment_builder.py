@@ -2,20 +2,10 @@ import gc
 import itertools
 import logging
 import math
+from collections.abc import Generator, Sequence
 from contextlib import ExitStack
 from functools import reduce
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    TypedDict,
-    Union,
-    cast,
-)
+from typing import Any, Self, TypedDict, cast
 
 import attrs
 import dask
@@ -29,7 +19,6 @@ import tiledbsoma as soma
 from dask.delayed import Delayed
 from scipy import sparse
 from somacore.options import OpenMode
-from typing_extensions import Self
 
 from ..build_state import CensusBuildArgs
 from ..util import log_process_resource_status, urlcat
@@ -78,11 +67,11 @@ class AxisStats:
     var_stats: pd.DataFrame
 
 
-AccumulateXResult = Tuple[PresenceResult, AxisStats]
+AccumulateXResult = tuple[PresenceResult, AxisStats]
 AccumulateXResults = Sequence[AccumulateXResult]
 
 
-def _assert_open_for_write(obj: Optional[somacore.SOMAObject]) -> None:
+def _assert_open_for_write(obj: somacore.SOMAObject | None) -> None:
     assert obj is not None
     assert obj.exists(obj.uri)
     assert obj.mode == "w"
@@ -91,8 +80,7 @@ def _assert_open_for_write(obj: Optional[somacore.SOMAObject]) -> None:
 
 @attrs.define(frozen=True)
 class ExperimentSpecification:
-    """
-    Declarative "specification" of a SOMA experiment. This is a read-only
+    """Declarative "specification" of a SOMA experiment. This is a read-only
     specification, independent of the datasets used to build the census.
 
     Parameters:
@@ -117,8 +105,7 @@ class ExperimentSpecification:
 
 
 class ExperimentBuilder:
-    """
-    Class that embodies the operators and state to build an Experiment.
+    """Class that embodies the operators and state to build an Experiment.
     The creation and driving of these objects is done by the main loop.
     """
 
@@ -131,15 +118,15 @@ class ExperimentBuilder:
         self.n_var: int = 0
         self.n_datasets: int = 0
         self.n_donors: int = 0  # Caution: defined as (unique dataset_id, donor_id) tuples, *excluding* some values
-        self.obs_df: Optional[pd.DataFrame] = None
-        self.var_df: Optional[pd.DataFrame] = None
-        self.dataset_obs_joinid_start: Dict[str, int] = {}  # starting joinid per dataset_id
-        self.dataset_n_obs: Dict[str, int] = {}  # n_obs per dataset_id
+        self.obs_df: pd.DataFrame | None = None
+        self.var_df: pd.DataFrame | None = None
+        self.dataset_obs_joinid_start: dict[str, int] = {}  # starting joinid per dataset_id
+        self.dataset_n_obs: dict[str, int] = {}  # n_obs per dataset_id
         self.census_summary_cell_counts: pd.DataFrame = init_summary_counts_accumulator()
-        self.experiment: Optional[soma.Experiment] = None  # initialized in create()
-        self.experiment_uri: Optional[str] = None  # initialized in create()
-        self.global_var_joinids: Optional[pd.DataFrame] = None
-        self.presence: Dict[int, Tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
+        self.experiment: soma.Experiment | None = None  # initialized in create()
+        self.experiment_uri: str | None = None  # initialized in create()
+        self.global_var_joinids: pd.DataFrame | None = None
+        self.presence: dict[int, tuple[npt.NDArray[np.bool_], npt.NDArray[np.int64]]] = {}
 
     @property
     def name(self) -> str:
@@ -151,7 +138,6 @@ class ExperimentBuilder:
 
     def create(self, census_data: soma.Collection) -> None:
         """Create experiment within the specified Collection with a single Measurement."""
-
         logger.info(f"{self.name}: create experiment at {urlcat(census_data.uri, self.name)}")
 
         self.experiment = census_data.add_new_collection(self.name, soma.Experiment)
@@ -213,9 +199,7 @@ class ExperimentBuilder:
             rna_measurement.var.write(pa_table)
 
     def create_X_with_layers(self) -> None:
-        """
-        Create layers in ms['RNA']/X
-        """
+        """Create layers in ms['RNA']/X."""
         logger.info(f"{self.name}: create X layers")
 
         rna_measurement = self.experiment.ms[MEASUREMENT_RNA_NAME]  # type:ignore
@@ -235,10 +219,8 @@ class ExperimentBuilder:
                     platform_config=CENSUS_X_LAYERS_PLATFORM_CONFIG[layer_name],
                 )
 
-    def populate_presence_matrix(self, datasets: List[Dataset]) -> None:
-        """
-        Save presence matrix per Experiment
-        """
+    def populate_presence_matrix(self, datasets: list[Dataset]) -> None:
+        """Save presence matrix per Experiment."""
         _assert_open_for_write(self.experiment)
         logger.info(f"Save presence matrix for {self.name} - start")
 
@@ -274,11 +256,11 @@ class ExperimentBuilder:
 
 def accumulate_axes_dataframes(
     base_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
-) -> List[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]]:
-    """
-    Two parallel operations.
+    datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+) -> list[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]]:
+    """Two parallel operations.
+
     From all datasets:
     1. Concat all obs dataframes
     2. Union all var dataframes
@@ -313,7 +295,7 @@ def accumulate_axes_dataframes(
             return obs_df, var_df
 
     datasets_bag = dask.bag.from_sequence(datasets)
-    df_pairs_per_eb: List[tuple[pd.DataFrame, pd.DataFrame]] = dask.compute(
+    df_pairs_per_eb: list[tuple[pd.DataFrame, pd.DataFrame]] = dask.compute(
         *[
             datasets_bag.map(
                 get_obs_and_var,
@@ -329,26 +311,28 @@ def accumulate_axes_dataframes(
             experiment_builders,
             [
                 (
-                    pd.concat(cast(List[pd.DataFrame], [df_pair[0] for df_pair in df_pairs]), ignore_index=True),
+                    pd.concat(cast(list[pd.DataFrame], [df_pair[0] for df_pair in df_pairs]), ignore_index=True),
                     pd.concat(
-                        cast(List[pd.DataFrame], [df_pair[1] for df_pair in df_pairs]), ignore_index=True
+                        cast(list[pd.DataFrame], [df_pair[1] for df_pair in df_pairs]), ignore_index=True
                     ).drop_duplicates(ignore_index=True),
                 )
                 for df_pairs in df_pairs_per_eb
             ],
+            strict=False,
         )
     )
 
 
-def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]]) -> None:
-    """
-    Processing steps post-accumulation of all axes dataframes. Includes:
+def post_acc_axes_processing(accumulated: list[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]]) -> None:
+    """Processing steps post-accumulation of all axes dataframes.
+
+    Includes:
     * assign soma_joinids
     * add derived or summary columns
     * generate summary and/or working data for the experiment_builder
     """
 
-    def add_placeholder_columns(df: pd.DataFrame, table_spec: TableSpec, default: Dict[npt.DTypeLike, Any]) -> None:
+    def add_placeholder_columns(df: pd.DataFrame, table_spec: TableSpec, default: dict[npt.DTypeLike, Any]) -> None:
         for key in table_spec.field_names():
             if key not in df:
                 dtype = table_spec.field(key).to_pandas_dtype(ignore_dict_type=True)
@@ -400,12 +384,11 @@ def post_acc_axes_processing(accumulated: List[tuple[ExperimentBuilder, tuple[pd
 
 
 def _get_axis_stats(
-    raw_X: Union[sparse.spmatrix, npt.NDArray[np.float32]],
+    raw_X: sparse.spmatrix | npt.NDArray[np.float32],
     dataset_obs_joinid_start: int,
     local_var_joinids: npt.NDArray[np.int64],
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Generate obs and var summary stats, e.g., raw_sum, etc.
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Generate obs and var summary stats, e.g., raw_sum, etc.
 
     Return tuple of (obs_stats_df, var_stats_df), both indexed by soma_joinid.
     """
@@ -423,15 +406,15 @@ def _get_axis_stats(
 
 
 class XReduction(TypedDict):
-    """Information accumulated/reduced from each AnnData X read"""
+    """Information accumulated/reduced from each AnnData X read."""
 
     obs_stats: pd.DataFrame
     var_stats: pd.DataFrame
-    presence: List[PresenceResult]
+    presence: list[PresenceResult]
 
 
 def reduce_X_stats_chunk(results: Sequence[XReduction]) -> XReduction:
-    """Reduce multiple XReduction objects into one"""
+    """Reduce multiple XReduction objects into one."""
     results = list(results)
     assert len(results)
     if len(results) == 1:
@@ -517,7 +500,7 @@ def dispatch_X_chunk(
 
     _is_smart_seq = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), SMART_SEQ)
     if _is_smart_seq.any():
-        is_smart_seq: Optional[npt.NDArray[np.bool_]] = _is_smart_seq
+        is_smart_seq: npt.NDArray[np.bool_] | None = _is_smart_seq
         feature_length = adata.var.feature_length.to_numpy()
     else:
         is_smart_seq = None
@@ -612,11 +595,10 @@ def dispatch_X_chunk(
 
 def _reduce_X_matrices(
     base_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
-) -> Dict[str, Delayed]:
-    """
-    Helper function for populate_X_layers. Create Dask delayed that will save and reduce all X data.
+    datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+) -> dict[str, Delayed]:
+    """Helper function for populate_X_layers. Create Dask delayed that will save and reduce all X data.
 
     This function does not perform the compute - it just creates the graph. Caller must dispatch the graph.
     """
@@ -701,17 +683,16 @@ def _reduce_X_matrices(
 
 def populate_X_layers(
     assets_path: str,
-    datasets: List[Dataset],
-    experiment_builders: List[ExperimentBuilder],
+    datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
     args: CensusBuildArgs,
 ) -> None:
-    """
-    Process X layers for all datasets. Includes saving raw/normalized SOMA arrays,
+    """Process X layers for all datasets. Includes saving raw/normalized SOMA arrays,
     and reducing obs/var axis stats from X data.
     """
     grph = _reduce_X_matrices(assets_path, datasets, experiment_builders)
-    result: Dict[str, XReduction]
-    (result,) = cast(tuple[Dict[str, XReduction]], dask.compute(grph))
+    result: dict[str, XReduction]
+    (result,) = cast(tuple[dict[str, XReduction]], dask.compute(grph))
 
     for eb in experiment_builders:
         if eb.name not in result:
@@ -737,7 +718,7 @@ def populate_X_layers(
 class SummaryStats(TypedDict):
     total_cell_count: int
     unique_cell_count: int
-    number_donors: Dict[str, int]
+    number_donors: dict[str, int]
 
 
 def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> SummaryStats:
@@ -749,8 +730,7 @@ def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> Summa
 
 
 def add_tissue_mapping(obs_df: pd.DataFrame) -> None:
-    """Inplace addition of tissue_general-related columns"""
-
+    """Inplace addition of tissue_general-related columns."""
     # UBERON tissue term mapper
     from .tissue_mapper import TissueMapper  # type: ignore
 
@@ -771,10 +751,9 @@ def add_tissue_mapping(obs_df: pd.DataFrame) -> None:
 
 
 def reopen_experiment_builders(
-    experiment_builders: List[ExperimentBuilder], mode: OpenMode = "w"
+    experiment_builders: list[ExperimentBuilder], mode: OpenMode = "w"
 ) -> Generator[ExperimentBuilder, None, None]:
-    """
-    Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use
+    """Re-opens all ExperimentBuilder's `experiment` for writing as a Generator, allowing iterating code to use
     the experiment for writing, without having to explicitly close it.
     """
     with ExitStack() as experiments_stack:
@@ -794,9 +773,7 @@ def _divide_by_row_sum(
     d0: npt.NDArray[np.int64],
     data: npt.NDArray[np.float32],
 ) -> npt.NDArray[np.float32]:
-    """
-    IMPORTANT: in-place operation. Divide each value by the sum of the row.
-    """
+    """IMPORTANT: in-place operation. Divide each value by the sum of the row."""
     row_sum = np.zeros((n_rows,), dtype=np.float64)
     for i in range(len(d0)):
         row_sum[d0[i]] += data[i]
@@ -809,8 +786,7 @@ def _divide_by_row_sum(
 
 @numba.jit(nopython=True, nogil=True)  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _roundHalfToEven(a: npt.NDArray[np.float32], keepbits: int) -> npt.NDArray[np.float32]:
-    """
-    Generate reduced precision floating point array, with round half to even.
+    """Generate reduced precision floating point array, with round half to even.
     IMPORANT: In-place operation.
 
     Ref: https://gmd.copernicus.org/articles/14/377/2021/gmd-14-377-2021.html

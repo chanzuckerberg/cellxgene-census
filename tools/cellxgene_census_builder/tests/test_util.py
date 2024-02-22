@@ -1,7 +1,8 @@
 import numpy as np
+from scipy.sparse import csr_matrix
+
 from cellxgene_census_builder.build_soma.util import is_nonnegative_integral
 from cellxgene_census_builder.util import urlcat, urljoin
-from scipy.sparse import csr_matrix
 
 
 def test_is_nonnegative_integral() -> None:

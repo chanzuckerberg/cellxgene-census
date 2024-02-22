@@ -2,7 +2,7 @@
 #
 # Licensed under the MIT License.
 
-"""Versioning of Census builds
+"""Versioning of Census builds.
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
@@ -18,36 +18,75 @@ The following types describe the expected directory of Census builds, used
 to bootstrap all data location requests.
 """
 CensusVersionName = str  # census version name, e.g., "release-99", "2022-10-01-test", etc.
-CensusLocator = TypedDict(
-    "CensusLocator",
-    {
-        "uri": str,  # [deprecated: only used in census < 1.6.0] absolute resource URI.
-        "relative_uri": str,  # resource URI (relative)
-        "s3_region": Optional[str],  # [deprecated: only used in census < 1.6.0] if an S3 URI, has optional region
-    },
-)
-CensusVersionRetraction = TypedDict(
-    "CensusVersionRetraction",
-    {
-        "date": str,  # the date of retraction
-        "reason": Optional[str],  # the reason for retraction
-        "info_url": Optional[str],  # a permalink to more information
-        "replaced_by": Optional[str],  # the census version that replaces this one
-    },
-)
+
+
+class CensusLocator(TypedDict):
+    """A locator for a Census resource.
+
+    Args:
+        uri:
+            Absolute resource URI (deprecated: only used in census < 1.6.0).
+        relative_uri:
+            Resource URI (relative).
+        s3_region:
+             If an S3 URI, has optional region (deprecated: only used in census < 1.6.0).
+    """
+
+    uri: str
+    relative_uri: str
+    s3_region: Optional[str]
+
+
+class CensusVersionRetraction(TypedDict):
+    """A retraction of a Census version.
+
+    Args:
+        date:
+            The date of retraction.
+        reason:
+            The reason for retraction.
+        info_url:
+            A permalink to more information.
+        replaced_by:
+            The census version that replaces this one.
+    """
+
+    date: str
+    reason: Optional[str]
+    info_url: Optional[str]
+    replaced_by: Optional[str]
+
+
 ReleaseFlag = Literal["lts", "retracted"]
 ReleaseFlags = Dict[ReleaseFlag, bool]
-CensusVersionDescription = TypedDict(
-    "CensusVersionDescription",
-    {
-        "release_date": Optional[str],  # date of release (deprecated)
-        "release_build": str,  # date of build
-        "soma": CensusLocator,  # SOMA objects locator
-        "h5ads": CensusLocator,  # source H5ADs locator
-        "flags": NotRequired[ReleaseFlags],  # flags for the release
-        "retraction": NotRequired[CensusVersionRetraction],  # if retracted, details of the retraction
-    },
-)
+
+
+class CensusVersionDescription(TypedDict):
+    """A description of a Census version.
+
+    Args:
+        release_date:
+            The date of the release (deprecated).
+        release_build:
+            Date of build.
+        soma:
+            SOMA objects locator.
+        h5ads:
+            Source H5ADs locator.
+        flags:
+            Flags for the release.
+        retraction:
+            If retracted, details of the retraction.
+    """
+
+    release_date: Optional[str]
+    release_build: str
+    soma: CensusLocator
+    h5ads: CensusLocator
+    flags: NotRequired[ReleaseFlags]
+    retraction: NotRequired[CensusVersionRetraction]
+
+
 CensusDirectory = Dict[CensusVersionName, Union[CensusVersionName, CensusVersionDescription]]
 
 """
@@ -57,44 +96,63 @@ the correct configuration based on the URI.
 """
 Provider = Literal["S3", "file", "unknown"]
 
-"""
-A mirror identifies a location that can host the census artifacts. A dict of available mirrors exists
-in the mirrors.json file, and looks like this:
 
-{
-    "default": "default-mirror",
-    "default-mirror": {
-        "provider": "S3",
-        "base_uri": "s3://a-public-bucket/",
-        "region": "us-west-2"
-    }
-}
-
-"""
 CensusMirrorName = str  # name of the mirror
-CensusMirror = TypedDict(
-    "CensusMirror",
-    {
-        "provider": Provider,  # provider of the mirror.
-        "base_uri": str,  # base URI for the mirror location, e.g. s3://cellxgene-data-public/
-        "region": Optional[str],  # region of the bucket or resource
-    },
-)
+
+
+class CensusMirror(TypedDict):
+    """A mirror for a Census resource.
+
+    A mirror identifies a location that can host the census artifacts. A dict of available mirrors exists in the
+    ``mirrors.json`` file, and looks like this:
+
+    .. highlight:: json
+    .. code-block:: json
+
+        {
+            "default": "default-mirror",
+            "default-mirror": {
+                "provider": "S3",
+                "base_uri": "s3://a-public-bucket/",
+                "region": "us-west-2"
+            }
+        }
+
+    Args:
+        provider:
+            Provider of the mirror.
+        base_uri:
+            Base URI for the mirror location, e.g. s3://cellxgene-data-public/.
+        region:
+            Region of the bucket or resource.
+    """
+
+    provider: Provider
+    base_uri: str
+    region: Optional[str]
+
 
 CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
 
-"""
-A `ResolvedCensusLocator` represent an absolute location of a Census resource, including the provider info.
-It is obtained by resolving a relative location against a specified mirror.
-"""
-ResolvedCensusLocator = TypedDict(
-    "ResolvedCensusLocator",
-    {
-        "uri": str,  # resource URI (absolute)
-        "region": Optional[str],  # if an S3 URI, has optional region
-        "provider": str,  # Provider
-    },
-)
+
+class ResolvedCensusLocator(TypedDict):
+    """A resolved locator for a Census resource.
+
+    A `ResolvedCensusLocator` represent an absolute location of a Census resource, including the provider info. It is
+    obtained by resolving a relative location against a specified mirror.
+
+    Args:
+        uri:
+            Resource URI (absolute).
+        region:
+            If an S3 URI, has optional region.
+        provider:
+            Provider.
+    """
+
+    uri: str
+    region: Optional[str]
+    provider: str
 
 
 # URL for the default top-level directory of all public data
@@ -140,8 +198,7 @@ def get_census_version_description(census_version: str) -> CensusVersionDescript
 def get_census_version_directory(
     *, lts: Optional[bool] = None, retracted: Optional[bool] = False
 ) -> Dict[CensusVersionName, CensusVersionDescription]:
-    """
-    Get the directory of Census versions currently available, optionally filtering by specified
+    """Get the directory of Census versions currently available, optionally filtering by specified
     flags. If a filtering flag is not specified, Census versions will not be filtered by that flag.
     Defaults to including both "long-term stable" (LTS) and weekly Census versions, and excluding
     retracted versions.
@@ -325,11 +382,9 @@ def get_census_version_directory(
         census_version_description = cast(CensusVersionDescription, directory_value)
         release_flags = cast(ReleaseFlags, {"lts": lts, "retracted": retracted})
         admitted = all(
-            [
-                census_version_description.get("flags", {}).get(flag_name, False) == release_flags[flag_name]
-                for flag_name, flag_value in release_flags.items()
-                if flag_value is not None
-            ]
+            census_version_description.get("flags", {}).get(flag_name, False) == release_flags[flag_name]
+            for flag_name, flag_value in release_flags.items()
+            if flag_value is not None
         )
         if not admitted:
             continue
@@ -354,8 +409,7 @@ def get_census_version_directory(
 
 
 def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
-    """
-    Get the directory of Census mirrors currently available.
+    """Get the directory of Census mirrors currently available.
 
     Returns:
         A dictionary that contains mirror names and their corresponding info,

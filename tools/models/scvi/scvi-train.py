@@ -41,7 +41,7 @@ if __name__ == "__main__":
     devices = train_config.get("devices")
     multi_gpu = train_config.get("multi_gpu", False)
 
-    trainer_config = train_config.get("trainer") or dict()
+    trainer_config = train_config.get("trainer") or {}
 
     training_plan_config = config.get("training_plan")
 

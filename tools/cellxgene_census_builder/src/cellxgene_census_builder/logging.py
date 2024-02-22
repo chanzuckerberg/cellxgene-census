@@ -2,15 +2,12 @@ import logging
 import math
 import pathlib
 import sys
-from typing import List, Optional, Tuple
 
 from .build_state import CensusBuildArgs
 
 
-def logging_init_params(verbose: int, handlers: Optional[List[logging.Handler]] = None) -> None:
-    """
-    Configure the logger defaults with explicit config params
-    """
+def logging_init_params(verbose: int, handlers: list[logging.Handler] | None = None) -> None:
+    """Configure the logger defaults with explicit config params."""
 
     def clamp(n: int, minn: int, maxn: int) -> int:
         return min(max(n, minn), maxn)
@@ -39,10 +36,8 @@ def logging_init_params(verbose: int, handlers: Optional[List[logging.Handler]] 
 
 
 def logging_init(args: CensusBuildArgs) -> None:
-    """
-    Configure the logger from CensusBuildArgs, including extra handlers.
-    """
-    handlers: List[logging.Handler] = [logging.StreamHandler(sys.stderr)]
+    """Configure the logger from CensusBuildArgs, including extra handlers."""
+    handlers: list[logging.Handler] = [logging.StreamHandler(sys.stderr)]
 
     # Create logging directory if configured appropriately
     if args.config.log_dir and args.config.log_file:
@@ -54,7 +49,7 @@ def logging_init(args: CensusBuildArgs) -> None:
     logging_init_params(args.config.verbose, handlers)
 
 
-def _hr_multibyte_unit(n_bytes: int, unit_base: int, unit_size_names: Tuple[str, ...]) -> str:
+def _hr_multibyte_unit(n_bytes: int, unit_base: int, unit_size_names: tuple[str, ...]) -> str:
     """Private. Convert number of bytes into a human-readable multi-byte unit string."""
     if n_bytes == 0:
         return "0B"

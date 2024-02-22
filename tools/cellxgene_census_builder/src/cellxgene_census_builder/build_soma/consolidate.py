@@ -3,7 +3,8 @@ import logging
 import re
 import threading
 import time
-from typing import Dict, List, Literal, Optional, Sequence
+from collections.abc import Sequence
+from typing import Literal
 
 import attrs
 import dask.distributed
@@ -50,11 +51,10 @@ def submit_consolidate(
     uri: str,
     pool: dask.distributed.Client | concurrent.futures.ProcessPoolExecutor,
     vacuum: bool,
-    include: Optional[Sequence[str]] = None,
-    exclude: Optional[Sequence[str]] = None,
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
 ) -> Sequence[dask.distributed.Future]:
-    """
-    This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
+    """This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
 
     Will vacuum if requested. Excludes any object URI matching a regex in the exclude list.
@@ -76,7 +76,7 @@ def submit_consolidate(
     return futures
 
 
-def _gather(uri: str) -> List[ConsolidationCandidate]:
+def _gather(uri: str) -> list[ConsolidationCandidate]:
     # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
         uris_to_consolidate = list_uris_to_consolidate(census)
@@ -85,10 +85,8 @@ def _gather(uri: str) -> List[ConsolidationCandidate]:
 
 def list_uris_to_consolidate(
     collection: soma.Collection,
-) -> List[ConsolidationCandidate]:
-    """
-    Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed.
-    """
+) -> list[ConsolidationCandidate]:
+    """Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed."""
     uris = []
     for soma_obj in collection.values():
         type = soma_obj.soma_type
@@ -119,8 +117,8 @@ def list_uris_to_consolidate(
 def _consolidate_array(
     obj: ConsolidationCandidate,
     vacuum: bool,
-    consolidation_modes: Optional[List[str]] = None,
-    consolidation_config: Optional[Dict[str, str]] = None,
+    consolidation_modes: list[str] | None = None,
+    consolidation_config: dict[str, str] | None = None,
 ) -> None:
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
@@ -151,8 +149,8 @@ def _consolidate_group(obj: ConsolidationCandidate, vacuum: bool) -> None:
 def _consolidate_tiledb_object(
     obj: ConsolidationCandidate,
     vacuum: bool,
-    consolidation_modes: Optional[List[str]] = None,
-    consolidation_config: Optional[Dict[str, str]] = None,
+    consolidation_modes: list[str] | None = None,
+    consolidation_config: dict[str, str] | None = None,
 ) -> str:
     assert soma.get_storage_engine() == "tiledb"
 
@@ -173,7 +171,7 @@ def _consolidate_tiledb_object(
         raise
 
 
-StopFlag = Dict[Literal["stop"], bool]
+StopFlag = dict[Literal["stop"], bool]
 
 
 @attrs.define(frozen=True, kw_only=True)
@@ -185,8 +183,7 @@ class AsyncConsolidator:
 def start_async_consolidation(
     uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 15.0
 ) -> AsyncConsolidator:
-    """
-    Start an async consolidation process that will safely work alongside writers.
+    """Start an async consolidation process that will safely work alongside writers.
     Intended use is background process during writing of X layers, to reduce total
     fragment count.
 
@@ -217,17 +214,14 @@ def _async_consolidator(
     uri: str, fragment_count_threshold: int, polling_period_sec: float, stop_request: StopFlag
 ) -> None:
     """Inner loop of async/incremental consolidator."""
-
     logger.info(f"Async consolidator - starting for {uri}")
     while not stop_request["stop"]:
         # Arrays are the only resource intensive consolidation step. Prioritize the array
         # with the largest number of fragments.
-        candidates = list(
-            sorted(
-                (c for c in _gather(uri) if c.is_array() and c.n_fragments > 1),
-                key=lambda c: c.n_fragments,
-                reverse=True,
-            )
+        candidates = sorted(
+            (c for c in _gather(uri) if c.is_array() and c.n_fragments > 1),
+            key=lambda c: c.n_fragments,
+            reverse=True,
         )
 
         start_time = time.perf_counter()
