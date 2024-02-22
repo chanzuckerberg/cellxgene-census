@@ -49,8 +49,8 @@ jobs:
           # Setting up mount-s3. We use S3 file system as it is necessary to persist the
           # profiling run data that are performed below
           
-          aws sts get-caller-identity
-          aws s3 ls s3://census-profiler-tests-trial
+          sudo aws sts get-caller-identity
+          sudo aws s3 ls s3://census-profiler-tests-trial
           mkdir ./census-profiler-tests
           mkdir ./s3_cache
           echo `pwd`
