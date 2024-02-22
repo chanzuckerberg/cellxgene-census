@@ -29,7 +29,7 @@ args = parser.parse_args()
 # The threshold (ratio) of allowable performance degradation between profiling runs
 threshold = 1.10
 
-db = profiler.data.FileBasedProfileDB(args.db_path)
+db = profiler.data.S3ProfileDB(args.db_path)
 command_profiles = db.find(f"{args.command}")
 
 

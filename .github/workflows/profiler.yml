@@ -24,7 +24,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::401986845158:role/PlaygroundS3
+          role-to-assume: arn:aws:iam::401986845158:role/MyNewPlayground #arn:aws:iam::401986845158:role/PlaygroundS3 #
           role-session-name: PushDockerImage
 
       - name: Install AWS CLI v2
@@ -49,10 +49,12 @@ jobs:
           # Setting up mount-s3. We use S3 file system as it is necessary to persist the
           # profiling run data that are performed below
           
-          sudo aws sts get-caller-identity
-          sudo aws s3 ls s3://census-profiler-tests-trial
-          mkdir ./census-profiler-tests
-          mkdir ./s3_cache
+          aws sts get-caller-identity
+          aws s3 ls s3://census-profiler-tests-trial
+          cd ~/
+          mkdir /tmp/s3mount
+          mkdir /tmp/s3cache
           echo `pwd`
-          sudo mount-s3 census-profiler-tests-trial `pwd`/census-profiler-tests --cache `pwd`/s3_cache  --metadata-ttl 300
+          ls
+          #mount-s3 --cache /tmp/s3cache  --metadata-ttl 300 --region us-west-2 census-profiler-tests-trial /tmp/s3mount 
           ./tools/perf_checker/perf_checker.sh

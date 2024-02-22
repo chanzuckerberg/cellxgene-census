@@ -4,7 +4,7 @@ set -euox pipefail
 
 
 
-dbpath=`pwd`/census-profiler-tests
+dbpath="census-profiler-tests"
 
 pip install psutil
 pip install gitpython
