@@ -730,7 +730,7 @@ def get_summary_stats(experiment_builders: Sequence[ExperimentBuilder]) -> Summa
 def add_tissue_mapping(obs_df: pd.DataFrame, dataset_id: str) -> None:
     """Inplace addition of tissue_general-related column."""
     # UBERON tissue term mapper
-    from .tissue_mapper import TissueMapper  # type: ignore
+    from .tissue_mapper import TissueMapper
 
     tissue_mapper: TissueMapper = TissueMapper()
 

@@ -1,18 +1,7 @@
-# type: ignore
-# isort:skip_file
-# flake8: noqa
-"""
-NOTE: This is a (literal) copy of
-https://github.com/chanzuckerberg/single-cell-data-portal/blob/9b94ccb0a2e0a8f6182b213aa4852c491f6f6aff/backend/wmg/data/tissue_mapper.py
-
-Please do not modify this file directly here. Instead, modify the original file in single-cell-data-portal, run the unit tests (which exist in that repo),
-get the PR approved and merged, and then port back the changes to this file.
-
-In the future, this code will be part of an ontology service library.
+"""NOTE: In the future, this code will be part of an ontology service library.
 
 This code contains several places that do not pass the lint/static analysis CI for this pipeline, so the analysis is disabled in this prologue.
 """
-from typing import List
 
 import owlready2
 
@@ -122,14 +111,14 @@ class TissueMapper:
         "UBERON_0001062",  # anatomical entity
     ]
 
-    def __init__(self):
-        self._cached_tissues = {}
-        self._cached_labels = {}
+    def __init__(self) -> None:
+        self._cached_tissues: dict[str, str] = {}
+        self._cached_labels: dict[str, str] = {}
         self._uberon = owlready2.get_ontology(CXG_UBERON_ONTOLOGY_URL).load()
 
     def get_high_level_tissue(self, tissue_ontology_term_id: str) -> str:
-        """
-        Returns the associated high-level tissue ontology term ID from any other ID
+        """Returns the associated high-level tissue ontology term ID from any other ID.
+
         Edge cases:
             - If multiple high-level tissues exists for a given tissue, returns the one with higher priority (the first
             appearance in list self.HIGH_LEVEL_TISSUES.
@@ -137,7 +126,6 @@ class TissueMapper:
             - If the input tissue is not found in the ontology, return the same as input.
                 - This could happen with something like "UBERON:0002048 (cell culture)"
         """
-
         tissue_ontology_term_id = self.reformat_ontology_term_id(tissue_ontology_term_id, to_writable=False)
 
         if tissue_ontology_term_id in self._cached_tissues:
@@ -155,7 +143,7 @@ class TissueMapper:
         # List ancestors for this entity, including itself. Ignore any ancestors that
         # are not descendents of UBERON_0000061 (anatomical structure).
         ancestors = [entity.name]
-        branch_ancestors = []
+        branch_ancestors: list[str] = []
         for is_a in entity.is_a:
             branch_ancestors = self._list_ancestors(is_a, branch_ancestors)
 
@@ -175,19 +163,18 @@ class TissueMapper:
         self._cached_tissues[tissue_ontology_term_id] = result
         return result
 
-    def get_label_from_writable_id(self, ontology_term_id: str):
-        """
-        Returns the label from and ontology term id that is in writable form
+    def get_label_from_writable_id(self, ontology_term_id: str) -> str:
+        """Returns the label from and ontology term id that is in writable form.
+
         Example: "UBERON:0002048" returns "lung"
         Example: "UBERON_0002048" raises ValueError because the ID is not in writable form
         """
-
         if ontology_term_id in self._cached_labels:
             return self._cached_labels[ontology_term_id]
 
         entity = self._get_entity_from_id(self.reformat_ontology_term_id(ontology_term_id, to_writable=False))
         if entity:
-            result = entity.label[0]
+            result: str = entity.label[0]
         else:
             result = ontology_term_id
 
@@ -195,13 +182,12 @@ class TissueMapper:
         return result
 
     @staticmethod
-    def reformat_ontology_term_id(ontology_term_id: str, to_writable: bool = True):
-        """
-        Converts ontology term id string between two formats:
-            - `to_writable == True`: from "UBERON_0002048" to "UBERON:0002048"
-            - `to_writable == False`: from "UBERON:0002048" to "UBERON_0002048"
-        """
+    def reformat_ontology_term_id(ontology_term_id: str, to_writable: bool = True) -> str:
+        """Converts ontology term id string between two formats.
 
+        - `to_writable == True`: from "UBERON_0002048" to "UBERON:0002048"
+        - `to_writable == False`: from "UBERON:0002048" to "UBERON_0002048"
+        """
         if to_writable:
             if ontology_term_id.count("_") != 1:
                 raise ValueError(f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one '_'")
@@ -211,11 +197,12 @@ class TissueMapper:
                 raise ValueError(f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one ':'")
             return ontology_term_id.replace(":", "_")
 
-    def _list_ancestors(self, entity: owlready2.entity.ThingClass, ancestors: List[str] = []) -> List[str]:
-        """
-        Recursive function that given an entity of an ontology, it traverses the ontology and returns
+    def _list_ancestors(self, entity: owlready2.entity.ThingClass, ancestors: list[str] | None = None) -> list[str]:
+        """Recursive function that given an entity of an ontology, it traverses the ontology and returns
         a list of all ancestors associated with the entity.
         """
+        if ancestors is None:
+            ancestors = []
 
         if self._is_restriction(entity):
             # Entity is a restriction, check for part_of relationship
@@ -242,10 +229,10 @@ class TissueMapper:
                 self._list_ancestors(super_entity, ancestors)
             return ancestors
 
+        raise ValueError("Unexpected condition in ontology.")
+
     def _get_entity_from_id(self, ontology_term_id: str) -> owlready2.entity.ThingClass:
-        """
-        Given a readable ontology term id (e.g. "UBERON_0002048"), it returns the associated ontology entity
-        """
+        """Given a readable ontology term id (e.g. "UBERON_0002048"), it returns the associated ontology entity."""
         return self._uberon.search_one(iri=f"http://purl.obolibrary.org/obo/{ontology_term_id}")
 
     @staticmethod
