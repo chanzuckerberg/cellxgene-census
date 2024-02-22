@@ -267,7 +267,7 @@ def validate_axis_dataframes(
         with open_experiment(soma_path, eb) as exp:
             n_vars = len(eb_info[eb.name].vars)
 
-            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id"]).concat().to_pandas()
+            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id", "tissue_type"]).concat().to_pandas()
             assert eb_info[eb.name].n_obs == len(census_obs_df)
             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
@@ -292,6 +292,10 @@ def validate_axis_dataframes(
             assert (len(var_unique_joinids) == 0) or (
                 (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
             )
+
+            # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
+            # See census schema for more info.
+            assert (census_obs_df.tissue_type == "tissue").all()
 
     return eb_info
 
