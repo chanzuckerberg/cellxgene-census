@@ -1,7 +1,4 @@
-"""NOTE: In the future, this code will be part of an ontology service library.
-
-This code contains several places that do not pass the lint/static analysis CI for this pipeline, so the analysis is disabled in this prologue.
-"""
+"""NOTE: In the future, this code will be part of an ontology service library."""
 
 import owlready2
 
