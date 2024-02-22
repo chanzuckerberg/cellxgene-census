@@ -151,7 +151,7 @@ def _consolidate_array(
                 {
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.consolidation.mode": mode,
-                    "sm.consolidation.total_buffer_size": 4 * 1024**3,
+                    "sm.consolidation.total_buffer_size": 32 * 1024**3,
                     **(consolidation_config or {}),
                 }
             ),
