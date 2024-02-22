@@ -4,7 +4,7 @@ import re
 import threading
 import time
 from collections.abc import Sequence
-from typing import Literal
+from typing import Literal, overload
 
 import attrs
 import dask.distributed
@@ -47,13 +47,35 @@ def consolidate(args: CensusBuildArgs, uri: str) -> None:
             uri = future.result()
 
 
+@overload
+def submit_consolidate(
+    uri: str,
+    pool: concurrent.futures.ProcessPoolExecutor,
+    vacuum: bool,
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
+) -> Sequence[concurrent.futures.Future[str]]:
+    ...
+
+
+@overload
+def submit_consolidate(
+    uri: str,
+    pool: dask.distributed.Client,
+    vacuum: bool,
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
+) -> Sequence[dask.distributed.Future]:
+    ...
+
+
 def submit_consolidate(
     uri: str,
     pool: dask.distributed.Client | concurrent.futures.ProcessPoolExecutor,
     vacuum: bool,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
-) -> Sequence[dask.distributed.Future]:
+) -> Sequence[dask.distributed.Future | concurrent.futures.Future[str]]:
     """This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
 
@@ -129,7 +151,7 @@ def _consolidate_array(
                 {
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.consolidation.mode": mode,
-                    "sm.consolidation.total_buffer_size": 32 * 1024**3,
+                    "sm.consolidation.total_buffer_size": 4 * 1024**3,
                     **(consolidation_config or {}),
                 }
             ),

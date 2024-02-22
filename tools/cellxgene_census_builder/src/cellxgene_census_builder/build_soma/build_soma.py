@@ -245,7 +245,7 @@ def build_step3_populate_obs_and_var_axes(
         for dataset in datasets:
             dataset.dataset_total_cell_count += cast(
                 int,
-                cells_per_dataset.get(dataset.dataset_id, default=0),  # type: ignore[arg-type]
+                cells_per_dataset.get(dataset.dataset_id, default=0),
             )
 
     logger.info("Build step 3 - accumulate obs and var axes - started")
