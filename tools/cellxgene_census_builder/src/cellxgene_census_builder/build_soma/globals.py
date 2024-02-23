@@ -243,7 +243,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
         "tiledb": {
             "create": {
                 **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
-                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 19}]}},
+                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 13}]}},
             }
         }
     },
@@ -305,8 +305,8 @@ DEFAULT_TILEDB_CONFIG = {
     # the default configs will hit kernel limits on high-CPU boxes. This
     # cap can be raised when TiledB-SOMA is more thread frugal. See for
     # example: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
-    "sm.compute_concurrency_level": min(cpu_count(), 32),
-    "sm.io_concurrency_level": min(cpu_count(), 32),
+    "sm.compute_concurrency_level": min(cpu_count(), 64),
+    "sm.io_concurrency_level": min(cpu_count(), 64),
 }
 
 

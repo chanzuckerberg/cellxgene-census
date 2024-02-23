@@ -163,7 +163,7 @@ def _validate_axis_dataframes(args: tuple[str, str, Dataset, list[ExperimentSpec
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
         dataset_id = dataset.dataset_id
-        unfiltered_ad = open_anndata(assets_path, dataset)
+        unfiltered_ad = open_anndata(dataset, base_path=assets_path)
         eb_info: dict[str, EbInfo] = {}
         for eb in experiment_specifications:
             eb_info[eb.name] = EbInfo()
@@ -371,7 +371,9 @@ def _validate_Xraw_contents_by_dataset(args: tuple[str, str, Dataset, list[Exper
     """
     assets_path, soma_path, dataset, experiment_specifications = args
     logger.info(f"validate X[raw] by contents - starting {dataset.dataset_id}")
-    unfiltered_ad = open_anndata(assets_path, dataset, include_filter_columns=True, var_column_names=("_index",))
+    unfiltered_ad = open_anndata(
+        dataset, base_path=assets_path, include_filter_columns=True, var_column_names=("_index",)
+    )
 
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
@@ -575,10 +577,11 @@ def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -
         assert (feature_length > 0).any()
         assert X_raw.shape[1] == n_cols
 
+        # Smallish, else will fail in scipy due to int32 overflow during coordinate broadcasting
+        # For more info: https://github.com/scipy/scipy/issues/13155
         ROW_SLICE_SIZE = 25_000
-        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (
-            2**31 - 1
-        )  # else, will fail in scipy due to int32 overflow during coordinate broadcasting
+        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (2**31 - 1)
+
         for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
             raw = (
                 X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
@@ -618,10 +621,10 @@ def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
-            ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1"
+            ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
             assert np.allclose(
                 norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
-            ), f"{experiment_specification.name}: normalized layer does not match raw contents"
+            ), f"{experiment_specification.name}: normalized layer does not match raw contents, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
 
             del norm_csr, raw_csr
             gc.collect()
@@ -756,8 +759,12 @@ def validate_manifest_contents(assets_path: str, datasets: list[Dataset]) -> boo
     return True
 
 
-def validate_consolidation(soma_path: str) -> bool:
+def validate_consolidation(args: CensusBuildArgs) -> bool:
     """Verify that obs, var and X layers are all fully consolidated & vacuumed."""
+    if not args.config.consolidate:
+        return True
+
+    soma_path = args.soma_path.as_posix()
 
     def is_empty_tiledb_array(uri: str) -> bool:
         with tiledb.open(uri) as A:
@@ -928,12 +935,12 @@ def validate_soma_bounding_box(
     return True
 
 
-def validate(args: CensusBuildArgs) -> bool:
+def validate_soma(args: CensusBuildArgs) -> bool:
     """Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
     """
-    logger.info("Validation start")
+    logger.info("Validation of SOMA objects - start")
 
     experiment_specifications = make_experiment_specs()
 
@@ -950,8 +957,16 @@ def validate(args: CensusBuildArgs) -> bool:
     assert (eb_info := validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args))
     assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
-    if args.config.consolidate:
-        assert validate_consolidation(soma_path)
     assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
-    logger.info("Validation finished (success)")
+
+    logger.info("Validation of SOMA objects - finished")
+    return True
+
+
+def validate(args: CensusBuildArgs) -> bool:
+    """Validate all."""
+    logger.info("Validating correct consolidation and vacuuming - start")
+    validate_soma(args)
+    validate_consolidation(args)
+    logger.info("Validating correct consolidation and vacuuming - complete")
     return True

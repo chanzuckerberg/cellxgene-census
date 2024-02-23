@@ -1,3 +1,5 @@
+"""Dev/test CLI for the build_soma package. This is not used for builds."""
+
 import argparse
 import logging
 import pathlib
@@ -8,8 +10,6 @@ import attrs
 
 from ..build_state import CensusBuildArgs, CensusBuildConfig
 from ..util import log_process_resource_status, process_init, start_resource_logger
-from .build_soma import build
-from .validate_soma import validate
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,10 @@ def main() -> int:
         }
     )
     args = CensusBuildArgs(working_dir=pathlib.PosixPath(cli_args.working_dir), config=default_config)
+    # enable the dashboard depending on verbosity level
+    if args.config.verbose:
+        args.config.dashboard = True
+
     process_init(args)
     logger.info(args)
 
@@ -34,10 +38,14 @@ def main() -> int:
 
     cc = 0
     if cli_args.subcommand == "build":
-        cc = build(args)
+        from . import build
 
-    if cc == 0 and (cli_args.subcommand == "validate" or cli_args.validate):
-        validate(args)
+        cc = build(args, validate=cli_args.validate)
+    elif cli_args.subcommand == "validate":
+        from .validate_soma import validate
+
+        # stand-alone validate - requires previously built objects.
+        cc = validate(args)
 
     log_process_resource_status(level=logging.INFO)
     return cc
@@ -88,6 +96,12 @@ def create_args_parser() -> argparse.ArgumentParser:
         action=argparse.BooleanOptionalAction,
         default=True,
         help="Consolidate TileDB objects after build",
+    )
+    build_parser.add_argument(
+        "--dashboard",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Start Dask dashboard",
     )
     build_parser.add_argument(
         "--dataset_id_blocklist_uri",

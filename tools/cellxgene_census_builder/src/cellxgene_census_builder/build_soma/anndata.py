@@ -1,6 +1,8 @@
 import logging
+from contextlib import AbstractContextManager
 from functools import cached_property
 from os import PathLike
+from types import TracebackType
 from typing import Any, Protocol, Self, TypedDict, cast
 
 import h5py
@@ -36,11 +38,13 @@ def _slice_index(prev: Index1D, new: Index1D, length: int) -> slice | npt.NDArra
             assert rng.stop >= 0
             return slice(rng.start, rng.stop, rng.step)
         else:
-            return np.arange(*prev.indices(length))[new]
+            idx = np.arange(*prev.indices(length))[new]
+            return idx if len(idx) else slice(0, 0)
     elif isinstance(prev, np.ndarray):
         if prev.dtype == np.bool_:  # a mask
             prev = np.nonzero(prev)[0].astype(np.int64)
-        return cast(npt.NDArray[np.int64], prev[new])
+        idx = cast(npt.NDArray[np.int64], prev[new])
+        return idx if len(idx) else slice(0, 0)
 
     # else confusion
     raise IndexError("Unsupported indexing types")
@@ -57,7 +61,7 @@ def _normed_index(idx: Index) -> tuple[Index1D, Index1D]:
         raise IndexError("Indexing supported on two dimensions only")
 
 
-class AnnDataProxy:
+class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
     """Recommend using `open_anndata()` rather than instantiating this class directly.
 
     AnnData-like proxy for the version 0.1.0 AnnData H5PY file encoding (aka H5AD).
@@ -83,6 +87,7 @@ class AnnDataProxy:
     _obs: pd.DataFrame
     _var: pd.DataFrame
     _X: h5py.Dataset | CSRDataset | CSCDataset
+    _file: h5py.File | None
 
     def __init__(
         self,
@@ -97,15 +102,24 @@ class AnnDataProxy:
         self.filename = filename
 
         if view_of is None:
+            self._file = h5py.File(self.filename, mode="r")
             self._obs, self._var, self._X = self._load_h5ad(obs_column_names, var_column_names)
             self._obs_idx: slice | npt.NDArray[np.int64] = slice(None)
             self._var_idx: slice | npt.NDArray[np.int64] = slice(None)
         else:
+            self._file = None
             self._obs, self._var, self._X = (view_of._obs, view_of._var, view_of._X)
             assert obs_idx is not None
             assert var_idx is not None
             self._obs_idx = obs_idx
             self._var_idx = var_idx
+
+    def __exit__(
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
+    ) -> None:
+        if self._file:
+            self._file.close()
+        self._file = None
 
     @property
     def X(self) -> sparse.spmatrix | npt.NDArray[np.integer[Any] | np.floating[Any]]:
@@ -156,6 +170,19 @@ class AnnDataProxy:
         vdx = _slice_index(self._var_idx, vdx, self.n_vars)
         return AnnDataProxy(self.filename, view_of=self, obs_idx=odx, var_idx=vdx)
 
+    def get_estimated_density(self) -> float:
+        """Return an estimated density for the H5AD, based upon the full file density.
+        This is NOT the density for any given slice.
+
+        Approach: divide the whole file nnz by the product of the shape.
+        """
+        nnz: int
+        if isinstance(self._X, CSRDataset | CSCDataset):
+            nnz = self._X.group["data"].size
+        else:
+            nnz = self._X.size
+        return nnz / (self.n_obs * self.n_vars)
+
     def _load_dataframe(self, elem: h5py.Group, column_names: tuple[str, ...] | None) -> pd.DataFrame:
         # if reading all, just use the built-in
         if not column_names:
@@ -196,27 +223,27 @@ class AnnDataProxy:
         This code utilizes the AnnData on-disk spec and several experimental API (as of 0.10.0).
         Spec: https://anndata.readthedocs.io/en/latest/fileformat-prose.html
         """
-        file = h5py.File(self.filename, mode="r")
+        assert isinstance(self._file, h5py.File)
 
         # Known to be compatible with this AnnData file encoding
         assert (
-            file.attrs["encoding-type"] == "anndata" and file.attrs["encoding-version"] == "0.1.0"
+            self._file.attrs["encoding-type"] == "anndata" and self._file.attrs["encoding-version"] == "0.1.0"
         ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
 
         # Verify we are reading the expected CxG schema version.
-        schema_version = read_elem(file["uns/schema_version"])
+        schema_version = read_elem(self._file["uns/schema_version"])
         if schema_version != CXG_SCHEMA_VERSION:
             raise ValueError(
                 f"{self.filename} -- incorrect CxG schema version (got {schema_version}, expected {CXG_SCHEMA_VERSION})"
             )
 
-        obs = self._load_dataframe(file["obs"], obs_column_names)
-        if "raw" in file:
-            var = self._load_dataframe(file["raw/var"], var_column_names)
-            X = file["raw/X"]
+        obs = self._load_dataframe(self._file["obs"], obs_column_names)
+        if "raw" in self._file:
+            var = self._load_dataframe(self._file["raw/var"], var_column_names)
+            X = self._file["raw/X"]
         else:
-            var = self._load_dataframe(file["var"], var_column_names)
-            X = file["X"]
+            var = self._load_dataframe(self._file["var"], var_column_names)
+            X = self._file["X"]
 
         if isinstance(X, h5py.Group):
             X = sparse_dataset(X)
@@ -232,12 +259,13 @@ CXG_VAR_COLUMNS_MINIMUM_READ = ("feature_biotype", "feature_reference")
 
 
 def open_anndata(
-    base_path: str,
-    dataset: Dataset,
+    dataset: str | Dataset,
     *,
+    base_path: str | None = None,
     include_filter_columns: bool = False,
     obs_column_names: tuple[str, ...] | None = None,
     var_column_names: tuple[str, ...] | None = None,
+    filter_spec: AnnDataFilterSpec | None = None,
 ) -> AnnDataProxy:
     """Open the dataset and return an AnnData-like AnnDataProxy object.
 
@@ -247,15 +275,19 @@ def open_anndata(
         include_filter_columns: if True, ensure that any obs/var columns required for H5AD filtering are included. If
             False (default), only load the columsn specified by the user.
     """
+    h5ad_path = dataset.dataset_h5ad_path if isinstance(dataset, Dataset) else dataset
+    h5ad_path = urlcat(base_path, h5ad_path) if base_path is not None else h5ad_path
+
+    include_filter_columns = include_filter_columns or (filter_spec is not None)
     if include_filter_columns:
         obs_column_names = tuple(set(CXG_OBS_COLUMNS_MINIMUM_READ + (obs_column_names or ())))
         var_column_names = tuple(set(CXG_VAR_COLUMNS_MINIMUM_READ + (var_column_names or ())))
 
-    return AnnDataProxy(
-        urlcat(base_path, dataset.dataset_h5ad_path),
-        obs_column_names=obs_column_names,
-        var_column_names=var_column_names,
-    )
+    adata = AnnDataProxy(h5ad_path, obs_column_names=obs_column_names, var_column_names=var_column_names)
+    if filter_spec is not None:
+        adata = make_anndata_cell_filter(filter_spec)(adata)
+
+    return adata
 
 
 class AnnDataFilterFunction(Protocol):
