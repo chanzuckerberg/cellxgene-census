@@ -80,9 +80,9 @@ def _open_soma(
 
 
 def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
-    """Return a :class:``tiledbsoma.SOMATileDBContext` with sensible defaults that can be further customized by the
-    user. The customized context can then be passed to :func:``cellxgene_census.open_soma`` with the ``context``
-    argument or to :meth:`somacore.SOMAObject.open`` with the ``context`` argument, such as
+    """Return a :class:`tiledbsoma.SOMATileDBContext` with sensible defaults that can be further customized by the
+    user. The customized context can then be passed to :func:`cellxgene_census.open_soma` with the ``context``
+    argument or to :meth:`somacore.SOMAObject.open` with the ``context`` argument, such as
     :meth:`tiledbsoma.Experiment.open`. Use the :meth:`tiledbsoma.SOMATileDBContext.replace` method on the returned
     object to customize its settings further.
 
@@ -92,7 +92,7 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
             defaults. If not specified, the default configuration will be returned.
 
     Returns:
-        A :class:``tiledbsoma.SOMATileDBContext` object with sensible defaults.
+        A :class:`tiledbsoma.SOMATileDBContext` object with sensible defaults.
 
     Examples:
         To reduce the amount of memory used by TileDB-SOMA I/O operations:
@@ -144,7 +144,7 @@ def open_soma(
         tiledb_config:
             A dictionary of TileDB configuration parameters that will be used to open the SOMA object. Optional,
             defaults to ``None``. If specified, the parameters will override the default settings specified by
-            ``get_default_soma_context().tiledb_config``. Only one of the ``tiledb_config and ``context`` params
+            ``get_default_soma_context().tiledb_config``. Only one of the ``tiledb_config`` and ``context`` params
             can be specified.
         context:
             A custom :class:`tiledbsoma.SOMATileDBContext` that will be used to open the SOMA object.

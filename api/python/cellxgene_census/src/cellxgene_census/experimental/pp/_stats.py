@@ -29,7 +29,7 @@ def mean_variance(
 
     Args:
         query:
-            An :class:`tiledbsoma.ExperimentAxisQuery`, specifying the ``obs``/``var`` selection over which mean and
+            A :class:`tiledbsoma.ExperimentAxisQuery`, specifying the ``obs``/``var`` selection over which mean and
             variance are calculated.
         layer:
             X layer used, e.g., ``"raw"``.
