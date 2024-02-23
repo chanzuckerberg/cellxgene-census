@@ -1,4 +1,5 @@
 import concurrent.futures
+import copy
 import dataclasses
 import gc
 import logging
@@ -7,14 +8,16 @@ import os.path
 import pathlib
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Self, TypeVar
+from typing import Any, Self, Sequence, TypeVar
 
+import dask
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
+from dask import delayed, distributed
 from scipy import sparse
 
 from ..build_state import CensusBuildArgs
@@ -45,6 +48,7 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .mp import (
+    create_dask_client,
     create_process_pool_executor,
     create_resource_pool_executor,
     log_on_broken_process_pool,
@@ -158,8 +162,131 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
     return True
 
 
-def _validate_axis_dataframes(args: tuple[str, str, Dataset, list[ExperimentSpecification]]) -> dict[str, EbInfo]:
-    assets_path, soma_path, dataset, experiment_specifications = args
+# def _validate_axis_dataframes(args: tuple[str, str, Dataset, list[ExperimentSpecification]]) -> dict[str, EbInfo]:
+#     assets_path, soma_path, dataset, experiment_specifications = args
+#     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+#         census_data = census[CENSUS_DATA_NAME]
+#         dataset_id = dataset.dataset_id
+#         unfiltered_ad = open_anndata(dataset, base_path=assets_path)
+#         eb_info: dict[str, EbInfo] = {}
+#         for eb in experiment_specifications:
+#             eb_info[eb.name] = EbInfo()
+#             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
+#             se = census_data[eb.name]
+#             ad = anndata_cell_filter(unfiltered_ad)
+#             dataset_obs = (
+#                 se.obs.read(
+#                     column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
+#                     value_filter=f"dataset_id == '{dataset_id}'",
+#                 )
+#                 .concat()
+#                 .to_pandas()
+#                 .drop(
+#                     columns=[
+#                         "dataset_id",
+#                         "tissue_general",
+#                         "tissue_general_ontology_term_id",
+#                         *CENSUS_OBS_STATS_COLUMNS,
+#                     ]
+#                 )
+#                 .sort_values(by="soma_joinid")
+#                 .drop(columns=["soma_joinid"])
+#                 .reset_index(drop=True)
+#             )
+
+#             # decategorize census obs slice, as it will not have the same categories as H5AD obs,
+#             # preventing Pandas from performing the DataFrame equivalence operation.
+#             for key in dataset_obs:
+#                 if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
+#                     dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
+
+#             assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
+#             if ad.n_obs > 0:
+#                 eb_info[eb.name].n_obs += ad.n_obs
+#                 eb_info[eb.name].dataset_ids.add(dataset_id)
+#                 eb_info[eb.name].vars |= set(ad.var.index.array)
+#                 ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(drop=True)
+#                 assert (
+#                     (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
+#                 ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
+
+#     gc.collect()
+#     log_process_resource_status()
+#     return eb_info
+
+
+def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
+    """Validate axis dataframe schema matches spec."""
+    logger.debug("validate_axis_dataframes_schema start")
+    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+        census_data = census[CENSUS_DATA_NAME]
+
+        # check schema
+        for eb in experiment_specifications:
+            obs = census_data[eb.name].obs
+            var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
+            assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
+            assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
+            for field in obs.schema:
+                assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
+                    field.type
+                ), f"Unexpected type in {field.name}: {field.type}"
+            for field in var.schema:
+                assert CENSUS_VAR_TABLE_SPEC.field(field.name).is_type_equivalent(
+                    field.type
+                ), f"Unexpected type in {field.name}: {field.type}"
+
+    logger.debug("validate_axis_dataframes_schema complete")
+    return True
+
+
+def validate_axis_dataframes_global_ids(
+    soma_path: str,
+    datasets: list[Dataset],
+    experiment_specifications: list[ExperimentSpecification],
+    eb_info: dict[str, EbInfo],
+    args: CensusBuildArgs,
+) -> bool:
+    for eb in experiment_specifications:
+        with open_experiment(soma_path, eb) as exp:
+            n_vars = len(eb_info[eb.name].vars)
+
+            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id", "tissue_type"]).concat().to_pandas()
+            assert eb_info[eb.name].n_obs == len(census_obs_df)
+            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
+            assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+
+            census_var_df = (
+                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
+            )
+            assert n_vars == len(census_var_df)
+            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
+            assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
+
+            # Validate that all obs soma_joinids are unique and in the range [0, n).
+            obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
+            assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
+            assert (len(obs_unique_joinids) == 0) or (
+                (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
+            )
+
+            # Validate that all var soma_joinids are unique and in the range [0, n).
+            var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
+            assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
+            assert (len(var_unique_joinids) == 0) or (
+                (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
+            )
+
+            # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
+            # See census schema for more info.
+            assert (census_obs_df.tissue_type == "tissue").all()
+
+    return True
+
+
+def _validate_axis_dataframes2(
+    dataset: Dataset, experiment_specifications: ExperimentSpecification, assets_path: str, soma_path: str
+) -> dict[str, EbInfo]:
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
         dataset_id = dataset.dataset_id
@@ -211,93 +338,119 @@ def _validate_axis_dataframes(args: tuple[str, str, Dataset, list[ExperimentSpec
     return eb_info
 
 
-def validate_axis_dataframes(
+def validate_axis_dataframes2(
     assets_path: str,
     soma_path: str,
     datasets: list[Dataset],
     experiment_specifications: list[ExperimentSpecification],
     args: CensusBuildArgs,
-) -> dict[str, EbInfo]:
-    """Validate axis dataframes: schema, shape, contents.
+) -> dask.Delayed[dict[str, EbInfo]]:
+    def reduce_eb_info(results: Sequence[dict[str, EbInfo]]) -> dict[str, EbInfo]:
+        eb_info = {}
+        for res in results:
+            for name, info in res.items():
+                if name not in eb_info:
+                    eb_info[name] = copy.copy(info)
+                else:
+                    eb_info[name].update(info)
+        return eb_info
 
-    Raises on error. Returns True on success.
-    """
-    logger.debug("validate_axis_dataframes")
-    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        census_data = census[CENSUS_DATA_NAME]
+    b = dask.bag.from_sequence((d, e) for d in datasets for e in experiment_specifications)
 
-        # check schema
-        for eb in experiment_specifications:
-            obs = census_data[eb.name].obs
-            var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
-            assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
-            assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
-            for field in obs.schema:
-                assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
-                    field.type
-                ), f"Unexpected type in {field.name}: {field.type}"
-            for field in var.schema:
-                assert CENSUS_VAR_TABLE_SPEC.field(field.name).is_type_equivalent(
-                    field.type
-                ), f"Unexpected type in {field.name}: {field.type}"
-
-    # check shapes & perform weak test of contents
-    eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
-    if args.config.multi_process:
-        with create_process_pool_executor(args) as ppe:
-            futures = [
-                ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
-                for dataset in datasets
-            ]
-            for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
-                log_on_broken_process_pool(ppe)
-                res = future.result()
-                for eb_name, ebi in res.items():
-                    eb_info[eb_name].update(ebi)
-                logger.info(f"validate_axis {n} of {len(datasets)} complete.")
-    else:
-        for n, dataset in enumerate(datasets, start=1):
-            for eb_name, ebi in _validate_axis_dataframes(
-                (assets_path, soma_path, dataset, experiment_specifications)
-            ).items():
-                eb_info[eb_name].update(ebi)
-            logger.info(f"validate_axis {n} of {len(datasets)} complete.")
-
-    for eb in experiment_specifications:
-        with open_experiment(soma_path, eb) as exp:
-            n_vars = len(eb_info[eb.name].vars)
-
-            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id", "tissue_type"]).concat().to_pandas()
-            assert eb_info[eb.name].n_obs == len(census_obs_df)
-            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
-            assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
-
-            census_var_df = (
-                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
-            )
-            assert n_vars == len(census_var_df)
-            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
-            assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
-
-            # Validate that all obs soma_joinids are unique and in the range [0, n).
-            obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
-            assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
-            assert (len(obs_unique_joinids) == 0) or (
-                (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
-            )
-
-            # Validate that all var soma_joinids are unique and in the range [0, n).
-            var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
-            assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
-            assert (len(var_unique_joinids) == 0) or (
-                (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
-            )
-
-            # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
-            # See census schema for more info.
-            assert (census_obs_df.tissue_type == "tissue").all()
+    eb_info = b.starmap(_validate_axis_dataframes2, assets_path=assets_path, soma_path=soma_path).reduction(
+        reduce_eb_info, reduce_eb_info
+    )
 
     return eb_info
+
+
+# def validate_axis_dataframes(
+#     assets_path: str,
+#     soma_path: str,
+#     datasets: list[Dataset],
+#     experiment_specifications: list[ExperimentSpecification],
+#     args: CensusBuildArgs,
+# ) -> dict[str, EbInfo]:
+#     """Validate axis dataframes: schema, shape, contents.
+
+#     Raises on error. Returns True on success.
+#     """
+#     logger.debug("validate_axis_dataframes")
+#     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+#         census_data = census[CENSUS_DATA_NAME]
+
+#         # check schema
+#         for eb in experiment_specifications:
+#             obs = census_data[eb.name].obs
+#             var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
+#             assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
+#             assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
+#             for field in obs.schema:
+#                 assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
+#                     field.type
+#                 ), f"Unexpected type in {field.name}: {field.type}"
+#             for field in var.schema:
+#                 assert CENSUS_VAR_TABLE_SPEC.field(field.name).is_type_equivalent(
+#                     field.type
+#                 ), f"Unexpected type in {field.name}: {field.type}"
+
+#     # check shapes & perform weak test of contents
+#     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
+#     if args.config.multi_process:
+#         with create_process_pool_executor(args) as ppe:
+#             futures = [
+#                 ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
+#                 for dataset in datasets
+#             ]
+#             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+#                 log_on_broken_process_pool(ppe)
+#                 res = future.result()
+#                 for eb_name, ebi in res.items():
+#                     eb_info[eb_name].update(ebi)
+#                 logger.info(f"validate_axis {n} of {len(datasets)} complete.")
+#     else:
+#         for n, dataset in enumerate(datasets, start=1):
+#             for eb_name, ebi in _validate_axis_dataframes(
+#                 (assets_path, soma_path, dataset, experiment_specifications)
+#             ).items():
+#                 eb_info[eb_name].update(ebi)
+#             logger.info(f"validate_axis {n} of {len(datasets)} complete.")
+
+#     for eb in experiment_specifications:
+#         with open_experiment(soma_path, eb) as exp:
+#             n_vars = len(eb_info[eb.name].vars)
+
+#             census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id", "tissue_type"]).concat().to_pandas()
+#             assert eb_info[eb.name].n_obs == len(census_obs_df)
+#             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
+#             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+
+#             census_var_df = (
+#                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
+#             )
+#             assert n_vars == len(census_var_df)
+#             assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
+#             assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
+
+#             # Validate that all obs soma_joinids are unique and in the range [0, n).
+#             obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
+#             assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
+#             assert (len(obs_unique_joinids) == 0) or (
+#                 (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
+#             )
+
+#             # Validate that all var soma_joinids are unique and in the range [0, n).
+#             var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
+#             assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
+#             assert (len(var_unique_joinids) == 0) or (
+#                 (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
+#             )
+
+#             # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
+#             # See census schema for more info.
+#             assert (census_obs_df.tissue_type == "tissue").all()
+
+#     return eb_info
 
 
 def _validate_X_obs_axis_stats(
@@ -935,7 +1088,7 @@ def validate_soma_bounding_box(
     return True
 
 
-def validate_soma(args: CensusBuildArgs) -> bool:
+def validate_soma(args: CensusBuildArgs) -> Delayed[bool]:
     """Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
@@ -948,25 +1101,37 @@ def validate_soma(args: CensusBuildArgs) -> bool:
     assets_path = args.h5ads_path.as_posix()
 
     assert validate_directory_structure(soma_path, assets_path)
-
     assert validate_all_soma_objects_exist(soma_path, experiment_specifications)
     assert validate_relative_path(soma_path)
+    assert validate_axis_dataframes_schema(soma_path, experiment_specifications)
+
     datasets = load_datasets_from_census(assets_path, soma_path)
     assert validate_manifest_contents(assets_path, datasets)
 
-    assert (eb_info := validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args))
-    assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
+    eb_info = validate_axis_dataframes2(assets_path, soma_path, datasets, experiment_specifications, args).compute()
+
+    #
+    # XXX not finished below here
+    #
+
+    # assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
+    assert validate_axis_dataframes_global_ids(soma_path, experiment_specifications, eb_info, args)
+    # assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
     assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
-    assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
 
     logger.info("Validation of SOMA objects - finished")
     return True
 
 
 def validate(args: CensusBuildArgs) -> bool:
-    """Validate all."""
+    """Validate all.
+
+    Stand-alone function, to validate outside of a build.
+    """
     logger.info("Validating correct consolidation and vacuuming - start")
-    validate_soma(args)
+    with create_dask_client(args) as client:
+        distributed.wait(client.compute(validate_soma(args)))
+
     validate_consolidation(args)
     logger.info("Validating correct consolidation and vacuuming - complete")
     return True

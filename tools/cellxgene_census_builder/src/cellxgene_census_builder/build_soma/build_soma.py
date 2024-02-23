@@ -4,6 +4,7 @@ import pathlib
 from datetime import UTC, datetime
 from typing import cast
 
+import dask.distributed
 import pandas as pd
 import psutil
 import tiledbsoma as soma
@@ -11,7 +12,7 @@ import tiledbsoma as soma
 from ..build_state import CensusBuildArgs
 from ..util import cpu_count
 from .census_summary import create_census_summary
-from .consolidate import consolidate, start_async_consolidation, stop_async_consolidation
+from .consolidate import start_async_consolidation, stop_async_consolidation, submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -31,7 +32,7 @@ from .mp import create_dask_client
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
 from .util import get_git_commit_sha, is_git_repo_dirty, shuffle
-from .validate_soma import validate as go_validate
+from .validate_soma import validate_consolidation, validate_soma
 
 logger = logging.getLogger(__name__)
 
@@ -120,14 +121,27 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
     tiledb_soma_1969_work_around(root_collection.uri)
 
-    # TODO: consolidation and validation can be done in parallel. Goal: do this work
-    # when refactoring validation to use Dask.
+    # # TODO: consolidation and validation can be done in parallel. Goal: do this work
+    # # when refactoring validation to use Dask.
 
-    if args.config.consolidate:
-        consolidate(args, root_collection.uri)
+    # if args.config.consolidate:
+    #     consolidate(args, root_collection.uri)
 
-    if validate:
-        go_validate(args)
+    # if validate:
+    #     go_validate(args)
+
+    with create_dask_client(args) as client:
+        consolidation_futures: list[dask.distributed.Future] | None = (
+            submit_consolidate(root_collection.uri, pool=client.current(), vacuum=True)
+            if args.config.consolidate
+            else None
+        )
+        validation_tasks = validate_soma(args) if validate else None
+        dask.distributed.wait(client.compute([consolidation_futures, validation_tasks]))
+
+    # after consolidation, check that it worked
+    if args.config.consolidate and validate:
+        validate_consolidation(args)
 
     return 0
 
