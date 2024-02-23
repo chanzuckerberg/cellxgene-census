@@ -41,7 +41,7 @@ def get_anndata(
         X_name:
             The ``X`` layer to query. Defaults to ``"raw"``.
         X_layers:
-            Additional layers to add to :attr:``anndata.AnnData.layers``.
+            Additional layers to add to :attr:`anndata.AnnData.layers`.
         obs_value_filter:
             Value filter for the ``obs`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.

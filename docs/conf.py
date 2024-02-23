@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'cellxgene-census'
-copyright = '2022-2023 Chan Zuckerberg Initiative Foundation'
-author = 'Chan Zuckerberg Initiative Foundation'
+copyright = '2022, Chan Zuckerberg Initiative'
+author = 'Chan Zuckerberg Initiative'
 
 import git
 repo = git.Repo(search_parent_directories=True)
@@ -38,7 +38,7 @@ tiledb_version = "latest"
 
 intersphinx_mapping = {
     "tiledbsoma-py": (
-        "https://tiledb-inc-tiledb-soma.readthedocs-hosted.com/en/%s/"
+        "https://tiledbsoma.readthedocs.io/en/%s/"
         % tiledb_version,
         None,
     ),
@@ -46,6 +46,10 @@ intersphinx_mapping = {
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
     'anndata': ('https://anndata.readthedocs.io/en/latest/', None),
+    'pandas': ('https://pandas.pydata.org/docs/', None),
+    'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
+    'torchdata': ('https://pytorch.org/data/beta/', None),
 }
 
 templates_path = ['_templates']

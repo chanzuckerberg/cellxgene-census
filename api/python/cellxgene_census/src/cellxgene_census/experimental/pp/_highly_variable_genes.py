@@ -370,7 +370,7 @@ def get_highly_variable_genes(
         batch_key_func:
             Optional function to create a user-defined batch key. Function will be called once per row in the obs
             dataframe. Function will receive a single argument: a :class:`pandas.Series` containing values specified in
-            the``batch_key`` argument.
+            the ``batch_key`` argument.
 
     Returns:
         :class:`pandas.DataFrame` containing annotations for all ``var`` values specified by the query.
@@ -383,7 +383,7 @@ def get_highly_variable_genes(
 
     Examples:
         Fetch a :class:`pandas.DataFrame` containing var annotations for a subset of the cells matching the
-        ``obs_value_filter`:
+        ``obs_value_filter``:
 
         >>> hvg = get_highly_variable_genes(
                 census,
@@ -397,7 +397,6 @@ def get_highly_variable_genes(
         >>> with cellxgene_census.open_soma(census_version="stable") as census:
                 organism = "mus_musculus"
                 obs_value_filter = "is_primary_data == True and tissue_general == 'lung'"
-
                 # Get the highly variable genes
                 hvg = cellxgene_census.experimental.pp.get_highly_variable_genes(
                     census,
@@ -405,7 +404,6 @@ def get_highly_variable_genes(
                     obs_value_filter=obs_value_filter,
                     n_top_genes = 500
                 )
-
                 # Fetch AnnData - all cells matching obs_value_filter, just the HVGs
                 hvg_soma_ids = hvg[hvg.highly_variable].index.values
                 adata = cellxgene_census.get_anndata(
