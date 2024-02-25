@@ -22,6 +22,7 @@ from dask import distributed
 from scipy import sparse
 
 from ..build_state import CensusBuildArgs
+from ..logging import logit
 from ..util import log_process_resource_status, urlcat
 from .anndata import make_anndata_cell_filter, open_anndata
 from .consolidate import list_uris_to_consolidate
@@ -171,9 +172,9 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
     return True
 
 
+@logit(logger)
 def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
     """Validate axis dataframe schema matches spec."""
-    logger.debug("validate_axis_dataframes_schema start")
     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
         census_data = census[CENSUS_DATA_NAME]
 
@@ -192,17 +193,16 @@ def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: l
                     field.type
                 ), f"Unexpected type in {field.name}: {field.type}"
 
-    logger.debug("validate_axis_dataframes_schema complete")
     return True
 
 
+@logit(logger)
 def validate_axis_dataframes_global_ids(
     soma_path: str,
     experiment_specifications: list[ExperimentSpecification],
     eb_info: dict[str, EbInfo],
 ) -> bool:
     """Validate axes joinid assignment, shape, etc."""
-    logger.info("validate_axis_dataframes_global_ids start")
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
             # obs
@@ -267,7 +267,6 @@ def validate_axis_dataframes_global_ids(
             del census_var_df
             gc.collect()
 
-    logger.info("validate_axis_dataframes_global_ids complete")
     return True
 
 
@@ -278,6 +277,7 @@ def validate_axis_dataframes(
     experiment_specifications: list[ExperimentSpecification],
     args: CensusBuildArgs,
 ) -> dask.delayed.Delayed[dict[str, EbInfo]]:
+    @logit(logger, msg="{0.dataset_id} {1.name}")
     def _validate_axis_dataframes(
         dataset: Dataset, eb: ExperimentSpecification, assets_path: str, soma_path: str
     ) -> dict[str, EbInfo]:
@@ -329,7 +329,6 @@ def validate_axis_dataframes(
                     (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
                 ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
-        logger.info(f"validate_axis_dataframes {dataset.dataset_id} {eb.name}")
         return eb_info
 
     def reduce_eb_info(results: Sequence[dict[str, EbInfo]]) -> dict[str, EbInfo]:
@@ -692,14 +691,11 @@ def _validate_Xraw_contents_by_dataset(args: tuple[str, str, Dataset, list[Exper
 def validate_X_layers_normalized(
     soma_path: str, experiment_specifications: list[ExperimentSpecification]
 ) -> dask.delayed.Delayed[bool]:
+    @logit(logger, msg="{0.name} rows [{1}, {2})")
     def _validate_X_layers_normalized(
         experiment_specification: ExperimentSpecification, row_range_start: int, row_range_stop: int, soma_path: str
     ) -> bool:
         """Validate that X['normalized'] is correct relative to X['raw']."""
-        logger.info(
-            f"validate_X_layers_normalized - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
-        )
-
         with open_experiment(soma_path, experiment_specification) as exp:
             if "normalized" not in exp.ms[MEASUREMENT_RNA_NAME].X:
                 return True
@@ -777,10 +773,6 @@ def validate_X_layers_normalized(
             del norm_csr, raw_csr
             gc.collect()
 
-        logger.info(
-            f"validate_X_layers_normalized - finish, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
-        )
-
         return True
 
     JOINID_STRIDE = 16_000
@@ -802,6 +794,7 @@ def validate_X_layers_has_unique_coords(
 ) -> dask.delayed.Delayed[bool]:
     """Validate that all X layers have no duplicate coordinates."""
 
+    @logit(logger, msg="{0.name}, {1}, rows [{2}, {3})")
     def _validate_X_layers_has_unique_coords(
         es: ExperimentSpecification,
         layer_name: str,
@@ -809,9 +802,6 @@ def validate_X_layers_has_unique_coords(
         row_range_stop: int,
         soma_path: str,
     ) -> bool:
-        logger.info(
-            f"validate_X_layers_has_unique_coords start, {es.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
-        )
         with open_experiment(soma_path, es) as exp:
             if layer_name not in exp.ms[MEASUREMENT_RNA_NAME].X:
                 return True
@@ -832,9 +822,6 @@ def validate_X_layers_has_unique_coords(
             del offsets, unique_offsets
             gc.collect()
 
-        logger.info(
-            f"validate_X_layers_has_unique_coords finished, {es.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
-        )
         gc.collect()
         return True
 
@@ -952,13 +939,13 @@ def validate_X_layers_has_unique_coords(
 #     return True
 
 
+@logit(logger)
 def validate_X_layers_schema(
     soma_path: str,
     experiment_specifications: list[ExperimentSpecification],
     eb_info: dict[str, EbInfo],
 ) -> bool:
     """Validate all X layer schema."""
-    logger.info("validate_X_layers_schema start")
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
             assert soma.Collection.exists(exp.ms[MEASUREMENT_RNA_NAME].X.uri)
@@ -977,7 +964,6 @@ def validate_X_layers_schema(
                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                     assert X.shape == (n_obs, n_vars)
 
-    logger.info("validate_X_layers_schema finished")
     return True
 
 
@@ -994,6 +980,7 @@ def load_datasets_from_census(assets_path: str, soma_path: str) -> list[Dataset]
         return datasets
 
 
+@logit(logger)
 def validate_manifest_contents(assets_path: str, datasets: list[Dataset]) -> bool:
     """Confirm contents of manifest are correct."""
     for d in datasets:
@@ -1004,6 +991,7 @@ def validate_manifest_contents(assets_path: str, datasets: list[Dataset]) -> boo
     return True
 
 
+@logit(logger)
 def validate_consolidation(args: CensusBuildArgs) -> bool:
     """Verify that obs, var and X layers are all fully consolidated & vacuumed."""
     if not args.config.consolidate:
@@ -1027,6 +1015,7 @@ def validate_consolidation(args: CensusBuildArgs) -> bool:
     return True
 
 
+@logit(logger)
 def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
     """Verify that the entire census is a single directory tree."""
     assert soma_path.startswith(assets_path.rsplit("/", maxsplit=1)[0])
@@ -1036,6 +1025,7 @@ def validate_directory_structure(soma_path: str, assets_path: str) -> bool:
     return True
 
 
+@logit(logger)
 def validate_relative_path(soma_path: str) -> bool:
     """Verify the census objects are stored in the same relative path.
 
@@ -1058,11 +1048,11 @@ def validate_relative_path(soma_path: str) -> bool:
     return True
 
 
+@logit(logger)
 def validate_internal_consistency(
     soma_path: str, experiment_specifications: list[ExperimentSpecification], datasets: list[Dataset]
 ) -> bool:
     """Internal checks that various computed stats match."""
-    logger.info("validate_internal_consistency - cross-checks start")
     datasets_df: pd.DataFrame = Dataset.to_dataframe(datasets).set_index("soma_joinid")
 
     for eb in experiment_specifications:
@@ -1127,10 +1117,10 @@ def validate_internal_consistency(
                 ).all(), f"{eb.name}: var.n_measured_obs does not match presence matrix."
                 del tmp
 
-    logger.info("validate_internal_consistency - cross-checks finished")
     return True
 
 
+@logit(logger)
 def validate_soma_bounding_box(
     soma_path: str, experiment_specifications: list[ExperimentSpecification], eb_info: dict[str, EbInfo]
 ) -> bool:
@@ -1140,7 +1130,6 @@ def validate_soma_bounding_box(
         * shape is set correctly
         * no sparse arrays contain the bounding box in metadata
     """
-    logger.info("validate_soma_bounding_box start")
 
     def get_sparse_arrays(C: soma.Collection) -> list[soma.SparseNDArray]:
         uris = []
@@ -1178,7 +1167,6 @@ def validate_soma_bounding_box(
             for key in bbox_metadata_keys:
                 assert key not in metadata, f"Unexpected bounding box key {key} found in metadata for {uri}"
 
-    logger.info("validate_soma_bounding_box complete")
     return True
 
 

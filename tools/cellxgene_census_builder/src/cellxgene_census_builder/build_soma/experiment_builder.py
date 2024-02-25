@@ -21,6 +21,7 @@ from scipy import sparse
 from somacore.options import OpenMode
 
 from ..build_state import CensusBuildArgs
+from ..logging import logit
 from ..util import log_process_resource_status, urlcat
 from .anndata import AnnDataFilterSpec, AnnDataProxy, open_anndata
 from .datasets import Dataset
@@ -476,6 +477,7 @@ REDUCE_X_MAJOR_ROW_STRIDE: int = 2_000_000
 REDUCE_X_MINOR_NNZ_STRIDE: int = 2**31
 
 
+@logit(logger, msg="{2.filename}, {3}")
 def dispatch_X_chunk(
     dataset_id: str,
     experiment_uri: str,
@@ -485,8 +487,6 @@ def dispatch_X_chunk(
     dataset_obs_joinid_start: int,
     global_var_joinids: pd.DataFrame,
 ) -> XReduction:
-    logger.info(f"start reading {adata.filename}, {row_start}")
-
     # result accumulator
     result: XReduction = {
         "obs_stats": pd.DataFrame(),
@@ -589,7 +589,6 @@ def dispatch_X_chunk(
         del xI, xJ, xNormD
         gc.collect()
 
-    logger.info(f"finished reading {adata.filename}, {row_start}")
     return result
 
 

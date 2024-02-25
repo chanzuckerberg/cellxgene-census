@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import logging
 import math
 import pathlib
 import sys
+import time
+from collections.abc import Callable
+from typing import Any, ParamSpec, TypeVar
 
 from .build_state import CensusBuildArgs
 
@@ -66,3 +71,31 @@ def hr_binary_unit(n_bytes: int) -> str:
 def hr_decimal_unit(n_bytes: int) -> str:
     """Convert number of bytes into a human-readable decimal (power of 1000) multi-byte unit string."""
     return _hr_multibyte_unit(n_bytes, 1000, ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"))
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def logit(
+    logger: logging.Logger, *, level: int = logging.INFO, msg: str | None = None, timeit: bool = True
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    """Log decorator factory - logs entry and exit."""
+
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            if msg is None:
+                _msg = ""
+            else:
+                _msg = ": " + msg.format(*args, **kwargs)
+            logger.log(level, f"{func.__name__} [enter]{_msg}")
+            t = time.perf_counter()
+            result: R = func(*args, **kwargs)
+            call_time = "" if not timeit else f", {(time.perf_counter()-t):.2f}s"
+            logger.log(level, f"{func.__name__} [exit{call_time}]{_msg}")
+            return result
+
+        return wrapper
+
+    return decorator
