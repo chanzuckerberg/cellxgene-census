@@ -27,7 +27,7 @@ classifiers = [
 dependencies= [
     "typing_extensions==4.9.0",
     "pyarrow==15.0.0",
-    "pandas[performance]==2.2.0",
+    "pandas[performance]==2.2.1",
     "anndata==0.10.5.post1",
     "numpy==1.24.4",
     # IMPORTANT: consider TileDB format compat before advancing this version. It is important that
@@ -47,8 +47,8 @@ dependencies= [
     "psutil==5.9.8",
     "pyyaml==6.0.1",
     "numba==0.58.1",
-    "dask==2024.2.0",
-    "distributed==2024.2.0",
+    "dask==2024.2.1",
+    "distributed==2024.2.1",
 ]
 
 [project.urls]

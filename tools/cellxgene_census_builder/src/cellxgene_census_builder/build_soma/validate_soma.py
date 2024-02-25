@@ -1,14 +1,15 @@
-import concurrent.futures
+from __future__ import annotations
+
 import copy
 import dataclasses
 import gc
 import logging
-import math
 import os.path
 import pathlib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Self, Sequence, TypeVar
+from typing import Any, Self, TypeVar
 
 import dask
 import numpy as np
@@ -17,7 +18,7 @@ import pandas as pd
 import pyarrow as pa
 import tiledb
 import tiledbsoma as soma
-from dask import delayed, distributed
+from dask import distributed
 from scipy import sparse
 
 from ..build_state import CensusBuildArgs
@@ -40,8 +41,10 @@ from .globals import (
     CENSUS_SUMMARY_NAME,
     CENSUS_VAR_TABLE_SPEC,
     CENSUS_X_LAYERS,
+    CXG_OBS_COLUMNS_READ,
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
+    CXG_VAR_COLUMNS_READ,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
     SMART_SEQ,
@@ -49,9 +52,6 @@ from .globals import (
 )
 from .mp import (
     create_dask_client,
-    create_process_pool_executor,
-    create_resource_pool_executor,
-    log_on_broken_process_pool,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,15 @@ class EbInfo:
 def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experiment:
     """Helper function that knows the Census schema path conventions."""
     return soma.Experiment.open(urlcat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
+
+
+def get_experiment_shape(base_uri: str, specs: list[ExperimentSpecification]) -> dict[str, tuple[int, int]]:
+    shapes = {}
+    for es in specs:
+        with open_experiment(base_uri, es) as exp:
+            shape = (exp.obs.count, exp.ms[MEASUREMENT_RNA_NAME].var.count)
+            shapes[es.name] = shape
+    return shapes
 
 
 def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
@@ -162,59 +171,6 @@ def validate_all_soma_objects_exist(soma_path: str, experiment_specifications: l
     return True
 
 
-# def _validate_axis_dataframes(args: tuple[str, str, Dataset, list[ExperimentSpecification]]) -> dict[str, EbInfo]:
-#     assets_path, soma_path, dataset, experiment_specifications = args
-#     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-#         census_data = census[CENSUS_DATA_NAME]
-#         dataset_id = dataset.dataset_id
-#         unfiltered_ad = open_anndata(dataset, base_path=assets_path)
-#         eb_info: dict[str, EbInfo] = {}
-#         for eb in experiment_specifications:
-#             eb_info[eb.name] = EbInfo()
-#             anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
-#             se = census_data[eb.name]
-#             ad = anndata_cell_filter(unfiltered_ad)
-#             dataset_obs = (
-#                 se.obs.read(
-#                     column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
-#                     value_filter=f"dataset_id == '{dataset_id}'",
-#                 )
-#                 .concat()
-#                 .to_pandas()
-#                 .drop(
-#                     columns=[
-#                         "dataset_id",
-#                         "tissue_general",
-#                         "tissue_general_ontology_term_id",
-#                         *CENSUS_OBS_STATS_COLUMNS,
-#                     ]
-#                 )
-#                 .sort_values(by="soma_joinid")
-#                 .drop(columns=["soma_joinid"])
-#                 .reset_index(drop=True)
-#             )
-
-#             # decategorize census obs slice, as it will not have the same categories as H5AD obs,
-#             # preventing Pandas from performing the DataFrame equivalence operation.
-#             for key in dataset_obs:
-#                 if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
-#                     dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
-
-#             assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
-#             if ad.n_obs > 0:
-#                 eb_info[eb.name].n_obs += ad.n_obs
-#                 eb_info[eb.name].dataset_ids.add(dataset_id)
-#                 eb_info[eb.name].vars |= set(ad.var.index.array)
-#                 ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(drop=True)
-#                 assert (
-#                     (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
-#                 ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
-
-#     gc.collect()
-#     log_process_resource_status()
-#     return eb_info
-
-
 def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: list[ExperimentSpecification]) -> bool:
     """Validate axis dataframe schema matches spec."""
     logger.debug("validate_axis_dataframes_schema start")
@@ -242,26 +198,34 @@ def validate_axis_dataframes_schema(soma_path: str, experiment_specifications: l
 
 def validate_axis_dataframes_global_ids(
     soma_path: str,
-    datasets: list[Dataset],
     experiment_specifications: list[ExperimentSpecification],
     eb_info: dict[str, EbInfo],
-    args: CensusBuildArgs,
 ) -> bool:
+    """Validate axes joinid assignment, shape, etc."""
+    logger.info("validate_axis_dataframes_global_ids start")
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
-            n_vars = len(eb_info[eb.name].vars)
+            # obs
 
-            census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id", "tissue_type"]).concat().to_pandas()
-            assert eb_info[eb.name].n_obs == len(census_obs_df)
+            census_obs_df = (
+                exp.obs.read(
+                    column_names=[
+                        "soma_joinid",
+                        "dataset_id",
+                        "tissue_type",
+                        "raw_sum",
+                        "nnz",
+                        "raw_mean_nnz",
+                        "raw_variance_nnz",
+                        "n_measured_vars",
+                    ]
+                )
+                .concat()
+                .to_pandas()
+            )
+            assert eb_info[eb.name].n_obs == len(census_obs_df) == exp.obs.count
             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
-
-            census_var_df = (
-                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
-            )
-            assert n_vars == len(census_var_df)
-            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
-            assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
             # Validate that all obs soma_joinids are unique and in the range [0, n).
             obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
@@ -270,6 +234,29 @@ def validate_axis_dataframes_global_ids(
                 (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
             )
 
+            # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
+            # See census schema for more info.
+            assert (census_obs_df.tissue_type == "tissue").all()
+
+            # Assert the stats values look reasonable
+            assert all(
+                np.isfinite(census_obs_df[col]).all() and (census_obs_df[col] >= 0).all()
+                for col in ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
+            )
+
+            del census_obs_df, obs_unique_joinids
+            gc.collect()
+
+            # var
+            n_vars = len(eb_info[eb.name].vars)
+
+            census_var_df = (
+                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
+            )
+            assert n_vars == len(census_var_df) == exp.ms[MEASUREMENT_RNA_NAME].var.count
+            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
+            assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
+
             # Validate that all var soma_joinids are unique and in the range [0, n).
             var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
             assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
@@ -277,26 +264,35 @@ def validate_axis_dataframes_global_ids(
                 (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
             )
 
-            # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
-            # See census schema for more info.
-            assert (census_obs_df.tissue_type == "tissue").all()
+            del census_var_df
+            gc.collect()
 
+    logger.info("validate_axis_dataframes_global_ids complete")
     return True
 
 
-def _validate_axis_dataframes2(
-    dataset: Dataset, experiment_specifications: ExperimentSpecification, assets_path: str, soma_path: str
-) -> dict[str, EbInfo]:
-    with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-        census_data = census[CENSUS_DATA_NAME]
-        dataset_id = dataset.dataset_id
-        unfiltered_ad = open_anndata(dataset, base_path=assets_path)
-        eb_info: dict[str, EbInfo] = {}
-        for eb in experiment_specifications:
-            eb_info[eb.name] = EbInfo()
-            anndata_cell_filter = make_anndata_cell_filter(eb.anndata_cell_filter_spec)
+def validate_axis_dataframes(
+    assets_path: str,
+    soma_path: str,
+    datasets: list[Dataset],
+    experiment_specifications: list[ExperimentSpecification],
+    args: CensusBuildArgs,
+) -> dask.delayed.Delayed[dict[str, EbInfo]]:
+    def _validate_axis_dataframes(
+        dataset: Dataset, eb: ExperimentSpecification, assets_path: str, soma_path: str
+    ) -> dict[str, EbInfo]:
+        with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+            census_data = census[CENSUS_DATA_NAME]
+            dataset_id = dataset.dataset_id
+            ad = open_anndata(
+                dataset,
+                base_path=assets_path,
+                obs_column_names=CXG_OBS_COLUMNS_READ,
+                var_column_names=CXG_VAR_COLUMNS_READ,
+                filter_spec=eb.anndata_cell_filter_spec,
+            )
+            eb_info = {eb.name: EbInfo()}
             se = census_data[eb.name]
-            ad = anndata_cell_filter(unfiltered_ad)
             dataset_obs = (
                 se.obs.read(
                     column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
@@ -333,18 +329,9 @@ def _validate_axis_dataframes2(
                     (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
                 ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
-    gc.collect()
-    log_process_resource_status()
-    return eb_info
+        logger.info(f"validate_axis_dataframes {dataset.dataset_id} {eb.name}")
+        return eb_info
 
-
-def validate_axis_dataframes2(
-    assets_path: str,
-    soma_path: str,
-    datasets: list[Dataset],
-    experiment_specifications: list[ExperimentSpecification],
-    args: CensusBuildArgs,
-) -> dask.Delayed[dict[str, EbInfo]]:
     def reduce_eb_info(results: Sequence[dict[str, EbInfo]]) -> dict[str, EbInfo]:
         eb_info = {}
         for res in results:
@@ -355,102 +342,13 @@ def validate_axis_dataframes2(
                     eb_info[name].update(info)
         return eb_info
 
-    b = dask.bag.from_sequence((d, e) for d in datasets for e in experiment_specifications)
-
-    eb_info = b.starmap(_validate_axis_dataframes2, assets_path=assets_path, soma_path=soma_path).reduction(
-        reduce_eb_info, reduce_eb_info
+    eb_info = (
+        dask.bag.from_sequence((d, e) for d in datasets for e in experiment_specifications)
+        .starmap(_validate_axis_dataframes, assets_path=assets_path, soma_path=soma_path)
+        .reduction(reduce_eb_info, reduce_eb_info)
     )
 
     return eb_info
-
-
-# def validate_axis_dataframes(
-#     assets_path: str,
-#     soma_path: str,
-#     datasets: list[Dataset],
-#     experiment_specifications: list[ExperimentSpecification],
-#     args: CensusBuildArgs,
-# ) -> dict[str, EbInfo]:
-#     """Validate axis dataframes: schema, shape, contents.
-
-#     Raises on error. Returns True on success.
-#     """
-#     logger.debug("validate_axis_dataframes")
-#     with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-#         census_data = census[CENSUS_DATA_NAME]
-
-#         # check schema
-#         for eb in experiment_specifications:
-#             obs = census_data[eb.name].obs
-#             var = census_data[eb.name].ms[MEASUREMENT_RNA_NAME].var
-#             assert sorted(obs.keys()) == sorted(CENSUS_OBS_TABLE_SPEC.field_names())
-#             assert sorted(var.keys()) == sorted(CENSUS_VAR_TABLE_SPEC.field_names())
-#             for field in obs.schema:
-#                 assert CENSUS_OBS_TABLE_SPEC.field(field.name).is_type_equivalent(
-#                     field.type
-#                 ), f"Unexpected type in {field.name}: {field.type}"
-#             for field in var.schema:
-#                 assert CENSUS_VAR_TABLE_SPEC.field(field.name).is_type_equivalent(
-#                     field.type
-#                 ), f"Unexpected type in {field.name}: {field.type}"
-
-#     # check shapes & perform weak test of contents
-#     eb_info = {eb.name: EbInfo() for eb in experiment_specifications}
-#     if args.config.multi_process:
-#         with create_process_pool_executor(args) as ppe:
-#             futures = [
-#                 ppe.submit(_validate_axis_dataframes, (assets_path, soma_path, dataset, experiment_specifications))
-#                 for dataset in datasets
-#             ]
-#             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
-#                 log_on_broken_process_pool(ppe)
-#                 res = future.result()
-#                 for eb_name, ebi in res.items():
-#                     eb_info[eb_name].update(ebi)
-#                 logger.info(f"validate_axis {n} of {len(datasets)} complete.")
-#     else:
-#         for n, dataset in enumerate(datasets, start=1):
-#             for eb_name, ebi in _validate_axis_dataframes(
-#                 (assets_path, soma_path, dataset, experiment_specifications)
-#             ).items():
-#                 eb_info[eb_name].update(ebi)
-#             logger.info(f"validate_axis {n} of {len(datasets)} complete.")
-
-#     for eb in experiment_specifications:
-#         with open_experiment(soma_path, eb) as exp:
-#             n_vars = len(eb_info[eb.name].vars)
-
-#             census_obs_df = exp.obs.read(column_names=["soma_joinid", "dataset_id", "tissue_type"]).concat().to_pandas()
-#             assert eb_info[eb.name].n_obs == len(census_obs_df)
-#             assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
-#             assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
-
-#             census_var_df = (
-#                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
-#             )
-#             assert n_vars == len(census_var_df)
-#             assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
-#             assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
-
-#             # Validate that all obs soma_joinids are unique and in the range [0, n).
-#             obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
-#             assert len(obs_unique_joinids) == len(census_obs_df.soma_joinid.to_numpy())
-#             assert (len(obs_unique_joinids) == 0) or (
-#                 (obs_unique_joinids[0] == 0) and (obs_unique_joinids[-1] == (len(obs_unique_joinids) - 1))
-#             )
-
-#             # Validate that all var soma_joinids are unique and in the range [0, n).
-#             var_unique_joinids = np.unique(census_var_df.soma_joinid.to_numpy())
-#             assert len(var_unique_joinids) == len(census_var_df.soma_joinid.to_numpy())
-#             assert (len(var_unique_joinids) == 0) or (
-#                 (var_unique_joinids[0] == 0) and var_unique_joinids[-1] == (len(var_unique_joinids) - 1)
-#             )
-
-#             # Validate that we only contain primary tissue cells, no organoid, cell culture, etc.
-#             # See census schema for more info.
-#             assert (census_obs_df.tissue_type == "tissue").all()
-
-#     return eb_info
 
 
 def _validate_X_obs_axis_stats(
@@ -549,6 +447,7 @@ def _validate_Xraw_contents_by_dataset(args: tuple[str, str, Dataset, list[Exper
                 continue
 
             # Assert the stats values look reasonable
+            # XXX moved to validate_axis_dataframes_global_ids
             assert all(
                 np.isfinite(obs_df[col]).all() and (obs_df[col] >= 0).all()
                 for col in ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
@@ -661,89 +560,185 @@ def _validate_Xraw_contents_by_dataset(args: tuple[str, str, Dataset, list[Exper
     return True
 
 
-def _validate_X_layer_has_unique_coords(args: tuple[ExperimentSpecification, str, str, int, int]) -> bool:
-    """Validate that all X layers have no duplicate coordinates."""
-    experiment_specification, soma_path, layer_name, row_range_start, row_range_stop = args
-    with open_experiment(soma_path, experiment_specification) as exp:
+# def _validate_X_layer_has_unique_coords(args: tuple[ExperimentSpecification, str, str, int, int]) -> bool:
+#     """Validate that all X layers have no duplicate coordinates."""
+#     experiment_specification, soma_path, layer_name, row_range_start, row_range_stop = args
+#     with open_experiment(soma_path, experiment_specification) as exp:
+#         logger.info(
+#             f"validate_no_dups_X start, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+#         )
+#         if layer_name not in exp.ms[MEASUREMENT_RNA_NAME].X:
+#             return True
+
+#         X_layer = exp.ms[MEASUREMENT_RNA_NAME].X[layer_name]
+#         n_rows, n_cols = X_layer.shape
+#         ROW_SLICE_SIZE = 125_000
+
+#         for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
+#             slice_of_X = X_layer.read(coords=(slice(row, row + ROW_SLICE_SIZE - 1),)).tables().concat()
+
+#             # Use C layout offset for unique test
+#             offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
+#             del slice_of_X
+#             unique_offsets = np.unique(offsets)
+#             assert len(offsets) == len(unique_offsets)
+#             del offsets
+#             gc.collect()
+
+#         logger.info(
+#             f"validate_no_dups_X finished, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+#         )
+
+#     gc.collect()
+#     log_process_resource_status()
+#     return True
+
+
+# def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -> bool:
+#     """Validate that X['normalized'] is correct relative to X['raw']."""
+#     experiment_specification, soma_path, row_range_start, row_range_stop = args
+#     logger.info(
+#         f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+#     )
+
+#     with open_experiment(soma_path, experiment_specification) as exp:
+#         if "normalized" not in exp.ms[MEASUREMENT_RNA_NAME].X:
+#             return True
+
+#         X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
+#         X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
+#         assert X_raw.shape == X_norm.shape
+
+#         is_smart_seq = np.isin(
+#             exp.obs.read(column_names=["assay_ontology_term_id"])
+#             .concat()
+#             .to_pandas()
+#             .assay_ontology_term_id.to_numpy(),
+#             SMART_SEQ,
+#         )
+
+#         var_df = (
+#             exp.ms[MEASUREMENT_RNA_NAME]
+#             .var.read(column_names=["soma_joinid", "feature_length"])
+#             .concat()
+#             .to_pandas()
+#             .set_index("soma_joinid")
+#         )
+#         n_cols = len(var_df)
+#         feature_length = var_df.feature_length.to_numpy()
+#         assert (feature_length > 0).any()
+#         assert X_raw.shape[1] == n_cols
+
+#         # Smallish, else will fail in scipy due to int32 overflow during coordinate broadcasting
+#         # For more info: https://github.com/scipy/scipy/issues/13155
+#         ROW_SLICE_SIZE = 25_000
+#         assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (2**31 - 1)
+
+#         for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
+#             raw = (
+#                 X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
+#                 .tables()
+#                 .concat()
+#                 .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
+#             )
+#             norm = (
+#                 X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
+#                 .tables()
+#                 .concat()
+#                 .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
+#             )
+
+#             assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
+#             assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
+#             # If we wrote a value, it MUST be larger than zero (i.e., represents a raw count value of 1 or greater)
+#             assert np.all(raw["soma_data"].to_numpy() > 0.0), "Found zero value in raw layer"
+#             assert np.all(norm["soma_data"].to_numpy() > 0.0), "Found zero value in normalized layer"
+
+#             dim0 = norm["soma_dim_0"].to_numpy()
+#             dim1 = norm["soma_dim_1"].to_numpy()
+#             row: npt.NDArray[np.int64] = pd.RangeIndex(row_idx, row_idx + ROW_SLICE_SIZE).get_indexer(dim0)  # type: ignore[no-untyped-call]
+#             col = var_df.index.get_indexer(dim1)
+#             n_rows: int = row.max() + 1
+
+#             norm_csr = sparse.coo_matrix((norm["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
+#             raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
+#             del raw, norm, dim0, dim1, row, col
+#             gc.collect()
+
+#             sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
+#             if sseq_mask.any():
+#                 # this is a very costly operation - do it only when necessary
+#                 raw_csr[sseq_mask, :] /= feature_length
+#             del sseq_mask
+
+#             assert np.allclose(
+#                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
+#             ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
+#             assert np.allclose(
+#                 norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
+#             ), f"{experiment_specification.name}: normalized layer does not match raw contents, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
+
+#             del norm_csr, raw_csr
+#             gc.collect()
+
+#     gc.collect()
+#     log_process_resource_status()
+#     logger.info(
+#         f"validate_Xnorm_layer - finish, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+#     )
+#     return True
+
+
+def validate_X_layers_normalized(
+    soma_path: str, experiment_specifications: list[ExperimentSpecification]
+) -> dask.delayed.Delayed[bool]:
+    def _validate_X_layers_normalized(
+        experiment_specification: ExperimentSpecification, row_range_start: int, row_range_stop: int, soma_path: str
+    ) -> bool:
+        """Validate that X['normalized'] is correct relative to X['raw']."""
         logger.info(
-            f"validate_no_dups_X start, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
-        )
-        if layer_name not in exp.ms[MEASUREMENT_RNA_NAME].X:
-            return True
-
-        X_layer = exp.ms[MEASUREMENT_RNA_NAME].X[layer_name]
-        n_rows, n_cols = X_layer.shape
-        ROW_SLICE_SIZE = 125_000
-
-        for row in range(row_range_start, min(row_range_stop, n_rows), ROW_SLICE_SIZE):
-            slice_of_X = X_layer.read(coords=(slice(row, row + ROW_SLICE_SIZE - 1),)).tables().concat()
-
-            # Use C layout offset for unique test
-            offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
-            del slice_of_X
-            unique_offsets = np.unique(offsets)
-            assert len(offsets) == len(unique_offsets)
-            del offsets
-            gc.collect()
-
-        logger.info(
-            f"validate_no_dups_X finished, {experiment_specification.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+            f"validate_X_layers_normalized - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
         )
 
-    gc.collect()
-    log_process_resource_status()
-    return True
+        with open_experiment(soma_path, experiment_specification) as exp:
+            if "normalized" not in exp.ms[MEASUREMENT_RNA_NAME].X:
+                return True
 
+            X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
+            X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
+            assert X_raw.shape == X_norm.shape
 
-def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -> bool:
-    """Validate that X['normalized'] is correct relative to X['raw']."""
-    experiment_specification, soma_path, row_range_start, row_range_stop = args
-    logger.info(
-        f"validate_Xnorm_layer - start, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
-    )
+            row_range_stop = min(X_raw.shape[0], row_range_stop)
 
-    with open_experiment(soma_path, experiment_specification) as exp:
-        if "normalized" not in exp.ms[MEASUREMENT_RNA_NAME].X:
-            return True
+            is_smart_seq = np.isin(
+                exp.obs.read(
+                    coords=(slice(row_range_start, row_range_stop - 1),), column_names=["assay_ontology_term_id"]
+                )
+                .concat()
+                .to_pandas()
+                .assay_ontology_term_id.to_numpy(),
+                SMART_SEQ,
+            )
 
-        X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
-        X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
-        assert X_raw.shape == X_norm.shape
+            var_df = (
+                exp.ms[MEASUREMENT_RNA_NAME]
+                .var.read(column_names=["soma_joinid", "feature_length"])
+                .concat()
+                .to_pandas()
+                .set_index("soma_joinid")
+            )
+            n_cols = len(var_df)
+            feature_length = var_df.feature_length.to_numpy()
+            assert (feature_length > 0).any()
 
-        is_smart_seq = np.isin(
-            exp.obs.read(column_names=["assay_ontology_term_id"])
-            .concat()
-            .to_pandas()
-            .assay_ontology_term_id.to_numpy(),
-            SMART_SEQ,
-        )
-
-        var_df = (
-            exp.ms[MEASUREMENT_RNA_NAME]
-            .var.read(column_names=["soma_joinid", "feature_length"])
-            .concat()
-            .to_pandas()
-            .set_index("soma_joinid")
-        )
-        n_cols = len(var_df)
-        feature_length = var_df.feature_length.to_numpy()
-        assert (feature_length > 0).any()
-        assert X_raw.shape[1] == n_cols
-
-        # Smallish, else will fail in scipy due to int32 overflow during coordinate broadcasting
-        # For more info: https://github.com/scipy/scipy/issues/13155
-        ROW_SLICE_SIZE = 25_000
-        assert (feature_length.shape[0] * ROW_SLICE_SIZE) < (2**31 - 1)
-
-        for row_idx in range(row_range_start, min(row_range_stop, X_raw.shape[0]), ROW_SLICE_SIZE):
             raw = (
-                X_raw.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
+                X_raw.read(coords=(slice(row_range_start, row_range_stop - 1),))
                 .tables()
                 .concat()
                 .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
             )
             norm = (
-                X_norm.read(coords=(slice(row_idx, row_idx + ROW_SLICE_SIZE - 1),))
+                X_norm.read(coords=(slice(row_range_start, row_range_stop - 1),))
                 .tables()
                 .concat()
                 .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
@@ -757,7 +752,7 @@ def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -
 
             dim0 = norm["soma_dim_0"].to_numpy()
             dim1 = norm["soma_dim_1"].to_numpy()
-            row: npt.NDArray[np.int64] = pd.RangeIndex(row_idx, row_idx + ROW_SLICE_SIZE).get_indexer(dim0)  # type: ignore[no-untyped-call]
+            row: npt.NDArray[np.int64] = pd.RangeIndex(row_range_start, row_range_stop).get_indexer(dim0)  # type: ignore[no-untyped-call]
             col = var_df.index.get_indexer(dim1)
             n_rows: int = row.max() + 1
 
@@ -766,58 +761,212 @@ def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -
             del raw, norm, dim0, dim1, row, col
             gc.collect()
 
-            sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
-            if sseq_mask.any():
+            if is_smart_seq.any():
                 # this is a very costly operation - do it only when necessary
-                raw_csr[sseq_mask, :] /= feature_length
-            del sseq_mask
+                raw_csr[is_smart_seq, :] /= feature_length
+            del is_smart_seq
+            gc.collect()
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
-            ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
+            ), f"{experiment_specification.name}: expected normalized X layer to sum to approx 1, rows [{row_range_start}, {row_range_stop})"
             assert np.allclose(
                 norm_csr.data, raw_csr.multiply(1.0 / raw_csr.sum(axis=1).A).tocsr().data, rtol=1e-6, atol=1e-4
-            ), f"{experiment_specification.name}: normalized layer does not match raw contents, rows [{row_idx}, {row_idx+ROW_SLICE_SIZE})"
+            ), f"{experiment_specification.name}: normalized layer does not match raw contents, rows [{row_range_start}, {row_range_stop})"
 
             del norm_csr, raw_csr
             gc.collect()
 
-    gc.collect()
-    log_process_resource_status()
-    logger.info(
-        f"validate_Xnorm_layer - finish, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+        logger.info(
+            f"validate_X_layers_normalized - finish, {experiment_specification.name}, rows [{row_range_start}, {row_range_stop})"
+        )
+
+        return True
+
+    JOINID_STRIDE = 16_000
+    X_shapes = get_experiment_shape(soma_path, experiment_specifications)
+    return (
+        dask.bag.from_sequence(
+            (es, id, id + JOINID_STRIDE)
+            for es in experiment_specifications
+            for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+        )
+        .starmap(_validate_X_layers_normalized, soma_path=soma_path)
+        .reduction(all, all)
+        .to_delayed()
     )
-    return True
 
 
-def validate_X_layers(
-    assets_path: str,
+def validate_X_layers_has_unique_coords(
+    soma_path: str, experiment_specifications: list[ExperimentSpecification]
+) -> dask.delayed.Delayed[bool]:
+    """Validate that all X layers have no duplicate coordinates."""
+
+    def _validate_X_layers_has_unique_coords(
+        es: ExperimentSpecification,
+        layer_name: str,
+        row_range_start: int,
+        row_range_stop: int,
+        soma_path: str,
+    ) -> bool:
+        logger.info(
+            f"validate_X_layers_has_unique_coords start, {es.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+        )
+        with open_experiment(soma_path, es) as exp:
+            if layer_name not in exp.ms[MEASUREMENT_RNA_NAME].X:
+                return True
+
+            X_layer = exp.ms[MEASUREMENT_RNA_NAME].X[layer_name]
+            n_rows, n_cols = X_layer.shape
+            slice_of_X = (
+                X_layer.read(coords=(slice(row_range_start, min(row_range_stop, n_rows) - 1),)).tables().concat()
+            )
+
+            # Use C layout offset for unique test
+            offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
+            del slice_of_X
+            gc.collect()
+
+            unique_offsets = np.unique(offsets)
+            assert len(offsets) == len(unique_offsets)
+            del offsets, unique_offsets
+            gc.collect()
+
+        logger.info(
+            f"validate_X_layers_has_unique_coords finished, {es.name}, {layer_name}, rows [{row_range_start}, {row_range_stop})"
+        )
+        gc.collect()
+        return True
+
+    JOINID_STRIDE = 50_000
+    X_shapes = get_experiment_shape(soma_path, experiment_specifications)
+    return (
+        dask.bag.from_sequence(
+            (es, layer_name, id, id + JOINID_STRIDE)
+            for es in experiment_specifications
+            for layer_name in CENSUS_X_LAYERS
+            for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+        )
+        .starmap(_validate_X_layers_has_unique_coords, soma_path=soma_path)
+        .reduction(all, all)
+        .to_delayed()
+    )
+
+
+# def validate_X_layers(
+#     assets_path: str,
+#     soma_path: str,
+#     datasets: list[Dataset],
+#     experiment_specifications: list[ExperimentSpecification],
+#     eb_info: dict[str, EbInfo],
+#     args: CensusBuildArgs,
+# ) -> bool:
+#     """Validate all X layers: schema, shape, contents.
+
+#     Raises on error. Returns True on success.
+#     """
+#     logger.info("validate_X_layers start")
+#     avg_row_nnz = 0
+#     for eb in experiment_specifications:
+#         with open_experiment(soma_path, eb) as exp:
+#             assert soma.Collection.exists(exp.ms[MEASUREMENT_RNA_NAME].X.uri)
+
+#             census_obs_df = exp.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
+#             n_obs = len(census_obs_df)
+#             logger.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb_info[eb.name].n_obs}; n_obs = {n_obs}")
+#             assert n_obs == eb_info[eb.name].n_obs
+
+#             census_var_df = (
+#                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
+#             )
+#             n_vars = len(census_var_df)
+#             assert n_vars == eb_info[eb.name].n_vars
+
+#             if n_obs > 0:
+#                 for lyr in CENSUS_X_LAYERS:
+#                     assert soma.SparseNDArray.exists(exp.ms[MEASUREMENT_RNA_NAME].X[lyr].uri)
+#                     X = exp.ms[MEASUREMENT_RNA_NAME].X[lyr]
+#                     assert X.schema.field("soma_dim_0").type == pa.int64()
+#                     assert X.schema.field("soma_dim_1").type == pa.int64()
+#                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
+#                     assert X.shape == (n_obs, n_vars)
+#                 avg_row_nnz = max(avg_row_nnz, math.ceil(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
+
+#     if args.config.multi_process:
+#         ROWS_PER_PROCESS = 500_000
+#         mem_budget_factor = int(20 * avg_row_nnz * 2)  # Heuristic:  3 columns, (int64, int64, float32), 100% overhead
+#         with create_resource_pool_executor(args) as ppe:
+#             futures = (
+#                 [
+#                     ppe.submit(
+#                         100_000 * mem_budget_factor,
+#                         _validate_Xnorm_layer,
+#                         (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
+#                     )
+#                     for eb in experiment_specifications
+#                     for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
+#                 ]
+#                 + [
+#                     ppe.submit(
+#                         400_000 * mem_budget_factor,
+#                         _validate_X_layer_has_unique_coords,
+#                         (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
+#                     )
+#                     for eb in experiment_specifications
+#                     for layer_name in CENSUS_X_LAYERS
+#                     for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
+#                 ]
+#                 + [
+#                     ppe.submit(
+#                         6 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
+#                         _validate_Xraw_contents_by_dataset,
+#                         (assets_path, soma_path, dataset, experiment_specifications),
+#                     )
+#                     for dataset in datasets
+#                 ]
+#             )
+#             for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+#                 log_on_broken_process_pool(ppe)
+#                 assert future.result()
+#                 logger.info(f"validate_X_layers {n} of {len(futures)} complete.")
+#                 log_process_resource_status()
+
+#     else:
+#         for eb in experiment_specifications:
+#             for layer_name in CENSUS_X_LAYERS:
+#                 logger.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
+#                 assert _validate_X_layer_has_unique_coords((eb, soma_path, layer_name, 0, n_obs))
+#         for n, vld in enumerate(
+#             (
+#                 _validate_Xraw_contents_by_dataset((assets_path, soma_path, dataset, experiment_specifications))
+#                 for dataset in datasets
+#             ),
+#             start=1,
+#         ):
+#             logger.info(f"validate_X {n} of {len(datasets)} complete.")
+#             assert vld
+#         for eb in experiment_specifications:
+#             assert _validate_Xnorm_layer((eb, soma_path, 0, eb_info[eb.name].n_obs))
+
+#     logger.info("validate_X_layers finished")
+#     return True
+
+
+def validate_X_layers_schema(
     soma_path: str,
-    datasets: list[Dataset],
     experiment_specifications: list[ExperimentSpecification],
     eb_info: dict[str, EbInfo],
-    args: CensusBuildArgs,
 ) -> bool:
-    """Validate all X layers: schema, shape, contents.
-
-    Raises on error. Returns True on success.
-    """
-    logger.info("validate_X_layers start")
-    avg_row_nnz = 0
+    """Validate all X layer schema."""
+    logger.info("validate_X_layers_schema start")
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
             assert soma.Collection.exists(exp.ms[MEASUREMENT_RNA_NAME].X.uri)
 
-            census_obs_df = exp.obs.read(column_names=["soma_joinid"]).concat().to_pandas()
-            n_obs = len(census_obs_df)
-            logger.info(f"uri = {exp.obs.uri}, eb.n_obs = {eb_info[eb.name].n_obs}; n_obs = {n_obs}")
-            assert n_obs == eb_info[eb.name].n_obs
-
-            census_var_df = (
-                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
-            )
-            n_vars = len(census_var_df)
-            assert n_vars == eb_info[eb.name].n_vars
+            n_obs = eb_info[eb.name].n_obs
+            n_vars = eb_info[eb.name].n_vars
+            assert n_obs == exp.obs.count
+            assert n_vars == exp.ms[MEASUREMENT_RNA_NAME].var.count
 
             if n_obs > 0:
                 for lyr in CENSUS_X_LAYERS:
@@ -827,65 +976,8 @@ def validate_X_layers(
                     assert X.schema.field("soma_dim_1").type == pa.int64()
                     assert X.schema.field("soma_data").type == CENSUS_X_LAYERS[lyr]
                     assert X.shape == (n_obs, n_vars)
-                avg_row_nnz = max(avg_row_nnz, math.ceil(exp.ms[MEASUREMENT_RNA_NAME].X["raw"].nnz / n_obs))
 
-    if args.config.multi_process:
-        ROWS_PER_PROCESS = 500_000
-        mem_budget_factor = int(20 * avg_row_nnz * 2)  # Heuristic:  3 columns, (int64, int64, float32), 100% overhead
-        with create_resource_pool_executor(args) as ppe:
-            futures = (
-                [
-                    ppe.submit(
-                        100_000 * mem_budget_factor,
-                        _validate_Xnorm_layer,
-                        (eb, soma_path, row_start, row_start + ROWS_PER_PROCESS),
-                    )
-                    for eb in experiment_specifications
-                    for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
-                ]
-                + [
-                    ppe.submit(
-                        400_000 * mem_budget_factor,
-                        _validate_X_layer_has_unique_coords,
-                        (eb, soma_path, layer_name, row_start, row_start + ROWS_PER_PROCESS),
-                    )
-                    for eb in experiment_specifications
-                    for layer_name in CENSUS_X_LAYERS
-                    for row_start in range(0, eb_info[eb.name].n_obs, ROWS_PER_PROCESS)
-                ]
-                + [
-                    ppe.submit(
-                        6 * dataset.asset_h5ad_filesize,  # Heuristic value based upon empirical testing.
-                        _validate_Xraw_contents_by_dataset,
-                        (assets_path, soma_path, dataset, experiment_specifications),
-                    )
-                    for dataset in datasets
-                ]
-            )
-            for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
-                log_on_broken_process_pool(ppe)
-                assert future.result()
-                logger.info(f"validate_X_layers {n} of {len(futures)} complete.")
-                log_process_resource_status()
-
-    else:
-        for eb in experiment_specifications:
-            for layer_name in CENSUS_X_LAYERS:
-                logger.info(f"Validating no duplicate coordinates in X layer {eb.name} layer {layer_name}")
-                assert _validate_X_layer_has_unique_coords((eb, soma_path, layer_name, 0, n_obs))
-        for n, vld in enumerate(
-            (
-                _validate_Xraw_contents_by_dataset((assets_path, soma_path, dataset, experiment_specifications))
-                for dataset in datasets
-            ),
-            start=1,
-        ):
-            logger.info(f"validate_X {n} of {len(datasets)} complete.")
-            assert vld
-        for eb in experiment_specifications:
-            assert _validate_Xnorm_layer((eb, soma_path, 0, eb_info[eb.name].n_obs))
-
-    logger.info("validate_X_layers finished")
+    logger.info("validate_X_layers_schema finished")
     return True
 
 
@@ -1048,6 +1140,7 @@ def validate_soma_bounding_box(
         * shape is set correctly
         * no sparse arrays contain the bounding box in metadata
     """
+    logger.info("validate_soma_bounding_box start")
 
     def get_sparse_arrays(C: soma.Collection) -> list[soma.SparseNDArray]:
         uris = []
@@ -1085,10 +1178,11 @@ def validate_soma_bounding_box(
             for key in bbox_metadata_keys:
                 assert key not in metadata, f"Unexpected bounding box key {key} found in metadata for {uri}"
 
+    logger.info("validate_soma_bounding_box complete")
     return True
 
 
-def validate_soma(args: CensusBuildArgs) -> Delayed[bool]:
+def validate_soma(args: CensusBuildArgs) -> dask.delayed.Delayed[bool]:
     """Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
@@ -1108,30 +1202,48 @@ def validate_soma(args: CensusBuildArgs) -> Delayed[bool]:
     datasets = load_datasets_from_census(assets_path, soma_path)
     assert validate_manifest_contents(assets_path, datasets)
 
-    eb_info = validate_axis_dataframes2(assets_path, soma_path, datasets, experiment_specifications, args).compute()
+    # Scan all H5ADs, check their axis contents, and return a summary.
+    eb_info = validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args)
+
+    # Perform various validations and roll-up their return value
+    a_bunch_of_checks = dask.delayed(all)(
+        (
+            dask.delayed(lambda e: len(e) == len(experiment_specifications))(eb_info),
+            dask.delayed(validate_axis_dataframes_global_ids)(soma_path, experiment_specifications, eb_info),
+            dask.delayed(validate_internal_consistency)(soma_path, experiment_specifications, datasets),
+            dask.delayed(validate_soma_bounding_box)(soma_path, experiment_specifications, eb_info),
+            dask.delayed(validate_X_layers_schema)(soma_path, experiment_specifications, eb_info),
+            validate_X_layers_normalized(soma_path, experiment_specifications),
+            validate_X_layers_has_unique_coords(soma_path, experiment_specifications),
+        )
+    )
+
+    # TODO: XXX - missing validate_X_layers equivalent, which includes:
+    #       [DONE] _validate_Xnorm_layer
+    #       [DONE] _validate_X_layer_has_unique_coords
+    #       _validate_Xraw_contents_by_dataset
+    #
+    return a_bunch_of_checks
 
     #
     # XXX not finished below here
     #
 
-    # assert validate_soma_bounding_box(soma_path, experiment_specifications, eb_info)
-    assert validate_axis_dataframes_global_ids(soma_path, experiment_specifications, eb_info, args)
     # assert validate_X_layers(assets_path, soma_path, datasets, experiment_specifications, eb_info, args)
-    assert validate_internal_consistency(soma_path, experiment_specifications, datasets)
 
-    logger.info("Validation of SOMA objects - finished")
-    return True
+    # logger.info("Validation of SOMA objects - finished")
+    # return True
 
 
-def validate(args: CensusBuildArgs) -> bool:
+def validate(args: CensusBuildArgs) -> int:
     """Validate all.
 
     Stand-alone function, to validate outside of a build.
     """
     logger.info("Validating correct consolidation and vacuuming - start")
-    with create_dask_client(args) as client:
+    with create_dask_client(args, memory_limit=None) as client:
         distributed.wait(client.compute(validate_soma(args)))
 
     validate_consolidation(args)
     logger.info("Validating correct consolidation and vacuuming - complete")
-    return True
+    return 0  # exit code for CLI

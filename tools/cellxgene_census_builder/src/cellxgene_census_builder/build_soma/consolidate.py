@@ -54,7 +54,7 @@ def submit_consolidate(
     vacuum: bool,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
-) -> Sequence[concurrent.futures.Future[str]]:
+) -> list[concurrent.futures.Future[str]]:
     ...
 
 
@@ -65,7 +65,7 @@ def submit_consolidate(
     vacuum: bool,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
-) -> Sequence[dask.distributed.Future]:
+) -> list[dask.distributed.Future]:
     ...
 
 
@@ -75,14 +75,14 @@ def submit_consolidate(
     vacuum: bool,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
-) -> Sequence[dask.distributed.Future | concurrent.futures.Future[str]]:
+) -> list[dask.distributed.Future | concurrent.futures.Future[str]]:
     """This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
 
     Will vacuum if requested. Excludes any object URI matching a regex in the exclude list.
     """
     if soma.get_storage_engine() != "tiledb":
-        return ()
+        return []
 
     exclude = [] if exclude is None else exclude
     include = [r".*"] if include is None else include

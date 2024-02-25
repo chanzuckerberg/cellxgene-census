@@ -73,7 +73,7 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
     prepare_file_system(args)
 
-    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=2):
+    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=0) as client:
         # Step 1 - get all source datasets
         datasets = build_step1_get_source_datasets(args)
 
@@ -85,17 +85,18 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
-    # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
-    # process the X array (partitions are large to reduce TileDB fragment count).
-    #
-    # TODO: when global order writes are supported, processing of much smaller slices will be
-    # possible, and this budget should drop considerably. When that is implemented, n_workers should be
-    # be much larger (eg., use default value of #CPUs or some such).
-    # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
-    MEM_BUDGET = 128 * 1024**3
-    total_memory = psutil.virtual_memory().total
-    n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
-    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0):
+        # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
+        # process the X array (partitions are large to reduce TileDB fragment count).
+        #
+        # TODO: when global order writes are supported, processing of much smaller slices will be
+        # possible, and this budget should drop considerably. When that is implemented, n_workers should be
+        # be much larger (eg., use default value of #CPUs or some such).
+        # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+        MEM_BUDGET = 128 * 1024**3
+        total_memory = psutil.virtual_memory().total
+        n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
+        client.cluster.scale(n_workers)
+
         try:
             if args.config.consolidate:
                 consolidator = start_async_consolidation(root_collection.uri)
@@ -118,19 +119,12 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
                 stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
                 del consolidator
 
-    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-    tiledb_soma_1969_work_around(root_collection.uri)
+        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+        tiledb_soma_1969_work_around(root_collection.uri)
 
-    # # TODO: consolidation and validation can be done in parallel. Goal: do this work
-    # # when refactoring validation to use Dask.
+        # Scale the cluster up to n_cpus as we are no longer memory constrained in the following phases
+        client.cluster.scale(n=cpu_count())
 
-    # if args.config.consolidate:
-    #     consolidate(args, root_collection.uri)
-
-    # if validate:
-    #     go_validate(args)
-
-    with create_dask_client(args) as client:
         consolidation_futures: list[dask.distributed.Future] | None = (
             submit_consolidate(root_collection.uri, pool=client.current(), vacuum=True)
             if args.config.consolidate
@@ -139,7 +133,7 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
         validation_tasks = validate_soma(args) if validate else None
         dask.distributed.wait(client.compute([consolidation_futures, validation_tasks]))
 
-    # after consolidation, check that it worked
+    # after consolidation is complete, confirm that it worked as expected
     if args.config.consolidate and validate:
         validate_consolidation(args)
 
