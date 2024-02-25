@@ -81,7 +81,25 @@ F = TypeVar("F", bound=Callable[..., Any])
 def logit(
     logger: logging.Logger, *, level: int = logging.INFO, msg: str | None = None, timeit: bool = True
 ) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    """Log decorator factory - logs entry and exit."""
+    """Log decorator factory -- logs entry and exit, with optional timing and user configurable message.
+
+    Args:
+        logger:
+            A logger instance.
+        level
+            Log level.
+        msg:
+            User-specified message. May contain formatting parameters, which will be
+            applied as ``msg.format(*args, **kwargs)``
+        timeit:
+            If true, log processing time.
+
+    Example:
+        @logit(logger, msg='{0}')
+        def inc(a: int) -> int:
+            return a + 1
+
+    """
 
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
