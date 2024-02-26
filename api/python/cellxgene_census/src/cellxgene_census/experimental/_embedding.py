@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Chan Zuckerberg Initiative Foundation
+# Copyright (c) 2022, Chan Zuckerberg Initiative
 #
 # Licensed under the MIT License.
 
@@ -24,7 +24,7 @@ def get_embedding_metadata(embedding_uri: str, context: soma.options.SOMATileDBC
 
     Args:
         embedding_uri:
-            The embedding URI
+            The embedding URI.
         context:
             A custom :class:`tiledbsoma.SOMATileDBContext` which will be used to open the SOMA object. Optional,
             defaults to ``None``.
@@ -82,7 +82,7 @@ def get_embedding(
 
     Examples:
         >>> obs_somaids_to_fetch = np.array([10,11], dtype=np.int64)
-        >>> emb = cellxgene_census.experimental.get_embedding('2023-10-23', embedding_uri, obs_somaids_to_fetch)
+        >>> emb = cellxgene_census.experimental.get_embedding('2023-12-15', embedding_uri, obs_somaids_to_fetch)
         >>> emb.shape
         (2, 200)
         >>> emb[:, 0:4]
