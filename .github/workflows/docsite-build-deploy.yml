@@ -9,7 +9,7 @@ permissions:
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
-    runs-on: ubuntu-latest
+    runs-on: single-cell-1tb-runner
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -39,8 +39,18 @@ jobs:
           make clean && make html
           cp -r _build/html/* ../docsite/.
 
-          # Copy R pkgdown docs (static HTML checked into git)
-          cd ../
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: ./api/r/cellxgene.census
+          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::pkgdown
+          needs: check
+          cache: true
+
+      - name: Build pkgdown website
+        run: |
+          cd api/r/cellxgene.census
+          Rscript -e 'pkgdown::build_site()'
+          cd ../../../
           mkdir -p docsite/r
           cp -r api/r/cellxgene.census/docs/* docsite/r/.
 
@@ -48,4 +58,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docsite # The folder the action should deploy.
-          branch: gh-pages
+          branch: gh-pages-test
