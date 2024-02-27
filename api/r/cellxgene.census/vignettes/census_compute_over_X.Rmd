@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 88, max.print=100)
+options(width = 88, max.print = 100)
 ```
 
 <!--
@@ -84,7 +84,7 @@ while (!tables$read_complete()) {
   # in its names
   sum_part <- tapply(as.vector(table_part$soma_data), gene_indexes, sum)
   # update the accumulator vector
-  which_genes <- as.integer(names(sum_part)) + 1  # nb: gene_indexes is zero-based
+  which_genes <- as.integer(names(sum_part)) + 1 # nb: gene_indexes is zero-based
   stopifnot(sum(which_genes > n_genes) == 0)
   raw_sum_by_gene[which_genes] <- raw_sum_by_gene[which_genes] + sum_part
 }
@@ -111,13 +111,13 @@ query <- census$get("census_data")$get("mus_musculus")$axis_query(
   var_query = SOMAAxisQuery$new(value_filter = "feature_name %in% c('Malat1', 'Ptprd', 'Dlg2', 'Pcdh9')")
 )
 
-obs_tbl <- query$obs(column_names=c("soma_joinid", "dataset_id"))$concat()
+obs_tbl <- query$obs(column_names = c("soma_joinid", "dataset_id"))$concat()
 obs_df <- data.frame(
   # materialize soma_joinid as character to avoid overflowing R 32-bit integer
   cell_id = as.character(obs_tbl$soma_joinid),
   dataset_id = obs_tbl$dataset_id$as_vector()
 )
-var_tbl <- query$var(column_names=c("soma_joinid", "feature_name"))$concat()
+var_tbl <- query$var(column_names = c("soma_joinid", "feature_name"))$concat()
 var_df <- data.frame(
   gene_id = as.character(var_tbl$soma_joinid),
   feature_name = var_tbl$feature_name$as_vector()
@@ -146,11 +146,11 @@ while (!tables$read_complete()) {
 
   # fold those into n_cells_grouped
   n_cells_grouped <- n_cells_part %>%
-                     select(-cell_id) %>%
-                     bind_rows(n_cells_grouped) %>%
-                      group_by(dataset_id, gene_id) %>%
-                      summarise(n_cells = sum(n_cells)) %>%
-                      ungroup()
+    select(-cell_id) %>%
+    bind_rows(n_cells_grouped) %>%
+    group_by(dataset_id, gene_id) %>%
+    summarise(n_cells = sum(n_cells)) %>%
+    ungroup()
 }
 
 # add gene names for display

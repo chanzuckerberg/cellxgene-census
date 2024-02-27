@@ -47,13 +47,14 @@ jobs:
         with:
           working-directory: ./api/r/cellxgene.census
           extra-repositories: https://tiledb-inc.r-universe.dev
-          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::pkgdown
+          extra-packages: any::rcmdcheck, any::styler, any::roxygen2, any::pkgdown, any::BiocManager,
           needs: check
           cache: true
 
       - name: Build pkgdown website
         run: |
           cd api/r/cellxgene.census
+          Rscript -e 'BiocManager::install("scater")'
           Rscript -e 'pkgdown::build_site()'
           cd ../../../
           mkdir -p docsite/r
