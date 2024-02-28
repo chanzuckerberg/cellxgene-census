@@ -9,7 +9,7 @@ permissions:
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
-    runs-on: single-cell-1tb-runner
+    runs-on: single-cell-8c64g-runner
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install Python deps 🔧 
         run: |
@@ -68,4 +68,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docsite # The folder the action should deploy.
-          branch: gh-pages
+          branch: gh-pages-test
