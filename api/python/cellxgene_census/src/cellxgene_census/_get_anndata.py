@@ -28,6 +28,8 @@ def get_anndata(
     var_value_filter: Optional[str] = None,
     var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[soma.AxisColumnNames] = None,
+    add_obs_embeddings: Optional[Sequence[str]] = (),
+    add_var_embeddings: Optional[Sequence[str]] = (),
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
@@ -59,10 +61,14 @@ def get_anndata(
             Columns to fetch for ``obs`` and ``var`` dataframes.
         obsm_layers:
             Additional obsm layers to read and return in the ``obsm`` slot.
-            Use :func:`get_all_available_embeddings` to retrieve available embeddings
-            for this Census version and organism.
         varm_layers:
             Additional varm layers to read and return in the ``varm`` slot.
+        add_obs_embeddings:
+            Embeddings to be returned as part of the ``obsm`` slot.
+            Use :func:`get_all_available_embeddings` to retrieve available embeddings
+            for this Census version and organism.
+        add_var_embeddings:
+            Embeddings to be returned as part of the ``varm`` slot.
             Use :func:`get_all_available_embeddings` to retrieve available embeddings
             for this Census version and organism.
 

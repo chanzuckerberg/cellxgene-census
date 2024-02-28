@@ -119,7 +119,7 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
     4. All supplied URLs must resolve
     5. Title must have length < 128 characters
     6. Description must have length < 2048 characters
-    7. Name must have length < 24 characters
+    7. Name must have length < 128 characters
     """
     if not metadata.id:
         raise ValueError("metadata is missing 'id' (accession)")
@@ -142,8 +142,8 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
             "Metadata: description must be string between 1 and {MAX_DESCRIPTION_LENGTH} characters in length",
         )
 
-    # 7. Name must have length < 24 characters
-    MAX_NAME_LENGTH = 24
+    # 7. Name must have length < 128 characters
+    MAX_NAME_LENGTH = 128
     if not metadata.name or len(metadata.name) > MAX_NAME_LENGTH:
         raise ValueError(
             f"Metadata: name must be string between 1 and {MAX_NAME_LENGTH} characters in length",
