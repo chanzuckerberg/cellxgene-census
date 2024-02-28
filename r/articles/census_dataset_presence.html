@@ -6,17 +6,23 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="cellxgene.census">
-<title>Census datasets presence • cellxgene.census</title>
+<title>Genes measured in each cell (dataset presence matrix) • cellxgene.census</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Census datasets presence">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Genes measured in each cell (dataset presence matrix)">
 <meta property="og:description" content="cellxgene.census">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]--><script defer data-domain="chanzuckerberg.github.io/cellxgene-census/r" src="https://plausible.io/js/script.js"></script>
+<![endif]--><script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,15 +42,30 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_axis_query.html">Axis Query Example</a>
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Census datasets presence</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
+    <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
+    <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
+    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
+    <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
   </div>
 </li>
       </ul>
@@ -68,12 +89,13 @@
 
 
 
-<script src="census_dataset_presence_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+
+<div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Census datasets presence</h1>
+      <img src="" class="logo" alt=""><h1>Genes measured in each cell (dataset presence matrix)</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/HEAD/vignettes/census_dataset_presence.Rmd" class="external-link"><code>vignettes/census_dataset_presence.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes/census_dataset_presence.Rmd" class="external-link"><code>vignettes/census_dataset_presence.Rmd</code></a></small>
       <div class="d-none name"><code>census_dataset_presence.Rmd</code></div>
     </div>
 
@@ -83,129 +105,337 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_dataset_presence.ipynb
 -->
-<p><em>Goal:</em> demonstrate basic use of the <code>datasets_presence_matrix</code> array.</p>
-<p>The presence matrix is a sparse array, indicating which features (var) were present in each dataset. The array has dimensions [n_datasets, n_var], and is stored in the SOMA Measurement <code>varp</code> collection. The first dimension is indexed by the <code>soma_joinid</code> in the <code>census_datasets</code> dataframe. The second is indexed by the <code>soma_joinid</code> in the <code>var</code> dataframe of the measurement.</p>
+<p>The Census is a compilation of cells from multiple datasets that may
+differ by the sets of genes they measure. This notebook describes the
+way to identify the genes measured per dataset.</p>
+<p>The presence matrix is a sparse boolean array, indicating which
+features (var) were present in each dataset. The array has dimensions
+[n_datasets, n_var], and is stored in the SOMA Measurement
+<code>varp</code> collection. The first dimension is indexed by the
+<code>soma_joinid</code> in the <code>census_datasets</code> dataframe.
+The second is indexed by the <code>soma_joinid</code> in the
+<code>var</code> dataframe of the measurement.</p>
+<p>As a reminder the <code>obs</code> data frame has a column
+<code>dataset_id</code> that can be used to link any cell in the Census
+to the presence matrix.</p>
+<p>Contents</p>
+<ol style="list-style-type: decimal">
+<li>Opening the Census.</li>
+<li>Fetching the IDs of the Census datasets.</li>
+<li>Fetching the dataset presence matrix.</li>
+<li>Identifying genes measured in a specific dataset.</li>
+<li>Identifying datasets that measured specific genes.</li>
+<li>Identifying all genes measured in a dataset.</li>
+</ol>
+<div class="section level2">
+<h2 id="opening-the-census">Opening the Census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
+</h2>
+<p>The <code>cellxgene.census</code> R package contains a convenient API
+to open any version of the Census (by default, the newest stable
+version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># Grab the experiment containing human data, and the measurement therein with RNA</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="fetching-the-ids-of-the-census-datasets">Fetching the IDs of the Census datasets<a class="anchor" aria-label="anchor" href="#fetching-the-ids-of-the-census-datasets"></a>
+</h2>
+<p>Let’s grab a table of all the datasets included in the Census and use
+this table in combination with the presence matrix below.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Grab the experiment containing human data, and the measurement therein with RNA</span></span>
 <span><span class="va">human</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span></span>
 <span><span class="va">human_rna</span> <span class="op">&lt;-</span> <span class="va">human</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The census-wide datasets</span></span>
-<span><span class="va">datasets_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">datasets_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">datasets_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 540 × 8</span></span></span>
-<span><span class="co">#&gt;    soma_joinid collection_id           collection_name collection_doi dataset_id</span></span>
-<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           0 1ca90a2d-2943-483d-b67… SEA-AD: Seattl… <span style="color: #949494;">""</span>             c2876b1b-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1 7651ac1a-f947-463a-922… Insulin is exp… <span style="color: #949494;">"</span>10.1038/s415… 3f32121d-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           2 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… be46dfdc-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           3 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… ac2fea99-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           4 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… a13bda79-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           5 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… 5695d556-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           6 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… 535e9336-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           7 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… 4fb330ab-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           8 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… 290d50c7-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           9 661a402a-2a5a-4c71-9b0… Single-cell ro… <span style="color: #949494;">"</span>10.1038/s415… 18e2a8c5-…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 530 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: dataset_title &lt;chr&gt;, dataset_h5ad_path &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
-<p>For convenience, read the entire presence matrix (for Homo sapiens) into a <code><a href="https://rdrr.io/pkg/Matrix/man/sparseMatrix.html" class="external-link">Matrix::sparseMatrix</a></code>. There is a convenience API providing this capability:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">presence_matrix</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_presence_matrix.html">get_presence_matrix</a></span><span class="op">(</span><span class="va">census</span>, <span class="st">"Homo sapiens"</span>, <span class="st">"RNA"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">presence_matrix</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]   540 60664</span></span></code></pre></div>
-<p>We also need the <code>var</code> dataframe, which is read into an R data frame for convenient manipulation:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human_rna</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 60,664 × 4</span></span></span>
-<span><span class="co">#&gt;    soma_joinid feature_id      feature_name feature_length</span></span>
-<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           0 ENSG00000000003 TSPAN6                 <span style="text-decoration: underline;">4</span>536</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1 ENSG00000000005 TNMD                   <span style="text-decoration: underline;">1</span>476</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           2 ENSG00000000419 DPM1                   <span style="text-decoration: underline;">9</span>276</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           3 ENSG00000000457 SCYL3                  <span style="text-decoration: underline;">6</span>883</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           4 ENSG00000000460 C1orf112               <span style="text-decoration: underline;">5</span>970</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           5 ENSG00000000938 FGR                    <span style="text-decoration: underline;">3</span>382</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           6 ENSG00000000971 CFH                    <span style="text-decoration: underline;">7</span>980</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           7 ENSG00000001036 FUCA2                  <span style="text-decoration: underline;">2</span>822</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           8 ENSG00000001084 GCLC                   <span style="text-decoration: underline;">8</span>618</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           9 ENSG00000001167 NFYA                   <span style="text-decoration: underline;">6</span>209</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 60,654 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;    soma_joinid                        collection_id</span></span>
+<span><span class="co">#&gt; 1            0 4dca242c-d302-4dba-a68f-4c61e7bad553</span></span>
+<span><span class="co">#&gt; 2            1 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 3            2 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 4            3 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 5            4 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 6            5 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 7            6 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 8            7 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 9            8 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 10           9 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt; 11          10 d17249d2-0e6e-4500-abb8-e6c93fa1ac6f</span></span>
+<span><span class="co">#&gt;                                                                       collection_name</span></span>
+<span><span class="co">#&gt; 1                Comparative transcriptomics reveals human-specific cortical features</span></span>
+<span><span class="co">#&gt; 2  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 3  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 4  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 5  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 6  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 7  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 8  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 9  Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 10 Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt; 11 Transcriptomic cytoarchitecture reveals principles of human neocortex organization</span></span>
+<span><span class="co">#&gt;             collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 1  10.1126/science.ade9516 2bdd3a2c-2ff4-4314-adf3-8a06b797a33a</span></span>
+<span><span class="co">#&gt; 2  10.1126/science.adf6812 f5b0810c-1664-4a62-ad06-be1d9964aa8b</span></span>
+<span><span class="co">#&gt; 3  10.1126/science.adf6812 e4ddac12-f48f-4455-8e8d-c2a48a683437</span></span>
+<span><span class="co">#&gt; 4  10.1126/science.adf6812 e2808a6e-e2ea-41b9-b38c-4a08f1677f02</span></span>
+<span><span class="co">#&gt; 5  10.1126/science.adf6812 d01c9dff-abd1-4825-bf30-2eb2ba74597e</span></span>
+<span><span class="co">#&gt; 6  10.1126/science.adf6812 c3aa4f95-7a18-4a7d-8dd8-ca324d714363</span></span>
+<span><span class="co">#&gt; 7  10.1126/science.adf6812 be401db3-d732-408a-b0c4-71af0458b8ab</span></span>
+<span><span class="co">#&gt; 8  10.1126/science.adf6812 a5d5c529-8a1f-40b5-bda3-35208970070d</span></span>
+<span><span class="co">#&gt; 9  10.1126/science.adf6812 9c63201d-bfd9-41a8-bbbc-18d947556f3d</span></span>
+<span><span class="co">#&gt; 10 10.1126/science.adf6812 93cb76aa-a84b-4a92-8e6c-66a914e26d4c</span></span>
+<span><span class="co">#&gt; 11 10.1126/science.adf6812 8d1dd010-5cbc-43fb-83f8-e0de8e8517da</span></span>
+<span><span class="co">#&gt;                      dataset_version_id</span></span>
+<span><span class="co">#&gt; 1  7eb7f2fd-fd74-4c99-863c-97836415652e</span></span>
+<span><span class="co">#&gt; 2  d4427196-7876-4bdd-a929-ae4d177ec776</span></span>
+<span><span class="co">#&gt; 3  3280113b-7148-4a3e-98d4-015f443aab8a</span></span>
+<span><span class="co">#&gt; 4  dc092185-3b8e-4fcb-ae21-1dc106d683ac</span></span>
+<span><span class="co">#&gt; 5  c4959ded-83dc-4442-aac7-9a59bdb47801</span></span>
+<span><span class="co">#&gt; 6  0476ef54-aefe-4754-b0e9-d9fcd75adff4</span></span>
+<span><span class="co">#&gt; 7  ee027704-72aa-4195-a467-0754db1ed65d</span></span>
+<span><span class="co">#&gt; 8  d47c0742-cea2-46c1-9e72-4d479214041c</span></span>
+<span><span class="co">#&gt; 9  8b09695a-1426-4867-961e-c40a1fbcc2da</span></span>
+<span><span class="co">#&gt; 10 98ad7381-f464-4f49-b850-5321b4f98be6</span></span>
+<span><span class="co">#&gt; 11 c56683d2-452a-45dc-b402-35397e27e325</span></span>
+<span><span class="co">#&gt;                                           dataset_title</span></span>
+<span><span class="co">#&gt; 1                               Human: Great apes study</span></span>
+<span><span class="co">#&gt; 2                       Dissection: Angular gyrus (AnG)</span></span>
+<span><span class="co">#&gt; 3                Supercluster: CGE-derived interneurons</span></span>
+<span><span class="co">#&gt; 4               Dissection: Primary auditory cortex(A1)</span></span>
+<span><span class="co">#&gt; 5  Supercluster: Deep layer (non-IT) excitatory neurons</span></span>
+<span><span class="co">#&gt; 6        Supercluster: IT-projecting excitatory neurons</span></span>
+<span><span class="co">#&gt; 7           Dissection: Anterior cingulate cortex (ACC)</span></span>
+<span><span class="co">#&gt; 8               Human Multiple Cortical Areas SMART-seq</span></span>
+<span><span class="co">#&gt; 9                Supercluster: MGE-derived interneurons</span></span>
+<span><span class="co">#&gt; 10        Dissection: Primary somatosensory cortex (S1)</span></span>
+<span><span class="co">#&gt; 11                Dissection: Primary visual cortex(V1)</span></span>
+<span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 1  2bdd3a2c-2ff4-4314-adf3-8a06b797a33a.h5ad                   156285</span></span>
+<span><span class="co">#&gt; 2  f5b0810c-1664-4a62-ad06-be1d9964aa8b.h5ad                   110752</span></span>
+<span><span class="co">#&gt; 3  e4ddac12-f48f-4455-8e8d-c2a48a683437.h5ad                   129495</span></span>
+<span><span class="co">#&gt; 4  e2808a6e-e2ea-41b9-b38c-4a08f1677f02.h5ad                   139054</span></span>
+<span><span class="co">#&gt; 5  d01c9dff-abd1-4825-bf30-2eb2ba74597e.h5ad                    92969</span></span>
+<span><span class="co">#&gt; 6  c3aa4f95-7a18-4a7d-8dd8-ca324d714363.h5ad                   638941</span></span>
+<span><span class="co">#&gt; 7  be401db3-d732-408a-b0c4-71af0458b8ab.h5ad                   135462</span></span>
+<span><span class="co">#&gt; 8  a5d5c529-8a1f-40b5-bda3-35208970070d.h5ad                    49417</span></span>
+<span><span class="co">#&gt; 9  9c63201d-bfd9-41a8-bbbc-18d947556f3d.h5ad                   185477</span></span>
+<span><span class="co">#&gt; 10 93cb76aa-a84b-4a92-8e6c-66a914e26d4c.h5ad                   153159</span></span>
+<span><span class="co">#&gt; 11 8d1dd010-5cbc-43fb-83f8-e0de8e8517da.h5ad                   241077</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 640 rows ]</span></span></code></pre></div>
+</div>
 <div class="section level2">
-<h2 id="is-a-feature-present-in-a-dataset">Is a feature present in a dataset?<a class="anchor" aria-label="anchor" href="#is-a-feature-present-in-a-dataset"></a>
+<h2 id="fetching-the-dataset-presence-matrix">Fetching the dataset presence matrix<a class="anchor" aria-label="anchor" href="#fetching-the-dataset-presence-matrix"></a>
 </h2>
-<p><em>Goal:</em> test if a given feature is present in a given dataset.</p>
-<p><strong>Important:</strong> the (one-based) indexes in the sparse presence matrix correspond to the (zero-based) <code>soma_joinid</code> + 1. In other words:</p>
-<ul>
-<li>the first dimension of the presence matrix is (one plus) the dataset’s <code>soma_joinid</code> as stored in the <code>census_datasets</code> dataframe.</li>
-<li>the second dimension of the presence matrix is (one plus) the feature’s <code>soma_joinid</code> as stored in the <code>var</code> dataframe.</li>
-</ul>
+<p>Now let’s fetch the dataset presence matrix.</p>
+<p>For convenience, read the entire presence matrix (for Homo sapiens)
+into a sparse matrix. There is a convenience function providing this
+capability:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">presence_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_presence_matrix.html">get_presence_matrix</a></span><span class="op">(</span><span class="va">census</span>, <span class="st">"Homo sapiens"</span>, <span class="st">"RNA"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">presence_matrix</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<p>We also need the <code>var</code> dataframe, which is read into an R
+data frame for convenient manipulation:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">human_rna</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    soma_joinid      feature_id feature_name feature_length      nnz n_measured_obs</span></span>
+<span><span class="co">#&gt; 1            0 ENSG00000233576      HTR3C2P           1057    69370       19581263</span></span>
+<span><span class="co">#&gt; 2            1 ENSG00000121410         A1BG           3999  5640476       62641311</span></span>
+<span><span class="co">#&gt; 3            2 ENSG00000268895     A1BG-AS1           3374  3071864       61946057</span></span>
+<span><span class="co">#&gt; 4            3 ENSG00000148584         A1CF           9603   734347       58195911</span></span>
+<span><span class="co">#&gt; 5            4 ENSG00000175899          A2M           6318  7894261       62704378</span></span>
+<span><span class="co">#&gt; 6            5 ENSG00000245105      A2M-AS1           2948  1637794       62086816</span></span>
+<span><span class="co">#&gt; 7            6 ENSG00000166535        A2ML1           7156  2156616       60911688</span></span>
+<span><span class="co">#&gt; 8            7 ENSG00000256069        A2MP1           4657   835384       23554778</span></span>
+<span><span class="co">#&gt; 9            8 ENSG00000184389      A3GALT2           1023   439067       53780311</span></span>
+<span><span class="co">#&gt; 10           9 ENSG00000128274       A4GALT           3358  2432348       62706770</span></span>
+<span><span class="co">#&gt; 11          10 ENSG00000118017        A4GNT           1779    52430       56117399</span></span>
+<span><span class="co">#&gt; 12          11 ENSG00000265544         AA06            632   220755       22545140</span></span>
+<span><span class="co">#&gt; 13          12 ENSG00000081760         AACS          16039 11280800       62842909</span></span>
+<span><span class="co">#&gt; 14          13 ENSG00000250420       AACSP1           3380   211588       22831831</span></span>
+<span><span class="co">#&gt; 15          14 ENSG00000114771        AADAC           1632   552258       54941618</span></span>
+<span><span class="co">#&gt; 16          15 ENSG00000188984      AADACL3           4055    24626       43074608</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 60648 rows ]</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="identifying-genes-measured-in-a-specific-dataset">Identifying genes measured in a specific dataset<a class="anchor" aria-label="anchor" href="#identifying-genes-measured-in-a-specific-dataset"></a>
+</h2>
+<p>Now that we have the dataset table, the genes metadata table, and the
+dataset presence matrix, we can check if a gene or set of genes were
+measured in a specific dataset.</p>
+<p><strong>Important:</strong> the presence matrix is indexed by
+<code>soma_joinid</code>, and is <em>NOT</em> positionally indexed. In
+other words:</p>
+<ul>
+<li>the first dimension of the presence matrix is the dataset’s
+<code>soma_joinid</code>, as stored in the <code>census_datasets</code>
+dataframe.</li>
+<li>the second dimension of the presence matrix is the feature’s
+<code>soma_joinid</code>, as stored in the <code>var</code>
+dataframe.</li>
+</ul>
+<p>The presence matrix has a method <code>$take()</code> that lets you
+slice it by <code>soma_joinid</code>s from <code>census_datasets</code>
+and <code>var</code>. And the full presence matrix, or slices of it, can
+then be exported to a regular matrix with the method
+<code>$get_one_based_matrix()</code></p>
+<p>Let’s find out if the the gene <code>"ENSG00000286096"</code> was
+measured in the dataset with id
+<code>"97a17473-e2b1-4f31-a544-44a60773e2dd"</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Get soma_joinid for datasets and genes of interest</span></span>
+<span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
 <span><span class="va">dataset_joinid</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">datasets_df</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"97a17473-e2b1-4f31-a544-44a60773e2dd"</span><span class="op">]</span></span>
-<span><span class="va">is_present</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">[</span><span class="va">dataset_joinid</span> <span class="op">+</span> <span class="fl">1</span>, <span class="va">var_joinid</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Slice presence matrix with datasets and genes of interest</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>i <span class="op">=</span> <span class="va">dataset_joinid</span>, j <span class="op">=</span> <span class="va">var_joinid</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Convert presence matrix to regular matrix</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix_slice</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Find how if the gene is present in this dataset</span></span>
+<span><span class="va">is_present</span> <span class="op">&lt;-</span> <span class="va">presence_matrix_slice</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Feature is"</span>, <span class="kw">if</span> <span class="op">(</span><span class="va">is_present</span><span class="op">)</span> <span class="st">"present."</span> <span class="kw">else</span> <span class="st">"not present."</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Feature is present.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="what-datasets-contain-a-feature">What datasets contain a feature?<a class="anchor" aria-label="anchor" href="#what-datasets-contain-a-feature"></a>
+<h2 id="identifying-datasets-that-measured-specific-genes">Identifying datasets that measured specific genes<a class="anchor" aria-label="anchor" href="#identifying-datasets-that-measured-specific-genes"></a>
 </h2>
-<p><em>Goal:</em> look up all datasets that have a feature_id present.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>Similarly, we can determine the datasets that measured a specific
+gene or set of genes.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Grab the feature's soma_joinid from the var dataframe</span></span>
 <span><span class="va">var_joinid</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">var_df</span><span class="op">$</span><span class="va">feature_id</span> <span class="op">==</span> <span class="st">"ENSG00000286096"</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># The presence matrix is indexed by the joinids of the dataset and var dataframes,</span></span>
 <span><span class="co"># so slice out the feature of interest by its joinid.</span></span>
-<span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">presence_matrix</span><span class="op">[</span>, <span class="va">var_joinid</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">]</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>j <span class="op">=</span> <span class="va">var_joinid</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">measured_datasets</span> <span class="op">&lt;-</span> <span class="va">presence_matrix_slice</span><span class="op">[</span>, , drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span></span>
+<span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">measured_datasets</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">datasets_df</span><span class="op">[</span><span class="va">dataset_joinids</span> <span class="op">+</span> <span class="fl">1</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 24 × 8</span></span></span>
-<span><span class="co">#&gt;    soma_joinid collection_id           collection_name collection_doi dataset_id</span></span>
-<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>          83 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… fe1a73ab-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>          87 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… f8dda921-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>         104 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… dd03ce70-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>         109 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… d2b5efc1-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>         119 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… c4b03352-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>         120 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… c2aad8fc-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>         121 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… c202b243-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>         122 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… bdb26abd-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>         127 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… acae7679-…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>         140 283d65eb-dd53-496d-adb… Transcriptomic… 10.1101/2022.… 9372df2d-…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: dataset_title &lt;chr&gt;, dataset_h5ad_path &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   dataset_total_cell_count &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co"># From the datasets dataframe, slice out the datasets which have a joinid in the list</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">datasets_df</span><span class="op">[</span><span class="va">dataset_joinids</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    soma_joinid                        collection_id</span></span>
+<span><span class="co">#&gt; 63          62 3f50314f-bdc9-40c6-8e4a-b0901ebfbe4c</span></span>
+<span><span class="co">#&gt; 64          63 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 65          64 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 66          65 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 67          66 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 69          68 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 70          69 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 72          71 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 73          72 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 77          76 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt; 78          77 e5f58829-1a66-40b5-a624-9046778e74f5</span></span>
+<span><span class="co">#&gt;                                                                                                                             collection_name</span></span>
+<span><span class="co">#&gt; 63 Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
+<span><span class="co">#&gt; 64                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 65                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 66                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 67                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 69                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 70                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 72                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 73                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 77                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt; 78                                                                                                                           Tabula Sapiens</span></span>
+<span><span class="co">#&gt;                 collection_doi                           dataset_id</span></span>
+<span><span class="co">#&gt; 63 10.1016/j.ccell.2021.03.007 bd65a70f-b274-4133-b9dd-0d1431b6af34</span></span>
+<span><span class="co">#&gt; 64     10.1126/science.abl4896 ff45e623-7f5f-46e3-b47d-56be0341f66b</span></span>
+<span><span class="co">#&gt; 65     10.1126/science.abl4896 f01bdd17-4902-40f5-86e3-240d66dd2587</span></span>
+<span><span class="co">#&gt; 66     10.1126/science.abl4896 e6a11140-2545-46bc-929e-da243eed2cae</span></span>
+<span><span class="co">#&gt; 67     10.1126/science.abl4896 e5c63d94-593c-4338-a489-e1048599e751</span></span>
+<span><span class="co">#&gt; 69     10.1126/science.abl4896 d77ec7d6-ef2e-49d6-9e79-05b7f8881484</span></span>
+<span><span class="co">#&gt; 70     10.1126/science.abl4896 cee11228-9f0b-4e57-afe2-cfe15ee56312</span></span>
+<span><span class="co">#&gt; 72     10.1126/science.abl4896 a2d4d33e-4c62-4361-b80a-9be53d2e50e8</span></span>
+<span><span class="co">#&gt; 73     10.1126/science.abl4896 a0754256-f44b-4c4a-962c-a552e47d3fdc</span></span>
+<span><span class="co">#&gt; 77     10.1126/science.abl4896 6d41668c-168c-4500-b06a-4674ccf3e19d</span></span>
+<span><span class="co">#&gt; 78     10.1126/science.abl4896 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c</span></span>
+<span><span class="co">#&gt;                      dataset_version_id</span></span>
+<span><span class="co">#&gt; 63 71815674-a8cf-4add-95dd-c5d5d1631597</span></span>
+<span><span class="co">#&gt; 64 0b29f4ce-5e72-4356-b74b-b54714979234</span></span>
+<span><span class="co">#&gt; 65 bd13c169-af97-4d8f-ba45-7588808c2e48</span></span>
+<span><span class="co">#&gt; 66 47615a3d-0a9f-4a78-88ef-5cce2a84637d</span></span>
+<span><span class="co">#&gt; 67 ac7714f0-dce2-40ba-9912-324de6c9a77f</span></span>
+<span><span class="co">#&gt; 69 c7679ec2-652d-437a-bded-3ec2344829e4</span></span>
+<span><span class="co">#&gt; 70 f89fa18f-c32b-4bae-9511-1a4d18f200e1</span></span>
+<span><span class="co">#&gt; 72 37ada0d2-9970-4ff2-8bcd-41e80ab6e081</span></span>
+<span><span class="co">#&gt; 73 1cda78aa-f0d9-4d50-96bf-8bc309318802</span></span>
+<span><span class="co">#&gt; 77 5297a910-453f-4e3f-af16-e18fd5a79090</span></span>
+<span><span class="co">#&gt; 78 b783b036-c837-4290-a07d-f6b79a301f59</span></span>
+<span><span class="co">#&gt;                                                                                                                               dataset_title</span></span>
+<span><span class="co">#&gt; 63 Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
+<span><span class="co">#&gt; 64                                                                                                                Tabula Sapiens - Pancreas</span></span>
+<span><span class="co">#&gt; 65                                                                                                          Tabula Sapiens - Salivary_Gland</span></span>
+<span><span class="co">#&gt; 66                                                                                                                   Tabula Sapiens - Heart</span></span>
+<span><span class="co">#&gt; 67                                                                                                                 Tabula Sapiens - Bladder</span></span>
+<span><span class="co">#&gt; 69                                                                                                                Tabula Sapiens - Prostate</span></span>
+<span><span class="co">#&gt; 70                                                                                                                  Tabula Sapiens - Spleen</span></span>
+<span><span class="co">#&gt; 72                                                                                                             Tabula Sapiens - Vasculature</span></span>
+<span><span class="co">#&gt; 73                                                                                                                     Tabula Sapiens - Eye</span></span>
+<span><span class="co">#&gt; 77                                                                                                                   Tabula Sapiens - Liver</span></span>
+<span><span class="co">#&gt; 78                                                                                                                     Tabula Sapiens - Fat</span></span>
+<span><span class="co">#&gt;                            dataset_h5ad_path dataset_total_cell_count</span></span>
+<span><span class="co">#&gt; 63 bd65a70f-b274-4133-b9dd-0d1431b6af34.h5ad                   167283</span></span>
+<span><span class="co">#&gt; 64 ff45e623-7f5f-46e3-b47d-56be0341f66b.h5ad                    13497</span></span>
+<span><span class="co">#&gt; 65 f01bdd17-4902-40f5-86e3-240d66dd2587.h5ad                    27199</span></span>
+<span><span class="co">#&gt; 66 e6a11140-2545-46bc-929e-da243eed2cae.h5ad                    11505</span></span>
+<span><span class="co">#&gt; 67 e5c63d94-593c-4338-a489-e1048599e751.h5ad                    24583</span></span>
+<span><span class="co">#&gt; 69 d77ec7d6-ef2e-49d6-9e79-05b7f8881484.h5ad                    16375</span></span>
+<span><span class="co">#&gt; 70 cee11228-9f0b-4e57-afe2-cfe15ee56312.h5ad                    34004</span></span>
+<span><span class="co">#&gt; 72 a2d4d33e-4c62-4361-b80a-9be53d2e50e8.h5ad                    16037</span></span>
+<span><span class="co">#&gt; 73 a0754256-f44b-4c4a-962c-a552e47d3fdc.h5ad                    10650</span></span>
+<span><span class="co">#&gt; 77 6d41668c-168c-4500-b06a-4674ccf3e19d.h5ad                     5007</span></span>
+<span><span class="co">#&gt; 78 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c.h5ad                    20263</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 31 rows ]</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="what-features-are-in-a-dataset">What features are in a dataset?<a class="anchor" aria-label="anchor" href="#what-features-are-in-a-dataset"></a>
+<h2 id="identifying-all-genes-measured-in-a-dataset">Identifying all genes measured in a dataset<a class="anchor" aria-label="anchor" href="#identifying-all-genes-measured-in-a-dataset"></a>
 </h2>
-<p><em>Goal:</em> lookup the features present in a given dataset.</p>
-<p>This example also demonstrates the ability to do the query on multiple datasets.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>Finally, we can find the set of genes that were measured in the cells
+of a given dataset.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Slice the dataset(s) of interest, and get the joinid(s)</span></span>
 <span><span class="va">dataset_joinids</span> <span class="op">&lt;-</span> <span class="va">datasets_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">datasets_df</span><span class="op">$</span><span class="va">collection_id</span> <span class="op">==</span> <span class="st">"17481d16-ee44-49e5-bcf0-28c0780d8c4a"</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># Slice the presence matrix by the first dimension, i.e., by dataset</span></span>
-<span><span class="va">var_joinids</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">presence_matrix</span><span class="op">[</span><span class="va">dataset_joinids</span> <span class="op">+</span> <span class="fl">1</span>, <span class="op">]</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">presence_matrix_slice</span> <span class="op">&lt;-</span> <span class="va">presence_matrix</span><span class="op">$</span><span class="fu">take</span><span class="op">(</span>i <span class="op">=</span> <span class="va">dataset_joinids</span><span class="op">)</span><span class="op">$</span><span class="fu">get_one_based_matrix</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">genes_measured</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">presence_matrix_slice</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
+<span><span class="va">var_joinids</span> <span class="op">&lt;-</span> <span class="va">var_df</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">[</span><span class="va">genes_measured</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">[</span><span class="va">var_joinids</span> <span class="op">+</span> <span class="fl">1</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 27,211 × 4</span></span></span>
-<span><span class="co">#&gt;    soma_joinid feature_id      feature_name feature_length</span></span>
-<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           0 ENSG00000000003 TSPAN6                 <span style="text-decoration: underline;">4</span>536</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1 ENSG00000000005 TNMD                   <span style="text-decoration: underline;">1</span>476</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           2 ENSG00000000419 DPM1                   <span style="text-decoration: underline;">9</span>276</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           3 ENSG00000000457 SCYL3                  <span style="text-decoration: underline;">6</span>883</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           4 ENSG00000000460 C1orf112               <span style="text-decoration: underline;">5</span>970</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           5 ENSG00000000938 FGR                    <span style="text-decoration: underline;">3</span>382</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           6 ENSG00000000971 CFH                    <span style="text-decoration: underline;">7</span>980</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           7 ENSG00000001036 FUCA2                  <span style="text-decoration: underline;">2</span>822</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           8 ENSG00000001084 GCLC                   <span style="text-decoration: underline;">8</span>618</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           9 ENSG00000001167 NFYA                   <span style="text-decoration: underline;">6</span>209</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 27,201 more rows</span></span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">[</span><span class="va">var_joinids</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    soma_joinid      feature_id feature_name feature_length      nnz n_measured_obs</span></span>
+<span><span class="co">#&gt; 1            0 ENSG00000233576      HTR3C2P           1057    69370       19581263</span></span>
+<span><span class="co">#&gt; 2            1 ENSG00000121410         A1BG           3999  5640476       62641311</span></span>
+<span><span class="co">#&gt; 3            2 ENSG00000268895     A1BG-AS1           3374  3071864       61946057</span></span>
+<span><span class="co">#&gt; 4            3 ENSG00000148584         A1CF           9603   734347       58195911</span></span>
+<span><span class="co">#&gt; 5            4 ENSG00000175899          A2M           6318  7894261       62704378</span></span>
+<span><span class="co">#&gt; 6            5 ENSG00000245105      A2M-AS1           2948  1637794       62086816</span></span>
+<span><span class="co">#&gt; 9            8 ENSG00000184389      A3GALT2           1023   439067       53780311</span></span>
+<span><span class="co">#&gt; 10           9 ENSG00000128274       A4GALT           3358  2432348       62706770</span></span>
+<span><span class="co">#&gt; 12          11 ENSG00000265544         AA06            632   220755       22545140</span></span>
+<span><span class="co">#&gt; 14          13 ENSG00000250420       AACSP1           3380   211588       22831831</span></span>
+<span><span class="co">#&gt; 16          15 ENSG00000188984      AADACL3           4055    24626       43074608</span></span>
+<span><span class="co">#&gt; 18          17 ENSG00000240602      AADACP1           2012    29491       23133490</span></span>
+<span><span class="co">#&gt; 19          18 ENSG00000109576        AADAT           2970  4524608       61559099</span></span>
+<span><span class="co">#&gt; 20          19 ENSG00000158122       PRXL2C           3098  5424472       55618144</span></span>
+<span><span class="co">#&gt; 21          20 ENSG00000103591        AAGAB           4138 12427442       62843055</span></span>
+<span><span class="co">#&gt; 22          21 ENSG00000115977         AAK1          24843 29280566       62664775</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 27195 rows ]</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
+</h3>
+<p>After use, the census object should be closed to release memory and
+other resources.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>This also closes all SOMA objects accessed via the top-level
+<code>census</code>. Closing can be automated using
+<code>on.exit(census$close(), add = TRUE)</code> immediately after
+<code>census &lt;- open_soma()</code>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -215,7 +445,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Chan Zuckerberg Initiative.</p>
+<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">

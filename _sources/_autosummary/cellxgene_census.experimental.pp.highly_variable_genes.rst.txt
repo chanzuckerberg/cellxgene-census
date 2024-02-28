@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.pp.highly\_variable\_genes
+=========================================================
+
+.. currentmodule:: cellxgene_census.experimental.pp
+
+.. autofunction:: highly_variable_genes

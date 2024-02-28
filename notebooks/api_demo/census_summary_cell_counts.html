@@ -4,14 +4,16 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Exploring pre-calculated summary cell counts &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>Exploring pre-calculated summary cell counts &mdash; cellxgene-census  documentation</title>
   
 
   
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,50 +42,73 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Learning about the CZ CELLxGENE Census" href="../analysis_demo/comp_bio_census_info.html" />
-    <link rel="prev" title="Querying and fetching the single-cell data and cell/gene metadata." href="census_query_extract.html" /> 
+    <link rel="next" title="Summarizing cell and gene metadata" href="../analysis_demo/comp_bio_summarize_axis_query.html" />
+    <link rel="prev" title="Genes measured in each cell (dataset presence matrix)" href="census_dataset_presence.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="../../_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
-                    </span>
+                  </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -99,19 +124,12 @@
                 
                 
                 <div class="version">
-                    0.5
+                    v1.10.2
                 </div>
                 
             
 
             
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
 
             
             </div>
@@ -127,12 +145,19 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-using-integrated-embeddings-and-models">[NEW! 🚀] Using integrated embeddings and models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a></li>
 <li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Exploring pre-calculated summary cell counts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Fetching-the-census_summary_cell_counts-dataframe">Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Creating-summary-counts-beyond-pre-calculated-values.">Creating summary counts beyond pre-calculated values.</a></li>
@@ -140,13 +165,12 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -175,7 +199,7 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
       <li class="breadcrumb-item active">Exploring pre-calculated summary cell counts</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/api_demo/census_summary_cell_counts.ipynb.txt" rel="nofollow"> View page source</a>
@@ -194,23 +218,32 @@
 <li><p>Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe.</p></li>
 <li><p>Creating summary counts beyond pre-calculated values.</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Fetching-the-census_summary_cell_counts-dataframe">
 <h2>Fetching the <code class="docutils literal notranslate"><span class="pre">census_summary_cell_counts</span></code> dataframe<a class="headerlink" href="#Fetching-the-census_summary_cell_counts-dataframe" title="Permalink to this heading">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
-census = cellxgene_census.open_soma()
-census_summary_cell_counts = census[&quot;census_info&quot;][&quot;summary_cell_counts&quot;].read().concat().to_pandas()
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="n">census_summary_cell_counts</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;summary_cell_counts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
-# Dropping the soma_joinid column as it isn&#39;t useful in this demo
-census_summary_cell_counts = census_summary_cell_counts.drop(columns=[&quot;soma_joinid&quot;])
+<span class="c1"># Dropping the soma_joinid column as it isn&#39;t useful in this demo</span>
+<span class="n">census_summary_cell_counts</span> <span class="o">=</span> <span class="n">census_summary_cell_counts</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span>
 
-census_summary_cell_counts
+<span class="n">census_summary_cell_counts</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -249,8 +282,8 @@ census_summary_cell_counts
       <td>Homo sapiens</td>
       <td>all</td>
       <td>na</td>
-      <td>29817108</td>
-      <td>46050829</td>
+      <td>33364242</td>
+      <td>56400873</td>
       <td>na</td>
     </tr>
     <tr>
@@ -258,8 +291,8 @@ census_summary_cell_counts
       <td>Homo sapiens</td>
       <td>assay</td>
       <td>EFO:0008722</td>
-      <td>206279</td>
-      <td>260396</td>
+      <td>264166</td>
+      <td>279635</td>
       <td>Drop-seq</td>
     </tr>
     <tr>
@@ -275,19 +308,19 @@ census_summary_cell_counts
       <th>3</th>
       <td>Homo sapiens</td>
       <td>assay</td>
-      <td>EFO:0008913</td>
-      <td>133511</td>
-      <td>133511</td>
-      <td>single-cell RNA sequencing</td>
+      <td>EFO:0008919</td>
+      <td>89477</td>
+      <td>206754</td>
+      <td>Seq-Well</td>
     </tr>
     <tr>
       <th>4</th>
       <td>Homo sapiens</td>
       <td>assay</td>
-      <td>EFO:0008919</td>
-      <td>44721</td>
-      <td>161998</td>
-      <td>Seq-Well</td>
+      <td>EFO:0008931</td>
+      <td>78750</td>
+      <td>188248</td>
+      <td>Smart-seq2</td>
     </tr>
     <tr>
       <th>...</th>
@@ -299,16 +332,16 @@ census_summary_cell_counts
       <td>...</td>
     </tr>
     <tr>
-      <th>1263</th>
+      <th>1357</th>
       <td>Mus musculus</td>
       <td>tissue_general</td>
       <td>UBERON:0002113</td>
-      <td>164881</td>
-      <td>188361</td>
+      <td>179684</td>
+      <td>208324</td>
       <td>kidney</td>
     </tr>
     <tr>
-      <th>1264</th>
+      <th>1358</th>
       <td>Mus musculus</td>
       <td>tissue_general</td>
       <td>UBERON:0002365</td>
@@ -317,7 +350,7 @@ census_summary_cell_counts
       <td>exocrine gland</td>
     </tr>
     <tr>
-      <th>1265</th>
+      <th>1359</th>
       <td>Mus musculus</td>
       <td>tissue_general</td>
       <td>UBERON:0002367</td>
@@ -326,7 +359,7 @@ census_summary_cell_counts
       <td>prostate gland</td>
     </tr>
     <tr>
-      <th>1266</th>
+      <th>1360</th>
       <td>Mus musculus</td>
       <td>tissue_general</td>
       <td>UBERON:0002368</td>
@@ -335,7 +368,7 @@ census_summary_cell_counts
       <td>endocrine gland</td>
     </tr>
     <tr>
-      <th>1267</th>
+      <th>1361</th>
       <td>Mus musculus</td>
       <td>tissue_general</td>
       <td>UBERON:0002371</td>
@@ -345,7 +378,7 @@ census_summary_cell_counts
     </tr>
   </tbody>
 </table>
-<p>1268 rows × 6 columns</p>
+<p>1362 rows × 6 columns</p>
 </div></div>
 </div>
 </section>
@@ -359,9 +392,9 @@ census_summary_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>human = census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
-obs_df = human.obs.read(column_names=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;]).concat().to_pandas()
-obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;], as_index=False, observed=True).size()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">obs_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -404,7 +437,7 @@ obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;
       <th>1</th>
       <td>CL:0000003</td>
       <td>native cell</td>
-      <td>778811</td>
+      <td>1308000</td>
     </tr>
     <tr>
       <th>2</th>
@@ -414,15 +447,15 @@ obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;
     </tr>
     <tr>
       <th>3</th>
-      <td>CL:0000019</td>
-      <td>sperm</td>
-      <td>11</td>
+      <td>CL:0000015</td>
+      <td>male germ cell</td>
+      <td>621</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>CL:0000031</td>
-      <td>neuroblast (sensu Vertebrata)</td>
-      <td>2355</td>
+      <td>CL:0000019</td>
+      <td>sperm</td>
+      <td>22</td>
     </tr>
     <tr>
       <th>...</th>
@@ -431,38 +464,38 @@ obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;
       <td>...</td>
     </tr>
     <tr>
-      <th>585</th>
-      <td>CL:4023070</td>
-      <td>caudal ganglionic eminence derived GABAergic c...</td>
-      <td>8463</td>
-    </tr>
-    <tr>
-      <th>586</th>
-      <td>CL:4028002</td>
-      <td>alveolar capillary type 1 endothelial cell</td>
-      <td>16048</td>
-    </tr>
-    <tr>
-      <th>587</th>
-      <td>CL:4028003</td>
-      <td>alveolar capillary type 2 endothelial cell</td>
-      <td>7157</td>
-    </tr>
-    <tr>
-      <th>588</th>
+      <th>608</th>
       <td>CL:4028006</td>
       <td>alveolar type 2 fibroblast cell</td>
-      <td>4670</td>
+      <td>38250</td>
     </tr>
     <tr>
-      <th>589</th>
-      <td>CL:4030006</td>
-      <td>fallopian tube secretory epithelial cell</td>
-      <td>463461</td>
+      <th>609</th>
+      <td>CL:4030009</td>
+      <td>epithelial cell of proximal tubule segment 1</td>
+      <td>777</td>
+    </tr>
+    <tr>
+      <th>610</th>
+      <td>CL:4030011</td>
+      <td>epithelial cell of proximal tubule segment 3</td>
+      <td>989</td>
+    </tr>
+    <tr>
+      <th>611</th>
+      <td>CL:4030018</td>
+      <td>kidney connecting tubule principal cell</td>
+      <td>107</td>
+    </tr>
+    <tr>
+      <th>612</th>
+      <td>CL:4030023</td>
+      <td>respiratory hillock cell</td>
+      <td>10170</td>
     </tr>
   </tbody>
 </table>
-<p>590 rows × 3 columns</p>
+<p>613 rows × 3 columns</p>
 </div></div>
 </div>
 <p>Close the census when complete.</p>
@@ -470,7 +503,7 @@ obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -482,14 +515,14 @@ obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;
             
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="census_query_extract.html" class="btn btn-neutral float-left" title="Querying and fetching the single-cell data and cell/gene metadata." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../analysis_demo/comp_bio_census_info.html" class="btn btn-neutral float-right" title="Learning about the CZ CELLxGENE Census" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="census_dataset_presence.html" class="btn btn-neutral float-left" title="Genes measured in each cell (dataset presence matrix)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../analysis_demo/comp_bio_summarize_axis_query.html" class="btn btn-neutral float-right" title="Summarizing cell and gene metadata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -504,13 +537,99 @@ obs_df.groupby(by=[&quot;cell_type_ontology_term_id&quot;, &quot;cell_type&quot;
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
       });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

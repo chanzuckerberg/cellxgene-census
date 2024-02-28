@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_anndata
+==============================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_anndata

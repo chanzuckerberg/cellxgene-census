@@ -1,0 +1,6 @@
+﻿cellxgene\_census.open\_soma
+============================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: open_soma

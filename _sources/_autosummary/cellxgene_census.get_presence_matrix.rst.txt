@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_presence\_matrix
+=======================================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_presence_matrix

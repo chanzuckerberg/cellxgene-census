@@ -1,0 +1,40 @@
+﻿cellxgene\_census.experimental.ml.pytorch.ExperimentDataPipe
+============================================================
+
+.. currentmodule:: cellxgene_census.experimental.ml.pytorch
+
+.. autoclass:: ExperimentDataPipe
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ExperimentDataPipe.__init__
+      ~ExperimentDataPipe.register_datapipe_as_function
+      ~ExperimentDataPipe.register_function
+      ~ExperimentDataPipe.reset
+      ~ExperimentDataPipe.set_getstate_hook
+      ~ExperimentDataPipe.set_reduce_ex_hook
+      ~ExperimentDataPipe.stats
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ExperimentDataPipe.functions
+      ~ExperimentDataPipe.getstate_hook
+      ~ExperimentDataPipe.obs_encoders
+      ~ExperimentDataPipe.reduce_ex_hook
+      ~ExperimentDataPipe.repr_hook
+      ~ExperimentDataPipe.shape
+      ~ExperimentDataPipe.str_hook
+   
+   

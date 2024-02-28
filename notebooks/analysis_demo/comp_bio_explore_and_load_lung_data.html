@@ -4,14 +4,16 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Exploring all data from a tissue &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>Exploring all data from a tissue &mdash; cellxgene-census  documentation</title>
   
 
   
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,50 +42,73 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Normalizing full-length gene sequencing data" href="comp_bio_normalizing_full_gene_sequencing.html" />
-    <link rel="prev" title="Integrating multi-dataset slices of data" href="comp_bio_data_integration_scvi.html" /> 
+    <link rel="next" title="Exploring the Census Datasets table" href="../api_demo/census_datasets.html" />
+    <link rel="prev" title="Learning about the CZ CELLxGENE Census" href="comp_bio_census_info.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="../../_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
-                    </span>
+                  </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -99,19 +124,12 @@
                 
                 
                 <div class="version">
-                    0.5
+                    v1.10.2
                 </div>
                 
             
 
             
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
 
             
             </div>
@@ -127,11 +145,16 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#api">API</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#analysis">Analysis</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-using-integrated-embeddings-and-models">[NEW! 🚀] Using integrated embeddings and models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
-<li class="toctree-l3"><a class="reference internal" href="comp_bio_data_integration_scvi.html">Integrating multi-dataset slices of data</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Exploring all data from a tissue</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Learning-about-the-lung-data-in-the-Census">Learning about the lung data in the Census</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Fetching-all-single-cell-human-lung-data-from-the-Census">Fetching all single-cell human lung data from the Census</a></li>
@@ -139,15 +162,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#Creating-a-normalized-expression-layer-and-embeddings">Creating a normalized expression layer and embeddings</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_demo/census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -176,7 +201,7 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
       <li class="breadcrumb-item active">Exploring all data from a tissue</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.ipynb.txt" rel="nofollow"> View page source</a>
@@ -202,31 +227,39 @@
 <li><p>Calculating QC metrics of the lung data.</p></li>
 <li><p>Creating a normalized expression layer and embeddings.</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Learning-about-the-lung-data-in-the-Census">
 <h2>Learning about the lung data in the Census<a class="headerlink" href="#Learning-about-the-lung-data-in-the-Census" title="Permalink to this heading">¶</a></h2>
 <p>First we will open the Census. If you are not familiar with the basics of the Census API you should take a look at notebook <a class="reference external" href="https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import cellxgene_census
-import scanpy as sc
-import pandas as pd
-import numpy as np
-from scipy.sparse import coo_matrix
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 
-census = cellxgene_census.open_soma()
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <p>Let’s first take a look at the number of cells from human lung:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>summary_table = census[&quot;census_info&quot;][&quot;summary_cell_counts&quot;].read().concat().to_pandas()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary_table</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;summary_cell_counts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
-summary_table.query(&quot;organism == &#39;Homo sapiens&#39; &amp; category == &#39;tissue_general&#39; &amp; label ==&#39;lung&#39;&quot;)
+<span class="n">summary_table</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;organism == &#39;Homo sapiens&#39; &amp; category == &#39;tissue_general&#39; &amp; label ==&#39;lung&#39;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -264,13 +297,13 @@ summary_table.query(&quot;organism == &#39;Homo sapiens&#39; &amp; category == &
   </thead>
   <tbody>
     <tr>
-      <th>944</th>
-      <td>944</td>
+      <th>980</th>
+      <td>980</td>
       <td>Homo sapiens</td>
       <td>tissue_general</td>
       <td>UBERON:0002048</td>
-      <td>2295237</td>
-      <td>4573212</td>
+      <td>2907156</td>
+      <td>6011592</td>
       <td>lung</td>
     </tr>
   </tbody>
@@ -286,13 +319,13 @@ summary_table.query(&quot;organism == &#39;Homo sapiens&#39; &amp; category == &
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs = (
-    census[&quot;census_data&quot;][&quot;homo_sapiens&quot;]
-    .obs.read(value_filter=&quot;tissue_general == &#39;lung&#39; and is_primary_data == True&quot;)
-    .concat()
-    .to_pandas()
-)
-lung_obs
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;lung&#39; and is_primary_data == True&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">lung_obs</span>
 </pre></div>
 </div>
 </div>
@@ -345,23 +378,23 @@ lung_obs
   <tbody>
     <tr>
       <th>0</th>
-      <td>145215</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
+      <td>5945423</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>native cell</td>
+      <td>CL:0000003</td>
+      <td>unknown</td>
+      <td>unknown</td>
       <td>normal</td>
       <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -369,23 +402,23 @@ lung_obs
     </tr>
     <tr>
       <th>1</th>
-      <td>145216</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>alveolar macrophage</td>
-      <td>CL:0000583</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>5945426</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>Drop-seq</td>
+      <td>EFO:0008722</td>
+      <td>ciliated columnar cell of tracheobronchial tree</td>
+      <td>CL:0002145</td>
+      <td>57-year-old human stage</td>
+      <td>HsapDv:0000151</td>
+      <td>pulmonary fibrosis</td>
+      <td>MONDO:0002771</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>male</td>
+      <td>PATO:0000384</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -393,23 +426,23 @@ lung_obs
     </tr>
     <tr>
       <th>2</th>
-      <td>145217</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>5945428</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' transcription profiling</td>
+      <td>EFO:0030003</td>
+      <td>CD8-positive, alpha-beta T cell</td>
+      <td>CL:0000625</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>squamous cell lung carcinoma</td>
+      <td>MONDO:0005097</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -417,23 +450,23 @@ lung_obs
     </tr>
     <tr>
       <th>3</th>
-      <td>145218</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>5945432</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>CD4-positive, alpha-beta T cell</td>
+      <td>CL:0000624</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>lung adenocarcinoma</td>
+      <td>MONDO:0005061</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -441,23 +474,23 @@ lung_obs
     </tr>
     <tr>
       <th>4</th>
-      <td>145219</td>
-      <td>d8da613f-e681-4c69-b463-e94f5e66847f</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>lung ciliated cell</td>
-      <td>CL:1000271</td>
-      <td>70-year-old human stage</td>
-      <td>HsapDv:0000164</td>
-      <td>normal</td>
-      <td>PATO:0000461</td>
+      <td>5945441</td>
+      <td>9f222629-9e39-47d0-b83f-e08d610c7479</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>CD8-positive, alpha-beta T cell</td>
+      <td>CL:0000625</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>lung adenocarcinoma</td>
+      <td>MONDO:0005061</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>female</td>
-      <td>PATO:0000383</td>
-      <td>nucleus</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
       <td>lung</td>
@@ -488,45 +521,21 @@ lung_obs
       <td>...</td>
     </tr>
     <tr>
-      <th>2295232</th>
-      <td>45561670</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>78-year-old human stage</td>
-      <td>HsapDv:0000172</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
-      <td>...</td>
-      <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>male</td>
-      <td>PATO:0000384</td>
-      <td>cell</td>
-      <td>lung</td>
-      <td>UBERON:0002048</td>
-      <td>lung</td>
-      <td>UBERON:0002048</td>
-    </tr>
-    <tr>
-      <th>2295233</th>
-      <td>45562154</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
+      <th>2907151</th>
+      <td>56400868</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
       <td>10x 3' v2</td>
       <td>EFO:0009899</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>67-year-old human stage</td>
-      <td>HsapDv:0000161</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
+      <td>unknown</td>
+      <td>unknown</td>
       <td>female</td>
       <td>PATO:0000383</td>
       <td>cell</td>
@@ -536,21 +545,21 @@ lung_obs
       <td>UBERON:0002048</td>
     </tr>
     <tr>
-      <th>2295234</th>
-      <td>45565290</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
+      <th>2907152</th>
+      <td>56400869</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
       <td>10x 3' v2</td>
       <td>EFO:0009899</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>65-year-old human stage</td>
-      <td>HsapDv:0000159</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
+      <td>unknown</td>
+      <td>unknown</td>
       <td>female</td>
       <td>PATO:0000383</td>
       <td>cell</td>
@@ -560,23 +569,23 @@ lung_obs
       <td>UBERON:0002048</td>
     </tr>
     <tr>
-      <th>2295235</th>
-      <td>45566613</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
+      <th>2907153</th>
+      <td>56400870</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
       <td>10x 3' v2</td>
       <td>EFO:0009899</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>80-year-old human stage</td>
-      <td>HsapDv:0000206</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>male</td>
-      <td>PATO:0000384</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
       <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
@@ -584,23 +593,47 @@ lung_obs
       <td>UBERON:0002048</td>
     </tr>
     <tr>
-      <th>2295236</th>
-      <td>45567413</td>
-      <td>f64e1be1-de15-4d27-8da4-82225cd4c035</td>
-      <td>10x 3' v3</td>
-      <td>EFO:0009922</td>
-      <td>T cell</td>
-      <td>CL:0000084</td>
-      <td>68-year-old human stage</td>
-      <td>HsapDv:0000162</td>
-      <td>lung adenocarcinoma</td>
-      <td>MONDO:0005061</td>
+      <th>2907154</th>
+      <td>56400871</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
       <td>...</td>
       <td>True</td>
-      <td>European</td>
-      <td>HANCESTRO:0005</td>
-      <td>male</td>
-      <td>PATO:0000384</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
+      <td>cell</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+      <td>lung</td>
+      <td>UBERON:0002048</td>
+    </tr>
+    <tr>
+      <th>2907155</th>
+      <td>56400872</td>
+      <td>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</td>
+      <td>10x 3' v2</td>
+      <td>EFO:0009899</td>
+      <td>pericyte</td>
+      <td>CL:0000669</td>
+      <td>51-year-old human stage</td>
+      <td>HsapDv:0000145</td>
+      <td>normal</td>
+      <td>PATO:0000461</td>
+      <td>...</td>
+      <td>True</td>
+      <td>unknown</td>
+      <td>unknown</td>
+      <td>female</td>
+      <td>PATO:0000383</td>
       <td>cell</td>
       <td>lung</td>
       <td>UBERON:0002048</td>
@@ -609,7 +642,7 @@ lung_obs
     </tr>
   </tbody>
 </table>
-<p>2295237 rows × 21 columns</p>
+<p>2907156 rows × 21 columns</p>
 </div></div>
 </div>
 <p>You can see that the number or rows represents the total number of unique lung cells in the Census. Now let’s take a deeper dive into the characteristics of these cells.</p>
@@ -620,14 +653,14 @@ lung_obs
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census_datasets = (
-    census[&quot;census_info&quot;][&quot;datasets&quot;]
-    .read(column_names=[&quot;collection_name&quot;, &quot;dataset_title&quot;, &quot;dataset_id&quot;, &quot;soma_joinid&quot;])
-    .concat()
-    .to_pandas()
-)
-census_datasets = census_datasets.set_index(&quot;dataset_id&quot;)
-census_datasets
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census_datasets</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_info&quot;</span><span class="p">][</span><span class="s2">&quot;datasets&quot;</span><span class="p">]</span>
+    <span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;collection_name&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_title&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;soma_joinid&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">census_datasets</span> <span class="o">=</span> <span class="n">census_datasets</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">)</span>
+<span class="n">census_datasets</span>
 </pre></div>
 </div>
 </div>
@@ -667,33 +700,33 @@ census_datasets
   </thead>
   <tbody>
     <tr>
-      <th>f512b8b6-369d-4a85-a695-116e0806857f</th>
-      <td>Transcriptional Programming of Normal and Infl...</td>
-      <td>Skin</td>
+      <th>f171db61-e57e-4535-a06a-35d8b6ef8f2b</th>
+      <td>Spatial multiomics map of trophoblast developm...</td>
+      <td>donor_p13_trophoblasts</td>
       <td>0</td>
     </tr>
     <tr>
-      <th>36c867a7-be10-4e69-9b39-5de12b0af6da</th>
-      <td>Single-Cell Analysis of Crohn’s Disease Lesion...</td>
-      <td>Ileum</td>
+      <th>ecf2e08e-2032-4a9e-b466-b65b395f4a02</th>
+      <td>Spatial multiomics map of trophoblast developm...</td>
+      <td>All donors trophoblasts</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
-      <td>Humoral immunity at the brain borders in homeo...</td>
-      <td>A scRNA-seq atlas of immune cells at the CNS b...</td>
+      <th>74cff64f-9da9-4b2a-9b3b-8a04a1598040</th>
+      <td>Spatial multiomics map of trophoblast developm...</td>
+      <td>All donors all cell states (in vivo)</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>456e8b9b-f872-488b-871d-94534090a865</th>
-      <td>Single-cell atlas of peripheral immune respons...</td>
-      <td>Single-cell atlas of peripheral immune respons...</td>
+      <th>5af90777-6760-4003-9dba-8f945fec6fdf</th>
+      <td>Mapping single-cell transcriptomes in the intr...</td>
+      <td>Single-cell transcriptomic datasets of Renal c...</td>
       <td>3</td>
     </tr>
     <tr>
-      <th>d8da613f-e681-4c69-b463-e94f5e66847f</th>
-      <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>A molecular single-cell lung atlas of lethal C...</td>
+      <th>bd65a70f-b274-4133-b9dd-0d1431b6af34</th>
+      <td>Single-cell sequencing links multiregional imm...</td>
+      <td>Single-cell sequencing links multiregional imm...</td>
       <td>4</td>
     </tr>
     <tr>
@@ -703,38 +736,38 @@ census_datasets
       <td>...</td>
     </tr>
     <tr>
-      <th>30498543-4fdd-4f86-9e1b-05c1a1454a6a</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>B cells -- CV19 infection, vaccination and HC</td>
-      <td>524</td>
+      <th>f9ad5649-f372-43e1-a3a8-423383e5a8a2</th>
+      <td>Molecular characterization of selectively vuln...</td>
+      <td>Molecular characterization of selectively vuln...</td>
+      <td>588</td>
     </tr>
     <tr>
-      <th>b5191f01-f67d-44b8-bc8d-511a4ecd07bb</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>innate T cells -- CV19 infection, vaccination ...</td>
-      <td>525</td>
+      <th>456e8b9b-f872-488b-871d-94534090a865</th>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>Single-cell atlas of peripheral immune respons...</td>
+      <td>589</td>
     </tr>
     <tr>
-      <th>e463dae9-3fc1-476d-870e-d98a04c56cd6</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>M cells -- CV19 infection, vaccination and HC</td>
-      <td>526</td>
+      <th>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</th>
+      <td>Construction of a human cell landscape at sing...</td>
+      <td>Construction of a human cell landscape at sing...</td>
+      <td>590</td>
     </tr>
     <tr>
-      <th>1b699e04-1127-42ea-998b-011ace4a5b81</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>T cells -- CV19 infection, vaccination and HC</td>
-      <td>527</td>
+      <th>e04daea4-4412-45b5-989e-76a9be070a89</th>
+      <td>A molecular cell atlas of the human lung from ...</td>
+      <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
+      <td>591</td>
     </tr>
     <tr>
-      <th>87ce26ed-e5d1-44b4-81cc-cc5b709a169f</th>
-      <td>COVID-19 mRNA vaccine elicits a potent adaptiv...</td>
-      <td>Circulating Immune cells -- CV19 infection, va...</td>
-      <td>528</td>
+      <th>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</th>
+      <td>A molecular cell atlas of the human lung from ...</td>
+      <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
+      <td>592</td>
     </tr>
   </tbody>
 </table>
-<p>529 rows × 3 columns</p>
+<p>593 rows × 3 columns</p>
 </div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">obs</span></code> cell metadata <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> contains a column <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> that can be used for joining to the <code class="docutils literal notranslate"><span class="pre">census_dataset</span></code> <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> we just created.</p>
@@ -743,11 +776,11 @@ census_datasets
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>dataset_cell_counts = pd.DataFrame(lung_obs[[&quot;dataset_id&quot;]].value_counts())
-dataset_cell_counts = dataset_cell_counts.rename(columns={0: &quot;cell_counts&quot;})
-dataset_cell_counts = dataset_cell_counts.merge(census_datasets, on=&quot;dataset_id&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_cell_counts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+<span class="n">dataset_cell_counts</span> <span class="o">=</span> <span class="n">dataset_cell_counts</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;cell_counts&quot;</span><span class="p">})</span>
+<span class="n">dataset_cell_counts</span> <span class="o">=</span> <span class="n">dataset_cell_counts</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">census_datasets</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">)</span>
 
-dataset_cell_counts
+<span class="n">dataset_cell_counts</span>
 </pre></div>
 </div>
 </div>
@@ -793,175 +826,175 @@ dataset_cell_counts
       <td>1028006</td>
       <td>High-resolution single-cell atlas reveals dive...</td>
       <td>The single-cell lung cancer atlas (LuCA) -- ex...</td>
-      <td>157</td>
+      <td>314</td>
     </tr>
     <tr>
-      <th>066943a2-fdac-4b29-b348-40cede398e4e</th>
-      <td>254931</td>
+      <th>9f222629-9e39-47d0-b83f-e08d610c7479</th>
+      <td>784630</td>
       <td>The integrated Human Lung Cell Atlas</td>
-      <td>The integrated Human Lung Cell Atlas</td>
-      <td>79</td>
+      <td>An integrated cell atlas of the human lung in ...</td>
+      <td>56</td>
     </tr>
     <tr>
       <th>f7c1c579-2dc0-47e2-ba19-8165c5a0e353</th>
       <td>217738</td>
       <td>A human cell atlas of fetal gene expression</td>
       <td>Survey of human embryonic development</td>
-      <td>94</td>
+      <td>483</td>
     </tr>
     <tr>
       <th>d8da613f-e681-4c69-b463-e94f5e66847f</th>
       <td>116313</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>4</td>
+      <td>80</td>
     </tr>
     <tr>
       <th>576f193c-75d0-4a11-bd25-8676587e6dc2</th>
       <td>90384</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Combined samples</td>
-      <td>519</td>
+      <td>377</td>
+    </tr>
+    <tr>
+      <th>d41f45c1-1b7b-4573-a998-ac5c5acb1647</th>
+      <td>82991</td>
+      <td>HTAN MSK - Transcriptional connectivity of reg...</td>
+      <td>Transcriptional connectivity of regulatory T c...</td>
+      <td>58</td>
     </tr>
     <tr>
       <th>3dc61ca1-ce40-46b6-8337-f27260fd9a03</th>
       <td>71752</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>All cells</td>
-      <td>75</td>
+      <td>325</td>
     </tr>
     <tr>
       <th>8c42cfd0-0b0a-46d5-910c-fc833d83c45e</th>
       <td>60993</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
-      <td>177</td>
+      <td>592</td>
     </tr>
     <tr>
       <th>2672b679-8048-4f5e-9786-f1b196ccfd08</th>
       <td>57019</td>
       <td>scRNA-seq assessment of the human lung, spleen...</td>
       <td>Lung Parenchyma</td>
-      <td>317</td>
+      <td>416</td>
     </tr>
     <tr>
       <th>9dbab10c-118d-496b-966a-67f1763a6b7d</th>
       <td>49014</td>
       <td>COVID-19 immune features revealed by a large-s...</td>
       <td>Large-scale single-cell analysis reveals criti...</td>
-      <td>63</td>
+      <td>482</td>
     </tr>
     <tr>
       <th>9968be68-ab65-4a38-9e1a-c9b6abece194</th>
       <td>47909</td>
       <td>Charting human development using a multi-endod...</td>
       <td>Developing Human Atlas</td>
-      <td>508</td>
+      <td>78</td>
     </tr>
     <tr>
       <th>3de0ad6d-4378-4f62-b37b-ec0b75a50d94</th>
       <td>46500</td>
       <td>LungMAP — Human data from a broad age healthy ...</td>
       <td>Single-cell multiomic profiling of human lungs...</td>
-      <td>188</td>
+      <td>456</td>
     </tr>
     <tr>
       <th>2f132ec9-24b5-422f-9be0-ccef03b4fe28</th>
       <td>39778</td>
       <td>SARS-CoV-2 receptor ACE2 and TMPRSS2 are prima...</td>
       <td>Lung</td>
-      <td>104</td>
+      <td>312</td>
     </tr>
     <tr>
       <th>1e5bd3b8-6a0e-4959-8d69-cafed30fe814</th>
       <td>35699</td>
       <td>Emphysema Cell Atlas</td>
       <td>immune cells</td>
-      <td>51</td>
+      <td>130</td>
     </tr>
     <tr>
       <th>53d208b0-2cfd-4366-9866-c3c6114081bc</th>
       <td>35682</td>
       <td>Tabula Sapiens</td>
       <td>Tabula Sapiens - All Cells</td>
-      <td>339</td>
+      <td>475</td>
     </tr>
     <tr>
       <th>1b9d8702-5af8-4142-85ed-020eb06ec4f6</th>
       <td>35419</td>
       <td>Cross-tissue immune cell analysis reveals tiss...</td>
       <td>Global</td>
-      <td>314</td>
+      <td>411</td>
     </tr>
     <tr>
       <th>4ed927e9-c099-49af-b8ce-a2652d069333</th>
       <td>35284</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
-      <td>62</td>
+      <td>367</td>
     </tr>
     <tr>
       <th>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</th>
       <td>33698</td>
       <td>Construction of a human cell landscape at sing...</td>
       <td>Construction of a human cell landscape at sing...</td>
-      <td>244</td>
+      <td>590</td>
     </tr>
     <tr>
       <th>4b6af54a-4a21-46e0-bc8d-673c0561a836</th>
-      <td>15495</td>
+      <td>18386</td>
       <td>Emphysema Cell Atlas</td>
       <td>non-immune cells</td>
-      <td>53</td>
+      <td>128</td>
     </tr>
     <tr>
       <th>01209dce-3575-4bed-b1df-129f57fbc031</th>
       <td>11059</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
-      <td>186</td>
+      <td>531</td>
     </tr>
     <tr>
       <th>e04daea4-4412-45b5-989e-76a9be070a89</th>
       <td>8657</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
-      <td>176</td>
-    </tr>
-    <tr>
-      <th>214bf9eb-93db-48c8-8e3c-9bb22fa3bc63</th>
-      <td>3662</td>
-      <td>Emphysema Cell Atlas</td>
-      <td>AT2 cells</td>
-      <td>52</td>
+      <td>591</td>
     </tr>
     <tr>
       <th>f9846bb4-784d-4582-92c1-3f279e4c6f0c</th>
       <td>176</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Fibroblast and smooth muscle</td>
-      <td>71</td>
+      <td>317</td>
     </tr>
     <tr>
       <th>f64e1be1-de15-4d27-8da4-82225cd4c035</th>
       <td>55</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Immune cells</td>
-      <td>520</td>
+      <td>370</td>
     </tr>
     <tr>
       <th>810ac45f-8969-4698-b42c-652f802f75c2</th>
       <td>10</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Endothelium</td>
-      <td>77</td>
+      <td>320</td>
     </tr>
     <tr>
       <th>0ba16f4b-cb87-4fa3-9363-19fc51eec6e7</th>
       <td>4</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Myeloid</td>
-      <td>74</td>
+      <td>326</td>
     </tr>
   </tbody>
 </table>
@@ -983,7 +1016,7 @@ dataset_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;assay&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;assay&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -994,19 +1027,20 @@ dataset_cell_counts
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 assay
-10x 3&#39; v2                                   1087211
-10x 3&#39; v3                                    436291
-10x 5&#39; v1                                    218556
+10x 3&#39; v2                                   1236968
+10x 3&#39; v3                                    702074
+10x 5&#39; v1                                    262323
 sci-RNA-seq                                  217738
 BD Rhapsody Whole Transcriptome Analysis     122902
+10x 3&#39; transcription profiling                97432
+Drop-seq                                      65220
 single cell library construction              58981
-10x 5&#39; v2                                     45798
+10x 5&#39; v2                                     41852
 microwell-seq                                 33698
 Smart-seq2                                    25662
 inDrop                                        25652
-10x 3&#39; v1                                     11558
-Drop-seq                                       7333
-10x 3&#39; transcription profiling                 3857
+10x 3&#39; v1                                      8638
+Seq-Well                                       8016
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1018,7 +1052,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;disease&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;disease&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1029,14 +1063,21 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 disease
-normal                                   1111566
-lung adenocarcinoma                       626322
-squamous cell lung carcinoma              189044
-COVID-19                                  128650
+normal                                   1164084
+lung adenocarcinoma                       772120
+COVID-19                                  331019
+squamous cell lung carcinoma              209675
 non-small cell lung carcinoma             120796
 chronic obstructive pulmonary disease      55254
-pulmonary emphysema                        32065
+pulmonary fibrosis                         51343
+interstitial lung disease                  45714
+pneumonia                                  31923
+pulmonary emphysema                        31792
 small cell lung carcinoma                  31540
+lung large cell carcinoma                  21167
+cystic fibrosis                            17590
+lymphangioleiomyomatosis                   12374
+pleomorphic carcinoma                      10765
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1048,7 +1089,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;sex&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;sex&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1059,9 +1100,9 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 sex
-male       1267756
-female     1019958
-unknown       7523
+male       1402565
+female     1122990
+unknown     381601
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1073,7 +1114,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;suspension_type&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;suspension_type&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1084,8 +1125,8 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 suspension_type
-cell               1879402
-nucleus             415835
+cell               2468587
+nucleus             438569
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1097,7 +1138,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;cell_type&quot;]].value_counts().head(20)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1108,26 +1149,26 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 cell_type
-alveolar macrophage                           244502
-CD4-positive, alpha-beta T cell               185787
-macrophage                                    154415
-CD8-positive, alpha-beta T cell               152746
-type II pneumocyte                            143252
-epithelial cell of lower respiratory tract    101959
-classical monocyte                             90969
-natural killer cell                            90715
-stromal cell                                   87587
-malignant cell                                 75917
-B cell                                         61804
-T cell                                         53703
-fibroblast                                     41934
-plasma cell                                    41907
-fibroblast of lung                             41294
-epithelial cell of lung                        38426
-epithelial cell                                37498
-regulatory T cell                              36381
-mesenchymal cell                               33235
-monocyte                                       33154
+alveolar macrophage                                291507
+native cell                                        263362
+CD4-positive, alpha-beta T cell                    211456
+CD8-positive, alpha-beta T cell                    189471
+macrophage                                         154415
+type II pneumocyte                                 128463
+epithelial cell of lower respiratory tract         105090
+classical monocyte                                 102303
+natural killer cell                                 95953
+T cell                                              92846
+stromal cell                                        87714
+B cell                                              81125
+malignant cell                                      75917
+plasma cell                                         64551
+epithelial cell                                     59353
+fibroblast                                          45305
+capillary endothelial cell                          39416
+regulatory T cell                                   36381
+ciliated columnar cell of tracheobronchial tree     36049
+epithelial cell of lung                             35467
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1139,7 +1180,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_obs[[&quot;tissue&quot;]].value_counts()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span><span class="p">[[</span><span class="s2">&quot;tissue&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1150,11 +1191,17 @@ Name: count, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tissue
-lung                       1882088
-lung parenchyma             311950
-alveolus of lung             54856
-lingula of left lung         35284
-lower lobe of left lung      11059
+lung                         2576327
+lung parenchyma               147410
+alveolus of lung               54085
+lingula of left lung           35284
+upper lobe of right lung       32099
+lower lobe of left lung        17854
+right lung                     12880
+upper lobe of left lung        10113
+left lung                       9276
+lower lobe of right lung        7981
+middle lobe of right lung       3847
 Name: count, dtype: int64
 </pre></div></div>
 </div>
@@ -1167,8 +1214,8 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_var = census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var.read().concat().to_pandas()
-lung_var
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_var</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">lung_var</span>
 </pre></div>
 </div>
 </div>
@@ -1205,37 +1252,37 @@ lung_var
     <tr>
       <th>0</th>
       <td>0</td>
-      <td>ENSG00000238009</td>
-      <td>RP11-34P13.7</td>
-      <td>3726</td>
+      <td>ENSG00000121410</td>
+      <td>A1BG</td>
+      <td>3999</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1</td>
-      <td>ENSG00000279457</td>
-      <td>WASH9P</td>
-      <td>1397</td>
+      <td>ENSG00000268895</td>
+      <td>A1BG-AS1</td>
+      <td>3374</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2</td>
-      <td>ENSG00000228463</td>
-      <td>AP006222.1</td>
-      <td>8224</td>
+      <td>ENSG00000148584</td>
+      <td>A1CF</td>
+      <td>9603</td>
     </tr>
     <tr>
       <th>3</th>
       <td>3</td>
-      <td>ENSG00000237094</td>
-      <td>RP4-669L17.4</td>
-      <td>6204</td>
+      <td>ENSG00000175899</td>
+      <td>A2M</td>
+      <td>6318</td>
     </tr>
     <tr>
       <th>4</th>
       <td>4</td>
-      <td>ENSG00000230021</td>
-      <td>RP11-206L10.17</td>
-      <td>5495</td>
+      <td>ENSG00000245105</td>
+      <td>A2M-AS1</td>
+      <td>2948</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1292,8 +1339,8 @@ lung_var
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>presence_matrix = cellxgene_census.get_presence_matrix(census, &quot;Homo sapiens&quot;, &quot;RNA&quot;)
-presence_matrix = presence_matrix[dataset_cell_counts.soma_joinid, :]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_presence_matrix</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
+<span class="n">presence_matrix</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="p">[</span><span class="n">dataset_cell_counts</span><span class="o">.</span><span class="n">soma_joinid</span><span class="p">,</span> <span class="p">:]</span>
 </pre></div>
 </div>
 </div>
@@ -1301,7 +1348,7 @@ presence_matrix = presence_matrix[dataset_cell_counts.soma_joinid, :]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>presence_matrix.sum(axis=1).A1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">presence_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">A1</span>
 </pre></div>
 </div>
 </div>
@@ -1311,18 +1358,18 @@ presence_matrix = presence_matrix[dataset_cell_counts.soma_joinid, :]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([17811, 28024, 44150, 34265, 22447, 26347, 20921, 24672, 27705,
-       27243, 26323, 27181, 23203, 57030, 32610, 29620, 26454, 23705,
-       38676, 47307, 21641, 23740, 22552, 20594, 19952], dtype=uint64)
+array([17811, 50259, 44150, 34265, 22447, 23642, 26347, 20921, 24672,
+       27705, 27243, 26323, 27181, 23203, 57042, 32610, 29620, 26454,
+       23705, 38676, 47307, 23740, 22552, 20594, 19952], dtype=uint64)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>genes_measured = presence_matrix.sum(axis=1).A1
-dataset_cell_counts[&quot;genes_measured&quot;] = genes_measured
-dataset_cell_counts
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">genes_measured</span> <span class="o">=</span> <span class="n">presence_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">A1</span>
+<span class="n">dataset_cell_counts</span><span class="p">[</span><span class="s2">&quot;genes_measured&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genes_measured</span>
+<span class="n">dataset_cell_counts</span>
 </pre></div>
 </div>
 </div>
@@ -1370,23 +1417,23 @@ dataset_cell_counts
       <td>1028006</td>
       <td>High-resolution single-cell atlas reveals dive...</td>
       <td>The single-cell lung cancer atlas (LuCA) -- ex...</td>
-      <td>157</td>
+      <td>314</td>
       <td>17811</td>
     </tr>
     <tr>
-      <th>066943a2-fdac-4b29-b348-40cede398e4e</th>
-      <td>254931</td>
+      <th>9f222629-9e39-47d0-b83f-e08d610c7479</th>
+      <td>784630</td>
       <td>The integrated Human Lung Cell Atlas</td>
-      <td>The integrated Human Lung Cell Atlas</td>
-      <td>79</td>
-      <td>28024</td>
+      <td>An integrated cell atlas of the human lung in ...</td>
+      <td>56</td>
+      <td>50259</td>
     </tr>
     <tr>
       <th>f7c1c579-2dc0-47e2-ba19-8165c5a0e353</th>
       <td>217738</td>
       <td>A human cell atlas of fetal gene expression</td>
       <td>Survey of human embryonic development</td>
-      <td>94</td>
+      <td>483</td>
       <td>44150</td>
     </tr>
     <tr>
@@ -1394,7 +1441,7 @@ dataset_cell_counts
       <td>116313</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
       <td>A molecular single-cell lung atlas of lethal C...</td>
-      <td>4</td>
+      <td>80</td>
       <td>34265</td>
     </tr>
     <tr>
@@ -1402,15 +1449,23 @@ dataset_cell_counts
       <td>90384</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Combined samples</td>
-      <td>519</td>
+      <td>377</td>
       <td>22447</td>
+    </tr>
+    <tr>
+      <th>d41f45c1-1b7b-4573-a998-ac5c5acb1647</th>
+      <td>82991</td>
+      <td>HTAN MSK - Transcriptional connectivity of reg...</td>
+      <td>Transcriptional connectivity of regulatory T c...</td>
+      <td>58</td>
+      <td>23642</td>
     </tr>
     <tr>
       <th>3dc61ca1-ce40-46b6-8337-f27260fd9a03</th>
       <td>71752</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>All cells</td>
-      <td>75</td>
+      <td>325</td>
       <td>26347</td>
     </tr>
     <tr>
@@ -1418,7 +1473,7 @@ dataset_cell_counts
       <td>60993</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, 10X</td>
-      <td>177</td>
+      <td>592</td>
       <td>20921</td>
     </tr>
     <tr>
@@ -1426,7 +1481,7 @@ dataset_cell_counts
       <td>57019</td>
       <td>scRNA-seq assessment of the human lung, spleen...</td>
       <td>Lung Parenchyma</td>
-      <td>317</td>
+      <td>416</td>
       <td>24672</td>
     </tr>
     <tr>
@@ -1434,7 +1489,7 @@ dataset_cell_counts
       <td>49014</td>
       <td>COVID-19 immune features revealed by a large-s...</td>
       <td>Large-scale single-cell analysis reveals criti...</td>
-      <td>63</td>
+      <td>482</td>
       <td>27705</td>
     </tr>
     <tr>
@@ -1442,7 +1497,7 @@ dataset_cell_counts
       <td>47909</td>
       <td>Charting human development using a multi-endod...</td>
       <td>Developing Human Atlas</td>
-      <td>508</td>
+      <td>78</td>
       <td>27243</td>
     </tr>
     <tr>
@@ -1450,7 +1505,7 @@ dataset_cell_counts
       <td>46500</td>
       <td>LungMAP — Human data from a broad age healthy ...</td>
       <td>Single-cell multiomic profiling of human lungs...</td>
-      <td>188</td>
+      <td>456</td>
       <td>26323</td>
     </tr>
     <tr>
@@ -1458,7 +1513,7 @@ dataset_cell_counts
       <td>39778</td>
       <td>SARS-CoV-2 receptor ACE2 and TMPRSS2 are prima...</td>
       <td>Lung</td>
-      <td>104</td>
+      <td>312</td>
       <td>27181</td>
     </tr>
     <tr>
@@ -1466,7 +1521,7 @@ dataset_cell_counts
       <td>35699</td>
       <td>Emphysema Cell Atlas</td>
       <td>immune cells</td>
-      <td>51</td>
+      <td>130</td>
       <td>23203</td>
     </tr>
     <tr>
@@ -1474,15 +1529,15 @@ dataset_cell_counts
       <td>35682</td>
       <td>Tabula Sapiens</td>
       <td>Tabula Sapiens - All Cells</td>
-      <td>339</td>
-      <td>57030</td>
+      <td>475</td>
+      <td>57042</td>
     </tr>
     <tr>
       <th>1b9d8702-5af8-4142-85ed-020eb06ec4f6</th>
       <td>35419</td>
       <td>Cross-tissue immune cell analysis reveals tiss...</td>
       <td>Global</td>
-      <td>314</td>
+      <td>411</td>
       <td>32610</td>
     </tr>
     <tr>
@@ -1490,7 +1545,7 @@ dataset_cell_counts
       <td>35284</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
       <td>Single-nucleus cross-tissue molecular referenc...</td>
-      <td>62</td>
+      <td>367</td>
       <td>29620</td>
     </tr>
     <tr>
@@ -1498,15 +1553,15 @@ dataset_cell_counts
       <td>33698</td>
       <td>Construction of a human cell landscape at sing...</td>
       <td>Construction of a human cell landscape at sing...</td>
-      <td>244</td>
+      <td>590</td>
       <td>26454</td>
     </tr>
     <tr>
       <th>4b6af54a-4a21-46e0-bc8d-673c0561a836</th>
-      <td>15495</td>
+      <td>18386</td>
       <td>Emphysema Cell Atlas</td>
       <td>non-immune cells</td>
-      <td>53</td>
+      <td>128</td>
       <td>23705</td>
     </tr>
     <tr>
@@ -1514,7 +1569,7 @@ dataset_cell_counts
       <td>11059</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
       <td>Single-cell transcriptomics of human T cells r...</td>
-      <td>186</td>
+      <td>531</td>
       <td>38676</td>
     </tr>
     <tr>
@@ -1522,23 +1577,15 @@ dataset_cell_counts
       <td>8657</td>
       <td>A molecular cell atlas of the human lung from ...</td>
       <td>Krasnow Lab Human Lung Cell Atlas, Smart-seq2</td>
-      <td>176</td>
+      <td>591</td>
       <td>47307</td>
-    </tr>
-    <tr>
-      <th>214bf9eb-93db-48c8-8e3c-9bb22fa3bc63</th>
-      <td>3662</td>
-      <td>Emphysema Cell Atlas</td>
-      <td>AT2 cells</td>
-      <td>52</td>
-      <td>21641</td>
     </tr>
     <tr>
       <th>f9846bb4-784d-4582-92c1-3f279e4c6f0c</th>
       <td>176</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Fibroblast and smooth muscle</td>
-      <td>71</td>
+      <td>317</td>
       <td>23740</td>
     </tr>
     <tr>
@@ -1546,7 +1593,7 @@ dataset_cell_counts
       <td>55</td>
       <td>HTAN MSK - Single cell profiling reveals novel...</td>
       <td>Immune cells</td>
-      <td>520</td>
+      <td>370</td>
       <td>22552</td>
     </tr>
     <tr>
@@ -1554,7 +1601,7 @@ dataset_cell_counts
       <td>10</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Endothelium</td>
-      <td>77</td>
+      <td>320</td>
       <td>20594</td>
     </tr>
     <tr>
@@ -1562,7 +1609,7 @@ dataset_cell_counts
       <td>4</td>
       <td>A human fetal lung cell atlas uncovers proxima...</td>
       <td>Myeloid</td>
-      <td>74</td>
+      <td>326</td>
       <td>19952</td>
     </tr>
   </tbody>
@@ -1574,7 +1621,7 @@ dataset_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>var_somaid = np.nonzero(presence_matrix.sum(axis=0).A1 == presence_matrix.shape[0])[0].tolist()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_somaid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">presence_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">A1</span> <span class="o">==</span> <span class="n">presence_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1582,8 +1629,8 @@ dataset_cell_counts
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_var = lung_var.query(f&quot;soma_joinid in {var_somaid}&quot;)
-lung_var
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_var</span> <span class="o">=</span> <span class="n">lung_var</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;soma_joinid in </span><span class="si">{</span><span class="n">var_somaid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">lung_var</span>
 </pre></div>
 </div>
 </div>
@@ -1618,39 +1665,39 @@ lung_var
   </thead>
   <tbody>
     <tr>
-      <th>6</th>
-      <td>6</td>
-      <td>ENSG00000177757</td>
-      <td>FAM87B</td>
-      <td>1947</td>
+      <th>0</th>
+      <td>0</td>
+      <td>ENSG00000121410</td>
+      <td>A1BG</td>
+      <td>3999</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>ENSG00000175899</td>
+      <td>A2M</td>
+      <td>6318</td>
     </tr>
     <tr>
       <th>8</th>
       <td>8</td>
-      <td>ENSG00000230368</td>
-      <td>FAM41C</td>
-      <td>1971</td>
+      <td>ENSG00000128274</td>
+      <td>A4GALT</td>
+      <td>3358</td>
     </tr>
     <tr>
       <th>10</th>
       <td>10</td>
-      <td>ENSG00000187634</td>
-      <td>SAMD11</td>
-      <td>4172</td>
+      <td>ENSG00000094914</td>
+      <td>AAAS</td>
+      <td>4727</td>
     </tr>
     <tr>
       <th>11</th>
       <td>11</td>
-      <td>ENSG00000188976</td>
-      <td>NOC2L</td>
-      <td>5540</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>12</td>
-      <td>ENSG00000187961</td>
-      <td>KLHL17</td>
-      <td>3402</td>
+      <td>ENSG00000081760</td>
+      <td>AACS</td>
+      <td>16039</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1660,43 +1707,43 @@ lung_var
       <td>...</td>
     </tr>
     <tr>
-      <th>27743</th>
-      <td>27743</td>
-      <td>ENSG00000160838</td>
-      <td>LRRC71</td>
-      <td>2649</td>
+      <th>29951</th>
+      <td>29951</td>
+      <td>ENSG00000177272</td>
+      <td>KCNA3</td>
+      <td>2476</td>
     </tr>
     <tr>
-      <th>30433</th>
-      <td>30433</td>
-      <td>ENSG00000136918</td>
-      <td>WDR38</td>
-      <td>1387</td>
+      <th>30157</th>
+      <td>30157</td>
+      <td>ENSG00000184709</td>
+      <td>LRRC26</td>
+      <td>1209</td>
     </tr>
     <tr>
-      <th>30816</th>
-      <td>30816</td>
-      <td>ENSG00000149021</td>
-      <td>SCGB1A1</td>
-      <td>584</td>
+      <th>30185</th>
+      <td>30185</td>
+      <td>ENSG00000087250</td>
+      <td>MT3</td>
+      <td>1679</td>
     </tr>
     <tr>
-      <th>31272</th>
-      <td>31272</td>
-      <td>ENSG00000187848</td>
-      <td>P2RX2</td>
-      <td>1975</td>
+      <th>30202</th>
+      <td>30202</td>
+      <td>ENSG00000136352</td>
+      <td>NKX2-1</td>
+      <td>3165</td>
     </tr>
     <tr>
-      <th>32538</th>
-      <td>32538</td>
-      <td>ENSG00000160472</td>
-      <td>TMEM190</td>
-      <td>605</td>
+      <th>30512</th>
+      <td>30512</td>
+      <td>ENSG00000231439</td>
+      <td>WASIR2</td>
+      <td>1054</td>
     </tr>
   </tbody>
 </table>
-<p>11516 rows × 4 columns</p>
+<p>11595 rows × 4 columns</p>
 </div></div>
 </div>
 <p>The number of rows represents the genes that were measured in all lung datasets.</p>
@@ -1726,8 +1773,8 @@ lung_var
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_cell_subsampled_n = 100000
-lung_cell_subsampled_ids = lung_obs[&quot;soma_joinid&quot;].sample(lung_cell_subsampled_n, random_state=1).tolist()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_cell_subsampled_n</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="n">lung_cell_subsampled_ids</span> <span class="o">=</span> <span class="n">lung_obs</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">lung_cell_subsampled_n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1736,15 +1783,15 @@ lung_cell_subsampled_ids = lung_obs[&quot;soma_joinid&quot;].sample(lung_cell_su
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_gene_ids = lung_var[&quot;soma_joinid&quot;].to_numpy()
-lung_adata = cellxgene_census.get_anndata(
-    census,
-    organism=&quot;Homo sapiens&quot;,
-    obs_coords=lung_cell_subsampled_ids,
-    var_coords=lung_gene_ids,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_gene_ids</span> <span class="o">=</span> <span class="n">lung_var</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">lung_adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+    <span class="n">obs_coords</span><span class="o">=</span><span class="n">lung_cell_subsampled_ids</span><span class="p">,</span>
+    <span class="n">var_coords</span><span class="o">=</span><span class="n">lung_gene_ids</span><span class="p">,</span>
+<span class="p">)</span>
 
-lung_adata.var_names = lung_adata.var[&quot;feature_name&quot;]
+<span class="n">lung_adata</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -1752,7 +1799,7 @@ lung_adata.var_names = lung_adata.var[&quot;feature_name&quot;]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_adata
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_adata</span>
 </pre></div>
 </div>
 </div>
@@ -1762,7 +1809,7 @@ lung_adata.var_names = lung_adata.var[&quot;feature_name&quot;]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-AnnData object with n_obs × n_vars = 100000 × 11516
+AnnData object with n_obs × n_vars = 100000 × 11595
     obs: &#39;soma_joinid&#39;, &#39;dataset_id&#39;, &#39;assay&#39;, &#39;assay_ontology_term_id&#39;, &#39;cell_type&#39;, &#39;cell_type_ontology_term_id&#39;, &#39;development_stage&#39;, &#39;development_stage_ontology_term_id&#39;, &#39;disease&#39;, &#39;disease_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;is_primary_data&#39;, &#39;self_reported_ethnicity&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex&#39;, &#39;sex_ontology_term_id&#39;, &#39;suspension_type&#39;, &#39;tissue&#39;, &#39;tissue_ontology_term_id&#39;, &#39;tissue_general&#39;, &#39;tissue_general_ontology_term_id&#39;
     var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;
 </pre></div></div>
@@ -1772,8 +1819,8 @@ AnnData object with n_obs × n_vars = 100000 × 11516
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>census.close()
-del census
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">del</span> <span class="n">census</span>
 </pre></div>
 </div>
 </div>
@@ -1786,7 +1833,7 @@ del census
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.highest_expr_genes(lung_adata, n_top=20)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">highest_expr_genes</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">n_top</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1802,8 +1849,8 @@ del census
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.calculate_qc_metrics(lung_adata, percent_top=None, log1p=False, inplace=True)
-sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot;, jitter=0.4, rotation=90)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">calculate_qc_metrics</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">percent_top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log1p</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="s2">&quot;n_genes_by_counts&quot;</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1819,7 +1866,7 @@ sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.violin(lung_adata, &quot;total_counts&quot;, groupby=&quot;assay&quot;, jitter=0.4, rotation=90)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="s2">&quot;total_counts&quot;</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1835,13 +1882,13 @@ sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.violin(
-    lung_adata[lung_adata.obs[&quot;assay&quot;] != &quot;Smart-seq2&quot;,],
-    &quot;total_counts&quot;,
-    groupby=&quot;assay&quot;,
-    jitter=0.4,
-    rotation=90,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span>
+    <span class="n">lung_adata</span><span class="p">[</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Smart-seq2&quot;</span><span class="p">,],</span>
+    <span class="s2">&quot;total_counts&quot;</span><span class="p">,</span>
+    <span class="n">groupby</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">,</span>
+    <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1860,8 +1907,8 @@ sc.pl.violin(lung_adata, &quot;n_genes_by_counts&quot;, groupby=&quot;assay&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_adata = lung_adata[lung_adata.obs[&quot;assay&quot;] != &quot;Smart-seq2&quot;,].copy()
-lung_adata.layers[&quot;counts&quot;] = lung_adata.X
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_adata</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="p">[</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Smart-seq2&quot;</span><span class="p">,]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">lung_adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="s2">&quot;counts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">X</span>
 </pre></div>
 </div>
 </div>
@@ -1876,11 +1923,11 @@ lung_adata.layers[&quot;counts&quot;] = lung_adata.X
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pp.normalize_total(lung_adata, target_sum=1e4)
-sc.pp.log1p(lung_adata)
-sc.pp.highly_variable_genes(lung_adata, n_top_genes=500, flavor=&quot;seurat_v3&quot;, layer=&quot;counts&quot;)
-lung_adata = lung_adata[:, lung_adata.var.highly_variable]
-sc.pp.scale(lung_adata, max_value=10)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;seurat_v3&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;counts&quot;</span><span class="p">)</span>
+<span class="n">lung_adata</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="p">[:,</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1889,9 +1936,9 @@ sc.pp.scale(lung_adata, max_value=10)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/preprocessing/_highly_variable_genes.py:62: UserWarning: `flavor=&#39;seurat_v3&#39;` expects raw count data, but non-integers were found.
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/preprocessing/_highly_variable_genes.py:62: UserWarning: `flavor=&#39;seurat_v3&#39;` expects raw count data, but non-integers were found.
   warnings.warn(
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
   view_to_actual(adata)
 </pre></div></div>
 </div>
@@ -1900,9 +1947,9 @@ sc.pp.scale(lung_adata, max_value=10)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.tl.pca(lung_adata)
-sc.pp.neighbors(lung_adata)
-sc.tl.umap(lung_adata)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1911,7 +1958,8 @@ sc.tl.umap(lung_adata)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
 </pre></div></div>
 </div>
 <p>And plot these embeddings.</p>
@@ -1919,14 +1967,14 @@ OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n_cell_types = len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_cell_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())</span>
 
-from random import randint
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 
-colors = []
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
 
-for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
-    colors.append(&quot;#%06X&quot; % randint(0, 0xFFFFFF))
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())):</span>
+    <span class="n">colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#</span><span class="si">%06X</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0xFFFFFF</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1934,7 +1982,7 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.umap(lung_adata, color=&quot;cell_type&quot;, palette=colors, legend_loc=None)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">legend_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1943,7 +1991,7 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -1959,7 +2007,7 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.umap(lung_adata, color=&quot;assay&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1968,7 +2016,7 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -1984,8 +2032,8 @@ for i in range(len(lung_adata.obs[&quot;cell_type&quot;].drop_duplicates())):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>top_cell_types = lung_adata.obs[&quot;cell_type&quot;].value_counts()
-top_cell_types = list(top_cell_types.reset_index().head(20)[&quot;cell_type&quot;])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top_cell_types</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">top_cell_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">top_cell_types</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1993,8 +2041,8 @@ top_cell_types = list(top_cell_types.reset_index().head(20)[&quot;cell_type&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lung_adata_top_cell_types = lung_adata[[i in top_cell_types for i in lung_adata.obs[&quot;cell_type&quot;]], :]
-sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_adata_top_cell_types</span> <span class="o">=</span> <span class="n">lung_adata</span><span class="p">[[</span><span class="n">i</span> <span class="ow">in</span> <span class="n">top_cell_types</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lung_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]],</span> <span class="p">:]</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata_top_cell_types</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cell_type&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2003,7 +2051,7 @@ sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -2019,7 +2067,7 @@ sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sc.pl.umap(lung_adata_top_cell_types, color=&quot;assay&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">lung_adata_top_cell_types</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;assay&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2028,7 +2076,7 @@ sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/pgarcianieto/opt/miniconda3/envs/census_latest/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
+/home/ssm-user/cellxgene-census/venv/lib/python3.10/site-packages/scanpy/plotting/_tools/scatterplots.py:392: UserWarning: No data for colormapping provided via &#39;c&#39;. Parameters &#39;cmap&#39; will be ignored
   cax = scatter(
 </pre></div></div>
 </div>
@@ -2047,14 +2095,14 @@ sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
             
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="comp_bio_data_integration_scvi.html" class="btn btn-neutral float-left" title="Integrating multi-dataset slices of data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="comp_bio_normalizing_full_gene_sequencing.html" class="btn btn-neutral float-right" title="Normalizing full-length gene sequencing data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="comp_bio_census_info.html" class="btn btn-neutral float-left" title="Learning about the CZ CELLxGENE Census" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api_demo/census_datasets.html" class="btn btn-neutral float-right" title="Exploring the Census Datasets table" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -2069,13 +2117,99 @@ sc.pl.umap(lung_adata_top_cell_types, color=&quot;cell_type&quot;)
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
       });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

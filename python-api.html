@@ -4,14 +4,16 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python API &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>Python API &mdash; cellxgene-census  documentation</title>
   
 
   
+  <link rel="icon" type="image/png" sizes="32x32" href="_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="_static/img/favicon_16x16_v2.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,14 +39,14 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="FAQ" href="cellxgene_census_docsite_FAQ.html" />
+    <link rel="next" title="cellxgene_census.open_soma" href="_autosummary/cellxgene_census.open_soma.html" />
     <link rel="prev" title="Census data releases" href="cellxgene_census_docsite_data_release_info.html" /> 
 </head>
 
@@ -52,35 +54,58 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
-                    </span>
+                  </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -96,19 +121,12 @@
                 
                 
                 <div class="version">
-                    0.5
+                    v1.10.2
                 </div>
                 
             
 
             
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
 
             
             </div>
@@ -124,17 +142,52 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Python API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#open-retrieve-cell-census-data">Open/retrieve Cell Census data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-slice-as-anndata">Get slice as AnnData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#feature-presence-matrix">Feature presence matrix</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#versioning-of-cell-census-builds">Versioning of Cell Census builds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#open-retrieve-cell-census-data">Open/retrieve Cell Census data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.open_soma.html">cellxgene_census.open_soma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_default_soma_context.html">cellxgene_census.get_default_soma_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_source_h5ad_uri.html">cellxgene_census.get_source_h5ad_uri</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.download_source_h5ad.html">cellxgene_census.download_source_h5ad</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-slice-as-anndata">Get slice as AnnData</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html">cellxgene_census.get_anndata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-presence-matrix">Feature presence matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_presence_matrix.html">cellxgene_census.get_presence_matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#versioning-of-cell-census-builds">Versioning of Cell Census builds</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_description.html">cellxgene_census.get_census_version_description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_directory.html">cellxgene_census.get_census_version_directory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-machine-learning">Experimental: Machine Learning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.Stats.html">cellxgene_census.experimental.ml.pytorch.Stats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-processing">Experimental: Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html">cellxgene_census.experimental.pp.get_highly_variable_genes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html">cellxgene_census.experimental.pp.highly_variable_genes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.mean_variance.html">cellxgene_census.experimental.pp.mean_variance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-embeddings">Experimental: Embeddings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding.html">cellxgene_census.experimental.get_embedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding_metadata.html">cellxgene_census.experimental.get_embedding_metadata</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -173,19 +226,115 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <section id="python-api">
-<h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this heading">¶</a></h1>
+  <section id="module-cellxgene_census">
+<span id="python-api"></span><h1>Python API<a class="headerlink" href="#module-cellxgene_census" title="Permalink to this heading">¶</a></h1>
+<p>An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at <a class="reference external" href="https://cellxgene.cziscience.com/">CELLxGENE Discover</a>.</p>
+<p>The API is built on the <cite>tiledbsoma</cite> SOMA API, and provides a number of helper functions including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Open a named version of the Census, for use with the SOMA API</p></li>
+<li><p>Get a list of available Census versions, and for each version, a description</p></li>
+<li><p>Get a slice of the Census as an AnnData, for use with ScanPy</p></li>
+<li><p>Get the URI for, or directly download, underlying data in H5AD format</p></li>
+</ul>
+</div></blockquote>
+<p>For more information on the API, visit the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/">cellxgene_census repo</a>. For more information on SOMA, see the <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">tiledbsoma repo</a>.</p>
 <section id="open-retrieve-cell-census-data">
 <h2>Open/retrieve Cell Census data<a class="headerlink" href="#open-retrieve-cell-census-data" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.open_soma.html#cellxgene_census.open_soma" title="cellxgene_census.open_soma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.open_soma</span></code></a></p></td>
+<td><p>Open the Census by version or URI.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_default_soma_context.html#cellxgene_census.get_default_soma_context" title="cellxgene_census.get_default_soma_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_default_soma_context</span></code></a></p></td>
+<td><p>Return a <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.SOMATileDBContext.html#tiledbsoma.SOMATileDBContext" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.SOMATileDBContext</span></code></a> with sensible defaults that can be further customized by the user.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_source_h5ad_uri.html#cellxgene_census.get_source_h5ad_uri" title="cellxgene_census.get_source_h5ad_uri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_source_h5ad_uri</span></code></a></p></td>
+<td><p>Open the named version of the census, and return the URI for the <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.download_source_h5ad.html#cellxgene_census.download_source_h5ad" title="cellxgene_census.download_source_h5ad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.download_source_h5ad</span></code></a></p></td>
+<td><p>Download the source H5AD dataset, for the given <cite>dataset_id</cite>, to the user-specified file name.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="get-slice-as-anndata">
 <h2>Get slice as AnnData<a class="headerlink" href="#get-slice-as-anndata" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata" title="cellxgene_census.get_anndata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata</span></code></a></p></td>
+<td><p>Convenience wrapper around <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.1.dev50+ga478647)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="feature-presence-matrix">
 <h2>Feature presence matrix<a class="headerlink" href="#feature-presence-matrix" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_presence_matrix.html#cellxgene_census.get_presence_matrix" title="cellxgene_census.get_presence_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_presence_matrix</span></code></a></p></td>
+<td><p>Read the feature dataset presence matrix and return as a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.12.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="versioning-of-cell-census-builds">
 <h2>Versioning of Cell Census builds<a class="headerlink" href="#versioning-of-cell-census-builds" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_description.html#cellxgene_census.get_census_version_description" title="cellxgene_census.get_census_version_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_census_version_description</span></code></a></p></td>
+<td><p>Get release description for given Census version, from the Census release directory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_census_version_directory.html#cellxgene_census.get_census_version_directory" title="cellxgene_census.get_census_version_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_census_version_directory</span></code></a></p></td>
+<td><p>Get the directory of Census versions currently available, optionally filtering by specified flags.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="experimental-machine-learning">
+<h2>Experimental: Machine Learning<a class="headerlink" href="#experimental-machine-learning" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html#cellxgene_census.experimental.ml.pytorch.experiment_dataloader" title="cellxgene_census.experimental.ml.pytorch.experiment_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</span></code></a></p></td>
+<td><p>Factory method for <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html#cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe" title="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</span></code></a></p></td>
+<td><p>An <a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html#torchdata.datapipes.iter.IterDataPipe" title="(in TorchData v0.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchdata.datapipes.iter.IterDataPipe</span></code></a> that reads <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">X</span></code> data from a <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a>, based upon the specified queries along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code> axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.Stats.html#cellxgene_census.experimental.ml.pytorch.Stats" title="cellxgene_census.experimental.ml.pytorch.Stats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.Stats</span></code></a></p></td>
+<td><p>Statistics about the data retrieved by <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> via SOMA API.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="experimental-processing">
+<h2>Experimental: Processing<a class="headerlink" href="#experimental-processing" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html#cellxgene_census.experimental.pp.get_highly_variable_genes" title="cellxgene_census.experimental.pp.get_highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.get_highly_variable_genes</span></code></a></p></td>
+<td><p>Convience wrapper around <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a> query and <a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html#cellxgene_census.experimental.pp.highly_variable_genes" title="cellxgene_census.experimental.pp.highly_variable_genes"><code class="xref py py-func docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.highly_variable_genes()</span></code></a> function, to build and execute a query, and annotate the query result genes (<code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe) based upon variability.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html#cellxgene_census.experimental.pp.highly_variable_genes" title="cellxgene_census.experimental.pp.highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.highly_variable_genes</span></code></a></p></td>
+<td><p>Identify and annotate highly variable genes contained in the query results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.mean_variance.html#cellxgene_census.experimental.pp.mean_variance" title="cellxgene_census.experimental.pp.mean_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.mean_variance</span></code></a></p></td>
+<td><p>Calculate  mean and/or variance along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis from query results.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="experimental-embeddings">
+<h2>Experimental: Embeddings<a class="headerlink" href="#experimental-embeddings" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding" title="cellxgene_census.experimental.get_embedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding</span></code></a></p></td>
+<td><p>Read cell (obs) embeddings and return as a dense <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding_metadata.html#cellxgene_census.experimental.get_embedding_metadata" title="cellxgene_census.experimental.get_embedding_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding_metadata</span></code></a></p></td>
+<td><p>Read embedding metadata and return as a Python dict.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 
@@ -195,13 +344,13 @@
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="cellxgene_census_docsite_data_release_info.html" class="btn btn-neutral float-left" title="Census data releases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cellxgene_census_docsite_FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="_autosummary/cellxgene_census.open_soma.html" class="btn btn-neutral float-right" title="cellxgene_census.open_soma" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -216,13 +365,99 @@
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
       });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

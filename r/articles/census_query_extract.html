@@ -7,16 +7,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="cellxgene.census">
 <title>Querying and fetching the single-cell data and cell/gene metadata • cellxgene.census</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Querying and fetching the single-cell data and cell/gene metadata">
 <meta property="og:description" content="cellxgene.census">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]--><script defer data-domain="chanzuckerberg.github.io/cellxgene-census/r" src="https://plausible.io/js/script.js"></script>
+<![endif]--><script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,15 +42,30 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/census_axis_query.html">Axis Query Example</a>
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Census datasets presence</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
+    <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
+    <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
+    <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
+    <a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
     <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
+    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
+    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
+    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
+    <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
+    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
   </div>
 </li>
       </ul>
@@ -68,12 +89,13 @@
 
 
 
-<script src="census_query_extract_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+
+<div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Querying and fetching the single-cell data and cell/gene metadata</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/HEAD/vignettes/census_query_extract.Rmd" class="external-link"><code>vignettes/census_query_extract.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes/census_query_extract.Rmd" class="external-link"><code>vignettes/census_query_extract.Rmd</code></a></small>
       <div class="d-none name"><code>census_query_extract.Rmd</code></div>
     </div>
 
@@ -83,43 +105,64 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_query_extract.ipynb
 -->
-<p>This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into R data frames and Seurat assays.</p>
+<p>This tutorial showcases the easiest ways to query the expression data
+and cell/gene metadata from the Census, and load them into R data
+frames, <a href="https://satijalab.org/seurat/" class="external-link">Seurat</a> assays, and
+<a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a>
+objects.</p>
 <p><strong>Contents</strong></p>
 <ol style="list-style-type: decimal">
 <li>Opening the census.</li>
 <li>Querying cell metadata (obs).</li>
 <li>Querying gene metadata (var).</li>
-<li>Querying expression data.</li>
+<li>Querying expression data as <code>Seurat</code>.</li>
+<li>Querying expression data as <code>SingleCellExperiment</code>.</li>
 </ol>
 <div class="section level2">
 <h2 id="opening-the-census">Opening the census<a class="anchor" aria-label="anchor" href="#opening-the-census"></a>
 </h2>
-<p>The <code>cellxgene.census</code> R package contains a convenient API to open the latest version of the Census.</p>
+<p>The <code>cellxgene.census</code> R package contains a convenient API
+to open any version of the Census (by default, the newest stable
+version).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>You can learn more about the <code>cellxgene.census</code> methods by accessing their corresponding documentation, for example <code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chanzuckerberg/cellxgene-census" class="external-link">"cellxgene.census"</a></span><span class="op">)</span></span>
+<span><span class="va">census</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/open_soma.html">open_soma</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>You can learn more about the <code>cellxgene.census</code> methods by
+accessing their corresponding documentation, for example
+<code><a href="../reference/open_soma.html">?cellxgene.census::open_soma</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="querying-cell-metadata-obs">Querying cell metadata (obs)<a class="anchor" aria-label="anchor" href="#querying-cell-metadata-obs"></a>
 </h2>
-<p>The human gene metadata of the Census, for RNA assays, is located at <code>census$get("census_data")$get("homo_sapiens")$obs</code>. This is a <code>SOMADataFrame</code> and as such it can be materialized as an R data frame (tibble) using <code>as.data.frame(obs$read())</code>.</p>
-<p>The mouse cell metadata is at <code>census$get("census_data")$get("mus_musculus").obs</code>.</p>
-<p>For slicing the cell metadata there are two relevant arguments that can be passed through <code>read():</code></p>
+<p>The human gene metadata of the Census, for RNA assays, is located at
+<code>census$get("census_data")$get("homo_sapiens")$obs</code>. This is
+a <code>SOMADataFrame</code> and as such it can be materialized as an R
+data frame (tibble) using
+<code>as.data.frame(obs$read()$concat())</code>.</p>
+<p>The mouse cell metadata is at
+<code>census$get("census_data")$get("mus_musculus").obs</code>.</p>
+<p>For slicing the cell metadata there are two relevant arguments that
+can be passed through <code>read():</code></p>
 <ul>
 <li>
-<code>column_names</code> — character vector indicating what metadata columns to fetch.</li>
+<code>column_names</code> — character vector indicating what
+metadata columns to fetch.</li>
 <li>
-<code>value_filter</code> — R expression with selection conditions to fetch rows.
+<code>value_filter</code> — R expression with selection conditions
+to fetch rows.
 <ul>
 <li>Expressions are one or more comparisons</li>
-<li>Comparisons are one of <code>&lt;column&gt; &lt;op&gt; &lt;value&gt;</code> or <code>&lt;column&gt; &lt;op&gt; &lt;column&gt;</code>
+<li>Comparisons are one of
+<code>&lt;column&gt; &lt;op&gt; &lt;value&gt;</code> or
+<code>&lt;column&gt; &lt;op&gt; &lt;column&gt;</code>
 </li>
 <li>Expressions can combine comparisons using &amp;&amp; or ||</li>
 <li>op is one of &lt; | &gt; | &lt;= | &gt;= | == | != or %in%</li>
 </ul>
 </li>
 </ul>
-<p>To learn what metadata columns are available for fetching and filtering we can directly look at the keys of the cell metadata.</p>
+<p>To learn what metadata columns are available for fetching and
+filtering we can directly look at the keys of the cell metadata.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "soma_joinid"                             </span></span>
@@ -142,141 +185,308 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt; [18] "tissue"                                  </span></span>
 <span><span class="co">#&gt; [19] "tissue_ontology_term_id"                 </span></span>
 <span><span class="co">#&gt; [20] "tissue_general"                          </span></span>
-<span><span class="co">#&gt; [21] "tissue_general_ontology_term_id"</span></span></code></pre></div>
-<p><code>soma_joinid</code> is a special <code>SOMADataFrame</code> column that is used for join operations. The definition for all other columns can be found at the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a>.</p>
-<p>All of these can be used to fetch specific columns or specific rows matching a condition. For the latter we need to know the values we are looking for <em>a priori</em>.</p>
-<p>For example let’s see what are the possible values available for <code>sex</code>. To this we can load all cell metadata but fetching only for the column <code>sex</code>.</p>
+<span><span class="co">#&gt; [21] "tissue_general_ontology_term_id"         </span></span>
+<span><span class="co">#&gt; [22] "raw_sum"                                 </span></span>
+<span><span class="co">#&gt; [23] "nnz"                                     </span></span>
+<span><span class="co">#&gt; [24] "raw_mean_nnz"                            </span></span>
+<span><span class="co">#&gt; [25] "raw_variance_nnz"                        </span></span>
+<span><span class="co">#&gt; [26] "n_measured_vars"</span></span></code></pre></div>
+<p><code>soma_joinid</code> is a special <code>SOMADataFrame</code>
+column that is used for join operations. The definition for all other
+columns can be found at the <a href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html" class="external-link">Census
+schema</a>.</p>
+<p>All of these can be used to fetch specific columns or specific rows
+matching a condition. For the latter we need to know the values we are
+looking for <em>a priori</em>.</p>
+<p>For example let’s see what are the possible values available for
+<code>sex</code>. To this we can load all cell metadata but fetching
+only for the column <code>sex</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 1</span></span></span>
-<span><span class="co">#&gt;   sex    </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> female </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> male   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> unknown</span></span></code></pre></div>
-<p>As you can see there are only three different values for sex, that is <code>"male"</code>, <code>"female"</code> and <code>"unknown"</code>.</p>
-<p>With this information we can fetch all cell metatadata for a specific sex value, for example <code>"unknown"</code>.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>column_names <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             sex</span></span>
+<span><span class="co">#&gt; 1          male</span></span>
+<span><span class="co">#&gt; 224      female</span></span>
+<span><span class="co">#&gt; 3747640 unknown</span></span></code></pre></div>
+<p>As you can see there are only three different values for sex, that is
+<code>"male"</code>, <code>"female"</code> and
+<code>"unknown"</code>.</p>
+<p>With this information we can fetch all cell metatadata for a specific
+sex value, for example <code>"unknown"</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"sex == 'unknown'"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2,112,935 × 21</span></span></span>
-<span><span class="co">#&gt;    soma_joinid dataset_id  assay assay_ontology_term_id cell_type cell_type_ontology_t…¹</span></span>
-<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1<span style="text-decoration: underline;">226</span>855 3f32121d-1… 10x … EFO:0009899            endothel… CL:0002138            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1<span style="text-decoration: underline;">226</span>856 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1<span style="text-decoration: underline;">226</span>857 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1<span style="text-decoration: underline;">226</span>858 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1<span style="text-decoration: underline;">226</span>859 3f32121d-1… 10x … EFO:0009899            T cell    CL:0000084            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1<span style="text-decoration: underline;">226</span>860 3f32121d-1… 10x … EFO:0009899            macropha… CL:0000235            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1<span style="text-decoration: underline;">226</span>861 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     1<span style="text-decoration: underline;">226</span>862 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1<span style="text-decoration: underline;">226</span>863 3f32121d-1… 10x … EFO:0009899            enterocy… CL:0000584            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1<span style="text-decoration: underline;">226</span>864 3f32121d-1… 10x … EFO:0009899            fibrobla… CL:0000057            </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2,112,925 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​cell_type_ontology_term_id</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 15 more variables: development_stage &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   development_stage_ontology_term_id &lt;chr&gt;, disease &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   disease_ontology_term_id &lt;chr&gt;, donor_id &lt;chr&gt;, is_primary_data &lt;lgl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   self_reported_ethnicity &lt;chr&gt;, self_reported_ethnicity_ontology_term_id &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   sex &lt;chr&gt;, sex_ontology_term_id &lt;chr&gt;, suspension_type &lt;chr&gt;, tissue &lt;chr&gt;, …</span></span></span></code></pre></div>
-<p>You can use both <code>column_names</code> and <code>value_filter</code> to perform specific queries. For example let’s fetch the <code>disease</code> column for the <code>cell_type</code> <code>"B cell"</code> in the <code>tissue_general</code> <code>"lung"</code>.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"sex == 'unknown'"</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   soma_joinid                           dataset_id     assay assay_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1     3747639 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 2     3747640 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 3     3747641 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 4     3747642 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 5     3747643 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 6     3747644 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 7     3747645 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 8     3747646 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt; 9     3747647 9fcb0b73-c734-40a5-be9c-ace7eea401c9 10x 3' v2            EFO:0009899</span></span>
+<span><span class="co">#&gt;    cell_type cell_type_ontology_term_id development_stage</span></span>
+<span><span class="co">#&gt; 1 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 2 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 3 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 4 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 5 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 6 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 7 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 8 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt; 9 fibroblast                 CL:0000057 human adult stage</span></span>
+<span><span class="co">#&gt;   development_stage_ontology_term_id disease disease_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 2                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 3                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 4                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 5                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 6                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 7                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 8                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt; 9                     HsapDv:0000087  normal             PATO:0000461</span></span>
+<span><span class="co">#&gt;                       donor_id is_primary_data self_reported_ethnicity</span></span>
+<span><span class="co">#&gt; 1 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 2 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 3 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 4 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 5 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 6 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 7 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 8 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt; 9 Pagella_GSE161267_GSM4904134            TRUE                 unknown</span></span>
+<span><span class="co">#&gt;   self_reported_ethnicity_ontology_term_id     sex sex_ontology_term_id suspension_type</span></span>
+<span><span class="co">#&gt; 1                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 2                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 3                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 4                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 5                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 6                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 7                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 8                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt; 9                                  unknown unknown              unknown            cell</span></span>
+<span><span class="co">#&gt;    tissue tissue_ontology_term_id tissue_general tissue_general_ontology_term_id</span></span>
+<span><span class="co">#&gt; 1 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 2 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 3 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 4 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 5 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 6 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 7 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 8 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt; 9 gingiva          UBERON:0001828         mucosa                  UBERON:0000344</span></span>
+<span><span class="co">#&gt;   raw_sum  nnz raw_mean_nnz raw_variance_nnz n_measured_vars</span></span>
+<span><span class="co">#&gt; 1     547  329     1.662614        14.559604           31602</span></span>
+<span><span class="co">#&gt; 2     982  563     1.744227         5.315247           31602</span></span>
+<span><span class="co">#&gt; 3   12467 3809     3.273038       109.305683           31602</span></span>
+<span><span class="co">#&gt; 4    1053  566     1.860424         7.430042           31602</span></span>
+<span><span class="co">#&gt; 5     548  363     1.509642         2.410818           31602</span></span>
+<span><span class="co">#&gt; 6     678  429     1.580420        11.379616           31602</span></span>
+<span><span class="co">#&gt; 7     848  524     1.618321         9.437216           31602</span></span>
+<span><span class="co">#&gt; 8     935  608     1.537829         4.868418           31602</span></span>
+<span><span class="co">#&gt; 9     735  485     1.515464         6.213087           31602</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 3301779 rows ]</span></span></code></pre></div>
+<p>You can use both <code>column_names</code> and
+<code>value_filter</code> to perform specific queries. For example let’s
+fetch the <code>disease</code> column for the <code>cell_type</code>
+<code>"B cell"</code> in the <code>tissue_general</code>
+<code>"lung"</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cell_metadata_b_cell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>    value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp;&amp; tissue_general == 'lung'"</span>,</span>
-<span>    column_names <span class="op">=</span> <span class="st">"disease"</span></span>
-<span>  <span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">cell_metadata_b_cell</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
+<span>  value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung'"</span>,</span>
+<span>  column_names <span class="op">=</span> <span class="st">"disease"</span></span>
 <span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cell_metadata_b_cell</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cell_metadata_b_cell</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cell_metadata_b_cell</span><span class="op">)</span></span>
 <span><span class="co">#&gt; disease</span></span>
-<span><span class="co">#&gt; chronic obstructive pulmonary disease                              COVID-19 </span></span>
-<span><span class="co">#&gt;                                  4166                                  1104 </span></span>
-<span><span class="co">#&gt;                   lung adenocarcinoma         non-small cell lung carcinoma </span></span>
-<span><span class="co">#&gt;                                 50228                                 17484 </span></span>
-<span><span class="co">#&gt;                                normal                   pulmonary emphysema </span></span>
-<span><span class="co">#&gt;                                 17046                                  1512 </span></span>
-<span><span class="co">#&gt;             small cell lung carcinoma          squamous cell lung carcinoma </span></span>
-<span><span class="co">#&gt;                                   583                                 11584</span></span></code></pre></div>
+<span><span class="co">#&gt;                              COVID-19 chronic obstructive pulmonary disease </span></span>
+<span><span class="co">#&gt;                                  2729                                  6369 </span></span>
+<span><span class="co">#&gt;          hypersensitivity pneumonitis             interstitial lung disease </span></span>
+<span><span class="co">#&gt;                                    52                                   376 </span></span>
+<span><span class="co">#&gt;                   lung adenocarcinoma             lung large cell carcinoma </span></span>
+<span><span class="co">#&gt;                                 62351                                  1534 </span></span>
+<span><span class="co">#&gt;              lymphangioleiomyomatosis         non-small cell lung carcinoma </span></span>
+<span><span class="co">#&gt;                                   133                                 17484 </span></span>
+<span><span class="co">#&gt;   non-specific interstitial pneumonia                                normal </span></span>
+<span><span class="co">#&gt;                                   231                                 25461 </span></span>
+<span><span class="co">#&gt;                 pleomorphic carcinoma                             pneumonia </span></span>
+<span><span class="co">#&gt;                                  1210                                    50 </span></span>
+<span><span class="co">#&gt;                   pulmonary emphysema                    pulmonary fibrosis </span></span>
+<span><span class="co">#&gt;                                  1512                                  6798 </span></span>
+<span><span class="co">#&gt;                 pulmonary sarcoidosis             small cell lung carcinoma </span></span>
+<span><span class="co">#&gt;                                     6                                   583 </span></span>
+<span><span class="co">#&gt;          squamous cell lung carcinoma </span></span>
+<span><span class="co">#&gt;                                 11920</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="querying-gene-metadata-var">Querying gene metadata (var)<a class="anchor" aria-label="anchor" href="#querying-gene-metadata-var"></a>
 </h2>
-<p>The human gene metadata of the Census is located at <code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>. Similarly to the cell metadata, it is a <code>SOMADataFrame</code> and thus we can also use its method <code>read()</code>.</p>
-<p>The mouse gene metadata is at <code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var</code>.</p>
-<p>Let’s take a look at the metadata available for column selection and row filtering.</p>
+<p>The human gene metadata of the Census is located at
+<code>census$get("census_data")$get("homo_sapiens")$ms$get("RNA")$var</code>.
+Similarly to the cell metadata, it is a <code>SOMADataFrame</code> and
+thus we can also use its method <code>read()</code>.</p>
+<p>The mouse gene metadata is at
+<code>census$get("census_data")$get("mus_musculus")$ms$get("RNA")$var</code>.</p>
+<p>Let’s take a look at the metadata available for column selection and
+row filtering.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">colnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length"</span></span></code></pre></div>
-<p>With the exception of soma_joinid these columns are defined in the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census schema</a>. Similarly to the cell metadata, we can use the same operations to learn and fetch gene metadata.</p>
-<p>For example, to get the <code>feature_name</code> and <code>feature_length</code> of the genes <code>"ENSG00000161798"</code> and <code>"ENSG00000188229"</code> we can do the following.</p>
+<span><span class="co">#&gt; [1] "soma_joinid"    "feature_id"     "feature_name"   "feature_length" "nnz"           </span></span>
+<span><span class="co">#&gt; [6] "n_measured_obs"</span></span></code></pre></div>
+<p>With the exception of soma_joinid these columns are defined in the <a href="https://cellxgene-census.readthedocs.io/en/latest/cellxgene_census_docsite_schema.html" class="external-link">Census
+schema</a>. Similarly to the cell metadata, we can use the same
+operations to learn and fetch gene metadata.</p>
+<p>For example, to get the <code>feature_name</code> and
+<code>feature_length</code> of the genes <code>"ENSG00000161798"</code>
+and <code>"ENSG00000188229"</code> we can do the following.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
-<span>    value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
-<span>    column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"feature_name"</span>, <span class="st">"feature_length"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"homo_sapiens"</span><span class="op">)</span><span class="op">$</span><span class="va">ms</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"RNA"</span><span class="op">)</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span></span>
+<span>  value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
+<span>  column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"feature_name"</span>, <span class="st">"feature_length"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">var_df</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   feature_name feature_length</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AQP5                   <span style="text-decoration: underline;">1</span>884</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TUBB4B                 <span style="text-decoration: underline;">2</span>037</span></span></code></pre></div>
+<span><span class="co">#&gt; 1         AQP5           1884</span></span>
+<span><span class="co">#&gt; 2       TUBB4B           2037</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="querying-expression-data">Querying expression data<a class="anchor" aria-label="anchor" href="#querying-expression-data"></a>
+<h2 id="querying-expression-data-as-seurat">Querying expression data as <code>Seurat</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-seurat"></a>
 </h2>
-<p>A convenient way to query and fetch expression data is to use the <code>get_seurat</code> method of the <code>cellxgene.census</code> API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
-<p>The method will return a <code>Seurat</code> object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
+<p>A convenient way to query and fetch expression data is to use the
+<code>get_seurat</code> method of the <code>cellxgene.census</code> API.
+This is a method that combines the column selection and value filtering
+we described above to obtain slices of the expression data based on
+metadata queries.</p>
+<p>The method will return a <a href="https://satijalab.org/seurat/" class="external-link"><code>Seurat</code> object</a>, it
+takes as an input a census object, the string for an organism, and for
+both cell and gene metadata we can specify filters and column selection
+as described above but with the following arguments:</p>
 <ul>
 <li>
-<code>obs_column_names</code> — character vector indicating the columns to select for cell metadata.</li>
+<code>obs_column_names</code> — character vector indicating the
+columns to select for cell metadata.</li>
 <li>
-<code>obs_value_filter</code> — expression with selection conditions to fetch cells meeting a criteria.</li>
+<code>obs_value_filter</code> — expression with selection conditions
+to fetch cells meeting a criteria.</li>
 <li>
-<code>var_column_names</code> — character vector indicating the columns to select for gene metadata.</li>
+<code>var_column_names</code> — character vector indicating the
+columns to select for gene metadata.</li>
 <li>
-<code>var_value_filter</code> — expression with selection conditions to fetch genes meeting a criteria.</li>
+<code>var_value_filter</code> — expression with selection conditions
+to fetch genes meeting a criteria.</li>
 </ul>
 <p>For example if we want to fetch the expression data for:</p>
 <ul>
-<li>Genes <code>"ENSG00000161798"</code> and <code>"ENSG00000188229"</code>.</li>
-<li>All <code>"B cells"</code> of <code>"lung"</code> with <code>"COVID-19"</code>.</li>
-<li>With all gene metadata and adding <code>sex</code> cell metadata.</li>
+<li>Genes <code>"ENSG00000161798"</code> and
+<code>"ENSG00000188229"</code>.</li>
+<li>All <code>"B cells"</code> of <code>"lung"</code> with
+<code>"COVID-19"</code>.</li>
+<li>With all gene metadata and adding <code>sex</code> cell
+metadata.</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">cellxgene.census</span><span class="fu">::</span><span class="fu"><a href="../reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://satijalab.org/seurat" class="external-link">"Seurat"</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_seurat.html">get_seurat</a></span><span class="op">(</span></span>
 <span>  <span class="va">census</span>, <span class="st">"Homo sapiens"</span>,</span>
 <span>  obs_column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"tissue_general"</span>, <span class="st">"disease"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span>
 <span>  var_value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
-<span>  obs_value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp;&amp; tissue_general == 'lung' &amp;&amp; disease == 'COVID-19'"</span></span>
+<span>  obs_value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung' &amp; disease == 'COVID-19'"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: No reductions found</span></span>
-<span><span class="co">#&gt; Warning: No graphs found in 'obsp'</span></span>
 <span><span class="va">seurat_obj</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
-<span><span class="co">#&gt; 2 features across 1104 samples within 1 assay </span></span>
-<span><span class="co">#&gt; Active assay: RNA (2 features, 0 variable features)</span></span></code></pre></div>
+<span><span class="co">#&gt; 2 features across 2729 samples within 1 assay </span></span>
+<span><span class="co">#&gt; Active assay: RNA (2 features, 0 variable features)</span></span>
+<span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
-<span><span class="co">#&gt; cell3308854 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309254 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309571 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309597 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309750 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell3309768 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt;              sex</span></span>
-<span><span class="co">#&gt; cell3308854 male</span></span>
-<span><span class="co">#&gt; cell3309254 male</span></span>
-<span><span class="co">#&gt; cell3309571 male</span></span>
-<span><span class="co">#&gt; cell3309597 male</span></span>
-<span><span class="co">#&gt; cell3309750 male</span></span>
-<span><span class="co">#&gt; cell3309768 male</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                 orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
+<span><span class="co">#&gt; cell13391229 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell13393737 SeuratProject          1            1    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell13394391 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell13394897 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell13395941 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt; cell13397408 SeuratProject          0            0    B cell           lung COVID-19</span></span>
+<span><span class="co">#&gt;                  sex</span></span>
+<span><span class="co">#&gt; cell13391229    male</span></span>
+<span><span class="co">#&gt; cell13393737 unknown</span></span>
+<span><span class="co">#&gt; cell13394391    male</span></span>
+<span><span class="co">#&gt; cell13394897 unknown</span></span>
+<span><span class="co">#&gt; cell13395941    male</span></span>
+<span><span class="co">#&gt; cell13397408 unknown</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">@</span><span class="va">meta.features</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                   feature_id feature_name feature_length</span></span>
-<span><span class="co">#&gt; feature10493 ENSG00000161798         AQP5           1884</span></span>
-<span><span class="co">#&gt; feature16068 ENSG00000188229       TUBB4B           2037</span></span></code></pre></div>
-<p>For a full description refer to <code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                 feature_name feature_length      nnz n_measured_obs</span></span>
+<span><span class="co">#&gt; ENSG00000161798         AQP5           1884  1029069       58250439</span></span>
+<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037 21416107       62655002</span></span></code></pre></div>
+<p>For a full description refer to
+<code><a href="../reference/get_seurat.html">?cellxgene.census::get_seurat</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="querying-expression-data-as-singlecellexperiment">Querying expression data as <code>SingleCellExperiment</code><a class="anchor" aria-label="anchor" href="#querying-expression-data-as-singlecellexperiment"></a>
+</h2>
+<p>Similarly to the previous section, there is a
+<code>get_single_cell_experiment</code> method in the
+<code>cellxgene.census</code> API. It behaves exactly the same as
+<code>get_seurat</code> but it returns a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link"><code>SingleCellExperiment</code>
+object</a>.</p>
+<p>For example, to repeat the same query we can simply do the
+following.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"SingleCellExperiment"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sce_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_single_cell_experiment.html">get_single_cell_experiment</a></span><span class="op">(</span></span>
+<span>  <span class="va">census</span>, <span class="st">"Homo sapiens"</span>,</span>
+<span>  obs_column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell_type"</span>, <span class="st">"tissue_general"</span>, <span class="st">"disease"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span>
+<span>  var_value_filter <span class="op">=</span> <span class="st">"feature_id %in% c('ENSG00000161798', 'ENSG00000188229')"</span>,</span>
+<span>  obs_value_filter <span class="op">=</span> <span class="st">"cell_type == 'B cell' &amp; tissue_general == 'lung' &amp; disease == 'COVID-19'"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sce_obj</span></span>
+<span><span class="co">#&gt; class: SingleCellExperiment </span></span>
+<span><span class="co">#&gt; dim: 2 2729 </span></span>
+<span><span class="co">#&gt; metadata(0):</span></span>
+<span><span class="co">#&gt; assays(1): counts</span></span>
+<span><span class="co">#&gt; rownames(2): ENSG00000161798 ENSG00000188229</span></span>
+<span><span class="co">#&gt; rowData names(4): feature_name feature_length nnz n_measured_obs</span></span>
+<span><span class="co">#&gt; colnames(2729): obs13391229 obs13393737 ... obs54635684 obs54635708</span></span>
+<span><span class="co">#&gt; colData names(4): cell_type tissue_general disease sex</span></span>
+<span><span class="co">#&gt; reducedDimNames(0):</span></span>
+<span><span class="co">#&gt; mainExpName: RNA</span></span>
+<span><span class="co">#&gt; altExpNames(0):</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DataFrame with 6 rows and 4 columns</span></span>
+<span><span class="co">#&gt;               cell_type tissue_general     disease         sex</span></span>
+<span><span class="co">#&gt;             &lt;character&gt;    &lt;character&gt; &lt;character&gt; &lt;character&gt;</span></span>
+<span><span class="co">#&gt; obs13391229      B cell           lung    COVID-19        male</span></span>
+<span><span class="co">#&gt; obs13393737      B cell           lung    COVID-19     unknown</span></span>
+<span><span class="co">#&gt; obs13394391      B cell           lung    COVID-19        male</span></span>
+<span><span class="co">#&gt; obs13394897      B cell           lung    COVID-19     unknown</span></span>
+<span><span class="co">#&gt; obs13395941      B cell           lung    COVID-19        male</span></span>
+<span><span class="co">#&gt; obs13397408      B cell           lung    COVID-19     unknown</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">sce_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DataFrame with 2 rows and 4 columns</span></span>
+<span><span class="co">#&gt;                 feature_name feature_length       nnz n_measured_obs</span></span>
+<span><span class="co">#&gt;                  &lt;character&gt;      &lt;integer&gt; &lt;integer&gt;      &lt;integer&gt;</span></span>
+<span><span class="co">#&gt; ENSG00000161798         AQP5           1884   1029069       58250439</span></span>
+<span><span class="co">#&gt; ENSG00000188229       TUBB4B           2037  21416107       62655002</span></span></code></pre></div>
+<p>For a full description refer to
+<code><a href="../reference/get_single_cell_experiment.html">?cellxgene.census::get_single_cell_experiment</a></code>.</p>
+<div class="section level3">
+<h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
+</h3>
+<p>After use, the census object should be closed to release memory and
+other resources.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>This also closes all SOMA objects accessed via the top-level
+<code>census</code>. Closing can be automated using
+<code>on.exit(census$close(), add = TRUE)</code> immediately after
+<code>census &lt;- open_soma()</code>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -286,7 +496,7 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Chan Zuckerberg Initiative.</p>
+<p>Developed by Chan Zuckerberg Initiative Foundation.</p>
 </div>
 
 <div class="pkgdown-footer-right">

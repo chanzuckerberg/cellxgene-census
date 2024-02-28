@@ -1,0 +1,718 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Understanding and filtering out duplicate cells &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.10.2
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Understanding and filtering out duplicate cells</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_duplicated_cells.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Understanding-and-filtering-out-duplicate-cells">
+<h1>Understanding and filtering out duplicate cells<a class="headerlink" href="#Understanding-and-filtering-out-duplicate-cells" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial provides an explanation for the existence of duplicate cells in the Census, and it showcases different ways to handle these cells when performing queries on the Census using the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> cell metadata variable.</p>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Why are there duplicate cells in the Census?</p></li>
+<li><p>An example: duplicate cells in the Tabula Muris Senis data.</p></li>
+<li><p>Filtering out duplicates cells.</p>
+<ol class="arabic simple">
+<li><p>Filtering out duplicate cells when reading the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame.</p></li>
+<li><p>Filtering out duplicate cells when creating an AnnData.</p></li>
+<li><p>Filtering out duplicate cells for out-of-core operations.</p></li>
+</ol>
+</li>
+</ol>
+<section id="Why-are-there-duplicate-cells-in-the-Census?">
+<h2>Why are there duplicate cells in the Census?<a class="headerlink" href="#Why-are-there-duplicate-cells-in-the-Census?" title="Permalink to this heading">¶</a></h2>
+<p>Duplicate cells are labeled on the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> cell metadata variable as <code class="docutils literal notranslate"><span class="pre">False</span></code>. To learn more about this please take a look at the corresponding <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data">section of the dataset schema</a>.</p>
+<p>The Census data is a concatenation of most RNA data from CZ CELLxGENE Discover and these data are ingested one dataset at a time. You can take a look at what data is included in the Census <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html">here</a>.</p>
+<p>In some cases data from the same cell exists in different datasets, therefore cells can be duplicated throughout CELLxGENE Discover and by extension the Census.</p>
+<p>The following are a few examples where cells are duplicated in CELLxGENE Discover:</p>
+<ul class="simple">
+<li><p>There are datasets that combine data from other, pre-existing datasets.</p></li>
+</ul>
+<blockquote>
+<div><p><em>For example</em><a class="reference external" href="https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5">Tabula Sapiens</a><em>has one dataset with all of its cells and separate datasets with cells divided by high-level lineage (i.e. immune, epithelial, stromal, endothelial)</em></p>
+</div></blockquote>
+<ul class="simple">
+<li><p>A dataset may provide a meta-analysis of pre-existing datasets.</p></li>
+</ul>
+<blockquote>
+<div><p><em>For example</em><a class="reference external" href="https://cellxgene.cziscience.com/collections/b9fc3d70-5a72-4479-a046-c2cc1ab19efc">Jin et al.</a><em>performed a meta-analysis of COVID-19 data, and they included both the individual datasets as well as one concatenated dataset</em></p>
+</div></blockquote>
+<p>The Census has all of these data to allow for the execution of dataset-based queries, which would be otherwise be limited if only non-duplicate cells were included.</p>
+</section>
+<section id="An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data">
+<h2>An example: duplicate cells in the Tabula Muris Senis data<a class="headerlink" href="#An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data" title="Permalink to this heading">¶</a></h2>
+<p>Let’s take a look at an example from the Census using the Tabula Muris Senis data. Some of its datasets contain duplicated cells.</p>
+<p>We can obtain cell metadata for the <strong>main</strong> Tabula Muris Senis dataset: “All - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”, which contains the original (non-duplicated) cells.</p>
+<p>And remember we must include the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> column.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="n">tabula_muris_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;48b37086-25f7-4ecd-be66-f5bb378e3aea&quot;</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id == &#39;</span><span class="si">{</span><span class="n">tabula_muris_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">tabula_muris_obs</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<p>Now let’s take a look at counts for the unique combinations of values.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tabula_muris_obs</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tissue           is_primary_data  dataset_id
+bone marrow      True             48b37086-25f7-4ecd-be66-f5bb378e3aea    40220
+spleen           True             48b37086-25f7-4ecd-be66-f5bb378e3aea    35718
+limb muscle      True             48b37086-25f7-4ecd-be66-f5bb378e3aea    28867
+lung             True             48b37086-25f7-4ecd-be66-f5bb378e3aea    24540
+kidney           True             48b37086-25f7-4ecd-be66-f5bb378e3aea    21647
+tongue           True             48b37086-25f7-4ecd-be66-f5bb378e3aea    20680
+mammary gland    True             48b37086-25f7-4ecd-be66-f5bb378e3aea    12295
+thymus           True             48b37086-25f7-4ecd-be66-f5bb378e3aea     9275
+bladder lumen    True             48b37086-25f7-4ecd-be66-f5bb378e3aea     8945
+heart            True             48b37086-25f7-4ecd-be66-f5bb378e3aea     8613
+trachea          True             48b37086-25f7-4ecd-be66-f5bb378e3aea     7976
+liver            True             48b37086-25f7-4ecd-be66-f5bb378e3aea     7294
+adipose tissue   True             48b37086-25f7-4ecd-be66-f5bb378e3aea     6777
+pancreas         True             48b37086-25f7-4ecd-be66-f5bb378e3aea     6201
+skin of body     True             48b37086-25f7-4ecd-be66-f5bb378e3aea     4454
+large intestine  True             48b37086-25f7-4ecd-be66-f5bb378e3aea     1887
+Name: count, dtype: int64
+</pre></div></div>
+</div>
+<p>You can see all cells across the tissues are labelled as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
+<p>But what if we select cells from the dataset that only contains cells from the liver: “Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tabula_muris_liver_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;6202a243-b713-4e12-9ced-c387f8483dea&quot;</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">tabula_muris_liver_obs</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id == &#39;</span><span class="si">{</span><span class="n">tabula_muris_liver_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">tabula_muris_liver_obs</span> <span class="o">=</span> <span class="n">tabula_muris_liver_obs</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<p>And we take a look at counts for the unique combinations of values.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tabula_muris_liver_obs</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tissue  is_primary_data  dataset_id
+liver   False            6202a243-b713-4e12-9ced-c387f8483dea    7294
+Name: count, dtype: int64
+</pre></div></div>
+</div>
+<p>You can see that:</p>
+<ol class="arabic simple">
+<li><p>This dataset only contains cells from liver.</p></li>
+<li><p>All cells are labelled as <code class="docutils literal notranslate"><span class="pre">False</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>. <strong>This is because the cells are marked as duplicate cells of the main Tabula Muris Senis dataset.</strong></p></li>
+</ol>
+</section>
+<section id="Filtering-out-duplicate-cells">
+<h2>Filtering out duplicate cells<a class="headerlink" href="#Filtering-out-duplicate-cells" title="Permalink to this heading">¶</a></h2>
+<p>In some cases you may be interested in getting all cells for a specific biological context, for example <em>“all natural killer cells from blood of female cells with COVID-19”</em> but you need to be aware that there is a chance you end up with some duplicate cells.</p>
+<p>We therefore recommend that you always look at <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> and use that information based on your needs.</p>
+<p>If you know <em>a priori</em> that you don’t want duplicated cells this section shows you how to efficiently exclude them from your queries.</p>
+<section id="Filtering-out-duplicate-cells-when-reading-the-obs-data-frame.">
+<h3>Filtering out duplicate cells when reading the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame.<a class="headerlink" href="#Filtering-out-duplicate-cells-when-reading-the-obs-data-frame." title="Permalink to this heading">¶</a></h3>
+<p>Let’s say you are interested in looking at the cell metadata of <em>“all natural killer cells from blood of female cells with COVID-19”</em> but you want to exclude duplicate cells, then you can use <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> when reading the data frame to only include cells with <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> as <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Let’s first read the cell metadata including <strong>all</strong> cells:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">nk_cells</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+        <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
+        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">nk_cells</span> <span class="o">=</span> <span class="n">nk_cells</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nk_cells</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(80935, 21)
+</pre></div></div>
+</div>
+<p>And now we repeat the query only using cells marked as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
+        <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
+        <span class="s2">&quot;and is_primary_data == True&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">nk_cells_primary</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nk_cells_primary</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(59109, 21)
+</pre></div></div>
+</div>
+<p>You can see a clear reduction in the number of cells.</p>
+</section>
+<section id="Filtering-out-duplicate-cells-when-creating-an-AnnData">
+<h3>Filtering out duplicate cells when creating an AnnData<a class="headerlink" href="#Filtering-out-duplicate-cells-when-creating-an-AnnData" title="Permalink to this heading">¶</a></h3>
+<p>You can also utilize <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> on the <code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> of <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code>.</p>
+<p>Let’s repeat the process above. First querying by including <strong>all</strong> cells. To reduce the bandwidth and memory usage, let’s just fetch data for one gene.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+        <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+        <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;AQP5&#39;&quot;</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+        <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
+        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+80935
+</pre></div></div>
+</div>
+<p>And now we repeat the query only using cells marked as <code class="docutils literal notranslate"><span class="pre">True</span></code> for <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">adata_primary</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+        <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+        <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;AQP5&#39;&quot;</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+        <span class="s2">&quot;and sex == &#39;female&#39; &quot;</span>
+        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
+        <span class="s2">&quot;and is_primary_data == True&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">adata_primary</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+59109
+</pre></div></div>
+</div>
+<p>In this case you can also observe a clear reduction in the number of cells.</p>
+<section id="Filtering-out-duplicate-cells-for-out-of-core-operations.">
+<h4>Filtering out duplicate cells for out-of-core operations.<a class="headerlink" href="#Filtering-out-duplicate-cells-for-out-of-core-operations." title="Permalink to this heading">¶</a></h4>
+<p>Finally we can utilize <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> on the <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> of <code class="docutils literal notranslate"><span class="pre">obs</span></code> of an “Axis Query” to perform out-of-core operations.</p>
+<p>In this example we only include the version with duplicated cells removed.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tiledbsoma</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+
+    <span class="c1"># initialize lazy query</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">tiledbsoma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span>
+            <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+            <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+            <span class="s2">&quot;and tissue_general == &#39;blood&#39; &quot;</span>
+            <span class="s2">&quot;and sex == &#39;female&#39; &quot;</span>
+            <span class="s2">&quot;and is_primary_data == True&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># get iterator for X</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">()</span>
+
+    <span class="c1"># iterate in chunks</span>
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+        <span class="c1"># since this is a demo we stop right away</span>
+        <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_version=&#34;2023-05-15&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+pyarrow.Table
+soma_dim_0: int64
+soma_dim_1: int64
+soma_data: float
+----
+soma_dim_0: [[8448858,8448858,8448858,8448858,8448858,...,52812487,52812553,52812556,52812556,52812566]]
+soma_dim_1: [[59,60,62,113,170,...,37033,37052,36904,36919,37033]]
+soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

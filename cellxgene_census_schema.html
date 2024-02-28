@@ -4,14 +4,16 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CZ CELLxGENE Discover Census Schema &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>CZ CELLxGENE Discover Census Schema &mdash; cellxgene-census  documentation</title>
   
 
   
+  <link rel="icon" type="image/png" sizes="32x32" href="_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="_static/img/favicon_16x16_v2.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +39,7 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -50,35 +52,58 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
-                    </span>
+                  </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -94,19 +119,12 @@
                 
                 
                 <div class="version">
-                    0.5
+                    v1.10.2
                 </div>
                 
             
 
             
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
 
             
             </div>
@@ -122,11 +140,13 @@
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -167,20 +187,20 @@
                 
   <section id="cz-cellxgene-discover-census-schema">
 <h1>CZ CELLxGENE Discover Census Schema<a class="headerlink" href="#cz-cellxgene-discover-census-schema" title="Permalink to this heading">¶</a></h1>
-<p><strong>Version</strong>: 1.0.0.</p>
-<p><strong>Last edited</strong>: Apr, 2023.</p>
+<p><strong>Version</strong>: 1.3.0</p>
+<p><strong>Last edited</strong>: December, 2023.</p>
 <p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED” “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <a class="reference external" href="https://tools.ietf.org/html/bcp14">BCP 14</a>, <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc2119.txt">RFC2119</a>, and <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc8174.txt">RFC8174</a> when, and only when, they appear in all capitals, as shown here.</p>
 <section id="census-overview">
 <h2>Census overview<a class="headerlink" href="#census-overview" title="Permalink to this heading">¶</a></h2>
 <p>The CZ CELLxGENE Discover Census, hereafter referred as Census, is a versioned data object and API for most of the single-cell data hosted at <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To learn more about the Census visit the <code class="docutils literal notranslate"><span class="pre">chanzuckerberg/cellxgene-census</span></code> <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census">github repository</a></p>
-<p>To better understand this document the reader should be familiar with the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">CELLxGENE dataset schema</a> and <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md">SOMA</a>.</p>
+<p>To better understand this document the reader should be familiar with the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md">CELLxGENE dataset schema</a> and <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md">SOMA</a>.</p>
 </section>
 <section id="definitions">
 <h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this heading">¶</a></h2>
 <p>The following terms are used throughout this document:</p>
 <ul class="simple">
 <li><p>adata – generic variable name that refers to an <a class="reference external" href="https://anndata.readthedocs.io/"><code class="docutils literal notranslate"><span class="pre">AnnData</span></code></a> object.</p></li>
-<li><p>CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">CELLxGENE dataset schema version is 3.0.X</a></p></li>
+<li><p>CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md">CELLxGENE dataset schema version is 4.0.0</a></p></li>
 <li><p>census_obj – the Census root object, a SOMACollection.</p></li>
 <li><p>Census data release – a versioned Census object deposited in a public bucket and accessible by APIs.</p></li>
 <li><p>tissue – original tissue annotation.</p></li>
@@ -209,22 +229,22 @@
 </ul>
 </li>
 </ul>
-<p>Changes MUST be documented in the schema <a class="reference external" href="https://docs.python.org/3/whatsnew/changelog.html#changelog" title="Python 3.11"><span class="xref myst">Changelog</span></a> at the end of this document.</p>
+<p>Changes MUST be documented in the schema <a class="reference internal" href="#changelog"><span class="std std-ref">Changelog</span></a> at the end of this document.</p>
 <p>Census data releases are versioned separately from the schema.</p>
 </section>
 <section id="schema">
 <h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading">¶</a></h2>
 <section id="data-included">
 <h3>Data included<a class="headerlink" href="#data-included" title="Permalink to this heading">¶</a></h3>
-<p>All datasets included in the Census MUST be of <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md">CELLxGENE dataset schema version 3.0.X</a>. The following data constraints are imposed on top of the CELLxGENE dataset schema.</p>
+<p>All datasets included in the Census MUST be of <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md">CELLxGENE dataset schema version 4.0.0</a>. The following data constraints are imposed on top of the CELLxGENE dataset schema.</p>
 <section id="species">
 <h4>Species<a class="headerlink" href="#species" title="Permalink to this heading">¶</a></h4>
-<p>The Census MUST only contain observations (cells) with an  <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included.</p>
-<p>The Census MUST only contain features (genes) with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included</p>
+<p>The Census MUST only contain observations (cells) with an  <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included.</p>
+<p>The Census MUST only contain features (genes) with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included</p>
 </section>
 <section id="multi-species-data-constraints">
 <h4>Multi-species data constraints<a class="headerlink" href="#multi-species-data-constraints" title="Permalink to this heading">¶</a></h4>
-<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#general-requirements">multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one</a>, as defined in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> and <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> respectively.</p>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#general-requirements">multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one</a>, as defined in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> and <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> respectively.</p>
 <p>For a given multi-species dataset, the table below shows all possible combinations of organisms for both observations and features. For each combination, inclusion criteria for the Census is provided.</p>
 <table>
 <thead>
@@ -255,151 +275,183 @@
 </section>
 <section id="assays">
 <h4>Assays<a class="headerlink" href="#assays" title="Permalink to this heading">¶</a></h4>
-<p>Assays are defined in the CELLxGENE dataset schema in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#assay_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code></a>. The Census MUST only contain cells with
-an <code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code> value from the list below:</p>
+<p>Assays are defined in the CELLxGENE dataset schema in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#assay_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code></a>.</p>
+<p>The Census MUST <em>include</em> all cells with the following <code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code> terms:</p>
 <table>
 <thead>
   <tr>
     <th>ID</th>
     <th>Label</th>
-    <th>Notes</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td>EFO:0008720</td>
-    <td>DroNc-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008722</td>
-    <td>Drop-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008780</td>
-    <td>inDrop</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008913</td>
-    <td>single-cell RNA sequencing</td>
-    <td>Refers to "TruDrop" from this <a href="https://cellxgene.cziscience.com/collections/a48f5033-3438-4550-8574-cdff3263fdfd">collection</a> which is not included in EFO at the moment.</td>
-  </tr>
-  <tr>
-    <td>EFO:0008919</td>
-    <td>Seq-Well</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008930</td>
-    <td>Smart-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008931</td>
-    <td>Smart-seq2</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008953</td>
-    <td>STRT-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0008995</td>
-    <td>10x technology</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0009899</td>
-    <td>10x 3' v2</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0009900</td>
-    <td>10x 5' v2</td>
-    <td></td>
+    <td>EFO:0030003</td>
+    <td>10x 3' transcription profiling</td>
   </tr>
   <tr>
     <td>EFO:0009901</td>
     <td>10x 3' v1</td>
-    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0009899</td>
+    <td>10x 3' v2</td>
   </tr>
   <tr>
     <td>EFO:0009922</td>
     <td>10x 3' v3</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0010010</td>
-    <td>CEL-seq2</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0010183</td>
-    <td>single cell library construction</td>
-    <td>Refers to "GEXSCOPE" from this <a href="https://cellxgene.cziscience.com/collections/edb893ee-4066-4128-9aec-5eb2b03f8287">collection</a> which is not included in EFO at the moment.</td>
-  </tr>
-  <tr>
-    <td>EFO:0010550</td>
-    <td>sci-RNA-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0011025</td>
-    <td>10x 5' v1</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0030002</td>
-    <td>microwell-seq</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>EFO:0030003</td>
-    <td>10x 3' transcription profiling</td>
-    <td></td>
   </tr>
   <tr>
     <td>EFO:0030004</td>
     <td>10x 5' transcription profiling</td>
-    <td></td>
   </tr>
   <tr>
-    <td>EFO:0030019</td>
-    <td>Seq-Well S3</td>
-    <td></td>
+    <td>EFO:0011025</td>
+    <td>10x 5' v1</td>
   </tr>
   <tr>
-    <td>EFO:0700003</td>
-    <td>BD Rhapsody Whole Transcriptome Analysis</td>
-    <td></td>
+    <td>EFO:0009900</td>
+    <td>10x 5' v2</td>
   </tr>
   <tr>
     <td>EFO:0700004</td>
     <td>BD Rhapsody Targeted mRNA</td>
-    <td></td>
+  </tr>
+  <tr>
+    <td>EFO:0700003</td>
+    <td>BD Rhapsody Whole Transcriptome Analysis</td>
+  </tr>
+  <tr>
+    <td>EFO:0010010</td>
+    <td>CEL-seq2</td>
+  </tr>
+  <tr>
+    <td>EFO:0008720</td>
+    <td>DroNc-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0008722</td>
+    <td>Drop-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0700011</td>
+    <td>GEXSCOPE technology</td>
+  </tr>
+  <tr>
+    <td>EFO:0008780</td>
+    <td>inDrop</td>
+  </tr>
+  <tr>
+    <td>EFO:0008796</td>
+    <td>MARS-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0030002</td>
+    <td>microwell-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0010550</td>
+    <td>sci-RNA-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0008919</td>
+    <td>Seq-Well</td>
+  </tr>
+  <tr>
+    <td>EFO:0030019</td>
+    <td>Seq-Well S3</td>
+  </tr>
+  <tr>
+    <td>EFO:0008930</td>
+    <td>Smart-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0700016</td>
+    <td>Smart-seq v4</td>
+  </tr>
+  <tr>
+    <td>EFO:0008931</td>
+    <td>Smart-seq2</td>
+  </tr>
+  <tr>
+    <td>EFO:0008953</td>
+    <td>STRT-seq</td>
+  </tr>
+  <tr>
+    <td>EFO:0700010</td>
+    <td>TruDrop</td>
   </tr>
 </tbody>
 </table>
-<p>Additional Notes:</p>
-<ul class="simple">
-<li><p>EFO:0030026 “sci-Plex” is not included in spite of being RNA data. This assay has specific cell metadata that is not present in the CELLxGENE dataset schema, without these metadata the RNA data lacks proper context and thus may be misleading to include.</p></li>
-<li><p>EFO:0009920 and EFO:0030062 “Slide-seq” and “Slide-seqV2”, respectively, are not included as coverage is low compared to other assays and data lacks context without spatial metadata not included in CELLxGENE dataset schema.</p></li>
-</ul>
+<p>The Census MUST <em>exclude</em> cells with any <code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code> value not present in the above list. The rational for excluding assays includes:</p>
+<table>
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Label</th>
+    <th>Reason for exclusion</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>EFO:0030059</td>
+    <td>10x multiome</td>
+    <td>Non-RNA data is not supported, as it cannot be determined if data from this assay represents ATAC or RNA measurements.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030007</td>
+    <td>10x scATAC-seq</td>
+    <td>Non-RNA data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0008992</td>
+    <td>MERFISH</td>
+    <td>Spatial data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0008853</td>
+    <td>Patch-seq</td>
+    <td>Non-RNA data is not supported, as it cannot be determined with certainty if data from this assay only represents RNA measurements.</td>
+  </tr>
+  <tr>
+    <td>EFO:0010891</td>
+    <td>scATAC-seq</td>
+    <td>Non-RNA data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030026</td>
+    <td>sci-Plex</td>
+    <td>It has cell metadata not present in the CELLxGENE dataset schema. Without these metadata the RNA data lacks proper context.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030062</td>
+    <td>Slide-seqV2</td>
+    <td>Spatial data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0030027</td>
+    <td>snmC-Seq2</td>
+    <td>Non-RNA data is not supported.</td>
+  </tr>
+  <tr>
+    <td>EFO:0010961</td>
+    <td>Visium Spatial Gene Expression</td>
+    <td>Spatial data is not supported.</td>
+  </tr>
+</tbody>
+</table>
 </section>
 <section id="data-matrix-types">
 <h4>Data matrix types<a class="headerlink" href="#data-matrix-types" title="Permalink to this heading">¶</a></h4>
-<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. Author-normalized data layers <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">as defined in the CELLxGENE dataset schema</a> MUST NOT be included in the Census.</p>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. Author-normalized data layers <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#x-matrix-layers">as defined in the CELLxGENE dataset schema</a> MUST NOT be included in the Census.</p>
 </section>
 <section id="sample-types">
 <h4>Sample types<a class="headerlink" href="#sample-types" title="Permalink to this heading">¶</a></h4>
-<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#tissue_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">tissue_ontology_term_id</span></code></a> value of  “ontology_term_id (organoid)” or “ontology_term_id (cell line)” MUST NOT be included.</p>
+<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#tissue_type"><code class="docutils literal notranslate"><span class="pre">tissue_type</span></code></a> value equal to “tissue” MUST be included; other values of <code class="docutils literal notranslate"><span class="pre">tissue_type</span></code> MUST NOT be included.</p>
 </section>
 <section id="repeated-data">
 <h4>Repeated data<a class="headerlink" href="#repeated-data" title="Permalink to this heading">¶</a></h4>
-<p>When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data"><code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code></a>. This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.</p>
+<p>When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#is_primary_data"><code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code></a>. This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.</p>
 </section>
 </section>
 <section id="data-encoding-and-organization">
@@ -488,7 +540,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 <tbody>
   <tr>
     <td>census_schema_version</td>
-    <td>0.0.1</td>
+    <td>1.3.0</td>
   </tr>
   <tr>
     <td>census_build_date</td>
@@ -496,7 +548,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   </tr>
   <tr>
     <td>dataset_schema_version </td>
-    <td>3.0.0</td>
+    <td>4.0.0</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -531,9 +583,14 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 </thead>
 <tbody>
   <tr>
+    <td>citation</td>
+    <td>string</td>
+    <td>As defined in the CELLxGENE schema.</td>
+  </tr>
+  <tr>
     <td>collection_id</td>
     <td>string</td>
-    <td rowspan="5">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
+    <td rowspan="6">As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
   </tr>
   <tr>
     <td>collection_name</td>
@@ -560,6 +617,11 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
     <td>dataset_total_cell_count</td>
     <td>int</td>
     <td>Total number of cells from the dataset included in the Census.</td>
+  </tr>
+  <tr>
+    <td>dataset_version_id</td>
+    <td>string</td>
+    <td>As defined in CELLxGENE Discover <a href="https://api.cellxgene.cziscience.com/curation/ui/">data schema</a> (see &quot;Schemas&quot; section for field definitions)".</td>
   </tr>
 </tbody>
 </table>
@@ -605,7 +667,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <tr>
     <td>ontology_term_id</td>
     <td>string</td>
-    <td>ID associated to instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td> 
+    <td>ID associated to instance of metadata (e.g. <code>"UBERON:0002048"</code> if category is <code>"tissue"</code>). <code>"na"</code> if none.</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -615,7 +677,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <tr>
     <td>unique_cell_count</td>
     <td>int</td>
-    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
+    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
   </tr>
 </tbody>
 </table>
@@ -848,6 +910,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 <li><p>Matrix  data –  <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. It MUST contain exactly one layer:</p>
 <ul>
 <li><p>Count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code></p></li>
+<li><p>Normalized count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;normalized&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code></p></li>
 </ul>
 </li>
 <li><p>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMAIndexedDataFrame</span></code></p></li>
@@ -857,12 +920,21 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 </ul>
 <section id="matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray">
 <h4>Matrix Data, count (raw) matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray" title="Permalink to this heading">¶</a></h4>
-<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. These counts MUST be encoded as <code class="docutils literal notranslate"><span class="pre">float32</span></code> in this <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code> with a fill value of zero (0), and no explicitly stored zero values.</p>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. These counts MUST be encoded as <code class="docutils literal notranslate"><span class="pre">float32</span></code> in this <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code> with a fill value of zero (0), and no explicitly stored zero values.</p>
+</section>
+<section id="matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray">
+<h4>Matrix Data, normalized count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;normalized&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray" title="Permalink to this heading">¶</a></h4>
+<p>This is an experimental data artifact - it may be removed at any time.</p>
+<p>A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
+For Smart-Seq assays, given a value <code class="docutils literal notranslate"><span class="pre">X[i,j]</span></code> in the counts (raw) matrix, library-size normalized values are defined
+as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]</span> <span class="pre">=</span> <span class="pre">(X[i,j]</span> <span class="pre">/</span> <span class="pre">var[j].feature_length)</span> <span class="pre">/</span> <span class="pre">sum(X[i,</span> <span class="pre">]</span> <span class="pre">/</span> <span class="pre">var.feature_length[j])</span></code>.
+For all other assays, for a value <code class="docutils literal notranslate"><span class="pre">X[i,j]</span></code> in the counts (raw) matrix, library-size normalized values are defined
+as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]</span> <span class="pre">=</span> <span class="pre">X[i,j]</span> <span class="pre">/</span> <span class="pre">sum(X[i,</span> <span class="pre">])</span></code>.</p>
 </section>
 <section id="feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe">
 <h4>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe" title="Permalink to this heading">¶</a></h4>
-<p>The Census MUST only contain features with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#feature_biotype"><code class="docutils literal notranslate"><span class="pre">feature_biotype</span></code></a> value of “gene”.</p>
-<p>The <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene references are pinned</a> as defined in the CELLxGENE dataset schema.</p>
+<p>The Census MUST only contain features with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#feature_biotype"><code class="docutils literal notranslate"><span class="pre">feature_biotype</span></code></a> value of “gene”.</p>
+<p>The <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#required-gene-annotations">gene references are pinned</a> as defined in the CELLxGENE dataset schema.</p>
 <p>The following columns MUST be included:</p>
 <table>
 <thead>
@@ -881,12 +953,22 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <tr>
     <td>feature_name</td>
     <td>str</td>
-    <td>As defined in CELLxGENE dataset schema </td>
+    <td>As defined in CELLxGENE dataset schema</td>
   </tr>
   <tr>
     <td>feature_length</td>
     <td>int</td>
-    <td>Gene length in base pairs derived from the <a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">gene reference files from the CELLxGENE dataset schema</a>.</td>
+    <td>As defined in CELLxGENE dataset schema</a>.</td>
+  </tr>
+  <tr>
+    <td>nnz</td>
+    <td>int64</td>
+    <td>For this feature, the number of non-zero values present in the `X['raw']` counts (raw) matrix.</td>
+  </tr>
+  <tr>
+    <td>n_measured_obs</td>
+    <td>int64</td>
+    <td>For this feature, the number of observations present in the source H5AD (sum of feature presence matrix).</td>
   </tr>
 </tbody>
 </table>
@@ -957,7 +1039,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   </tr>
   <tr>
     <td>assay_ontology_term_id</td>
-    <td colspan="2" rowspan="17">As defined in CELLxGENE dataset schema</td>
+    <td colspan="2" rowspan="19">As defined in CELLxGENE dataset schema</td>
   </tr>
   <tr>
     <td>assay</td>
@@ -987,6 +1069,9 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
     <td>is_primary_data</td>
   </tr>
   <tr>
+    <td>observation_joinid</td>
+  </tr>
+  <tr>
     <td>self_reported_ethnicity_ontology_term_id</td>
   </tr>
   <tr>
@@ -1007,6 +1092,34 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <tr>
     <td>tissue</td>
   </tr>
+  <tr>
+    <td>tissue_type</td>
+  </tr>
+  <tr>
+    <td>nnz</td>
+    <td>int64</td>
+    <td>For this observation, the number of non-zero measurements in the `X['raw']` counts (raw) matrix.</td>
+  </tr>
+  <tr>
+    <td>n_measured_vars</td>
+    <td>int64</td>
+    <td>For this observation, the number of features present in the source H5AD (sum of feature presence matrix).</td>
+  </tr>
+  <tr>
+    <td>raw_sum</td>
+    <td>float32</td>
+    <td>For this observation, the sum of the `X['raw']` counts (raw) matrix values.</td>
+  </tr>
+  <tr>
+    <td>raw_mean_nnz</td>
+    <td>float32</td>
+    <td>For this observation, the mean of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
+  </tr>
+  <tr>
+    <td>raw_variance_nnz</td>
+    <td>float32</td>
+    <td>For this observation, the variance of the `X['raw']` counts (raw) matrix values. Zeroes are excluded from the calculation.</td>
+  </tr>
 </tbody>
 </table>
 </section>
@@ -1014,6 +1127,29 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
 </section>
 <section id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h2>
+<section id="version-1-3-0">
+<h3>Version 1.3.0<a class="headerlink" href="#version-1-3-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Update to require <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md">CELLxGENE schema version 4.0.0</a></p></li>
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">citation</span></code> to “Census table of CELLxGENE Discover datasets – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code>”</p></li>
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">observation_joinid</span></code> and <code class="docutils literal notranslate"><span class="pre">tissue_type</span></code> to <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe</p></li>
+</ul>
+</section>
+<section id="version-1-2-0">
+<h3>Version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Update to require <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md">CELLxGENE schema version 3.1.0</a></p></li>
+</ul>
+</section>
+<section id="version-1-1-0">
+<h3>Version 1.1.0<a class="headerlink" href="#version-1-1-0" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">dataset_version_id</span></code> to “Census table of CELLxGENE Discover datasets – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code>”</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code> layer</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">nnz</span></code> and <code class="docutils literal notranslate"><span class="pre">n_measured_obs</span></code> columns to <code class="docutils literal notranslate"><span class="pre">ms[&quot;RNA&quot;].var</span></code> dataframe</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">nnz</span></code>, <code class="docutils literal notranslate"><span class="pre">n_measured_vars</span></code>, <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code>, <code class="docutils literal notranslate"><span class="pre">raw_mean_nnz</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_variance_nnz</span></code> columns to <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe</p></li>
+</ul>
+</section>
 <section id="version-1-0-0">
 <h3>Version 1.0.0<a class="headerlink" href="#version-1-0-0" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
@@ -1062,7 +1198,7 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -1077,13 +1213,99 @@ an <code class="docutils literal notranslate"><span class="pre">assay_ontology_t
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
       });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

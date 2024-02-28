@@ -1,10 +1,16 @@
-pandoc: 2.9.2.1
+pandoc: 3.1.11
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  census_axis_query: census_axis_query.html
+  census_access_maintained_embeddings: census_access_maintained_embeddings.html
+  census_citation_generation: census_citation_generation.html
+  census_compute_over_X: census_compute_over_X.html
   census_dataset_presence: census_dataset_presence.html
   census_datasets: census_datasets.html
   census_query_extract: census_query_extract.html
-last_built: 2023-04-26T19:53Z
+  comp_bio_census_info: comp_bio_census_info.html
+  comp_bio_data_integration: comp_bio_data_integration.html
+  comp_bio_normalizing_full_gene_sequencing: comp_bio_normalizing_full_gene_sequencing.html
+  comp_bio_summarize_axis_query: comp_bio_summarize_axis_query.html
+last_built: 2024-02-28T02:34Z
 

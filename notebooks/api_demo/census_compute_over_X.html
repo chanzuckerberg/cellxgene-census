@@ -4,14 +4,16 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Computing on X using online (incremental) algorithms &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>Computing on X using online (incremental) algorithms &mdash; cellxgene-census  documentation</title>
   
 
   
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,50 +42,71 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Genes measured in each cell (dataset presence matrix)" href="census_dataset_presence.html" />
-    <link rel="prev" title="Tutorials" href="../../examples.html" /> 
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="../../_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
-                    </span>
+                  </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -99,19 +122,12 @@
                 
                 
                 <div class="version">
-                    0.5
+                    v1.10.2
                 </div>
                 
             
 
             
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
 
             
             </div>
@@ -124,30 +140,16 @@
                 
                 
                 
-                <ul class="current">
+                <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#api">API</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Computing on X using online (incremental) algorithms</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Incremental-count-and-mean-calculation.">Incremental count and mean calculation.</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Incremental-variance-calculation">Incremental variance calculation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Counting-cells-per-gene,-grouped-by-dataset_id">Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata.</a></li>
-<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analysis">Analysis</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -176,7 +178,6 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../examples.html">Tutorials</a></li>
       <li class="breadcrumb-item active">Computing on X using online (incremental) algorithms</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/api_demo/census_compute_over_X.ipynb.txt" rel="nofollow"> View page source</a>
@@ -197,61 +198,78 @@
 <li><p>Incremental variance calculation.</p></li>
 <li><p>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></li>
 </ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-import pandas as pd
-
-import cellxgene_census
-import tiledbsoma as soma
-from tiledbsoma.experiment_query import X_as_series
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">from</span> <span class="nn">tiledbsoma.experiment_query</span> <span class="kn">import</span> <span class="n">X_as_series</span>
 </pre></div>
 </div>
 </div>
 <section id="Incremental-count-and-mean-calculation.">
 <h2>Incremental count and mean calculation.<a class="headerlink" href="#Incremental-count-and-mean-calculation." title="Permalink to this heading">¶</a></h2>
 <p>Many statistics, such as <code class="docutils literal notranslate"><span class="pre">mean</span></code>, are easy to calculate incrementally. This cell demonstrates a query on the <code class="docutils literal notranslate"><span class="pre">X['raw']</span></code> sparse nD array, which will return results in batches. Accumulate the sum and count incrementally, into <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_n</span></code>, and then compute mean.</p>
-<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names: * <code class="docutils literal notranslate"><span class="pre">soma_data</span></code> - the X value (float32) * <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> - the obs coordinate (int64) * <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> - the var coordinate (int64)</p>
+<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">soma_data</span></code> - the X value (float32)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> - the obs coordinate (int64)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> - the var coordinate (int64)</p></li>
+</ul>
 <p><strong>Important</strong>: the X matrices are joined to var/obs axis DataFrames by an integer join “id” (aka <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>). They are <em>NOT</em> positionally indexed, and any given cell or gene may have a <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> of any value (e.g., a large integer). In other words, for any given <code class="docutils literal notranslate"><span class="pre">X</span></code> value, the <code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe, and the <code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code> coordinate corresponds to the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
 <p>For convenience, the query package contains a utility function to simplify operations on query slices. <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> returns an indexer that can be used to wrap the output of <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>, converting from <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> to positional indexing. Positions are <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">N)</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code> are the number of results on the query for any given axis (equivalent to the Pandas <code class="docutils literal notranslate"><span class="pre">.iloc</span></code> of the axis dataframe).</p>
-<p>Key points: * it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations. * by default, data in the census is indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> and not positionally. Use <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> if you want positions.</p>
+<p>Key points:</p>
+<ul class="simple">
+<li><p>it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations.</p></li>
+<li><p>by default, data in the census is indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> and not positionally. Use <code class="docutils literal notranslate"><span class="pre">query.indexer</span></code> if you want positions.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with cellxgene_census.open_soma() as census:
-    mouse = census[&quot;census_data&quot;][&quot;mus_musculus&quot;]
-    with mouse.axis_query(
-        measurement_name=&quot;RNA&quot;,
-        obs_query=soma.AxisQuery(value_filter=&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;),
-    ) as query:
-        var_df = query.var().concat().to_pandas().set_index(&quot;soma_joinid&quot;)
-        n_vars = len(var_df)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39; and is_primary_data==True&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
 
-        raw_n = np.zeros((n_vars,), dtype=np.int64)  # accumulate number of non-zero X values
-        raw_sum = np.zeros((n_vars,), dtype=np.float64)  # accumulate the sum of expression
+        <span class="n">raw_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_vars</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>  <span class="c1"># accumulate number of non-zero X values</span>
+        <span class="n">raw_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_vars</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>  <span class="c1"># accumulate the sum of expression</span>
 
-        # query.X() returns an iterator of pyarrow.Table, with X data in COO format.
-        # You can request an indexer from the query that will map it to positional indices
-        indexer = query.indexer
-        for arrow_tbl in query.X(&quot;raw&quot;).tables():
-            var_dim = indexer.by_var(arrow_tbl[&quot;soma_dim_1&quot;])
-            data = arrow_tbl[&quot;soma_data&quot;]
-            np.add.at(raw_n, var_dim, 1)
-            np.add.at(raw_sum, var_dim, data)
+        <span class="c1"># query.X() returns an iterator of pyarrow.Table, with X data in COO format.</span>
+        <span class="c1"># You can request an indexer from the query that will map it to positional indices</span>
+        <span class="n">indexer</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">indexer</span>
+        <span class="k">for</span> <span class="n">arrow_tbl</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">():</span>
+            <span class="n">var_dim</span> <span class="o">=</span> <span class="n">indexer</span><span class="o">.</span><span class="n">by_var</span><span class="p">(</span><span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_dim_1&quot;</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_data&quot;</span><span class="p">]</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">raw_n</span><span class="p">,</span> <span class="n">var_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">raw_sum</span><span class="p">,</span> <span class="n">var_dim</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-    with np.errstate(divide=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
-        raw_mean = raw_sum / query.n_obs
-    raw_mean[np.isnan(raw_mean)] = 0
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+        <span class="n">raw_mean</span> <span class="o">=</span> <span class="n">raw_sum</span> <span class="o">/</span> <span class="n">query</span><span class="o">.</span><span class="n">n_obs</span>
+    <span class="n">raw_mean</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">raw_mean</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
 
-    var_df = var_df.assign(raw_n=pd.Series(data=raw_n, index=var_df.index))
-    var_df = var_df.assign(raw_mean=pd.Series(data=raw_mean, index=var_df.index))
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_n</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">raw_n</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_mean</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">raw_mean</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
 
-    display(var_df)
+    <span class="n">display</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -296,8 +314,8 @@ from tiledbsoma.experiment_query import X_as_series
       <td>ENSMUSG00000051951</td>
       <td>Xkr4</td>
       <td>6094</td>
-      <td>398</td>
-      <td>1.283861</td>
+      <td>202</td>
+      <td>1.032743</td>
     </tr>
     <tr>
       <th>1</th>
@@ -320,16 +338,16 @@ from tiledbsoma.experiment_query import X_as_series
       <td>ENSMUSG00000025900</td>
       <td>Rp1</td>
       <td>12311</td>
-      <td>144</td>
-      <td>0.291416</td>
+      <td>106</td>
+      <td>0.236265</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ENSMUSG00000025902</td>
       <td>Sox17</td>
       <td>4772</td>
-      <td>4213</td>
-      <td>60.741540</td>
+      <td>3259</td>
+      <td>48.991975</td>
     </tr>
     <tr>
       <th>...</th>
@@ -341,41 +359,41 @@ from tiledbsoma.experiment_query import X_as_series
     </tr>
     <tr>
       <th>52387</th>
-      <td>ENSMUSG00000118631</td>
-      <td>Gm53019</td>
-      <td>794</td>
+      <td>ENSMUSG00000081591</td>
+      <td>Btf3-ps9</td>
+      <td>496</td>
       <td>0</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52388</th>
-      <td>ENSMUSG00000118645</td>
-      <td>ENSMUSG00000118645</td>
-      <td>480</td>
+      <td>ENSMUSG00000118710</td>
+      <td>mmu-mir-467a-3_ENSMUSG00000118710</td>
+      <td>83</td>
       <td>0</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52389</th>
-      <td>ENSMUSG00000118646</td>
-      <td>RP23-380K24.5</td>
-      <td>383</td>
+      <td>ENSMUSG00000119584</td>
+      <td>Rn18s</td>
+      <td>1849</td>
       <td>0</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52390</th>
-      <td>ENSMUSG00000118652</td>
-      <td>RP23-43L14.2</td>
-      <td>358</td>
+      <td>ENSMUSG00000118538</td>
+      <td>Gm18218</td>
+      <td>970</td>
       <td>0</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52391</th>
-      <td>ENSMUSG00000118670</td>
-      <td>Muc19</td>
-      <td>22800</td>
+      <td>ENSMUSG00000084217</td>
+      <td>Setd9-ps</td>
+      <td>670</td>
       <td>0</td>
       <td>0.000000</td>
     </tr>
@@ -392,104 +410,110 @@ from tiledbsoma.experiment_query import X_as_series
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numba
-import numpy.typing as npt
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 
 
-class OnlineMatrixMeanVariance:
-    n_samples: int
-    n_variables: int
+<span class="k">class</span> <span class="nc">OnlineMatrixMeanVariance</span><span class="p">:</span>
+    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span>
 
-    def __init__(self, n_samples: int, n_variables: int):
-        &quot;&quot;&quot;
-        Compute mean and variance for n_variables over n_samples, encoded
-        in a COO format. Equivalent to:
-            numpy.mean(data, axis=0)
-            numpy.var(data, axix=0)
-        where the input `data` is of shape (n_samples, n_variables)
-        &quot;&quot;&quot;
-        self.n_samples = n_samples
-        self.n_variables = n_variables
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute mean and variance for n_variables over n_samples, encoded</span>
+<span class="sd">        in a COO format. Equivalent to:</span>
+<span class="sd">            numpy.mean(data, axis=0)</span>
+<span class="sd">            numpy.var(data, axix=0)</span>
+<span class="sd">        where the input `data` is of shape (n_samples, n_variables)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_variables</span> <span class="o">=</span> <span class="n">n_variables</span>
 
-        self.n_a = np.zeros((n_variables,), dtype=np.int32)
-        self.u_a = np.zeros((n_variables,), dtype=np.float64)
-        self.M2_a = np.zeros((n_variables,), dtype=np.float64)
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_variables</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
-    def update(self, coord_vec: npt.NDArray[np.int64], value_vec: npt.NDArray[np.float32]) -&gt; None:
-        _mean_variance_update(coord_vec, value_vec, self.n_a, self.u_a, self.M2_a)
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coord_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span> <span class="n">value_vec</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_mean_variance_update</span><span class="p">(</span><span class="n">coord_vec</span><span class="p">,</span> <span class="n">value_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
 
-    def finalize(self) -&gt; tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        &quot;&quot;&quot;
-        Returns tuple containing mean and variance
-        &quot;&quot;&quot;
-        u, M2 = _mean_variance_finalize(self.n_samples, self.n_a, self.u_a, self.M2_a)
+    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns tuple containing mean and variance&quot;&quot;&quot;</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">M2</span> <span class="o">=</span> <span class="n">_mean_variance_finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
 
-        # compute sample variance
-        var = M2 / max(1, (self.n_samples - 1))
+        <span class="c1"># compute sample variance</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">M2</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
-        return u, var
+        <span class="k">return</span> <span class="n">u</span><span class="p">,</span> <span class="n">var</span>
 
 
-@numba.jit(nopython=True)
-def _mean_variance_update(
-    col_arr: npt.NDArray[np.int64],
-    val_arr: npt.NDArray[np.float32],
-    n: npt.NDArray[np.int32],
-    u: npt.NDArray[np.float64],
-    M2: npt.NDArray[np.float64],
-):
-    &quot;&quot;&quot;
-    Incrementally accumulate mean and sum of square of distance from mean using
-    Welford&#39;s online method.
-    &quot;&quot;&quot;
-    for col, val in zip(col_arr, val_arr):
-        u_prev = u[col]
-        M2_prev = M2[col]
-        n[col] += 1
-        u[col] = u_prev + (val - u_prev) / n[col]
-        M2[col] = M2_prev + (val - u_prev) * (val - u[col])
+<span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_mean_variance_update</span><span class="p">(</span>
+    <span class="n">col_arr</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span>
+    <span class="n">val_arr</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
+    <span class="n">n</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span>
+    <span class="n">u</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+    <span class="n">M2</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Incrementally accumulate mean and sum of square of distance from mean using</span>
+<span class="sd">    Welford&#39;s online method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">col_arr</span><span class="p">,</span> <span class="n">val_arr</span><span class="p">):</span>
+        <span class="n">u_prev</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">M2_prev</span> <span class="o">=</span> <span class="n">M2</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">n</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_prev</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">u_prev</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">M2</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">M2_prev</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">u_prev</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
 
 
-@numba.jit(nopython=True)
-def _mean_variance_finalize(
-    n_samples: int, n_a: npt.NDArray[np.int32], u_a: npt.NDArray[np.float64], M2_a: npt.NDArray[np.float64]
-):
-    &quot;&quot;&quot;
-    Finalize incremental values, acconting for missing elements (due to sparse input).
-    Non-sparse and sparse combined using Chan&#39;s parallel adaptation of Welford&#39;s.
-    The code assumes the sparse elements are all zero and ignores those terms.
-    &quot;&quot;&quot;
-    n_b = n_samples - n_a
-    delta = -u_a  # assumes u_b == 0
-    u = (n_a * u_a) / n_samples
-    M2 = M2_a + delta**2 * n_a * n_b / n_samples  # assumes M2_b == 0
-    return u, M2
+<span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_mean_variance_finalize</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">n_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span>
+    <span class="n">u_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+    <span class="n">M2_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalize incremental values, acconting for missing elements (due to sparse input).</span>
+<span class="sd">    Non-sparse and sparse combined using Chan&#39;s parallel adaptation of Welford&#39;s.</span>
+<span class="sd">    The code assumes the sparse elements are all zero and ignores those terms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_b</span> <span class="o">=</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="n">n_a</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="o">-</span><span class="n">u_a</span>  <span class="c1"># assumes u_b == 0</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_a</span> <span class="o">*</span> <span class="n">u_a</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_samples</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">M2_a</span> <span class="o">+</span> <span class="n">delta</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_a</span> <span class="o">*</span> <span class="n">n_b</span> <span class="o">/</span> <span class="n">n_samples</span>  <span class="c1"># assumes M2_b == 0</span>
+    <span class="k">return</span> <span class="n">u</span><span class="p">,</span> <span class="n">M2</span>
 
 
-with cellxgene_census.open_soma() as census:
-    mouse = census[&quot;census_data&quot;][&quot;mus_musculus&quot;]
-    with mouse.axis_query(
-        measurement_name=&quot;RNA&quot;,
-        obs_query=soma.AxisQuery(value_filter=&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39;&quot;),
-    ) as query:
-        var_df = query.var().concat().to_pandas().set_index(&quot;soma_joinid&quot;)
-        n_vars = len(var_df)
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39; and sex==&#39;male&#39; and is_primary_data==True&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
 
-        indexer = query.indexer
-        mvn = OnlineMatrixMeanVariance(query.n_obs, n_vars)
-        for arrow_tbl in query.X(&quot;raw&quot;).tables():
-            var_dim = indexer.by_var(arrow_tbl[&quot;soma_dim_1&quot;])
-            data = arrow_tbl[&quot;soma_data&quot;].to_numpy()
-            mvn.update(var_dim, data)
+        <span class="n">indexer</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">indexer</span>
+        <span class="n">mvn</span> <span class="o">=</span> <span class="n">OnlineMatrixMeanVariance</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="n">n_vars</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arrow_tbl</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">():</span>
+            <span class="n">var_dim</span> <span class="o">=</span> <span class="n">indexer</span><span class="o">.</span><span class="n">by_var</span><span class="p">(</span><span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_dim_1&quot;</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">arrow_tbl</span><span class="p">[</span><span class="s2">&quot;soma_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">mvn</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">var_dim</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-        u, v = mvn.finalize()
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">mvn</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
-    var_df = var_df.assign(raw_mean=pd.Series(data=u, index=var_df.index))
-    var_df = var_df.assign(raw_variance=pd.Series(data=v, index=var_df.index))
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_mean</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">var_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">raw_variance</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
 
-    display(var_df)
+    <span class="n">display</span><span class="p">(</span><span class="n">var_df</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -534,8 +558,8 @@ with cellxgene_census.open_soma() as census:
       <td>ENSMUSG00000051951</td>
       <td>Xkr4</td>
       <td>6094</td>
-      <td>1.283861</td>
-      <td>1054.385124</td>
+      <td>1.032743</td>
+      <td>848.312801</td>
     </tr>
     <tr>
       <th>1</th>
@@ -558,16 +582,16 @@ with cellxgene_census.open_soma() as census:
       <td>ENSMUSG00000025900</td>
       <td>Rp1</td>
       <td>12311</td>
-      <td>0.291416</td>
-      <td>210.326410</td>
+      <td>0.236265</td>
+      <td>169.182975</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ENSMUSG00000025902</td>
       <td>Sox17</td>
       <td>4772</td>
-      <td>60.741540</td>
-      <td>346890.414437</td>
+      <td>48.991975</td>
+      <td>279575.656207</td>
     </tr>
     <tr>
       <th>...</th>
@@ -579,41 +603,41 @@ with cellxgene_census.open_soma() as census:
     </tr>
     <tr>
       <th>52387</th>
-      <td>ENSMUSG00000118631</td>
-      <td>Gm53019</td>
-      <td>794</td>
+      <td>ENSMUSG00000081591</td>
+      <td>Btf3-ps9</td>
+      <td>496</td>
       <td>0.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52388</th>
-      <td>ENSMUSG00000118645</td>
-      <td>ENSMUSG00000118645</td>
-      <td>480</td>
+      <td>ENSMUSG00000118710</td>
+      <td>mmu-mir-467a-3_ENSMUSG00000118710</td>
+      <td>83</td>
       <td>0.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52389</th>
-      <td>ENSMUSG00000118646</td>
-      <td>RP23-380K24.5</td>
-      <td>383</td>
+      <td>ENSMUSG00000119584</td>
+      <td>Rn18s</td>
+      <td>1849</td>
       <td>0.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52390</th>
-      <td>ENSMUSG00000118652</td>
-      <td>RP23-43L14.2</td>
-      <td>358</td>
+      <td>ENSMUSG00000118538</td>
+      <td>Gm18218</td>
+      <td>970</td>
       <td>0.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>52391</th>
-      <td>ENSMUSG00000118670</td>
-      <td>Muc19</td>
-      <td>22800</td>
+      <td>ENSMUSG00000084217</td>
+      <td>Setd9-ps</td>
+      <td>670</td>
       <td>0.000000</td>
       <td>0.000000</td>
     </tr>
@@ -631,53 +655,64 @@ with cellxgene_census.open_soma() as census:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with cellxgene_census.open_soma() as census:
-    mouse = census[&quot;census_data&quot;][&quot;mus_musculus&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">mouse</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
 
-    with mouse.axis_query(
-        measurement_name=&quot;RNA&quot;,
-        obs_query=soma.AxisQuery(value_filter=&quot;tissue==&#39;brain&#39;&quot;),
-        var_query=soma.AxisQuery(value_filter=&quot;feature_name in [&#39;Malat1&#39;, &#39;Ptprd&#39;, &#39;Dlg2&#39;, &#39;Pcdh9&#39;]&quot;),
-    ) as query:
-        obs_df = query.obs(column_names=[&quot;soma_joinid&quot;, &quot;dataset_id&quot;]).concat().to_pandas().set_index(&quot;soma_joinid&quot;)
-        var_df = query.var().concat().to_pandas().set_index(&quot;soma_joinid&quot;)
-        n_cells_by_dataset = pd.Series(
-            0,
-            index=pd.MultiIndex.from_product(
-                (var_df.index, obs_df.dataset_id.unique()), names=[&quot;soma_joinid&quot;, &quot;dataset_id&quot;]
-            ),
-            dtype=np.int64,
-            name=&quot;n_cells&quot;,
-        )
+    <span class="k">with</span> <span class="n">mouse</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue==&#39;brain&#39;&quot;</span><span class="p">),</span>
+        <span class="n">var_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name in [&#39;Malat1&#39;, &#39;Ptprd&#39;, &#39;Dlg2&#39;, &#39;Pcdh9&#39;]&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">obs_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">var_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">)</span>
+        <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">dataset_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()),</span>
+                <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">],</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;n_cells&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        for X_tbl in query.X(&quot;raw&quot;).tables():
-            # Group by dataset_id and count unique (genes, dataset_id)
-            value_counts = (
-                X_as_series(X_tbl)
-                .to_frame()
-                .join(obs_df[[&quot;dataset_id&quot;]], on=&quot;soma_dim_0&quot;)
-                .reset_index(level=1)
-                .drop(columns=[&quot;soma_data&quot;])
-                .value_counts()
-            )
-            np.add.at(
-                n_cells_by_dataset, n_cells_by_dataset.index.get_indexer(value_counts.index), value_counts.to_numpy()
-            )
+        <span class="k">for</span> <span class="n">X_tbl</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">():</span>
+            <span class="c1"># Group by dataset_id and count unique (genes, dataset_id)</span>
+            <span class="n">value_counts</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">X_as_series</span><span class="p">(</span><span class="n">X_tbl</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">obs_df</span><span class="p">[[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]],</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;soma_dim_0&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_data&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span>
+                <span class="n">n_cells_by_dataset</span><span class="p">,</span>
+                <span class="n">n_cells_by_dataset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_indexer</span><span class="p">(</span><span class="n">value_counts</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">value_counts</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+            <span class="p">)</span>
 
-    # drop any combinations that are not observed
-    n_cells_by_dataset = n_cells_by_dataset[n_cells_by_dataset &gt; 0]
+    <span class="c1"># drop any combinations that are not observed</span>
+    <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="n">n_cells_by_dataset</span><span class="p">[</span><span class="n">n_cells_by_dataset</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
 
-    # and join with var_df to pick up feature_id and feature_name
-    n_cells_by_dataset = (
-        n_cells_by_dataset.to_frame()
-        .reset_index(level=1)
-        .join(var_df[[&quot;feature_id&quot;, &quot;feature_name&quot;]])
-        .set_index([&quot;dataset_id&quot;, &quot;feature_id&quot;])
-    )
+    <span class="c1"># and join with var_df to pick up feature_id and feature_name</span>
+    <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">n_cells_by_dataset</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_df</span><span class="p">[[</span><span class="s2">&quot;feature_id&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_name&quot;</span><span class="p">]])</span>
+        <span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_id&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
 
-    display(n_cells_by_dataset)
+    <span class="n">display</span><span class="p">(</span><span class="n">n_cells_by_dataset</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -714,6 +749,12 @@ with cellxgene_census.open_soma() as census:
   </thead>
   <tbody>
     <tr>
+      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>ENSMUSG00000028399</th>
+      <td>79578</td>
+      <td>Ptprd</td>
+    </tr>
+    <tr>
       <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
       <th>ENSMUSG00000028399</th>
       <td>474</td>
@@ -721,9 +762,9 @@ with cellxgene_census.open_soma() as census:
     </tr>
     <tr>
       <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
-      <th>ENSMUSG00000028399</th>
-      <td>79578</td>
-      <td>Ptprd</td>
+      <th>ENSMUSG00000052572</th>
+      <td>79513</td>
+      <td>Dlg2</td>
     </tr>
     <tr>
       <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
@@ -732,15 +773,15 @@ with cellxgene_census.open_soma() as census:
       <td>Dlg2</td>
     </tr>
     <tr>
-      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
-      <th>ENSMUSG00000052572</th>
-      <td>856</td>
-      <td>Dlg2</td>
-    </tr>
-    <tr>
       <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
       <th>ENSMUSG00000052572</th>
       <td>908</td>
+      <td>Dlg2</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000052572</th>
+      <td>856</td>
       <td>Dlg2</td>
     </tr>
     <tr>
@@ -751,9 +792,9 @@ with cellxgene_census.open_soma() as census:
     </tr>
     <tr>
       <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
-      <th>ENSMUSG00000052572</th>
-      <td>79513</td>
-      <td>Dlg2</td>
+      <th>ENSMUSG00000055421</th>
+      <td>79476</td>
+      <td>Pcdh9</td>
     </tr>
     <tr>
       <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
@@ -762,15 +803,15 @@ with cellxgene_census.open_soma() as census:
       <td>Pcdh9</td>
     </tr>
     <tr>
-      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
-      <th>ENSMUSG00000055421</th>
-      <td>2910</td>
-      <td>Pcdh9</td>
-    </tr>
-    <tr>
       <th>98e5ea9f-16d6-47ec-a529-686e76515e39</th>
       <th>ENSMUSG00000055421</th>
       <td>3027</td>
+      <td>Pcdh9</td>
+    </tr>
+    <tr>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
+      <th>ENSMUSG00000055421</th>
+      <td>2910</td>
       <td>Pcdh9</td>
     </tr>
     <tr>
@@ -781,20 +822,14 @@ with cellxgene_census.open_soma() as census:
     </tr>
     <tr>
       <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
-      <th>ENSMUSG00000055421</th>
-      <td>79476</td>
-      <td>Pcdh9</td>
+      <th>ENSMUSG00000092341</th>
+      <td>79667</td>
+      <td>Malat1</td>
     </tr>
     <tr>
       <th>58b01044-c5e5-4b0f-8a2d-6ebf951e01ff</th>
       <th>ENSMUSG00000092341</th>
       <td>12622</td>
-      <td>Malat1</td>
-    </tr>
-    <tr>
-      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
-      <th>ENSMUSG00000092341</th>
-      <td>7102</td>
       <td>Malat1</td>
     </tr>
     <tr>
@@ -804,15 +839,15 @@ with cellxgene_census.open_soma() as census:
       <td>Malat1</td>
     </tr>
     <tr>
-      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
+      <th>66ff82b4-9380-469c-bc4b-cfa08eacd325</th>
       <th>ENSMUSG00000092341</th>
-      <td>12992</td>
+      <td>7102</td>
       <td>Malat1</td>
     </tr>
     <tr>
-      <th>3bbb6cf9-72b9-41be-b568-656de6eb18b5</th>
+      <th>c08f8441-4a10-4748-872a-e70c0bcccdba</th>
       <th>ENSMUSG00000092341</th>
-      <td>79667</td>
+      <td>12992</td>
       <td>Malat1</td>
     </tr>
   </tbody>
@@ -826,15 +861,12 @@ with cellxgene_census.open_soma() as census:
             </div>
             
             </div>
-            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../../examples.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="census_dataset_presence.html" class="btn btn-neutral float-right" title="Genes measured in each cell (dataset presence matrix)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+            <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -849,13 +881,99 @@ with cellxgene_census.open_soma() as census:
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
       });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

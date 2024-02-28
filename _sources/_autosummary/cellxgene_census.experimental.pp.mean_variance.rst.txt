@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.pp.mean\_variance
+================================================
+
+.. currentmodule:: cellxgene_census.experimental.pp
+
+.. autofunction:: mean_variance

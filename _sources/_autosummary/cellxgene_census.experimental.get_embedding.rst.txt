@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.get\_embedding
+=============================================
+
+.. currentmodule:: cellxgene_census.experimental
+
+.. autofunction:: get_embedding

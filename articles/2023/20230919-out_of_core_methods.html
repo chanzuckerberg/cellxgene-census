@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Memory-efficient implementations of commonly used single-cell methods &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Introducing a normalized layer and pre-calculated cell and gene statistics in Census" href="20231012-normalized_layer_precalc_stats.html" />
+    <link rel="prev" title="R package cellxgene.census V1 is out!" href="20230808-r_api_release.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.10.2
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../articles.html">What’s new?</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../articles.html#id1">2023</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="20230808-r_api_release.html">R package <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> V1 is out!</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Memory-efficient implementations of commonly used single-cell methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#efficient-calculation-of-average-and-variance-gene-expression-across-millions-of-cells">Efficient calculation of average and variance gene expression across millions of cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#efficient-calculation-of-highly-variable-genes-across-millions-of-cells">Efficient calculation of highly variable genes across millions of cells</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="20231012-normalized_layer_precalc_stats.html">Introducing a normalized layer and pre-calculated cell and gene statistics in Census</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../articles.html">What’s new?</a></li>
+      <li class="breadcrumb-item active">Memory-efficient implementations of commonly used single-cell methods</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/articles/2023/20230919-out_of_core_methods.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="memory-efficient-implementations-of-commonly-used-single-cell-methods">
+<h1>Memory-efficient implementations of commonly used single-cell methods<a class="headerlink" href="#memory-efficient-implementations-of-commonly-used-single-cell-methods" title="Permalink to this heading">¶</a></h1>
+<p><em>Published:</em> <em>September 18, 2023</em></p>
+<p><em>By:</em> <em><a class="reference internal" href="#pgarcia-nieto&#64;chanzuckerberg.com"><span class="xref myst">Pablo Garcia-Nieto</span></a></em></p>
+<p>The Census team is thrilled to officially announce memory-efficient implementations of some of the most widely used single-cell algorithms.</p>
+<p>With just a few lines of code, using the Census Python API, users can now perform the following computational tasks across tens of millions of cells using a conventional laptop with 8GB of memory:</p>
+<ul class="simple">
+<li><p>Calculating average and variance gene expression for cells or genes. See example below or the full <a class="reference internal" href="../../notebooks/experimental/mean_variance.html"><span class="std std-doc">tutorial here</span></a>.</p></li>
+<li><p>Obtaining batch-corrected highly variable genes.  See example below or the full <a class="reference internal" href="../../notebooks/experimental/highly_variable_genes.html"><span class="doc std std-doc">tutorial here</span></a>.</p></li>
+</ul>
+<p>These implementations are interwoven with the way users query slices of Census data, which means that these tasks can be seamlessly applied to any slice of the 33M+ cells available in Census.</p>
+<p>Continue reading for more implementation details and usage examples.</p>
+<section id="efficient-calculation-of-average-and-variance-gene-expression-across-millions-of-cells">
+<h2>Efficient calculation of average and variance gene expression across millions of cells<a class="headerlink" href="#efficient-calculation-of-average-and-variance-gene-expression-across-millions-of-cells" title="Permalink to this heading">¶</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.mean_variance</span></code> users can now get gene expression average and variance for all genes or cells in a given Census query.</p>
+<section id="how-it-works">
+<h3>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading">¶</a></h3>
+<p>Calculations are done in an accumulative incremental fashion, meaning that only a small fraction of the total data is processed at any given time.</p>
+<p>The Census data is downloaded in increments and average and variance accumulators are updated at each incremental step. The implementation also takes advantage of CPU-based multiprocessing to speed up the process.</p>
+<p>Currently, the mean and variance are calculated using the full population of cells/genes, including those with a zero valued measurement. In the future, we will enable calculation of mean including only the population of non-zero cells/genes.</p>
+</section>
+<section id="example-kras-and-aqp4-average-and-variance-expression-in-lung-epithelial-cells">
+<h3>Example: <em>KRAS</em> and <em>AQP4</em> average and variance expression in lung epithelial cells<a class="headerlink" href="#example-kras-and-aqp4-average-and-variance-expression-in-lung-epithelial-cells" title="Permalink to this heading">¶</a></h3>
+<p>The following calculates the average and variance values for the genes <em>KRAS</em> and <em>AQP4</em> in all epithelial cells of the human lung.</p>
+<p>Users can easily switch the calculation, and obtain average and variance for each cell across the genes in the query. This is controlled by the <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument of <code class="docutils literal notranslate"><span class="pre">mean_variance</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.pp</span> <span class="kn">import</span> <span class="n">mean_variance</span>
+
+<span class="c1"># Open the Census</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+<span class="n">human_data</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+
+<span class="c1"># Set filters</span>
+<span class="n">cell_filter</span> <span class="o">=</span> <span class="p">(</span>
+  <span class="s2">&quot;is_primary_data == True &quot;</span>
+  <span class="s2">&quot;and tissue_general == &#39;lung&#39; &quot;</span>
+  <span class="s2">&quot;and cell_type == &#39;epithelial cell&#39;&quot;</span>
+ <span class="p">)</span>
+<span class="n">gene_filter</span> <span class="o">=</span> <span class="s2">&quot;feature_name in [&#39;KRAS&#39;, &#39;AQP4&#39;]&quot;</span>
+
+<span class="c1"># Perform query</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">human_data</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+  <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+  <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span> <span class="n">cell_filter</span><span class="p">),</span>
+  <span class="n">var_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span> <span class="n">gene_filter</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Calculate mean and average per gene</span>
+<span class="n">mean_variance_df</span> <span class="o">=</span> <span class="n">mean_variance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">calculate_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">calculate_variance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Get gene metadata of query</span>
+<span class="n">gene_df</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Which results in:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mean_variance_df</span>
+<span class="c1"># soma_joinid      mean     variance</span>
+<span class="c1"># 8624         3.071926  5741.242485</span>
+<span class="c1"># 16437        8.233282   452.119153</span>
+
+<span class="n">gene_df</span>
+<span class="c1">#    soma_joinid       feature_id feature_name  feature_length</span>
+<span class="c1"># 0         8624  ENSG00000171885         AQP4            5943</span>
+<span class="c1"># 1        16437  ENSG00000133703         KRAS            6845</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="efficient-calculation-of-highly-variable-genes-across-millions-of-cells">
+<h2>Efficient calculation of highly variable genes across millions of cells<a class="headerlink" href="#efficient-calculation-of-highly-variable-genes-across-millions-of-cells" title="Permalink to this heading">¶</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.get_highly_variable_genes</span></code> users can get the most highly variable genes of a Census query while accounting for batch effects.</p>
+<p>This is usually the first pre-processing step necessary for other downstream tasks, for example data integration.</p>
+<section id="id1">
+<h3>How it works<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>The Census algorithm is based on the scanpy method <code class="docutils literal notranslate"><span class="pre">scanpy.pp.highly_variable_genes</span></code>, and in particular the Seurat V3 method, which is designed for raw counts and can account for batch effects.</p>
+<p>The Census implementation utilizes the same incremental paradigm used in <code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.mean_variance</span></code> (see above), calculating incremental-based mean and variance accumulators with some tweaks to comply to the Seurat V3 method.</p>
+</section>
+<section id="example-finding-highly-variable-genes-for-all-cells-of-the-human-esophagus">
+<h3>Example: Finding highly variable genes for all cells of the human esophagus<a class="headerlink" href="#example-finding-highly-variable-genes-for-all-cells-of-the-human-esophagus" title="Permalink to this heading">¶</a></h3>
+<p>The following example identifies the top 1000 highly variable genes for all human esophagus cells. As a general rule of thumb it is good to use <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> as the batch variable.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.pp</span> <span class="kn">import</span> <span class="n">get_highly_variable_genes</span>
+
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
+
+<span class="n">hvg</span> <span class="o">=</span> <span class="n">get_highly_variable_genes</span><span class="p">(</span>
+  <span class="n">census</span><span class="p">,</span>
+  <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+  <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;is_primary_data == True and tissue_general == &#39;esophagus&#39;&quot;</span><span class="p">,</span>
+  <span class="n">n_top_genes</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+  <span class="n">batch_key</span> <span class="o">=</span> <span class="s2">&quot;dataset_id&quot;</span>
+<span class="p">)</span>
+
+<span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Which results in:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hvg</span>
+<span class="c1"># soma_joinid    means  variances  ...  variances_norm  highly_variable</span>
+<span class="c1"># 0            0.003692   0.004627  ...        0.748221            False</span>
+<span class="c1"># 1            0.003084   0.003203  ...        0.898657            False</span>
+<span class="c1"># 2            0.014962   0.037395  ...        0.513473            False</span>
+<span class="c1"># 3            0.218865   1.547648  ...        4.786928             True</span>
+<span class="c1"># 4            0.002142   0.002242  ...        0.894955            False</span>
+<span class="c1"># ...               ...        ...  ...             ...              ...</span>
+<span class="c1"># 60659        0.000000   0.000000  ...        0.000000            False</span>
+<span class="c1"># 60660        0.000000   0.000000  ...        0.000000            False</span>
+<span class="c1"># 60661        0.000000   0.000000  ...        0.000000            False</span>
+<span class="c1"># 60662        0.000000   0.000000  ...        0.000000            False</span>
+<span class="c1"># 60663        0.000000   0.000000  ...        0.000000            False</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="20230808-r_api_release.html" class="btn btn-neutral float-left" title="R package cellxgene.census V1 is out!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="20231012-normalized_layer_precalc_stats.html" class="btn btn-neutral float-right" title="Introducing a normalized layer and pre-calculated cell and gene statistics in Census" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

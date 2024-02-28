@@ -1,0 +1,1059 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Experimental Highly Variable Genes API &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Out-of-core (incremental) mean and variance calculation" href="mean_variance.html" />
+    <link rel="prev" title="Normalizing full-length gene sequencing data" href="../analysis_demo/comp_bio_normalizing_full_gene_sequencing.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.10.2
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-using-integrated-embeddings-and-models">[NEW! 🚀] Using integrated embeddings and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Experimental Highly Variable Genes API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#get_highly_variable_genes">get_highly_variable_genes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#highly_variable_genes">highly_variable_genes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mean_variance.html">Out-of-core (incremental) mean and variance calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Experimental Highly Variable Genes API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/experimental/highly_variable_genes.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Experimental-Highly-Variable-Genes-API">
+<h1>Experimental Highly Variable Genes API<a class="headerlink" href="#Experimental-Highly-Variable-Genes-API" title="Permalink to this heading">¶</a></h1>
+<p>This tutorial describes use of the <code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp</span></code> API for finding highly variable genes (HVGs) in the Census. The HVG algorithm implements the ranked normalized variance method <code class="docutils literal notranslate"><span class="pre">seurat_v3</span></code> described in <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html#scanpy.pp.highly_variable_genes">scanpy.pp.highly_variable_genes</a>.</p>
+<p>There are two API available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_highly_variable_genes()</span></code> - high level function which accepts arguments similar to <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code>, and returns annotations for each <code class="docutils literal notranslate"><span class="pre">var</span></code> feature in a Pandas DataFrame.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">highly_variable_genes()</span></code> - lower level function which accepts a <code class="docutils literal notranslate"><span class="pre">tiledbsoma.ExperimentAxisQuery</span></code> and returns the same result.</p></li>
+</ul>
+<p>Both functions accept common arguments to control ranking, with argument semantics matching the Scanpy API:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n_top_genes</span></code> - number of genes to rank.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_key</span></code> - if specified, normalized ranking will be done in separate batches based upon the obs column value name specified, and then merged into the final result.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">span</span></code> - the fraction of the data (cells) used when estimating the variance in the <a class="reference external" href="https://has2k1.github.io/scikit-misc/stable/generated/skmisc.loess.loess_model.html#skmisc.loess.loess_model">loess model fit</a>.</p></li>
+</ul>
+<p>In addition:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">max_lowess_jitter</span></code> - maxmimum jitter (noise) to data if LOESS fails. Disable by setting to zero.</p></li>
+</ul>
+<p>For more information, see the docstrings for both functions (e.g. <code class="docutils literal notranslate"><span class="pre">help(function)</span></code>)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import packages</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.pp</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_highly_variable_genes</span><span class="p">,</span>
+    <span class="n">highly_variable_genes</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="get_highly_variable_genes">
+<h2>get_highly_variable_genes<a class="headerlink" href="#get_highly_variable_genes" title="Permalink to this heading">¶</a></h2>
+<p>This convenience function will meet most use cases, and is a wrapper around <code class="docutils literal notranslate"><span class="pre">highly_variable_genes</span></code>. This demonstration requests the top 500 genes from the Mouse census where <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> is <code class="docutils literal notranslate"><span class="pre">heart</span></code>, and joins with the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
+<p>The HVGs returned by get_highly_variable_genes are indexed by their <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>. Join with the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe to have a merged view of var metadata.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;stable&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">hvgs_df</span> <span class="o">=</span> <span class="n">get_highly_variable_genes</span><span class="p">(</span>
+        <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+        <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;is_primary_data == True and tissue_general == &#39;heart&#39;&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># while the Census is open, also grab the var dataframe for the mouse</span>
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+
+<span class="n">hvgs_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>means</th>
+      <th>variances</th>
+      <th>highly_variable_rank</th>
+      <th>variances_norm</th>
+      <th>highly_variable</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.230445</td>
+      <td>116.044863</td>
+      <td>NaN</td>
+      <td>1.749637</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.287551</td>
+      <td>45.276809</td>
+      <td>NaN</td>
+      <td>0.461324</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>67.407450</td>
+      <td>363945.055626</td>
+      <td>280.0</td>
+      <td>2.958509</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>52387</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52388</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52389</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52390</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52391</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+<p>52392 rows × 5 columns</p>
+</div></div>
+</div>
+<p>Concat the two dataframes for convenience:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">var_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">),</span> <span class="n">hvgs_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">combined_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>means</th>
+      <th>variances</th>
+      <th>highly_variable_rank</th>
+      <th>variances_norm</th>
+      <th>highly_variable</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ENSMUSG00000051951</td>
+      <td>Xkr4</td>
+      <td>6094</td>
+      <td>0.230445</td>
+      <td>116.044863</td>
+      <td>NaN</td>
+      <td>1.749637</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ENSMUSG00000089699</td>
+      <td>Gm1992</td>
+      <td>250</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ENSMUSG00000102343</td>
+      <td>Gm37381</td>
+      <td>1364</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ENSMUSG00000025900</td>
+      <td>Rp1</td>
+      <td>12311</td>
+      <td>0.287551</td>
+      <td>45.276809</td>
+      <td>NaN</td>
+      <td>0.461324</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ENSMUSG00000025902</td>
+      <td>Sox17</td>
+      <td>4772</td>
+      <td>67.407450</td>
+      <td>363945.055626</td>
+      <td>280.0</td>
+      <td>2.958509</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>52387</th>
+      <td>ENSMUSG00000081591</td>
+      <td>Btf3-ps9</td>
+      <td>496</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52388</th>
+      <td>ENSMUSG00000118710</td>
+      <td>mmu-mir-467a-3_ENSMUSG00000118710</td>
+      <td>83</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52389</th>
+      <td>ENSMUSG00000119584</td>
+      <td>Rn18s</td>
+      <td>1849</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52390</th>
+      <td>ENSMUSG00000118538</td>
+      <td>Gm18218</td>
+      <td>970</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52391</th>
+      <td>ENSMUSG00000084217</td>
+      <td>Setd9-ps</td>
+      <td>670</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+<p>52392 rows × 8 columns</p>
+</div></div>
+</div>
+<p>Select <em>only</em> the highly_variable genes by using the <code class="docutils literal notranslate"><span class="pre">highly_variable</span></code> column value:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_df</span><span class="p">[</span><span class="n">combined_df</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature_id</th>
+      <th>feature_name</th>
+      <th>feature_length</th>
+      <th>means</th>
+      <th>variances</th>
+      <th>highly_variable_rank</th>
+      <th>variances_norm</th>
+      <th>highly_variable</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>4</th>
+      <td>ENSMUSG00000025902</td>
+      <td>Sox17</td>
+      <td>4772</td>
+      <td>67.407450</td>
+      <td>363945.055626</td>
+      <td>280.0</td>
+      <td>2.958509</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>188</th>
+      <td>ENSMUSG00000026117</td>
+      <td>Zap70</td>
+      <td>2992</td>
+      <td>5.409091</td>
+      <td>14793.026717</td>
+      <td>350.0</td>
+      <td>2.775560</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>233</th>
+      <td>ENSMUSG00000026073</td>
+      <td>Il1r2</td>
+      <td>1908</td>
+      <td>4.764085</td>
+      <td>41918.471500</td>
+      <td>206.0</td>
+      <td>3.402176</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>500</th>
+      <td>ENSMUSG00000026185</td>
+      <td>Igfbp5</td>
+      <td>6006</td>
+      <td>43.234876</td>
+      <td>314355.591239</td>
+      <td>156.0</td>
+      <td>3.825651</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>512</th>
+      <td>ENSMUSG00000026180</td>
+      <td>Cxcr2</td>
+      <td>3048</td>
+      <td>2.379390</td>
+      <td>10491.033344</td>
+      <td>173.0</td>
+      <td>3.640129</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>30296</th>
+      <td>ENSMUSG00000024803</td>
+      <td>Ankrd1</td>
+      <td>2886</td>
+      <td>38.548572</td>
+      <td>274005.455137</td>
+      <td>107.0</td>
+      <td>4.741864</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>30313</th>
+      <td>ENSMUSG00000024987</td>
+      <td>Cyp26a1</td>
+      <td>1983</td>
+      <td>2.186686</td>
+      <td>12973.622003</td>
+      <td>454.0</td>
+      <td>2.580162</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>30379</th>
+      <td>ENSMUSG00000018822</td>
+      <td>Sfrp5</td>
+      <td>1900</td>
+      <td>2.927853</td>
+      <td>10943.645525</td>
+      <td>410.0</td>
+      <td>2.637004</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>32042</th>
+      <td>ENSMUSG00000031838</td>
+      <td>Ifi30</td>
+      <td>980</td>
+      <td>91.676950</td>
+      <td>995276.564962</td>
+      <td>128.0</td>
+      <td>4.205886</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>33314</th>
+      <td>ENSMUSG00000092572</td>
+      <td>Serpinb10</td>
+      <td>3490</td>
+      <td>0.264085</td>
+      <td>227.239812</td>
+      <td>487.0</td>
+      <td>2.535469</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>500 rows × 8 columns</p>
+</div></div>
+</div>
+</section>
+<section id="highly_variable_genes">
+<h2>highly_variable_genes<a class="headerlink" href="#highly_variable_genes" title="Permalink to this heading">¶</a></h2>
+<p>This API provides the same function as <code class="docutils literal notranslate"><span class="pre">get_highly_variable_genes</span></code>, but accepts any <code class="docutils literal notranslate"><span class="pre">tiledbsoma.ExperimentAxisQuery</span></code>. It is intended for more advanced users who wish to use create and manage their own queries.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;stable&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">experiment</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;is_primary_data == True and tissue_general == &#39;heart&#39;&quot;&quot;&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">hvgs_df</span> <span class="o">=</span> <span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+<span class="n">hvgs_df</span><span class="p">[</span><span class="n">hvgs_df</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>means</th>
+      <th>variances</th>
+      <th>highly_variable_rank</th>
+      <th>variances_norm</th>
+      <th>highly_variable</th>
+    </tr>
+    <tr>
+      <th>soma_joinid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>4</th>
+      <td>67.407450</td>
+      <td>363945.055626</td>
+      <td>280.0</td>
+      <td>2.958509</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>188</th>
+      <td>5.409091</td>
+      <td>14793.026717</td>
+      <td>350.0</td>
+      <td>2.775560</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>233</th>
+      <td>4.764085</td>
+      <td>41918.471500</td>
+      <td>206.0</td>
+      <td>3.402176</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>500</th>
+      <td>43.234876</td>
+      <td>314355.591239</td>
+      <td>156.0</td>
+      <td>3.825651</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>512</th>
+      <td>2.379390</td>
+      <td>10491.033344</td>
+      <td>173.0</td>
+      <td>3.640129</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>30296</th>
+      <td>38.548572</td>
+      <td>274005.455137</td>
+      <td>107.0</td>
+      <td>4.741864</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>30313</th>
+      <td>2.186686</td>
+      <td>12973.622003</td>
+      <td>454.0</td>
+      <td>2.580162</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>30379</th>
+      <td>2.927853</td>
+      <td>10943.645525</td>
+      <td>410.0</td>
+      <td>2.637004</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>32042</th>
+      <td>91.676950</td>
+      <td>995276.564962</td>
+      <td>128.0</td>
+      <td>4.205886</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>33314</th>
+      <td>0.264085</td>
+      <td>227.239812</td>
+      <td>487.0</td>
+      <td>2.535469</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>500 rows × 5 columns</p>
+</div></div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../analysis_demo/comp_bio_normalizing_full_gene_sequencing.html" class="btn btn-neutral float-left" title="Normalizing full-length gene sequencing data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mean_variance.html" class="btn btn-neutral float-right" title="Out-of-core (incremental) mean and variance calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

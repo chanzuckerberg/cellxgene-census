@@ -4,14 +4,16 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CZ CELLxGENE Discover Census &mdash; cellxgene-census 0.5.0 documentation</title>
+  <title>CZ CELLxGENE Discover Census &mdash; cellxgene-census  documentation</title>
   
 
   
+  <link rel="icon" type="image/png" sizes="32x32" href="_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="_static/img/favicon_16x16_v2.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +39,7 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script data-domain="cellxgene-census.readthedocs.io" defer="defer" src="https://plausible.io/js/script.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -50,35 +52,58 @@
 
   <div style="height: 100vh; overflow: hidden;">
      
-    <!-- top 48px for navbar height -->
+    <!-- top 56px for navbar height -->
     <div class="navbar-cxg">
         <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
             <span style="display:flex; gap: 32px; align-items: center;">
                 <a href="https://cellxgene.cziscience.com/">
                   <img src="_static/img/cellxgene-discover-logo.svg" />
                 </a>
-                <span style="display:flex; gap: 16px;">
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>    
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
                     </span>
-                    <span class="navbar-cxg-link">
-                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>    
-                    </span>
+                  </span>
                 </span>
             </span>
 
             <span class="navbar-cxg-link">
-              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>    
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
             </span>
         </div>
     </div>
-    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 48px;">
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
         
-        <!-- top 48px for navbar height -->
-        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 48px;" >
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
         <div class="wy-side-scroll">
             <div class="wy-side-nav-search" >
             
@@ -94,19 +119,12 @@
                 
                 
                 <div class="version">
-                    0.5
+                    v1.10.2
                 </div>
                 
             
 
             
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
 
             
             </div>
@@ -122,11 +140,13 @@
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_quick_start.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
 
@@ -165,75 +185,86 @@
             <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div itemprop="articleBody">
                 
-  <p>❗ <strong>R API in beta.</strong></p>
+  <p><span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: we’ve created a <strong>centralized hub of models and embeddings</strong> using Census data. <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Check it out</a>!</p>
+ </span>
 <section id="cz-cellxgene-discover-census">
 <h1>CZ CELLxGENE Discover Census<a class="headerlink" href="#cz-cellxgene-discover-census" title="Permalink to this heading">¶</a></h1>
-<p><img alt="image" src="_images/cellxgene_census_docsite_workflow.svg" /></p>
-<p>The CZ CELLxGENE Discover <strong>Census</strong> provides efficient computational tooling to access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover.</p>
-<p>Using a <strong>new access paradigm of cell-based slicing and querying</strong>, you can interact with the data across datasets through <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a>, or get slices in <a class="reference external" href="https://anndata.readthedocs.io/">AnnData</a> or <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> objects.</p>
-<p>Get started on using the Census:</p>
+<p>The Census provides efficient computational tooling to <strong>access, query, and analyze all single-cell RNA data from CZ CELLxGENE Discover</strong>. Using a new access paradigm of cell-based slicing and querying, you can interact with the data through TileDB-SOMA, or get slices in AnnData, Seurat, or SingleCellExperiment objects, thus accelerating your research by significantly minimizing data harmonization.</p>
+<p>Get started:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="cellxgene_census_docsite_installation.html"><span class="std std-doc">Installation</span></a></p></li>
-<li><p><a class="reference internal" href="cellxgene_census_docsite_quick_start.html"><span class="std std-doc">R &amp; Python quick start</span></a></p></li>
+<li><p><a class="reference internal" href="cellxgene_census_docsite_quick_start.html"><span class="std std-doc">Quick start (Python and R)</span></a></p></li>
 <li><p><a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">Census data and schema</span></a></p></li>
-<li><p><a class="reference internal" href="cellxgene_census_docsite_FAQ.html"><span class="std std-doc">FAQ</span></a></p></li>
 <li><p><a class="reference internal" href="examples.html"><span class="std std-doc">Python tutorials</span></a></p></li>
-<li><p>R tutorials. <em>Coming soon.</em></p></li>
+<li><p><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/articles/">R tutorials</a></p></li>
+<li><p><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census">Github repository</a></p></li>
 </ul>
-<section id="citing-the-census">
-<h2>Citing the Census<a class="headerlink" href="#citing-the-census" title="Permalink to this heading">¶</a></h2>
-<p>Please follow the <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citation guidelines</a> offered by CZ CELLxGENE Discover.</p>
+<p><img alt="image" src="_images/cellxgene_census_docsite_workflow.svg" /></p>
+<section id="citing-census">
+<h2>Citing Census<a class="headerlink" href="#citing-census" title="Permalink to this heading">¶</a></h2>
+<p>To cite the project please follow the <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citation guidelines</a> offered by CZ CELLxGENE Discover.</p>
+<p>To cite individual studies please refer to the tutorial <a class="reference internal" href="notebooks/api_demo/census_citation_generation.html"><span class="std std-doc">Generating citations for Census slices</span></a>.</p>
 </section>
 <section id="census-capabilities">
 <h2>Census Capabilities<a class="headerlink" href="#census-capabilities" title="Permalink to this heading">¶</a></h2>
-<p>The Census is a data object publicly hosted online and a convenience API to open it. The object is built using the <a class="reference external" href="https://github.com/single-cell-data/SOMA">SOMA</a> API and data model via its implementation <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a>. As such, the Census has all the data capabilities offered by TileDB-SOMA including:</p>
-<p><strong>Data access at scale</strong></p>
+<p>The Census is a data object publicly hosted online and an API to open it. The object is built using the <a class="reference external" href="https://github.com/single-cell-data/SOMA">SOMA</a> API specification and data model, and it is implemented via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a>. As such, the Census has all the data capabilities offered by TileDB-SOMA including:</p>
+<p><strong>Data access at scale:</strong></p>
 <ul class="simple">
 <li><p>Cloud-based data access.</p></li>
 <li><p>Efficient access for larger-than-memory slices of data.</p></li>
 <li><p>Query and access data based on cell or gene metadata at low latency.</p></li>
 </ul>
-<p><strong>Interoperability with existing single-cell toolkits</strong></p>
+<p><strong>Interoperability with existing single-cell toolkits:</strong></p>
 <ul class="simple">
 <li><p>Load and create <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> objects.</p></li>
-<li><p>Load and create <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> objects. Coming soon.</p></li>
+<li><p>Load and create <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> objects.</p></li>
+<li><p>Load and create <a class="reference external" href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html">SingleCellExperiment</a> objects.</p></li>
 </ul>
-<p><strong>Interoperability with existing Python or R data structures</strong></p>
+<p><strong>Interoperability with existing Python or R data structures:</strong></p>
 <ul class="simple">
 <li><p>From Python create <a class="reference external" href="https://arrow.apache.org/docs/python/index.html">PyArrow</a> objects, SciPy sparse matrices, NumPy arrays, and pandas data frames.</p></li>
 <li><p>From R create <a class="reference external" href="https://arrow.apache.org/docs/r/index.html">R Arrow</a> objects, sparse matrices (via the <a class="reference external" href="https://cran.r-project.org/package=Matrix">Matrix</a> package), and standard data frames and (dense) matrices.</p></li>
 </ul>
 </section>
+<section id="census-data-and-schema">
+<h2>Census Data and Schema<a class="headerlink" href="#census-data-and-schema" title="Permalink to this heading">¶</a></h2>
+<p>A description of the Census data and its schema is detailed <a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">here</span></a>.</p>
+<p>⚠️ Note that the data includes:</p>
+<ul class="simple">
+<li><p><strong>Full-gene sequencing read counts</strong> (e.g. Smart-Seq2) and <strong>molecule counts</strong> (e.g. 10X).</p></li>
+<li><p><strong>Duplicate cells</strong> present across multiple datasets, these can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p></li>
+</ul>
+</section>
 <section id="census-data-releases">
 <h2>Census Data Releases<a class="headerlink" href="#census-data-releases" title="Permalink to this heading">¶</a></h2>
 <p>The Census data release plans are detailed <a class="reference internal" href="cellxgene_census_docsite_data_release_info.html"><span class="std std-doc">here</span></a>.</p>
-<p>Shortly, starting in May 15, 2023, Census long-term supported data releases will be published every 6 months and will be publicly accessible for at least 5 years. In addition, weekly releases are published without any guarantee of permanence.</p>
+<p>Starting May 15th, 2023, Census data releases with long-term support will be published every six months. These releases will be publicly accessible for at least five years. In addition, weekly releases may be published without any guarantee of permanence.</p>
 </section>
 <section id="questions-feedback-and-issues">
-<h2>Questions, feedback and issues<a class="headerlink" href="#questions-feedback-and-issues" title="Permalink to this heading">¶</a></h2>
+<h2>Questions, Feedback and Issues<a class="headerlink" href="#questions-feedback-and-issues" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>Check out  the <a class="reference internal" href="cellxgene_census_docsite_FAQ.html"><span class="std std-doc">FAQ</span></a>.</p></li>
-<li><p>Questions: we encourage you to ask questions via <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issues</a>. Alternatively, for quick support you can join the <a class="reference external" href="https://czi.co/science-slack">CZI Science Community</a> on Slack and join the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel</p></li>
-<li><p>Bugs: please submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issue</a>.</p></li>
-<li><p>Security issues: if you believe you have found a security issue, in lieu of filing an issue please responsibly disclose it by contacting <a class="reference external" href="mailto:security&#37;&#52;&#48;chanzuckerberg&#46;com">security<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a>.</p></li>
-<li><p>You can send any other feedback to <a class="reference external" href="mailto:soma&#37;&#52;&#48;chanzuckerberg&#46;com">soma<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a></p></li>
+<li><p>Users are encouraged to submit questions and feature requests about the Census via <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issues</a>.</p></li>
+<li><p>For quick support, you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p></li>
+<li><p>Users are encouraged to share their feedback by emailing <a class="reference external" href="mailto:soma&#37;&#52;&#48;chanzuckerberg&#46;com">soma<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a>.</p></li>
+<li><p>Bugs can be submitted via <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">github issues</a>.</p></li>
+<li><p>If you believe you have found a security issue, please disclose it by contacting <a class="reference external" href="mailto:security&#37;&#52;&#48;chanzuckerberg&#46;com">security<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a>.</p></li>
+<li><p>Additional FAQs can be found <a class="reference internal" href="cellxgene_census_docsite_FAQ.html"><span class="std std-doc">here</span></a>.</p></li>
 </ul>
 </section>
 <section id="coming-soon">
-<h2>Coming soon<a class="headerlink" href="#coming-soon" title="Permalink to this heading">¶</a></h2>
+<h2>Coming Soon!<a class="headerlink" href="#coming-soon" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>We are currently working on creating the tooling necessary to perform data modeling at scale with seamless integration of the Census and <a class="reference external" href="https://pytorch.org/">PyTorch</a>.</p></li>
 <li><p>To increase the usability of the Census for research, in 2023 and 2024 we are planning to explore the following areas:</p>
 <ul>
 <li><p>Include organism-wide normalized layers.</p></li>
-<li><p>Include Organism-wide embeddings.</p></li>
+<li><p>Include organism-wide embeddings.</p></li>
 <li><p>On-demand information-rich subsampling.</p></li>
 </ul>
 </li>
 </ul>
 </section>
 <section id="projects-and-tools-using-census">
-<h2>Projects and tools using Census<a class="headerlink" href="#projects-and-tools-using-census" title="Permalink to this heading">¶</a></h2>
+<h2>Projects and Tools Using Census<a class="headerlink" href="#projects-and-tools-using-census" title="Permalink to this heading">¶</a></h2>
 <p>If you are interested in listing a project here, please reach out to us at <a class="reference external" href="mailto:soma&#37;&#52;&#48;chanzuckerberg&#46;com">soma<span>&#64;</span>chanzuckerberg<span>&#46;</span>com</a></p>
 </section>
 </section>
@@ -247,7 +278,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -262,13 +293,99 @@
         </section>
 
     </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
   </div>
   
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
       });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
   </script>
 
   

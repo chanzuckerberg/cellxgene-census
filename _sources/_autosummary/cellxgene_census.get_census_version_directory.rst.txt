@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_census\_version\_directory
+=================================================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_census_version_directory

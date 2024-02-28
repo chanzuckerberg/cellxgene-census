@@ -1,0 +1,545 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introducing a normalized layer and pre-calculated cell and gene statistics in Census &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="CZ CELLxGENE Discover Census in AWS" href="../../cellxgene_census_aws_open_data.html" />
+    <link rel="prev" title="Memory-efficient implementations of commonly used single-cell methods" href="20230919-out_of_core_methods.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.10.2
+                </div>
+                
+            
+
+            
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../articles.html">What’s new?</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../articles.html#id1">2023</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="20230808-r_api_release.html">R package <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> V1 is out!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="20230919-out_of_core_methods.html">Memory-efficient implementations of commonly used single-cell methods</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Introducing a normalized layer and pre-calculated cell and gene statistics in Census</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description-of-new-data-added-to-census">Description of new data added to Census</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-use-the-new-features">How to use the new features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#help-us-improve-these-data-additions">Help us improve these data additions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../articles.html">What’s new?</a></li>
+      <li class="breadcrumb-item active">Introducing a normalized layer and pre-calculated cell and gene statistics in Census</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/articles/2023/20231012-normalized_layer_precalc_stats.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="introducing-a-normalized-layer-and-pre-calculated-cell-and-gene-statistics-in-census">
+<h1>Introducing a normalized layer and pre-calculated cell and gene statistics in Census<a class="headerlink" href="#introducing-a-normalized-layer-and-pre-calculated-cell-and-gene-statistics-in-census" title="Permalink to this heading">¶</a></h1>
+<!-- markdownlint-disable MD036 -->
+<p><em>Published: October 12, 2023</em></p>
+<p><em>By: <a class="reference internal" href="#mlombardo&#64;chanzuckerberg.com"><span class="xref myst">Maximilian Lombardo</span></a> and <a class="reference internal" href="#pgarcia-nieto&#64;chanzuckerberg.com"><span class="xref myst">Pablo Garcia-Nieto</span></a></em></p>
+<!-- markdownlint-enable MD036 -->
+<p>The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md">Census schema V1.1.0</a>.</p>
+<p>With these additions users can easily:</p>
+<ul class="simple">
+<li><p>Expand their Census query filters to select genes or cells based on the new metadata. For example, selecting only cells with N number of genes expressed.</p></li>
+<li><p>Export the expanded cell and gene metadata for downstream analysis.</p></li>
+<li><p>Export a normalized expression data matrix for downstream analysis.</p></li>
+</ul>
+<p>These features are currently exclusive to the “latest” versions of the Census data release and they will be available in the next LTS data release. We invite your feedback as you explore these novel functionalities.</p>
+<p>Keep on reading to find out more about these features!</p>
+<section id="description-of-new-data-added-to-census">
+<h2>Description of new data added to Census<a class="headerlink" href="#description-of-new-data-added-to-census" title="Permalink to this heading">¶</a></h2>
+<p>All of the following changes were introduced in the Census schema V1.1.0.</p>
+<section id="added-a-new-library-size-normalized-layer">
+<h3>Added a new library-size normalized layer<a class="headerlink" href="#added-a-new-library-size-normalized-layer" title="Permalink to this heading">¶</a></h3>
+<p>We have introduced a library-size normalized X layer for the RNA measurements of both the human and mouse experiments available as <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code>.  The normalized layer is built by dividing each value in the raw count matrix by its corresponding row sum (i.e. size normalization).</p>
+<p>To reduce data size and improve performance, normalized values are stored with a reduced floating point precision. In addition, to ensure that small count values do not round to zero, a small sigma has been added. You will see the effect of these artifacts in row (per-cell) values not summing to precisely 1.0.</p>
+</section>
+<section id="enhanced-gene-metadata">
+<h3>Enhanced gene metadata<a class="headerlink" href="#enhanced-gene-metadata" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">ms[&quot;RNA&quot;].var</span></code> DataFrame for both the human and mouse experiments has been enriched with two new metadata fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nnz</span></code> — the number of explicitly stored values, effectively the number of cells expressing this gene.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_measured_obs</span></code> — the “measured” cells for this gene, effectively the number of cells for which this gene was measured in their respective dataset.</p></li>
+</ul>
+</section>
+<section id="enhanced-cell-metadata">
+<h3>Enhanced cell metadata<a class="headerlink" href="#enhanced-cell-metadata" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">obs</span></code> DataFrame for both the human and mouse experiments is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing. For each cell:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> — the sum of the raw counts, derived from <code class="docutils literal notranslate"><span class="pre">X[&quot;raw&quot;]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nnz</span></code> — the number of explicitly stored values, effectively the number of genes expressed on this cell.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw_mean_nnz</span></code> — the average counts from explicitly stored values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw_variance_nnz</span></code> — the variance of the counts from explicitly stored values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_measured_vars</span></code> — the “measured” genes, effectively the number of genes measured in the dataset from which the cell originated, thus all cells from the same dataset have the same value for this variable.</p></li>
+</ul>
+</section>
+</section>
+<section id="how-to-use-the-new-features">
+<h2>How to use the new features<a class="headerlink" href="#how-to-use-the-new-features" title="Permalink to this heading">¶</a></h2>
+<section id="exporting-the-normalized-data-to-existing-single-cell-toolkits">
+<h3>Exporting the normalized data to existing single-cell toolkits<a class="headerlink" href="#exporting-the-normalized-data-to-existing-single-cell-toolkits" title="Permalink to this heading">¶</a></h3>
+<p>In Python, the normalized data can be exported into AnnData specifying the <code class="docutils literal notranslate"><span class="pre">X_name</span> <span class="pre">=</span> <span class="pre">&quot;normalized&quot;</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">cellxgene.get_anndata()</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span>
+        <span class="n">census</span> <span class="o">=</span> <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+        <span class="n">var_value_filter</span> <span class="o">=</span> <span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;cell_type == &#39;sympathetic neuron&#39;&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]},</span>
+        <span class="n">X_name</span> <span class="o">=</span> <span class="s2">&quot;normalized&quot;</span> <span class="c1"># Specify the normalized layer for this query</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>Similarly, in R we can export the data to Seurat or SingleCellExperiment objects with the argument <code class="docutils literal notranslate"><span class="pre">X_layers</span></code> of the functions <code class="docutils literal notranslate"><span class="pre">get_seurat()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_single_cell_experiment()</span></code>.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;Seurat&quot;</span><span class="p">)</span>
+
+<span class="n">census</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;latest&quot;</span><span class="p">)</span>
+
+<span class="n">organism</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;Homo sapiens&quot;</span>
+<span class="n">gene_filter</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;feature_id %in% c(&#39;ENSG00000107317&#39;, &#39;ENSG00000106034&#39;)&quot;</span>
+<span class="n">cell_filter</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="s">&quot;cell_type == &#39;sympathetic neuron&#39;&quot;</span>
+<span class="n">cell_columns</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;tissue&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cell_type&quot;</span><span class="p">)</span>
+<span class="n">layers</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;normalized&quot;</span><span class="p">)</span>
+
+<span class="n">seurat_obj</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">get_seurat</span><span class="p">(</span>
+<span class="w">   </span><span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="p">,</span>
+<span class="w">   </span><span class="n">organism</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">organism</span><span class="p">,</span>
+<span class="w">   </span><span class="n">var_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gene_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_column_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_columns</span><span class="p">,</span>
+<span class="w">   </span><span class="n">X_layers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">layers</span>
+<span class="p">)</span>
+
+<span class="c1">#Single Cell Experiment</span>
+
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;SingleCellExperiment&quot;</span><span class="p">)</span>
+
+<span class="n">sce_obj</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">get_single_cell_experiment</span><span class="p">(</span>
+<span class="w">   </span><span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="p">,</span>
+<span class="w">   </span><span class="n">organism</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">organism</span><span class="p">,</span>
+<span class="w">   </span><span class="n">var_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gene_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_column_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_columns</span><span class="p">,</span>
+<span class="w">   </span><span class="n">X_layers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">layers</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="accessing-library-size-normalized-data-layer-via-tiledb-soma">
+<h3>Accessing library-size normalized data layer via TileDB-SOMA<a class="headerlink" href="#accessing-library-size-normalized-data-layer-via-tiledb-soma" title="Permalink to this heading">¶</a></h3>
+<p>For memory-efficient data retrieval, you can use TileDB-SOMA as outlined below. In Python this looks like the following.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span>
+
+<span class="c1"># Open context manager</span>
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+
+    <span class="c1"># Access human SOMA object</span>
+    <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+       <span class="n">measurement_name</span> <span class="o">=</span> <span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+       <span class="n">obs_query</span> <span class="o">=</span> <span class="n">tiledbsoma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span>
+           <span class="n">value_filter</span> <span class="o">=</span> <span class="s2">&quot;tissue == &#39;brain&#39; and sex == &#39;male&#39;&quot;</span>
+       <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Set iterable for normalized matrix</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;normalized&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">()</span>
+    
+    <span class="c1"># Iterate over the normalized matrix.</span>
+    <span class="c1"># Get an iterative slice as pyarrow.Table</span>
+    <span class="n">raw_slice</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
+    
+    <span class="c1"># Perform analysis</span>
+    
+    <span class="c1"># close the query</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>And the equivalent code in R.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;tiledbsoma&quot;</span><span class="p">)</span>
+
+<span class="n">human</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">census</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;census_data&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;homo_sapiens&quot;</span><span class="p">)</span>
+<span class="n">query</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">human</span><span class="o">$</span><span class="nf">axis_query</span><span class="p">(</span>
+<span class="w">  </span><span class="n">measurement_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;RNA&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">obs_query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SOMAAxisQuery</span><span class="o">$</span><span class="nf">new</span><span class="p">(</span>
+<span class="w">    </span><span class="n">value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;tissue == &#39;brain&#39; &amp; sex == &#39;male&#39;&quot;</span>
+<span class="w">  </span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Set iterable for normalized matrix</span>
+<span class="n">iterator</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">query</span><span class="o">$</span><span class="nf">X</span><span class="p">(</span><span class="s">&quot;normalized&quot;</span><span class="p">)</span><span class="o">$</span><span class="nf">tables</span><span class="p">()</span>
+
+<span class="c1"># Iterate over the normalized matrix.</span>
+<span class="c1"># Get an iterative slice as an Arrow Table</span>
+<span class="n">raw_slice</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="n">iterator</span><span class="o">$</span><span class="nf">read_next</span><span class="p">()</span>
+
+<span class="c1"># Perform analysis</span>
+</pre></div>
+</div>
+</section>
+<section id="utilizing-pre-calculated-stats-for-querying-obs-and-var">
+<h3>Utilizing pre-calculated stats for querying <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code><a class="headerlink" href="#utilizing-pre-calculated-stats-for-querying-obs-and-var" title="Permalink to this heading">¶</a></h3>
+<p>To filter cells or genes based on pre-calculated statistics and export to AnnData, you can use the new metadata variables as value filters.</p>
+<p>For example, you can add a filter to query cells with more than 500 genes expressed, along with other filters. In Python this looks like the following.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+
+<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+        <span class="n">census</span> <span class="o">=</span> <span class="n">census</span><span class="p">,</span>
+        <span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+        <span class="n">obs_value_filter</span> <span class="o">=</span> <span class="s2">&quot;nnz &gt; 500 and cell_type == &#39;sympathetic neuron&#39;&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]},</span>
+        <span class="n">var_value_filter</span> <span class="o">=</span> <span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In R, the equivalent code looks as follows.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1">#Seurat</span>
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;Seurat&quot;</span><span class="p">)</span>
+
+<span class="n">census</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;latest&quot;</span><span class="p">)</span>
+
+<span class="n">organism</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;Homo sapiens&quot;</span>
+<span class="n">gene_filter</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;feature_id %in% c(&#39;ENSG00000107317&#39;, &#39;ENSG00000106034&#39;)&quot;</span>
+<span class="n">cell_filter</span><span class="w"> </span><span class="o">&lt;-</span><span class="w">  </span><span class="s">&quot;nnz &gt; 500 &amp; cell_type == &#39;sympathetic neuron&#39;&quot;</span>
+<span class="n">cell_columns</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;tissue&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cell_type&quot;</span><span class="p">)</span>
+
+<span class="n">seurat_obj</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">get_seurat</span><span class="p">(</span>
+<span class="w">   </span><span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="p">,</span>
+<span class="w">   </span><span class="n">organism</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">organism</span><span class="p">,</span>
+<span class="w">   </span><span class="n">var_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gene_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_column_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_columns</span>
+<span class="p">)</span>
+
+<span class="c1">#Single Cell Experiment</span>
+
+<span class="nf">library</span><span class="p">(</span><span class="s">&quot;SingleCellExperiment&quot;</span><span class="p">)</span>
+
+<span class="n">sce_obj</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">get_single_cell_experiment</span><span class="p">(</span>
+<span class="w">   </span><span class="n">census</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">census</span><span class="p">,</span>
+<span class="w">   </span><span class="n">organism</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">organism</span><span class="p">,</span>
+<span class="w">   </span><span class="n">var_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gene_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_value_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_filter</span><span class="p">,</span>
+<span class="w">   </span><span class="n">obs_column_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell_columns</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="help-us-improve-these-data-additions">
+<h2>Help us improve these data additions<a class="headerlink" href="#help-us-improve-these-data-additions" title="Permalink to this heading">¶</a></h2>
+<p>We encourage you to engage with these new features in the Census API and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.</p>
+<p>For further information on any new feature, please reach out to us at <a class="reference internal" href="#soma&#64;chanzuckerberg.com"><span class="xref myst">soma&#64;chanzuckerberg.com</span></a>. To report issues or for additional feedback, refer to our <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">Census GitHub repository</a>.</p>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="20230919-out_of_core_methods.html" class="btn btn-neutral float-left" title="Memory-efficient implementations of commonly used single-cell methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../cellxgene_census_aws_open_data.html" class="btn btn-neutral float-right" title="CZ CELLxGENE Discover Census in AWS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+    <!-- Newsletter Banner -->
+    <div role="banner" id="newsletter-banner">
+      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
+      <div id="newsletter-banner-close-button" role="button">X</div>
+    </div>
+    <!-- Newsletter Modal -->
+    <dialog id="newsletter-modal">
+      <div id="newsletter-header">
+        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
+        <div id="newsletter-close-button" role="button">X</div>
+      </div>
+      <div id="newsletter-content">
+        <div id="newsletter-callout">Join Our Newsletter</div>
+        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
+        <!-- HubSpot Form target -->
+        <div id="newsletter-form-container"></div>
+      </div>
+
+      <div id="newsletter-footnote">Unsubscribe at any time.</div>
+    </dialog>
+  </div>
+  
+
+  <script>
+    // (thuang): 30 days
+    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
+
+    var script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/v2.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    // Run the code once the script is loaded
+    script.onload = async function() {
+      await hbspt.forms.create({
+        region: "na1",
+        portalId: "7272273",
+        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
+        target: '#newsletter-form-container',
+        onFormReady() {
+          // get element by type "email"
+          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailInput.setAttribute('placeholder', 'Enter email address');
+
+          // remove the label element for emailInput
+          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
+          emailLabel.remove();
+        },
+        submitText: 'Subscribe',
+      });
+    };
+
+    checkNewsletterBanner();
+
+    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
+      document.querySelector('#newsletter-banner').remove();
+      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
+    });
+
+    const modal = document.querySelector('#newsletter-modal');
+
+    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
+      modal.showModal();
+    });
+
+    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
+      modal.close();
+    });
+
+    function checkNewsletterBanner() {
+      /**
+       * (thuang): Use LocalStorage to store dismissed state for 30 days
+       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
+       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
+       * And vice versa.
+       */
+      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
+
+      if (newsletterBannerDismissed) {
+        return;
+      }
+
+      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
+        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
+      }
+
+      const newsletterBanner = document.querySelector('#newsletter-banner');
+
+      if (!newsletterBannerDismissed) {
+        newsletterBanner.style.display = 'flex';
+      }
+    }
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

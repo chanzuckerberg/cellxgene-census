@@ -6,7 +6,7 @@ Dependencies
 
 You must be on a Linux or MacOS system, with the following installed:
 
-- Python 3.7 to 3.10 (3.11 is not yet supported)
+- Python 3.8 to 3.11
 - Jupyter or some other means of running notebooks (e.g., vscode)
 
 For now, it is recommended that you do all this on a host with sufficient memory,
