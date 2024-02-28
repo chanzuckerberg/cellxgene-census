@@ -71,7 +71,7 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 
 
 # CXG schema columns we preserve in our census, and the Arrow type to encode as.  Schema:
-# https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md
+# https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md
 #
 # NOTE: a few additional columns are added (they are not defined in the CXG schema),
 # eg., dataset_id, tissue_general, etc.

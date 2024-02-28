@@ -1,8 +1,8 @@
 # CZ CELLxGENE Discover Census Schema
 
-**Version**: 1.3.0
+**Version**: 2.0.0
 
-**Last edited**: December, 2023.
+**Last edited**: March, 2024.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED" "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14), [RFC2119](https://www.rfc-editor.org/rfc/rfc2119.txt), and [RFC8174](https://www.rfc-editor.org/rfc/rfc8174.txt) when, and only when, they appear in all capitals, as shown here.
 
@@ -339,7 +339,7 @@ An example of this `SOMADataFrame` is shown below:
 <tbody>
   <tr>
     <td>census_schema_version</td>
-    <td>1.3.0</td>
+    <td>2.0.0</td>
   </tr>
   <tr>
     <td>census_build_date</td>
