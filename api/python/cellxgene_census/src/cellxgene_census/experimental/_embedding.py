@@ -136,3 +136,48 @@ def get_embedding(
             np.put(embedding.reshape(-1), indices, emb)
 
     return embedding
+
+
+def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
+    """Return a dictionary of all available embeddings for a given Census version.
+
+    Args:
+        census_version:
+            The Census version tag, e.g., ``"2023-12-15"``.
+
+    Returns:
+        A list of dictionaries, each containing metadata describing an available embedding.
+
+    Examples:
+        >>> get_all_available_embeddings('2023-12-15')
+        [{
+            'experiment_name': 'experiment_1',
+            'measurement_name': 'RNA',
+            'organism': "homo_sapiens",
+            'census_version': '2023-12-15',
+            'n_embeddings': 1000,
+            'n_features': 200,
+            'uri': 's3://bucket/embedding_1'
+        }]
+
+    """
+    pass
+
+
+def get_all_census_versions_with_embedding(
+    embedding_name: str, organism: str, embedding_type: str | None = "obs_embedding"
+) -> list[str]:
+    """Get a list of all census versions that contain a specific embedding.
+
+    Args:
+        embedding_name:
+            The name of the embedding.
+        organism:
+            The organism for which the embedding is associated.
+        embedding_type:
+            The type of embedding. Defaults to "obs_embedding".
+
+    Returns:
+        A list of census versions that contain the specified embedding.
+    """
+    pass

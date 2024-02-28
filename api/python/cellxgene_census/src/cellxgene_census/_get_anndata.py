@@ -22,6 +22,7 @@ def get_anndata(
     X_name: str = "raw",
     X_layers: Optional[Sequence[str]] = (),
     obsm_layers: Optional[Sequence[str]] = (),
+    varm_layers: Optional[Sequence[str]] = (),
     obs_value_filter: Optional[str] = None,
     obs_coords: Optional[SparseDFCoord] = None,
     var_value_filter: Optional[str] = None,
@@ -58,6 +59,12 @@ def get_anndata(
             Columns to fetch for ``obs`` and ``var`` dataframes.
         obsm_layers:
             Additional obsm layers to read and return in the ``obsm`` slot.
+            Use :func:`get_all_available_embeddings` to retrieve available embeddings
+            for this Census version and organism.
+        varm_layers:
+            Additional varm layers to read and return in the ``varm`` slot.
+            Use :func:`get_all_available_embeddings` to retrieve available embeddings
+            for this Census version and organism.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
