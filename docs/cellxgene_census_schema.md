@@ -89,21 +89,21 @@ For a given multi-species dataset, the table below shows all possible combinatio
 
 Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#assay_ontology_term_id).
 
-The Census MUST include all cells from the list of [accepted assays](./census_accepted_assays.csv). 
+The Census MUST include all cells from the list of [accepted assays](./census_accepted_assays.csv).
 
 These assays were selected with the following criteria:
 
 > Only children "EFO:0002772" or "EFO:0010183" are shown as this is a constraint imposed by the CELLxGENE dataset schema >3.0.0.
 >
 > * Must measure gene expression via RNA sequencing.
-> * Can be done at the single-cell level. 
-> * May include nascent or elongating RNA data. 
-> * May be targeted to specific genes in an assay-specific manner. 
+> * Can be done at the single-cell level.
+> * May include nascent or elongating RNA data.
+> * May be targeted to specific genes in an assay-specific manner.
 > * Doesn't measure other non-RNA molecules concurrently.
 > * Doesn’t measure spatial information.
-> * Doesn’t require auhtor metadata for correct interpretability (e.g. perturbation-based technologies).
+> * Doesn’t require author metadata for correct interpretability (e.g. perturbation-based technologies).
 > * Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
-> * Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs) 
+> * Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs).
 > * Doesn’t intend to primarily measure viral RNA.
 > * Doesn’t intend to primarily measure introns.
 > * Doesn’t do ribosome profiling .
