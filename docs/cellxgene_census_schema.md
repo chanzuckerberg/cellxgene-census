@@ -95,19 +95,18 @@ These assays were selected with the following criteria:
 
 > Only children "EFO:0002772" or "EFO:0010183" are shown as this is a constraint imposed by the CELLxGENE dataset schema >3.0.0.
 >
-> - Must measure gene expression via RNA sequencing.
-> - Can be done at the single-cell level. 
-> - May include nascent or elongating RNA data. 
-> - May be targeted to specific genes in an assay-specific manner. 
-> - Doesn't measure other non-RNA molecules concurrently.
-> - Doesn’t measure spatial information.
-> - Doesn’t require auhtor metadata for correct interpretability (e.g. perturbation-based technologies).
-> - Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
-> - Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs) 
-> - Doesn’t intend to primarily measure viral RNA.
-> - Doesn’t intend to primarily measure introns.
-> - Doesn’t do ribosome profiling .
-
+> * Must measure gene expression via RNA sequencing.
+> * Can be done at the single-cell level. 
+> * May include nascent or elongating RNA data. 
+> * May be targeted to specific genes in an assay-specific manner. 
+> * Doesn't measure other non-RNA molecules concurrently.
+> * Doesn’t measure spatial information.
+> * Doesn’t require auhtor metadata for correct interpretability (e.g. perturbation-based technologies).
+> * Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
+> * Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs) 
+> * Doesn’t intend to primarily measure viral RNA.
+> * Doesn’t intend to primarily measure introns.
+> * Doesn’t do ribosome profiling .
 
 #### Data matrix types
 
