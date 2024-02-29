@@ -106,7 +106,7 @@ These assays were selected with the following criteria:
 > * Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs).
 > * Doesn’t intend to primarily measure viral RNA.
 > * Doesn’t intend to primarily measure introns.
-> * Doesn’t do ribosome profiling .
+> * Doesn’t do ribosome profiling.
 
 #### Data matrix types
 
