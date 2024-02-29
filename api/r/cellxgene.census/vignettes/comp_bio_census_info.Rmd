@@ -169,7 +169,7 @@ All of these questions can be answered by directly querying the cell metadata as
 To exemplify the process of accessing and slicing cell metadata for summary stats, let's start with a trivial example and take a look at all human cell types available in the Census:
 
 ```{r}
-obs_df <-   census$get("census_data")$get("homo_sapiens")$obs$read(column_names = c("cell_type", "is_primary_data"))
+obs_df <- census$get("census_data")$get("homo_sapiens")$obs$read(column_names = c("cell_type", "is_primary_data"))
 as.data.frame(obs_df$concat())
 ```
 
