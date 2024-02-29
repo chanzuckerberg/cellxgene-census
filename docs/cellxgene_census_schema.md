@@ -89,173 +89,25 @@ For a given multi-species dataset, the table below shows all possible combinatio
 
 Assays are defined in the CELLxGENE dataset schema in [`assay_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#assay_ontology_term_id).
 
-The Census MUST *include* all cells with the following `assay_ontology_term_id` terms:
+The Census MUST include all cells from the list of [accepted assays](./census_accepted_assays.csv). 
 
-<table>
-<thead>
-  <tr>
-    <th>ID</th>
-    <th>Label</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>EFO:0030003</td>
-    <td>10x 3' transcription profiling</td>
-  </tr>
-  <tr>
-    <td>EFO:0009901</td>
-    <td>10x 3' v1</td>
-  </tr>
-  <tr>
-    <td>EFO:0009899</td>
-    <td>10x 3' v2</td>
-  </tr>
-  <tr>
-    <td>EFO:0009922</td>
-    <td>10x 3' v3</td>
-  </tr>
-  <tr>
-    <td>EFO:0030004</td>
-    <td>10x 5' transcription profiling</td>
-  </tr>
-  <tr>
-    <td>EFO:0011025</td>
-    <td>10x 5' v1</td>
-  </tr>
-  <tr>
-    <td>EFO:0009900</td>
-    <td>10x 5' v2</td>
-  </tr>
-  <tr>
-    <td>EFO:0700004</td>
-    <td>BD Rhapsody Targeted mRNA</td>
-  </tr>
-  <tr>
-    <td>EFO:0700003</td>
-    <td>BD Rhapsody Whole Transcriptome Analysis</td>
-  </tr>
-  <tr>
-    <td>EFO:0010010</td>
-    <td>CEL-seq2</td>
-  </tr>
-  <tr>
-    <td>EFO:0008720</td>
-    <td>DroNc-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0008722</td>
-    <td>Drop-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0700011</td>
-    <td>GEXSCOPE technology</td>
-  </tr>
-  <tr>
-    <td>EFO:0008780</td>
-    <td>inDrop</td>
-  </tr>
-  <tr>
-    <td>EFO:0008796</td>
-    <td>MARS-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0030002</td>
-    <td>microwell-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0010550</td>
-    <td>sci-RNA-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0008919</td>
-    <td>Seq-Well</td>
-  </tr>
-  <tr>
-    <td>EFO:0030019</td>
-    <td>Seq-Well S3</td>
-  </tr>
-  <tr>
-    <td>EFO:0008930</td>
-    <td>Smart-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0700016</td>
-    <td>Smart-seq v4</td>
-  </tr>
-  <tr>
-    <td>EFO:0008931</td>
-    <td>Smart-seq2</td>
-  </tr>
-  <tr>
-    <td>EFO:0008953</td>
-    <td>STRT-seq</td>
-  </tr>
-  <tr>
-    <td>EFO:0700010</td>
-    <td>TruDrop</td>
-  </tr>
-</tbody>
-</table>
+These assays were selected with the following criteria:
 
-The Census MUST *exclude* cells with any `assay_ontology_term_id` value not present in the above list. The rational for excluding assays includes:
+> Only children "EFO:0002772" or "EFO:0010183" are shown as this is a constraint imposed by the CELLxGENE dataset schema >3.0.0.
+>
+> - Must measure gene expression via RNA sequencing.
+> - Can be done at the single-cell level. 
+> - May include nascent or elongating RNA data. 
+> - May be targeted to specific genes in an assay-specific manner. 
+> - Doesn't measure other non-RNA molecules concurrently.
+> - Doesn’t measure spatial information.
+> - Doesn’t require auhtor metadata for correct interpretability (e.g. perturbation-based technologies).
+> - Doesn’t intend to primarily measure RNA structure, RNA fusions, RNA modifications, or RNA interactions.
+> - Doesn’t intend to primarily measure non-mRNA (e.g. tRNA, rRNA, small RNAs) 
+> - Doesn’t intend to primarily measure viral RNA.
+> - Doesn’t intend to primarily measure introns.
+> - Doesn’t do ribosome profiling .
 
-<table>
-<thead>
-  <tr>
-    <th>ID</th>
-    <th>Label</th>
-    <th>Reason for exclusion</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>EFO:0030059</td>
-    <td>10x multiome</td>
-    <td>Non-RNA data is not supported, as it cannot be determined if data from this assay represents ATAC or RNA measurements.</td>
-  </tr>
-  <tr>
-    <td>EFO:0030007</td>
-    <td>10x scATAC-seq</td>
-    <td>Non-RNA data is not supported.</td>
-  </tr>
-  <tr>
-    <td>EFO:0008992</td>
-    <td>MERFISH</td>
-    <td>Spatial data is not supported.</td>
-  </tr>
-  <tr>
-    <td>EFO:0008853</td>
-    <td>Patch-seq</td>
-    <td>Non-RNA data is not supported, as it cannot be determined with certainty if data from this assay only represents RNA measurements.</td>
-  </tr>
-  <tr>
-    <td>EFO:0010891</td>
-    <td>scATAC-seq</td>
-    <td>Non-RNA data is not supported.</td>
-  </tr>
-  <tr>
-    <td>EFO:0030026</td>
-    <td>sci-Plex</td>
-    <td>It has cell metadata not present in the CELLxGENE dataset schema. Without these metadata the RNA data lacks proper context.</td>
-  </tr>
-  <tr>
-    <td>EFO:0030062</td>
-    <td>Slide-seqV2</td>
-    <td>Spatial data is not supported.</td>
-  </tr>
-  <tr>
-    <td>EFO:0030027</td>
-    <td>snmC-Seq2</td>
-    <td>Non-RNA data is not supported.</td>
-  </tr>
-  <tr>
-    <td>EFO:0010961</td>
-    <td>Visium Spatial Gene Expression</td>
-    <td>Spatial data is not supported.</td>
-  </tr>
-</tbody>
-</table>
 
 #### Data matrix types
 
