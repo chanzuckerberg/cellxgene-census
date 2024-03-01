@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import logging
 import math
 import pathlib
@@ -9,13 +10,11 @@ from collections.abc import Callable
 from typing import Any, ParamSpec, TypeVar
 
 from .build_state import CensusBuildArgs
+from .util import clamp
 
 
 def logging_init_params(verbose: int, handlers: list[logging.Handler] | None = None) -> None:
     """Configure the logger defaults with explicit config params."""
-
-    def clamp(n: int, minn: int, maxn: int) -> int:
-        return min(max(n, minn), maxn)
 
     def get_level(v: int) -> int:
         levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -100,18 +99,21 @@ def logit(
             return a + 1
 
     """
+    exit_log_level = level
+    enter_log_level = {logging.NOTSET: logging.NOTSET, logging.INFO: logging.DEBUG}.get(level, logging.DEBUG)
 
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             if msg is None:
                 _msg = ""
             else:
                 _msg = ": " + msg.format(*args, **kwargs)
-            logger.log(level, f"{func.__name__} [enter]{_msg}")
+            logger.log(enter_log_level, f"{func.__name__} [enter]{_msg}")
             t = time.perf_counter()
             result: R = func(*args, **kwargs)
             call_time = "" if not timeit else f", {(time.perf_counter()-t):.2f}s"
-            logger.log(level, f"{func.__name__} [exit{call_time}]{_msg}")
+            logger.log(exit_log_level, f"{func.__name__} [exit{call_time}]{_msg}")
             return result
 
         return wrapper

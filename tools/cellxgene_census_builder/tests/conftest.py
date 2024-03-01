@@ -13,7 +13,7 @@ from cellxgene_census_builder.build_soma.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
 from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
-from cellxgene_census_builder.util import process_init
+from cellxgene_census_builder.process_init import process_init
 
 
 @attrs.define(frozen=True)

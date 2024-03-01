@@ -8,8 +8,6 @@ import requests
 import urllib3
 from scipy import sparse
 
-T = TypeVar("T")
-
 
 def fetch_json(url: str, delay_secs: float = 0.0) -> object:
     s = requests.Session()
@@ -63,6 +61,9 @@ def is_git_repo_dirty() -> bool:
     repo = git.repo.base.Repo(search_parent_directories=True)
     is_dirty: bool = repo.is_dirty()
     return is_dirty
+
+
+T = TypeVar("T")
 
 
 def shuffle(items: list[T], step: int) -> list[T]:

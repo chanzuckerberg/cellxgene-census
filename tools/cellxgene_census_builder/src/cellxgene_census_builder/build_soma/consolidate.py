@@ -11,9 +11,8 @@ import dask.distributed
 import tiledb
 import tiledbsoma as soma
 
-from ..build_state import CensusBuildArgs
+from ..util import cpu_count
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
-from .mp import create_process_pool_executor, log_on_broken_process_pool
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +35,10 @@ class ConsolidationCandidate:
         return not self.is_array()
 
 
-def consolidate(args: CensusBuildArgs, uri: str) -> None:
-    """The old API - consolidate & vacuum everything, and return when done."""
-    with create_process_pool_executor(args) as ppe:
-        futures = submit_consolidate(uri, pool=ppe, vacuum=True, exclude=None)
-
-        # Wait for consolidation to complete
-        for future in concurrent.futures.as_completed(futures):
-            log_on_broken_process_pool(ppe)
-            uri = future.result()
+def consolidate_all(uri: str) -> None:
+    """Consolidate & vacuum everything, and return when done."""
+    for candidate in _gather(uri):
+        _consolidate_tiledb_object(candidate, vacuum=True)
 
 
 @overload
@@ -152,6 +146,8 @@ def _consolidate_array(
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.consolidation.mode": mode,
                     "sm.consolidation.total_buffer_size": 32 * 1024**3,
+                    "sm.compute_concurrency_level": cpu_count(),
+                    "sm.io_concurrency_level": cpu_count(),
                     **(consolidation_config or {}),
                 }
             ),
@@ -225,11 +221,12 @@ def start_async_consolidation(
     return AsyncConsolidator(thread=t, stop_request=stop_request)
 
 
-def stop_async_consolidation(ac: AsyncConsolidator) -> None:
+def stop_async_consolidation(ac: AsyncConsolidator, *, join: bool = True) -> None:
     """Stop the async consolidator. Will block until it is done."""
     logger.info("Async consolidator: asking for stop")
     ac.stop_request["stop"] = True
-    ac.thread.join()
+    if join:
+        ac.thread.join()
 
 
 def _async_consolidator(
@@ -258,9 +255,9 @@ def _async_consolidator(
                 consolidation_modes=["fragments"],
                 consolidation_config={
                     # config for small, incremental consolidation steps.
-                    "sm.consolidation.steps": "8",
+                    "sm.consolidation.steps": "2",
                     "sm.consolidation.step_min_frags": "2",
-                    "sm.consolidation.step_max_frags": "16",
+                    "sm.consolidation.step_max_frags": "8",
                     "sm.consolidation.max_fragment_size": str(2 * 1024**3),
                 },
             )

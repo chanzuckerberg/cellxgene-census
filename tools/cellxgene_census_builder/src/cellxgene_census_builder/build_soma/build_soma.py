@@ -10,9 +10,9 @@ import psutil
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from ..util import cpu_count
+from ..util import clamp, cpu_count
 from .census_summary import create_census_summary
-from .consolidate import start_async_consolidation, stop_async_consolidation, submit_consolidate
+from .consolidate import consolidate_all, start_async_consolidation, stop_async_consolidation, submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -73,65 +73,83 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
     prepare_file_system(args)
 
-    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=0) as client:
-        # Step 1 - get all source datasets
-        datasets = build_step1_get_source_datasets(args)
+    try:
+        with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=0) as client:
+            # Step 1 - get all source datasets
+            datasets = build_step1_get_source_datasets(args)
 
-        # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-        root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
+            # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
+            root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
 
-        # Step 3 - populate axes
-        filtered_datasets = build_step3_populate_obs_and_var_axes(
-            args.h5ads_path.as_posix(), datasets, experiment_builders, args
-        )
-
-        # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
-        # process the X array (partitions are large to reduce TileDB fragment count).
-        #
-        # TODO: when global order writes are supported, processing of much smaller slices will be
-        # possible, and this budget should drop considerably. When that is implemented, n_workers should be
-        # be much larger (eg., use default value of #CPUs or some such).
-        # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
-        MEM_BUDGET = 128 * 1024**3
-        total_memory = psutil.virtual_memory().total
-        n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
-        client.cluster.scale(n_workers)
-
-        try:
-            if args.config.consolidate:
-                consolidator = start_async_consolidation(root_collection.uri)
-            else:
-                consolidator = None
-
-            # Step 4 - populate X layers
-            build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
-
-            # Prune datasets that we will not use, and do not want to include in the build
-            prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
-
-            # Step 5- write out dataset manifest and summary information
-            build_step5_save_axis_and_summary_info(
-                root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+            # Step 3 - populate axes
+            filtered_datasets = build_step3_populate_obs_and_var_axes(
+                args.h5ads_path.as_posix(), datasets, experiment_builders, args
             )
 
-        finally:
-            if consolidator:
-                stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
-                del consolidator
+            # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
+            # process the X array (partitions are large to reduce TileDB fragment count).
+            #
+            # TODO: when global order writes are supported, processing of much smaller slices will be
+            # possible, and this budget should drop considerably. When that is implemented, n_workers should be
+            # be much larger (eg., use default value of #CPUs or some such).
+            # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+            MEM_BUDGET = 72 * 1024**3
+            n_workers = clamp(
+                int(psutil.virtual_memory().total // MEM_BUDGET) - 1, 1, args.config.max_worker_processes
+            )  # reserve one for main thread
+            logger.info(f"Scaling cluster to {n_workers} workers.")
+            client.cluster.scale(n_workers)
 
-        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-        tiledb_soma_1969_work_around(root_collection.uri)
+            try:
+                if args.config.consolidate:
+                    consolidator = start_async_consolidation(root_collection.uri)
+                else:
+                    consolidator = None
 
-        # Scale the cluster up to n_cpus as we are no longer memory constrained in the following phases
-        client.cluster.scale(n=cpu_count())
+                # Step 4 - populate X layers
+                build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
+                if consolidator:
+                    stop_async_consolidation(consolidator, join=False)  # async request, does not block
 
-        consolidation_futures: list[dask.distributed.Future] | None = (
-            submit_consolidate(root_collection.uri, pool=client.current(), vacuum=True)
-            if args.config.consolidate
-            else None
-        )
-        validation_tasks = validate_soma(args) if validate else None
-        dask.distributed.wait(client.compute([consolidation_futures, validation_tasks]))
+                # Prune datasets that we will not use, and do not want to include in the build
+                prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+
+                # Step 5- write out dataset manifest and summary information
+                build_step5_save_axis_and_summary_info(
+                    root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+                )
+
+            finally:
+                if consolidator:
+                    stop_async_consolidation(consolidator, join=True)  # blocks until any running consolidate finishes
+                    del consolidator
+
+            # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+            tiledb_soma_1969_work_around(root_collection.uri)
+
+            # Scale the cluster up as we are no longer memory constrained in the following phases
+            n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+            logger.info(f"Scaling cluster to {n_workers} workers.")
+            client.cluster.scale(n=n_workers)
+
+            # consolidate in parallel. Do NOT vacuum or races ensue
+            consolidation_futures: list[dask.distributed.Future] | None = (
+                submit_consolidate(root_collection.uri, pool=client.current(), vacuum=False)
+                if args.config.consolidate
+                else None
+            )
+            validation_tasks = validate_soma(args) if validate else None
+            for f in dask.distributed.wait(client.compute([consolidation_futures, validation_tasks])).done:
+                f.result()  # allow any exceptions to propagate
+
+            logger.info("Validation & consolidation complete.")
+
+    except TimeoutError:
+        pass
+
+    # final consolidate+vacuum, if consolidation enabled
+    if args.config.consolidate:
+        consolidate_all(root_collection.uri)
 
     # after consolidation is complete, confirm that it worked as expected
     if args.config.consolidate and validate:

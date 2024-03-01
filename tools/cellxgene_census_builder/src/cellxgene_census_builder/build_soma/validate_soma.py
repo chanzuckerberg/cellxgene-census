@@ -6,7 +6,7 @@ import gc
 import logging
 import os.path
 import pathlib
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Self, TypeVar
@@ -24,7 +24,7 @@ from scipy import sparse
 
 from ..build_state import CensusBuildArgs
 from ..logging import logit
-from ..util import log_process_resource_status, urlcat
+from ..util import clamp, cpu_count, log_process_resource_status, urlcat
 from .anndata import open_anndata
 from .consolidate import list_uris_to_consolidate
 from .datasets import Dataset
@@ -52,9 +52,7 @@ from .globals import (
     SMART_SEQ,
     SOMA_TileDB_Context,
 )
-from .mp import (
-    create_dask_client,
-)
+from .mp import create_dask_client
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +74,12 @@ class EbInfo:
     @property
     def n_vars(self) -> int:
         return len(self.vars)
+
+
+def assert_all(__iterable: Iterable[object]) -> bool:
+    r = all(__iterable)
+    assert r
+    return r
 
 
 def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experiment:
@@ -278,57 +282,61 @@ def validate_axis_dataframes(
     experiment_specifications: list[ExperimentSpecification],
     args: CensusBuildArgs,
 ) -> Delayed[dict[str, EbInfo]]:
-    @logit(logger, msg="{0.dataset_id} {1.name}")
+    @logit(logger, msg="{0.dataset_id}")
     def _validate_axis_dataframes(
-        dataset: Dataset, eb: ExperimentSpecification, assets_path: str, soma_path: str
+        dataset: Dataset, experiment_specifications: list[ExperimentSpecification], assets_path: str, soma_path: str
     ) -> dict[str, EbInfo]:
-        with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-            census_data = census[CENSUS_DATA_NAME]
-            dataset_id = dataset.dataset_id
-            ad = open_anndata(
-                dataset,
-                base_path=assets_path,
-                obs_column_names=CXG_OBS_COLUMNS_READ,
-                var_column_names=CXG_VAR_COLUMNS_READ,
-                filter_spec=eb.anndata_cell_filter_spec,
-            )
-            eb_info = {eb.name: EbInfo()}
-            se = census_data[eb.name]
-            dataset_obs = (
-                se.obs.read(
-                    column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
-                    value_filter=f"dataset_id == '{dataset_id}'",
+        eb_info: dict[str, EbInfo] = {}
+        for eb in experiment_specifications:
+            with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
+                census_data = census[CENSUS_DATA_NAME]
+                dataset_id = dataset.dataset_id
+                ad = open_anndata(
+                    dataset,
+                    base_path=assets_path,
+                    obs_column_names=CXG_OBS_COLUMNS_READ,
+                    var_column_names=CXG_VAR_COLUMNS_READ,
+                    filter_spec=eb.anndata_cell_filter_spec,
                 )
-                .concat()
-                .to_pandas()
-                .drop(
-                    columns=[
-                        "dataset_id",
-                        "tissue_general",
-                        "tissue_general_ontology_term_id",
-                        *CENSUS_OBS_STATS_COLUMNS,
-                    ]
+                eb_info[eb.name] = EbInfo()
+                se = census_data[eb.name]
+                dataset_obs = (
+                    se.obs.read(
+                        column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
+                        value_filter=f"dataset_id == '{dataset_id}'",
+                    )
+                    .concat()
+                    .to_pandas()
+                    .drop(
+                        columns=[
+                            "dataset_id",
+                            "tissue_general",
+                            "tissue_general_ontology_term_id",
+                            *CENSUS_OBS_STATS_COLUMNS,
+                        ]
+                    )
+                    .sort_values(by="soma_joinid")
+                    .drop(columns=["soma_joinid"])
+                    .reset_index(drop=True)
                 )
-                .sort_values(by="soma_joinid")
-                .drop(columns=["soma_joinid"])
-                .reset_index(drop=True)
-            )
 
-            # decategorize census obs slice, as it will not have the same categories as H5AD obs,
-            # preventing Pandas from performing the DataFrame equivalence operation.
-            for key in dataset_obs:
-                if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
-                    dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
+                # decategorize census obs slice, as it will not have the same categories as H5AD obs,
+                # preventing Pandas from performing the DataFrame equivalence operation.
+                for key in dataset_obs:
+                    if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
+                        dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
 
-            assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
-            if ad.n_obs > 0:
-                eb_info[eb.name].n_obs += ad.n_obs
-                eb_info[eb.name].dataset_ids.add(dataset_id)
-                eb_info[eb.name].vars |= set(ad.var.index.array)
-                ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(drop=True)
-                assert (
-                    (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
-                ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
+                assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
+                if ad.n_obs > 0:
+                    eb_info[eb.name].n_obs += ad.n_obs
+                    eb_info[eb.name].dataset_ids.add(dataset_id)
+                    eb_info[eb.name].vars |= set(ad.var.index.array)
+                    ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(
+                        drop=True
+                    )
+                    assert (
+                        (dataset_obs.sort_index(axis=1) == ad_obs.sort_index(axis=1)).all().all()
+                    ), f"{dataset.dataset_id}/{eb.name} obs content, mismatch"
 
         return eb_info
 
@@ -343,8 +351,13 @@ def validate_axis_dataframes(
         return eb_info
 
     eb_info = (
-        dask.bag.from_sequence((d, e) for d in datasets for e in experiment_specifications)
-        .starmap(_validate_axis_dataframes, assets_path=assets_path, soma_path=soma_path)
+        dask.bag.from_sequence(datasets, partition_size=8)
+        .map(
+            _validate_axis_dataframes,
+            experiment_specifications=experiment_specifications,
+            assets_path=assets_path,
+            soma_path=soma_path,
+        )
         .reduction(reduce_eb_info, reduce_eb_info)
     )
 
@@ -397,28 +410,43 @@ def validate_X_layers_normalized(
                 .concat()
                 .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
             )
+            raw_soma_data = raw["soma_data"].to_numpy()
+            raw_soma_dim_0 = raw["soma_dim_0"].to_numpy()
+            raw_soma_dim_1 = raw["soma_dim_1"].to_numpy()
+            del raw
+            gc.collect()
+
             norm = (
                 X_norm.read(coords=(slice(row_range_start, row_range_stop - 1),))
                 .tables()
                 .concat()
                 .sort_by([("soma_dim_0", "ascending"), ("soma_dim_1", "ascending")])
             )
+            norm_soma_data = norm["soma_data"].to_numpy()
+            norm_soma_dim_0 = norm["soma_dim_0"].to_numpy()
+            norm_soma_dim_1 = norm["soma_dim_1"].to_numpy()
+            del norm
+            gc.collect()
 
-            assert np.array_equal(raw["soma_dim_0"].to_numpy(), norm["soma_dim_0"].to_numpy())
-            assert np.array_equal(raw["soma_dim_1"].to_numpy(), norm["soma_dim_1"].to_numpy())
+            # confirm identical coordinates
+            assert np.array_equal(raw_soma_dim_0, norm_soma_dim_0)
+            assert np.array_equal(raw_soma_dim_1, norm_soma_dim_1)
+            del norm_soma_dim_0, norm_soma_dim_1
+            gc.collect()
+
             # If we wrote a value, it MUST be larger than zero (i.e., represents a raw count value of 1 or greater)
-            assert np.all(raw["soma_data"].to_numpy() > 0.0), "Found zero value in raw layer"
-            assert np.all(norm["soma_data"].to_numpy() > 0.0), "Found zero value in normalized layer"
+            assert np.all(raw_soma_data > 0.0), "Found zero value in raw layer"
+            assert np.all(norm_soma_data > 0.0), "Found zero value in normalized layer"
 
-            dim0 = norm["soma_dim_0"].to_numpy()
-            dim1 = norm["soma_dim_1"].to_numpy()
-            row: npt.NDArray[np.int64] = pd.RangeIndex(row_range_start, row_range_stop).get_indexer(dim0)  # type: ignore[no-untyped-call]
-            col = var_df.index.get_indexer(dim1)
+            row: npt.NDArray[np.int64] = pd.RangeIndex(row_range_start, row_range_stop).get_indexer(raw_soma_dim_0)  # type: ignore[no-untyped-call]
+            col = var_df.index.get_indexer(raw_soma_dim_1)
             n_rows: int = row.max() + 1
+            del raw_soma_dim_0, raw_soma_dim_1
+            gc.collect()
 
-            norm_csr = sparse.coo_matrix((norm["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
-            raw_csr = sparse.coo_matrix((raw["soma_data"].to_numpy(), (row, col)), shape=(n_rows, n_cols)).tocsr()
-            del raw, norm, dim0, dim1, row, col
+            norm_csr = sparse.coo_matrix((norm_soma_data, (row, col)), shape=(n_rows, n_cols)).tocsr()
+            raw_csr = sparse.coo_matrix((raw_soma_data, (row, col)), shape=(n_rows, n_cols)).tocsr()
+            del row, col
             gc.collect()
 
             if is_smart_seq.any():
@@ -439,13 +467,20 @@ def validate_X_layers_normalized(
 
         return True
 
-    JOINID_STRIDE = 16_000
+    JOINID_STRIDE = 32_000
     X_shapes = get_experiment_shape(soma_path, experiment_specifications)
+    # JOINID_STRIDE must be smallish, else will fail in scipy due to int32 overflow during coordinate
+    # broadcasting. For more info, see: https://github.com/scipy/scipy/issues/13155
+    assert all((shape[1] * JOINID_STRIDE < (2**31 - 1)) for shape in X_shapes.values())
+
     return (
         dask.bag.from_sequence(
-            (es, id, id + JOINID_STRIDE)
-            for es in experiment_specifications
-            for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+            (
+                (es, id, id + JOINID_STRIDE)
+                for es in experiment_specifications
+                for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+            ),
+            partition_size=8,
         )
         .starmap(_validate_X_layers_normalized, soma_path=soma_path)
         .reduction(all, all)
@@ -489,14 +524,17 @@ def validate_X_layers_has_unique_coords(
         gc.collect()
         return True
 
-    JOINID_STRIDE = 50_000
+    JOINID_STRIDE = 96_000
     X_shapes = get_experiment_shape(soma_path, experiment_specifications)
     return (
         dask.bag.from_sequence(
-            (es, layer_name, id, id + JOINID_STRIDE)
-            for es in experiment_specifications
-            for layer_name in CENSUS_X_LAYERS
-            for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+            (
+                (es, layer_name, id, id + JOINID_STRIDE)
+                for es in experiment_specifications
+                for layer_name in CENSUS_X_LAYERS
+                for id in range(0, X_shapes[es.name][0], JOINID_STRIDE)
+            ),
+            partition_size=8,
         )
         .starmap(_validate_X_layers_has_unique_coords, soma_path=soma_path)
         .reduction(all, all)
@@ -540,47 +578,50 @@ def validate_X_layers_presence(
 
         return True
 
-    @logit(logger, msg="{0.dataset_id}, {1.name}")
-    def _validate_X_layers_presence(dataset: Dataset, es: ExperimentSpecification, soma_path: str) -> bool:
+    @logit(logger, msg="{0.dataset_id}")
+    def _validate_X_layers_presence(
+        dataset: Dataset, experiment_specifications: list[ExperimentSpecification], soma_path: str
+    ) -> bool:
         """For a given dataset and experiment, confirm that the presence matrix matches contents of X[raw]."""
-        with open_experiment(soma_path, es) as exp:
-            obs_df = (
-                exp.obs.read(
-                    value_filter=f"dataset_id == '{dataset.soma_joinid}'",
-                    column_names=["soma_joinid", "n_measured_vars"],
-                )
-                .concat()
-                .to_pandas()
-            )
-            if len(obs_df) > 0:  # skip empty experiments
-                X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
-
-                presence_accumulator = np.zeros((X_raw.shape[1]), dtype=np.bool_)
-                for block, _ in (
-                    X_raw.read(coords=(obs_df.soma_joinids.to_numpy(), slice(None)))
-                    .blockwise(axis=0, eager=False, reindex_disable_on_axis=[0, 1])
-                    .tables()
-                ):
-                    presence_accumulator[block["soma_dim_1"].to_numpy()] = 1
-
-                presence = (
-                    exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
-                    .read((dataset.soma_joinid,))
-                    .tables()
+        for es in experiment_specifications:
+            with open_experiment(soma_path, es) as exp:
+                obs_df = (
+                    exp.obs.read(
+                        value_filter=f"dataset_id == '{dataset.soma_joinid}'",
+                        column_names=["soma_joinid", "n_measured_vars"],
+                    )
                     .concat()
+                    .to_pandas()
                 )
+                if len(obs_df) > 0:  # skip empty experiments
+                    X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"]
 
-                assert np.array_equal(presence_accumulator, presence), "Presence value does not match X[raw]"
+                    presence_accumulator = np.zeros((X_raw.shape[1]), dtype=np.bool_)
+                    for block, _ in (
+                        X_raw.read(coords=(obs_df.soma_joinids.to_numpy(), slice(None)))
+                        .blockwise(axis=0, size=2**20, eager=False, reindex_disable_on_axis=[0, 1])
+                        .tables()
+                    ):
+                        presence_accumulator[block["soma_dim_1"].to_numpy()] = 1
 
-                assert (
-                    obs_df.n_measured_vars.to_numpy() == presence_accumulator.sum()
-                ).all(), f"{es.name}:{dataset.dataset_id} obs.n_measured_vars incorrect."
+                    presence = (
+                        exp.ms[MEASUREMENT_RNA_NAME][FEATURE_DATASET_PRESENCE_MATRIX_NAME]
+                        .read((dataset.soma_joinid,))
+                        .tables()
+                        .concat()
+                    )
+
+                    assert np.array_equal(presence_accumulator, presence), "Presence value does not match X[raw]"
+
+                    assert (
+                        obs_df.n_measured_vars.to_numpy() == presence_accumulator.sum()
+                    ).all(), f"{es.name}:{dataset.dataset_id} obs.n_measured_vars incorrect."
 
         return True
 
     check_presence_values = (
-        dask.bag.from_sequence((d, es) for d in datasets for es in experiment_specifications)
-        .starmap(_validate_X_layers_presence, soma_path=soma_path)
+        dask.bag.from_sequence(datasets, partition_size=8)
+        .map(_validate_X_layers_presence, soma_path=soma_path, experiment_specifications=experiment_specifications)
         .reduction(all, all)
         .to_delayed()
     )
@@ -660,101 +701,112 @@ def validate_X_layers_raw_contents(
 
         return True
 
-    @logit(logger, msg="{0.dataset_id}, {1.name}")
+    @logit(logger, msg="{0.dataset_id}")
     def _validate_X_layers_raw_contents(
-        dataset: Dataset, es: ExperimentSpecification, soma_path: str, assets_path: str
+        dataset: Dataset, experiment_specifications: list[ExperimentSpecification], soma_path: str, assets_path: str
     ) -> bool:
-        ad = open_anndata(
-            dataset, base_path=assets_path, filter_spec=es.anndata_cell_filter_spec, var_column_names=("_index",)
-        )
-        with open_experiment(soma_path, es) as exp:
-            # get the joinids for the obs axis
-            obs_df = (
-                exp.obs.read(
-                    column_names=["soma_joinid", "dataset_id", *CENSUS_OBS_STATS_COLUMNS],
-                    value_filter=f"dataset_id == '{dataset.dataset_id}'",
-                )
-                .concat()
-                .to_pandas()
+        for es in experiment_specifications:
+            ad = open_anndata(
+                dataset, base_path=assets_path, filter_spec=es.anndata_cell_filter_spec, var_column_names=("_index",)
             )
-            assert ad.n_obs == len(obs_df)
-            if len(obs_df) == 0:  # skip empty
-                return True
-
-            # get the joinids for the var axis
-            var_df = (
-                exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
-            )
-            # mask defines which feature_ids are in the AnnData
-            var_joinid_in_adata = var_df.feature_id.isin(ad.var.index)
-            assert ad.n_vars == var_joinid_in_adata.sum()
-
-            # var/col reindexer
-            var_index = soma.tiledbsoma_build_index(
-                ad.var.join(var_df.set_index("feature_id")).soma_joinid.to_numpy(), context=exp.context
-            )
-            var_df = var_df[["soma_joinid"]]  # save some memory
-
-            STRIDE = 16_000
-            for idx in range(0, ad.n_obs, STRIDE):
-                obs_joinids_split = obs_df.soma_joinid.to_numpy()[idx : idx + STRIDE]
-                X_raw = exp.ms[MEASUREMENT_RNA_NAME].X["raw"].read((obs_joinids_split, slice(None))).tables().concat()
-                X_raw_data = X_raw["soma_data"].to_numpy()
-                X_raw_obs_joinids = X_raw["soma_dim_0"].to_numpy()
-                X_raw_var_joinids = X_raw["soma_dim_1"].to_numpy()
-                del X_raw
-
-                # positionally re-index
-                cols_by_position = var_index.get_indexer(X_raw_var_joinids)
-                rows_by_position = soma.tiledbsoma_build_index(obs_joinids_split, context=exp.context).get_indexer(
-                    X_raw_obs_joinids
-                )
-                del X_raw_obs_joinids
-
-                expected_X = ad[idx : idx + STRIDE].X
-                if isinstance(expected_X, np.ndarray):
-                    expected_X = sparse.csr_matrix(expected_X)
-
-                # Check that Census summary stats in obs match the AnnData
-                assert _validate_X_obs_stats(es, dataset, obs_df.iloc[idx : idx + STRIDE], expected_X)
-
-                # Check that raw_sum stat matches raw layer stored in the Census. This ensures that we have
-                # not accidentally stored _extra_ values, for columns not in the H5AD var dataframe. This
-                # is largely redundant with Assertion #2 - could simply compare raw_sum with the axis sum of
-                # the expected_X matrix.
-                raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
-                np.add.at(raw_sum, rows_by_position, X_raw_data)
-                raw_sum = raw_sum.astype(
-                    CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
-                )  # cast to the storage type
-                assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
-                del raw_sum
-
-                # Assertion 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
-                assert (
-                    sparse.coo_matrix(
-                        (X_raw_data, (rows_by_position, cols_by_position)),
-                        shape=(len(obs_joinids_split), ad.shape[1]),
+            with open_experiment(soma_path, es) as exp:
+                # get the joinids for the obs axis
+                obs_df = (
+                    exp.obs.read(
+                        column_names=["soma_joinid", "dataset_id", *CENSUS_OBS_STATS_COLUMNS],
+                        value_filter=f"dataset_id == '{dataset.dataset_id}'",
                     )
-                    != expected_X
-                ).nnz == 0, f"{es.name}:{dataset.dataset_id} the X matrix elements are not equal."
-                del X_raw_data, cols_by_position, rows_by_position, expected_X
+                    .concat()
+                    .to_pandas()
+                )
+                assert ad.n_obs == len(obs_df)
+                if len(obs_df) == 0:  # skip empty
+                    return True
 
-                # Assertion 2 - the contents of the X matrix are EMPTY for all var ids NOT present in the AnnData.
-                # Test by asserting that no col IDs contain a joinid not in the AnnData.
-                assert (
-                    var_joinid_in_adata.all()
-                    or not pd.Series(X_raw_var_joinids).isin(var_df[~var_joinid_in_adata].soma_joinid).any()
-                ), f"{es.name}:{dataset.dataset_id} unexpected values present in the X matrix."
-                del X_raw_var_joinids
+                # get the joinids for the var axis
+                var_df = (
+                    exp.ms[MEASUREMENT_RNA_NAME]
+                    .var.read(column_names=["soma_joinid", "feature_id"])
+                    .concat()
+                    .to_pandas()
+                )
+                # mask defines which feature_ids are in the AnnData
+                var_joinid_in_adata = var_df.feature_id.isin(ad.var.index)
+                assert ad.n_vars == var_joinid_in_adata.sum()
 
-                gc.collect()
+                # var/col reindexer
+                var_index = soma.tiledbsoma_build_index(
+                    ad.var.join(var_df.set_index("feature_id")).soma_joinid.to_numpy(), context=exp.context
+                )
+                var_df = var_df[["soma_joinid"]]  # save some memory
+
+                STRIDE = 48_000  # TODO: scale by density for more consistent memory use
+                for idx in range(0, ad.n_obs, STRIDE):
+                    obs_joinids_split = obs_df.soma_joinid.to_numpy()[idx : idx + STRIDE]
+                    X_raw = (
+                        exp.ms[MEASUREMENT_RNA_NAME].X["raw"].read((obs_joinids_split, slice(None))).tables().concat()
+                    )
+                    X_raw_data = X_raw["soma_data"].to_numpy()
+                    X_raw_obs_joinids = X_raw["soma_dim_0"].to_numpy()
+                    X_raw_var_joinids = X_raw["soma_dim_1"].to_numpy()
+                    del X_raw
+
+                    # positionally re-index
+                    cols_by_position = var_index.get_indexer(X_raw_var_joinids)
+                    rows_by_position = soma.tiledbsoma_build_index(obs_joinids_split, context=exp.context).get_indexer(
+                        X_raw_obs_joinids
+                    )
+                    del X_raw_obs_joinids
+
+                    expected_X = ad[idx : idx + STRIDE].X
+                    if isinstance(expected_X, np.ndarray):
+                        expected_X = sparse.csr_matrix(expected_X)
+
+                    # Check that Census summary stats in obs match the AnnData
+                    assert _validate_X_obs_stats(es, dataset, obs_df.iloc[idx : idx + STRIDE], expected_X)
+
+                    # Check that raw_sum stat matches raw layer stored in the Census. This ensures that we have
+                    # not accidentally stored _extra_ values, for columns not in the H5AD var dataframe. This
+                    # is largely redundant with Assertion #2 - could simply compare raw_sum with the axis sum of
+                    # the expected_X matrix.
+                    raw_sum = np.zeros((len(obs_joinids_split),), dtype=np.float64)  # 64 bit for numerical stability
+                    np.add.at(raw_sum, rows_by_position, X_raw_data)
+                    raw_sum = raw_sum.astype(
+                        CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()
+                    )  # cast to the storage type
+                    assert np.allclose(raw_sum, obs_df.raw_sum.iloc[idx : idx + STRIDE].to_numpy())
+                    del raw_sum
+
+                    # Assertion 1 - the contents of the X matrix are EQUAL for all var values present in the AnnData
+                    assert (
+                        sparse.coo_matrix(
+                            (X_raw_data, (rows_by_position, cols_by_position)),
+                            shape=(len(obs_joinids_split), ad.shape[1]),
+                        )
+                        != expected_X
+                    ).nnz == 0, f"{es.name}:{dataset.dataset_id} the X matrix elements are not equal."
+                    del X_raw_data, cols_by_position, rows_by_position, expected_X
+
+                    # Assertion 2 - the contents of the X matrix are EMPTY for all var ids NOT present in the AnnData.
+                    # Test by asserting that no col IDs contain a joinid not in the AnnData.
+                    assert (
+                        var_joinid_in_adata.all()
+                        or not pd.Series(X_raw_var_joinids).isin(var_df[~var_joinid_in_adata].soma_joinid).any()
+                    ), f"{es.name}:{dataset.dataset_id} unexpected values present in the X matrix."
+                    del X_raw_var_joinids
+
+                    gc.collect()
 
         return True
 
     return (
-        dask.bag.from_sequence((d, es) for d in datasets for es in experiment_specifications)
-        .starmap(_validate_X_layers_raw_contents, soma_path=soma_path, assets_path=assets_path)
+        dask.bag.from_sequence(datasets, partition_size=8)
+        .map(
+            _validate_X_layers_raw_contents,
+            experiment_specifications=experiment_specifications,
+            soma_path=soma_path,
+            assets_path=assets_path,
+        )
         .reduction(all, all)
         .to_delayed()
     )
@@ -904,6 +956,7 @@ def validate_internal_consistency(
                     ),
                     shape=(len(datasets_df), len(var)),
                 ).tocsr()
+                del presence_tbl
 
                 # Assertion 1 - counts are mutually consistent
                 assert obs.nnz.sum() == var.nnz.sum(), f"{eb.name}: axis NNZ mismatch."
@@ -1015,29 +1068,41 @@ def validate_soma(args: CensusBuildArgs) -> dask.delayed.Delayed[bool]:
     eb_info = validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args)
 
     # Perform various validations and roll-up their return value
-    return dask.delayed(all)(
-        (
-            dask.delayed(lambda e: len(e) == len(experiment_specifications))(eb_info),
-            dask.delayed(validate_axis_dataframes_global_ids)(soma_path, experiment_specifications, eb_info),
-            dask.delayed(validate_internal_consistency)(soma_path, experiment_specifications, datasets),
-            dask.delayed(validate_soma_bounding_box)(soma_path, experiment_specifications, eb_info),
-            dask.delayed(validate_X_layers_schema)(soma_path, experiment_specifications, eb_info),
-            validate_X_layers_normalized(soma_path, experiment_specifications),
-            validate_X_layers_has_unique_coords(soma_path, experiment_specifications),
-            validate_X_layers_presence(soma_path, datasets, experiment_specifications),
-            validate_X_layers_raw_contents(soma_path, assets_path, datasets, experiment_specifications),
+    (g,) = dask.optimize(
+        dask.delayed(assert_all)(
+            (
+                dask.delayed(lambda e: len(e) == len(experiment_specifications))(eb_info),
+                dask.delayed(validate_axis_dataframes_global_ids)(soma_path, experiment_specifications, eb_info),
+                dask.delayed(validate_internal_consistency)(soma_path, experiment_specifications, datasets),
+                dask.delayed(validate_soma_bounding_box)(soma_path, experiment_specifications, eb_info),
+                dask.delayed(validate_X_layers_schema)(soma_path, experiment_specifications, eb_info),
+                validate_X_layers_normalized(soma_path, experiment_specifications),
+                validate_X_layers_has_unique_coords(soma_path, experiment_specifications),
+                validate_X_layers_presence(soma_path, datasets, experiment_specifications),
+                validate_X_layers_raw_contents(soma_path, assets_path, datasets, experiment_specifications),
+            )
         )
     )
+    return g
 
 
 def validate(args: CensusBuildArgs) -> int:
     """Validate all.
 
-    Stand-alone function, to validate outside of a build.
+    Stand-alone function, to validate outside of a build, for use in CLI
     """
     logger.info("Validating correct consolidation and vacuuming - start")
-    with create_dask_client(args, memory_limit=None) as client:
-        distributed.wait(client.compute(validate_soma(args)))
+    n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+
+    try:
+        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
+            for r in distributed.wait(client.compute(validate_soma(args))).done:
+                assert r.result()
+            logging.info("Validation complete.")
+            client.shutdown()
+
+    except TimeoutError:
+        pass
 
     validate_consolidation(args)
     logger.info("Validating correct consolidation and vacuuming - complete")
