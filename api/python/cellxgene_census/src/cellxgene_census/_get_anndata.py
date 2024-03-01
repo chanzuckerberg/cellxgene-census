@@ -12,9 +12,11 @@ import anndata
 import tiledbsoma as soma
 from somacore.options import SparseDFCoord
 
-from util import _extract_census_version
+from ._util import _extract_census_version
 
 from ._experiment import _get_experiment
+
+CENSUS_EMBEDDINGS_LOCATION_BASE_URI = "s3://cellxgene-contrib-public/contrib/cell-census/soma"
 
 
 def get_anndata(
@@ -106,7 +108,15 @@ def get_anndata(
 
         # If add_obs_embeddings or add_var_embeddings are defined, inject them in the appropriate slot
         if add_obs_embeddings or add_var_embeddings:
+            obs_soma_joinids = query.obs_joinids()
             from cellxgene_census.experimental import get_embedding, get_embedding_metadata_by_name
             census_version = _extract_census_version(census)
-            get_embedding_metadata_by_name()
+            for emb in add_obs_embeddings:
+                emb_metadata = get_embedding_metadata_by_name(emb, organism, census_version, "obs_embedding")
+                uri = f"{CENSUS_EMBEDDINGS_LOCATION_BASE_URI}/{census_version}/{emb_metadata['id']}"
+                embedding = get_embedding(census_version, uri, obs_soma_joinids)
+                adata.obsm[emb] = embedding
+
+        return adata
+            
 
