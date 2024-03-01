@@ -1,4 +1,5 @@
 import urllib.parse
+import tiledbsoma as soma
 
 
 def _uri_join(base: str, url: str) -> str:
@@ -18,3 +19,7 @@ def _uri_join(base: str, url: str) -> str:
         p_url.fragment,
     ]
     return urllib.parse.urlunparse(parts)
+
+def _extract_census_version(census: soma.Collection):
+    """Extract the Census version from the given Census object."""
+    return urllib.parse.urlparse(census.uri).path.split("/")[2]

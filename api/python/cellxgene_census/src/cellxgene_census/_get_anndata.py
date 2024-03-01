@@ -12,6 +12,8 @@ import anndata
 import tiledbsoma as soma
 from somacore.options import SparseDFCoord
 
+from util import _extract_census_version
+
 from ._experiment import _get_experiment
 
 
@@ -88,14 +90,23 @@ def get_anndata(
     exp = _get_experiment(census, organism)
     obs_coords = (slice(None),) if obs_coords is None else (obs_coords,)
     var_coords = (slice(None),) if var_coords is None else (var_coords,)
+
     with exp.axis_query(
         measurement_name,
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
         var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
-        return query.to_anndata(
+        adata = query.to_anndata(
             X_name=X_name,
             column_names=column_names,
             X_layers=X_layers,
             obsm_layers=obsm_layers,
+            varm_layers=varm_layers
         )
+
+        # If add_obs_embeddings or add_var_embeddings are defined, inject them in the appropriate slot
+        if add_obs_embeddings or add_var_embeddings:
+            from cellxgene_census.experimental import get_embedding, get_embedding_metadata_by_name
+            census_version = _extract_census_version(census)
+            get_embedding_metadata_by_name()
+
