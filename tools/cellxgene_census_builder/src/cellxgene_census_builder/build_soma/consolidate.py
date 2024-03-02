@@ -251,7 +251,7 @@ def _async_consolidator(
             logger.info(f"Async consolidator: fragments={c.n_fragments}, uri={c.uri}")
             _consolidate_tiledb_object(
                 c,
-                vacuum=True,
+                vacuum=False,
                 consolidation_modes=["fragments"],
                 consolidation_config={
                     # config for small, incremental consolidation steps.

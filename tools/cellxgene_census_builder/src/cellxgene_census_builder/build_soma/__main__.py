@@ -49,6 +49,7 @@ def main() -> int:
         cc = validate(args)
 
     log_process_resource_status(level=logging.INFO)
+    logger.info("Fini")
     return cc
 
 

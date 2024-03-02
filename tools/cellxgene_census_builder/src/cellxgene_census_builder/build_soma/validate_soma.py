@@ -250,7 +250,6 @@ def validate_axis_dataframes_global_ids(
             )
 
             del census_obs_df, obs_unique_joinids
-            gc.collect()
 
             # var
             n_vars = len(eb_info[eb.name].vars)
@@ -270,7 +269,6 @@ def validate_axis_dataframes_global_ids(
             )
 
             del census_var_df
-            gc.collect()
 
     return True
 
@@ -414,7 +412,6 @@ def validate_X_layers_normalized(
             raw_soma_dim_0 = raw["soma_dim_0"].to_numpy()
             raw_soma_dim_1 = raw["soma_dim_1"].to_numpy()
             del raw
-            gc.collect()
 
             norm = (
                 X_norm.read(coords=(slice(row_range_start, row_range_stop - 1),))
@@ -426,13 +423,11 @@ def validate_X_layers_normalized(
             norm_soma_dim_0 = norm["soma_dim_0"].to_numpy()
             norm_soma_dim_1 = norm["soma_dim_1"].to_numpy()
             del norm
-            gc.collect()
 
             # confirm identical coordinates
             assert np.array_equal(raw_soma_dim_0, norm_soma_dim_0)
             assert np.array_equal(raw_soma_dim_1, norm_soma_dim_1)
             del norm_soma_dim_0, norm_soma_dim_1
-            gc.collect()
 
             # If we wrote a value, it MUST be larger than zero (i.e., represents a raw count value of 1 or greater)
             assert np.all(raw_soma_data > 0.0), "Found zero value in raw layer"
@@ -442,18 +437,15 @@ def validate_X_layers_normalized(
             col = var_df.index.get_indexer(raw_soma_dim_1)
             n_rows: int = row.max() + 1
             del raw_soma_dim_0, raw_soma_dim_1
-            gc.collect()
 
             norm_csr = sparse.coo_matrix((norm_soma_data, (row, col)), shape=(n_rows, n_cols)).tocsr()
             raw_csr = sparse.coo_matrix((raw_soma_data, (row, col)), shape=(n_rows, n_cols)).tocsr()
             del row, col
-            gc.collect()
 
             if is_smart_seq.any():
                 # this is a very costly operation - do it only when necessary
                 raw_csr[is_smart_seq, :] /= feature_length
             del is_smart_seq
-            gc.collect()
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
@@ -514,14 +506,12 @@ def validate_X_layers_has_unique_coords(
             # Use C layout offset for unique test
             offsets = (slice_of_X["soma_dim_0"].to_numpy() * n_cols) + slice_of_X["soma_dim_1"].to_numpy()
             del slice_of_X
-            gc.collect()
 
             unique_offsets = np.unique(offsets)
             assert len(offsets) == len(unique_offsets)
             del offsets, unique_offsets
             gc.collect()
 
-        gc.collect()
         return True
 
     JOINID_STRIDE = 96_000
@@ -800,7 +790,7 @@ def validate_X_layers_raw_contents(
         return True
 
     return (
-        dask.bag.from_sequence(datasets, partition_size=8)
+        dask.bag.from_sequence(datasets)
         .map(
             _validate_X_layers_raw_contents,
             experiment_specifications=experiment_specifications,
@@ -1044,7 +1034,7 @@ def validate_soma_bounding_box(
     return True
 
 
-def validate_soma(args: CensusBuildArgs) -> dask.delayed.Delayed[bool]:
+def validate_soma(args: CensusBuildArgs) -> dask.distributed.Future:
     """Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
@@ -1067,23 +1057,48 @@ def validate_soma(args: CensusBuildArgs) -> dask.delayed.Delayed[bool]:
     # Scan all H5ADs, check their axis contents, and return a summary.
     eb_info = validate_axis_dataframes(assets_path, soma_path, datasets, experiment_specifications, args)
 
-    # Perform various validations and roll-up their return value
-    (g,) = dask.optimize(
-        dask.delayed(assert_all)(
-            (
-                dask.delayed(lambda e: len(e) == len(experiment_specifications))(eb_info),
-                dask.delayed(validate_axis_dataframes_global_ids)(soma_path, experiment_specifications, eb_info),
-                dask.delayed(validate_internal_consistency)(soma_path, experiment_specifications, datasets),
-                dask.delayed(validate_soma_bounding_box)(soma_path, experiment_specifications, eb_info),
-                dask.delayed(validate_X_layers_schema)(soma_path, experiment_specifications, eb_info),
-                validate_X_layers_normalized(soma_path, experiment_specifications),
-                validate_X_layers_has_unique_coords(soma_path, experiment_specifications),
-                validate_X_layers_presence(soma_path, datasets, experiment_specifications),
-                validate_X_layers_raw_contents(soma_path, assets_path, datasets, experiment_specifications),
-            )
+    # Tasks are scheduled into two priority groups to minimize overall execution time:
+    # - long running tasks scheduled higher priority
+    # - everything else with default (0) priority
+    # This is solely to remove the case of a small number of long-running tasks being
+    # delaying overall completion.
+
+    client = distributed.Client.current()
+    futures: list[dask.distributed.Future] = []
+
+    futures.extend(
+        client.compute(
+            [
+                dask.delayed(assert_all)(
+                    (validate_X_layers_raw_contents(soma_path, assets_path, datasets, experiment_specifications),)
+                )
+            ],
+            priority=10,  # higher priority
         )
     )
-    return g
+    futures.extend(
+        client.compute(
+            [
+                dask.delayed(assert_all)(
+                    (
+                        dask.delayed(lambda e: len(e) == len(experiment_specifications))(eb_info),
+                        dask.delayed(validate_axis_dataframes_global_ids)(
+                            soma_path, experiment_specifications, eb_info
+                        ),
+                        dask.delayed(validate_internal_consistency)(soma_path, experiment_specifications, datasets),
+                        dask.delayed(validate_soma_bounding_box)(soma_path, experiment_specifications, eb_info),
+                        dask.delayed(validate_X_layers_schema)(soma_path, experiment_specifications, eb_info),
+                        validate_X_layers_normalized(soma_path, experiment_specifications),
+                        validate_X_layers_has_unique_coords(soma_path, experiment_specifications),
+                        validate_X_layers_presence(soma_path, datasets, experiment_specifications),
+                    )
+                )
+            ],
+            priority=0,  # default priority
+        )
+    )
+
+    return futures
 
 
 def validate(args: CensusBuildArgs) -> int:
@@ -1095,15 +1110,13 @@ def validate(args: CensusBuildArgs) -> int:
     n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
 
     try:
-        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
-            for r in distributed.wait(client.compute(validate_soma(args))).done:
-                assert r.result()
+        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None):
+            assert all([r.result() for r in distributed.wait(validate_soma(args)).done])
             logging.info("Validation complete.")
-            client.shutdown()
 
     except TimeoutError:
         pass
 
-    validate_consolidation(args)
+    assert validate_consolidation(args)
     logger.info("Validating correct consolidation and vacuuming - complete")
     return 0  # exit code for CLI

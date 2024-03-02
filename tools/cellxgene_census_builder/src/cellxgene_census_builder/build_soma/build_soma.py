@@ -133,16 +133,16 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             client.cluster.scale(n=n_workers)
 
             # consolidate in parallel. Do NOT vacuum or races ensue
-            consolidation_futures: list[dask.distributed.Future] | None = (
-                submit_consolidate(root_collection.uri, pool=client.current(), vacuum=False)
-                if args.config.consolidate
-                else None
-            )
-            validation_tasks = validate_soma(args) if validate else None
-            for f in dask.distributed.wait(client.compute([consolidation_futures, validation_tasks])).done:
-                f.result()  # allow any exceptions to propagate
-
-            logger.info("Validation & consolidation complete.")
+            futures: list[dask.distributed.Future] = []
+            if args.config.consolidate:
+                futures.extend(submit_consolidate(root_collection.uri, pool=client.current(), vacuum=False))
+            if validate:
+                futures.extend(validate_soma(args))
+            if futures:
+                # allow exceptions and results to propagate up
+                for f in dask.distributed.wait(futures).done:
+                    assert f.result()
+                logger.info("Validation & consolidation complete.")
 
     except TimeoutError:
         pass
