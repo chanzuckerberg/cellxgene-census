@@ -1111,7 +1111,7 @@ def validate(args: CensusBuildArgs) -> int:
 
     try:
         with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None):
-            assert all([r.result() for r in distributed.wait(validate_soma(args)).done])
+            assert all(r.result() for r in distributed.wait(validate_soma(args)).done)
             logging.info("Validation complete.")
 
     except TimeoutError:
