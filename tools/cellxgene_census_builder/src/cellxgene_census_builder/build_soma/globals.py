@@ -264,7 +264,6 @@ RNA_SEQ = [
     "EFO:0008643",  # 3′-Seq
     "EFO:0008661",  # Bru-Seq
     "EFO:0008669",  # CAGEscan
-    "EFO:0008671",  # CAP-seq
     "EFO:0008673",  # CapSeq
     "EFO:0008675",  # CaptureSeq
     "EFO:0008679",  # CEL-seq
@@ -328,11 +327,8 @@ RNA_SEQ = [
     "EFO:0009919",  # SPLiT-seq
     "EFO:0009922",  # 10x 3' v3
     "EFO:0009991",  # Nuc-Seq
-    "EFO:0009999",  # G&T-Seq
     "EFO:0010003",  # RASL-seq
     "EFO:0010004",  # SCRB-seq
-    "EFO:0010005",  # DR-Seq
-    "EFO:0010006",  # scM&T-seq
     "EFO:0010010",  # CEL-seq2
     "EFO:0010022",  # Smart-3Seq
     "EFO:0010034",  # Cappable-Seq
@@ -358,7 +354,6 @@ RNA_SEQ = [
     "EFO:0030031",  # SCOPE-chip
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0030074",  # SORT-seq
-    "EFO:0030077",  # cell hashing
     "EFO:0030078",  # droplet-based single-cell RNA library preparation
     "EFO:0030080",  # 10x transcription profiling
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
@@ -368,10 +363,27 @@ RNA_SEQ = [
     "EFO:0700016",  # Smart-seq v4
 ]
 
-# Smart-Seq has special handling in the "normalized" X layers
-SMART_SEQ = [
+# Full-gene assays have special handling in the "normalized" X layers
+FULL_GENE_ASSAY = [
+    "EFO:0003755",  # FL-cDNA
+    "EFO:0008441",  # full length single cell RNA sequencing
+    "EFO:0008747",  # FRISCR
+    "EFO:0008763",  # Hi-SCL
+    "EFO:0008797",  # MATQ-seq
+    "EFO:0008877",  # Quartz-seq
     "EFO:0008930",  # Smart-seq
     "EFO:0008931",  # Smart-seq2
+    "EFO:0008956",  # SUPeR-seq
+    "EFO:0009810",  # full length single nucleus RNA sequencing
+    "EFO:0010004",  # SCRB-seq
+    "EFO:0010022",  # Smart-3Seq
+    "EFO:0010058",  # Fluidigm C1-based library preparation
+    "EFO:0010184",  # Smart-like
+    "EFO:0022396",  # TruSeq
+    "EFO:0022488",  # Smart-seq3
+    "EFO:0030031",  # SCOPE-chip
+    "EFO:0030061",  # mcSCRB-seq
+    "EFO:0700010",  # TruDrop
     "EFO:0700016",  # Smart-seq v4
 ]
 

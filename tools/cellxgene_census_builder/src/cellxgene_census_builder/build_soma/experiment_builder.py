@@ -35,8 +35,8 @@ from .globals import (
     CXG_VAR_COLUMNS_READ,
     DONOR_ID_IGNORE,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
-    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .schema_util import TableSpec
@@ -498,12 +498,12 @@ def dispatch_X_chunk(
     local_var_joinids = adata.var.join(global_var_joinids).soma_joinid.to_numpy()
     assert (local_var_joinids >= 0).all(), f"Illegal join id, {dataset_id}"
 
-    _is_smart_seq = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), SMART_SEQ)
-    if _is_smart_seq.any():
-        is_smart_seq: npt.NDArray[np.bool_] | None = _is_smart_seq
+    _is_full_gene_assay = np.isin(adata.obs.assay_ontology_term_id.to_numpy(), FULL_GENE_ASSAY)
+    if _is_full_gene_assay.any():
+        is_full_gene_assay: npt.NDArray[np.bool_] | None = _is_full_gene_assay
         feature_length = adata.var.feature_length.to_numpy()
     else:
-        is_smart_seq = None
+        is_full_gene_assay = None
         feature_length = None
 
     minor_stride = max(1, int(REDUCE_X_MINOR_NNZ_STRIDE // (adata.get_estimated_density() * adata.n_vars)))
@@ -564,10 +564,10 @@ def dispatch_X_chunk(
         del X
         gc.collect()
 
-        if is_smart_seq is not None:
+        if is_full_gene_assay is not None:
             assert feature_length is not None
-            smart_seq_mask = is_smart_seq[idx : idx + minor_stride]
-            xNormD = np.where(smart_seq_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
+            is_full_gene_assay_mask = is_full_gene_assay[idx : idx + minor_stride]
+            xNormD = np.where(is_full_gene_assay_mask[xI], xD / feature_length[xJ], xD).astype(np.float32)
             xNormD = _divide_by_row_sum(n_obs, xI, xNormD)  # in-place operation
         else:
             xNormD = _divide_by_row_sum(n_obs, xI, xD.copy())  # in-place operation

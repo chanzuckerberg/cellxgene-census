@@ -40,8 +40,8 @@ from .globals import (
     CXG_OBS_TERM_COLUMNS,
     CXG_SCHEMA_VERSION,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
-    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .mp import (
@@ -557,12 +557,12 @@ def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -
         X_norm = exp.ms[MEASUREMENT_RNA_NAME].X["normalized"]
         assert X_raw.shape == X_norm.shape
 
-        is_smart_seq = np.isin(
+        is_full_gene_assay = np.isin(
             exp.obs.read(column_names=["assay_ontology_term_id"])
             .concat()
             .to_pandas()
             .assay_ontology_term_id.to_numpy(),
-            SMART_SEQ,
+            FULL_GENE_ASSAY,
         )
 
         var_df = (
@@ -613,11 +613,11 @@ def _validate_Xnorm_layer(args: tuple[ExperimentSpecification, str, int, int]) -
             del raw, norm, dim0, dim1, row, col
             gc.collect()
 
-            sseq_mask = is_smart_seq[row_idx : row_idx + ROW_SLICE_SIZE]
-            if sseq_mask.any():
+            full_gene_mask = is_full_gene_assay[row_idx : row_idx + ROW_SLICE_SIZE]
+            if full_gene_mask.any():
                 # this is a very costly operation - do it only when necessary
-                raw_csr[sseq_mask, :] /= feature_length
-            del sseq_mask
+                raw_csr[full_gene_mask, :] /= feature_length
+            del full_gene_mask
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
