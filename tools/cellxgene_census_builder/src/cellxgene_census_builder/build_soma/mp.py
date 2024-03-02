@@ -95,7 +95,12 @@ def create_dask_client(
     assert _mp_config_checks()
 
     n_workers = max(1, n_workers or cpu_count())
-    dask.config.set({"distributed.comm.timeouts": {"connect": "120s", "tcp": "120s"}})
+    dask.config.set(
+        {
+            "distributed.comm.timeouts": {"connect": "120s", "tcp": "120s"},
+            "distributed.scheduler.worker-ttl": "24 hours",  # some of our tasks are very long-lived, e.g., consolidation
+        }
+    )
 
     client = dask.distributed.Client(
         n_workers=n_workers,

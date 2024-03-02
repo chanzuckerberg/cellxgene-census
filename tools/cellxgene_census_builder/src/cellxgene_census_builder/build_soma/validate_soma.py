@@ -1034,7 +1034,7 @@ def validate_soma_bounding_box(
     return True
 
 
-def validate_soma(args: CensusBuildArgs) -> dask.distributed.Future:
+def validate_soma(args: CensusBuildArgs, client: dask.distributed.Client) -> dask.distributed.Future:
     """Validate that the "census" matches the datasets and experiment builder spec.
 
     Will raise if validation fails. Returns True on success.
@@ -1063,7 +1063,6 @@ def validate_soma(args: CensusBuildArgs) -> dask.distributed.Future:
     # This is solely to remove the case of a small number of long-running tasks being
     # delaying overall completion.
 
-    client = distributed.Client.current()
     futures: list[dask.distributed.Future] = []
 
     futures.extend(
@@ -1110,8 +1109,8 @@ def validate(args: CensusBuildArgs) -> int:
     n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
 
     try:
-        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None):
-            assert all(r.result() for r in distributed.wait(validate_soma(args)).done)
+        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
+            assert all(r.result() for r in distributed.wait(validate_soma(args, client)).done)
             logging.info("Validation complete.")
 
     except TimeoutError:

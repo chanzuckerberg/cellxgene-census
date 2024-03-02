@@ -249,6 +249,10 @@ def _async_consolidator(
                 break  # type: ignore[unreachable]
 
             logger.info(f"Async consolidator: fragments={c.n_fragments}, uri={c.uri}")
+            # IMPORTANT: in principle we coudl also vacuum, and reduce overall disk footprint.
+            # However, there seems to be a race somewhere in TileDB that causes vacuum to fail
+            # periodically if we consolidate in parallel with writes. Disable as a work-around.
+            # The work-around impact is simply extra working disk space during the build.
             _consolidate_tiledb_object(
                 c,
                 vacuum=False,

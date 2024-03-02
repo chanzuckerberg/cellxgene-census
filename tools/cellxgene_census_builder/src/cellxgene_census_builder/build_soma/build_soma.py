@@ -135,12 +135,12 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             # consolidate in parallel. Do NOT vacuum or races ensue
             futures: list[dask.distributed.Future] = []
             if args.config.consolidate:
-                futures.extend(submit_consolidate(root_collection.uri, pool=client.current(), vacuum=False))
+                futures.extend(submit_consolidate(root_collection.uri, pool=client, vacuum=False))
             if validate:
-                futures.extend(validate_soma(args))
+                futures.extend(validate_soma(args, client))
             if futures:
-                # allow exceptions and results to propagate up
-                for f in dask.distributed.wait(futures).done:
+                # allow exceptions and results to propagate up. All must be truthy on success.
+                for f in dask.distributed.as_completed(futures):
                     assert f.result()
                 logger.info("Validation & consolidation complete.")
 

@@ -563,7 +563,6 @@ def dispatch_X_chunk(
             ]
         )
         del _obs_stats, _var_stats
-        gc.collect()
 
         xI, xJ, xD = getijd(X)
         assert n_obs == X.shape[0]
