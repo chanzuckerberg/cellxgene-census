@@ -9,7 +9,6 @@ EFO:0008641,3’-end-seq
 EFO:0008643,3′-Seq
 EFO:0008661,Bru-Seq
 EFO:0008669,CAGEscan
-EFO:0008671,CAP-seq
 EFO:0008673,CapSeq
 EFO:0008675,CaptureSeq
 EFO:0008679,CEL-seq
@@ -73,11 +72,8 @@ EFO:0009901,10x 3' v1
 EFO:0009919,SPLiT-seq
 EFO:0009922,10x 3' v3
 EFO:0009991,Nuc-Seq
-EFO:0009999,G&T-Seq
 EFO:0010003,RASL-seq
 EFO:0010004,SCRB-seq
-EFO:0010005,DR-Seq
-EFO:0010006,scM&T-seq
 EFO:0010010,CEL-seq2
 EFO:0010022,Smart-3Seq
 EFO:0010034,Cappable-Seq
@@ -103,7 +99,6 @@ EFO:0030030,Quant-seq
 EFO:0030031,SCOPE-chip
 EFO:0030061,mcSCRB-seq
 EFO:0030074,SORT-seq
-EFO:0030077,cell hashing
 EFO:0030078,droplet-based single-cell RNA library preparation
 EFO:0030080,10x transcription profiling
 EFO:0700003,BD Rhapsody Whole Transcriptome Analysis

@@ -108,6 +108,12 @@ These assays were selected with the following criteria:
 > * Doesn’t intend to primarily measure introns.
 > * Doesn’t do ribosome profiling.
 
+##### Full-gene sequencing assays
+
+From the list of accepted assays, this list of [full-gene sequencing assays](./census_accepted_assays_full_gene.csv) are those that when used at the single-cell level will always perform full-gene sequencing.
+
+These data need to be normalized by gene length for downstream analysis.
+
 #### Data matrix types
 
 Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read counts](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#x-matrix-layers). Author-normalized data layers [as defined in the CELLxGENE dataset schema](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#x-matrix-layers) MUST NOT be included in the Census.
@@ -575,7 +581,7 @@ Per the CELLxGENE dataset schema, [all RNA assays MUST include UMI or read count
 This is an experimental data artifact - it may be removed at any time.
 
 A library-sized normalized layer, containing a normalized variant of the count (raw) matrix.
-For Smart-Seq assays, given a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
+For [full-gene sequencing assays](#Full-gene-sequencing-assays), given a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
 as `normalized[i,j] = (X[i,j] / var[j].feature_length) / sum(X[i, ] / var.feature_length[j])`.
 For all other assays, for a value `X[i,j]` in the counts (raw) matrix, library-size normalized values are defined
 as `normalized[i,j] = X[i,j] / sum(X[i, ])`.
