@@ -383,7 +383,6 @@ FULL_GENE_ASSAY = [
     "EFO:0022488",  # Smart-seq3
     "EFO:0030031",  # SCOPE-chip
     "EFO:0030061",  # mcSCRB-seq
-    "EFO:0700010",  # TruDrop
     "EFO:0700016",  # Smart-seq v4
 ]
 
