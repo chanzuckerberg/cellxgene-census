@@ -598,7 +598,7 @@ def dispatch_X_chunk(
     return result
 
 
-def _reduce_X_matrices2(
+def _reduce_X_matrices(
     base_path: str,
     datasets: list[Dataset],
     experiment_builders: list[ExperimentBuilder],
@@ -608,7 +608,7 @@ def _reduce_X_matrices2(
     This function does not perform the compute - it just creates the graph. Caller must dispatch the graph.
     """
 
-    def read_and_dispatch_partial_h5ad2(
+    def read_and_dispatch_partial_h5ad(
         dataset_id: str,
         dataset_h5ad_path: str,
         experiment_uri: str,
@@ -658,7 +658,7 @@ def _reduce_X_matrices2(
         ]
         per_eb_results[eb.name] = (
             dask.bag.from_sequence(read_file_chunks)
-            .starmap(read_and_dispatch_partial_h5ad2, global_var_joinids=global_var_joinids)
+            .starmap(read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids)
             .foldby("dataset_id", reduce_X_stats_binop)
         )
 
@@ -677,7 +677,7 @@ def populate_X_layers(
     and reducing obs/var axis stats from X data.
     """
     datasets_by_id = {d.dataset_id: d for d in datasets}
-    per_eb_results = _reduce_X_matrices2(assets_path, datasets, experiment_builders)
+    per_eb_results = _reduce_X_matrices(assets_path, datasets, experiment_builders)
 
     for eb in experiment_builders:
         if eb.name not in per_eb_results:
