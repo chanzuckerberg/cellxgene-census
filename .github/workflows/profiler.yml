@@ -37,24 +37,4 @@ jobs:
                 rm -rf /tmp/aws
       - name: Run all tests
         run: |
-          # Download gnu time tool
-          sudo apt-get update -y
-          sudo apt-get install wget -y
-          # Download the right version of python
-          #sudo apt install python3.11 -y
-          # Installing mount-s3
-          sudo wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
-          sudo apt install -y ./mount-s3.deb
-          
-          # Setting up mount-s3. We use S3 file system as it is necessary to persist the
-          # profiling run data that are performed below
-          
-          aws sts get-caller-identity
-          aws s3 ls s3://census-profiler-tests-trial
-          cd ~/
-          mkdir /tmp/s3mount
-          mkdir /tmp/s3cache
-          echo `pwd`
-          ls
-          #mount-s3 --cache /tmp/s3cache  --metadata-ttl 300 --region us-west-2 census-profiler-tests-trial /tmp/s3mount 
           ./tools/perf_checker/perf_checker.sh

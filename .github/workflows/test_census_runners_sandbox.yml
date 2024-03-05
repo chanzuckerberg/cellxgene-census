@@ -1,0 +1,25 @@
+name: Test Sandbox runners
+
+on:
+  pull_request:
+
+jobs:
+  run_profiler:
+    name: Test Sandbox runners
+    strategy:
+      matrix:
+        os: [single-cell-sandbox-runner]
+        python-version: ["3.11"]
+    runs-on: ${{matrix.os}}
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Test Sandbox runner
+        run:  |
+                ls

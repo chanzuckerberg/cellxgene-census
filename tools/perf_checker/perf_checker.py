@@ -53,7 +53,7 @@ if len(command_profiles) >= 2:
         f"TileDB version ver = first: {first_profile.tiledbsoma_version} curr: {curr_profile.tiledbsoma_version}"
     )
     if float(curr_time) > threshold * float(first_time):
-        raise SystemExit(f"Major performance degradation detected on {args.benchmark}")
+        raise SystemExit(f"Major performance degradation detected on {args.command}")
 
     if threshold * float(curr_time) < float(first_time):
         logging.info(f"Major performance increase detected on {args.command}")

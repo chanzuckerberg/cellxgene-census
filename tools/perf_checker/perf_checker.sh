@@ -2,15 +2,19 @@
 #!/bin/sh
 set -euox pipefail
 
+dbpath="census-profiler-tests-trial"
+sudo apt install time
 
-
-dbpath="census-profiler-tests"
+python3.11 -m venv ~/venv
+. ~/venv/bin/activate
 
 pip install psutil
 pip install gitpython
 pip install somacore
 pip install tiledbsoma
 pip install cellxgene_census
+pip install boto3
+#which python
 
 # Download the repo including the profiler
 cd ../
