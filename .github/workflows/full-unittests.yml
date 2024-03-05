@@ -80,6 +80,7 @@ jobs:
           python --version
           echo 'DEBUGGING END'
 
+          pip uninstall tiledbsoma -y
           pip install '${{ github.event.inputs.tiledbsoma_python_dependency }}'
 
       - name: pytest (--expensive --experimental)
