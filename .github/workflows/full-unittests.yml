@@ -54,10 +54,6 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      # - name: install python 3.11 dev packages
-      #   run: |
-      #     sudo apt-get install -y python3.11-dev python3.11-full
-
       - uses: actions/setup-python@v5
         with:
           python-version: 3.11
@@ -68,6 +64,14 @@ jobs:
 
       - name: install python dependencies (including experimental)
         run: |
+          echo 'DEBUGGING'
+          echo $LD_LIBRARY_PATH
+          which python
+          pip --version
+          python --version
+          ldd `which python`
+          echo 'DEBUGGING END'
+
           python -m pip install -U pip setuptools setuptools_scm wheel
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
