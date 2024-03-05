@@ -103,7 +103,7 @@ cat(
 # Report the 10 most common
 top_10 <- sort(table(obs_df$cell_type), decreasing = TRUE)[1:10]
 cat(
-  "The top 10 cell types where tissue_ontology_term_id ==", 
+  "The top 10 cell types where tissue_ontology_term_id ==",
   LUNG_TISSUE,
   "are: ",
   paste(names(top_10), collapse = ", ")
@@ -143,10 +143,10 @@ cols_to_query <- c(
 total_cells <- 0
 for (organism in census$get("census_data")$names()) {
   print(organism)
-  
+
   obs_df <- census$get("census_data")$get(organism)$obs$read(column_names = cols_to_query)
   obs_df <- as.data.frame(obs_df$concat())
-  
+
   total_cells <- total_cells + nrow(obs_df)
   for (col in cols_to_query) {
     cat("  Unique ", col, " values: ", length(unique(obs_df[[col]])), "\n")

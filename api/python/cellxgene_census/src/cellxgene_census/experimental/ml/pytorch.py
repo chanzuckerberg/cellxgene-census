@@ -327,7 +327,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
-    """An :class:`torchdata.datapipes.iter.IterDataPipe` that reads ``obs`` and ``X`` data from a
+    r"""An :class:`torchdata.datapipes.iter.IterDataPipe` that reads ``obs`` and ``X`` data from a
     :class:`tiledbsoma.Experiment`, based upon the specified queries along the ``obs`` and ``var`` axes. Provides an
     iterator over these data when the object is passed to Python's built-in ``iter`` function.
 
@@ -351,10 +351,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                  [2417,    0,    3]], dtype=torch.int64))
 
     The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse
-    :class:`torch.Tensor`. If the model supports use of sparse :class:`torch.Tensor`s, this will reduce memory usage.
+    :class:`torch.Tensor`. If the model supports use of sparse :class:`torch.Tensor`\ s, this will reduce memory usage.
 
     The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
-    element is always the ``soma_joinid`` of the ``obs`` :class:`pandas.DataFrame` (or, equiavalently, the
+    element is always the ``soma_joinid`` of the ``obs`` :class:`pandas.DataFrame` (or, equivalently, the
     ``soma_dim_0`` of the ``X`` matrix). The remaining elements are the ``obs`` columns specified by
     ``obs_column_names``, and string-typed columns are encoded as integer values. If needed, these values can be decoded
     by obtaining the encoder for a given ``obs`` column name and calling its ``inverse_transform`` method:
@@ -394,7 +394,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         soma_chunk_size: Optional[int] = None,
         use_eager_fetch: bool = True,
     ) -> None:
-        """Construct a new ``ExperimentDataPipe``.
+        r"""Construct a new ``ExperimentDataPipe``.
 
         Args:
             experiment:
@@ -415,7 +415,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             batch_size:
                 The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to ``1``. A value of
                 ``1`` will result in :class:`torch.Tensor` of rank 1 being returns (a single row); larger values will
-                result in :class:`torch.Tensor`s of rank 2 (multiple rows).
+                result in :class:`torch.Tensor`\ s of rank 2 (multiple rows).
             shuffle:
                 Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``False`` (no shuffling).
                 For performance reasons, shuffling is performed in two steps: 1) a global shuffling, where contiguous
@@ -436,7 +436,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             return_sparse_X:
                 Controls whether the ``X`` data is returned as a dense or sparse :class:`torch.Tensor`. As ``X`` data is
                 very sparse, setting this to ``True`` will reduce memory usage, if the model supports use of sparse
-                :class:`torch.Tensor`s. Defaults to ``False``, since sparse :class:`torch.Tensor`s are still
+                :class:`torch.Tensor`\ s. Defaults to ``False``, since sparse :class:`torch.Tensor`\ s are still
                 experimental in PyTorch.
             soma_chunk_size:
                 The number of ``obs``/``X`` rows to retrieve when reading data from SOMA. This impacts two aspects of
@@ -624,11 +624,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     # TODO: This does not work in multiprocessing mode, as child process's stats are not collected
     def stats(self) -> Stats:
-        """Get data loading stats for this :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe`.
+        """Get data loading stats for this :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
 
         Returns:
-            The :class:`cellxgene_census.ml.pytorch.Stats` object for this
-            :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe`.
+            The :class:`cellxgene_census.experimental.ml.pytorch.Stats` object for this
+            :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
 
         Lifecycle:
             experimental
@@ -637,7 +637,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @property
     def shape(self) -> Tuple[int, int]:
-        """Get the shape of the data that will be returned by this :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe`.
+        """Get the shape of the data that will be returned by this :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
         This is the number of obs (cell) and var (feature) counts in the returned data. If used in multiprocessing mode
         (i.e. :class:`torch.utils.data.DataLoader` instantiated with num_workers > 0), the obs (cell) count will reflect
         the size of the partition of the data assigned to the active process.
@@ -684,7 +684,7 @@ def experiment_dataloader(
     **dataloader_kwargs: Any,
 ) -> DataLoader:
     """Factory method for :class:`torch.utils.data.DataLoader`. This method can be used to safely instantiate a
-    :class:`torch.utils.data.DataLoader` that works with :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe`,
+    :class:`torch.utils.data.DataLoader` that works with :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`,
     since some of the :class:`torch.utils.data.DataLoader` constructor parameters are not applicable when using a
     :class:`torchdata.datapipes.iter.IterDataPipe` (``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``,
     ``collate_fn``).
@@ -692,15 +692,15 @@ def experiment_dataloader(
     Args:
         datapipe:
             An :class:`torchdata.datapipes.iter.IterDataPipe`, which can be an
-            :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe` or any other
+            :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe` or any other
             :class:`torchdata.datapipes.iter.IterDataPipe` that has been chained to the
-            :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe`.
+            :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
         num_workers:
             Number of worker processes to use for data loading. If ``0``, data will be loaded in the main process.
         **dataloader_kwargs:
             Additional keyword arguments to pass to the :class:`torch.utils.data.DataLoader` constructor,
             except for ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not
-            supported when using :class:`cellxgene_census.ml.pytorch.ExperimentDataPipe`.
+            supported when using :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
 
     Returns:
         A :class:`torch.utils.data.DataLoader`.

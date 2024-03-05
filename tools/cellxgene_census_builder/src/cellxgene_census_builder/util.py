@@ -77,7 +77,7 @@ def env_var_init() -> None:
         # In particular, the docs state that >8 threads is not helpful except in extreme circumstances.
         val = str(min(8, max(1, cpu_count() // 2)))
         os.environ["NUMEXPR_MAX_THREADS"] = val
-        logger.info(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
+        logger.debug(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
 
     for env_name in [
         "OMP_NUM_THREADS",
@@ -86,7 +86,7 @@ def env_var_init() -> None:
         "VECLIB_MAXIMUM_THREADS",
     ]:
         if env_name not in os.environ:
-            logger.info(f'Setting {env_name} environment variable to "1"')
+            logger.debug(f'Setting {env_name} environment variable to "1"')
             os.environ[env_name] = "1"
 
 

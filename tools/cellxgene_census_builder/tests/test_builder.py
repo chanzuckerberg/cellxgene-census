@@ -10,7 +10,7 @@ import pytest
 import tiledb
 import tiledbsoma as soma
 
-from cellxgene_census_builder.build_soma import build, validate
+from cellxgene_census_builder.build_soma import build
 from cellxgene_census_builder.build_soma.build_soma import build_step1_get_source_datasets
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_soma.globals import (
@@ -35,20 +35,20 @@ def test_base_builder_creation(
     census_build_args: CensusBuildArgs,
     setup: None,
 ) -> None:
-    """Runs the builder, queries the census and performs a set of base assertions."""
+    """
+    Runs the builder, queries the census and performs a set of base assertions.
+    """
     with patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"), patch(
         "cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets
-    ), patch("cellxgene_census_builder.build_soma.consolidate.submit_consolidate", return_value=[]), patch(
-        "cellxgene_census_builder.build_soma.validate_soma.validate_consolidation", return_value=True
+    ), patch("cellxgene_census_builder.build_soma.build_soma.consolidate"), patch(
+        "cellxgene_census_builder.build_soma.build_soma.go_validate", return_value=True
+    ), patch(
+        "cellxgene_census_builder.build_soma.build_soma.start_async_consolidation",
     ):
         return_value = build(census_build_args)
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
-
-        # validate the census build
-        return_value = validate(census_build_args)
-        assert return_value is True
 
         # Query the census and do assertions
         with soma.Collection.open(

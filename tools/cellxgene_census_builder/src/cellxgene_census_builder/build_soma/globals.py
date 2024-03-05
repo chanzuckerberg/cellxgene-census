@@ -18,7 +18,7 @@ CXG_SCHEMA_VERSION = "4.0.0"  # the CELLxGENE schema version supported
 
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
 # hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
-CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
+CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-09-05/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -243,7 +243,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
         "tiledb": {
             "create": {
                 **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
-                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 19}]}},
+                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 13}]}},
             }
         }
     },
@@ -305,8 +305,8 @@ DEFAULT_TILEDB_CONFIG = {
     # the default configs will hit kernel limits on high-CPU boxes. This
     # cap can be raised when TiledB-SOMA is more thread frugal. See for
     # example: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
-    "sm.compute_concurrency_level": min(cpu_count(), 32),
-    "sm.io_concurrency_level": min(cpu_count(), 32),
+    "sm.compute_concurrency_level": min(cpu_count(), 64),
+    "sm.io_concurrency_level": min(cpu_count(), 64),
 }
 
 

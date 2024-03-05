@@ -62,14 +62,14 @@ And now we can use the column `"dataset_id"` present in both the dataset table a
 ```{r,message=FALSE,warning=FALSE}
 # Query cell metadata
 cell_metadata <- census$get("census_data")$get("homo_sapiens")$obs$read(
-    value_filter = "tissue == 'cardiac atrium'",
-    column_names = c("dataset_id", "cell_type")
+  value_filter = "tissue == 'cardiac atrium'",
+  column_names = c("dataset_id", "cell_type")
 )
 
 cell_metadata <- as.data.frame(cell_metadata$concat())
 
 # Get a citation string for the slice
-slice_datasets = datasets[datasets$dataset_id  %in% cell_metadata$dataset_id,]
+slice_datasets <- datasets[datasets$dataset_id %in% cell_metadata$dataset_id, ]
 print(slice_datasets$citation)
 ```
 
@@ -78,16 +78,16 @@ print(slice_datasets$citation)
 ```{r,message=FALSE,warning=FALSE}
 # Fetch a Seurat object
 seurat_obj <- get_seurat(
-    census = census,
-    organism = "homo_sapiens",
-    measurement_name = "RNA",
-    obs_value_filter = "tissue == 'cardiac atrium'",
-    var_value_filter = "feature_name == 'MYBPC3'",
-    obs_column_names = c("dataset_id", "cell_type")
+  census = census,
+  organism = "homo_sapiens",
+  measurement_name = "RNA",
+  obs_value_filter = "tissue == 'cardiac atrium'",
+  var_value_filter = "feature_name == 'MYBPC3'",
+  obs_column_names = c("dataset_id", "cell_type")
 )
 
 # Get a citation string for the slice
-slice_datasets = datasets[datasets$dataset_id  %in% seurat_obj[[]]$dataset_id,]
+slice_datasets <- datasets[datasets$dataset_id %in% seurat_obj[[]]$dataset_id, ]
 print(slice_datasets$citation)
 ```
 
@@ -96,15 +96,15 @@ print(slice_datasets$citation)
 ```{r,message=FALSE,warning=FALSE}
 # Fetch a Seurat object
 sce_obj <- get_single_cell_experiment(
-    census = census,
-    organism = "homo_sapiens",
-    measurement_name = "RNA",
-    obs_value_filter = "tissue == 'cardiac atrium'",
-    var_value_filter = "feature_name == 'MYBPC3'",
-    obs_column_names = c("dataset_id", "cell_type")
+  census = census,
+  organism = "homo_sapiens",
+  measurement_name = "RNA",
+  obs_value_filter = "tissue == 'cardiac atrium'",
+  var_value_filter = "feature_name == 'MYBPC3'",
+  obs_column_names = c("dataset_id", "cell_type")
 )
 
 # Get a citation string for the slice
-slice_datasets = datasets[datasets$dataset_id  %in% sce_obj$dataset_id,]
+slice_datasets <- datasets[datasets$dataset_id %in% sce_obj$dataset_id, ]
 print(slice_datasets$citation)
 ```

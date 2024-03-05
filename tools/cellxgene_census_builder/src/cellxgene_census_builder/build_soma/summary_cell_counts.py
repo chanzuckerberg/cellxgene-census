@@ -65,6 +65,8 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
         (None, "suspension_type"),
     ]
 
+    dataset_id = obs_df.iloc[0].dataset_id
+
     dfs = []
     for term_id, term_label in CATEGORIES:
         cats = []
@@ -105,12 +107,13 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
         counts["category"] = term_label if term_label is not None else term_id
         counts["unique_cell_count"] = counts[True]
         counts["total_cell_count"] = counts[True] + counts[False]
+        counts["dataset_id"] = dataset_id
         counts = counts.drop(columns=[True, False]).reset_index()
         dfs.append(counts)
 
     all = pd.DataFrame(
         data={
-            "dataset_id": [obs_df.iloc[0].dataset_id],
+            "dataset_id": [dataset_id],
             "organism": [obs_df.iloc[0].organism],
             "ontology_term_id": ["na"],
             "label": ["na"],
@@ -119,4 +122,5 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
             "total_cell_count": [dfs[0].total_cell_count.sum()],
         }
     )
+
     return pd.concat([current, all, *dfs], ignore_index=True)

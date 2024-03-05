@@ -1,35 +1,37 @@
-import gc
 import logging
 import os
 import pathlib
-from collections.abc import Iterator
 from datetime import UTC, datetime
+from typing import cast
 
+import pandas as pd
+import psutil
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from .anndata import AnnDataProxy, open_anndata
+from ..util import cpu_count
 from .census_summary import create_census_summary
-from .consolidate import consolidate
+from .consolidate import consolidate, start_async_consolidation, stop_async_consolidation
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
+    accumulate_axes_dataframes,
     populate_X_layers,
+    post_acc_axes_processing,
     reopen_experiment_builders,
 )
 from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
-    CXG_OBS_COLUMNS_READ,
-    CXG_VAR_COLUMNS_READ,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import EagerIterator, create_thread_pool_executor
+from .mp import create_dask_client
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, is_git_repo_dirty
+from .util import get_git_commit_sha, is_git_repo_dirty, shuffle
+from .validate_soma import validate as go_validate
 
 logger = logging.getLogger(__name__)
 
@@ -49,16 +51,17 @@ def prepare_file_system(args: CensusBuildArgs) -> None:
     args.h5ads_path.mkdir(parents=True, exist_ok=False)
 
 
-def build(args: CensusBuildArgs) -> int:
+def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     """Build.
 
     Approximately, build steps are:
     1. Download manifest and copy/stage all source assets
-    2. Read all H5AD and create axis dataframe (serial)
-        * write obs/var dataframes
-        * accumulate overall shape of X
-    3. Read all H5AD assets again, write X layer (parallel)
-    4. Optional: validate
+    2. Create top-level collections per experiment
+    3. Read (parallel) all H5AD and create axis dataframe (serial). Accumulate overall shape of X
+    4. Read (parallel) all H5AD assets again, write X layers. Accumulate X summary stats, presence, etc.
+    5. Write axis dataframes and summary information
+    6. Consolidate
+    7. Validate
 
     Returns:
     int
@@ -69,39 +72,62 @@ def build(args: CensusBuildArgs) -> int:
 
     prepare_file_system(args)
 
-    # Step 1 - get all source datasets
-    datasets = build_step1_get_source_datasets(args)
+    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=2):
+        # Step 1 - get all source datasets
+        datasets = build_step1_get_source_datasets(args)
 
-    # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-    root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
-    gc.collect()
+        # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
+        root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
 
-    # Step 3 - populate axes
-    filtered_datasets = build_step3_populate_obs_and_var_axes(
-        args.h5ads_path.as_posix(), datasets, experiment_builders, args
-    )
+        # Step 3 - populate axes
+        filtered_datasets = build_step3_populate_obs_and_var_axes(
+            args.h5ads_path.as_posix(), datasets, experiment_builders, args
+        )
 
-    # Prune datasets that we will not use, and do not want to include in the build
-    prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+    # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
+    # process the X array (partitions are large to reduce TileDB fragment count).
+    #
+    # TODO: when global order writes are supported, processing of much smaller slices will be
+    # possible, and this budget should drop considerably. When that is implemented, n_workers should be
+    # be much larger (eg., use default value of #CPUs or some such).
+    # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+    MEM_BUDGET = 128 * 1024**3
+    total_memory = psutil.virtual_memory().total
+    n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
+    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0):
+        try:
+            if args.config.consolidate:
+                consolidator = start_async_consolidation(root_collection.uri)
+            else:
+                consolidator = None
 
-    # Step 4 - populate X layers
-    build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
-    gc.collect()
+            # Step 4 - populate X layers
+            build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
 
-    # Step 5- write out dataset manifest and summary information
-    build_step5_save_axis_and_summary_info(
-        root_collection, experiment_builders, filtered_datasets, args.config.build_tag
-    )
+            # Prune datasets that we will not use, and do not want to include in the build
+            prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
 
-    # Step 6 - create and save derived artifacts
-    build_step6_save_derived_data(root_collection, experiment_builders, args)
+            # Step 5- write out dataset manifest and summary information
+            build_step5_save_axis_and_summary_info(
+                root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+            )
+
+        finally:
+            if consolidator:
+                stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
+                del consolidator
 
     # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
     tiledb_soma_1969_work_around(root_collection.uri)
 
-    # consolidate TileDB data
+    # TODO: consolidation and validation can be done in parallel. Goal: do this work
+    # when refactoring validation to use Dask.
+
     if args.config.consolidate:
         consolidate(args, root_collection.uri)
+
+    if validate:
+        go_validate(args)
 
     return 0
 
@@ -147,64 +173,28 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> list[Dataset]:
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
 
     # Testing/debugging hook - hidden option
-    if args.config.test_first_n is not None and args.config.test_first_n > 0:
-        # Process the N smallest datasets
-        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)[0 : args.config.test_first_n]
+    if args.config.test_first_n is not None and abs(args.config.test_first_n) > 0:
+        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)
+        if args.config.test_first_n > 0:
+            # Process the N smallest datasets
+            datasets = datasets[: args.config.test_first_n]
+        else:
+            # Process the N largest datasets
+            datasets = datasets[args.config.test_first_n :]
 
     else:
-        datasets = all_datasets
+        # Shuffle datasets by size.
+        # TODO: it is unclear if this shuffle has material impact. Needs more benchmarking.
+        # Nothing magical about a step of 16, other than the observation that the dataset
+        # distribution is disproportionately populated by small datasets.
+        datasets = shuffle(sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize), step=16)
+        assert {d.dataset_id for d in all_datasets} == {d.dataset_id for d in datasets}
 
     # Stage all files
     stage_source_assets(datasets, args)
 
     logger.info("Build step 1 - get source assets - finished")
     return datasets
-
-
-def accumulate_axes(
-    assets_path: str, datasets: list[Dataset], experiment_builders: list[ExperimentBuilder], args: CensusBuildArgs
-) -> list[Dataset]:
-    filtered_datasets = []
-    N = len(datasets) * len(experiment_builders)
-    n = 0
-
-    with create_thread_pool_executor() as pool:
-        adata_iter: Iterator[tuple[Dataset, AnnDataProxy]] = (
-            (
-                dataset,
-                open_anndata(
-                    assets_path, dataset, obs_column_names=CXG_OBS_COLUMNS_READ, var_column_names=CXG_VAR_COLUMNS_READ
-                ),
-            )
-            for dataset in datasets
-        )
-        if args.config.multi_process:
-            adata_iter = EagerIterator(adata_iter, pool)
-
-        for dataset, ad in adata_iter:
-            dataset_total_cell_count = 0
-            for eb in experiment_builders:
-                n += 1
-                logger.info(f"{eb.name}: filtering dataset '{dataset.dataset_id}' ({n} of {N})")
-                ad_filtered = eb.filter_anndata_cells(ad)
-
-                if len(ad_filtered.obs) == 0:  # type:ignore
-                    logger.info(f"{eb.name} - H5AD has no data after filtering, skipping {dataset.dataset_h5ad_path}")
-                    continue
-
-                # accumulate `obs` and `var` data
-                dataset_total_cell_count += eb.accumulate_axes(dataset, ad_filtered)
-
-            # dataset passes filter if either experiment includes cells from the dataset
-            if dataset_total_cell_count > 0:
-                filtered_datasets.append(dataset)
-                dataset.dataset_total_cell_count = dataset_total_cell_count
-
-    for eb in experiment_builders:
-        eb.finalize_obs_axes()
-        logger.info(f"Experiment {eb.name} will contain {eb.n_obs} cells from {eb.n_datasets} datasets")
-
-    return filtered_datasets
 
 
 def build_step2_create_root_collection(soma_path: str, experiment_builders: list[ExperimentBuilder]) -> soma.Collection:
@@ -225,22 +215,55 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: list
 
 
 def build_step3_populate_obs_and_var_axes(
-    assets_path: str, datasets: list[Dataset], experiment_builders: list[ExperimentBuilder], args: CensusBuildArgs
+    base_path: str,
+    datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+    args: CensusBuildArgs,
 ) -> list[Dataset]:
-    """Populate obs and var axes. Filter cells from datasets for each experiment, as obs is built."""
-    logger.info("Build step 3 - Populate obs and var axes - started")
+    """Populate obs and var axes.
 
-    filtered_datasets = accumulate_axes(assets_path, datasets, experiment_builders, args)
-    logger.info(f"({len(filtered_datasets)} of {len(datasets)}) datasets suitable for processing.")
+    Method:
+    1. Concat all obs dataframes
+    2. Union all var dataframes
+    3. Calculate derived stats and filter datasets by used/not-used
+    4. Stash in the ExperimentBuilder
 
-    for e in experiment_builders:
-        e.populate_var_axis()
+    Accumulation is parallelized; summarization is not parallelized -- it is fast enough
+    and benefits from the simplicity.
+    """
 
-    assign_dataset_soma_joinids(filtered_datasets)
+    def count_cells_per_dataset(
+        datasets: list[Dataset],
+        accumulated: list[tuple[ExperimentBuilder, tuple[pd.DataFrame, pd.DataFrame]]],
+    ) -> None:
+        # per dataset, calculate and date total cell count
+        cells_per_dataset = (
+            pd.concat(obs.value_counts("dataset_id") for _, (obs, _) in accumulated if len(obs))
+            .groupby("dataset_id")
+            .sum()
+        )
+        for dataset in datasets:
+            dataset.dataset_total_cell_count += cast(
+                int,
+                cells_per_dataset.get(dataset.dataset_id, default=0),
+            )
 
-    logger.info("Build step 3 - Populate obs and var axes - finished")
+    logger.info("Build step 3 - accumulate obs and var axes - started")
 
-    return filtered_datasets
+    accumulated = accumulate_axes_dataframes(base_path, datasets, experiment_builders)
+
+    logger.info("Build step 3 - axis accumulation complete")
+
+    # Determine which datasets are utilized
+    count_cells_per_dataset(datasets, accumulated)
+    datasets_utilized = list(filter(lambda d: d.dataset_total_cell_count > 0, datasets))
+    assign_dataset_soma_joinids(datasets_utilized)
+
+    # summarize axes, add additional columns, etc - saving result into experiment_builders
+    post_acc_axes_processing(accumulated)
+
+    logger.info("Build step 3 - accumulate obs and var axes - finished")
+    return datasets_utilized
 
 
 def build_step4_populate_X_layers(
@@ -284,24 +307,11 @@ def build_step5_save_axis_and_summary_info(
     logger.info("Build step 5 - Save axis and summary info - finished")
 
 
-def build_step6_save_derived_data(
-    root_collection: soma.Collection, experiment_builders: list[ExperimentBuilder], args: CensusBuildArgs
-) -> None:
-    logger.info("Build step 6 - Creating derived objects - started")
-
-    for eb in reopen_experiment_builders(experiment_builders):
-        eb.write_X_normalized(args)
-
-        # TODO: to simplify code at some build time expense, we could move
-        # feature presence matrix building into this step, and build from
-        # X['raw'] rather than building from source H5AD.
-
-    logger.info("Build step 6 - Creating derived objects - finished")
-    return
-
-
 def tiledb_soma_1969_work_around(census_uri: str) -> None:
-    """See single-cell-data/TileDB-SOMA#1969 and other issues related. Remove any inserted bounding box metadata."""
+    """Remove any inserted bounding box metadata.
+
+    See single-cell-data/TileDB-SOMA#1969 and other issues related.
+    """
     bbox_metadata_keys = [
         "soma_dim_0_domain_lower",
         "soma_dim_0_domain_upper",
@@ -328,4 +338,5 @@ def tiledb_soma_1969_work_around(census_uri: str) -> None:
         logger.info(f"tiledb_soma_1969_work_around: deleting bounding box from {uri}")
         with soma.open(uri, mode="w") as A:
             for key in bbox_metadata_keys:
-                del A.metadata[key]
+                if key in A.metadata:
+                    del A.metadata[key]

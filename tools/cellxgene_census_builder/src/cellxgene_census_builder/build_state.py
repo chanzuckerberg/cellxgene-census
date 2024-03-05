@@ -23,6 +23,7 @@ CENSUS_BUILD_STATE = "state.yaml"
 @define
 class CensusBuildConfig:
     verbose: int = field(converter=int, default=1)
+    dashboard = field(converter=bool, default=False)
     log_dir: str = field(default="logs")
     log_file: str = field(default="build.log")
     reports_dir: str = field(default="reports")
