@@ -72,14 +72,6 @@ jobs:
       - name: install tiledbsoma version override
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
         run: |
-          echo 'DEBUGGING'
-          echo $LD_LIBRARY_PATH
-          which python
-          ldd `which python`
-          pip --version
-          python --version
-          echo 'DEBUGGING END'
-
           pip uninstall tiledbsoma -y
           pip install -v -v -v '${{ github.event.inputs.tiledbsoma_python_dependency }}'
 
