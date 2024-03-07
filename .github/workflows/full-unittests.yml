@@ -73,7 +73,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
         run: |
           pip uninstall tiledbsoma -y
-          pip install -v -v -v '${{ github.event.inputs.tiledbsoma_python_dependency }}'
+          pip install '${{ github.event.inputs.tiledbsoma_python_dependency }}'
 
       - name: pytest (--expensive --experimental)
         run: |
