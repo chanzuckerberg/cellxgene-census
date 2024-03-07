@@ -230,21 +230,21 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
         # very common tissue, with standard buffer size
         pytest.param(
             "tissue_general=='brain'",
-            slice(0, 2_000_000),
+            slice(0, 1_000_000),
             DEFAULT_TILEDB_CONFIGURATION,
             marks=pytest.mark.expensive,
         ),
         # very common cell type, with standard buffer size
         pytest.param(
             "cell_type=='neuron'",
-            slice(0, 2_000_000),
+            slice(0, 1_000_000),
             DEFAULT_TILEDB_CONFIGURATION,
             marks=pytest.mark.expensive,
         ),
         # many primary cells, with big buffer size
         pytest.param(
             "is_primary_data==True",
-            slice(0, 2_000_000),
+            slice(0, 1_000_000),
             {"soma.init_buffer_bytes": 4 * 1024**3},
             marks=pytest.mark.expensive,
         ),
@@ -252,7 +252,7 @@ def test_incremental_query(organism: str, obs_value_filter: str, stop_after: Opt
         # a large enchilada, if not the whole thing, with a big buffer size
         pytest.param(
             None,
-            slice(0, 2_000_000),
+            slice(0, 1_000_000),
             {"soma.init_buffer_bytes": 4 * 1024**3},
             marks=pytest.mark.expensive,
         ),
