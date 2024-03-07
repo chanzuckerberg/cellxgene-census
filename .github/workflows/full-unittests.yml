@@ -57,7 +57,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.11
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: |
             api/**/pyproject.toml
             api/**/requirements*.txt
@@ -72,11 +72,8 @@ jobs:
       - name: install tiledbsoma version override
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
         run: |
-          # Due to a bug in the tiledbsoma setup, this must be installed editable, ie., `-e`.
-          # Filed as single-cell-data/TileDB-SOMA#1991
-          # PR https://github.com/single-cell-data/TileDB-SOMA/pull/1937 will resolve the
-          # issue and allow removal of `-e`
-          pip install -e '${{ github.event.inputs.tiledbsoma_python_dependency }}'
+          pip uninstall tiledbsoma -y
+          pip install '${{ github.event.inputs.tiledbsoma_python_dependency }}'
 
       - name: pytest (--expensive --experimental)
         run: |
