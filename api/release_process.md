@@ -13,7 +13,6 @@ Python:
 R:
 
 1. The version number of `cellxgene.census` needs to be manually updated in the `DESCRIPTION` file of the package, and merged to main to match the desired release version.
-1. The R doc-site needs to be created locally with the new version number and then merged to main prior to the release.
 1. Upon the GitHub release, a package build is automatically triggered at [https://chanzuckerberg.r-universe.dev/builds](https://chanzuckerberg.r-universe.dev/builds). A build will only be triggered if the version number in `DESCRIPTION` file has changed.
 
 ## Prerequisites
@@ -40,12 +39,10 @@ R builds occur automatically at R-universe ([https://chanzuckerberg.r-universe.d
 **However, the version number needs to be manually updated for the R package.** This needs to be done prior to the release by doing the following.
 
 1. Create a new branch to bump version number.
-2. Update the version number in the file `api/r/cellxgene.census/DESCRIPTION`. R only allows numerical versions, therefore:
+1. Update the version number in the file `api/r/cellxgene.census/DESCRIPTION`. R only allows numerical versions, therefore:
    - If this is a release candidate, bump the dot-dot-dot-dot version number. For example the R version number for v2.0.0-rc1 would be `2.0.0.1`
    - If this is the final release, bump the version number to its final state. For example the R version number for v2.0.0 would be `2.0.0`
-3. Regenerate the doc-site to reflect the version bump in the doc-site pages. Follow [these instructions](https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_).
-4. Check that the doc-site was rendered correctly by opening `api/r/cellxgene.census/docs/index.html`.
-5. Submit PR and merge to main.
+1. Submit PR and merge to main.
 
 ## Step 2: Creating and testing the package builds
 

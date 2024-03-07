@@ -40,11 +40,11 @@ Here we will ask for a Seurat object with the expression data for all human cell
 library("Seurat")
 
 seurat_obj <- get_seurat(
-  census, 
+  census,
   organism = "homo_sapiens",
   obs_value_filter = "tissue_general == 'central nervous system'",
   obs_column_names = c("cell_type"),
-  obsm_layers = c("scvi","geneformer")
+  obsm_layers = c("scvi", "geneformer")
 )
 ```
 
@@ -52,9 +52,9 @@ With the embeddings stored as dimensional reductions on `seurat_obj`, we can tak
 
 ```{r,warning=FALSE,message=FALSE,fig.width=7,fig.height=4}
 seurat_obj <- RunUMAP(
-  seurat_obj, 
+  seurat_obj,
   reduction = "scvi",
-  dims=1:ncol(Embeddings(seurat_obj, "scvi"))
+  dims = 1:ncol(Embeddings(seurat_obj, "scvi"))
 )
 
 DimPlot(seurat_obj, reduction = "umap", group.by = "cell_type") +
@@ -68,11 +68,11 @@ Similarly, [`cellxgene.census::get_single_cell_experiment()`](https://chanzucker
 ```{r,warning=FALSE,message=FALSE}
 library("SingleCellExperiment")
 sce_obj <- get_single_cell_experiment(
-  census, 
+  census,
   organism = "homo_sapiens",
   obs_value_filter = "tissue_general == 'central nervous system'",
   obs_column_names = c("cell_type"),
-  obsm_layers = c("scvi","geneformer")
+  obsm_layers = c("scvi", "geneformer")
 )
 ```
 
@@ -89,7 +89,8 @@ Lastly, we can use a [SOMAExperimentAxisQuery](https://single-cell-data.github.i
 
 ```{r,warning=FALSE,message=FALSE}
 query <- census$get("census_data")$get("homo_sapiens")$axis_query(
-  "RNA", obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue == 'tongue'")
+  "RNA",
+  obs_query = tiledbsoma::SOMAAxisQuery$new(value_filter = "tissue == 'tongue'")
 )
 embeddings <- query$to_sparse_matrix("obsm", "geneformer")
 str(embeddings)
@@ -100,7 +101,7 @@ Each row of the embeddings `sparseMatrix` provides the fine-tuned Geneformer mod
 Still lower-level access is available through [`SOMAExperimentAxisQuery$read()`](https://single-cell-data.github.io/TileDB-SOMA/reference/SOMAExperimentAxisQuery.html#method-read-), which streams Arrow tables. And other methods on `SOMAExperimentAxisQuery` can fetch metadata like `cell_type`:
 
 ```{r}
-head(as.data.frame(query$obs(column_names = c("soma_joinid","cell_type"))$concat()))
+head(as.data.frame(query$obs(column_names = c("soma_joinid", "cell_type"))$concat()))
 ```
 
 The `SOMAExperimentAxisQuery` loads only what you ask for from the Census, unlike the high-level `get_seurat()` and `get_single_cell_experiment()` functions, which eagerly populate those objects based on your query.
