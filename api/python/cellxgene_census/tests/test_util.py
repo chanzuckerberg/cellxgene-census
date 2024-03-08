@@ -1,7 +1,9 @@
-from cellxgene_census._util import _uri_join, _extract_census_version
-import cellxgene_census
-import pytest
 import re
+
+import pytest
+
+import cellxgene_census
+from cellxgene_census._util import _extract_census_version, _uri_join
 
 
 def test_uri_join() -> None:
@@ -23,11 +25,12 @@ def test_uri_join() -> None:
 
     assert _uri_join("https://foo/bar", "https://a/b") == "https://a/b"
 
+
 @pytest.mark.live_corpus
 def test_extract_census_version() -> None:
     """Ensures that extracting the Census version from a Collection object does not break"""
 
-    pattern = r'^\d{4}-\d{2}-\d{2}$'
+    pattern = r"^\d{4}-\d{2}-\d{2}$"
 
     with cellxgene_census.open_soma(census_version="stable") as census:
         assert census is not None

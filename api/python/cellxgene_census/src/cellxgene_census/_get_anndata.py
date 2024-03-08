@@ -12,9 +12,8 @@ import anndata
 import tiledbsoma as soma
 from somacore.options import SparseDFCoord
 
-from ._util import _extract_census_version
-
 from ._experiment import _get_experiment
+from ._util import _extract_census_version
 
 CENSUS_EMBEDDINGS_LOCATION_BASE_URI = "s3://cellxgene-contrib-public/contrib/cell-census/soma"
 
@@ -103,13 +102,14 @@ def get_anndata(
             column_names=column_names,
             X_layers=X_layers,
             obsm_layers=obsm_layers,
-            varm_layers=varm_layers
+            varm_layers=varm_layers,
         )
 
         # If add_obs_embeddings or add_var_embeddings are defined, inject them in the appropriate slot
-        if add_obs_embeddings or add_var_embeddings:
+        if add_obs_embeddings is not None:
             obs_soma_joinids = query.obs_joinids()
             from cellxgene_census.experimental import get_embedding, get_embedding_metadata_by_name
+
             census_version = _extract_census_version(census)
             for emb in add_obs_embeddings:
                 emb_metadata = get_embedding_metadata_by_name(emb, organism, census_version, "obs_embedding")
@@ -118,5 +118,3 @@ def get_anndata(
                 adata.obsm[emb] = embedding
 
         return adata
-            
-

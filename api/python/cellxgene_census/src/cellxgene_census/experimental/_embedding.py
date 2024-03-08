@@ -13,8 +13,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyarrow as pa
-import tiledbsoma as soma
 import requests
+import tiledbsoma as soma
 
 from .._open import get_default_soma_context, open_soma
 from .._release_directory import get_census_version_directory
@@ -140,8 +140,11 @@ def get_embedding(
 
     return embedding
 
-def get_embedding_metadata_by_name(embedding_name: str, organism: str, census_version: str, embedding_type: str | None = "obs_embedding") -> dict[str, Any]:
-    """Return metadata for a specific embedding. If more embeddings match the query parameters, 
+
+def get_embedding_metadata_by_name(
+    embedding_name: str, organism: str, census_version: str, embedding_type: str | None = "obs_embedding"
+) -> dict[str, Any]:
+    """Return metadata for a specific embedding. If more embeddings match the query parameters,
     the most recent one will be returned.
 
     Args:
@@ -167,13 +170,19 @@ def get_embedding_metadata_by_name(embedding_name: str, organism: str, census_ve
     manifest = response.json()
     embeddings = []
     for _, obj in manifest.items():
-        if obj["embedding_name"] == embedding_name and obj["experiment_name"] == organism and obj["data_type"] == embedding_type and obj["census_version"] == census_version:
+        if (
+            obj["embedding_name"] == embedding_name
+            and obj["experiment_name"] == organism
+            and obj["data_type"] == embedding_type
+            and obj["census_version"] == census_version
+        ):
             embeddings.append(obj)
 
     if len(embeddings) == 0:
         raise ValueError(f"No embeddings found for {embedding_name}, {organism}, {census_version}, {embedding_type}")
-    
+
     return sorted(embeddings, key=lambda x: x["submission_date"])[-1]
+
 
 def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
     """Return a dictionary of all available embeddings for a given Census version.
@@ -188,19 +197,19 @@ def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
     Examples:
         >>> get_all_available_embeddings('2023-12-15')
         [{
-            'experiment_name': 'experiment_1', 
-            'measurement_name': 'RNA', 
-            'organism': "homo_sapiens", 
-            'census_version': '2023-12-15', 
-            'n_embeddings': 1000, 
-            'n_features': 200, 
+            'experiment_name': 'experiment_1',
+            'measurement_name': 'RNA',
+            'organism': "homo_sapiens",
+            'census_version': '2023-12-15',
+            'n_embeddings': 1000,
+            'n_features': 200,
             'uri': 's3://bucket/embedding_1'
         }]
 
     """
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
     response.raise_for_status()
-    
+
     embeddings = []
     manifest = response.json()
     for _, obj in manifest.items():
@@ -209,16 +218,18 @@ def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
 
     return embeddings
 
-def get_all_census_versions_with_embedding(embedding_name: str, organism: str, embedding_type: str | None = "obs_embedding") -> list[str]:
-    """
-    Get a list of all census versions that contain a specific embedding.
+
+def get_all_census_versions_with_embedding(
+    embedding_name: str, organism: str, embedding_type: str | None = "obs_embedding"
+) -> list[str]:
+    """Get a list of all census versions that contain a specific embedding.
 
     Args:
-        embedding_name: 
+        embedding_name:
             The name of the embedding, e.g. "scvi".
-        organism: 
+        organism:
             The organism for which the embedding is associated.
-        embedding_type: 
+        embedding_type:
             The type of embedding. Defaults to "obs_embedding".
 
     Returns:
@@ -226,11 +237,15 @@ def get_all_census_versions_with_embedding(embedding_name: str, organism: str, e
     """
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
     response.raise_for_status()
-    
+
     versions = set()
     manifest = response.json()
     for _, obj in manifest.items():
-        if obj["embedding_name"] == embedding_name and obj["experiment_name"] == organism and obj["data_type"] == embedding_type:
+        if (
+            obj["embedding_name"] == embedding_name
+            and obj["experiment_name"] == organism
+            and obj["data_type"] == embedding_type
+        ):
             versions.add(obj["census_version"])
 
-    return sorted(list(versions))
+    return sorted(versions)

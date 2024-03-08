@@ -144,7 +144,7 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
 
     # 7. Name must have length < 128 characters
     MAX_NAME_LENGTH = 128
-    if not metadata.name or len(metadata.name) > MAX_NAME_LENGTH:
+    if not metadata.embedding_name or len(metadata.embedding_name) > MAX_NAME_LENGTH:
         raise ValueError(
             f"Metadata: name must be string between 1 and {MAX_NAME_LENGTH} characters in length",
         )

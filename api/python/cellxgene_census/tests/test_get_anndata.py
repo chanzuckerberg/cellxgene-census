@@ -194,6 +194,7 @@ def test_get_anndata_obsm_two_layers(census: soma.Collection, obsm_layers: List[
         assert obsm_layer in ad.obsm.keys()
         assert ad.obsm[obsm_layer].shape[0] == 100
 
+
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("add_obs_embeddings", [["scvi", "geneformer"]])
 def test_get_anndata_add_obs_embeddings(census: soma.Collection, add_obs_embeddings: List[str]) -> None:
