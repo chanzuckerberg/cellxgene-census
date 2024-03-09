@@ -167,7 +167,7 @@ def get_embedding_metadata_by_name(
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
     response.raise_for_status()
 
-    manifest = response.json()
+    manifest = cast(dict[str, dict[str, Any]], response.json())
     embeddings = []
     for _, obj in manifest.items():
         if (
