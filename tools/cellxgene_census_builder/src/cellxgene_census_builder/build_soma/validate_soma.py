@@ -52,7 +52,7 @@ from .globals import (
     SMART_SEQ,
     SOMA_TileDB_Context,
 )
-from .mp import create_dask_client
+from .mp import create_dask_client, shutdown_dask_cluster
 
 logger = logging.getLogger(__name__)
 
@@ -1112,6 +1112,8 @@ def validate(args: CensusBuildArgs) -> int:
         with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
             assert all(r.result() for r in distributed.wait(validate_soma(args, client)).done)
             logging.info("Validation complete.")
+
+            shutdown_dask_cluster(client)
 
     except TimeoutError:
         pass

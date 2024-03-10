@@ -1,17 +1,17 @@
 import concurrent.futures
 import logging
 import re
-import threading
 import time
 from collections.abc import Sequence
-from typing import Literal, overload
+from typing import overload
 
 import attrs
 import dask.distributed
+import psutil
 import tiledb
 import tiledbsoma as soma
 
-from ..util import cpu_count
+from ..util import clamp, cpu_count
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
 
 logger = logging.getLogger(__name__)
@@ -138,6 +138,10 @@ def _consolidate_array(
 ) -> None:
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
+
+    # use ~1/8 of RAM, clamed to [1, 32].
+    total_buffer_size = clamp(int(psutil.virtual_memory().total / 8 // 1024**3), 1, 32) * 1024**3
+
     for mode in modes:
         tiledb.consolidate(
             uri,
@@ -145,7 +149,7 @@ def _consolidate_array(
                 {
                     **DEFAULT_TILEDB_CONFIG,
                     "sm.consolidation.mode": mode,
-                    "sm.consolidation.total_buffer_size": 32 * 1024**3,
+                    "sm.consolidation.total_buffer_size": total_buffer_size,
                     "sm.compute_concurrency_level": cpu_count(),
                     "sm.io_concurrency_level": cpu_count(),
                     **(consolidation_config or {}),
@@ -187,86 +191,3 @@ def _consolidate_tiledb_object(
     except tiledb.TileDBError as e:
         logger.error(f"Consolidate[vacuum={vacuum}] error, uri={obj.uri}: {str(e)}")
         raise
-
-
-StopFlag = dict[Literal["stop"], bool]
-
-
-@attrs.define(frozen=True, kw_only=True)
-class AsyncConsolidator:
-    stop_request: StopFlag
-    thread: threading.Thread
-
-
-def start_async_consolidation(
-    uri: str, fragment_count_threshold: int = 4, polling_period_sec: float = 15.0
-) -> AsyncConsolidator:
-    """Start an async consolidation process that will safely work alongside writers.
-    Intended use is background process during writing of X layers, to reduce total
-    fragment count.
-
-    Stop the consolidator by calling `stop_async_consolidation`
-    """
-    assert fragment_count_threshold > 1
-    assert polling_period_sec > 0.0
-
-    stop_request: StopFlag = {"stop": False}
-    t = threading.Thread(
-        target=_async_consolidator,
-        args=(uri, fragment_count_threshold, polling_period_sec, stop_request),
-        daemon=True,
-        name="Async consolidator",
-    )
-    t.start()
-    return AsyncConsolidator(thread=t, stop_request=stop_request)
-
-
-def stop_async_consolidation(ac: AsyncConsolidator, *, join: bool = True) -> None:
-    """Stop the async consolidator. Will block until it is done."""
-    logger.info("Async consolidator: asking for stop")
-    ac.stop_request["stop"] = True
-    if join:
-        ac.thread.join()
-
-
-def _async_consolidator(
-    uri: str, fragment_count_threshold: int, polling_period_sec: float, stop_request: StopFlag
-) -> None:
-    """Inner loop of async/incremental consolidator."""
-    logger.info(f"Async consolidator - starting for {uri}")
-    while not stop_request["stop"]:
-        # Arrays are the only resource intensive consolidation step. Prioritize the array
-        # with the largest number of fragments.
-        candidates = sorted(
-            (c for c in _gather(uri) if c.is_array() and c.n_fragments > 1),
-            key=lambda c: c.n_fragments,
-            reverse=True,
-        )
-
-        start_time = time.perf_counter()
-        for c in candidates:
-            if stop_request["stop"]:
-                break  # type: ignore[unreachable]
-
-            logger.info(f"Async consolidator: fragments={c.n_fragments}, uri={c.uri}")
-            # IMPORTANT: in principle we coudl also vacuum, and reduce overall disk footprint.
-            # However, there seems to be a race somewhere in TileDB that causes vacuum to fail
-            # periodically if we consolidate in parallel with writes. Disable as a work-around.
-            # The work-around impact is simply extra working disk space during the build.
-            _consolidate_tiledb_object(
-                c,
-                vacuum=False,
-                consolidation_modes=["fragments"],
-                consolidation_config={
-                    # config for small, incremental consolidation steps.
-                    "sm.consolidation.steps": "2",
-                    "sm.consolidation.step_min_frags": "2",
-                    "sm.consolidation.step_max_frags": "8",
-                    "sm.consolidation.max_fragment_size": str(2 * 1024**3),
-                },
-            )
-        else:
-            if (time.perf_counter() - start_time) < polling_period_sec:
-                time.sleep(polling_period_sec)
-
-    logger.info(f"Async consolidator - stopping for {uri}")
