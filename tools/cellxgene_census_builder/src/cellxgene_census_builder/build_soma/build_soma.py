@@ -117,10 +117,14 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             logger.info(f"Scaling cluster to {n_workers} workers.")
             client.cluster.scale(n=n_workers)
 
-            for f in dask.distributed.as_completed(submit_consolidate(root_collection.uri, pool=client, vacuum=True)):
-                assert f.result()
-            for f in dask.distributed.as_completed(validate_soma(args, client)):
-                assert f.result()
+            if args.config.consolidate:
+                for f in dask.distributed.as_completed(
+                    submit_consolidate(root_collection.uri, pool=client, vacuum=True)
+                ):
+                    assert f.result()
+            if validate:
+                for f in dask.distributed.as_completed(validate_soma(args, client)):
+                    assert f.result()
             if args.config.consolidate and validate:
                 validate_consolidation(args)
             logger.info("Validation & consolidation complete.")

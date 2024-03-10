@@ -22,6 +22,7 @@ from cellxgene_census_builder.build_soma.globals import (
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
     MEASUREMENT_RNA_NAME,
 )
+from cellxgene_census_builder.build_soma.mp import create_dask_client, shutdown_dask_cluster
 from cellxgene_census_builder.build_state import CensusBuildArgs
 
 
@@ -42,9 +43,6 @@ def test_base_builder_creation(
         patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"),
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
         patch("cellxgene_census_builder.build_soma.build_soma.validate_consolidation", return_value=True),
-        patch(
-            "cellxgene_census_builder.build_soma.build_soma.start_async_consolidation",
-        ),
     ):
         return_value = build(census_build_args)
 
@@ -151,7 +149,9 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_ar
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
 
     # Call the function
-    datasets = build_step1_get_source_datasets(census_build_args)
+    with create_dask_client(census_build_args) as client:
+        datasets = build_step1_get_source_datasets(census_build_args)
+        shutdown_dask_cluster(client)
 
     # Verify that 2 datasets are returned
     assert len(datasets) == 2
