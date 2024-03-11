@@ -21,57 +21,6 @@ def _mp_config_checks() -> bool:
     return True
 
 
-# def _hard_process_cap(args: CensusBuildArgs, n_proc: int) -> int:
-#     """Enforce the configured worker process limit.
-
-#     NOTE: logic below only enforces this limit in cases using the default worker count,
-#     as there are special cases where we want higher limits, due to special knowledge that we
-#     will not be subject to the default resource constraints (e.g., VM map usage by SOMA).
-#     """
-#     return min(int(args.config.max_worker_processes), n_proc)
-
-
-# def _default_worker_process_count(args: CensusBuildArgs) -> int:
-#     """Return the default worker process count, subject to configured limit."""
-#     return _hard_process_cap(args, cpu_count())
-
-
-# def create_process_pool_executor(
-#     args: CensusBuildArgs,
-#     max_workers: int | None = None,
-#     max_tasks_per_child: int | None = None,
-# ) -> ProcessPoolExecutor:
-#     assert _mp_config_checks()
-#     if max_workers is None:
-#         max_workers = _default_worker_process_count(args)
-#     max_workers = max(1, max_workers)
-#     logger.debug(f"create_process_pool_executor [max_workers={max_workers}, max_tasks_per_child={max_tasks_per_child}]")
-#     return ProcessPoolExecutor(
-#         max_workers=max_workers, initializer=process_init, initargs=(args,), max_tasks_per_child=max_tasks_per_child
-#     )
-
-
-# def log_on_broken_process_pool(ppe: ProcessPoolExecutor) -> None:
-#     """There are a number of conditions where the Process Pool can be broken,
-#     such that it will hang in a shutdown. This will cause the context __exit__
-#     to hang indefinitely, as it calls ProcessPoolExecutor.shutdown with
-#     `wait=True`.
-
-#     An example condition which can cause a deadlock is an OOM, where a the
-#     repear kills a process.
-
-#     This routine is used to detect the condition and log the error, so a
-#     human has a chance of detecting/diagnosing.
-
-#     Caution: uses ProcessPoolExecutor internal API, as this state is not
-#     otherwise visible.
-#     """
-#     if ppe._broken:
-#         logger.critical(f"Process pool broken and may fail or hang: {ppe._broken}")
-
-#     return
-
-
 class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
     """Pass config to all workers."""
 
