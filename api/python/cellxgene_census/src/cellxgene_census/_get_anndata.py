@@ -1,8 +1,8 @@
-# Copyright (c) 2022-2023 Chan Zuckerberg Initiative Foundation
+# Copyright (c) 2022, Chan Zuckerberg Initiative
 #
 # Licensed under the MIT License.
 
-"""Get slice as AnnData
+"""Get slice as AnnData.
 
 Methods to retrieve slices of the census as AnnData objects.
 """
@@ -28,21 +28,20 @@ def get_anndata(
     var_coords: Optional[SparseDFCoord] = None,
     column_names: Optional[soma.AxisColumnNames] = None,
 ) -> anndata.AnnData:
-    """
-    Convience wrapper around ``soma.Experiment`` query, to build and execute a query,
+    """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
 
     Args:
         census:
-            The census object, usually returned by :func:`cellxgene_census.open_soma()`.
+            The census object, usually returned by :func:`open_soma`.
         organism:
-            The organism to query, usually one of `Homo sapiens` or `Mus musculus`.
+            The organism to query, usually one of ``"Homo sapiens`` or ``"Mus musculus"``.
         measurement_name:
-            The measurement object to query. Defaults to `RNA`.
+            The measurement object to query. Defaults to ``"RNA"``.
         X_name:
-            The ``X`` layer to query. Defaults to `raw`.
+            The ``X`` layer to query. Defaults to ``"raw"``.
         X_layers:
-            Additional layers to add to ``anndata.AnnData.layers``.
+            Additional layers to add to :attr:`anndata.AnnData.layers`.
         obs_value_filter:
             Value filter for the ``obs`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
@@ -81,4 +80,9 @@ def get_anndata(
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
         var_query=soma.AxisQuery(value_filter=var_value_filter, coords=var_coords),
     ) as query:
-        return query.to_anndata(X_name=X_name, column_names=column_names, X_layers=X_layers, obsm_layers=obsm_layers)
+        return query.to_anndata(
+            X_name=X_name,
+            column_names=column_names,
+            X_layers=X_layers,
+            obsm_layers=obsm_layers,
+        )

@@ -1,7 +1,7 @@
 import pathlib
-from typing import List
 
 import pytest
+
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_state import CensusBuildArgs
 
@@ -9,7 +9,7 @@ from ..conftest import ORGANISMS, get_anndata
 
 
 @pytest.fixture
-def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
 
@@ -36,7 +36,7 @@ def datasets_with_mixed_feature_reference(census_build_args: CensusBuildArgs) ->
 
 
 @pytest.fixture
-def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
 
@@ -65,7 +65,7 @@ def datasets_with_larger_raw_layer(census_build_args: CensusBuildArgs) -> List[D
 
 
 @pytest.fixture
-def datasets_with_incorrect_schema_version(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets_with_incorrect_schema_version(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
 
@@ -102,8 +102,8 @@ def h5ad_simple(tmp_path: pathlib.Path) -> str:
 @pytest.fixture
 def h5ad_with_organoids_and_cell_culture(tmp_path: pathlib.Path) -> str:
     adata = get_anndata(ORGANISMS[0], no_zero_counts=True)
-    adata.obs.at["1", "tissue_ontology_term_id"] = "CL:0000192 (organoid)"
-    adata.obs.at["2", "tissue_ontology_term_id"] = "CL:0000192 (cell culture)"
+    adata.obs.at["1", "tissue_type"] = "organoid"
+    adata.obs.at["2", "tissue_type"] = "cell culture"
 
     path = "with_organoids_and_cell_culture.h5ad"
     adata.write_h5ad(tmp_path / path)

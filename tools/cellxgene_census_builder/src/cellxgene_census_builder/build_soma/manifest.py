@@ -2,7 +2,6 @@ import csv
 import io
 import logging
 import os.path
-from typing import List, Set
 
 import fsspec
 
@@ -15,17 +14,15 @@ logger = logging.getLogger(__name__)
 CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 
 
-def parse_manifest_file(manifest_fp: io.TextIOBase) -> List[Dataset]:
-    """
-    return manifest as list of tuples, (dataset_id, URI/path), read from the text stream
-    """
+def parse_manifest_file(manifest_fp: io.TextIOBase) -> list[Dataset]:
+    """Return manifest as list of tuples, (dataset_id, URI/path), read from the text stream."""
     # skip comments and strip leading/trailing white space
     skip_comments = csv.reader(row for row in manifest_fp if not row.startswith("#"))
     stripped = [[r.strip() for r in row] for row in skip_comments]
     return [Dataset(dataset_id=r[0], dataset_asset_h5ad_uri=r[1]) for r in stripped]
 
 
-def dedup_datasets(datasets: List[Dataset]) -> List[Dataset]:
+def dedup_datasets(datasets: list[Dataset]) -> list[Dataset]:
     ds = {d.dataset_id: d for d in datasets}
     if len(ds) != len(datasets):
         logger.warning("Dataset manifest contained DUPLICATES, which will be ignored.")
@@ -33,7 +30,7 @@ def dedup_datasets(datasets: List[Dataset]) -> List[Dataset]:
     return datasets
 
 
-def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> List[Dataset]:
+def load_manifest_from_fp(manifest_fp: io.TextIOBase) -> list[Dataset]:
     logger.info("Loading manifest from file")
     all_datasets = parse_manifest_file(manifest_fp)
     datasets = [
@@ -52,7 +49,7 @@ def null_to_empty_str(val: str | None) -> str:
     return val
 
 
-def load_manifest_from_CxG() -> List[Dataset]:
+def load_manifest_from_CxG() -> list[Dataset]:
     logger.info("Loading manifest from CELLxGENE data portal...")
 
     # Load all collections and extract dataset_id
@@ -104,8 +101,8 @@ def load_manifest_from_CxG() -> List[Dataset]:
     return response
 
 
-def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
-    blocked_dataset_ids: Set[str] = set()
+def load_blocklist(dataset_id_blocklist_uri: str | None) -> set[str]:
+    blocked_dataset_ids: set[str] = set()
     if not dataset_id_blocklist_uri:
         msg = "No dataset blocklist specified - builder is misconfigured"
         logger.error(msg)
@@ -124,7 +121,7 @@ def load_blocklist(dataset_id_blocklist_uri: str | None) -> Set[str]:
     return blocked_dataset_ids
 
 
-def apply_blocklist(datasets: List[Dataset], dataset_id_blocklist_uri: str | None) -> List[Dataset]:
+def apply_blocklist(datasets: list[Dataset], dataset_id_blocklist_uri: str | None) -> list[Dataset]:
     try:
         blocked_dataset_ids = load_blocklist(dataset_id_blocklist_uri)
         return list(filter(lambda d: d.dataset_id not in blocked_dataset_ids, datasets))
@@ -138,9 +135,8 @@ def apply_blocklist(datasets: List[Dataset], dataset_id_blocklist_uri: str | Non
 def load_manifest(
     manifest_fp: str | io.TextIOBase | None = None,
     dataset_id_blocklist_uri: str | None = None,
-) -> List[Dataset]:
-    """
-    Load dataset manifest from the file pointer if provided, else bootstrap
+) -> list[Dataset]:
+    """Load dataset manifest from the file pointer if provided, else bootstrap
     from the CELLxGENE REST API.  Apply the blocklist if provided.
     """
     if manifest_fp is not None:

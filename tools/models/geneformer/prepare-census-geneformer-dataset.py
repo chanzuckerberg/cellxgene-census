@@ -42,13 +42,13 @@ def main(argv):
         with GeneformerTokenizer(
             census_human,
             obs_query=tiledbsoma.AxisQuery(coords=(coords,)),
-            obs_attributes=list(
+            obs_attributes=[
                 # cell_subclass isn't yet in Census (select_cells() added it to obs_df for us), so
                 # exclude from the experiment axis query
                 it
                 for it in args.obs_columns
                 if it not in ("cell_subclass", "cell_subclass_ontology_term_id")
-            ),
+            ],
         ) as tokenizer:
             logger.info(f"tokenizing {len(coords)} cells...")
             dataset = tokenizer.build()
@@ -131,8 +131,7 @@ def parse_arguments(argv):
 
 
 def select_cells(census_human, value_filter, percentage_data, sampling_column, N):
-    """
-    Select the desired cells from the human census experiment.
+    """Select the desired cells from the human census experiment.
 
     Return a pd.DataFrame indexed by soma_joinid with additional cell_subclass and cell_subclass_ontology_term_id
     attributes. These aren't currently provided in obs, so we derive them on the fly.
@@ -152,8 +151,7 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     mapper = CellSubclassMapper(map_orphans_to_class=True)
     obs_df["cell_subclass_ontology_term_id"] = obs_df["cell_type_ontology_term_id"].map(
         # if CellSubclassMapper doesn't find a subclass, just use the cell type itself
-        lambda it: mapper.get_top_high_level_term(it)
-        or it
+        lambda it: mapper.get_top_high_level_term(it) or it
     )
     obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
     subclass_counts = Counter(obs_df["cell_subclass"])

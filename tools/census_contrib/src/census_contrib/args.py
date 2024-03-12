@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from tap import Tap
 
@@ -13,9 +12,9 @@ class CommonArgs(Tap):  # type: ignore[misc]
     verbose: int = 0  # Logging level
     metadata: str = "meta.yml"  # Metadata file name, as .json or .yaml
     skip_storage_version_check: bool = False  # Skip TileDB storage equivalence check
-    census_uri: Optional[
-        str
-    ] = None  # override Census URI. If not specified, will look up using metadata `census_version` field.
+    census_uri: str | None = (
+        None  # override Census URI. If not specified, will look up using metadata `census_version` field.
+    )
 
     def configure(self) -> None:
         super().configure()
@@ -84,11 +83,9 @@ class Arguments(Tap):  # type: ignore[misc]
             setattr(self, arg_name, self.cwd.joinpath(getattr(self, arg_name)))
 
     def process_args(self) -> None:
-        """
-        process_args only called for classes where parse_ars is called, i.e.
+        """process_args only called for classes where parse_ars is called, i.e.
         not on sub-command classes. So do all sub-class process_arg work here.
         """
-
         # Validate cwd
         if not self.cwd.is_dir():
             raise ValueError("Must specify working directory")

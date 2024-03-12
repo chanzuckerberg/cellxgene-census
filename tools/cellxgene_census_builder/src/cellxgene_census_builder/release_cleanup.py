@@ -2,7 +2,6 @@ import argparse
 import logging
 import sys
 from datetime import datetime, timedelta
-from typing import List
 
 import s3fs
 
@@ -20,8 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool, s3_anon: bool = False) -> None:
-    """
-    Remove old releases, committing the change to release.json.
+    """Remove old releases, committing the change to release.json.
 
     Current rules - delete releases where:
     * Tag is a date older than `days` in age
@@ -34,7 +32,6 @@ def remove_releases_older_than(days: int, census_base_url: str, dryrun: bool, s3
     Age of release is determined by the release version name, i.e., YYYY-MM-DD. The S3 object date or
     other information is not utilized.
     """
-
     _log_it(f"Delete releases older than {days} days old.", dryrun)
 
     # Load the release manifest
@@ -78,7 +75,7 @@ def _update_release_manifest(
 
 
 def _perform_recursive_delete(rls_tag: CensusVersionName, uri: str, dryrun: bool) -> None:
-    """Will raise FileNotFound error if the path does not exist (which should never happen)"""
+    """Will raise FileNotFound error if the path does not exist (which should never happen)."""
     _log_it(f"Delete census release {rls_tag}: {uri}", dryrun)
     if dryrun:
         return
@@ -86,7 +83,7 @@ def _perform_recursive_delete(rls_tag: CensusVersionName, uri: str, dryrun: bool
     s3.rm(uri, recursive=True)
 
 
-def _find_removal_candidates(release_manifest: CensusReleaseManifest, days_older_than: int) -> List[CensusVersionName]:
+def _find_removal_candidates(release_manifest: CensusReleaseManifest, days_older_than: int) -> list[CensusVersionName]:
     delete_before_date = datetime.now() - timedelta(days=days_older_than)
 
     # all releases which have a tag aliasing them
@@ -94,7 +91,7 @@ def _find_removal_candidates(release_manifest: CensusReleaseManifest, days_older
     # In practice, we REQUIRE at least a `latest` tag, so this list should never be empty
     assert len(is_aliased) > 0
 
-    candidates: List[CensusVersionName] = []
+    candidates: list[CensusVersionName] = []
     for rls_tag, rls_info in release_manifest.items():
         if isinstance(rls_info, dict) and (rls_tag not in is_aliased) and not rls_info.get("do_not_delete", False):
             # candidate for deletion - check timestamp

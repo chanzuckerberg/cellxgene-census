@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import List, Optional, Sequence, Tuple, TypeVar, Union, cast
+from collections.abc import Sequence
+from typing import TypeVar, cast
 
 import attrs
 import numpy.typing as npt
@@ -17,7 +18,7 @@ based upon number of labels).
 
 """
 
-OptDataFrame = TypeVar("OptDataFrame", pd.DataFrame, None, Optional[pd.DataFrame])
+OptDataFrame = TypeVar("OptDataFrame", pd.DataFrame, None, pd.DataFrame | None)
 
 
 @attrs.define(frozen=True, kw_only=True, slots=True)
@@ -31,8 +32,7 @@ class FieldSpec:
     is_dictionary: bool = False  # dictionary or primitive field type
 
     def to_pandas_dtype(self, *, ignore_dict_type: bool = False) -> npt.DTypeLike:
-        """
-        Return the Pandas dtype for this field.
+        """Return the Pandas dtype for this field.
 
         This is only possible if the field is not a dictionary-type field.
 
@@ -44,8 +44,7 @@ class FieldSpec:
         return cast(npt.DTypeLike, self.type.to_pandas_dtype())
 
     def is_type_equivalent(self, other_type: pa.DataType, *, null_non_primitive_equivalence: bool = False) -> bool:
-        """
-        Return True if this FieldSpec is equivalent to the Arrow `other_type`.
+        """Return True if this FieldSpec is equivalent to the Arrow `other_type`.
         For convenience in comparing with types inferred from Pandas DataFrames,
         where strings and other Arrow non-primitives are stored as objects, allow a
         pa.null DataType to be equivalent to Arrow non-primitive.
@@ -91,19 +90,18 @@ class FieldSpec:
 
 @attrs.define(frozen=True, kw_only=True, slots=True)
 class TableSpec:
-    """
-    List of FieldSpec defining an Arrow Table, with a table-wide feature flag enabling/disabling
+    """List of FieldSpec defining an Arrow Table, with a table-wide feature flag enabling/disabling
     use of Dictionary types.
 
     Instantiate ONLY with the class method `create`.
     """
 
-    fields: List[FieldSpec]
+    fields: list[FieldSpec]
     use_arrow_dictionaries: bool  # Feature flag to enable/disable dictionary/enum support
 
     @classmethod
     def create(
-        cls, fields: Sequence[Union[FieldSpec, Tuple[str, pa.DataType]]], *, use_arrow_dictionary: bool = False
+        cls, fields: Sequence[FieldSpec | tuple[str, pa.DataType]], *, use_arrow_dictionary: bool = False
     ) -> TableSpec:
         u = []
         for f in fields:
@@ -116,14 +114,13 @@ class TableSpec:
                 u.append(FieldSpec(name=name, type=type, is_dictionary=False))
 
         # quick unique check
-        if len(set(f.name for f in u)) != len(fields):
+        if len(set(f.name for f in u)) != len(fields):  # noqa: C401
             raise ValueError("All field names must be unique.")
 
         return TableSpec(fields=u, use_arrow_dictionaries=use_arrow_dictionary)
 
-    def to_arrow_schema(self, df: Optional[pd.DataFrame] = None) -> pa.Schema:
-        """
-        Returns Arrow schema for a Table.
+    def to_arrow_schema(self, df: pd.DataFrame | None = None) -> pa.Schema:
+        """Returns Arrow schema for a Table.
 
         Use the specified types, but check for equivalence. Where the field spec is a
         dictionary, create the narrowest possible dictionary index_type sufficient for
@@ -151,8 +148,8 @@ class TableSpec:
         return pa.schema(pa_fields)
 
     def field_names(self) -> Sequence[str]:
-        """Return field names for this TableSpec as a sequence of string"""
-        return list(field.name for field in self.fields)
+        """Return field names for this TableSpec as a sequence of string."""
+        return [field.name for field in self.fields]
 
     def field(self, key: str) -> FieldSpec:
         """Return the named field, or raise ValueError if no such key."""
@@ -163,7 +160,7 @@ class TableSpec:
         return r[0]
 
     def recategoricalize(self, df: OptDataFrame) -> OptDataFrame:
-        """Apply/unapply categorical typing to match table schema spec"""
+        """Apply/unapply categorical typing to match table schema spec."""
         if df is None or df.empty:
             return df
 

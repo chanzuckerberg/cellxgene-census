@@ -1,25 +1,27 @@
 import logging
-import multiprocessing
 import os
 import platform
 import re
 import threading
 import time
 import urllib.parse
-from typing import cast
+from typing import TypeVar, cast
 
 import psutil
-
-from .build_state import CensusBuildArgs
-from .logging import logging_init
 
 logger = logging.getLogger(__name__)
 
 
+V = TypeVar("V", bound=int | float)
+
+
+def clamp(val: V, min_val: V, max_val: V) -> V:
+    """Clamp to range, inclusive of min_val and max_val."""
+    return min(max(min_val, val), max_val)
+
+
 def urljoin(base: str, url: str) -> str:
-    """
-    like urllib.parse.urljoin, but doesn't get confused by S3://
-    """
+    """Like urllib.parse.urljoin, but doesn't get confused by s3://."""
     p_url = urllib.parse.urlparse(url)
     if p_url.netloc:
         return url
@@ -38,15 +40,15 @@ def urljoin(base: str, url: str) -> str:
 
 
 def urlcat(base: str, *paths: str) -> str:
-    """
-    Concat one or more paths, separated with '/'. Similar to urllib.parse.urljoin,
+    """Concat one or more paths, separated with '/'.
+
+    Similar to urllib.parse.urljoin,
     but doesn't get confused by S3:// and other "non-standard" protocols (treats
-    them as if they are same as http: or file:)
+    them as if they are same as http: or file:).
 
     Similar to urllib.parse.urljoin except it takes an iterator, and
     assumes the container_uri is a 'directory'/container, ie, ends in '/'.
     """
-
     url = base
     for p in paths:
         url = url if url.endswith("/") else url + "/"
@@ -54,62 +56,10 @@ def urlcat(base: str, *paths: str) -> str:
     return url
 
 
-def env_var_init() -> None:
-    """
-    Set environment variables as needed by dependencies, etc.
-
-    This controls thread allocation for worker (child) processes. It is executed too
-    late to influence __init__ time thread pool allocations for the main process.
-    """
-
-    # Each of these control thread-pool allocation for commonly used packages that
-    # may be pulled into our environment, and which have import-time pool allocation.
-    # Most do import time thread pool allocation equal to host CPU count, which can
-    # result in excessive unused thread pools on high CPU machines.
-    #
-    # Where we are confident we have no performance dependency related to their concurrency,
-    # set their pool size to "1". Otherwise set to something useful.
-    #
-    # OMP_NUM_THREADS: OpenMp,
-    # OPENBLAS_NUM_THREADS: OpenBLAS,
-    # MKL_NUM_THREADS: Intel MKL,
-    # VECLIB_MAXIMUM_THREADS: Accelerate,
-    # NUMEXPR_NUM_THREADS: NumExpr
-
-    if "NUMEXPR_MAX_THREADS" not in os.environ:
-        # ref: https://numexpr.readthedocs.io/en/latest/user_guide.html#threadpool-configuration
-        # In particular, the docs state that >8 threads is not helpful except in extreme circumstances.
-        val = str(min(8, max(1, cpu_count() // 2)))
-        os.environ["NUMEXPR_MAX_THREADS"] = val
-        logger.info(f'Setting NUMEXPR_MAX_THREADS environment variable to "{val}"')
-
-    for env_name in [
-        "OMP_NUM_THREADS",
-        "OPENBLAS_NUM_THREADS",
-        "MKL_NUM_THREADS",
-        "VECLIB_MAXIMUM_THREADS",
-    ]:
-        if env_name not in os.environ:
-            logger.info(f'Setting {env_name} environment variable to "1"')
-            os.environ[env_name] = "1"
-
-
-def process_init(args: CensusBuildArgs) -> None:
-    """
-    Called on every process start to configure global package/module behavior.
-    """
-    logging_init(args)
-
-    if multiprocessing.get_start_method(True) != "spawn":
-        multiprocessing.set_start_method("spawn", True)
-
-    env_var_init()
-
-
 class ProcessResourceGetter:
-    """
-    Access to process resource state, primary for diagnostic/debugging purposes. Currently
-    provides current and high water mark for:
+    """Access to process resource state, primary for diagnostic/debugging purposes.
+
+    Currently provides current and high water mark for:
     * thread count
     * mmaps
     * major page faults
@@ -160,9 +110,9 @@ class ProcessResourceGetter:
 
 
 class SystemResourceGetter:
-    """
-    Access to system resource state, primary for diagnostic/debugging purposes. Currently
-    provides current and high water mark for:
+    """Access to system resource state, primary for diagnostic/debugging purposes.
+
+    Currently provides current and high water mark for:
     * memory total
     * memory available
 
@@ -186,7 +136,7 @@ _system_resource_getter = SystemResourceGetter()
 
 
 def log_process_resource_status(preface: str = "Resource use:", level: int = logging.DEBUG) -> None:
-    """Print current and historical max of thread and (memory) map counts"""
+    """Print current and historical max of thread and (memory) map counts."""
     if platform.system() == "Linux":
         me = psutil.Process()
         mem_full_info = me.memory_full_info()
@@ -228,10 +178,9 @@ def start_resource_logger(log_period_sec: float = 15.0, level: int = logging.INF
 
 
 def cpu_count() -> int:
-    """
+    """This function exists to always return a default of `1` when os.cpu_count returns None.
+
     os.cpu_count() returns None if "undetermined" number of CPUs.
-    This function exists to always return a default of `1` when
-    os.cpu_count returns None.
     """
     cpu_count = os.cpu_count()
     if os.cpu_count() is None:

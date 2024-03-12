@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import List, Type, TypeVar
+from typing import TypeVar
 
 import pandas as pd
 import pyarrow as pa
@@ -15,9 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass  # TODO: use attrs
 class Dataset:
-    """
-    Type used to handle source H5AD datasets read from manifest
-    """
+    """Type used to handle source H5AD datasets read from manifest."""
 
     # Required
     dataset_id: str  # CELLxGENE dataset_id
@@ -43,35 +41,31 @@ class Dataset:
     soma_joinid: int = -1
 
     def __post_init__(self) -> None:
-        """
-        Type contracts - downstream code assume these types, so enforce it.
-        """
+        """Type contracts - downstream code assume these types, so enforce it."""
         for f in dataclasses.fields(self):
             assert isinstance(
                 getattr(self, f.name), f.type
             ), f"{f.name} has incorrect type, expected {f.type}, got {type(getattr(self,f.name))}"
 
     @classmethod
-    def to_dataframe(cls: Type[T], datasets: List[T]) -> pd.DataFrame:
+    def to_dataframe(cls: type[T], datasets: list[T]) -> pd.DataFrame:
         if len(datasets) == 0:
             return pd.DataFrame({field.name: pd.Series(dtype=field.type) for field in dataclasses.fields(cls)})
 
         return pd.DataFrame(datasets)
 
     @classmethod
-    def from_dataframe(cls: Type[T], datasets: pd.DataFrame) -> List["Dataset"]:
+    def from_dataframe(cls: type[T], datasets: pd.DataFrame) -> list["Dataset"]:
         return [Dataset(**r) for r in datasets.to_dict("records")]  # type: ignore[misc]
 
 
-def assign_dataset_soma_joinids(datasets: List[Dataset]) -> None:
+def assign_dataset_soma_joinids(datasets: list[Dataset]) -> None:
     for joinid, dataset in enumerate(datasets):
         dataset.soma_joinid = joinid
 
 
-def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dataset]) -> None:
-    """
-    Write the Census `census_datasets` dataframe
-    """
+def create_dataset_manifest(info_collection: soma.Collection, datasets: list[Dataset]) -> None:
+    """Write the Census `census_datasets` dataframe."""
     logger.info("Creating dataset_manifest")
     manifest_df = Dataset.to_dataframe(datasets)
     manifest_df = manifest_df[list(CENSUS_DATASETS_TABLE_SPEC.field_names())]
@@ -84,4 +78,4 @@ def create_dataset_manifest(info_collection: soma.Collection, datasets: List[Dat
     with info_collection.add_new_dataframe(
         CENSUS_DATASETS_NAME, schema=schema, index_column_names=["soma_joinid"]
     ) as manifest:
-        manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False))
+        manifest.write(pa.Table.from_pandas(manifest_df, preserve_index=False, schema=schema))

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from concurrent import futures
-from typing import Any, Generator, Tuple
+from typing import Any, Generator
 
 import numpy as np
 import numpy.typing as npt
@@ -21,44 +21,38 @@ def mean_variance(
     ddof: int = 1,
     nnz_only: bool = False,
 ) -> pd.DataFrame:
-    """
-    Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations
-    are done in an accumulative chunked fashion. For the mean and variance calculations,
-    the total number of elements (N) is, by default, the corresponding dimension size:
-    for column-wise calculations (``axis = 0``) N is number of rows,
-    for row-wise calculations (``axis = 1``) N is number of columns.
-    For metrics calculated only on nnz (explicitly stored)values of the sparse matrix,
-    specify ``nnz_only=True``.
+    """Calculate  mean and/or variance along the ``obs`` axis from query results. Calculations are done in an accumulative
+    chunked fashion. For the mean and variance calculations, the total number of elements (N) is, by default, the
+    corresponding dimension size: for column-wise calculations (``axis = 0``) N is number of rows, for row-wise
+    calculations (``axis = 1``) N is number of columns. For metrics calculated only on nnz (explicitly stored) values of
+    the sparse matrix, specify ``nnz_only=True``.
 
     Args:
         query:
-            A SOMA query, specifying the obs/var selection over which mean and variance are calculated.
-
+            A :class:`tiledbsoma.ExperimentAxisQuery`, specifying the ``obs``/``var`` selection over which mean and
+            variance are calculated.
         layer:
-            X layer used, e.g., ``raw``
-
+            X layer used, e.g., ``"raw"``.
         axis:
-           Axis or axes along which the statistics are computed
-
+           Axis or axes along which the statistics are computed.
         calculate_mean:
-            If ``True`` it calculates mean, otherwise skips calculation
-
+            If ``True`` it calculates mean, otherwise skips calculation.
         calculate_variance:
-            If ``True`` it calculates variance, otherwise skips calculation
-
+            If ``True`` it calculates variance, otherwise skips calculation.
         ddof:
-            "Delta Degrees of Freedom": the divisor used in the calculation for variance is ``N - ddof``, where ``N`` represents the number of elements.
-
+            "Delta Degrees of Freedom": the divisor used in the calculation for variance is ``N - ddof``, where ``N``
+            represents the number of elements.
         nnz_only:
-            If ``True`` mean and variance will only be calculated over explicitly stored values in the sparse matrix. Defaults to ``False``.
+            If ``True`` mean and variance will only be calculated over explicitly stored values in the sparse matrix.
+            Defaults to ``False``.
 
     Returns:
-        Pandas DataFrame indexed by the ``soma_joinid`` and with columns ``mean`` (if ``calculate_mean = True``), and ``variance`` (if ``calculate_variance = True``)
+        :class:`pandas.DataFrame` indexed by the ``soma_joinid`` and with columns ``mean`` (if
+        ``calculate_mean = True``), and ``variance`` (if ``calculate_variance = True``).
 
     Lifecycle:
         experimental
     """
-
     if axis not in (0, 1):
         raise ValueError("axis must be 0 or 1")
 
@@ -74,9 +68,12 @@ def mean_variance(
     n_batches = 1
     n_samples = np.array([n_dim_1], dtype=np.int64)
 
-    idx = pd.Index(data=query.obs_joinids() if axis == 1 else query.var_joinids(), name="soma_joinid")
+    idx = pd.Index(
+        data=query.obs_joinids() if axis == 1 else query.var_joinids(),
+        name="soma_joinid",
+    )
 
-    def iterate() -> Generator[Tuple[npt.NDArray[np.int64], Any], None, None]:
+    def iterate() -> Generator[tuple[npt.NDArray[np.int64], Any], None, None]:
         with futures.ThreadPoolExecutor(max_workers=1) as pool:  # Note: _EagerIterator only supports one thread
             for arrow_tbl in _EagerIterator(query.X(layer).tables(), pool=pool):
                 dim = idx.get_indexer(arrow_tbl[f"soma_dim_{1-axis}"].to_numpy())

@@ -1,16 +1,18 @@
+import concurrent.futures
 import logging
 import re
-from concurrent.futures import Executor, Future, as_completed
-from typing import List, Optional, Sequence
+import time
+from collections.abc import Sequence
+from typing import overload
 
 import attrs
+import dask.distributed
+import psutil
 import tiledb
 import tiledbsoma as soma
 
-from ..build_state import CensusBuildArgs
-from ..util import cpu_count
+from ..util import clamp, cpu_count
 from .globals import DEFAULT_TILEDB_CONFIG, SOMA_TileDB_Context
-from .mp import create_process_pool_executor, log_on_broken_process_pool
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +21,8 @@ logger = logging.getLogger(__name__)
 class ConsolidationCandidate:
     uri: str
     soma_type: str
+    n_columns: int
+    n_fragments: int  # zero if Group
 
     def is_array(self) -> bool:
         return self.soma_type in [
@@ -31,33 +35,48 @@ class ConsolidationCandidate:
         return not self.is_array()
 
 
-def consolidate(args: CensusBuildArgs, uri: str) -> None:
-    """The old API - consolidate & vacuum everything, and return when done."""
-    with create_process_pool_executor(args) as ppe:
-        futures = submit_consolidate(args, uri, pool=ppe, vacuum=True, exclude=None)
+def consolidate_all(uri: str) -> None:
+    """Consolidate & vacuum everything, and return when done."""
+    for candidate in _gather(uri):
+        _consolidate_tiledb_object(candidate, vacuum=True)
 
-        # Wait for consolidation to complete
-        for future in as_completed(futures):
-            log_on_broken_process_pool(ppe)
-            uri = future.result()
+
+@overload
+def submit_consolidate(
+    uri: str,
+    pool: concurrent.futures.ProcessPoolExecutor,
+    vacuum: bool,
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
+) -> list[concurrent.futures.Future[str]]:
+    ...
+
+
+@overload
+def submit_consolidate(
+    uri: str,
+    pool: dask.distributed.Client,
+    vacuum: bool,
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
+) -> list[dask.distributed.Future]:
+    ...
 
 
 def submit_consolidate(
-    args: CensusBuildArgs,
     uri: str,
-    pool: Executor,
+    pool: dask.distributed.Client | concurrent.futures.ProcessPoolExecutor,
     vacuum: bool,
-    include: Optional[Sequence[str]] = None,
-    exclude: Optional[Sequence[str]] = None,
-) -> Sequence[Future[str]]:
-    """
-    This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
+    include: Sequence[str] | None = None,
+    exclude: Sequence[str] | None = None,
+) -> list[dask.distributed.Future | concurrent.futures.Future[str]]:
+    """This is a non-portable, TileDB-specific consolidation routine. Returns sequence of
     futures, each of which returns the URI for the array/group.
 
     Will vacuum if requested. Excludes any object URI matching a regex in the exclude list.
     """
     if soma.get_storage_engine() != "tiledb":
-        return ()
+        return []
 
     exclude = [] if exclude is None else exclude
     include = [r".*"] if include is None else include
@@ -73,7 +92,7 @@ def submit_consolidate(
     return futures
 
 
-def _gather(uri: str) -> List[ConsolidationCandidate]:
+def _gather(uri: str) -> list[ConsolidationCandidate]:
     # Gather URIs for any arrays that potentially need consolidation
     with soma.Collection.open(uri, context=SOMA_TileDB_Context()) as census:
         uris_to_consolidate = list_uris_to_consolidate(census)
@@ -82,10 +101,8 @@ def _gather(uri: str) -> List[ConsolidationCandidate]:
 
 def list_uris_to_consolidate(
     collection: soma.Collection,
-) -> List[ConsolidationCandidate]:
-    """
-    Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed.
-    """
+) -> list[ConsolidationCandidate]:
+    """Recursively walk the soma.Collection and return all uris for soma_types that can be consolidated and vacuumed."""
     uris = []
     for soma_obj in collection.values():
         type = soma_obj.soma_type
@@ -101,13 +118,29 @@ def list_uris_to_consolidate(
 
         if type in ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]:
             uris += list_uris_to_consolidate(soma_obj)
-        uris.append(ConsolidationCandidate(uri=soma_obj.uri, soma_type=type))
+            n_columns = 0
+            n_fragments = 0
+        else:
+            n_columns = len(soma_obj.schema)
+            n_fragments = len(tiledb.array_fragments(soma_obj.uri))
+        uris.append(
+            ConsolidationCandidate(uri=soma_obj.uri, soma_type=type, n_columns=n_columns, n_fragments=n_fragments)
+        )
 
     return uris
 
 
-def _consolidate_array(uri: str, vacuum: bool) -> None:
-    modes = ["fragment_meta", "array_meta", "commits", "fragments"]
+def _consolidate_array(
+    obj: ConsolidationCandidate,
+    vacuum: bool,
+    consolidation_modes: list[str] | None = None,
+    consolidation_config: dict[str, str] | None = None,
+) -> None:
+    modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
+    uri = obj.uri
+
+    # use ~1/8 of RAM, clamed to [1, 32].
+    total_buffer_size = clamp(int(psutil.virtual_memory().total / 8 // 1024**3), 1, 32) * 1024**3
 
     for mode in modes:
         tiledb.consolidate(
@@ -115,12 +148,11 @@ def _consolidate_array(uri: str, vacuum: bool) -> None:
             config=tiledb.Config(
                 {
                     **DEFAULT_TILEDB_CONFIG,
-                    "sm.compute_concurrency_level": max(16, cpu_count()),
-                    "sm.io_concurrency_level": max(16, cpu_count()),
-                    # once we update to TileDB core 2.19, remove this and replace
-                    # with sm.consolidation.total_buffer_size
-                    "sm.consolidation.buffer_size": 1 * 1024**3,
                     "sm.consolidation.mode": mode,
+                    "sm.consolidation.total_buffer_size": total_buffer_size,
+                    "sm.compute_concurrency_level": cpu_count(),
+                    "sm.io_concurrency_level": cpu_count(),
+                    **(consolidation_config or {}),
                 }
             ),
         )
@@ -129,22 +161,32 @@ def _consolidate_array(uri: str, vacuum: bool) -> None:
             tiledb.vacuum(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG, "sm.vacuum.mode": mode}))
 
 
-def _consolidate_group(uri: str, vacuum: bool) -> None:
+def _consolidate_group(obj: ConsolidationCandidate, vacuum: bool) -> None:
+    uri = obj.uri
     tiledb.Group.consolidate_metadata(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG}))
     if vacuum:
         tiledb.Group.vacuum_metadata(uri, config=tiledb.Config({**DEFAULT_TILEDB_CONFIG}))
 
 
-def _consolidate_tiledb_object(obj: ConsolidationCandidate, vacuum: bool) -> str:
+def _consolidate_tiledb_object(
+    obj: ConsolidationCandidate,
+    vacuum: bool,
+    consolidation_modes: list[str] | None = None,
+    consolidation_config: dict[str, str] | None = None,
+) -> str:
     assert soma.get_storage_engine() == "tiledb"
 
     try:
         logger.info(f"Consolidate[vacuum={vacuum}] start, uri={obj.uri}")
+        consolidate_start_time = time.perf_counter()
         if obj.is_array():
-            _consolidate_array(obj.uri, vacuum)
+            _consolidate_array(
+                obj, vacuum=vacuum, consolidation_modes=consolidation_modes, consolidation_config=consolidation_config
+            )
         else:
-            _consolidate_group(obj.uri, vacuum)
-        logger.info(f"Consolidate[vacuum={vacuum}] finish, uri={obj.uri}")
+            _consolidate_group(obj, vacuum=vacuum)
+        consolidate_time = time.perf_counter() - consolidate_start_time
+        logger.info(f"Consolidate[vacuum={vacuum}] finish, {consolidate_time:.2f} seconds, uri={obj.uri}")
         return obj.uri
     except tiledb.TileDBError as e:
         logger.error(f"Consolidate[vacuum={vacuum}] error, uri={obj.uri}: {str(e)}")

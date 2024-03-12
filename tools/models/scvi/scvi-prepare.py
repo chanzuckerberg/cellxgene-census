@@ -11,7 +11,7 @@ if __name__ == "__main__":
     with open(file) as f:
         config = yaml.safe_load(f)
 
-    census = cellxgene_census.open_soma(census_version="latest")
+    census = cellxgene_census.open_soma(census_version="2023-12-15")
 
     census_config = config.get("census")
     experiment_name = census_config.get("organism")

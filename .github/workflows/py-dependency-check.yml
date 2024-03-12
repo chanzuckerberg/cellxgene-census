@@ -26,6 +26,11 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
+      - name: install tooling
+        if: matrix.os == 'single-cell-8c64g-runner'
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
       - name: get latest release with tag
         id: latestrelease
         run: |
@@ -46,7 +51,7 @@ jobs:
           ref: ${{ steps.latestrelease.outputs.releasetag }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 

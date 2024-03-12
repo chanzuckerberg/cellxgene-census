@@ -1,26 +1,26 @@
 import pathlib
-from typing import Any, List
+from typing import Any
 
 import anndata as ad
 import numpy as np
 import numpy.typing as npt
 import pytest
+from scipy import sparse
+
 from cellxgene_census_builder.build_soma.anndata import AnnDataProxy, make_anndata_cell_filter, open_anndata
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_state import CensusBuildArgs
-from scipy import sparse
 
 from ..conftest import ORGANISMS, get_anndata
 
 
-def test_open_anndata(datasets: List[Dataset]) -> None:
-    """
-    `open_anndata` should open the h5ads for each of the dataset in the argument,
+def test_open_anndata(datasets: list[Dataset]) -> None:
+    """`open_anndata` should open the h5ads for each of the dataset in the argument,
     and yield both the dataset and the corresponding AnnData object.
     This test does not involve additional filtering steps.
     The `datasets` used here have no raw layer.
     """
-    result = [(d, open_anndata(".", d)) for d in datasets]
+    result = [(d, open_anndata(d, base_path=".")) for d in datasets]
     assert len(result) == len(datasets)
     for i, (dataset, anndata_obj) in enumerate(result):
         assert dataset == datasets[i]
@@ -31,31 +31,27 @@ def test_open_anndata(datasets: List[Dataset]) -> None:
 
 
 def test_open_anndata_filters_out_datasets_with_mixed_feature_reference(
-    datasets_with_mixed_feature_reference: List[Dataset],
+    datasets_with_mixed_feature_reference: list[Dataset],
 ) -> None:
-    """
-    Datasets with a "mixed" feature_reference will not be included by the filter pipeline
-    """
+    """Datasets with a "mixed" feature_reference will not be included by the filter pipeline"""
     ad_filter = make_anndata_cell_filter({})
-    result = [ad_filter(open_anndata(".", d)) for d in datasets_with_mixed_feature_reference]
+    result = [ad_filter(open_anndata(d, base_path=".")) for d in datasets_with_mixed_feature_reference]
     assert all(len(ad) == 0 for ad in result)
 
 
 def test_open_anndata_filters_out_wrong_schema_version_datasets(
     caplog: pytest.LogCaptureFixture,
-    datasets_with_incorrect_schema_version: List[Dataset],
+    datasets_with_incorrect_schema_version: list[Dataset],
 ) -> None:
-    """
-    Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`
-    """
+    """Datasets with a schema version different from `CXG_SCHEMA_VERSION` will not be included by `open_anndata`"""
     for dataset in datasets_with_incorrect_schema_version:
         with pytest.raises(ValueError, match="incorrect CxG schema version"):
-            _ = open_anndata(".", dataset)
+            _ = open_anndata(dataset, base_path=".")
 
 
 def test_make_anndata_cell_filter(tmp_path: pathlib.Path, h5ad_simple: str) -> None:
     dataset = Dataset(dataset_id="test", dataset_asset_h5ad_uri="test", dataset_h5ad_path=h5ad_simple)
-    adata_simple = open_anndata(tmp_path.as_posix(), dataset)
+    adata_simple = open_anndata(dataset, base_path=tmp_path.as_posix())
 
     func = make_anndata_cell_filter({})
     filtered_adata_simple = func(adata_simple)
@@ -72,7 +68,7 @@ def test_make_anndata_cell_filter_filters_out_organoids_cell_culture(
     dataset = Dataset(
         dataset_id="test", dataset_asset_h5ad_uri="test", dataset_h5ad_path=h5ad_with_organoids_and_cell_culture
     )
-    adata_with_organoids_and_cell_culture = open_anndata(tmp_path.as_posix(), dataset)
+    adata_with_organoids_and_cell_culture = open_anndata(dataset, base_path=tmp_path.as_posix())
 
     func = make_anndata_cell_filter({})
     filtered_adata_with_organoids_and_cell_culture = func(adata_with_organoids_and_cell_culture)
@@ -83,7 +79,7 @@ def test_make_anndata_cell_filter_filters_out_organoids_cell_culture(
 
 def test_make_anndata_cell_filter_organism(tmp_path: pathlib.Path, h5ad_with_organism: str) -> None:
     dataset = Dataset(dataset_id="test", dataset_asset_h5ad_uri="test", dataset_h5ad_path=h5ad_with_organism)
-    adata_with_organism = open_anndata(tmp_path.as_posix(), dataset)
+    adata_with_organism = open_anndata(dataset, base_path=tmp_path.as_posix())
 
     func = make_anndata_cell_filter({"organism_ontology_term_id": ORGANISMS[0].organism_ontology_term_id})
     filtered_adata_with_organism = func(adata_with_organism)
@@ -94,7 +90,7 @@ def test_make_anndata_cell_filter_organism(tmp_path: pathlib.Path, h5ad_with_org
 
 def test_make_anndata_cell_filter_feature_biotype_gene(tmp_path: pathlib.Path, h5ad_with_feature_biotype: str) -> None:
     dataset = Dataset(dataset_id="test", dataset_asset_h5ad_uri="test", dataset_h5ad_path=h5ad_with_feature_biotype)
-    adata_with_feature_biotype = open_anndata(tmp_path.as_posix(), dataset)
+    adata_with_feature_biotype = open_anndata(dataset, base_path=tmp_path.as_posix())
 
     func = make_anndata_cell_filter({})
     filtered_adata_with_feature_biotype = func(adata_with_feature_biotype)
@@ -105,7 +101,7 @@ def test_make_anndata_cell_filter_feature_biotype_gene(tmp_path: pathlib.Path, h
 
 def test_make_anndata_cell_filter_assay(tmp_path: pathlib.Path, h5ad_with_assays: str) -> None:
     dataset = Dataset(dataset_id="test", dataset_asset_h5ad_uri="test", dataset_h5ad_path=h5ad_with_assays)
-    adata_with_assays = open_anndata(tmp_path.as_posix(), dataset, include_filter_columns=True)
+    adata_with_assays = open_anndata(dataset, base_path=tmp_path.as_posix(), include_filter_columns=True)
 
     func = make_anndata_cell_filter({"assay_ontology_term_ids": ["EFO:1234", "EFO:1235"]})
     filtered_adata_with_assays = func(adata_with_assays)
@@ -148,7 +144,7 @@ def test_AnnDataProxy_X_types(census_build_args: CensusBuildArgs, X_conv: str, X
     assert isinstance(adata[0:2].X, X_type)
 
     def _toarray(a: npt.NDArray[np.float32] | sparse.spmatrix) -> npt.NDArray[np.float32]:
-        if isinstance(a, (sparse.csc_matrix, sparse.csr_matrix)):
+        if isinstance(a, (sparse.csc_matrix, sparse.csr_matrix)):  # noqa: UP038
             return a.toarray()  # type: ignore[no-any-return]
         else:
             return a
@@ -185,6 +181,12 @@ def test_AnnDataProxy_X_types(census_build_args: CensusBuildArgs, X_conv: str, X
         # exercise multiple slices (slicing views)
         [slice(3), slice(2)],
         [np.array([True, True, True, False]), np.array([True, False, True])],
+        #
+        # empty slices
+        [slice(0, 0, 1)],
+        [np.array([], dtype=np.int64)],
+        [slice(0, 0, 1), np.array([], dtype=np.int64)],
+        [slice(0, 0, 1), np.array([], dtype=np.int64), slice(0, 0)],
     ],
 )
 def test_AnnDataProxy_indexing(census_build_args: CensusBuildArgs, slices: Any) -> None:

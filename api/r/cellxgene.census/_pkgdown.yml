@@ -41,6 +41,10 @@ reference:
   contents:
     - get_census_version_description
     - get_census_version_directory
+- title: Census mirrors
+  contents:
+    - get_census_mirror
+    - get_census_mirror_directory
 
 articles:
 - title: Embeddings

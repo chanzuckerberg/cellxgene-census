@@ -1,8 +1,7 @@
 import functools
-from typing import Any, List, Set, Tuple, Union
+from typing import Any
 
 import pyarrow as pa
-import tiledb
 import tiledbsoma as soma
 
 from ..util import cpu_count
@@ -19,7 +18,7 @@ CXG_SCHEMA_VERSION = "4.0.0"  # the CELLxGENE schema version supported
 
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
 # hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
-CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
+CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-09-05/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -77,6 +76,10 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 # NOTE: a few additional columns are added (they are not defined in the CXG schema),
 # eg., dataset_id, tissue_general, etc.
 #
+# IMPORTANT: for any `obs` column, use Arrow `large_string` and `large_binary`, rather
+# than `string` or `binary`. There is no at-rest difference (TileDB-SOMA encodes both as large),
+# but the in-memory Arrow Array indices for string/binary can overflow as cell counts increase.
+#
 CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modification.
     "assay",
     "assay_ontology_term_id",
@@ -98,36 +101,36 @@ CXG_OBS_TERM_COLUMNS = [  # Columns pulled from the CXG H5AD without modificatio
     "tissue_ontology_term_id",
     "tissue_type",
 ]
-CXG_OBS_COLUMNS_READ: Tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata()
+CXG_OBS_COLUMNS_READ: tuple[str, ...] = (  # Columns READ from the CXG H5AD - see open_anndata()
     *CXG_OBS_TERM_COLUMNS,
     "organism",
     "organism_ontology_term_id",
 )
 CENSUS_OBS_STATS_COLUMNS = ["raw_sum", "nnz", "raw_mean_nnz", "raw_variance_nnz", "n_measured_vars"]
-CENSUS_OBS_FIELDS: List[Union[FieldSpec, Tuple[str, pa.DataType]]] = [
+CENSUS_OBS_FIELDS: list[FieldSpec | tuple[str, pa.DataType]] = [
     ("soma_joinid", pa.int64()),
-    FieldSpec(name="dataset_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="assay", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="assay_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="cell_type", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="cell_type_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="development_stage", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="development_stage_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="disease", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="disease_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="donor_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="dataset_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="assay", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="assay_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="cell_type", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="cell_type_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="development_stage", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="development_stage_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="disease", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="disease_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="donor_id", type=pa.large_string(), is_dictionary=True),
     ("is_primary_data", pa.bool_()),
     ("observation_joinid", pa.large_string()),
-    FieldSpec(name="self_reported_ethnicity", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="self_reported_ethnicity_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="sex", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="sex_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="suspension_type", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="tissue", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="tissue_ontology_term_id", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="tissue_type", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="tissue_general", type=pa.string(), is_dictionary=True),
-    FieldSpec(name="tissue_general_ontology_term_id", type=pa.string(), is_dictionary=True),
+    FieldSpec(name="self_reported_ethnicity", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="self_reported_ethnicity_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="sex", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="sex_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="suspension_type", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="tissue", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="tissue_ontology_term_id", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="tissue_type", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="tissue_general", type=pa.large_string(), is_dictionary=True),
+    FieldSpec(name="tissue_general_ontology_term_id", type=pa.large_string(), is_dictionary=True),
     ("raw_sum", pa.float64()),
     ("nnz", pa.int64()),
     ("raw_mean_nnz", pa.float64()),
@@ -155,7 +158,7 @@ _AllOtherObsAttrs = [
     if f.name not in (_DictLikeObsAttrs + _NumericObsAttrs + ["soma_joinid"])
 ]
 # Dict filter varies depending on whether we are using dictionary types in the schema
-_DictLikeFilter: List[Any] = (
+_DictLikeFilter: list[Any] = (
     [{"_type": "ZstdFilter", "level": 19}]
     if USE_ARROW_DICTIONARY
     else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
@@ -178,7 +181,7 @@ CENSUS_OBS_PLATFORM_CONFIG = {
     }
 }
 
-CXG_VAR_COLUMNS_READ: Tuple[str, ...] = (
+CXG_VAR_COLUMNS_READ: tuple[str, ...] = (
     "_index",
     "feature_name",
     "feature_length",
@@ -240,7 +243,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
         "tiledb": {
             "create": {
                 **CENSUS_DEFAULT_X_LAYERS_PLATFORM_CONFIG["tiledb"]["create"],
-                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 19}]}},
+                "attrs": {"soma_data": {"filters": [{"_type": "ZstdFilter", "level": 13}]}},
             }
         }
     },
@@ -287,7 +290,7 @@ DONOR_ID_IGNORE = ["pooled", "unknown"]
 
 # Feature_reference values which are ignored (not considered) in
 # multi-organism filtering. Currently the null set.
-FEATURE_REFERENCE_IGNORE: Set[str] = set()
+FEATURE_REFERENCE_IGNORE: set[str] = set()
 
 
 # The default configuration for TileDB contexts used in the builder.
@@ -298,11 +301,12 @@ DEFAULT_TILEDB_CONFIG = {
     "soma.init_buffer_bytes": 1 * 1024**3,
     "sm.mem.reader.sparse_global_order.ratio_array_data": 0.3,
     #
-    # Concurrency levels are capped for high-CPU boxes. Left unchecked, some
-    # of the largest host configs can bump into Linux kernel thread limits,
-    # without any real benefit to overall performance.
-    "sm.compute_concurrency_level": min(cpu_count(), 128),
-    "sm.io_concurrency_level": min(cpu_count(), 128),
+    # Concurrency levels are capped for high-CPU boxes. Left unchecked,
+    # the default configs will hit kernel limits on high-CPU boxes. This
+    # cap can be raised when TiledB-SOMA is more thread frugal. See for
+    # example: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    "sm.compute_concurrency_level": min(cpu_count(), 48),
+    "sm.io_concurrency_level": min(cpu_count(), 48),
 }
 
 
@@ -313,9 +317,4 @@ Singletons used throughout the package
 
 @functools.cache
 def SOMA_TileDB_Context() -> soma.options.SOMATileDBContext:
-    return soma.options.SOMATileDBContext(tiledb_ctx=TileDB_Ctx(), timestamp=None)
-
-
-@functools.cache
-def TileDB_Ctx() -> tiledb.Ctx:
-    return tiledb.Ctx(DEFAULT_TILEDB_CONFIG)
+    return soma.options.SOMATileDBContext(tiledb_config=DEFAULT_TILEDB_CONFIG, timestamp=None)
