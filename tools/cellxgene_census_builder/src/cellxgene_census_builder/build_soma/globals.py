@@ -405,8 +405,8 @@ DEFAULT_TILEDB_CONFIG = {
     # the default configs will hit kernel limits on high-CPU boxes. This
     # cap can be raised when TiledB-SOMA is more thread frugal. See for
     # example: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
-    "sm.compute_concurrency_level": min(cpu_count(), 64),
-    "sm.io_concurrency_level": min(cpu_count(), 64),
+    "sm.compute_concurrency_level": min(cpu_count(), 48),
+    "sm.io_concurrency_level": min(cpu_count(), 48),
 }
 
 

@@ -3,6 +3,7 @@ import pathlib
 from types import ModuleType
 
 from cellxgene_census_builder.build_soma.datasets import Dataset
+from cellxgene_census_builder.build_soma.mp import create_dask_client, shutdown_dask_cluster
 from cellxgene_census_builder.build_soma.source_assets import stage_source_assets
 from cellxgene_census_builder.build_state import CensusBuildArgs
 
@@ -22,7 +23,9 @@ def test_source_assets(tmp_path: pathlib.Path, census_build_args: CensusBuildArg
         datasets.append(dataset)
 
     # Call the function
-    stage_source_assets(datasets, census_build_args)
+    with create_dask_client(census_build_args) as client:
+        stage_source_assets(datasets, census_build_args)
+        shutdown_dask_cluster(client)
 
     # Verify that the files exist
     for i in range(10):

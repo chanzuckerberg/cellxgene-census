@@ -4,14 +4,15 @@ import pathlib
 from datetime import UTC, datetime
 from typing import cast
 
+import dask.distributed
 import pandas as pd
 import psutil
 import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
-from ..util import cpu_count
+from ..util import clamp, cpu_count
 from .census_summary import create_census_summary
-from .consolidate import consolidate, start_async_consolidation, stop_async_consolidation
+from .consolidate import submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
     ExperimentBuilder,
@@ -27,11 +28,11 @@ from .globals import (
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
-from .mp import create_dask_client
+from .mp import create_dask_client, shutdown_dask_cluster
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, is_git_repo_dirty, shuffle
-from .validate_soma import validate as go_validate
+from .util import get_git_commit_sha, is_git_repo_dirty
+from .validate_soma import validate_consolidation, validate_soma
 
 logger = logging.getLogger(__name__)
 
@@ -72,34 +73,30 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
     prepare_file_system(args)
 
-    with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=2):
-        # Step 1 - get all source datasets
-        datasets = build_step1_get_source_datasets(args)
+    try:
+        with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=0) as client:
+            # Step 1 - get all source datasets
+            datasets = build_step1_get_source_datasets(args)
 
-        # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-        root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
+            # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
+            root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
 
-        # Step 3 - populate axes
-        filtered_datasets = build_step3_populate_obs_and_var_axes(
-            args.h5ads_path.as_posix(), datasets, experiment_builders, args
-        )
+            # Step 3 - populate axes
+            filtered_datasets = build_step3_populate_obs_and_var_axes(
+                args.h5ads_path.as_posix(), datasets, experiment_builders, args
+            )
 
-    # Constraining parallelism is critical at this step, as each worker utilizes ~128GiB+ of memory to
-    # process the X array (partitions are large to reduce TileDB fragment count).
-    #
-    # TODO: when global order writes are supported, processing of much smaller slices will be
-    # possible, and this budget should drop considerably. When that is implemented, n_workers should be
-    # be much larger (eg., use default value of #CPUs or some such).
-    # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
-    MEM_BUDGET = 128 * 1024**3
-    total_memory = psutil.virtual_memory().total
-    n_workers = max(1, int(total_memory // MEM_BUDGET) - 1)  # reserve one for main thread
-    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0):
-        try:
-            if args.config.consolidate:
-                consolidator = start_async_consolidation(root_collection.uri)
-            else:
-                consolidator = None
+            # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
+            # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
+            #
+            # TODO: when global order writes are supported, processing of much smaller slices will be
+            # possible, and this budget should drop considerably. When that is implemented, n_workers should be
+            # be much larger (eg., use default value of #CPUs or some such).
+            # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+            MEM_BUDGET = 64 * 1024**3
+            n_workers = clamp(int(psutil.virtual_memory().total // MEM_BUDGET), 1, args.config.max_worker_processes)
+            logger.info(f"Scaling cluster to {n_workers} workers.")
+            client.cluster.scale(n_workers)
 
             # Step 4 - populate X layers
             build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
@@ -112,22 +109,31 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
                 root_collection, experiment_builders, filtered_datasets, args.config.build_tag
             )
 
-        finally:
-            if consolidator:
-                stop_async_consolidation(consolidator)  # blocks until any running consolidate finishes
-                del consolidator
+            # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+            tiledb_soma_1969_work_around(root_collection.uri)
 
-    # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-    tiledb_soma_1969_work_around(root_collection.uri)
+            # Scale the cluster up as we are no longer memory constrained in the following phases
+            n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+            logger.info(f"Scaling cluster to {n_workers} workers.")
+            client.cluster.scale(n=n_workers)
 
-    # TODO: consolidation and validation can be done in parallel. Goal: do this work
-    # when refactoring validation to use Dask.
+            if args.config.consolidate:
+                for f in dask.distributed.as_completed(
+                    submit_consolidate(root_collection.uri, pool=client, vacuum=True)
+                ):
+                    assert f.result()
+            if validate:
+                for f in dask.distributed.as_completed(validate_soma(args, client)):
+                    assert f.result()
+            if args.config.consolidate and validate:
+                validate_consolidation(args)
+            logger.info("Validation & consolidation complete.")
 
-    if args.config.consolidate:
-        consolidate(args, root_collection.uri)
+            shutdown_dask_cluster(client)
 
-    if validate:
-        go_validate(args)
+    except TimeoutError:
+        # quiet tornado race conditions (harmless) on shutdown
+        pass
 
     return 0
 
@@ -172,23 +178,17 @@ def build_step1_get_source_datasets(args: CensusBuildArgs) -> list[Dataset]:
         logger.error("No H5AD files in the manifest (or we can't find the files)")
         raise RuntimeError("No H5AD files in the manifest (or we can't find the files)")
 
+    # sort encourages (does not guarantee) largest files processed first
+    datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)
+
     # Testing/debugging hook - hidden option
     if args.config.test_first_n is not None and abs(args.config.test_first_n) > 0:
-        datasets = sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize)
         if args.config.test_first_n > 0:
             # Process the N smallest datasets
             datasets = datasets[: args.config.test_first_n]
         else:
             # Process the N largest datasets
             datasets = datasets[args.config.test_first_n :]
-
-    else:
-        # Shuffle datasets by size.
-        # TODO: it is unclear if this shuffle has material impact. Needs more benchmarking.
-        # Nothing magical about a step of 16, other than the observation that the dataset
-        # distribution is disproportionately populated by small datasets.
-        datasets = shuffle(sorted(all_datasets, key=lambda d: d.asset_h5ad_filesize), step=16)
-        assert {d.dataset_id for d in all_datasets} == {d.dataset_id for d in datasets}
 
     # Stage all files
     stage_source_assets(datasets, args)

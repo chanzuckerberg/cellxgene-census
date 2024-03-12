@@ -16,12 +16,12 @@ import pandas as pd
 import pyarrow as pa
 import somacore
 import tiledbsoma as soma
-from dask.delayed import Delayed
 from scipy import sparse
 from somacore.options import OpenMode
 
 from ..build_state import CensusBuildArgs
-from ..util import log_process_resource_status, urlcat
+from ..logging import logit
+from ..util import clamp, log_process_resource_status, urlcat
 from .anndata import AnnDataFilterSpec, AnnDataProxy, open_anndata
 from .datasets import Dataset
 from .globals import (
@@ -408,6 +408,7 @@ def _get_axis_stats(
 class XReduction(TypedDict):
     """Information accumulated/reduced from each AnnData X read."""
 
+    dataset_id: str
     obs_stats: pd.DataFrame
     var_stats: pd.DataFrame
     presence: list[PresenceResult]
@@ -421,6 +422,7 @@ def reduce_X_stats_chunk(results: Sequence[XReduction]) -> XReduction:
         return results[0].copy()
     else:
         return {
+            "dataset_id": results[0]["dataset_id"],
             "obs_stats": pd.concat([r["obs_stats"] for r in results], verify_integrity=True),
             "var_stats": reduce(
                 lambda a, b: a.add(b, fill_value=0).astype(np.int64),
@@ -428,6 +430,11 @@ def reduce_X_stats_chunk(results: Sequence[XReduction]) -> XReduction:
             ),
             "presence": list(itertools.chain(*[r["presence"] for r in results])),
         }
+
+
+def reduce_X_stats_binop(a: XReduction, b: XReduction) -> XReduction:
+    assert a["dataset_id"] == b["dataset_id"]
+    return reduce_X_stats_chunk((a, b))
 
 
 def compute_X_file_stats(
@@ -473,9 +480,10 @@ def compute_X_file_stats(
 # See also: MEMORY_BUDGET in the `build_soma.build()` function
 #
 REDUCE_X_MAJOR_ROW_STRIDE: int = 2_000_000
-REDUCE_X_MINOR_NNZ_STRIDE: int = 2**31
+REDUCE_X_MINOR_NNZ_STRIDE: int = 2**30
 
 
+@logit(logger, msg="{2.filename}, {3}")
 def dispatch_X_chunk(
     dataset_id: str,
     experiment_uri: str,
@@ -485,10 +493,10 @@ def dispatch_X_chunk(
     dataset_obs_joinid_start: int,
     global_var_joinids: pd.DataFrame,
 ) -> XReduction:
-    logger.info(f"start reading {adata.filename}, {row_start}")
-
+    """Read a chunk of an AnnData, pull out stats, and save as both raw & normalized layer."""
     # result accumulator
     result: XReduction = {
+        "dataset_id": dataset_id,
         "obs_stats": pd.DataFrame(),
         "var_stats": pd.DataFrame(),
         "presence": [],
@@ -506,10 +514,7 @@ def dispatch_X_chunk(
         is_full_gene_assay = None
         feature_length = None
 
-    minor_stride = max(1, int(REDUCE_X_MINOR_NNZ_STRIDE // (adata.get_estimated_density() * adata.n_vars)))
-    minor_stride = min(minor_stride, n_rows)
-
-    # Helper functions
+    minor_stride = clamp(int(REDUCE_X_MINOR_NNZ_STRIDE // (adata.get_estimated_density() * adata.n_vars)), 1, n_rows)
     sigma = np.finfo(np.float32).smallest_subnormal
 
     def getijd(
@@ -550,6 +555,7 @@ def dispatch_X_chunk(
             [
                 result,
                 {
+                    "dataset_id": dataset_id,
                     "obs_stats": _obs_stats,
                     "var_stats": _var_stats,
                     "presence": [],  # this is handled in the file reducer
@@ -557,7 +563,6 @@ def dispatch_X_chunk(
             ]
         )
         del _obs_stats, _var_stats
-        gc.collect()
 
         xI, xJ, xD = getijd(X)
         assert n_obs == X.shape[0]
@@ -589,7 +594,6 @@ def dispatch_X_chunk(
         del xI, xJ, xNormD
         gc.collect()
 
-    logger.info(f"finished reading {adata.filename}, {row_start}")
     return result
 
 
@@ -597,7 +601,7 @@ def _reduce_X_matrices(
     base_path: str,
     datasets: list[Dataset],
     experiment_builders: list[ExperimentBuilder],
-) -> dict[str, Delayed]:
+) -> dict[str, list[tuple[str, XReduction]]]:
     """Helper function for populate_X_layers. Create Dask delayed that will save and reduce all X data.
 
     This function does not perform the compute - it just creates the graph. Caller must dispatch the graph.
@@ -637,48 +641,29 @@ def _reduce_X_matrices(
         assert eb.global_var_joinids is not None
         global_var_joinids = dask.delayed(eb.global_var_joinids)
 
-        all_datasets = []
-        for d in datasets:
-            dataset_obs_joinid_start = eb.dataset_obs_joinid_start.get(d.dataset_id, None)
-            if dataset_obs_joinid_start is None:
-                # this dataset has no data for this experiment
-                continue
-
-            if d.dataset_id in eb.dataset_n_obs:
-                # chunk up the dataset by MAJOR_STRIDE, put all chunks in a bag, and
-                # process each chunk, followed by adding per-dataset stats.
-                read_file_chunks = [
-                    (
-                        d.dataset_id,
-                        d.dataset_h5ad_path,
-                        eb.experiment_uri,
-                        chunk,
-                        REDUCE_X_MAJOR_ROW_STRIDE,
-                        dataset_obs_joinid_start,
-                        eb.specification.anndata_cell_filter_spec,
-                    )
-                    for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_ROW_STRIDE)
-                ]
-                b = dask.bag.from_sequence(read_file_chunks).starmap(
-                    read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids
-                )
-                i = b.reduction(reduce_X_stats_chunk, reduce_X_stats_chunk)
-                d = dask.delayed(compute_X_file_stats)(
-                    i,
-                    n_obs=eb.dataset_n_obs[d.dataset_id],
-                    dataset_id=d.dataset_id,
-                    dataset_soma_joinid=d.soma_joinid,
-                    eb_name=eb.name,
-                )
-                all_datasets.append(d)
-
-        # Reduce all datasets to the experiment results
-        per_eb_results[eb.name] = dask.bag.from_delayed(all_datasets).reduction(
-            reduce_X_stats_chunk, reduce_X_stats_chunk
+        read_file_chunks = [
+            (
+                d.dataset_id,
+                d.dataset_h5ad_path,
+                eb.experiment_uri,
+                chunk,
+                REDUCE_X_MAJOR_ROW_STRIDE,
+                eb.dataset_obs_joinid_start[d.dataset_id],
+                eb.specification.anndata_cell_filter_spec,
+            )
+            for d in datasets
+            if d.dataset_id in eb.dataset_obs_joinid_start
+            for chunk in range(0, eb.dataset_n_obs[d.dataset_id], REDUCE_X_MAJOR_ROW_STRIDE)
+        ]
+        per_eb_results[eb.name] = (
+            dask.bag.from_sequence(read_file_chunks)
+            .starmap(read_and_dispatch_partial_h5ad, global_var_joinids=global_var_joinids)
+            .foldby("dataset_id", reduce_X_stats_binop)
         )
 
-    (per_eb_results,) = dask.optimize(per_eb_results)
-    return per_eb_results
+    result: dict[str, list[tuple[str, XReduction]]]
+    (result,) = dask.compute(per_eb_results)
+    return result
 
 
 def populate_X_layers(
@@ -690,15 +675,29 @@ def populate_X_layers(
     """Process X layers for all datasets. Includes saving raw/normalized SOMA arrays,
     and reducing obs/var axis stats from X data.
     """
-    grph = _reduce_X_matrices(assets_path, datasets, experiment_builders)
-    result: dict[str, XReduction]
-    (result,) = cast(tuple[dict[str, XReduction]], dask.compute(grph))
+    datasets_by_id = {d.dataset_id: d for d in datasets}
+    per_eb_results = _reduce_X_matrices(assets_path, datasets, experiment_builders)
 
     for eb in experiment_builders:
-        if eb.name not in result:
+        if eb.name not in per_eb_results:
             continue
 
-        eb_summary: XReduction = result[eb.name]
+        # add per-dataset stats to each per-dataset XReduction
+        eb_result: list[XReduction] = []
+        for dataset_id, xreduction in per_eb_results[eb.name]:
+            assert dataset_id == xreduction["dataset_id"]
+            d = datasets_by_id[dataset_id]
+            eb_result.extend(
+                compute_X_file_stats(
+                    xreduction,
+                    n_obs=eb.dataset_n_obs[d.dataset_id],
+                    dataset_id=d.dataset_id,
+                    dataset_soma_joinid=d.soma_joinid,
+                    eb_name=eb.name,
+                )
+            )
+
+        eb_summary = reduce_X_stats_chunk(eb_result)
         assert isinstance(eb.obs_df, pd.DataFrame)
         eb.obs_df.update(eb_summary["obs_stats"])
         assert isinstance(eb.var_df, pd.DataFrame)
