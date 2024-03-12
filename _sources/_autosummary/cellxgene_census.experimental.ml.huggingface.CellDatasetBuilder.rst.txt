@@ -1,0 +1,43 @@
+﻿cellxgene\_census.experimental.ml.huggingface.CellDatasetBuilder
+================================================================
+
+.. currentmodule:: cellxgene_census.experimental.ml.huggingface
+
+.. autoclass:: CellDatasetBuilder
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CellDatasetBuilder.X
+      ~CellDatasetBuilder.__init__
+      ~CellDatasetBuilder.build
+      ~CellDatasetBuilder.cell_item
+      ~CellDatasetBuilder.close
+      ~CellDatasetBuilder.obs
+      ~CellDatasetBuilder.obs_joinids
+      ~CellDatasetBuilder.obsm
+      ~CellDatasetBuilder.obsp
+      ~CellDatasetBuilder.to_anndata
+      ~CellDatasetBuilder.var
+      ~CellDatasetBuilder.var_joinids
+      ~CellDatasetBuilder.varm
+      ~CellDatasetBuilder.varp
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CellDatasetBuilder.indexer
+      ~CellDatasetBuilder.n_obs
+      ~CellDatasetBuilder.n_vars
+   
+   

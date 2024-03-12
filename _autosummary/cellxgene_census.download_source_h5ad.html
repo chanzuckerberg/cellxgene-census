@@ -162,6 +162,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#versioning-of-cell-census-builds">Versioning of Cell Census builds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-machine-learning">Experimental: Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-processing">Experimental: Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-embeddings">Experimental: Embeddings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Python tutorials</a></li>
@@ -215,14 +216,13 @@ file name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_id</strong> – Fetch the source (original) H5AD associated with this <cite>dataset_id</cite>.</p></li>
-<li><p><strong>to_path</strong> – The file name where the downloaded H5AD will be written.  Must not already exist.</p></li>
-<li><p><strong>census_version</strong> – The census version name. Defaults to <cite>stable</cite>.</p></li>
+<li><p><strong>dataset_id</strong> – Fetch the source (original) H5AD associated with this <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></li>
+<li><p><strong>to_path</strong> – The file name where the downloaded H5AD will be written. Must not already exist.</p></li>
+<li><p><strong>census_version</strong> – The census version name. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;stable&quot;</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if the path already exists (i.e., will not overwrite
-    an existing file), or is not a file.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if the path already exists (i.e., will not overwrite an existing file), or is not a file.</p>
 </dd>
 </dl>
 <p class="rubric">Lifecycle</p>
@@ -251,7 +251,7 @@ file name.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

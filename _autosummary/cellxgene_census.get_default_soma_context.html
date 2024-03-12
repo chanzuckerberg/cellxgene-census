@@ -162,6 +162,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#versioning-of-cell-census-builds">Versioning of Cell Census builds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-machine-learning">Experimental: Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-processing">Experimental: Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-embeddings">Experimental: Embeddings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Python tutorials</a></li>
@@ -209,18 +210,19 @@
 <h1>cellxgene_census.get_default_soma_context<a class="headerlink" href="#cellxgene-census-get-default-soma-context" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="cellxgene_census.get_default_soma_context">
-<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_default_soma_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tiledb_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SOMATileDBContext</span></span></span><a class="headerlink" href="#cellxgene_census.get_default_soma_context" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> with sensible defaults that can be further customized by the user.  The customized
-context can then be passed to <code class="docutils literal notranslate"><span class="pre">open_soma(context=...)</span></code> or a <code class="docutils literal notranslate"><span class="pre">SOMAObject.open(context=...)</span></code> method,
-such as <code class="docutils literal notranslate"><span class="pre">tiledbsoma.Experiment.open()</span></code>.  Use the <code class="docutils literal notranslate"><span class="pre">replace()</span></code> method on the returned object to customize its
-settings further.</p>
+<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_default_soma_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tiledb_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.SOMATileDBContext.html#tiledbsoma.SOMATileDBContext" title="(in TileDB-SOMA-Py)"><span class="pre">SOMATileDBContext</span></a></span></span><a class="headerlink" href="#cellxgene_census.get_default_soma_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.SOMATileDBContext.html#tiledbsoma.SOMATileDBContext" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.SOMATileDBContext</span></code></a> with sensible defaults that can be further customized by the
+user. The customized context can then be passed to <a class="reference internal" href="cellxgene_census.open_soma.html#cellxgene_census.open_soma" title="cellxgene_census.open_soma"><code class="xref py py-func docutils literal notranslate"><span class="pre">cellxgene_census.open_soma()</span></code></a> with the <code class="docutils literal notranslate"><span class="pre">context</span></code>
+argument or to <code class="xref py py-meth docutils literal notranslate"><span class="pre">somacore.SOMAObject.open()</span></code> with the <code class="docutils literal notranslate"><span class="pre">context</span></code> argument, such as
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">tiledbsoma.Experiment.open()</span></code>. Use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">tiledbsoma.SOMATileDBContext.replace()</span></code> method on the returned
+object to customize its settings further.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>tiledb_config</strong> – A dictionary of TileDB configuration parameters. If specified, the parameters will override the
 defaults. If not specified, the default configuration will be returned.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> object with sensible defaults.</p>
+<dd class="field-even"><p>A <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.SOMATileDBContext.html#tiledbsoma.SOMATileDBContext" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.SOMATileDBContext</span></code></a> object with sensible defaults.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -256,7 +258,7 @@ defaults. If not specified, the default configuration will be returned.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

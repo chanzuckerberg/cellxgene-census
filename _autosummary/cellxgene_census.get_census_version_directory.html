@@ -160,6 +160,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-machine-learning">Experimental: Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-processing">Experimental: Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-embeddings">Experimental: Embeddings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Python tutorials</a></li>
@@ -208,26 +209,28 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="cellxgene_census.get_census_version_directory">
 <span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_census_version_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retracted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CensusVersionDescription</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cellxgene_census.get_census_version_directory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the directory of Census versions currently available, optionally filtering by specified flags. If a filtering
-flag is not specified, Census versions will not be filtered by that flag. Defaults to including both “long-term
-stable” (LTS) and weekly Census versions, and excluding retracted versions.</p>
-<dl class="simple">
-<dt>Params:</dt><dd><dl class="simple">
-<dt>lts: A filtering flag to either include or exclude long-term stable releases in the result. If None, no</dt><dd><p>filtering is performed based on this flag. Defaults to None, which includes both LTS and non-LTS (weekly)
-versions.</p>
-</dd>
-<dt>retracted: A filtering flag to either include or exclude retracted releases in the result. If None, no</dt><dd><p>filtering is performed based on this flag. Defaults to False, which excludes retracted releases in the result.</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<dd><p>Get the directory of Census versions currently available, optionally filtering by specified
+flags. If a filtering flag is not specified, Census versions will not be filtered by that flag.
+Defaults to including both “long-term stable” (LTS) and weekly Census versions, and excluding
+retracted versions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary that contains Census version names and their corresponding descriptions. Census versions are
-always named by their release date (<code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code>) but may also have aliases. If an alias is specified,
-the Census version will appear multiple times in the dictionary, once under it’s release date name,
-and again for each alias. Aliases may be: “stable”, “latest”, or “V#”. The “stable” alias is used for the
-most recent LTS release, the “latest” alias is used for the most recent weekly release, and the “V#” aliases
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lts</strong> – A filtering flag to either include or exclude long-term stable releases in the result.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no filtering is performed based on this flag. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>, which
+includes both LTS and non-LTS (weekly) versions.</p></li>
+<li><p><strong>retracted</strong> – A filtering flag to either include or exclude retracted releases in the result. If
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, no filtering is performed based on this flag. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>, which
+excludes retracted releases in the result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary that contains Census version names and their corresponding descriptions. Census
+versions are always named by their release date (<code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code>) but may also have aliases.
+If an alias is specified, the Census version will appear multiple times in the dictionary,
+once under it’s release date name, and again for each alias. Aliases may be: <code class="docutils literal notranslate"><span class="pre">&quot;stable&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;latest&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;V#&quot;</span></code>. The <code class="docutils literal notranslate"><span class="pre">&quot;stable&quot;</span></code> alias is used for the most recent LTS release,
+the <code class="docutils literal notranslate"><span class="pre">&quot;latest&quot;</span></code> alias is used for the most recent weekly release, and the <code class="docutils literal notranslate"><span class="pre">&quot;V#&quot;</span></code> aliases
 are used to identify LTS releases by a sequentially incrementing version number.</p>
 </dd>
 </dl>
@@ -235,7 +238,7 @@ are used to identify LTS releases by a sequentially incrementing version number.
 <p>maturing</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="cellxgene_census.get_census_version_description.html#cellxgene_census.get_census_version_description" title="cellxgene_census.get_census_version_description"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_census_version_description()</span></code></a>: get description by census_version_name.</p>
+<p><a class="reference internal" href="cellxgene_census.get_census_version_description.html#cellxgene_census.get_census_version_description" title="cellxgene_census.get_census_version_description"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_census_version_description()</span></code></a>: get description by <code class="docutils literal notranslate"><span class="pre">census_version</span></code>.</p>
 </div>
 <p class="rubric">Examples</p>
 <p>Get all LTS and weekly versions, but exclude retracted LTS versions:</p>
@@ -374,7 +377,7 @@ are used to identify LTS releases by a sequentially incrementing version number.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

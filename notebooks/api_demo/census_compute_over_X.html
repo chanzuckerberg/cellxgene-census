@@ -203,10 +203,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
 <span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
 <span class="kn">from</span> <span class="nn">tiledbsoma.experiment_query</span> <span class="kn">import</span> <span class="n">X_as_series</span>
 </pre></div>
@@ -420,8 +419,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
     <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_variables</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compute mean and variance for n_variables over n_samples, encoded</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute mean and variance for n_variables over n_samples, encoded</span>
 <span class="sd">        in a COO format. Equivalent to:</span>
 <span class="sd">            numpy.mean(data, axis=0)</span>
 <span class="sd">            numpy.var(data, axix=0)</span>
@@ -438,9 +436,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
         <span class="n">_mean_variance_update</span><span class="p">(</span><span class="n">coord_vec</span><span class="p">,</span> <span class="n">value_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns tuple containing mean and variance</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns tuple containing mean and variance&quot;&quot;&quot;</span>
         <span class="n">u</span><span class="p">,</span> <span class="n">M2</span> <span class="o">=</span> <span class="n">_mean_variance_finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M2_a</span><span class="p">)</span>
 
         <span class="c1"># compute sample variance</span>
@@ -457,8 +453,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
     <span class="n">u</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
     <span class="n">M2</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Incrementally accumulate mean and sum of square of distance from mean using</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Incrementally accumulate mean and sum of square of distance from mean using</span>
 <span class="sd">    Welford&#39;s online method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">col_arr</span><span class="p">,</span> <span class="n">val_arr</span><span class="p">):</span>
@@ -471,10 +466,12 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 
 <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_mean_variance_finalize</span><span class="p">(</span>
-    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span> <span class="n">u_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">M2_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">n_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">],</span>
+    <span class="n">u_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+    <span class="n">M2_a</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finalize incremental values, acconting for missing elements (due to sparse input).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalize incremental values, acconting for missing elements (due to sparse input).</span>
 <span class="sd">    Non-sparse and sparse combined using Chan&#39;s parallel adaptation of Welford&#39;s.</span>
 <span class="sd">    The code assumes the sparse elements are all zero and ignores those terms.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -671,7 +668,8 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
         <span class="n">n_cells_by_dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="mi">0</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">dataset_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()),</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span>
+                <span class="p">(</span><span class="n">var_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">dataset_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()),</span>
+                <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">],</span>
             <span class="p">),</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;n_cells&quot;</span><span class="p">,</span>
@@ -688,7 +686,9 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
                 <span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
             <span class="p">)</span>
             <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span>
-                <span class="n">n_cells_by_dataset</span><span class="p">,</span> <span class="n">n_cells_by_dataset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_indexer</span><span class="p">(</span><span class="n">value_counts</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">value_counts</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+                <span class="n">n_cells_by_dataset</span><span class="p">,</span>
+                <span class="n">n_cells_by_dataset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_indexer</span><span class="p">(</span><span class="n">value_counts</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">value_counts</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
             <span class="p">)</span>
 
     <span class="c1"># drop any combinations that are not observed</span>
@@ -866,7 +866,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

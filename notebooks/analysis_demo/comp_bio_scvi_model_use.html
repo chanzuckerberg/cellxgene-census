@@ -266,8 +266,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
 
@@ -322,17 +323,11 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
 <span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 <span class="kn">import</span> <span class="nn">scvi</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
-<span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 </pre></div>
 </div>
@@ -521,7 +516,10 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 <span class="c1"># Some PBMC data from these collections</span>
 <span class="c1"># 1. https://cellxgene.cziscience.com/collections/c697eaaf-a3be-4251-b036-5f9052179e70</span>
 <span class="c1"># 2. https://cellxgene.cziscience.com/collections/f2a488bf-782f-4c20-a8e5-cb34d48c1f7e</span>
-<span class="n">dataset_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fa8605cf-f27e-44af-ac2a-476bee4410d3&quot;</span><span class="p">,</span> <span class="s2">&quot;3c75a463-6a87-4132-83a8-c3002624394d&quot;</span><span class="p">]</span>
+<span class="n">dataset_ids</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;fa8605cf-f27e-44af-ac2a-476bee4410d3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;3c75a463-6a87-4132-83a8-c3002624394d&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="n">adata_census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
     <span class="n">census</span><span class="o">=</span><span class="n">census</span><span class="p">,</span>
@@ -619,7 +617,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -447,7 +447,7 @@
 </section>
 <section id="sample-types">
 <h4>Sample types<a class="headerlink" href="#sample-types" title="Permalink to this heading">¶</a></h4>
-<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#tissue_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">tissue_ontology_term_id</span></code></a> value of  “ontology_term_id (organoid)” or “ontology_term_id (cell line)” MUST NOT be included.</p>
+<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md#tissue_type"><code class="docutils literal notranslate"><span class="pre">tissue_type</span></code></a> value equal to “tissue” MUST be included; other values of <code class="docutils literal notranslate"><span class="pre">tissue_type</span></code> MUST NOT be included.</p>
 </section>
 <section id="repeated-data">
 <h4>Repeated data<a class="headerlink" href="#repeated-data" title="Permalink to this heading">¶</a></h4>
@@ -1198,7 +1198,7 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

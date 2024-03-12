@@ -1,0 +1,48 @@
+﻿cellxgene\_census.experimental.ml.huggingface.GeneformerTokenizer
+=================================================================
+
+.. currentmodule:: cellxgene_census.experimental.ml.huggingface
+
+.. autoclass:: GeneformerTokenizer
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeneformerTokenizer.X
+      ~GeneformerTokenizer.__init__
+      ~GeneformerTokenizer.build
+      ~GeneformerTokenizer.cell_item
+      ~GeneformerTokenizer.close
+      ~GeneformerTokenizer.obs
+      ~GeneformerTokenizer.obs_joinids
+      ~GeneformerTokenizer.obsm
+      ~GeneformerTokenizer.obsp
+      ~GeneformerTokenizer.to_anndata
+      ~GeneformerTokenizer.var
+      ~GeneformerTokenizer.var_joinids
+      ~GeneformerTokenizer.varm
+      ~GeneformerTokenizer.varp
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeneformerTokenizer.indexer
+      ~GeneformerTokenizer.n_obs
+      ~GeneformerTokenizer.n_vars
+      ~GeneformerTokenizer.obs_column_names
+      ~GeneformerTokenizer.max_input_tokens
+      ~GeneformerTokenizer.model_gene_ids
+      ~GeneformerTokenizer.model_gene_tokens
+      ~GeneformerTokenizer.model_gene_medians
+   
+   

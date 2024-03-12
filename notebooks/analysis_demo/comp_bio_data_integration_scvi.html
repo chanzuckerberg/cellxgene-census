@@ -235,8 +235,8 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 <span class="kn">import</span> <span class="nn">scvi</span>
 <span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">csr_matrix</span>
 </pre></div>
@@ -351,10 +351,15 @@ The &#34;latest&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tabula_muris_liver_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;4546e757-34d0-4d17-be06-538318925fcd&quot;</span><span class="p">,</span> <span class="s2">&quot;6202a243-b713-4e12-9ced-c387f8483dea&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tabula_muris_liver_ids</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;4546e757-34d0-4d17-be06-538318925fcd&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;6202a243-b713-4e12-9ced-c387f8483dea&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
-    <span class="n">census</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span> <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id in </span><span class="si">{</span><span class="n">tabula_muris_liver_ids</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id in </span><span class="si">{</span><span class="n">tabula_muris_liver_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -468,7 +473,12 @@ Name: count, dtype: int64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span>
-    <span class="n">adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;seurat_v3&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;counts&quot;</span><span class="p">,</span> <span class="n">batch_key</span><span class="o">=</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;seurat_v3&quot;</span><span class="p">,</span>
+    <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;counts&quot;</span><span class="p">,</span>
+    <span class="n">batch_key</span><span class="o">=</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span>
+    <span class="n">subset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -814,7 +824,7 @@ Epoch 100/100: 100%|██████████| 100/100 [01:19&lt;00:00,  1.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

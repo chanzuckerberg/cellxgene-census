@@ -270,8 +270,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
 
@@ -318,20 +319,19 @@
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BertForSequenceClassification</span>
-<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">Trainer</span>
-<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="n">DataCollatorForCellClassification</span>
-<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="n">TranscriptomeTokenizer</span>
-<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="n">EmbExtractor</span>
-<span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding</span>
-<span class="kn">from</span> <span class="nn">cellxgene_census.experimental.ml.huggingface</span> <span class="kn">import</span> <span class="n">GeneformerTokenizer</span>
-<span class="kn">import</span> <span class="nn">datasets</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">tiledbsoma</span>
+<span class="kn">import</span> <span class="nn">datasets</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">geneformer</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DataCollatorForCellClassification</span><span class="p">,</span>
+    <span class="n">EmbExtractor</span><span class="p">,</span>
+    <span class="n">TranscriptomeTokenizer</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BertForSequenceClassification</span><span class="p">,</span> <span class="n">Trainer</span>
 </pre></div>
 </div>
 </div>
@@ -343,7 +343,11 @@
 <h3>Preparing single-cell data<a class="headerlink" href="#Preparing-single-cell-data" title="Permalink to this heading">¶</a></h3>
 <p>Let’s load the test data. In preparation to use with Geneformer we do the following:</p>
 <ul class="simple">
-<li><p>Set the index as the ENSEMBL ID and stores it in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;ensembl_id&quot;</span></code></p></li>
+<li><p>Set the index as the ENSEMBL gene ID and stores it in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;ensembl_id&quot;</span></code></p>
+<ul>
+<li><p>e.g. <code class="docutils literal notranslate"><span class="pre">ENSG00000139618</span></code> (<em>without</em> a version number suffix)</p></li>
+</ul>
+</li>
 <li><p>Add read counts to the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;n_counts&quot;</span></code></p></li>
 <li><p>Add an ID column to be used for joining later in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> column <code class="docutils literal notranslate"><span class="pre">&quot;joinid&quot;</span></code></p></li>
 </ul>
@@ -419,7 +423,7 @@ Creating dataset.
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./fine_tuned_geneformer/&quot;</span>
 <span class="n">label_mapping_dict_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="s2">&quot;label_to_cell_subclass.json&quot;</span><span class="p">)</span>
 
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_mapping_dict_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label_mapping_dict_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
     <span class="n">label_mapping_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -788,7 +792,10 @@ Dataset({
 <span class="c1"># 1. https://cellxgene.cziscience.com/collections/c697eaaf-a3be-4251-b036-5f9052179e70</span>
 <span class="c1"># 2. https://cellxgene.cziscience.com/collections/f2a488bf-782f-4c20-a8e5-cb34d48c1f7e</span>
 
-<span class="n">dataset_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fa8605cf-f27e-44af-ac2a-476bee4410d3&quot;</span><span class="p">,</span> <span class="s2">&quot;3c75a463-6a87-4132-83a8-c3002624394d&quot;</span><span class="p">]</span>
+<span class="n">dataset_ids</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;fa8605cf-f27e-44af-ac2a-476bee4410d3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;3c75a463-6a87-4132-83a8-c3002624394d&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="n">adata_census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
     <span class="n">census</span><span class="o">=</span><span class="n">census</span><span class="p">,</span>
@@ -890,7 +897,7 @@ Dataset({
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

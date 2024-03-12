@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,13 +89,12 @@
 
 
 
-
-<div class="row">
+<script src="census_compute_over_X_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Computing on X using online (incremental) algorithms</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes_/census_compute_over_X.Rmd" class="external-link"><code>vignettes/census_compute_over_X.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes/census_compute_over_X.Rmd" class="external-link"><code>vignettes/census_compute_over_X.Rmd</code></a></small>
       <div class="d-none name"><code>census_compute_over_X.Rmd</code></div>
     </div>
 
@@ -105,12 +104,8 @@
 THIS VIGNETTE IS BASED ON:
 https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_compute_over_X.ipynb
 -->
-<p>This tutorial showcases computing per-gene and per-cell statistics
-for a user-defined query using out-of-core operations, where incremental
-(online) algorithms are needed.</p>
-<p><em>NOTE:</em> when query results are small enough to fit in memory,
-it’s usually easier to use <code><a href="../reference/get_seurat.html">get_seurat()</a></code> or
-<code><a href="../reference/get_single_cell_experiment.html">get_single_cell_experiment()</a></code>.</p>
+<p>This tutorial showcases computing per-gene and per-cell statistics for a user-defined query using out-of-core operations, where incremental (online) algorithms are needed.</p>
+<p><em>NOTE:</em> when query results are small enough to fit in memory, it’s usually easier to use <code><a href="../reference/get_seurat.html">get_seurat()</a></code> or <code><a href="../reference/get_single_cell_experiment.html">get_single_cell_experiment()</a></code>.</p>
 <p><strong>Contents</strong></p>
 <ul>
 <li>Incremental mean calculation</li>
@@ -119,16 +114,8 @@ it’s usually easier to use <code><a href="../reference/get_seurat.html">get_se
 <div class="section level2">
 <h2 id="incremental-mean-calculation">Incremental mean calculation<a class="anchor" aria-label="anchor" href="#incremental-mean-calculation"></a>
 </h2>
-<p>Many statistics, such as marginal means, are easy to calculate
-incrementally. Let’s begin with a query on the <code>X$raw</code> sparse
-matrix of unnormalized read counts, which will return results in shards
-incrementally accumulate the read count for each gene, then divide by
-the cell count to get the mean reads per cell for each gene.</p>
-<p>First define a query - in this case a slice over the obs axis for
-cells with a specific tissue &amp; sex value, and all genes on the var
-axis. The <code>query$X()</code> method returns an iterator of results,
-each as an Arrow Table. Each table will contain the sparse X data and
-obs/var coordinates, using standard SOMA names:</p>
+<p>Many statistics, such as marginal means, are easy to calculate incrementally. Let’s begin with a query on the <code>X$raw</code> sparse matrix of unnormalized read counts, which will return results in shards incrementally accumulate the read count for each gene, then divide by the cell count to get the mean reads per cell for each gene.</p>
+<p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code>query$X()</code> method returns an iterator of results, each as an Arrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:</p>
 <ul>
 <li>
 <code>soma_data</code> - the X values (float32)</li>
@@ -137,27 +124,12 @@ obs/var coordinates, using standard SOMA names:</p>
 <li>
 <code>soma_dim_1</code> - the var coordinate (int64)</li>
 </ul>
-<p><strong>Important:</strong> the X matrices are joined to var/obs axis
-DataFrames by an integer join “id” (aka <code>soma_joinid</code>). They
-are NOT positionally indexed, and any given cell or gene may have a
-<code>soma_joinid</code> of any value (e.g., a large integer). In other
-words, for any given X value, the <code>soma_dim_0</code> corresponds to
-the soma_joinid in the <code>obs</code> dataframe, and the
-<code>soma_dim_1</code> coordinate corresponds to the
-<code>soma_joinid</code> in the <code>var</code> dataframe.</p>
-<p>For convenience, the query class includes a utility to simplify
-operations on query slices. <code>query$indexer</code> is an indexer
-used to wrap the output of <code>query$X()</code>, converting from
-<code>soma_joinid</code>s to positional indexing in the query results.
-Positions are <code>[0, N)</code>, where N are the number of results on
-the query for any given axis.</p>
+<p><strong>Important:</strong> the X matrices are joined to var/obs axis DataFrames by an integer join “id” (aka <code>soma_joinid</code>). They are NOT positionally indexed, and any given cell or gene may have a <code>soma_joinid</code> of any value (e.g., a large integer). In other words, for any given X value, the <code>soma_dim_0</code> corresponds to the soma_joinid in the <code>obs</code> dataframe, and the <code>soma_dim_1</code> coordinate corresponds to the <code>soma_joinid</code> in the <code>var</code> dataframe.</p>
+<p>For convenience, the query class includes a utility to simplify operations on query slices. <code>query$indexer</code> is an indexer used to wrap the output of <code>query$X()</code>, converting from <code>soma_joinid</code>s to positional indexing in the query results. Positions are <code>[0, N)</code>, where N are the number of results on the query for any given axis.</p>
 <p>Key points:</p>
 <ul>
-<li>it is expensive to query and read the results - so rather than make
-multiple passes over the data, read it once and perform multiple
-computations.</li>
-<li>by default, data in the census is indexed by
-<code>soma_joinid</code> and not positionally.</li>
+<li>it is expensive to query and read the results - so rather than make multiple passes over the data, read it once and perform multiple computations.</li>
+<li>by default, data in the census is indexed by <code>soma_joinid</code> and not positionally.</li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">"tiledbsoma"</a></span><span class="op">)</span></span>
@@ -195,7 +167,7 @@ computations.</li>
 <span>  <span class="co"># in its names</span></span>
 <span>  <span class="va">sum_part</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">table_part</span><span class="op">$</span><span class="va">soma_data</span><span class="op">)</span>, <span class="va">gene_indexes</span>, <span class="va">sum</span><span class="op">)</span></span>
 <span>  <span class="co"># update the accumulator vector</span></span>
-<span>  <span class="va">which_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sum_part</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>  <span class="co"># nb: gene_indexes is zero-based</span></span>
+<span>  <span class="va">which_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sum_part</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span> <span class="co"># nb: gene_indexes is zero-based</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">which_genes</span> <span class="op">&gt;</span> <span class="va">n_genes</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span>
 <span>  <span class="va">raw_sum_by_gene</span><span class="op">[</span><span class="va">which_genes</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">raw_sum_by_gene</span><span class="op">[</span><span class="va">which_genes</span><span class="op">]</span> <span class="op">+</span> <span class="va">sum_part</span></span>
 <span><span class="op">}</span></span>
@@ -244,14 +216,8 @@ computations.</li>
 <div class="section level2">
 <h2 id="counting-cells-grouped-by-dataset-and-gene">Counting cells grouped by dataset and gene<a class="anchor" aria-label="anchor" href="#counting-cells-grouped-by-dataset-and-gene"></a>
 </h2>
-<p>The goal of this example is to count the number of cells with nonzero
-reads, grouped by gene and Census <code>dataset_id</code>. The result is
-a data frame with dataset, gene, and the number of cells with nonzero
-reads for that dataset and gene.</p>
-<p>For this multi-factor aggregation, we’ll take advantage of
-<code>dplyr</code> routines instead of the lower-level vector indexer
-shown above. And for presentation purposes, we’ll limit the query to
-four genes, but this can be expanded to all genes easily.</p>
+<p>The goal of this example is to count the number of cells with nonzero reads, grouped by gene and Census <code>dataset_id</code>. The result is a data frame with dataset, gene, and the number of cells with nonzero reads for that dataset and gene.</p>
+<p>For this multi-factor aggregation, we’ll take advantage of <code>dplyr</code> routines instead of the lower-level vector indexer shown above. And for presentation purposes, we’ll limit the query to four genes, but this can be expanded to all genes easily.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://dplyr.tidyverse.org" class="external-link">"dplyr"</a></span><span class="op">)</span></span>
 <span></span>
@@ -261,13 +227,13 @@ four genes, but this can be expanded to all genes easily.</p>
 <span>  var_query <span class="op">=</span> <span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>value_filter <span class="op">=</span> <span class="st">"feature_name %in% c('Malat1', 'Ptprd', 'Dlg2', 'Pcdh9')"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">obs_tbl</span> <span class="op">&lt;-</span> <span class="va">query</span><span class="op">$</span><span class="fu">obs</span><span class="op">(</span>column_names<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span>, <span class="st">"dataset_id"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">obs_tbl</span> <span class="op">&lt;-</span> <span class="va">query</span><span class="op">$</span><span class="fu">obs</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span>, <span class="st">"dataset_id"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">obs_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="co"># materialize soma_joinid as character to avoid overflowing R 32-bit integer</span></span>
 <span>  cell_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">obs_tbl</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">)</span>,</span>
 <span>  dataset_id <span class="op">=</span> <span class="va">obs_tbl</span><span class="op">$</span><span class="va">dataset_id</span><span class="op">$</span><span class="fu">as_vector</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">var_tbl</span> <span class="op">&lt;-</span> <span class="va">query</span><span class="op">$</span><span class="fu">var</span><span class="op">(</span>column_names<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span>, <span class="st">"feature_name"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">var_tbl</span> <span class="op">&lt;-</span> <span class="va">query</span><span class="op">$</span><span class="fu">var</span><span class="op">(</span>column_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soma_joinid"</span>, <span class="st">"feature_name"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  gene_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">var_tbl</span><span class="op">$</span><span class="va">soma_joinid</span><span class="op">)</span>,</span>
 <span>  feature_name <span class="op">=</span> <span class="va">var_tbl</span><span class="op">$</span><span class="va">feature_name</span><span class="op">$</span><span class="fu">as_vector</span><span class="op">(</span><span class="op">)</span></span>
@@ -296,18 +262,18 @@ four genes, but this can be expanded to all genes easily.</p>
 <span></span>
 <span>  <span class="co"># fold those into n_cells_grouped</span></span>
 <span>  <span class="va">n_cells_grouped</span> <span class="op">&lt;-</span> <span class="va">n_cells_part</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>                     <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cell_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>                     <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">n_cells_grouped</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>                      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">dataset_id</span>, <span class="va">gene_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>                      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>n_cells <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n_cells</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>                      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cell_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">n_cells_grouped</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">dataset_id</span>, <span class="va">gene_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>n_cells <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n_cells</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># add gene names for display</span></span>
 <span><span class="va">n_cells_grouped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">n_cells_grouped</span>, <span class="va">var_df</span>, by <span class="op">=</span> <span class="st">"gene_id"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">n_cells_grouped</span><span class="op">$</span><span class="va">feature_name</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">n_cells_grouped</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset_id"</span>, <span class="st">"feature_name"</span>, <span class="st">"n_cells"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 x 3</span></span></span>
 <span><span class="co">#&gt;    dataset_id                           feature_name n_cells</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 3bbb6cf9-72b9-41be-b568-656de6eb18b5 Ptprd          <span style="text-decoration: underline;">79</span>578</span></span>
@@ -320,7 +286,7 @@ four genes, but this can be expanded to all genes easily.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 58b01044-c5e5-4b0f-8a2d-6ebf951e01ff Malat1         <span style="text-decoration: underline;">12</span>622</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 66ff82b4-9380-469c-bc4b-cfa08eacd325 Dlg2             856</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 66ff82b4-9380-469c-bc4b-cfa08eacd325 Pcdh9           <span style="text-decoration: underline;">2</span>910</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># i 11 more rows</span></span></span></code></pre></div>
 <p>Don’t forget to close the census.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>

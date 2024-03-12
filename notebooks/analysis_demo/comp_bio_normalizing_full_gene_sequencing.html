@@ -230,7 +230,6 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 <span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">csr_matrix</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
@@ -327,7 +326,9 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">liver_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;4546e757-34d0-4d17-be06-538318925fcd&quot;</span>
 <span class="n">liver_adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
-    <span class="n">census</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span> <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id==&#39;</span><span class="si">{</span><span class="n">liver_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Mus musculus&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id==&#39;</span><span class="si">{</span><span class="n">liver_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -566,7 +567,7 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

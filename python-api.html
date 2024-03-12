@@ -171,12 +171,19 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.Stats.html">cellxgene_census.experimental.ml.pytorch.Stats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder.html">cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer.html">cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#experimental-processing">Experimental: Processing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html">cellxgene_census.experimental.pp.get_highly_variable_genes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html">cellxgene_census.experimental.pp.highly_variable_genes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.mean_variance.html">cellxgene_census.experimental.pp.mean_variance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-embeddings">Experimental: Embeddings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding.html">cellxgene_census.experimental.get_embedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding_metadata.html">cellxgene_census.experimental.get_embedding_metadata</a></li>
 </ul>
 </li>
 </ul>
@@ -242,7 +249,7 @@
 <td><p>Open the Census by version or URI.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_default_soma_context.html#cellxgene_census.get_default_soma_context" title="cellxgene_census.get_default_soma_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_default_soma_context</span></code></a></p></td>
-<td><p>Return a <code class="docutils literal notranslate"><span class="pre">SOMATileDBContext</span></code> with sensible defaults that can be further customized by the user.</p></td>
+<td><p>Return a <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.SOMATileDBContext.html#tiledbsoma.SOMATileDBContext" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.SOMATileDBContext</span></code></a> with sensible defaults that can be further customized by the user.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_source_h5ad_uri.html#cellxgene_census.get_source_h5ad_uri" title="cellxgene_census.get_source_h5ad_uri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_source_h5ad_uri</span></code></a></p></td>
 <td><p>Open the named version of the census, and return the URI for the <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>.</p></td>
@@ -258,7 +265,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata" title="cellxgene_census.get_anndata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata</span></code></a></p></td>
-<td><p>Convience wrapper around <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.1.dev50+g4d8afb3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
+<td><p>Convenience wrapper around <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.1.dev50+g765fabc)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -268,7 +275,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_presence_matrix.html#cellxgene_census.get_presence_matrix" title="cellxgene_census.get_presence_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_presence_matrix</span></code></a></p></td>
-<td><p>Read the feature dataset presence matrix and return as a SciPy sparse CSR array.</p></td>
+<td><p>Read the feature dataset presence matrix and return as a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.12.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -291,13 +298,19 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html#cellxgene_census.experimental.ml.pytorch.experiment_dataloader" title="cellxgene_census.experimental.ml.pytorch.experiment_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</span></code></a></p></td>
-<td><p>Factory method for PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></td>
+<td><p>Factory method for <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html#cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe" title="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</span></code></a></p></td>
-<td><p>An iterable-style PyTorch <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code> that reads <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">X</span></code> data from a SOMA <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>, based upon the specified queries along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code> axes.</p></td>
+<td><p>An <a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html#torchdata.datapipes.iter.IterDataPipe" title="(in TorchData v0.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchdata.datapipes.iter.IterDataPipe</span></code></a> that reads <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">X</span></code> data from a <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a>, based upon the specified queries along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code> axes.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.pytorch.Stats.html#cellxgene_census.experimental.ml.pytorch.Stats" title="cellxgene_census.experimental.ml.pytorch.Stats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.pytorch.Stats</span></code></a></p></td>
 <td><p>Statistics about the data retrieved by <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> via SOMA API.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder.html#cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder" title="cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder</span></code></a></p></td>
+<td><p>Abstract base class for methods to process CELLxGENE Census ExperimentAxisQuery results into a Hugging Face Dataset in which each item represents one cell.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer.html#cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer" title="cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer</span></code></a></p></td>
+<td><p>Generate a Hugging Face <cite>Dataset</cite> containing Geneformer token sequences for each cell in CELLxGENE Census ExperimentAxisQuery results (human).</p></td>
 </tr>
 </tbody>
 </table>
@@ -307,13 +320,26 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.get_highly_variable_genes.html#cellxgene_census.experimental.pp.get_highly_variable_genes" title="cellxgene_census.experimental.pp.get_highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.get_highly_variable_genes</span></code></a></p></td>
-<td><p>Convenience wrapper</p></td>
+<td><p>Convience wrapper around <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a> query and <a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html#cellxgene_census.experimental.pp.highly_variable_genes" title="cellxgene_census.experimental.pp.highly_variable_genes"><code class="xref py py-func docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.highly_variable_genes()</span></code></a> function, to build and execute a query, and annotate the query result genes (<code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe) based upon variability.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.highly_variable_genes.html#cellxgene_census.experimental.pp.highly_variable_genes" title="cellxgene_census.experimental.pp.highly_variable_genes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.highly_variable_genes</span></code></a></p></td>
 <td><p>Identify and annotate highly variable genes contained in the query results.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.pp.mean_variance.html#cellxgene_census.experimental.pp.mean_variance" title="cellxgene_census.experimental.pp.mean_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp.mean_variance</span></code></a></p></td>
 <td><p>Calculate  mean and/or variance along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis from query results.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="experimental-embeddings">
+<h2>Experimental: Embeddings<a class="headerlink" href="#experimental-embeddings" title="Permalink to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding" title="cellxgene_census.experimental.get_embedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding</span></code></a></p></td>
+<td><p>Read cell (obs) embeddings and return as a dense <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.experimental.get_embedding_metadata.html#cellxgene_census.experimental.get_embedding_metadata" title="cellxgene_census.experimental.get_embedding_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.experimental.get_embedding_metadata</span></code></a></p></td>
+<td><p>Read embedding metadata and return as a Python dict.</p></td>
 </tr>
 </tbody>
 </table>
@@ -332,7 +358,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2023 Chan Zuckerberg Initiative Foundation.</p>
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
