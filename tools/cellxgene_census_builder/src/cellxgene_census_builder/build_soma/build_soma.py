@@ -74,7 +74,8 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
     prepare_file_system(args)
 
     try:
-        with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=0) as client:
+        n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as client:
             # Step 1 - get all source datasets
             datasets = build_step1_get_source_datasets(args)
 
