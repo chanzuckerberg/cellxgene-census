@@ -24,6 +24,7 @@ from cellxgene_census_builder.build_soma.globals import (
 )
 from cellxgene_census_builder.build_soma.mp import create_dask_client, shutdown_dask_cluster
 from cellxgene_census_builder.build_state import CensusBuildArgs
+from cellxgene_census_builder.process_init import process_init
 
 
 @pytest.mark.parametrize(
@@ -44,6 +45,7 @@ def test_base_builder_creation(
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
         patch("cellxgene_census_builder.build_soma.build_soma.validate_consolidation", return_value=True),
     ):
+        process_init(census_build_args)
         return_value = build(census_build_args)
 
         # return_value = 0 means that the build succeeded
