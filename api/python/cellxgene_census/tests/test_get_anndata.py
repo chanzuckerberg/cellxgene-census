@@ -12,6 +12,11 @@ def census() -> soma.Collection:
     return cellxgene_census.open_soma(census_version="latest")
 
 
+@pytest.fixture
+def lts_census() -> soma.Collection:
+    return cellxgene_census.open_soma(census_version="stable")
+
+
 @pytest.mark.live_corpus
 def test_get_anndata_value_filter(census: soma.Collection) -> None:
     with census:
@@ -160,10 +165,12 @@ def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("obsm_layer", ["scvi", "geneformer"])
-def test_get_anndata_obsm_one_layer(census: soma.Collection, obsm_layer: str) -> None:
-    with census:
+def test_get_anndata_obsm_one_layer(lts_census: soma.Collection, obsm_layer: str) -> None:
+    # NOTE: this test will break after next LTS release (>2023-12-15), since scvi and geneformer
+    # won't be distributed as part of `obsm_layers` anymore. Delete this test when it happens.
+    with lts_census:
         ad = cellxgene_census.get_anndata(
-            census,
+            lts_census,
             organism="Homo sapiens",
             X_name="raw",
             obs_coords=slice(100),
@@ -173,15 +180,17 @@ def test_get_anndata_obsm_one_layer(census: soma.Collection, obsm_layer: str) ->
 
     assert len(ad.obsm.keys()) == 1
     assert obsm_layer in ad.obsm.keys()
-    assert ad.obsm[obsm_layer].shape[0] == 100
+    assert ad.obsm[obsm_layer].shape[0] == 101
 
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("obsm_layers", [["scvi", "geneformer"]])
-def test_get_anndata_obsm_two_layers(census: soma.Collection, obsm_layers: List[str]) -> None:
-    with census:
+def test_get_anndata_obsm_two_layers(lts_census: soma.Collection, obsm_layers: List[str]) -> None:
+    # NOTE: this test will break after next LTS release (>2023-12-15), since scvi and geneformer
+    # won't be distributed as part of `obsm_layers` anymore. Delete this test when it happens.
+    with lts_census:
         ad = cellxgene_census.get_anndata(
-            census,
+            lts_census,
             organism="Homo sapiens",
             X_name="raw",
             obs_coords=slice(100),
@@ -192,15 +201,18 @@ def test_get_anndata_obsm_two_layers(census: soma.Collection, obsm_layers: List[
     assert len(ad.obsm.keys()) == 2
     for obsm_layer in obsm_layers:
         assert obsm_layer in ad.obsm.keys()
-        assert ad.obsm[obsm_layer].shape[0] == 100
+        assert ad.obsm[obsm_layer].shape[0] == 101
 
 
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("add_obs_embeddings", [["scvi", "geneformer"]])
-def test_get_anndata_add_obs_embeddings(census: soma.Collection, add_obs_embeddings: List[str]) -> None:
-    with census:
+@pytest.mark.parametrize("add_obs_embeddings", [["scvi", "geneformer", "uce"]])
+def test_get_anndata_add_obs_embeddings(lts_census: soma.Collection, add_obs_embeddings: List[str]) -> None:
+    # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
+    # so this test could require adjustments.
+
+    with lts_census:
         ad = cellxgene_census.get_anndata(
-            census,
+            lts_census,
             organism="Homo sapiens",
             X_name="raw",
             obs_coords=slice(100),
@@ -208,7 +220,31 @@ def test_get_anndata_add_obs_embeddings(census: soma.Collection, add_obs_embeddi
             add_obs_embeddings=add_obs_embeddings,
         )
 
-    assert len(ad.obsm.keys()) == 2
+    assert len(ad.obsm.keys()) == 3
+    assert len(ad.varm.keys()) == 0
     for obsm_layer in add_obs_embeddings:
         assert obsm_layer in ad.obsm.keys()
-        assert ad.obsm[obsm_layer].shape[0] == 100
+        assert ad.obsm[obsm_layer].shape[0] == 101
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize("add_var_embeddings", [["nmf"]])
+def test_get_anndata_add_var_embeddings(lts_census: soma.Collection, add_var_embeddings: List[str]) -> None:
+    # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
+    # so this test could require adjustments.
+
+    with lts_census:
+        ad = cellxgene_census.get_anndata(
+            lts_census,
+            organism="Homo sapiens",
+            X_name="raw",
+            obs_coords=slice(100),
+            var_coords=slice(200),
+            add_var_embeddings=add_var_embeddings,
+        )
+
+    assert len(ad.obsm.keys()) == 0
+    assert len(ad.varm.keys()) == 1
+    for varm_layers in add_var_embeddings:
+        assert varm_layers in ad.varm.keys()
+        assert ad.varm[varm_layers].shape[0] == 201
