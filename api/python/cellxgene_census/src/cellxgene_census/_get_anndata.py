@@ -25,7 +25,6 @@ def get_anndata(
     X_name: str = "raw",
     X_layers: Optional[Sequence[str]] = (),
     obsm_layers: Optional[Sequence[str]] = (),
-    varm_layers: Optional[Sequence[str]] = (),
     obs_value_filter: Optional[str] = None,
     obs_coords: Optional[SparseDFCoord] = None,
     var_value_filter: Optional[str] = None,
@@ -64,8 +63,6 @@ def get_anndata(
             Columns to fetch for ``obs`` and ``var`` dataframes.
         obsm_layers:
             Additional obsm layers to read and return in the ``obsm`` slot.
-        varm_layers:
-            Additional varm layers to read and return in the ``varm`` slot.
         add_obs_embeddings:
             Embeddings to be returned as part of the ``obsm`` slot.
             Use :func:`get_all_available_embeddings` to retrieve available embeddings
@@ -102,7 +99,6 @@ def get_anndata(
             column_names=column_names,
             X_layers=X_layers,
             obsm_layers=obsm_layers,
-            varm_layers=varm_layers,
         )
 
         # If add_obs_embeddings or add_var_embeddings are defined, inject them in the appropriate slot

@@ -45,7 +45,6 @@ def _get_experiment(census: soma.Collection, organism: str) -> soma.Experiment:
 
         >>> human = get_experiment(census, "homo_sapiens")
     """
-    # lower/snake case the organism name to find the experiment name
     exp_name = _get_experiment_name(organism)
 
     if exp_name not in census["census_data"]:
