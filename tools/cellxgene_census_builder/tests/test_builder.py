@@ -151,6 +151,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_ar
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
 
     # Call the function
+    process_init(census_build_args)
     with create_dask_client(census_build_args) as client:
         datasets = build_step1_get_source_datasets(census_build_args)
         shutdown_dask_cluster(client)
