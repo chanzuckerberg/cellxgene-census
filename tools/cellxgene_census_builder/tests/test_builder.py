@@ -29,7 +29,7 @@ from cellxgene_census_builder.process_init import process_init
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"multi_process": False, "consolidate": False, "build_tag": "test_tag", "verbose": 1, "max_worker_processes": 2}],
+    [{"multi_process": False, "consolidate": False, "build_tag": "test_tag", "verbose": 0, "max_worker_processes": 2}],
     indirect=True,
 )
 def test_base_builder_creation(
