@@ -11,9 +11,7 @@ from .util import fetch_json
 
 logger = logging.getLogger(__name__)
 
-# CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
-# DEBUGGING ONLY XXX CLEANUP
-CXG_BASE_URI = "https://api.cellxgene.dev.single-cell.czi.technology/"
+CXG_BASE_URI = "https://api.cellxgene.cziscience.com/"
 
 
 def parse_manifest_file(manifest_fp: io.TextIOBase) -> list[Dataset]:
