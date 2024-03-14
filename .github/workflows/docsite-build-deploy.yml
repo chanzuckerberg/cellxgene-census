@@ -58,6 +58,7 @@ jobs:
       - name: Build pkgdown website
         run: |
           cd api/r/cellxgene.census
+          mv _vignettes vignettes
           Rscript -e 'BiocManager::install("scater")'
           Rscript -e 'pkgdown::build_site()'
           cd ../../../
