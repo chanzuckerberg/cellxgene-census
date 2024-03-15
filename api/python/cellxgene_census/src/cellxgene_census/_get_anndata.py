@@ -13,6 +13,7 @@ import tiledbsoma as soma
 from somacore.options import SparseDFCoord
 
 from ._experiment import _get_experiment, _get_experiment_name
+from ._release_directory import get_census_version_directory
 from ._util import _extract_census_version
 
 CENSUS_EMBEDDINGS_LOCATION_BASE_URI = "s3://cellxgene-contrib-public/contrib/cell-census/soma"
@@ -76,7 +77,7 @@ def get_anndata(
         An :class:`anndata.AnnData` object containing the census slice.
 
     Lifecycle:
-        maturing
+        experimental
 
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
@@ -103,17 +104,18 @@ def get_anndata(
 
         # If add_obs_embeddings or add_var_embeddings are defined, inject them in the appropriate slot
         if add_obs_embeddings is not None or add_var_embeddings is not None:
-            from cellxgene_census.experimental import get_embedding, get_embedding_metadata_by_name
+            from .experimental._embedding import _get_embedding, get_embedding_metadata_by_name
 
             census_version = _extract_census_version(census)
             experiment_name = _get_experiment_name(organism)
+            census_directory = get_census_version_directory()
 
             if add_obs_embeddings is not None:
                 obs_soma_joinids = query.obs_joinids()
                 for emb in add_obs_embeddings:
                     emb_metadata = get_embedding_metadata_by_name(emb, experiment_name, census_version, "obs_embedding")
                     uri = f"{CENSUS_EMBEDDINGS_LOCATION_BASE_URI}/{census_version}/{emb_metadata['id']}"
-                    embedding = get_embedding(census_version, uri, obs_soma_joinids)
+                    embedding = _get_embedding(census, census_directory, census_version, uri, obs_soma_joinids)
                     adata.obsm[emb] = embedding
 
             if add_var_embeddings is not None:
@@ -121,7 +123,7 @@ def get_anndata(
                 for emb in add_var_embeddings:
                     emb_metadata = get_embedding_metadata_by_name(emb, experiment_name, census_version, "var_embedding")
                     uri = f"{CENSUS_EMBEDDINGS_LOCATION_BASE_URI}/{census_version}/{emb_metadata['id']}"
-                    embedding = get_embedding(census_version, uri, var_soma_joinids)
+                    embedding = _get_embedding(census, census_directory, census_version, uri, var_soma_joinids)
                     adata.varm[emb] = embedding
 
         return adata
