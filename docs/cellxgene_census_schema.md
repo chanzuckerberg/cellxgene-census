@@ -56,7 +56,14 @@ The Census MUST only contain features (genes) with a [`feature_reference`](https
 
 Per the CELLxGENE dataset schema, [multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#general-requirements), as defined in [`organism_ontology_term_id`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#organism_ontology_term_id) and [`feature_reference`](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#feature_reference) respectively.
 
-For a given multi-species dataset, the table below shows all possible combinations of organisms for both observations and features. For each combination, inclusion criteria for the Census is provided.
+For any given multi-species dataset, observation and features from the dataset are included in the Census as defined by the following:
+
+* Where a dataset includes observations and features from a single species, all observations and features from the dataset are included in the Census.
+* Where a dataset includes observations from a single species `S`, and includes features from multiple species *including* the species `S`, all dataset observations and all features from `S` will be included in the Census.
+* Where a dataset includes features from a single species `S`, and observations from multiple species *including* the species `S`, all dataset features and all observations from speices `S` are included in the Census.
+* Where a species has observations *AND* features from multiple species, the dataset will be excluded from the Census.
+
+The table below shows all possible combinations of organisms for both observations and features, assuming a Census comprised of Homo sapiens and Mus musculus. For each combination, inclusion criteria for the Census is provided.
 
 <table>
 <thead>
@@ -68,19 +75,39 @@ For a given multi-species dataset, the table below shows all possible combinatio
 </thead>
 <tbody>
   <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:9606" for Homo sapiens</td>
-    <td>The Census MUST only contain observations from "NCBITaxon:9606" for <i>Homo sapiens</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
+    <td>All observations and all features are included.</td>
   </tr>
   <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
     <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>The Census MUST only contain observations from <i>Mus musculus</i></td>
+    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>All observations and all features are included.</td>
   </tr>
   <tr>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> AND "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations MUST NOT be included</td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:9606" for Homo sapiens</td>
+    <td>The Census MUST only contain observations from "NCBITaxon:9606" for <i>Homo sapiens</i>. All features MUST be included.</td>
+  </tr>
+  <tr>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>The Census MUST only contain observations from "NCBITaxon:10090" for <i>Mus musculus</i>. All features MUST be included.</td>
+  </tr>
+  <tr>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>All observations MUST be included. The Census MUST only contain feautes from "NCBITaxon:9606" for <i>Homo sapiens</i>.</td>
+  </tr>
+  <tr>
+    <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>All observations MUST be included. The Census MUST only contain feautes from "NCBITaxon:10090" for <i>Mus musculus</i>.</td>
+  </tr>
+  <tr>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
+    <td>All observations and features MUST NOT be included.</td>
   </tr>
 </tbody>
 </table>
@@ -791,6 +818,9 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 ### Version 2.0.0
 
 * Update to require [CELLxGENE schema version 5.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md)
+* Expanded list of assays included in the Census.
+* Expanded the list of assays defined as full-gene sequencing assays, which have special `normalized` layer handling.
+* Clarified handling of datasets which are multi-species on the obs or var axis.
 
 ### Version 1.3.0
 
