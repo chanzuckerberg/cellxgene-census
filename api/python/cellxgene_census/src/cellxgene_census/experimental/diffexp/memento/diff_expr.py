@@ -35,9 +35,11 @@ CUBE_LOGICAL_DIMS_OBS = [
 ]
 
 
+# flake8: noqa: D103
+
+
 def compute_memento_estimators_from_precomputed_stats(estimators_df: pl.DataFrame) -> pl.DataFrame:
-    """
-    Computes the mean and standard error of the mean (SEM) for each feature in the estimators DataFrame.
+    """Computes the mean and standard error of the mean (SEM) for each feature in the estimators DataFrame.
 
     This function takes a DataFrame containing precomputed statistics for each feature, including the number of observations,
     sum, sum of squares, and size factor. It calculates the mean and SEM for each feature based on these statistics.
@@ -112,16 +114,20 @@ def compute_all(
     n_processes: int,
     covariates_str: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pstats.Stats]:
-    default_covariates = CUBE_LOGICAL_DIMS_OBS
+    default_covariates: List[str] = []
 
     if covariates_str is None:
         covariates = default_covariates
     else:
         covariates = covariates_str.split(",")
+
+    # make treatment variable be in the first column because that is needed for the design matrix
+    # NOTE: if covariates == [] then variables for the design matrix will only contain the treatment column
+    variables = [treatment] + [covariate for covariate in covariates if covariate != treatment]
+
     with tiledb.open(os.path.join(cube_path, OBS_GROUPS_ARRAY), "r") as obs_groups_array:
         obs_groups_df = obs_groups_array.query(cond=query_filter or None).df[:]
-        if covariates != default_covariates:
-            obs_groups_df = obs_groups_df[covariates + [treatment, "obs_group_joinid", "n_obs"]]
+        obs_groups_df = obs_groups_df[variables + ["obs_group_joinid", "n_obs"]]
 
         distinct_treatment_values = obs_groups_df[treatment].nunique()
         assert distinct_treatment_values == 2, "treatment must have exactly 2 distinct values"
@@ -135,8 +141,6 @@ def compute_all(
         f"computing for {len(obs_groups_df)} obs groups ({obs_groups_df.n_obs.sum()} cells) and {len(features)} features using {n_feature_groups} processes, {len(features) // n_feature_groups} features/process"
     )
 
-    # make treatment variable be in the first column of the design matrix
-    variables = [treatment] + [covariate for covariate in covariates if covariate != treatment]
     selected_vars_groups_groupby = obs_groups_df.groupby(variables, observed=True)
 
     agg_dict = {i: "first" for i in variables}
@@ -308,9 +312,7 @@ def de_wls(
     n: npt.NDArray[np.float32],
     v: npt.NDArray[np.float32],
 ) -> Tuple[np.float32, np.float32, np.float32]:
-    """
-    Perform DE for each gene using Weighted Least Squares (i.e., a weighted Linear Regression model)
-    """
+    """Perform DE for each gene using Weighted Least Squares (i.e., a weighted Linear Regression model)."""
     coef = de_wls_fit(X, y, n)
     z, pv = de_wls_stats(X, v, coef)
 
