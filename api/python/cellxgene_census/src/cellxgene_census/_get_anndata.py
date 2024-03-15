@@ -65,11 +65,11 @@ def get_anndata(
         obsm_layers:
             Additional obsm layers to read and return in the ``obsm`` slot.
         add_obs_embeddings:
-            Embeddings to be returned as part of the ``obsm`` slot.
+            Additional embeddings to be returned as part of the ``obsm`` slot.
             Use :func:`get_all_available_embeddings` to retrieve available embeddings
             for this Census version and organism.
         add_var_embeddings:
-            Embeddings to be returned as part of the ``varm`` slot.
+            Additional embeddings to be returned as part of the ``varm`` slot.
             Use :func:`get_all_available_embeddings` to retrieve available embeddings
             for this Census version and organism.
 
@@ -103,14 +103,19 @@ def get_anndata(
         )
 
         # If add_obs_embeddings or add_var_embeddings are defined, inject them in the appropriate slot
-        if add_obs_embeddings is not None or add_var_embeddings is not None:
+        if add_obs_embeddings or add_var_embeddings:
             from .experimental._embedding import _get_embedding, get_embedding_metadata_by_name
 
             census_version = _extract_census_version(census)
             experiment_name = _get_experiment_name(organism)
             census_directory = get_census_version_directory()
 
-            if add_obs_embeddings is not None:
+            if add_obs_embeddings:
+                if obsm_layers and [x for x in add_obs_embeddings if x in obsm_layers]:
+                    raise ValueError(
+                        "Cannot request both `obsm_layers` and `add_obs_embeddings` for the same embedding name"
+                    )
+
                 obs_soma_joinids = query.obs_joinids()
                 for emb in add_obs_embeddings:
                     emb_metadata = get_embedding_metadata_by_name(emb, experiment_name, census_version, "obs_embedding")
@@ -118,7 +123,7 @@ def get_anndata(
                     embedding = _get_embedding(census, census_directory, census_version, uri, obs_soma_joinids)
                     adata.obsm[emb] = embedding
 
-            if add_var_embeddings is not None:
+            if add_var_embeddings:
                 var_soma_joinids = query.var_joinids()
                 for emb in add_var_embeddings:
                     emb_metadata = get_embedding_metadata_by_name(emb, experiment_name, census_version, "var_embedding")

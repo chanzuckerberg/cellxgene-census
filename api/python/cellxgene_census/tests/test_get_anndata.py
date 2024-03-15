@@ -248,3 +248,19 @@ def test_get_anndata_add_var_embeddings(lts_census: soma.Collection, add_var_emb
     for varm_layers in add_var_embeddings:
         assert varm_layers in ad.varm.keys()
         assert ad.varm[varm_layers].shape[0] == 201
+
+
+@pytest.mark.live_corpus
+def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Collection) -> None:
+    """Fails if both `obsm_layers` and `add_obs_embeddings` are specified."""
+    with lts_census:
+        with pytest.raises(ValueError):
+            cellxgene_census.get_anndata(
+                lts_census,
+                organism="Homo sapiens",
+                X_name="raw",
+                obs_coords=slice(100),
+                var_coords=slice(200),
+                obsm_layers=["scvi"],
+                add_obs_embeddings=["scvi"],
+            )
