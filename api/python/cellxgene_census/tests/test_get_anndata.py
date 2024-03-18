@@ -205,8 +205,8 @@ def test_get_anndata_obsm_two_layers(lts_census: soma.Collection, obsm_layers: L
 
 
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("add_obs_embeddings", [["scvi", "geneformer", "uce"]])
-def test_get_anndata_add_obs_embeddings(lts_census: soma.Collection, add_obs_embeddings: List[str]) -> None:
+@pytest.mark.parametrize("obs_embeddings", [["scvi", "geneformer", "uce"]])
+def test_get_anndata_obs_embeddings(lts_census: soma.Collection, obs_embeddings: List[str]) -> None:
     # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
     # so this test could require adjustments.
 
@@ -217,19 +217,19 @@ def test_get_anndata_add_obs_embeddings(lts_census: soma.Collection, add_obs_emb
             X_name="raw",
             obs_coords=slice(100),
             var_coords=slice(200),
-            add_obs_embeddings=add_obs_embeddings,
+            obs_embeddings=obs_embeddings,
         )
 
     assert len(ad.obsm.keys()) == 3
     assert len(ad.varm.keys()) == 0
-    for obsm_layer in add_obs_embeddings:
+    for obsm_layer in obs_embeddings:
         assert obsm_layer in ad.obsm.keys()
         assert ad.obsm[obsm_layer].shape[0] == 101
 
 
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("add_var_embeddings", [["nmf"]])
-def test_get_anndata_add_var_embeddings(lts_census: soma.Collection, add_var_embeddings: List[str]) -> None:
+@pytest.mark.parametrize("var_embeddings", [["nmf"]])
+def test_get_anndata_var_embeddings(lts_census: soma.Collection, var_embeddings: List[str]) -> None:
     # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
     # so this test could require adjustments.
 
@@ -240,19 +240,19 @@ def test_get_anndata_add_var_embeddings(lts_census: soma.Collection, add_var_emb
             X_name="raw",
             obs_coords=slice(100),
             var_coords=slice(200),
-            add_var_embeddings=add_var_embeddings,
+            var_embeddings=var_embeddings,
         )
 
     assert len(ad.obsm.keys()) == 0
     assert len(ad.varm.keys()) == 1
-    for varm_layers in add_var_embeddings:
+    for varm_layers in var_embeddings:
         assert varm_layers in ad.varm.keys()
         assert ad.varm[varm_layers].shape[0] == 201
 
 
 @pytest.mark.live_corpus
 def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Collection) -> None:
-    """Fails if both `obsm_layers` and `add_obs_embeddings` are specified."""
+    """Fails if both `obsm_layers` and `obs_embeddings` are specified."""
     with lts_census:
         with pytest.raises(ValueError):
             cellxgene_census.get_anndata(
@@ -262,5 +262,5 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
                 obs_coords=slice(100),
                 var_coords=slice(200),
                 obsm_layers=["scvi"],
-                add_obs_embeddings=["scvi"],
+                obs_embeddings=["scvi"],
             )

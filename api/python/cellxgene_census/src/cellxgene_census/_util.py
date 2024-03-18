@@ -24,5 +24,9 @@ def _uri_join(base: str, url: str) -> str:
 
 def _extract_census_version(census: soma.Collection) -> str:
     """Extract the Census version from the given Census object."""
-    version: str = urllib.parse.urlparse(census.uri).path.split("/")[2]
+    try:
+        version: str = urllib.parse.urlparse(census.uri).path.split("/")[2]
+    except (KeyError, IndexError):
+        raise ValueError("Unable to extract Census version.") from None
+
     return version

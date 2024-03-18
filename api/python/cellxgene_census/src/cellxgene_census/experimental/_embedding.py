@@ -254,14 +254,13 @@ def get_all_census_versions_with_embedding(
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
     response.raise_for_status()
 
-    versions = set()
     manifest = response.json()
-    for _, obj in manifest.items():
-        if (
-            obj["embedding_name"] == embedding_name
+    return sorted(
+        {
+            obj["census_version"]
+            for obj in manifest.values()
+            if obj["embedding_name"] == embedding_name
             and obj["experiment_name"] == organism
             and obj["data_type"] == embedding_type
-        ):
-            versions.add(obj["census_version"])
-
-    return sorted(versions)
+        }
+    )
