@@ -93,15 +93,17 @@ class ExperimentSpecification:
 
     name: str
     anndata_cell_filter_spec: AnnDataFilterSpec
+    organism_ontology_term_id: str
 
     @classmethod
     def create(
         cls,
         name: str,
         anndata_cell_filter_spec: AnnDataFilterSpec,
+        organism_ontology_term_id: str,
     ) -> Self:
         """Factory method. Do not instantiate the class directly."""
-        return cls(name, anndata_cell_filter_spec)
+        return cls(name, anndata_cell_filter_spec, organism_ontology_term_id)
 
 
 class ExperimentBuilder:

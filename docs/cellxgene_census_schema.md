@@ -97,12 +97,12 @@ The table below shows all possible combinations of organisms for both observatio
   <tr>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i></td>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations MUST be included. The Census MUST only contain feautes from "NCBITaxon:9606" for <i>Homo sapiens</i>.</td>
+    <td>All observations MUST be included. The Census MUST only contain features from "NCBITaxon:9606" for <i>Homo sapiens</i>.</td>
   </tr>
   <tr>
     <td>"NCBITaxon:10090" for <i>Mus musculus</i></td>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>
-    <td>All observations MUST be included. The Census MUST only contain feautes from "NCBITaxon:10090" for <i>Mus musculus</i>.</td>
+    <td>All observations MUST be included. The Census MUST only contain features from "NCBITaxon:10090" for <i>Mus musculus</i>.</td>
   </tr>
   <tr>
     <td>"NCBITaxon:9606" for <i>Homo sapiens</i> <b>AND</b> "NCBITaxon:10090" for <i>Mus musculus</i></td>

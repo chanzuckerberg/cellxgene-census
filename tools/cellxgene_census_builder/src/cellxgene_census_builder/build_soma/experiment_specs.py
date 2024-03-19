@@ -18,6 +18,7 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
                 "organism_ontology_term_id": "NCBITaxon:9606",
                 "assay_ontology_term_ids": RNA_SEQ,
             },
+            organism_ontology_term_id="NCBITaxon:9606",
         ),
         ExperimentSpecification.create(
             name="mus_musculus",
@@ -25,6 +26,7 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
                 "organism_ontology_term_id": "NCBITaxon:10090",
                 "assay_ontology_term_ids": RNA_SEQ,
             },
+            organism_ontology_term_id="NCBITaxon:10090",
         ),
     ]
 

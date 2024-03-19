@@ -388,10 +388,6 @@ FULL_GENE_ASSAY = [
 
 DONOR_ID_IGNORE = ["pooled", "unknown"]
 
-# Feature_reference values which are ignored (not considered) in
-# multi-organism filtering. Currently the null set.
-FEATURE_REFERENCE_IGNORE: set[str] = set()
-
 
 # The default configuration for TileDB contexts used in the builder.
 # Ref: https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
