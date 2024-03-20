@@ -227,7 +227,7 @@ An example of this `SOMADataFrame` is shown below:
   </tr>
   <tr>
     <td>census_build_date</td>
-    <td>2022-11-30</td>
+    <td>2024-04-01</td>
   </tr>
   <tr>
     <td>dataset_schema_version </td>
