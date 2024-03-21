@@ -31,6 +31,7 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
+    # TODO: When ready to release 1.12.0 update tiledbsoma version to 1.9.0 and delete this temporary comment 
     "tiledbsoma~=1.8.0",
     "anndata",
     "numpy>=1.21",
