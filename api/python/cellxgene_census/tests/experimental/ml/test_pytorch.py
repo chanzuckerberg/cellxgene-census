@@ -1,6 +1,6 @@
 import pathlib
 import sys
-from typing import Callable, List, Optional, Sequence, Union
+from typing import Callable, List, Literal, Optional, Sequence, Union
 from unittest.mock import patch
 
 import numpy as np
@@ -278,13 +278,16 @@ def test_batching__empty_query_result(soma_experiment: Experiment, use_eager_fet
     "obs_range,var_range,X_value_gen,use_eager_fetch",
     [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
-def test_sparse_output__non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
+@pytest.mark.parametrize("X_format", ("coo", "csr"))
+def test_sparse_output__non_batched(
+    soma_experiment: Experiment, use_eager_fetch: bool, X_format: Literal["dense", "csr", "coo"]
+) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
-        return_sparse_X=True,
+        X_format=X_format,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -300,14 +303,17 @@ def test_sparse_output__non_batched(soma_experiment: Experiment, use_eager_fetch
     "obs_range,var_range,X_value_gen,use_eager_fetch",
     [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
-def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
+@pytest.mark.parametrize("X_format", ("coo", "csr"))
+def test_sparse_output__batched(
+    soma_experiment: Experiment, use_eager_fetch: bool, X_format: Literal["dense", "csr", "coo"]
+) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
-        return_sparse_X=True,
+        X_format=X_format,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
