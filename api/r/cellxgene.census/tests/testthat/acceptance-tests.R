@@ -113,7 +113,6 @@ test_that("test_incremental_read_X_human-large-buffer-size", {
   expect_true(table_iter_is_ok(X_iter))
 })
 
-# Fails
 test_that("test_incremental_read_X_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
