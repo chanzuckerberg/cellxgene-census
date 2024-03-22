@@ -84,7 +84,9 @@ class ExperimentSpecification:
     specification, independent of the datasets used to build the census.
 
     Parameters:
-    * experiment "name" (eg, 'human'), must be unique in all experiments.
+    * experiment "name" (eg, 'homo_sapiens'), must be unique in all experiments.
+    * a human-readable label, e.g, "Homo sapiens"
+    * ontology ID
     * an AnnData filter used to cherry pick data for the experiment
     * external reference data used to build the experiment, e.g., gene length data
 
@@ -92,6 +94,7 @@ class ExperimentSpecification:
     """
 
     name: str
+    label: str
     anndata_cell_filter_spec: AnnDataFilterSpec
     organism_ontology_term_id: str
 
@@ -99,11 +102,12 @@ class ExperimentSpecification:
     def create(
         cls,
         name: str,
+        label: str,
         anndata_cell_filter_spec: AnnDataFilterSpec,
         organism_ontology_term_id: str,
     ) -> Self:
         """Factory method. Do not instantiate the class directly."""
-        return cls(name, anndata_cell_filter_spec, organism_ontology_term_id)
+        return cls(name, label, anndata_cell_filter_spec, organism_ontology_term_id)
 
 
 class ExperimentBuilder:

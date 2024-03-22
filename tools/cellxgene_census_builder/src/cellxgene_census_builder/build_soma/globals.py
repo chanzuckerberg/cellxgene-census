@@ -63,6 +63,9 @@ CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name
 # "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_NAME = "summary"
 
+# "census_info"/"organisms" SOMA Dataframe
+CENSUS_INFO_ORGANISMS_NAME = "organisms"
+
 # "census_data"/{organism}/ms/"RNA" SOMA Matrix
 MEASUREMENT_RNA_NAME = "RNA"
 

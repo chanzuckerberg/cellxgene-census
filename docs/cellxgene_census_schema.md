@@ -583,6 +583,61 @@ Example of this `SOMADataFrame`:
 </tbody>
 </table>
 
+#### Census table of organisms  – `census_obj["census_info"]["organisms"]` – `SOMADataframe`
+
+Information about organisms whose cells are included in the Census MUST be included in a table modeled as a `SOMADataFrame`. Each row MUST correspond to an individual organism with the following columns:
+
+<table>
+<thead>
+  <tr>
+    <th>Column</th>
+    <th>Encoding</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>organism_ontology_term_id</td>
+    <td>string</td>
+    <td>As defined in the CELLxGENE dataset schema.</td>
+  </tr>
+  <tr>
+    <td>organism_label</td>
+    <td>string</td>
+    <td>Human-readable label as given by the ontology.</td>
+  </tr>
+  <tr>
+    <td>organism</td>
+    <td>string</td>
+    <td>Machine-friendly label used to name the SOMA Experiments, see below  <a href="#census-data--census_objcensus_dataorganism--somaexperiment">Census Data section.</a></td>
+  </tr>
+</tbody>
+</table>
+
+An example of this `SOMADataFrame` is shown below:
+
+<table>
+<thead>
+  <tr>
+    <th>organism_ontology_term_id</th>
+    <th>organism_label</th>
+    <th>organism</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>NCBITaxon:9606</td>
+    <td>Homo sapiens</td>
+    <td>homo_sapiens</td>
+  </tr>
+  <tr>
+    <td>NCBITaxon:10090</td>
+    <td>Mus musculus</td>
+    <td>mus_musculus</td>
+  </tr>
+</tbody>
+</table>
+
 ### Census Data – `census_obj["census_data"][organism]` – `SOMAExperiment`
 
 Data for *Homo sapiens* MUST be stored as a `SOMAExperiment` in `census_obj["homo_sapiens"]`.

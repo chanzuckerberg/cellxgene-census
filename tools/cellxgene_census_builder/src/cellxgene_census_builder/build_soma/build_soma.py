@@ -11,7 +11,7 @@ import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
 from ..util import clamp, cpu_count
-from .census_summary import create_census_summary
+from .census_summary import create_census_info_organisms, create_census_summary
 from .consolidate import submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
@@ -297,6 +297,7 @@ def build_step5_save_axis_and_summary_info(
         create_dataset_manifest(census_info, filtered_datasets)
         create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
         create_census_summary(census_info, experiment_builders, build_tag)
+        create_census_info_organisms(census_info, experiment_builders)
 
     logger.info("Build step 5 - Save axis and summary info - finished")
 
