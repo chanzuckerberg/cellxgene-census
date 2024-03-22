@@ -8,9 +8,8 @@ from ..util import cpu_count
 from .schema_util import FieldSpec, TableSpec
 
 # Feature flag - enables/disables use of Arrow dictionary / TileDB enum for
-# DataFrame columns. True is enabled, False is disabled. Usage currently blocked
-# by several TileDB-SOMA bugs.
-USE_ARROW_DICTIONARY = False
+# DataFrame columns. True is enabled, False is disabled.
+USE_ARROW_DICTIONARY = True
 
 CENSUS_SCHEMA_VERSION = "1.3.0"
 
@@ -159,7 +158,7 @@ _AllOtherObsAttrs = [
 ]
 # Dict filter varies depending on whether we are using dictionary types in the schema
 _DictLikeFilter: list[Any] = (
-    [{"_type": "ZstdFilter", "level": 19}]
+    [{"_type": "ZstdFilter", "level": 9}]
     if USE_ARROW_DICTIONARY
     else ["DictionaryFilter", {"_type": "ZstdFilter", "level": 19}]
 )
