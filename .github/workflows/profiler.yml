@@ -2,7 +2,8 @@ name: Profiler
 
 on:
   pull_request:
-
+    paths:
+      - api
 jobs:
   run_profiler:
     name: Run Profiler
