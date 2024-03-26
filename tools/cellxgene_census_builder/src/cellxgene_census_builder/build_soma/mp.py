@@ -71,7 +71,17 @@ def create_dask_client(
 
 def shutdown_dask_cluster(client: dask.distributed.Client) -> None:
     """Clean-ish shutdown, designed to prevent hangs and error messages in log."""
-    client.retire_workers()
+    try:
+        client.retire_workers()
+    except TimeoutError:
+        # Quiet Tornado errors
+        pass
+
     time.sleep(1)
-    client.shutdown()
+    try:
+        client.shutdown()
+    except TimeoutError:
+        # Quiet Tornado errors
+        pass
+
     logger.info("Dask cluster shut down")
