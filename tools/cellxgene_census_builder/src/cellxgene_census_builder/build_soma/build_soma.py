@@ -11,7 +11,7 @@ import tiledbsoma as soma
 
 from ..build_state import CensusBuildArgs
 from ..util import clamp, cpu_count
-from .census_summary import create_census_summary
+from .census_summary import create_census_info_organisms, create_census_summary
 from .consolidate import submit_consolidate
 from .datasets import Dataset, assign_dataset_soma_joinids, create_dataset_manifest
 from .experiment_builder import (
@@ -73,67 +73,61 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
     prepare_file_system(args)
 
-    try:
-        with create_dask_client(args, n_workers=cpu_count(), threads_per_worker=1, memory_limit=0) as client:
-            # Step 1 - get all source datasets
-            datasets = build_step1_get_source_datasets(args)
+    n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=0) as client:
+        # Step 1 - get all source datasets
+        datasets = build_step1_get_source_datasets(args)
 
-            # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
-            root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
+        # Step 2 - create root collection, and all child objects, but do not populate any dataframes or matrices
+        root_collection = build_step2_create_root_collection(args.soma_path.as_posix(), experiment_builders)
 
-            # Step 3 - populate axes
-            filtered_datasets = build_step3_populate_obs_and_var_axes(
-                args.h5ads_path.as_posix(), datasets, experiment_builders, args
-            )
+        # Step 3 - populate axes
+        filtered_datasets = build_step3_populate_obs_and_var_axes(
+            args.h5ads_path.as_posix(), datasets, experiment_builders, args
+        )
 
-            # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
-            # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
-            #
-            # TODO: when global order writes are supported, processing of much smaller slices will be
-            # possible, and this budget should drop considerably. When that is implemented, n_workers should be
-            # be much larger (eg., use default value of #CPUs or some such).
-            # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
-            MEM_BUDGET = 64 * 1024**3
-            n_workers = clamp(int(psutil.virtual_memory().total // MEM_BUDGET), 1, args.config.max_worker_processes)
-            logger.info(f"Scaling cluster to {n_workers} workers.")
-            client.cluster.scale(n_workers)
+        # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
+        # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
+        #
+        # TODO: when global order writes are supported, processing of much smaller slices will be
+        # possible, and this budget should drop considerably. When that is implemented, n_workers should be
+        # be much larger (eg., use default value of #CPUs or some such).
+        # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+        MEM_BUDGET = 64 * 1024**3
+        n_workers = clamp(int(psutil.virtual_memory().total // MEM_BUDGET), 1, args.config.max_worker_processes)
+        logger.info(f"Scaling cluster to {n_workers} workers.")
+        client.cluster.scale(n_workers)
 
-            # Step 4 - populate X layers
-            build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
+        # Step 4 - populate X layers
+        build_step4_populate_X_layers(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
 
-            # Prune datasets that we will not use, and do not want to include in the build
-            prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+        # Prune datasets that we will not use, and do not want to include in the build
+        prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
 
-            # Step 5- write out dataset manifest and summary information
-            build_step5_save_axis_and_summary_info(
-                root_collection, experiment_builders, filtered_datasets, args.config.build_tag
-            )
+        # Step 5- write out dataset manifest and summary information
+        build_step5_save_axis_and_summary_info(
+            root_collection, experiment_builders, filtered_datasets, args.config.build_tag
+        )
 
-            # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
-            tiledb_soma_1969_work_around(root_collection.uri)
+        # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
+        tiledb_soma_1969_work_around(root_collection.uri)
 
-            # Scale the cluster up as we are no longer memory constrained in the following phases
-            n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
-            logger.info(f"Scaling cluster to {n_workers} workers.")
-            client.cluster.scale(n=n_workers)
+        # Scale the cluster up as we are no longer memory constrained in the following phases
+        n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
+        logger.info(f"Scaling cluster to {n_workers} workers.")
+        client.cluster.scale(n=n_workers)
 
-            if args.config.consolidate:
-                for f in dask.distributed.as_completed(
-                    submit_consolidate(root_collection.uri, pool=client, vacuum=True)
-                ):
-                    assert f.result()
-            if validate:
-                for f in dask.distributed.as_completed(validate_soma(args, client)):
-                    assert f.result()
-            if args.config.consolidate and validate:
-                validate_consolidation(args)
-            logger.info("Validation & consolidation complete.")
+        if args.config.consolidate:
+            for f in dask.distributed.as_completed(submit_consolidate(root_collection.uri, pool=client, vacuum=True)):
+                assert f.result()
+        if validate:
+            for f in dask.distributed.as_completed(validate_soma(args, client)):
+                assert f.result()
+        if args.config.consolidate and validate:
+            validate_consolidation(args)
+        logger.info("Validation & consolidation complete.")
 
-            shutdown_dask_cluster(client)
-
-    except TimeoutError:
-        # quiet tornado race conditions (harmless) on shutdown
-        pass
+        shutdown_dask_cluster(client)
 
     return 0
 
@@ -303,6 +297,7 @@ def build_step5_save_axis_and_summary_info(
         create_dataset_manifest(census_info, filtered_datasets)
         create_census_summary_cell_counts(census_info, [e.census_summary_cell_counts for e in experiment_builders])
         create_census_summary(census_info, experiment_builders, build_tag)
+        create_census_info_organisms(census_info, experiment_builders)
 
     logger.info("Build step 5 - Save axis and summary info - finished")
 

@@ -14,14 +14,14 @@ from anndata.experimental import CSCDataset, CSRDataset, read_elem, sparse_datas
 
 from ..util import urlcat
 from .datasets import Dataset
-from .globals import CXG_SCHEMA_VERSION, FEATURE_REFERENCE_IGNORE
+from .globals import CXG_SCHEMA_VERSION
 
 logger = logging.getLogger(__name__)
 
 
 class AnnDataFilterSpec(TypedDict):
-    organism_ontology_term_id: str | None
-    assay_ontology_term_ids: list[str] | None
+    organism_ontology_term_id: str
+    assay_ontology_term_ids: list[str]
 
 
 # Indexing types
@@ -175,7 +175,12 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
         This is NOT the density for any given slice.
 
         Approach: divide the whole file nnz by the product of the shape.
+
+        Arbitarily picks density of 1.0 if the file is empty on either axis
         """
+        if self.n_obs * self.n_vars == 0:
+            return 1.0
+
         nnz: int
         if isinstance(self._X, CSRDataset | CSCDataset):
             nnz = self._X.group["data"].size
@@ -298,46 +303,43 @@ class AnnDataFilterFunction(Protocol):
 def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFunction:
     """Return an anndata sliced/filtered for those cells/genes of interest.
 
+    See: https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md
+
     obs filter:
     * not organoid or cell culture
     * Caller-specified assays only
     * Caller-specified taxa (obs.organism_ontology_term_id == '<user-supplied>')
     * Organism term ID value not equal to gene feature_reference value
+    * Single organism
 
     var filter:
     * genes only  (var.feature_biotype == 'gene')
+    * Single organism
     """
     organism_ontology_term_id = filter_spec.get("organism_ontology_term_id", None)
     assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids", None)
 
     def _filter(ad: AnnDataProxy) -> AnnDataProxy:
-        # Multi-organism datasets are dropped - any dataset with 2+ feature_reference organisms is ignored,
-        # exclusive of values in FEATURE_REFERENCE_IGNORE. See also, cell filter for mismatched
-        # cell/feature organism values.
-        feature_reference_organisms = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
-        if len(feature_reference_organisms) > 1:
-            logger.info(f"H5AD ignored due to multi-organism feature_reference: {ad.filename}")
+        """Filter observations and features per Census schema."""
+        var_mask = ad.var.feature_biotype == "gene"
+        obs_mask = ad.obs.tissue_type == "tissue"
+
+        # Handle multi-species edge case
+        var_organisms = set(ad.var.feature_reference[var_mask].unique())
+        obs_organisms = set(ad.obs.organism_ontology_term_id[obs_mask].unique())
+        if len(var_organisms) > 1 and len(obs_organisms) > 1:
+            # if multi-species on both axis -- drop everything
+            logger.info(f"H5AD ignored - multi-species content on both axes: {ad.filename}")
             return ad[0:0]  # ie., drop all cells
 
-        #
-        # Filter cells per Census schema
-        #
-        obs_mask = ad.obs.tissue_type == "tissue"
-        if organism_ontology_term_id is not None:
-            obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
-        if assay_ontology_term_ids is not None:
+        # Filter by the species specified in the filter-spec
+        var_mask = var_mask & (ad.var.feature_reference == organism_ontology_term_id)
+        obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == organism_ontology_term_id)
+        if assay_ontology_term_ids:
             obs_mask = obs_mask & ad.obs.assay_ontology_term_id.isin(assay_ontology_term_ids)
 
-        # multi-organism dataset cell filter - exclude any cells where organism != feature_reference
-        feature_references = set(ad.var.feature_reference.unique()) - FEATURE_REFERENCE_IGNORE
-        assert len(feature_references) == 1  # else there is a bug in the test above
-        feature_reference_organism_ontology_id = feature_references.pop()
-        obs_mask = obs_mask & (ad.obs.organism_ontology_term_id == feature_reference_organism_ontology_id)
-
-        #
-        # Filter features per Census schema
-        #
-        var_mask = ad.var.feature_biotype == "gene"
+        if not (var_mask.any() and obs_mask.any()):
+            return ad[0:0]  # i.e., drop all cells
 
         return ad[
             slice(None) if obs_mask.all() else obs_mask.to_numpy(),

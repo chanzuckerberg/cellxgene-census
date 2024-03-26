@@ -14,17 +14,21 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
     return [  # The soma.Experiments we want to build
         ExperimentSpecification.create(
             name="homo_sapiens",
+            label="Homo sapiens",
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:9606",
                 "assay_ontology_term_ids": RNA_SEQ,
             },
+            organism_ontology_term_id="NCBITaxon:9606",
         ),
         ExperimentSpecification.create(
             name="mus_musculus",
+            label="Mus musculus",
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:10090",
                 "assay_ontology_term_ids": RNA_SEQ,
             },
+            organism_ontology_term_id="NCBITaxon:10090",
         ),
     ]
 

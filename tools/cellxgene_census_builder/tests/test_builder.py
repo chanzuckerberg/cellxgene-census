@@ -29,7 +29,7 @@ from cellxgene_census_builder.process_init import process_init
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"multi_process": False, "consolidate": False, "build_tag": "test_tag", "verbose": 0}],
+    [{"multi_process": False, "consolidate": False, "build_tag": "test_tag", "verbose": 0, "max_worker_processes": 2}],
     indirect=True,
 )
 def test_base_builder_creation(
@@ -151,6 +151,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_ar
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
 
     # Call the function
+    process_init(census_build_args)
     with create_dask_client(census_build_args) as client:
         datasets = build_step1_get_source_datasets(census_build_args)
         shutdown_dask_cluster(client)

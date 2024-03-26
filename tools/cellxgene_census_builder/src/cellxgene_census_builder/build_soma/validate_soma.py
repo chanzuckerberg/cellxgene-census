@@ -48,8 +48,8 @@ from .globals import (
     CXG_SCHEMA_VERSION,
     CXG_VAR_COLUMNS_READ,
     FEATURE_DATASET_PRESENCE_MATRIX_NAME,
+    FULL_GENE_ASSAY,
     MEASUREMENT_RNA_NAME,
-    SMART_SEQ,
     SOMA_TileDB_Context,
 )
 from .mp import create_dask_client, shutdown_dask_cluster
@@ -381,14 +381,14 @@ def validate_X_layers_normalized(
 
             row_range_stop = min(X_raw.shape[0], row_range_stop)
 
-            is_smart_seq = np.isin(
+            is_full_gene_assay = np.isin(
                 exp.obs.read(
                     coords=(slice(row_range_start, row_range_stop - 1),), column_names=["assay_ontology_term_id"]
                 )
                 .concat()
                 .to_pandas()
                 .assay_ontology_term_id.to_numpy(),
-                SMART_SEQ,
+                FULL_GENE_ASSAY,
             )
 
             var_df = (
@@ -442,10 +442,10 @@ def validate_X_layers_normalized(
             raw_csr = sparse.coo_matrix((raw_soma_data, (row, col)), shape=(n_rows, n_cols)).tocsr()
             del row, col
 
-            if is_smart_seq.any():
+            if is_full_gene_assay.any():
                 # this is a very costly operation - do it only when necessary
-                raw_csr[is_smart_seq, :] /= feature_length
-            del is_smart_seq
+                raw_csr[is_full_gene_assay, :] /= feature_length
+            del is_full_gene_assay
 
             assert np.allclose(
                 norm_csr.sum(axis=1).A1, np.ones((n_rows,), dtype=np.float32), rtol=1e-6, atol=1e-4
@@ -1108,15 +1108,10 @@ def validate(args: CensusBuildArgs) -> int:
     logger.info("Validating correct consolidation and vacuuming - start")
     n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
 
-    try:
-        with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
-            assert all(r.result() for r in distributed.wait(validate_soma(args, client)).done)
-            logging.info("Validation complete.")
-
-            shutdown_dask_cluster(client)
-
-    except TimeoutError:
-        pass
+    with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
+        assert all(r.result() for r in distributed.wait(validate_soma(args, client)).done)
+        shutdown_dask_cluster(client)
+        logging.info("Validation complete.")
 
     assert validate_consolidation(args)
     logger.info("Validating correct consolidation and vacuuming - complete")
