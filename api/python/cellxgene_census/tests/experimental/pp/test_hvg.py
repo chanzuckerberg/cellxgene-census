@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import Any
 
 import numpy as np
@@ -15,6 +16,10 @@ from cellxgene_census.experimental.pp import (
 )
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 9),
+    reason="scanpy 1.10 requires Python 3.9+ and our hvg implementation aims to be compatible with that version.",
+)
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
