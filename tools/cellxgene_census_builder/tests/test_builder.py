@@ -1,6 +1,7 @@
 import os
 import pathlib
 from types import ModuleType
+from typing import Any
 from unittest.mock import patch
 
 import dask
@@ -43,9 +44,8 @@ def test_base_builder_creation(
     """
 
     def proxy_create_dask_client(
-        # args: CensusBuildArgs,
-        *args,
-        **kwargs,
+        *args: CensusBuildArgs,
+        **kwargs: Any,
     ) -> dask.distributed.Client:
         from cellxgene_census_builder.build_soma.mp import create_dask_client
 

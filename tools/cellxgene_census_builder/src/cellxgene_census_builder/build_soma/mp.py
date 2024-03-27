@@ -1,6 +1,7 @@
 import logging
 import multiprocessing
 import time
+from typing import Any
 
 import dask
 import dask.distributed
@@ -33,7 +34,7 @@ class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
 
 def create_dask_client(
     args: CensusBuildArgs,
-    **kwargs,
+    **kwargs: Any,
 ) -> dask.distributed.Client:
     """Create and return a Dask client."""
     # create a new client
