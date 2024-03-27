@@ -117,7 +117,9 @@ def test_hvg_vs_scanpy(
     scanpy_hvg.index.name = "soma_joinid"
     scanpy_hvg.index = scanpy_hvg.index.astype(int)
     assert len(scanpy_hvg) == len(hvg)
-    assert set(scanpy_hvg.drop("gene_name", axis=1).keys()) == set(hvg.keys())
+    # Since scanpy 1.10, there is an extra column in the dataframe that our hvg implementation
+    # does not support.  Drop it for comparison.
+    assert set(scanpy_hvg.drop("gene_name", axis=1, errors="ignore").keys()) == set(hvg.keys())
 
     assert (hvg.index == scanpy_hvg.index).all()
     assert np.allclose(
