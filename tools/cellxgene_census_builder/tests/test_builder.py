@@ -3,6 +3,7 @@ import pathlib
 from types import ModuleType
 from unittest.mock import patch
 
+import dask
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -40,10 +41,25 @@ def test_base_builder_creation(
     """
     Runs the builder, queries the census and performs a set of base assertions.
     """
+
+    def proxy_create_dask_client(
+        # args: CensusBuildArgs,
+        *args,
+        **kwargs,
+    ) -> dask.distributed.Client:
+        from cellxgene_census_builder.build_soma.mp import create_dask_client
+
+        kwargs["processes"] = False
+        kwargs.pop("threads_per_worker")
+        return create_dask_client(*args, **kwargs)
+
     with (
         patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"),
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
         patch("cellxgene_census_builder.build_soma.build_soma.validate_consolidation", return_value=True),
+        patch(
+            "cellxgene_census_builder.build_soma.build_soma.create_dask_client", side_effect=proxy_create_dask_client
+        ),
     ):
         process_init(census_build_args)
         return_value = build(census_build_args)
@@ -152,7 +168,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_ar
 
     # Call the function
     process_init(census_build_args)
-    with create_dask_client(census_build_args) as client:
+    with create_dask_client(census_build_args, processes=False) as client:
         datasets = build_step1_get_source_datasets(census_build_args)
         shutdown_dask_cluster(client)
 

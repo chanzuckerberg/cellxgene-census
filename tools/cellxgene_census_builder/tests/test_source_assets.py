@@ -25,7 +25,7 @@ def test_source_assets(tmp_path: pathlib.Path, census_build_args: CensusBuildArg
 
     # Call the function
     process_init(census_build_args)
-    with create_dask_client(census_build_args) as client:
+    with create_dask_client(census_build_args, processes=False) as client:
         stage_source_assets(datasets, census_build_args)
         shutdown_dask_cluster(client)
 
