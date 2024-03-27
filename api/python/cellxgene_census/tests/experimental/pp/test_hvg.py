@@ -117,7 +117,7 @@ def test_hvg_vs_scanpy(
     scanpy_hvg.index.name = "soma_joinid"
     scanpy_hvg.index = scanpy_hvg.index.astype(int)
     assert len(scanpy_hvg) == len(hvg)
-    assert [k for k in scanpy_hvg.keys() if k != "gene_name"] == list(hvg.keys())
+    assert set(scanpy_hvg.drop("gene_name").keys()) == set(hvg.keys())
 
     assert (hvg.index == scanpy_hvg.index).all()
     assert np.allclose(
