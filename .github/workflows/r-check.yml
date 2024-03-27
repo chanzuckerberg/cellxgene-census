@@ -31,7 +31,8 @@ jobs:
           if [[ '${{ matrix.tiledbsoma_version }}' == 'tiledbsoma_latest' ]]; then
             Rscript -e 'remotes::install_git("https://github.com/single-cell-data/TileDB-SOMA.git", subdir="apis/r")'
           else
-            Rscript -e 'remotes::install_git("https://github.com/TileDB-Inc/TileDB-R.git", ref="0.24.0")'
+            Rscript -e 'install.packages("tiledbsoma", repos = c("https://tiledb-inc.r-universe.dev",
+                                                                 "https://cloud.r-project.org"))'
           fi
       - name: styler
         run: Rscript -e 'library("styler"); style_pkg("api/r/cellxgene.census", dry="fail")'
