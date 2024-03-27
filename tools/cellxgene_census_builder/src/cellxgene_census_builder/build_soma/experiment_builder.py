@@ -301,6 +301,9 @@ def accumulate_axes_dataframes(
             return obs_df, var_df
 
     datasets_bag = dask.bag.from_sequence(datasets)
+    # PRATHAP-BRUCE: Should this be of type list[list[tuple[pd.DataFrame, pd.Dataframe]]]?
+    # That is, it returns a list of 2 lists where each list contains of pairs of dataframes (obs and var)
+    # for each dataset?
     df_pairs_per_eb: list[tuple[pd.DataFrame, pd.DataFrame]] = dask.compute(
         *[
             datasets_bag.map(

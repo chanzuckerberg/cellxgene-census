@@ -46,6 +46,7 @@ class CensusBuildConfig:
     #
     # Default multi-process. Memory scaling based on empirical tests.
     multi_process: bool = field(converter=bool, default=True)
+    # PRATHAP-BRUCE: Perhaps a verbal explanation of the resource constraints here?
     #
     # The memory budget used to determine appropriate parallelism in many steps of build.
     # Only set to a smaller number if you want to not use all available RAM.
