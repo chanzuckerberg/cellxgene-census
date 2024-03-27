@@ -39,3 +39,11 @@ def test_get_var_stats(format: str) -> None:
 
     assert (df.nnz == nnz).all()
     assert (df.n_measured_obs == 0).all()
+
+
+def test_expected_errors() -> None:
+    with pytest.raises(NotImplementedError):
+        get_obs_stats(np.ones((10, 2), dtype=np.float32))
+
+    with pytest.raises(NotImplementedError):
+        get_var_stats([0, 1, 2])

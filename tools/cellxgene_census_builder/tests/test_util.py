@@ -1,8 +1,17 @@
 import numpy as np
+from unittest import mock
 from scipy.sparse import csr_matrix
 
+
 from cellxgene_census_builder.build_soma.util import is_nonnegative_integral
-from cellxgene_census_builder.util import urlcat, urljoin
+from cellxgene_census_builder.util import (
+    urlcat,
+    clamp,
+    urljoin,
+    cpu_count,
+    log_process_resource_status,
+    log_system_memory_status,
+)
 
 
 def test_is_nonnegative_integral() -> None:
@@ -73,3 +82,34 @@ def test_urlcat() -> None:
     assert urlcat("s3://foo", "bar", "baz") == "s3://foo/bar/baz"
     assert urlcat("s3://foo", "bar/", "baz") == "s3://foo/bar/baz"
     assert urlcat("s3://foo", "bar/", "baz/") == "s3://foo/bar/baz/"
+
+
+def test_cpu_count() -> None:
+    import os
+
+    assert cpu_count() > 0
+    assert cpu_count() == (os.cpu_count() or 1)
+
+    with mock.patch("os.cpu_count", return_value=None):
+        assert cpu_count() == 1
+
+
+def test_clamp() -> None:
+    assert clamp(0, 1, 100) == 1
+    assert clamp(1, 1, 100) == 1
+    assert clamp(10, 1, 100) == 10
+    assert clamp(100, 1, 100) == 100
+    assert clamp(101, 1, 100) == 100
+
+
+def test_log_process_resource_status() -> None:
+
+    with mock.patch("cellxgene_census_builder.util.logger.log") as mocked_logger:
+        log_process_resource_status()
+    mocked_logger.assert_called_once()
+
+
+def test_log_system_memory_status() -> None:
+    with mock.patch("cellxgene_census_builder.util.logger.log") as mocked_logger:
+        log_system_memory_status()
+    mocked_logger.assert_called_once()
