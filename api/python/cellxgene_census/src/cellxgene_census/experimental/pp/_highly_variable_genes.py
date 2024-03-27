@@ -206,7 +206,6 @@ def _highly_variable_genes_seurat_v3(
     median_ranked = np.ma.median(ma_ranked, axis=0).filled(np.nan)  # type: ignore[no-untyped-call]
 
     var_df = var_df.assign(
-        gene_name=var_df.index,
         highly_variable_nbatches=pd.Series(num_batches_high_var, index=var_df.index),
         highly_variable_rank=pd.Series(median_ranked, index=var_df.index),
         variances_norm=pd.Series(np.mean(norm_gene_vars, axis=0), index=var_df.index),

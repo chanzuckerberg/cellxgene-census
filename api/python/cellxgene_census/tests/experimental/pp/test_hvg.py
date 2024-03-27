@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from typing import Any
 
 import numpy as np
@@ -16,10 +15,6 @@ from cellxgene_census.experimental.pp import (
 )
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 9),
-    reason="scanpy 1.10 requires Python 3.9+ and our hvg implementation aims to be compatible with that version.",
-)
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
@@ -122,7 +117,7 @@ def test_hvg_vs_scanpy(
     scanpy_hvg.index.name = "soma_joinid"
     scanpy_hvg.index = scanpy_hvg.index.astype(int)
     assert len(scanpy_hvg) == len(hvg)
-    assert all(scanpy_hvg.keys() == hvg.keys())
+    assert [k for k in scanpy_hvg.keys() if k != "gene_name"] == list(hvg.keys())
 
     assert (hvg.index == scanpy_hvg.index).all()
     assert np.allclose(
