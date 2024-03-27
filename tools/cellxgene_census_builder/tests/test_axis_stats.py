@@ -1,5 +1,7 @@
 import numpy as np
 import numpy.ma as ma
+import numpy.typing as npt
+import pandas as pd
 import pytest
 import scipy.sparse as sparse
 
@@ -19,7 +21,7 @@ def test_get_obs_stats(format: str) -> None:
     assert (df.raw_mean_nnz == raw_mean_nnz).all()
 
     Xarr = X.toarray()
-    Xmasked = ma.masked_array(Xarr, Xarr == 0)
+    Xmasked: npt.NDArray[np.float32] = ma.masked_array(Xarr, Xarr == 0)  # type: ignore[no-untyped-call]
     raw_variance_nnz = Xmasked.var(axis=1, ddof=1, dtype=np.float64).filled(0.0)
     assert np.allclose(df.raw_variance_nnz, raw_variance_nnz)
 
@@ -29,13 +31,13 @@ def test_get_obs_stats(format: str) -> None:
 @pytest.mark.parametrize("format", ["csr", "csc", "np"])
 def test_get_var_stats(format: str) -> None:
     if format == "np":
-        X = np.random.default_rng().random((1000, 100), dtype=np.float32)
-        nnz = np.count_nonzero(X, axis=0)
+        Xnd = np.random.default_rng().random((1000, 100), dtype=np.float32)
+        nnz = np.count_nonzero(Xnd, axis=0)
+        df: pd.DataFrame = get_var_stats(Xnd)
     else:
-        X = sparse.random(1000, 100, format=format, dtype=np.float32)
-        nnz = X.getnnz(axis=0)
-
-    df = get_var_stats(X)
+        Xsp = sparse.random(1000, 100, format=format, dtype=np.float32)
+        nnz = Xsp.getnnz(axis=0)
+        df = get_var_stats(Xsp)
 
     assert (df.nnz == nnz).all()
     assert (df.n_measured_obs == 0).all()

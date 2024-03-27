@@ -1,16 +1,16 @@
-import numpy as np
 from unittest import mock
-from scipy.sparse import csr_matrix
 
+import numpy as np
+from scipy.sparse import csr_matrix
 
 from cellxgene_census_builder.build_soma.util import is_nonnegative_integral
 from cellxgene_census_builder.util import (
-    urlcat,
     clamp,
-    urljoin,
     cpu_count,
     log_process_resource_status,
     log_system_memory_status,
+    urlcat,
+    urljoin,
 )
 
 
@@ -103,7 +103,6 @@ def test_clamp() -> None:
 
 
 def test_log_process_resource_status() -> None:
-
     with mock.patch("cellxgene_census_builder.util.logger.log") as mocked_logger:
         log_process_resource_status()
     mocked_logger.assert_called_once()
