@@ -31,12 +31,29 @@ from cellxgene_census_builder.process_init import process_init
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"multi_process": False, "consolidate": False, "build_tag": "test_tag", "verbose": 0, "max_worker_processes": 2}],
+    (
+        {
+            "multi_process": False,
+            "consolidate": False,
+            "build_tag": "test_tag",
+            "verbose": 0,
+            "max_worker_processes": 2,
+        },
+        {
+            "multi_process": False,
+            "consolidate": True,
+            "build_tag": "test_tag",
+            "verbose": 0,
+            "max_worker_processes": 2,
+        },
+    ),
     indirect=True,
 )
+@pytest.mark.parametrize("validate", (True, False))
 def test_base_builder_creation(
     datasets: list[Dataset],
     census_build_args: CensusBuildArgs,
+    validate: bool,
     setup: None,
 ) -> None:
     """
@@ -62,7 +79,7 @@ def test_base_builder_creation(
         ),
     ):
         process_init(census_build_args)
-        return_value = build(census_build_args)
+        return_value = build(census_build_args, validate=validate)
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
