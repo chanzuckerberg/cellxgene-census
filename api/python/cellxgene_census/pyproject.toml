@@ -45,6 +45,7 @@ experimental = [
     "torchdata~=0.7",
     "scikit-learn~=1.0",
     "scikit-misc>=0.2",  # scikit-misc 0.3 dropped Python 3.8 support
+    "polars==0.20.4",
     "psutil~=5.0",
     "datasets~=2.0",
     "tdigest~=0.5",

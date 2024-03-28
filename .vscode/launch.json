@@ -1,0 +1,72 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Memento (tiny)",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/api/python/cellxgene_census/src/",
+            "module": "cellxgene_census.experimental.diffexp.memento.diff_expr",
+            "justMyCode": true,
+            "args": [
+                "tissue_general_ontology_term_id in ['UBERON:0002405']", 
+                "sex_ontology_term_id",
+                "/mnt/census/estimators-cube-70a7705/",
+                "1",
+                "1000"],
+            "subProcess": true
+        },
+        {
+            "name": "Memento (small)",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/api/python/cellxgene_census/src/",
+            "module": "cellxgene_census.experimental.diffexp.memento.diff_expr",
+            "justMyCode": true,
+            "args": [
+                "tissue_general_ontology_term_id in ['UBERON:0000030', 'UBERON:0000992']", 
+                "tissue_general_ontology_term_id",
+                "/mnt/census/estimators-cube-70a7705/",
+                "1",
+                "1000"],
+            "subProcess": true
+        },
+        {
+            "name": "Memento (medium)",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/api/python/cellxgene_census/src/",
+            "module": "cellxgene_census.experimental.diffexp.memento.diff_expr",
+            "justMyCode": true,
+            "args": [
+                "tissue_general_ontology_term_id in ['UBERON:0000948', 'UBERON:0001004']", 
+                "tissue_general_ontology_term_id",
+                "/mnt/census/estimators-cube-70a7705/",
+                "1",
+                "5000"],
+            "subProcess": true
+        },        
+        {
+            "name": "Memento (large)",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/api/python/cellxgene_census/src/",
+            "module": "cellxgene_census.experimental.diffexp.memento.diff_expr",
+            "justMyCode": true,
+            "args": [
+                "tissue_general_ontology_term_id in ['UBERON:0000948', 'UBERON:0001004']", 
+                "tissue_general_ontology_term_id",
+                "/mnt/census/estimators-cube-70a7705/",
+                "1",
+                ""],
+            "subProcess": true
+        },        
+        {
+            "name": "Python: File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "justMyCode": true
+        }
+    ]
+}
