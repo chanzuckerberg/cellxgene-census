@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -312,20 +312,20 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 23:56:36 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 23:56:36 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 23:56:36 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 23:56:36 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 22:33:46 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 22:33:46 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 22:33:46 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 22:33:46 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 23:56:37 Writing NN index file to temp file /tmp/Rtmp6OqMco/file2233e7cc0e60a</span></span>
-<span><span class="co">#&gt; 23:56:37 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 23:56:40 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 23:56:41 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 23:56:41 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
-<span><span class="co">#&gt; 23:56:42 Commencing optimization for 200 epochs, with 409958 positive edges</span></span>
-<span><span class="co">#&gt; 23:56:46 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 22:33:48 Writing NN index file to temp file /tmp/Rtmpdjw8zk/file11b8631beecc6</span></span>
+<span><span class="co">#&gt; 22:33:48 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 22:33:52 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 22:33:52 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 22:33:53 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 22:33:54 Commencing optimization for 200 epochs, with 409958 positive edges</span></span>
+<span><span class="co">#&gt; 22:33:58 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
