@@ -89,9 +89,7 @@ def _highly_variable_genes_seurat_v3(
         n_batches = len(batch_index.cat.categories)
         n_samples = batch_index.value_counts().loc[batch_index.cat.categories.to_numpy()].to_numpy()
         if n_batches > 1:
-            batch_indexer = soma.tiledbsoma_build_index(
-                batch_index.index.to_numpy(), context=query.experiment.context
-            ).get_indexer
+            batch_indexer = soma.IntIndexer(batch_index.index.to_numpy(), context=query.experiment.context).get_indexer
             batch_codes = batch_index.cat.codes.to_numpy().astype(np.int64)
     else:
         n_batches = 1
