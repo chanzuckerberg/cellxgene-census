@@ -1,5 +1,7 @@
 import urllib.parse
 
+import tiledbsoma as soma
+
 
 def _uri_join(base: str, url: str) -> str:
     """Like urllib.parse.urljoin, but doesn't get confused by s3://."""
@@ -18,3 +20,13 @@ def _uri_join(base: str, url: str) -> str:
         p_url.fragment,
     ]
     return urllib.parse.urlunparse(parts)
+
+
+def _extract_census_version(census: soma.Collection) -> str:
+    """Extract the Census version from the given Census object."""
+    try:
+        version: str = urllib.parse.urlparse(census.uri).path.split("/")[2]
+    except (KeyError, IndexError):
+        raise ValueError("Unable to extract Census version.") from None
+
+    return version

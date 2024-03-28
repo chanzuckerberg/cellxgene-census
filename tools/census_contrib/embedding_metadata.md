@@ -21,6 +21,7 @@ Each embedding will contain a variety of metadata stored in the SOMA `metadata` 
 | Field name             | Required | Type          | Description                                                                           |
 | ---------------------- | -------- | ------------- | ------------------------------------------------------------------------------------- |
 | id                     | required | string        | CZI-assigned accession ID for this embedding                                          |
+| embedding_name         | required | string        | Name of the algorithm used to generate the embedding                                  |
 | title                  | required | string        | Brief project title                                                                   |
 | description            | required | string        | Succinct description of the method and characteristics of the embeddings and model    |
 | primary_contact        | required | Contact       | Primary contact person for these embeddings.                                          |
@@ -49,6 +50,7 @@ For example:
 ```json
 {
   "id": "CxG-contrib-99999",
+  "embedding_name": "model_algo",
   "title": "An embedding",
   "description": "Longer description of the embedding and method used to generate it",
   "primary_contact": {
