@@ -725,7 +725,7 @@ def validate_X_layers_raw_contents(
                 assert ad.n_vars == var_joinid_in_adata.sum()
 
                 # var/col reindexer
-                var_index = soma.tiledbsoma_build_index(
+                var_index = soma.IntIndexer(
                     ad.var.join(var_df.set_index("feature_id")).soma_joinid.to_numpy(), context=exp.context
                 )
                 var_df = var_df[["soma_joinid"]]  # save some memory
@@ -743,7 +743,7 @@ def validate_X_layers_raw_contents(
 
                     # positionally re-index
                     cols_by_position = var_index.get_indexer(X_raw_var_joinids)
-                    rows_by_position = soma.tiledbsoma_build_index(obs_joinids_split, context=exp.context).get_indexer(
+                    rows_by_position = soma.IntIndexer(obs_joinids_split, context=exp.context).get_indexer(
                         X_raw_obs_joinids
                     )
                     del X_raw_obs_joinids
