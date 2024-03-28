@@ -1,6 +1,7 @@
 import logging
 import multiprocessing
 import time
+from typing import Any
 
 import dask
 import dask.distributed
@@ -33,16 +34,16 @@ class SetupDaskWorker(dask.distributed.WorkerPlugin):  # type: ignore[misc]
 
 def create_dask_client(
     args: CensusBuildArgs,
-    *,
-    n_workers: int | None = None,
-    threads_per_worker: int | None = None,
-    memory_limit: str | float | int | None = "auto",
+    **kwargs: Any,
 ) -> dask.distributed.Client:
     """Create and return a Dask client."""
     # create a new client
     assert _mp_config_checks()
-
-    n_workers = max(1, n_workers or cpu_count())
+    kwargs.update(
+        {
+            "n_workers": max(1, kwargs.get("n_workers", cpu_count())),
+        }
+    )
     dask.config.set(
         {
             "distributed.scheduler.worker-ttl": "24 hours",  # some tasks are very long-lived, e.g., consolidation
@@ -50,10 +51,8 @@ def create_dask_client(
     )
 
     client = dask.distributed.Client(
-        n_workers=n_workers,
-        threads_per_worker=threads_per_worker,
-        memory_limit=memory_limit,
         dashboard_address=":8787" if args.config.dashboard else None,
+        **kwargs,
     )
     client.register_plugin(SetupDaskWorker(args))
     logger.info(f"Dask client created: {client}")

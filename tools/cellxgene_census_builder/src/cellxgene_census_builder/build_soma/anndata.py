@@ -178,7 +178,10 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
 
         Arbitarily picks density of 1.0 if the file is empty on either axis
         """
-        if self.n_obs * self.n_vars == 0:
+        # Use whole-file n_obs/n_vars, not the slice length
+        n_obs = len(self._obs)
+        n_vars = len(self._var)
+        if n_obs * n_vars == 0:
             return 1.0
 
         nnz: int
@@ -186,7 +189,8 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
             nnz = self._X.group["data"].size
         else:
             nnz = self._X.size
-        return nnz / (self.n_obs * self.n_vars)
+
+        return nnz / (n_obs * n_vars)
 
     def _load_dataframe(self, elem: h5py.Group, column_names: tuple[str, ...] | None) -> pd.DataFrame:
         # if reading all, just use the built-in
@@ -236,7 +240,10 @@ class AnnDataProxy(AbstractContextManager["AnnDataProxy"]):
         ), "Unsupported AnnData encoding-type or encoding-version - likely indicates file was created with an unsupported AnnData version"
 
         # Verify we are reading the expected CxG schema version.
-        schema_version = read_elem(self._file["uns/schema_version"])
+        if "schema_version" in self._file["uns"]:
+            schema_version = read_elem(self._file["uns/schema_version"])
+        else:
+            schema_version = "UNKNOWN"
         if schema_version != CXG_SCHEMA_VERSION:
             raise ValueError(
                 f"{self.filename} -- incorrect CxG schema version (got {schema_version}, expected {CXG_SCHEMA_VERSION})"
@@ -316,8 +323,10 @@ def make_anndata_cell_filter(filter_spec: AnnDataFilterSpec) -> AnnDataFilterFun
     * genes only  (var.feature_biotype == 'gene')
     * Single organism
     """
-    organism_ontology_term_id = filter_spec.get("organism_ontology_term_id", None)
-    assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids", None)
+    organism_ontology_term_id = filter_spec.get("organism_ontology_term_id")
+    assert isinstance(organism_ontology_term_id, str)
+    assay_ontology_term_ids = filter_spec.get("assay_ontology_term_ids")
+    assert isinstance(assay_ontology_term_ids, list)
 
     def _filter(ad: AnnDataProxy) -> AnnDataProxy:
         """Filter observations and features per Census schema."""
