@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple
 
 import numpy as np
 import numpy.typing as npt
@@ -226,7 +226,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         batch_size: int,
         encoders: Dict[str, LabelEncoder],
         stats: Stats,
-        return_sparse_X: bool,
+        X_format: Literal["dense", "csr", "coo"],
         use_eager_fetch: bool,
         shuffle_rng: Optional[Generator] = None,
     ) -> None:
@@ -238,7 +238,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.soma_chunk = None
         self.var_joinids = var_joinids
         self.batch_size = batch_size
-        self.return_sparse_X = return_sparse_X
+        self.X_format = X_format
         self.encoders = encoders
         self.stats = stats
         self.max_process_mem_usage_bytes = 0
@@ -272,8 +272,15 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         # `to_numpy()` avoids copying the numpy array data
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
-        if not self.return_sparse_X:
+        if self.X_format == "dense":
             X_tensor = torch.from_numpy(X.todense())
+        elif self.X_format == "csr":
+            X_tensor = torch.sparse_csr_tensor(
+                crow_indices=torch.as_tensor(X.indptr),
+                col_indices=torch.as_tensor(X.indices),
+                values=torch.as_tensor(X.data),
+                size=X.shape,
+            )
         else:
             coo = X.tocoo()
 
@@ -350,7 +357,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                  [2416,    0,    4],
                  [2417,    0,    3]], dtype=torch.int64))
 
-    The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse
+    The ``X_format`` parameter controls whether the ``X`` data is returned as a dense or sparse
     :class:`torch.Tensor`. If the model supports use of sparse :class:`torch.Tensor`\ s, this will reduce memory usage.
 
     The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
@@ -390,7 +397,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         batch_size: int = 1,
         shuffle: bool = False,
         seed: Optional[int] = None,
-        return_sparse_X: bool = False,
+        X_format: Literal["dense", "csr", "coo"] = "dense",
         soma_chunk_size: Optional[int] = None,
         use_eager_fetch: bool = True,
     ) -> None:
@@ -433,11 +440,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
                 :class:`torch.nn.parallel.DistributedDataParallel` to ensure data partitions are disjoint across worker
                 processes.
-            return_sparse_X:
-                Controls whether the ``X`` data is returned as a dense or sparse :class:`torch.Tensor`. As ``X`` data is
-                very sparse, setting this to ``True`` will reduce memory usage, if the model supports use of sparse
-                :class:`torch.Tensor`\ s. Defaults to ``False``, since sparse :class:`torch.Tensor`\ s are still
-                experimental in PyTorch.
+            X_format:
+                Controls whether the ``X`` data is returned as a dense or sparse :class:`torch.Tensor`. Must be one of
+                ``"dense"``, ``"csr"``, or ``"coo"``. As ``X`` data is very sparse, setting this to ``"coo"`` or
+                ``"csr"`` will reduce memory usage, if the model supports use of sparse :class:`torch.Tensor`\ s.
+                Defaults to ``"dense"``, since sparse :class:`torch.Tensor`\ s are still experimental in PyTorch.
             soma_chunk_size:
                 The number of ``obs``/``X`` rows to retrieve when reading data from SOMA. This impacts two aspects of
                 this class's behavior: 1) The maximum memory utilization, with larger values providing
@@ -463,7 +470,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.var_query = var_query
         self.obs_column_names = obs_column_names
         self.batch_size = batch_size
-        self.return_sparse_X = return_sparse_X
+        self.X_format = X_format
         self.soma_chunk_size = soma_chunk_size
         self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
@@ -545,7 +552,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         pytorch_logger.debug(f"Using {self.soma_chunk_size=}")
 
         if (
-            self.return_sparse_X
+            self.X_format != "dense"
             and torch.utils.data.get_worker_info()
             and torch.utils.data.get_worker_info().num_workers > 0
         ):
@@ -583,7 +590,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 batch_size=self.batch_size,
                 encoders=self.obs_encoders,
                 stats=self._stats,
-                return_sparse_X=self.return_sparse_X,
+                X_format=self.X_format,
                 use_eager_fetch=self.use_eager_fetch,
                 shuffle_rng=self._shuffle_rng,
             )
