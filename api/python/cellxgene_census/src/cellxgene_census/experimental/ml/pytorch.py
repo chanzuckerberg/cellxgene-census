@@ -452,6 +452,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
                 parallel with client-side processing of the SOMA data, potentially improving overall performance at the
                 cost of doubling memory utilization. Defaults to ``True``.
+            encoders:
+                This is an optional user specified dictionary of encoders. Defaults to ``None``.
 
         Lifecycle:
             experimental
