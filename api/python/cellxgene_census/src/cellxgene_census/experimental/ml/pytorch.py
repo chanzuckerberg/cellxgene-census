@@ -393,6 +393,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         return_sparse_X: bool = False,
         soma_chunk_size: Optional[int] = None,
         use_eager_fetch: bool = True,
+        encoders: Optional[Encoders] = None
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -467,7 +468,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.soma_chunk_size = soma_chunk_size
         self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
-        self._encoders = None
+        self._encoders = encoders
         self._obs_joinids = None
         self._var_joinids = None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
@@ -615,7 +616,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         obs = query.obs(column_names=self.obs_column_names).concat()
         encoders = {}
         for col in self.obs_column_names:
-            if obs[col].type in (pa.string(), pa.large_string()):
+            if col in self._encoders:
+                encoders[col] = self._encoders[col]
+            elif obs[col].type in (pa.string(), pa.large_string()):
                 enc = LabelEncoder()
                 enc.fit(obs[col].combine_chunks().unique())
                 encoders[col] = enc
