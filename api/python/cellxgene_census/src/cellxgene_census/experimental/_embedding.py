@@ -93,7 +93,7 @@ def _get_embedding(
         embedding_shape = (len(obs_soma_joinids), E.shape[1])
         embedding = np.full(embedding_shape, np.NaN, dtype=np.float32, order="C")
 
-        obs_indexer = soma.tiledbsoma_build_index(obs_soma_joinids, context=E.context)
+        obs_indexer = soma.IntIndexer(obs_soma_joinids, context=E.context)
         for tbl in E.read(coords=(obs_soma_joinids,)).tables():
             obs_idx = obs_indexer.get_indexer(tbl.column("soma_dim_0").to_numpy())
             feat_idx = tbl.column("soma_dim_1").to_numpy()

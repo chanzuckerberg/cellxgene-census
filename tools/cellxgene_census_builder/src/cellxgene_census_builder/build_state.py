@@ -60,8 +60,9 @@ class CensusBuildConfig:
     # Previously this value was 192, and worked fine on hosts with CPU count up to 192 using
     # the default AWS Linux 2 and Ubuntu 22 kernel default config. This should be raised once
     # TileDB has reduced thread allocation. See also the DEFAULT_TILEDB_CONFIG in globals.py
-    # which also hard-caps threads to a reduced number for the same reason.
-    max_worker_processes: int = field(converter=int, default=64)
+    # which also hard-caps threads to a reduced number for the same reason. FMI:
+    # https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    max_worker_processes: int = field(converter=int, default=48)
     #
     # Host minimum resource validation
     host_validation_disable: int = field(

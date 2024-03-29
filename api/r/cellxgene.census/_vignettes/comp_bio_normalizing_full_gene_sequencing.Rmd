@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width = 88, max.print=100)
+options(width = 88, max.print = 100)
 ```
 
 <!--
@@ -52,8 +52,8 @@ Let's first find this dataset's id by using the dataset table of the Census.
 ```{r}
 liver_dataset <- as.data.frame(
   census$get("census_info")$get("datasets")
-        $read(value_filter="dataset_title == 'Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2'")
-        $concat()
+  $read(value_filter = "dataset_title == 'Liver - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2'")
+  $concat()
 )
 liver_dataset
 ```
@@ -62,7 +62,7 @@ liver_dataset
 Now we can use this id to fetch the data.
 
 ```{r,warning=FALSE,message=FALSE}
-liver_dataset_id <- liver_dataset[1,"dataset_id"]
+liver_dataset_id <- liver_dataset[1, "dataset_id"]
 liver_seurat <- cellxgene.census::get_seurat(
   census,
   organism = "Mus musculus",
@@ -112,7 +112,7 @@ GetAssayData(liver_seurat[1:5, 1:5], slot = "data")
 ```{r}
 gene_lengths <- liver_seurat$RNA@meta.features$feature_length
 liver_seurat <- SetAssayData(
-  liver_seurat, 
+  liver_seurat,
   new.data = sweep(GetAssayData(liver_seurat, slot = "data"), 1, gene_lengths, "/")
 )
 ```

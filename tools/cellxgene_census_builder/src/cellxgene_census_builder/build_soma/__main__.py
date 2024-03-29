@@ -9,7 +9,8 @@ from datetime import datetime
 import attrs
 
 from ..build_state import CensusBuildArgs, CensusBuildConfig
-from ..util import log_process_resource_status, process_init, start_resource_logger
+from ..process_init import process_init
+from ..util import log_process_resource_status, start_resource_logger
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ def main() -> int:
         cc = validate(args)
 
     log_process_resource_status(level=logging.INFO)
+    logger.info("Fini")
     return cc
 
 

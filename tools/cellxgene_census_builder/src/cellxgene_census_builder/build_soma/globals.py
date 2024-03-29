@@ -12,13 +12,13 @@ from .schema_util import FieldSpec, TableSpec
 # by several TileDB-SOMA bugs.
 USE_ARROW_DICTIONARY = False
 
-CENSUS_SCHEMA_VERSION = "1.3.0"
+CENSUS_SCHEMA_VERSION = "2.0.0"
 
-CXG_SCHEMA_VERSION = "4.0.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "5.0.0"  # the CELLxGENE schema version supported
 
 # NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
 # hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
-CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-09-05/uberon.owl"
+CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2024-01-18/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -63,6 +63,9 @@ CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name
 # "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_NAME = "summary"
 
+# "census_info"/"organisms" SOMA Dataframe
+CENSUS_INFO_ORGANISMS_NAME = "organisms"
+
 # "census_data"/{organism}/ms/"RNA" SOMA Matrix
 MEASUREMENT_RNA_NAME = "RNA"
 
@@ -71,7 +74,7 @@ FEATURE_DATASET_PRESENCE_MATRIX_NAME = "feature_dataset_presence_matrix"
 
 
 # CXG schema columns we preserve in our census, and the Arrow type to encode as.  Schema:
-# https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/4.0.0/schema.md
+# https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md
 #
 # NOTE: a few additional columns are added (they are not defined in the CXG schema),
 # eg., dataset_id, tissue_general, etc.
@@ -253,25 +256,109 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
 # terms are excluded from the Census.
 RNA_SEQ = [
+    "EFO:0003755",  # FL-cDNA
+    "EFO:0004158",  # random RNA-Seq across whole transcriptome
+    "EFO:0005684",  # RNA-seq of coding RNA from single cells
+    "EFO:0005685",  # RNA-seq of non coding RNA from single cells
+    "EFO:0008440",  # tag based single cell RNA sequencing
+    "EFO:0008441",  # full length single cell RNA sequencing
+    "EFO:0008640",  # 3'T-fill
+    "EFO:0008641",  # 3’-end-seq
+    "EFO:0008643",  # 3′-Seq
+    "EFO:0008661",  # Bru-Seq
+    "EFO:0008669",  # CAGEscan
+    "EFO:0008673",  # CapSeq
+    "EFO:0008675",  # CaptureSeq
+    "EFO:0008679",  # CEL-seq
+    "EFO:0008694",  # ClickSeq
+    "EFO:0008697",  # cP-RNA-Seq
+    "EFO:0008708",  # DeepCAGE
+    "EFO:0008710",  # Digital RNA
+    "EFO:0008718",  # DP-Seq
     "EFO:0008720",  # DroNc-seq
     "EFO:0008722",  # Drop-seq
+    "EFO:0008735",  # FACS-seq
+    "EFO:0008747",  # FRISCR
+    "EFO:0008748",  # FRT-Seq
+    "EFO:0008752",  # GMUCT 1.0
+    "EFO:0008753",  # GMUCT 2.0
+    "EFO:0008756",  # GRO-CAP
+    "EFO:0008763",  # Hi-SCL
     "EFO:0008780",  # inDrop
     "EFO:0008796",  # MARS-seq
+    "EFO:0008797",  # MATQ-seq
+    "EFO:0008824",  # NanoCAGE
+    "EFO:0008825",  # Nanogrid RNA-Seq
+    "EFO:0008826",  # NET-Seq
+    "EFO:0008850",  # PAS-Seq
+    "EFO:0008859",  # PEAT
+    "EFO:0008863",  # PLATE-Seq
+    "EFO:0008868",  # PRO-cap
+    "EFO:0008869",  # PRO-seq
+    "EFO:0008877",  # Quartz-seq
+    "EFO:0008896",  # RNA-Seq
+    "EFO:0008897",  # RNAtag-Seq
+    "EFO:0008898",  # RNET-seq
+    "EFO:0008903",  # SC3-seq
+    "EFO:0008908",  # SCI-seq
+    "EFO:0008913",  # single-cell RNA sequencing
     "EFO:0008919",  # Seq-Well
+    "EFO:0008929",  # SMA
     "EFO:0008930",  # Smart-seq
     "EFO:0008931",  # Smart-seq2
+    "EFO:0008937",  # snDrop-seq
+    "EFO:0008941",  # sNuc-Seq
+    "EFO:0008945",  # SPET-seq
     "EFO:0008953",  # STRT-seq
+    "EFO:0008954",  # STRT-seq-2i
+    "EFO:0008956",  # SUPeR-seq
+    "EFO:0008962",  # TARDIS
+    "EFO:0008966",  # TCR Chain Paring
+    "EFO:0008967",  # TCR-LA-MC PCR
+    "EFO:0008972",  # TL-seq
+    "EFO:0008974",  # Tomo-Seq
+    "EFO:0008975",  # TRAP-Seq
+    "EFO:0008978",  # TSS Sequencing
+    "EFO:0008980",  # UMI Method
+    "EFO:0009309",  # Div-Seq
+    "EFO:0009809",  # single nucleus RNA sequencing
+    "EFO:0009810",  # full length single nucleus RNA sequencing
+    "EFO:0009811",  # tag based single nucleus RNA sequencing
     "EFO:0009899",  # 10x 3' v2
     "EFO:0009900",  # 10x 5' v2
     "EFO:0009901",  # 10x 3' v1
+    "EFO:0009919",  # SPLiT-seq
     "EFO:0009922",  # 10x 3' v3
+    "EFO:0009991",  # Nuc-Seq
+    "EFO:0010003",  # RASL-seq
+    "EFO:0010004",  # SCRB-seq
     "EFO:0010010",  # CEL-seq2
+    "EFO:0010022",  # Smart-3Seq
+    "EFO:0010034",  # Cappable-Seq
+    "EFO:0010041",  # Nascent-Seq
+    "EFO:0010058",  # Fluidigm C1-based library preparation
+    "EFO:0010184",  # Smart-like
     "EFO:0010550",  # sci-RNA-seq
+    "EFO:0010713",  # 10x immune profiling
+    "EFO:0010714",  # 10x TCR enrichment
+    "EFO:0010715",  # 10x Ig enrichment
+    "EFO:0010964",  # barcoded plate-based single cell RNA-seq
     "EFO:0011025",  # 10x 5' v1
+    "EFO:0022396",  # TruSeq
+    "EFO:0022488",  # Smart-seq3
+    "EFO:0022490",  # ScaleBio single cell RNA sequencing
     "EFO:0030002",  # microwell-seq
     "EFO:0030003",  # 10x 3' transcription profiling
     "EFO:0030004",  # 10x 5' transcription profiling
     "EFO:0030019",  # Seq-Well S3
+    "EFO:0030021",  # Nx1-seq
+    "EFO:0030028",  # sci-RNA-seq3
+    "EFO:0030030",  # Quant-seq
+    "EFO:0030031",  # SCOPE-chip
+    "EFO:0030061",  # mcSCRB-seq
+    "EFO:0030074",  # SORT-seq
+    "EFO:0030078",  # droplet-based single-cell RNA library preparation
+    "EFO:0030080",  # 10x transcription profiling
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
     "EFO:0700010",  # TruDrop
@@ -279,18 +366,30 @@ RNA_SEQ = [
     "EFO:0700016",  # Smart-seq v4
 ]
 
-# Smart-Seq has special handling in the "normalized" X layers
-SMART_SEQ = [
+# Full-gene assays have special handling in the "normalized" X layers
+FULL_GENE_ASSAY = [
+    "EFO:0003755",  # FL-cDNA
+    "EFO:0008441",  # full length single cell RNA sequencing
+    "EFO:0008747",  # FRISCR
+    "EFO:0008763",  # Hi-SCL
+    "EFO:0008797",  # MATQ-seq
+    "EFO:0008877",  # Quartz-seq
     "EFO:0008930",  # Smart-seq
     "EFO:0008931",  # Smart-seq2
+    "EFO:0008956",  # SUPeR-seq
+    "EFO:0009810",  # full length single nucleus RNA sequencing
+    "EFO:0010004",  # SCRB-seq
+    "EFO:0010022",  # Smart-3Seq
+    "EFO:0010058",  # Fluidigm C1-based library preparation
+    "EFO:0010184",  # Smart-like
+    "EFO:0022396",  # TruSeq
+    "EFO:0022488",  # Smart-seq3
+    "EFO:0030031",  # SCOPE-chip
+    "EFO:0030061",  # mcSCRB-seq
     "EFO:0700016",  # Smart-seq v4
 ]
 
 DONOR_ID_IGNORE = ["pooled", "unknown"]
-
-# Feature_reference values which are ignored (not considered) in
-# multi-organism filtering. Currently the null set.
-FEATURE_REFERENCE_IGNORE: set[str] = set()
 
 
 # The default configuration for TileDB contexts used in the builder.
@@ -305,8 +404,8 @@ DEFAULT_TILEDB_CONFIG = {
     # the default configs will hit kernel limits on high-CPU boxes. This
     # cap can be raised when TiledB-SOMA is more thread frugal. See for
     # example: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
-    "sm.compute_concurrency_level": min(cpu_count(), 64),
-    "sm.io_concurrency_level": min(cpu_count(), 64),
+    "sm.compute_concurrency_level": min(cpu_count(), 48),
+    "sm.io_concurrency_level": min(cpu_count(), 48),
 }
 
 

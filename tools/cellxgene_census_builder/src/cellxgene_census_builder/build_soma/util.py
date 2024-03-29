@@ -1,14 +1,12 @@
 import os
 import time
-from typing import Any, TypeVar
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 import requests
 import urllib3
 from scipy import sparse
-
-T = TypeVar("T")
 
 
 def fetch_json(url: str, delay_secs: float = 0.0) -> object:
@@ -63,25 +61,3 @@ def is_git_repo_dirty() -> bool:
     repo = git.repo.base.Repo(search_parent_directories=True)
     is_dirty: bool = repo.is_dirty()
     return is_dirty
-
-
-def shuffle(items: list[T], step: int) -> list[T]:
-    """Shuffle (interleave) from each end of the list. Step param controls
-    bias of selection from front and back, i.e., if if step==2, every other
-    item will be selected from end of list, if step==3, every third item
-    will come from the end of the list.
-
-    Expected use: reorder a sorted list (e.g by size) so that it ends up as (for step==2):
-    [largest, smallest, second-largest, second-smallest, third-largest, ...]
-
-    It is possible that a random shuffle (e.g., reservoir) would be better for the
-    build use case (see build_soma step 1), but that is TBD.
-    """
-    assert step > 0
-    r = []
-    for i in range(len(items)):
-        if i % step == 0:
-            r.append(items[-i // step - 1])
-        else:
-            r.append(items[(step - 1) * (i // step) + (i % step) - 1])
-    return r
