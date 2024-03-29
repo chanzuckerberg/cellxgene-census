@@ -86,13 +86,13 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
+        # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
+        # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
+        #
         # TODO: when global order writes are supported, processing of much smaller slices will be
         # possible, and this budget should drop considerably. When that is implemented, n_workers should be
         # be much larger (eg., use default value of #CPUs or some such).
         # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
-        #
-        # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
-        # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
         #
         # BRUCE-PRATHAP: Need explanation of how you came up with this memory budget.
         # As I step into the functions in step 4, I see mention of memory budget of 128GiB per task.
