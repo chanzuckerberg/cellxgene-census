@@ -239,6 +239,13 @@ class ExperimentBuilder:
             max_dataset_joinid = max(d.soma_joinid for d in datasets)
 
             # LIL is fast way to create spmatrix
+            #
+            # BRUCE-PRATHAP: What is a good resource to learn about the advantages/disadvantages
+            # of these various sparse matrix datastructures and their intuition?
+            # Wikipedia has some info but not much.
+            # scipy documentation doesn't explain much of the intuition behind these representations.
+            # One option is to read the scipy code for these various representation and build the
+            # mental model.
             pm = sparse.lil_matrix((max_dataset_joinid + 1, self.n_var), dtype=bool)
             for dataset_joinid, presence in self.presence.items():
                 data, cols = presence
@@ -301,7 +308,7 @@ def accumulate_axes_dataframes(
             return obs_df, var_df
 
     datasets_bag = dask.bag.from_sequence(datasets)
-    # PRATHAP-BRUCE: Should this be of type list[list[tuple[pd.DataFrame, pd.Dataframe]]]?
+    # BRUCE-PRATHAP: Should this be of type list[list[tuple[pd.DataFrame, pd.Dataframe]]]?
     # That is, it returns a list of 2 lists where each list contains of pairs of dataframes (obs and var)
     # for each dataset?
     df_pairs_per_eb: list[tuple[pd.DataFrame, pd.DataFrame]] = dask.compute(
@@ -488,6 +495,16 @@ def compute_X_file_stats(
 #
 # See also: MEMORY_BUDGET in the `build_soma.build()` function
 #
+# BRUCE-PRATHAP: max memory per task is calculated to be 128GiB - How? What about MEMORY_BUDGET in `build_soma.build()`?
+#
+# My attempt at understanding:
+#
+# Assuming there are 2**16 genes and each gene is 4 bytes (2**2 bytes), then
+# each row at most takes 2**18 bytes. If the memory budget is 128GiB = 2**37, then with a fully
+# dense row, each task can handle only 2**19 rows (About 500K rows).
+# However, assuming only 25% of rows are dense, then each row has only 2**14 nnz for an expected
+# memory utilization per row of 2**16 bytes. Then each task can process 2**21 rows (about 2M rows).
+#
 REDUCE_X_MAJOR_ROW_STRIDE: int = 2_000_000
 REDUCE_X_MINOR_NNZ_STRIDE: int = 2**30
 
@@ -523,6 +540,20 @@ def dispatch_X_chunk(
         is_full_gene_assay = None
         feature_length = None
 
+    # BRUCE-PRATHAP: What is the intuition behind computing the minor stride this way?
+    #
+    # My attempt at understanding this:
+    #
+    # I think this is attempting to compute a "stride" for the set of rows being processed in such a
+    # way that each "stride" amounts to taking about 1 GB of rows (which is REDUCED_X_MINOR_NNZ_STRIDE).
+    # This is a "stride" over the n_rows <= 2_000_000 where stride >= 1.
+    # Assuming there are at most 2**16 genes, a fully dense nnz means that the stride is
+    # (2**30)/(2**16) = 2**14 rows.
+    # However assuming a density of 1/(2**7), the stride = (2**30)/((1/2**7) * (2**16)) = 2**21 rows.
+    #
+    # BRUCE-PRATHAP: If my understanding is about right, why is further chunking even needed? Is it because
+    # the input chunk is too large to load into memory and therefore further chunking => computation => garbage collection
+    # is needed?
     minor_stride = clamp(int(REDUCE_X_MINOR_NNZ_STRIDE // (adata.get_estimated_density() * adata.n_vars)), 1, n_rows)
     sigma = np.finfo(np.float32).smallest_subnormal
 
@@ -687,6 +718,15 @@ def populate_X_layers(
     datasets_by_id = {d.dataset_id: d for d in datasets}
     per_eb_results = _reduce_X_matrices(assets_path, datasets, experiment_builders)
 
+    # BRUCE-PRATHAP: By the time we get here we have list[tuple[dataset_id, XReduction]] that we run
+    # a final reduction over to get the full obs_stats and var_stats dataframe and add it to the experiment_builders.
+    # Roughly how big is the incremental memory footprint of these dataframes after stitching them?
+    # Is this memory footprint small enough that we needn't be concerned about it as a bottleneck?
+    # Each obs row in-memory holds 5 numerics (each 8 bytes) and each var row in-memory holds 2 numerics (each 8 bytes):
+    # Including other data such as "soma_joinid", if we round up the memory footprint per row of obs and var to be
+    # 100 bytes, then
+    # estimated_memory_footprint = (|obs| + |var|) * 100 bytes.
+
     for eb in experiment_builders:
         if eb.name not in per_eb_results:
             continue
@@ -710,6 +750,7 @@ def populate_X_layers(
         assert isinstance(eb.obs_df, pd.DataFrame)
         eb.obs_df.update(eb_summary["obs_stats"])
         assert isinstance(eb.var_df, pd.DataFrame)
+
         eb.var_df.loc[
             eb_summary["var_stats"].index.to_numpy(),
             eb_summary["var_stats"].columns.to_list(),

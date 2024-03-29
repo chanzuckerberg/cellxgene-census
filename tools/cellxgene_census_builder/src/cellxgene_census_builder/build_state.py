@@ -46,8 +46,6 @@ class CensusBuildConfig:
     #
     # Default multi-process. Memory scaling based on empirical tests.
     multi_process: bool = field(converter=bool, default=True)
-    # PRATHAP-BRUCE: Perhaps a verbal explanation of the resource constraints here?
-    #
     # The memory budget used to determine appropriate parallelism in many steps of build.
     # Only set to a smaller number if you want to not use all available RAM.
     memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
@@ -63,6 +61,10 @@ class CensusBuildConfig:
     # TileDB has reduced thread allocation. See also the DEFAULT_TILEDB_CONFIG in globals.py
     # which also hard-caps threads to a reduced number for the same reason. FMI:
     # https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    #
+    # BRUCE-PRATHAP: Perhaps a bit more explanation about the resource constraints here?
+    # Particularly in regards to https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    #
     max_worker_processes: int = field(converter=int, default=48)
     #
     # Host minimum resource validation

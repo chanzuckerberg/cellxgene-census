@@ -86,13 +86,22 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             args.h5ads_path.as_posix(), datasets, experiment_builders, args
         )
 
-        # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
-        # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
-        #
         # TODO: when global order writes are supported, processing of much smaller slices will be
         # possible, and this budget should drop considerably. When that is implemented, n_workers should be
         # be much larger (eg., use default value of #CPUs or some such).
         # https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+        #
+        # Constraining parallelism is critical at this step, as each worker utilizes (max) ~64GiB+ of memory to
+        # process the X array (partitions are large to reduce TileDB fragment count, which reduces consolidation time).
+        #
+        # BRUCE-PRATHAP: Need explanation of how you came up with this memory budget.
+        # As I step into the functions in step 4, I see mention of memory budget of 128GiB per task.
+        # How does that reconcile with memory budget of 64GiB mentioned here? Both of the memory
+        # budget comments revolve around the "global order write concat" issue: https://github.com/single-cell-data/TileDB-SOMA/issues/2054
+
+        # BRUCE-PRATHAP: Need more explanation on what "concatenation of fragments" on writes
+        # has to do with "global order of the writes" as mentioned in the ticket. My understanding is
+        # that you can already specify the order of the write for sparse arrays ("unorder" or "global order").
         MEM_BUDGET = 64 * 1024**3
         n_workers = clamp(int(psutil.virtual_memory().total // MEM_BUDGET), 1, args.config.max_worker_processes)
         logger.info(f"Scaling cluster to {n_workers} workers.")
@@ -113,6 +122,15 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
         tiledb_soma_1969_work_around(root_collection.uri)
 
         # Scale the cluster up as we are no longer memory constrained in the following phases
+        #
+        # BRUCE-PRATHAP: It seems `args.config.max_worker_processes = 48` due to:
+        # https://github.com/single-cell-data/TileDB-SOMA/issues/2149, and in this function
+        # we constrained n_workers to `int(psutil.virtual_memory().total // MEM_BUDGET)` (line 106)
+        # due to: https://github.com/single-cell-data/TileDB-SOMA/issues/2054.
+        # These two seem related in that if #2054, we can effectively set `n_workers = args.config.max_worker_processes`
+        # and if #2149 is fixed, we can increment `args.config.max_worker_process` to be `cpu_count()`.
+        # Is that correct?
+        #
         n_workers = clamp(cpu_count(), 1, args.config.max_worker_processes)
         logger.info(f"Scaling cluster to {n_workers} workers.")
         client.cluster.scale(n=n_workers)

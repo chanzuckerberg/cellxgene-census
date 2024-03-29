@@ -300,8 +300,6 @@ def do_sync_to_replica_s3_bucket(args: CensusBuildArgs) -> bool:
     return True
 
 
-# BRUCE-PRATHAP: Is the working_dir of a build currently resident in the EC2 instance from which
-# you manually invoke the build?
 def create_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cellxgene_census_builder", description="Build the official Census.")
     parser.add_argument("working_dir", type=str, help="Working directory for the build")
