@@ -10,7 +10,8 @@ import s3fs
 
 from .build_soma import build as build_a_soma
 from .build_state import CENSUS_BUILD_CONFIG, CENSUS_BUILD_STATE, CensusBuildArgs, CensusBuildConfig, CensusBuildState
-from .util import log_process_resource_status, process_init, start_resource_logger, urlcat
+from .process_init import process_init
+from .util import log_process_resource_status, start_resource_logger, urlcat
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,41 @@
+name: Profiler
+
+on:
+  pull_request:
+    paths:
+      - api
+jobs:
+  run_profiler:
+    name: Run Profiler
+    strategy:
+      matrix:
+        os: [single-cell-8c64g-runner]
+        python-version: ["3.11"]
+    runs-on: ${{matrix.os}}
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::401986845158:role/MyNewPlayground
+          role-session-name: PushDockerImage
+
+      - name: Install AWS CLI v2
+        run:  |
+                sudo apt install unzip
+                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+                unzip -q /tmp/awscliv2.zip -d /tmp
+                rm /tmp/awscliv2.zip
+                sudo /tmp/aws/install --update
+                rm -rf /tmp/aws
+      - name: Run all tests
+        run: |
+          ./tools/perf_checker/perf_checker.sh

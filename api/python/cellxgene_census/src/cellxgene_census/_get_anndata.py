@@ -14,9 +14,9 @@ from somacore.options import SparseDFCoord
 
 from ._experiment import _get_experiment, _get_experiment_name
 from ._release_directory import get_census_version_directory
-from ._util import _extract_census_version
+from ._util import _extract_census_version, _uri_join
 
-CENSUS_EMBEDDINGS_LOCATION_BASE_URI = "s3://cellxgene-contrib-public/contrib/cell-census/soma"
+CENSUS_EMBEDDINGS_LOCATION_BASE_URI = "s3://cellxgene-contrib-public/contrib/cell-census/soma/"
 
 
 def get_anndata(
@@ -132,7 +132,7 @@ def get_anndata(
                 obs_soma_joinids = query.obs_joinids()
                 for emb in obs_embeddings:
                     emb_metadata = get_embedding_metadata_by_name(emb, experiment_name, census_version, "obs_embedding")
-                    uri = f"{CENSUS_EMBEDDINGS_LOCATION_BASE_URI}/{census_version}/{emb_metadata['id']}"
+                    uri = _uri_join(CENSUS_EMBEDDINGS_LOCATION_BASE_URI, f"{census_version}/{emb_metadata['id']}")
                     embedding = _get_embedding(census, census_directory, census_version, uri, obs_soma_joinids)
                     adata.obsm[emb] = embedding
 
@@ -140,7 +140,7 @@ def get_anndata(
                 var_soma_joinids = query.var_joinids()
                 for emb in var_embeddings:
                     emb_metadata = get_embedding_metadata_by_name(emb, experiment_name, census_version, "var_embedding")
-                    uri = f"{CENSUS_EMBEDDINGS_LOCATION_BASE_URI}/{census_version}/{emb_metadata['id']}"
+                    uri = _uri_join(CENSUS_EMBEDDINGS_LOCATION_BASE_URI, f"{census_version}/{emb_metadata['id']}")
                     embedding = _get_embedding(census, census_directory, census_version, uri, var_soma_joinids)
                     adata.varm[emb] = embedding
 

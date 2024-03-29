@@ -115,7 +115,7 @@ var_joinid <- var_df$soma_joinid[var_df$feature_id == "ENSG00000286096"]
 
 # The presence matrix is indexed by the joinids of the dataset and var dataframes,
 # so slice out the feature of interest by its joinid.
-presence_matrix_slice  <- presence_matrix$take(j = var_joinid)$get_one_based_matrix()
+presence_matrix_slice <- presence_matrix$take(j = var_joinid)$get_one_based_matrix()
 measured_datasets <- presence_matrix_slice[, , drop = TRUE] != 0
 dataset_joinids <- datasets_df$soma_joinid[measured_datasets]
 

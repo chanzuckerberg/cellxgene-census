@@ -1,16 +1,20 @@
+from __future__ import annotations
+
+import functools
 import logging
 import math
 import pathlib
 import sys
+import time
+from collections.abc import Callable
+from typing import Any, ParamSpec, TypeVar
 
 from .build_state import CensusBuildArgs
+from .util import clamp
 
 
 def logging_init_params(verbose: int, handlers: list[logging.Handler] | None = None) -> None:
     """Configure the logger defaults with explicit config params."""
-
-    def clamp(n: int, minn: int, maxn: int) -> int:
-        return min(max(n, minn), maxn)
 
     def get_level(v: int) -> int:
         levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -66,3 +70,52 @@ def hr_binary_unit(n_bytes: int) -> str:
 def hr_decimal_unit(n_bytes: int) -> str:
     """Convert number of bytes into a human-readable decimal (power of 1000) multi-byte unit string."""
     return _hr_multibyte_unit(n_bytes, 1000, ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"))
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def logit(
+    logger: logging.Logger, *, level: int = logging.INFO, msg: str | None = None, timeit: bool = True
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    """Log decorator factory -- logs entry and exit, with optional timing and user configurable message.
+
+    Args:
+        logger:
+            A logger instance.
+        level
+            Log level.
+        msg:
+            User-specified message. May contain formatting parameters, which will be
+            applied as ``msg.format(*args, **kwargs)``
+        timeit:
+            If true, log processing time.
+
+    Example:
+        @logit(logger, msg='{0}')
+        def inc(a: int) -> int:
+            return a + 1
+
+    """
+    exit_log_level = level
+    enter_log_level = {logging.NOTSET: logging.NOTSET, logging.INFO: logging.DEBUG}.get(level, logging.DEBUG)
+
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        @functools.wraps(func)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            if msg is None:
+                _msg = ""
+            else:
+                _msg = ": " + msg.format(*args, **kwargs)
+            logger.log(enter_log_level, f"{func.__name__} [enter]{_msg}")
+            t = time.perf_counter()
+            result: R = func(*args, **kwargs)
+            call_time = "" if not timeit else f", {(time.perf_counter()-t):.2f}s"
+            logger.log(exit_log_level, f"{func.__name__} [exit{call_time}]{_msg}")
+            return result
+
+        return wrapper
+
+    return decorator
