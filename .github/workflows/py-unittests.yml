@@ -70,8 +70,8 @@ jobs:
       - name: Test with pytest (builder)
         run: |
           # Run with and without Numba JIT. This gives a more accurate representation of code coverage
-          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP ./tools/cellxgene_census_builder/tests/
-          PYTHONPATH=. NUMBA_DISABLE_JIT=1 coverage run --parallel-mode -m pytest -v -rP ./tools/cellxgene_census_builder/tests/
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -s -rP ./tools/cellxgene_census_builder/tests/
+          PYTHONPATH=. NUMBA_DISABLE_JIT=1 coverage run --parallel-mode -m pytest -v -s -rP ./tools/cellxgene_census_builder/tests/
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-builder-${{ matrix.os }}-${{ matrix.python-version }}
