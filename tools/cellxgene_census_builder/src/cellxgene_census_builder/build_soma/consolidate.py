@@ -142,6 +142,8 @@ def _consolidate_array(
     # use ~1/8 of RAM, clamed to [1, 32].
     total_buffer_size = clamp(int(psutil.virtual_memory().total / 8 // 1024**3), 1, 32) * 1024**3
 
+    print(">>>>>>>>>", total_buffer_size, psutil.virtual_memory().total)
+
     for mode in modes:
         tiledb.consolidate(
             uri,
