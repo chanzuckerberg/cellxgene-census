@@ -43,7 +43,7 @@ from cellxgene_census_builder.process_init import process_init
             "multi_process": False,
             "consolidate": True,
             "build_tag": "test_tag",
-            "verbose": 2,
+            "verbose": 0,
             "max_worker_processes": 2,
         },
     ),

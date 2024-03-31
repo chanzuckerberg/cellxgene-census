@@ -139,10 +139,8 @@ def _consolidate_array(
     modes = consolidation_modes or ["fragment_meta", "array_meta", "commits", "fragments"]
     uri = obj.uri
 
-    # use ~1/32th of RAM, clamed to [1, 32].
+    # use ~1/32th of RAM, clamped to [1, 32].
     total_buffer_size = clamp(int(psutil.virtual_memory().total / 32 // 1024**3), 1, 32) * 1024**3
-
-    print(">>>>>>>>>", total_buffer_size, psutil.virtual_memory().total)
 
     for mode in modes:
         tiledb.consolidate(
