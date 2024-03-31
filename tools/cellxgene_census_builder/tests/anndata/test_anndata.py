@@ -239,13 +239,17 @@ def test_AnnDataProxy_indexing(census_build_args: CensusBuildArgs, slices: Any) 
         original_X = original_X[slc]
 
 
+@pytest.mark.parametrize("h5ad_simple", ("csr", "csc", "dense"), indirect=True)
 def test_estimated_density(tmp_path: pathlib.Path, h5ad_simple: str) -> None:
     with open_anndata(h5ad_simple, base_path=tmp_path.as_posix()) as ad:
         density = ad.get_estimated_density()
         assert density == ad[1:].get_estimated_density()
 
     adata = anndata.read_h5ad(tmp_path / h5ad_simple)
-    assert density == adata.X.nnz / (adata.n_obs * adata.n_vars)
+    if isinstance(adata.X, sparse.spmatrix):
+        assert density == adata.X.nnz / (adata.n_obs * adata.n_vars)
+    else:
+        assert density == 1.0
 
 
 def test_empty_estimated_density(tmp_path: pathlib.Path) -> None:
