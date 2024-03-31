@@ -43,7 +43,7 @@ from cellxgene_census_builder.process_init import process_init
             "multi_process": False,
             "consolidate": True,
             "build_tag": "test_tag",
-            "verbose": 0,
+            "verbose": 2,
             "max_worker_processes": 2,
         },
     ),
@@ -73,7 +73,6 @@ def test_base_builder_creation(
     with (
         patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"),
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
-        patch("cellxgene_census_builder.build_soma.build_soma.validate_consolidation", return_value=True),
         patch(
             "cellxgene_census_builder.build_soma.build_soma.create_dask_client", side_effect=proxy_create_dask_client
         ),
