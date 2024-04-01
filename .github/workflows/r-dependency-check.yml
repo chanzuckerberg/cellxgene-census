@@ -13,6 +13,7 @@ jobs:
     name: r-dependency-check
 
     strategy:
+      fail-fast: false  # don't fail-fast, as errors are often specific to a single cell in the matrix
       matrix:
         os: [ubuntu-22.04, macos-latest]
 

@@ -10,6 +10,7 @@ jobs:
     name: Python LTS compatibility check
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.11"]
