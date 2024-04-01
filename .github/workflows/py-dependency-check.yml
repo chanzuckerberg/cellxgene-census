@@ -19,6 +19,7 @@ jobs:
     name: python-dependency-check
 
     strategy:
+      fail-fast: false  # don't fail-fast, as errors are often specific to a single cell in the matrix
       matrix:
         os: [single-cell-8c64g-runner, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
