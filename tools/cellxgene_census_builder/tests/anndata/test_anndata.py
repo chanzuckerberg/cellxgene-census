@@ -387,7 +387,7 @@ def test_multi_species_filter(
     * when one or both axes are single-species, return slice that matches the filter
 
     IMPORTANT: if the filter results in no cells (obs) matching, the result is empty on the
-    obs axes, and the var aixs IS NOT FILTERED (as there is no point to doing so). So test
+    obs axes, and the var axis IS NOT FILTERED (as there is no point to doing so). So test
     the obs length before asserting anything about var.
     """
 
