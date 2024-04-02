@@ -184,7 +184,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_ar
 
     # Call the function
     process_init(census_build_args)
-    with create_dask_client(census_build_args, processes=False) as client:
+    with create_dask_client(census_build_args, processes=False, memory_limit=0) as client:
         datasets = build_step1_get_source_datasets(census_build_args)
         shutdown_dask_cluster(client)
 
