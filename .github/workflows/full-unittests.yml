@@ -38,6 +38,52 @@ on:
         type: string
 
 jobs:
+  py_unit_tests:
+    runs-on: single-cell-1tb-runner
+    timeout-minutes: 1440 # 24 hour timeout
+    strategy:
+      fail-fast: false # prevent this job from killing other jobs
+    steps:
+      - name: log system state
+        run: |
+          free
+          echo ---------
+          df -kh
+          echo ---------
+          lscpu
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+          cache: "pip"
+          cache-dependency-path: |
+            api/**/pyproject.toml
+            api/**/requirements*.txt
+
+      - name: install python dependencies (including experimental)
+        run: |
+          python -m pip install -U pip setuptools setuptools_scm wheel
+          pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
+          pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          pip install './api/python/cellxgene_census/[experimental]'
+
+      - name: install tiledbsoma version override
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_python_dependency != ''
+        run: |
+          pip uninstall tiledbsoma -y
+          pip install '${{ github.event.inputs.tiledbsoma_python_dependency }}'
+
+      - name: pytest (--expensive --experimental)
+        run: |
+          echo '--------- tiledbsoma.show_package_version():'
+          python -c 'import tiledbsoma; tiledbsoma.show_package_versions()'
+          echo '--------- PIP package versions:'
+          pip freeze
+
+          PYTHONPATH=. pytest -v --durations=0 -rP --experimental --expensive ./api/python/cellxgene_census/tests/
+
   r_unit_tests:
     runs-on: single-cell-1tb-runner
     timeout-minutes: 1440 # 24 hour timeout
