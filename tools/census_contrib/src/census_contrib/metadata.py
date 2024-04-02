@@ -34,6 +34,7 @@ class Contact:
 @attrs.define(kw_only=True, frozen=True)
 class EmbeddingMetadata:
     id: str = field(validator=validators.instance_of(str))
+    embedding_name: str = field(validator=validators.instance_of(str))
     title: str = field(validator=validators.instance_of(str))
     description: str = field(validator=validators.instance_of(str))
     primary_contact: Contact = field(validator=validators.instance_of(Contact))
@@ -118,6 +119,7 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
     4. All supplied URLs must resolve
     5. Title must have length < 128 characters
     6. Description must have length < 2048 characters
+    7. Name must have length < 128 characters
     """
     if not metadata.id:
         raise ValueError("metadata is missing 'id' (accession)")
@@ -138,6 +140,13 @@ def validate_metadata(args: Arguments, metadata: EmbeddingMetadata) -> Embedding
     if not metadata.description or len(metadata.description) > MAX_DESCRIPTION_LENGTH:
         raise ValueError(
             "Metadata: description must be string between 1 and {MAX_DESCRIPTION_LENGTH} characters in length",
+        )
+
+    # 7. Name must have length < 128 characters
+    MAX_NAME_LENGTH = 128
+    if not metadata.embedding_name or len(metadata.embedding_name) > MAX_NAME_LENGTH:
+        raise ValueError(
+            f"Metadata: name must be string between 1 and {MAX_NAME_LENGTH} characters in length",
         )
 
     return metadata
