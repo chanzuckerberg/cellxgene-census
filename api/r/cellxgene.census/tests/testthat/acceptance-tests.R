@@ -1,3 +1,128 @@
+# These are expensive tests and should be run as part of the automated
+# testing framework. They are meant to be run manually via testthat::test_file()
+
+test_that("test_load_obs_human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "homo_sapiens"
+
+  # use subset of columns for speed
+  obs_df <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  obs_df <- as.data.frame(obs_df$concat())
+  expect_true(nrow(obs_df) > 0)
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_load_var_human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "homo_sapiens"
+
+  var_df <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  var_df <- as.data.frame(var_df$concat())
+  expect_true(nrow(var_df) > 0)
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_load_obs_mouse", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "mus_musculus"
+
+  # use subset of columns for speed
+  obs_df <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  obs_df <- as.data.frame(obs_df$concat())
+  expect_true(nrow(obs_df) > 0)
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_load_var_mouse", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "mus_musculus"
+
+  var_df <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  var_df <- as.data.frame(var_df$concat())
+  expect_true(nrow(var_df) > 0)
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_incremental_read_obs_human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "homo_sapiens"
+
+  # use subset of columns for speed
+  obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  expect_true(table_iter_is_ok(obs_iter))
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_incremental_read_var_human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "homo_sapiens"
+
+  var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  expect_true(table_iter_is_ok(var_iter))
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_incremental_read_obs_mouse", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "mus_musculus"
+
+  # use subset of columns for speed
+  obs_iter <- census$get("census_data")$get(organism)$obs$read(column_names = c("soma_joinid", "cell_type", "tissue"))
+  expect_true(table_iter_is_ok(obs_iter))
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_incremental_read_var_mouse", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "mus_musculus"
+
+  var_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$var$read()
+  expect_true(table_iter_is_ok(var_iter))
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_incremental_read_X_human", {
+  census <- open_soma_latest_for_test()
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "homo_sapiens"
+
+  # Warning that results cannot be concat because it
+  # exceeds R's capability to allocate vectors beyond 32bit
+  X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
+  expect_true(table_iter_is_ok(X_iter))
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
+test_that("test_incremental_read_X_human-large-buffer-size", {
+  census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
+  on.exit(census$close(), add = TRUE)
+
+  organism <- "homo_sapiens"
+
+  # Warning that results cannot be concat because it
+  # exceeds R's capability to allocate vectors beyond 32bit
+  X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
+  expect_true(table_iter_is_ok(X_iter))
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
+})
+
 test_that("test_incremental_read_X_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
@@ -8,8 +133,7 @@ test_that("test_incremental_read_X_mouse", {
   # exceeds R's capability to allocate vectors beyond 32bit
   X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_incremental_read_X_mouse-large-buffer-size", {
@@ -22,8 +146,7 @@ test_that("test_incremental_read_X_mouse-large-buffer-size", {
   # exceeds R's capability to allocate vectors beyond 32bit
   X_iter <- census$get("census_data")$get(organism)$ms$get("RNA")$X$get("raw")$read()$tables()
   expect_true(table_iter_is_ok(X_iter))
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_incremental_query_human_brain", {
@@ -42,8 +165,7 @@ test_that("test_incremental_query_human_brain", {
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_incremental_query_human_aorta", {
@@ -62,8 +184,7 @@ test_that("test_incremental_query_human_aorta", {
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_incremental_query_mouse_brain", {
@@ -82,8 +203,7 @@ test_that("test_incremental_query_mouse_brain", {
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_incremental_query_mouse_aorta", {
@@ -102,8 +222,7 @@ test_that("test_incremental_query_mouse_aorta", {
   expect_true(table_iter_is_ok(query$obs()))
   expect_true(table_iter_is_ok(query$var()))
   expect_true(table_iter_is_ok(query$X("raw")$tables()))
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_small-query", {
@@ -118,8 +237,7 @@ test_that("test_seurat_small-query", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_10K-cells-human", {
@@ -134,8 +252,7 @@ test_that("test_seurat_10K-cells-human", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_100K-cells-human", {
@@ -150,8 +267,7 @@ test_that("test_seurat_100K-cells-human", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_250K-cells-human", {
@@ -166,8 +282,7 @@ test_that("test_seurat_250K-cells-human", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_500K-cells-human", {
@@ -182,8 +297,7 @@ test_that("test_seurat_500K-cells-human", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_750K-cells-human", {
@@ -198,8 +312,7 @@ test_that("test_seurat_750K-cells-human", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_1M-cells-human", {
@@ -214,8 +327,7 @@ test_that("test_seurat_1M-cells-human", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_common-tissue", {
@@ -230,8 +342,7 @@ test_that("test_seurat_common-tissue", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_common-tissue-large-buffer-size", {
@@ -246,8 +357,7 @@ test_that("test_seurat_common-tissue-large-buffer-size", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_common-cell-type", {
@@ -263,8 +373,7 @@ test_that("test_seurat_common-cell-type", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_common-cell-type-large-buffer-size", {
@@ -280,8 +389,7 @@ test_that("test_seurat_common-cell-type-large-buffer-size", {
   )
 
   test_seurat(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_seurat_whole-enchilada-large-buffer-size", {
@@ -300,8 +408,7 @@ test_that("test_seurat_whole-enchilada-large-buffer-size", {
   }
 
   expect_true(TRUE)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_small-query", {
@@ -316,8 +423,7 @@ test_that("test_sce_small-query", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_10K-cells-human", {
@@ -332,8 +438,7 @@ test_that("test_sce_10K-cells-human", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_100K-cells-human", {
@@ -348,8 +453,7 @@ test_that("test_sce_100K-cells-human", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_250K-cells-human", {
@@ -364,8 +468,7 @@ test_that("test_sce_250K-cells-human", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_500K-cells-human", {
@@ -380,8 +483,7 @@ test_that("test_sce_500K-cells-human", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_750K-cells-human", {
@@ -396,8 +498,7 @@ test_that("test_sce_750K-cells-human", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_1M-cells-human", {
@@ -412,8 +513,7 @@ test_that("test_sce_1M-cells-human", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_common-tissue", {
@@ -428,8 +528,7 @@ test_that("test_sce_common-tissue", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_common-tissue-large-buffer-size", {
@@ -444,8 +543,7 @@ test_that("test_sce_common-tissue-large-buffer-size", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_common-cell-type", {
@@ -461,8 +559,7 @@ test_that("test_sce_common-cell-type", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_common-cell-type-large-buffer-size", {
@@ -478,8 +575,7 @@ test_that("test_sce_common-cell-type-large-buffer-size", {
   )
 
   test_sce(test_args)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
 
 test_that("test_sce_whole-enchilada-large-buffer-size", {
@@ -498,6 +594,5 @@ test_that("test_sce_whole-enchilada-large-buffer-size", {
   }
 
   expect_true(TRUE)
-  gc(verbose = getOption("verbose"), reset = FALSE, full = TRUE)
-
+  gc(verbose = TRUE, reset = FALSE, full = TRUE)
 })
