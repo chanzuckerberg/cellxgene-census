@@ -66,7 +66,7 @@ def _get_batch_index(
         batch_series = obs[cast(str, batch_key[0])]
 
     batch_series = batch_series.astype("category")
-    return batch_series
+    return batch_series.cat.remove_unused_categories()
 
 
 def _highly_variable_genes_seurat_v3(

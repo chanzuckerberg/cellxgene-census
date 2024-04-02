@@ -1,8 +1,10 @@
 import os
 import pathlib
 from types import ModuleType
+from typing import Any
 from unittest.mock import patch
 
+import dask
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -29,24 +31,55 @@ from cellxgene_census_builder.process_init import process_init
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"multi_process": False, "consolidate": False, "build_tag": "test_tag", "verbose": 0, "max_worker_processes": 2}],
+    (
+        {
+            "multi_process": False,
+            "consolidate": False,
+            "build_tag": "test_tag",
+            "verbose": 0,
+            "max_worker_processes": 1,
+        },
+        {
+            "multi_process": False,
+            "consolidate": True,
+            "build_tag": "test_tag",
+            "verbose": 1,
+            "max_worker_processes": 1,
+        },
+    ),
     indirect=True,
 )
+@pytest.mark.parametrize("validate", (True, False))
 def test_base_builder_creation(
     datasets: list[Dataset],
     census_build_args: CensusBuildArgs,
+    validate: bool,
     setup: None,
 ) -> None:
     """
     Runs the builder, queries the census and performs a set of base assertions.
     """
+
+    def proxy_create_dask_client(
+        *args: CensusBuildArgs,
+        **kwargs: Any,
+    ) -> dask.distributed.Client:
+        from cellxgene_census_builder.build_soma.mp import create_dask_client
+
+        kwargs["processes"] = False
+        kwargs["n_workers"] = 1
+        kwargs.pop("threads_per_worker")
+        return create_dask_client(*args, **kwargs)
+
     with (
         patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"),
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
-        patch("cellxgene_census_builder.build_soma.build_soma.validate_consolidation", return_value=True),
+        patch(
+            "cellxgene_census_builder.build_soma.build_soma.create_dask_client", side_effect=proxy_create_dask_client
+        ),
     ):
         process_init(census_build_args)
-        return_value = build(census_build_args)
+        return_value = build(census_build_args, validate=validate)
 
         # return_value = 0 means that the build succeeded
         assert return_value == 0
@@ -143,7 +176,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "multi_process": True, "max_worker_processes": 2}],
+    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "multi_process": False, "max_worker_processes": 1}],
     indirect=True,
 )
 def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:
@@ -152,7 +185,7 @@ def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_ar
 
     # Call the function
     process_init(census_build_args)
-    with create_dask_client(census_build_args) as client:
+    with create_dask_client(census_build_args, processes=False, memory_limit=0, n_workers=1) as client:
         datasets = build_step1_get_source_datasets(census_build_args)
         shutdown_dask_cluster(client)
 

@@ -1,4 +1,5 @@
 import pathlib
+from typing import Literal
 
 import anndata
 import attrs
@@ -26,8 +27,12 @@ ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus"
 GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
 NUM_DATASET = 2
 
+X_FORMAT = Literal["csr", "csc", "dense"]
 
-def get_anndata(organism: Organism, gene_ids: list[str] | None = None, no_zero_counts: bool = False) -> anndata.AnnData:
+
+def get_anndata(
+    organism: Organism, gene_ids: list[str] | None = None, no_zero_counts: bool = False, X_format: X_FORMAT = "csr"
+) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
     n_genes = len(gene_ids)
@@ -41,8 +46,15 @@ def get_anndata(organism: Organism, gene_ids: list[str] | None = None, no_zero_c
     X[X.sum(axis=1) == 0, rng.integers(X.shape[1])] = 6.0
     assert np.all(X.sum(axis=1) > 0.0)
 
-    # The builder only supports sparse matrices
-    X = sparse.csr_matrix(X)
+    match X_format:
+        case "csr":
+            X = sparse.csr_matrix(X)
+        case "csc":
+            X = sparse.csc_matrix(X)
+        case "dense":
+            pass
+        case _:
+            raise NotImplementedError("unsupported X format")
 
     # Create obs
     obs_dataframe = pd.DataFrame(
