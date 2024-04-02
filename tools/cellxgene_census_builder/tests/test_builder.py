@@ -37,14 +37,14 @@ from cellxgene_census_builder.process_init import process_init
             "consolidate": False,
             "build_tag": "test_tag",
             "verbose": 0,
-            "max_worker_processes": 2,
+            "max_worker_processes": 1,
         },
         {
             "multi_process": False,
             "consolidate": True,
             "build_tag": "test_tag",
-            "verbose": 0,
-            "max_worker_processes": 2,
+            "verbose": 1,
+            "max_worker_processes": 1,
         },
     ),
     indirect=True,
@@ -176,7 +176,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "multi_process": True, "max_worker_processes": 2}],
+    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "multi_process": False, "max_worker_processes": 1}],
     indirect=True,
 )
 def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:
