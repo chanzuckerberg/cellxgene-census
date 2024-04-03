@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any
+from typing import Any, cast
 
 import anndata
 import numpy as np
@@ -27,11 +27,11 @@ def test_open_anndata(datasets: list[Dataset]) -> None:
     The `datasets` used here have no raw layer.
     """
 
-    def _todense(X):
+    def _todense(X: npt.NDArray[np.float32] | sparse.sp_matrix) -> npt.NDArray[np.float32]:
         if isinstance(X, np.ndarray):
             return X
         else:
-            return X.todense()
+            return cast(npt.NDArray[np.float32], X.todense())
 
     result = [(d, open_anndata(d, base_path=".")) for d in datasets]
     assert len(result) == len(datasets) and len(datasets) > 0
