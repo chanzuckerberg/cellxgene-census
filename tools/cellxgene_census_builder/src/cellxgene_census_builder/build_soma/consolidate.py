@@ -48,8 +48,7 @@ def submit_consolidate(
     vacuum: bool,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
-) -> list[concurrent.futures.Future[str]]:
-    ...
+) -> list[concurrent.futures.Future[str]]: ...
 
 
 @overload
@@ -59,8 +58,7 @@ def submit_consolidate(
     vacuum: bool,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
-) -> list[dask.distributed.Future]:
-    ...
+) -> list[dask.distributed.Future]: ...
 
 
 def submit_consolidate(

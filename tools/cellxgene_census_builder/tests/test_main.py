@@ -9,7 +9,6 @@ def test_create_args_parser_default_build() -> None:
 
     assert args.working_dir == "."
     assert args.verbose == 0
-    assert args.multi_process is False
     assert isinstance(args.build_tag, str)
     assert args.subcommand == "build"
     assert args.validate is True
@@ -24,6 +23,5 @@ def test_create_args_parser_default_validate() -> None:
 
     assert args.working_dir == "."
     assert args.verbose == 0
-    assert args.multi_process is False
     assert isinstance(args.build_tag, str)
     assert args.subcommand == "validate"

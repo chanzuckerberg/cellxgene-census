@@ -6,6 +6,7 @@
 
 Methods to retrieve information about versions of the publicly hosted Census object.
 """
+
 import typing
 from collections import OrderedDict
 from typing import Dict, Literal, Optional, Union, cast

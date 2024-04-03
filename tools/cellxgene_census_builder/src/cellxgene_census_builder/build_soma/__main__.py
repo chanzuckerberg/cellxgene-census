@@ -59,13 +59,6 @@ def create_args_parser() -> argparse.ArgumentParser:
     parser.add_argument("working_dir", type=str, help="Census build working directory")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity")
     parser.add_argument(
-        "-mp",
-        "--multi-process",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Use multiple processes",
-    )
-    parser.add_argument(
         "--max_worker_processes",
         type=int,
         default=default_config.max_worker_processes,
@@ -112,8 +105,6 @@ def create_args_parser() -> argparse.ArgumentParser:
     )
     # hidden option for testing by devs. Will process only the first 'n' datasets
     build_parser.add_argument("--test-first-n", type=int, default=0)
-    # hidden option for testing by devs. Allow for WIP testing by devs.
-    build_parser.add_argument("--disable-dirty-git-check", action=argparse.BooleanOptionalAction, default=False)
 
     # VALIDATE
     subparsers.add_parser("validate", help="Validate an existing Census build")

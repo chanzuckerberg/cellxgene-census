@@ -32,8 +32,7 @@ class EmbeddingIJDPipe(EmbeddingTableIterator, AbstractContextManager["Embedding
         return self
 
     @abstractproperty
-    def type(self) -> pa.DataType:
-        ...
+    def type(self) -> pa.DataType: ...
 
     @abstractproperty
     def domains(self) -> EmbeddingIJDDomains:
