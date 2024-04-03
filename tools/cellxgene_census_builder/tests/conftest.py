@@ -16,6 +16,8 @@ from cellxgene_census_builder.build_soma.globals import (
 from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
 from cellxgene_census_builder.process_init import process_init
 
+MATRIX_FORMAT = Literal["csr", "csc", "dense"]
+
 
 @attrs.define(frozen=True)
 class Organism:
@@ -24,14 +26,18 @@ class Organism:
 
 
 ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
-GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
-NUM_DATASET = 2
-
-X_FORMAT = Literal["csr", "csc", "dense"]
+GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"], ["a", "b", "c"], ["e", "b", "c", "a"]]
+ASSAY_IDS = ["EFO:0009922", "EFO:0008931", "EFO:0009922", "EFO:0008931"]
+X_FORMAT: list[MATRIX_FORMAT] = ["csr", "csr", "csr", "csr"]
+NUM_DATASET = 4
 
 
 def get_anndata(
-    organism: Organism, gene_ids: list[str] | None = None, no_zero_counts: bool = False, X_format: X_FORMAT = "csr"
+    organism: Organism,
+    gene_ids: list[str] | None = None,
+    no_zero_counts: bool = False,
+    X_format: MATRIX_FORMAT = "csr",
+    assay_ontology_term_id: str = "EFO:0009922",
 ) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
@@ -61,7 +67,7 @@ def get_anndata(
         data={
             "cell_idx": pd.Series([1, 2, 3, 4]),
             "cell_type_ontology_term_id": "CL:0000192",
-            "assay_ontology_term_id": "EFO:0008720",
+            "assay_ontology_term_id": assay_ontology_term_id,
             "disease_ontology_term_id": "PATO:0000461",
             "organism_ontology_term_id": organism.organism_ontology_term_id,
             "sex_ontology_term_id": "unknown",
@@ -140,7 +146,9 @@ def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
     datasets = []
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
-            h5ad = get_anndata(organism, GENE_IDS[i], no_zero_counts=True)
+            h5ad = get_anndata(
+                organism, GENE_IDS[i], no_zero_counts=True, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
+            )
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(
