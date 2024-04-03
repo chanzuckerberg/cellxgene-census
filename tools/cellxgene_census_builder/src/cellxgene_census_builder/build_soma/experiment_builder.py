@@ -301,7 +301,7 @@ def accumulate_axes_dataframes(
             return obs_df, var_df
 
     datasets_bag = dask.bag.from_sequence(datasets)
-    df_pairs_per_eb: list[tuple[pd.DataFrame, pd.DataFrame]] = dask.compute(
+    df_pairs_per_eb: list[list[tuple[pd.DataFrame, pd.DataFrame]]] = dask.compute(
         *[
             datasets_bag.map(
                 get_obs_and_var,
