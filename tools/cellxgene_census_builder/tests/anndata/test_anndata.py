@@ -26,6 +26,13 @@ def test_open_anndata(datasets: list[Dataset]) -> None:
     This test does not involve additional filtering steps.
     The `datasets` used here have no raw layer.
     """
+
+    def _todense(X):
+        if isinstance(X, np.ndarray):
+            return X
+        else:
+            return X.todense()
+
     result = [(d, open_anndata(d, base_path=".")) for d in datasets]
     assert len(result) == len(datasets) and len(datasets) > 0
     for i, (dataset, anndata_obj) in enumerate(result):
@@ -33,7 +40,7 @@ def test_open_anndata(datasets: list[Dataset]) -> None:
         opened_anndata = anndata.read_h5ad(dataset.dataset_h5ad_path)
         assert opened_anndata.obs.equals(anndata_obj.obs)
         assert opened_anndata.var.equals(anndata_obj.var)
-        assert np.array_equal(opened_anndata.X.todense(), anndata_obj.X.todense())
+        assert np.array_equal(_todense(opened_anndata.X), _todense(anndata_obj.X))
 
     # also check context manager
     with open_anndata(datasets[0], base_path=".") as ad:

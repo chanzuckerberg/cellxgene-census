@@ -28,7 +28,7 @@ class Organism:
 ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
 GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"], ["a", "b", "c"], ["e", "b", "c", "a"]]
 ASSAY_IDS = ["EFO:0009922", "EFO:0008931", "EFO:0009922", "EFO:0008931"]
-X_FORMAT: list[MATRIX_FORMAT] = ["csr", "csr", "csr", "csr"]
+X_FORMAT: list[MATRIX_FORMAT] = ["csr", "csc", "csr", "dense"]
 NUM_DATASET = 4
 
 
