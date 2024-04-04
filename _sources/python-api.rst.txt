@@ -73,3 +73,7 @@ Experimental: Embeddings
 
     cellxgene_census.experimental.get_embedding
     cellxgene_census.experimental.get_embedding_metadata
+    cellxgene_census.experimental.get_embedding_metadata_by_name
+    cellxgene_census.experimental.get_all_available_embeddings
+    cellxgene_census.experimental.get_all_census_versions_with_embedding
+

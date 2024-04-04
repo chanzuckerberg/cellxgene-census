@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.get\_all\_available\_embeddings
+==============================================================
+
+.. currentmodule:: cellxgene_census.experimental
+
+.. autofunction:: get_all_available_embeddings

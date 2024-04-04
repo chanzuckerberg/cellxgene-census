@@ -124,7 +124,7 @@
                 
                 
                 <div class="version">
-                    v1.12.0
+                    v1.13.0
                 </div>
                 
             
@@ -240,18 +240,45 @@
 </section>
 <section id="Quick-start">
 <h2>Quick start<a class="headerlink" href="#Quick-start" title="Permalink to this heading">¶</a></h2>
-<p>The easiest way to access Census CELLxGENE-hosted embeddings is by creating a slice of Census into an AnnData, downloading the corresponding embedding matrix using the S3 URI of the embdding, and adding the matrix to the AnnData object.</p>
-<p>The workflow looks as follows.</p>
-<div class="nbinput nblast docutils container">
+<p>The easiest way to access Census CELLxGENE-hosted embeddings is by calling the <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code> function with an <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code> or <code class="docutils literal notranslate"><span class="pre">var_embeddings</span></code> parameter.</p>
+<p>Let’s start by exploring what embeddings are available:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_all_available_embeddings</span>
+
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">get_all_available_embeddings</span><span class="p">(</span><span class="n">census_version</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;embedding_name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;data_type&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+scvi            mus_musculus    obs_embedding
+scvi            homo_sapiens    obs_embedding
+geneformer      homo_sapiens    obs_embedding
+scgpt           homo_sapiens    obs_embedding
+uce             homo_sapiens    obs_embedding
+uce             mus_musculus    obs_embedding
+nmf             homo_sapiens    obs_embedding
+nmf             homo_sapiens    var_embedding
+</pre></div></div>
+</div>
+<p>These can also be viewed on the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">CELLxGENE Census Models page</a>.</p>
+<p>For this example, we’ll use <code class="docutils literal notranslate"><span class="pre">scgpt</span></code>. We can call <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code> with the <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code> parameter:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 <span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding</span>
 
-<span class="c1"># scGPT, for details check out</span>
-<span class="c1"># https://cellxgene.cziscience.com/census-models</span>
-<span class="n">EMBEDDING_URI</span> <span class="o">=</span> <span class="s2">&quot;s3://cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-1/&quot;</span>
 <span class="n">CENSUS_VERSION</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
 
 <span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
@@ -260,19 +287,14 @@
         <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
         <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
         <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue == &#39;tongue&#39;&quot;</span><span class="p">,</span>
+        <span class="n">obs_embeddings</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;scgpt&quot;</span><span class="p">],</span>
     <span class="p">)</span>
-
-<span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scgpt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span>
-    <span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">,</span>
-    <span class="n">embedding_uri</span><span class="o">=</span><span class="n">EMBEDDING_URI</span><span class="p">,</span>
-    <span class="n">obs_soma_joinids</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>And now you can use these data for downstream analysis.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span>
@@ -280,7 +302,7 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -292,7 +314,7 @@ AnnData object with n_obs × n_vars = 372 × 60664
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span>
@@ -300,7 +322,7 @@ AnnData object with n_obs × n_vars = 372 × 60664
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -331,7 +353,7 @@ AxisArrays with keys: scgpt
 </ol>
 <p>Let’s first do a few imports and utility functions used throughout this notebook.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># A few imports and utility functions used throughout this notebook</span>
@@ -343,7 +365,7 @@ AxisArrays with keys: scgpt
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scanpy</span>
 <span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
-<span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding</span><span class="p">,</span> <span class="n">get_embedding_metadata</span>
+<span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding_metadata</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
@@ -367,9 +389,9 @@ AxisArrays with keys: scgpt
 </ol>
 <section id="AnnData-embeddings-via-cellxgene_census.get_anndata()">
 <h4>AnnData embeddings via cellxgene_census.get_anndata()<a class="headerlink" href="#AnnData-embeddings-via-cellxgene_census.get_anndata()" title="Permalink to this heading">¶</a></h4>
-<p>This is the simplest way of getting the embeddings. In this example we create an AnnData for all “central nervous system” cells, and then add the corresponding embedding matrix from the corresponding cells using <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>.</p>
+<p>This is the simplest way of getting the embeddings. In this example we create an AnnData for all “central nervous system” cells, and use the <code class="docutils literal notranslate"><span class="pre">obs_embeddings</span></code> parameter to add scGPT embeddings to the <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
@@ -379,20 +401,15 @@ AxisArrays with keys: scgpt
         <span class="n">measurement_name</span><span class="o">=</span><span class="n">MEASUREMENT_NAME</span><span class="p">,</span>
         <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">,</span>
         <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;soma_joinid&quot;</span><span class="p">]},</span>
+        <span class="n">obs_embeddings</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;scgpt&quot;</span><span class="p">],</span>
     <span class="p">)</span>
-
-<span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scgpt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span>
-    <span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">,</span>
-    <span class="n">embedding_uri</span><span class="o">=</span><span class="n">EMBEDDING_URI</span><span class="p">,</span>
-    <span class="n">obs_soma_joinids</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. To learn more use <code class="docutils literal notranslate"><span class="pre">help(get_embedding)</span></code>.</p>
 <p>Then we can take a quick look at the embeddings in a 2D scatter plot via UMAP.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scanpy</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;scgpt&quot;</span><span class="p">)</span>
@@ -405,7 +422,7 @@ AxisArrays with keys: scgpt
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_api_demo_census_embedding_14_0.png" src="../../_images/notebooks_api_demo_census_embedding_14_0.png" />
+<img alt="../../_images/notebooks_api_demo_census_embedding_15_0.png" src="../../_images/notebooks_api_demo_census_embedding_15_0.png" />
 </div>
 </div>
 </section>
@@ -415,7 +432,7 @@ AxisArrays with keys: scgpt
 <p>As a reminder this class offers a lazy interface to query Census based on cell and gene metadata, and provides access to the correspondong expression data, and cell/gene metadata.</p>
 <p>Let’s initiate a lazy query with the same filters as the previous example.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span>
@@ -430,7 +447,7 @@ AxisArrays with keys: scgpt
 </div>
 <p>Now, before downloading all the data we can take a look at different attributes, for example the number of cells in our query.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">n_obs</span>
@@ -438,7 +455,7 @@ AxisArrays with keys: scgpt
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -448,7 +465,7 @@ AxisArrays with keys: scgpt
 </div>
 <p>And for example grab all the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values for the cells in this query.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">soma_joinids</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obs_joinids</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -457,7 +474,7 @@ AxisArrays with keys: scgpt
 </div>
 <p>Then create an AnnData.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">to_anndata</span><span class="p">(</span><span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]})</span>
@@ -466,7 +483,7 @@ AxisArrays with keys: scgpt
 </div>
 <p>And finally add the embedding matrix via <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> for the cells of the query using the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scgpt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span>
@@ -479,7 +496,7 @@ AxisArrays with keys: scgpt
 </div>
 <p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. To learn more use <code class="docutils literal notranslate"><span class="pre">help(get_embedding)</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span>
@@ -487,7 +504,7 @@ AxisArrays with keys: scgpt
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -499,7 +516,7 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -514,7 +531,7 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 <p>To load a embeddinng into a stand-alone numpy array you can select cells from the Census based on obs metadata, then given the resulting cells, use the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values to download an embedding, and finally save as a dense NDArray.</p>
 <p>Let’s first select cells based on cell metadata</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span>
@@ -530,7 +547,7 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </div>
 <p>Now you can use the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values to download the corresponding rows of the embedding matrix via <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span><span class="n">CENSUS_VERSION</span><span class="p">,</span> <span class="n">EMBEDDING_URI</span><span class="p">,</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">soma_joinid</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
@@ -539,7 +556,7 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -552,7 +569,7 @@ array([[-0.00506592, -0.01348877, -0.03173828, -0.02331543],
 </div>
 <p>⚠️ <strong>IMPORTANT</strong>: <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code> will fill in missing values in the embedding matrix with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, therefore missing cells are represented with rows where all values are <code class="docutils literal notranslate"><span class="pre">NaN</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span><span class="o">.</span><span class="n">shape</span>
@@ -560,7 +577,7 @@ array([[-0.00506592, -0.01348877, -0.03173828, -0.02331543],
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -575,7 +592,7 @@ array([[-0.00506592, -0.01348877, -0.03173828, -0.02331543],
 <p>This section describes a more advanced use case. Here we showcase how to load large slices of an embeding matrix, and then append cell metadata to them.</p>
 <p>The method starts with the loaded embedding, and for each embedded cell loads metadata or X data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load a portion of the embedding (caution: embeddings can be quite large)</span>
@@ -687,7 +704,7 @@ array([[-0.00762939, -0.00076675, -0.00047874, -0.03588867],
 <p>There are a variety of other metadata values <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/tools/census_contrib/embedding_metadata.md">documented here</a>.</p>
 <p>The following example demonstrates how to access and decode the metadata into a Python dictionary.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding_metadata</span> <span class="o">=</span> <span class="n">get_embedding_metadata</span><span class="p">(</span><span class="n">EMBEDDING_URI</span><span class="p">)</span>
@@ -697,7 +714,7 @@ array([[-0.00762939, -0.00076675, -0.00047874, -0.03588867],
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -724,7 +741,7 @@ array([[-0.00762939, -0.00076675, -0.00047874, -0.03588867],
 <p>A common use case for accessing embedding metadata is the prevention of nonsense results, which will occur when the embeddings were not derived from the Census or experiment in use.</p>
 <p>This demonstrates an easy way to grab the embedding metadata and confirm that it matches your expectations.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding_metadata</span> <span class="o">=</span> <span class="n">get_embedding_metadata</span><span class="p">(</span><span class="n">EMBEDDING_URI</span><span class="p">)</span>

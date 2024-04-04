@@ -1,0 +1,6 @@
+﻿cellxgene\_census.experimental.get\_embedding\_metadata\_by\_name
+=================================================================
+
+.. currentmodule:: cellxgene_census.experimental
+
+.. autofunction:: get_embedding_metadata_by_name

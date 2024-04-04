@@ -124,7 +124,7 @@
                 
                 
                 <div class="version">
-                    v1.12.0
+                    v1.13.0
                 </div>
                 
             
@@ -224,7 +224,7 @@
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Quick-start">
 <h2>Quick start<a class="headerlink" href="#Quick-start" title="Permalink to this heading">¶</a></h2>
-<p>CELLxGENE collaboration embeddings are stored in the <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot of selected Census versions, you can easily export them into an AnnData as shown below for any slice of Census. This example queries all cells from tongue tissue.</p>
+<p>CELLxGENE collaboration embeddings can easily be exported into an AnnData as shown below for any slice of Census. This example queries all cells from tongue tissue.</p>
 <p>⚠️ Note that Geneformer embeddings are only available for human data</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -241,7 +241,7 @@
         <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
         <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
         <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue == &#39;tongue&#39;&quot;</span><span class="p">,</span>
-        <span class="n">obsm_layers</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span>
+        <span class="n">obs_embeddings</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -286,7 +286,7 @@ AxisArrays with keys: scvi, geneformer
 </section>
 <section id="Storage-format">
 <h2>Storage format<a class="headerlink" href="#Storage-format" title="Permalink to this heading">¶</a></h2>
-<p>Each embedding is encoded as a SOMA SparseNDArray under <code class="docutils literal notranslate"><span class="pre">obsm</span></code> of an organism’s SOMA Experiment, where:</p>
+<p>Each embedding is encoded as a SOMA SparseNDArray, where:</p>
 <ul class="simple">
 <li><p>dimension 0 (<code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code>) encodes the cell (obs) <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value</p></li>
 <li><p>dimension 1 (<code class="docutils literal notranslate"><span class="pre">soma_dim_1</span></code>) encodes the embedding feature, and is in the range [0, N) where N is the number of features in the embedding</p></li>
@@ -330,7 +330,7 @@ AxisArrays with keys: scvi, geneformer
     <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
     <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">,</span>
     <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]},</span>
-    <span class="n">obsm_layers</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span>
+    <span class="n">obs_embeddings</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -387,10 +387,11 @@ AxisArrays with keys: scvi, geneformer
 <span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
 
 <span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;homo_sapiens&quot;</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
 
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">organism</span><span class="p">]</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
     <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
     <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">),</span>
@@ -416,16 +417,40 @@ AxisArrays with keys: scvi, geneformer
 31780
 </pre></div></div>
 </div>
-<p>Then create an AnnData.</p>
-<div class="nbinput nblast docutils container">
+<p>Then we create an AnnData, retrieve the embeddings and add them to the AnnData’s obsm slot:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;geneformer&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_embedding</span><span class="p">,</span> <span class="n">get_embedding_metadata_by_name</span>
 
-<span class="n">adata</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">to_anndata</span><span class="p">(</span><span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span> <span class="n">obsm_layers</span><span class="o">=</span><span class="n">emb_names</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]})</span>
+<span class="n">emb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;geneformer&quot;</span><span class="p">]</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">to_anndata</span><span class="p">(</span><span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]})</span>
+
+<span class="k">for</span> <span class="n">embedding_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;geneformer&quot;</span><span class="p">]:</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">get_embedding_metadata_by_name</span><span class="p">(</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
+    <span class="n">embedding_uri</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;s3://cellxgene-contrib-public/contrib/cell-census/soma/</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;census_version&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">embedding</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;census_version&quot;</span><span class="p">],</span> <span class="n">embedding_uri</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">obs_joinids</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">embedding_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">embedding</span>
+
+<span class="n">adata</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 31780 × 60664
+    obs: &#39;cell_type&#39;, &#39;tissue_general&#39;
+    var: &#39;soma_joinid&#39;, &#39;feature_id&#39;, &#39;feature_name&#39;, &#39;feature_length&#39;, &#39;nnz&#39;, &#39;n_measured_obs&#39;
+    obsm: &#39;scvi&#39;, &#39;geneformer&#39;
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -458,227 +483,91 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </div>
 </section>
 </section>
-<section id="Loading-embeddings-into-a-Scipy-matrices-and-NumPy-arrays">
-<h3>Loading embeddings into a Scipy matrices and NumPy arrays<a class="headerlink" href="#Loading-embeddings-into-a-Scipy-matrices-and-NumPy-arrays" title="Permalink to this heading">¶</a></h3>
-<p>This section demonstrates how to get embedings for a slice of census directly into Scipy sparse matrices or NumPy arrays.</p>
-<p>We demonstrate this access pattern by a lazy query via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>.</p>
-<p>First we open a handle to Census and initiate a query to create an <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>. In this example we will query for all human cells of <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> equal to <code class="docutils literal notranslate"><span class="pre">'central</span> <span class="pre">nervous</span> <span class="pre">system'</span></code>.</p>
+<section id="Load-an-embedding-into-a-dense-NumPy-array">
+<h3>Load an embedding into a dense NumPy array<a class="headerlink" href="#Load-an-embedding-into-a-dense-NumPy-array" title="Permalink to this heading">¶</a></h3>
+<p>To load a embeddinng into a stand-alone numpy array you can select cells from the Census based on obs metadata, then given the resulting cells, use the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values to download an embedding, and finally save as a dense NDArray.</p>
+<p>Let’s first select cells based on cell metadata.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
 
 <span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">experiment_name</span> <span class="o">=</span> <span class="s2">&quot;homo_sapiens&quot;</span>
 
 <span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
 
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-<span class="n">query</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
-    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
-    <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">),</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">experiment_name</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
 <span class="p">)</span>
+
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-<p>And now we can access any of the following:</p>
-<ul class="simple">
-<li><p>Expression data via the method <code class="docutils literal notranslate"><span class="pre">query.X()</span></code>.</p></li>
-<li><p>Cell and gene metadata via the methods <code class="docutils literal notranslate"><span class="pre">query.obs()</span></code> and <code class="docutils literal notranslate"><span class="pre">query.var()</span></code>, respectively.</p></li>
-<li><p>The cell embeddings via the method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code>.</p></li>
-</ul>
-<p>The method <code class="docutils literal notranslate"><span class="pre">query.obsm()</span></code> returns a reader class <code class="docutils literal notranslate"><span class="pre">soma.SparseNDArrayRead</span></code>, which in turn can return different types of iterators. In this case we will use a <code class="docutils literal notranslate"><span class="pre">blockwise.scipy()</span></code> iterator that guarantees full re-indexed rows in scipy sparse csr format.</p>
+<p>Now you can use the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values to download the corresponding rows of the embedding matrix via <code class="docutils literal notranslate"><span class="pre">get_embedding</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb_iter</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">obsm</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">blockwise</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">scipy</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">get_embedding_metadata_by_name</span><span class="p">(</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
+<span class="n">embedding_uri</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;s3://cellxgene-contrib-public/contrib/cell-census/soma/</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;census_version&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">get_embedding</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;census_version&quot;</span><span class="p">],</span> <span class="n">embedding_uri</span><span class="p">,</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">soma_joinid</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
-<p>Each iteration of <code class="docutils literal notranslate"><span class="pre">emb_iter</span></code> would return a tuple of size 3 with the following elements:</p>
-<ol class="arabic simple">
-<li><p>The scipy sparse matrix for this iteration.</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values for the rows (cells).</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values for the columns (genes).</p></li>
-</ol>
-<p>Thus if we’d like to concatenate all of the resulting sparse matrices we can do the following:</p>
-<div class="nbinput nblast docutils container">
+<p>And now we have a dense matrix with the embedding data.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">chunk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">emb_iter</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-<p>And now we have an sparse matrix with the embedding data.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;31780x200 sparse matrix of type &#39;&lt;class &#39;numpy.float32&#39;&gt;&#39;
-        with 6356000 stored elements in Compressed Sparse Row format&gt;
-</pre></div></div>
-</div>
-<p>Which can be easily converted to a numpy array.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span> <span class="o">=</span> <span class="n">emb</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
-<span class="n">emb</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-array([[ 3.9672852e-03,  1.2878418e-02,  4.8632812e-01, ...,
-        -3.5742188e-01, -3.0664062e-01, -1.3198853e-03],
-       [ 2.5390625e-02,  5.9814453e-03,  5.5078125e-01, ...,
-        -1.6015625e-01, -1.0000000e+00,  3.6132812e-01],
-       [ 1.0070801e-03,  1.9165039e-02,  5.4296875e-01, ...,
-         3.9648438e-01, -9.8828125e-01,  1.1796875e+00],
+array([[-6.17187500e-01,  3.82995605e-03, -7.50000000e-01, ...,
+         7.50000000e-01,  9.39941406e-03,  2.71606445e-03],
+       [ 3.39843750e-01,  4.71115112e-04, -8.32031250e-01, ...,
+         8.00781250e-01, -7.55310059e-04,  8.85009766e-03],
+       [ 4.10156250e-01, -2.42614746e-03, -5.00000000e-01, ...,
+         9.45312500e-01, -2.53295898e-03,  1.12915039e-02],
        ...,
-       [-3.7109375e-02,  2.3315430e-02,  7.8125000e-02, ...,
-        -7.6953125e-01,  1.4218750e+00,  2.4316406e-01],
-       [-1.2756348e-02,  3.1494141e-02,  4.2187500e-01, ...,
-        -9.4140625e-01,  1.7890625e+00, -1.1484375e+00],
-       [-2.9663086e-02, -6.2942505e-04,  4.4531250e-01, ...,
-         3.6315918e-03,  8.4765625e-01, -7.2656250e-01]], dtype=float32)
+       [ 3.84765625e-01, -1.54113770e-03, -1.94531250e+00, ...,
+        -2.38281250e-01, -1.03149414e-02,  2.28881836e-03],
+       [ 8.94531250e-01, -7.14111328e-03,  5.78125000e-01, ...,
+        -1.15234375e-01, -2.39562988e-03,  2.42614746e-03],
+       [ 6.79687500e-01, -8.48388672e-03,  1.45312500e+00, ...,
+        -1.19628906e-01,  6.62803650e-05, -1.88446045e-03]], dtype=float32)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emb</span><span class="o">.</span><span class="n">shape</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(31780, 200)
+(31780, 50)
 </pre></div></div>
-</div>
-<p>And we can then load the corresponding expression data or the metadata. In this example we retrieve the cell types for all cells in this slice.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">obs</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>cell_type</th>
-      <th>tissue_general</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>ependymal cell</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>astrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>astrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>astrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>astrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>31775</th>
-      <td>oligodendrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>31776</th>
-      <td>oligodendrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>31777</th>
-      <td>oligodendrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>31778</th>
-      <td>oligodendrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-    <tr>
-      <th>31779</th>
-      <td>oligodendrocyte</td>
-      <td>central nervous system</td>
-    </tr>
-  </tbody>
-</table>
-<p>31780 rows × 2 columns</p>
-</div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
