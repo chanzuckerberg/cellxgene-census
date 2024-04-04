@@ -21,7 +21,6 @@ classifiers = [
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3.11",
 ]
 dependencies= [
