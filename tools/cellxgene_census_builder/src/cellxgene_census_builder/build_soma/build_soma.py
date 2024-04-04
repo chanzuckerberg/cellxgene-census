@@ -31,7 +31,7 @@ from .manifest import load_manifest
 from .mp import create_dask_client, shutdown_dask_cluster
 from .source_assets import stage_source_assets
 from .summary_cell_counts import create_census_summary_cell_counts
-from .util import get_git_commit_sha, is_git_repo_dirty
+from .util import get_git_commit_sha
 from .validate_soma import validate_consolidation, validate_soma
 
 logger = logging.getLogger(__name__)
@@ -42,10 +42,6 @@ def prepare_file_system(args: CensusBuildArgs) -> None:
     # Don't clobber an existing census build
     if args.soma_path.exists() or args.h5ads_path.exists():
         raise Exception("Census build path already exists - aborting build")
-
-    # Ensure that the git tree is clean
-    if not args.config.disable_dirty_git_check and is_git_repo_dirty():
-        raise Exception("The git repo has uncommitted changes - aborting build")
 
     # Create top-level build directories
     args.soma_path.mkdir(parents=True, exist_ok=False)

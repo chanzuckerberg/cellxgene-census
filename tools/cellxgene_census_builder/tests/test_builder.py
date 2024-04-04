@@ -7,6 +7,7 @@ from unittest.mock import patch
 import dask
 import numpy as np
 import pandas as pd
+import psutil
 import pyarrow as pa
 import pytest
 import tiledb
@@ -33,14 +34,12 @@ from cellxgene_census_builder.process_init import process_init
     "census_build_args",
     (
         {
-            "multi_process": False,
             "consolidate": False,
             "build_tag": "test_tag",
             "verbose": 0,
             "max_worker_processes": 1,
         },
         {
-            "multi_process": False,
             "consolidate": True,
             "build_tag": "test_tag",
             "verbose": 1,
@@ -71,12 +70,21 @@ def test_base_builder_creation(
         kwargs.pop("threads_per_worker")
         return create_dask_client(*args, **kwargs)
 
+    # proxy psutil.virtual_memory to return 1/2 of the actual memory. There
+    # are repeated cases where the test runners OOM, and this helps avoid it.
+    memstats = psutil.virtual_memory()
+    memstats = memstats._replace(total=int(memstats.total // 2))
+
+    def proxy_psutil_virtual_memory() -> psutil._pslinux.svmem:
+        return memstats
+
     with (
         patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"),
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
         patch(
             "cellxgene_census_builder.build_soma.build_soma.create_dask_client", side_effect=proxy_create_dask_client
         ),
+        patch("psutil.virtual_memory", side_effect=proxy_psutil_virtual_memory),
     ):
         process_init(census_build_args)
         return_value = build(census_build_args, validate=validate)
@@ -176,7 +184,7 @@ def test_unicode_support(tmp_path: pathlib.Path) -> None:
 
 @pytest.mark.parametrize(
     "census_build_args",
-    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "multi_process": False, "max_worker_processes": 1}],
+    [{"manifest": True, "verbose": 2, "build_tag": "build_tag", "max_worker_processes": 1}],
     indirect=True,
 )
 def test_build_step1_get_source_datasets(tmp_path: pathlib.Path, census_build_args: CensusBuildArgs) -> None:

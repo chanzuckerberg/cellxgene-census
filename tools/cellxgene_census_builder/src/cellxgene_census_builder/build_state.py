@@ -8,7 +8,6 @@ from collections.abc import Iterator, Mapping
 from datetime import datetime
 from typing import Any, Self
 
-import psutil
 import yaml
 from attrs import define, field, fields, validators
 
@@ -28,7 +27,6 @@ class CensusBuildConfig:
     log_file: str = field(default="build.log")
     reports_dir: str = field(default="reports")
     consolidate = field(converter=bool, default=True)
-    disable_dirty_git_check = field(converter=bool, default=True)
     dryrun: bool = field(
         converter=bool, default=False
     )  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
@@ -44,24 +42,17 @@ class CensusBuildConfig:
     logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
     build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
     #
-    # Default multi-process. Memory scaling based on empirical tests.
-    multi_process: bool = field(converter=bool, default=True)
-    #
-    # The memory budget used to determine appropriate parallelism in many steps of build.
-    # Only set to a smaller number if you want to not use all available RAM.
-    memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
-    #
     # 'max_worker_processes' sets a limit on the number of worker processes to avoid running into
     # the max VM map kernel limit and other hard resource limits.
     #
-    # The current value is significantly reduced to accomadate excessive thread use in TileDBSOMA
-    # 1.7. https://github.com/single-cell-data/TileDB-SOMA/issues/2149
-    #
-    # Previously this value was 192, and worked fine on hosts with CPU count up to 192 using
-    # the default AWS Linux 2 and Ubuntu 22 kernel default config. This should be raised once
-    # TileDB has reduced thread allocation. See also the DEFAULT_TILEDB_CONFIG in globals.py
-    # which also hard-caps threads to a reduced number for the same reason. FMI:
+    # The current value is significantly reduced to accommodate high thread use in TileDB-SOMA
     # https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    #
+    # Current value tested on hosts up to 192 cpus worked fine on hosts with CPU count up to 192 using
+    # the default AWS Linux 2 and Ubuntu 22 kernel default config. This could be raised once
+    # TileDB has reduced thread allocation, if that helps overall throughput. See also the
+    # DEFAULT_TILEDB_CONFIG in globals.py which also hard-caps threads to a reduced number
+    # for the same reason. FMI: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
     max_worker_processes: int = field(converter=int, default=48)
     #
     # Host minimum resource validation

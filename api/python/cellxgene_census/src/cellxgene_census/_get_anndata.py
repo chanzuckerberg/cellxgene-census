@@ -6,6 +6,7 @@
 
 Methods to retrieve slices of the census as AnnData objects.
 """
+
 from typing import Optional, Sequence
 
 import anndata

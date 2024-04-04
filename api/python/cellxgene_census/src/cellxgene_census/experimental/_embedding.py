@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 
 """Methods to support simplifed access to community contributed embeddings."""
+
 from __future__ import annotations
 
 import json
