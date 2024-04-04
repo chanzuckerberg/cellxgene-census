@@ -5,7 +5,7 @@ import pytest
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_state import CensusBuildArgs
 
-from ..conftest import ORGANISMS, X_FORMAT, get_anndata
+from ..conftest import MATRIX_FORMAT, ORGANISMS, get_anndata
 
 
 @pytest.fixture
@@ -94,7 +94,7 @@ def datasets_with_incorrect_schema_version(census_build_args: CensusBuildArgs) -
 def h5ad_simple(request: pytest.FixtureRequest, tmp_path: pathlib.Path) -> str:
     # parameterization is optional
     try:
-        X_format: X_FORMAT = request.param
+        X_format: MATRIX_FORMAT = request.param
     except AttributeError:
         X_format = "csr"  # default
 

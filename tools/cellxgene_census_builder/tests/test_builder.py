@@ -97,15 +97,25 @@ def test_base_builder_creation(
             uri=census_build_args.soma_path.as_posix(),
             context=soma.options.SOMATileDBContext(tiledb_ctx=tiledb.Ctx({"vfs.s3.region": "us-west-2"})),
         ) as census:
-            # There are 8 cells in total (4 from the first and 4 from the second datasets). They all belong to homo_sapiens
+            # There are 16 cells in total (4 in each dataset). They all belong to homo_sapiens
             human_obs = census[CENSUS_DATA_NAME]["homo_sapiens"]["obs"].read().concat().to_pandas()
-            assert human_obs.shape[0] == 8
-            assert list(np.unique(human_obs["dataset_id"])) == ["homo_sapiens_0", "homo_sapiens_1"]
+            assert human_obs.shape[0] == 16
+            assert list(np.unique(human_obs["dataset_id"])) == [
+                "homo_sapiens_0",
+                "homo_sapiens_1",
+                "homo_sapiens_2",
+                "homo_sapiens_3",
+            ]
 
-            # mus_musculus should have 8 cells
+            # mus_musculus should have 16 cells
             mouse_obs = census[CENSUS_DATA_NAME]["mus_musculus"]["obs"].read().concat().to_pandas()
-            assert mouse_obs.shape[0] == 8
-            assert list(np.unique(mouse_obs["dataset_id"])) == ["mus_musculus_0", "mus_musculus_1"]
+            assert mouse_obs.shape[0] == 16
+            assert list(np.unique(mouse_obs["dataset_id"])) == [
+                "mus_musculus_0",
+                "mus_musculus_1",
+                "mus_musculus_2",
+                "mus_musculus_3",
+            ]
 
             # Assert number of unique genes
             var = census[CENSUS_DATA_NAME]["homo_sapiens"]["ms"]["RNA"]["var"].read().concat().to_pandas()
@@ -116,14 +126,18 @@ def test_base_builder_creation(
             assert var.shape[0] == 5
             assert all(var["feature_id"].str.startswith("mus_musculus"))
 
-            # There should be 4 total datasets
+            # There should be 8 total datasets
             returned_datasets = census[CENSUS_INFO_NAME]["datasets"].read().concat().to_pandas()
-            assert returned_datasets.shape[0] == 4
+            assert returned_datasets.shape[0] == 8
             assert list(returned_datasets["dataset_id"]) == [
                 "homo_sapiens_0",
                 "homo_sapiens_1",
+                "homo_sapiens_2",
+                "homo_sapiens_3",
                 "mus_musculus_0",
                 "mus_musculus_1",
+                "mus_musculus_2",
+                "mus_musculus_3",
             ]
 
             # Census summary has the correct metadata
@@ -159,9 +173,9 @@ def test_base_builder_creation(
                 fdpm_df = fdpm.read().tables().concat().to_pandas()
                 n_datasets = fdpm_df["soma_dim_0"].nunique()
                 n_features = fdpm_df["soma_dim_1"].nunique()
-                assert n_datasets == 2
+                assert n_datasets == 4
                 assert n_features == 5
-                assert fdpm.nnz == 7
+                assert fdpm.nnz == 14
 
 
 def test_unicode_support(tmp_path: pathlib.Path) -> None:
