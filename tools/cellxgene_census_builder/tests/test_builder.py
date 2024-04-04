@@ -7,6 +7,7 @@ from unittest.mock import patch
 import dask
 import numpy as np
 import pandas as pd
+import psutil
 import pyarrow as pa
 import pytest
 import tiledb
@@ -69,12 +70,21 @@ def test_base_builder_creation(
         kwargs.pop("threads_per_worker")
         return create_dask_client(*args, **kwargs)
 
+    # proxy psutil.virtual_memory to return 1/2 of the actual memory. There
+    # are repeated cases where the test runners OOM, and this helps avoid it.
+    memstats = psutil.virtual_memory()
+    memstats = memstats._replace(total=int(memstats.total // 2))
+
+    def proxy_psutil_virtual_memory() -> psutil._pslinux.svmem:
+        return memstats
+
     with (
         patch("cellxgene_census_builder.build_soma.build_soma.prepare_file_system"),
         patch("cellxgene_census_builder.build_soma.build_soma.build_step1_get_source_datasets", return_value=datasets),
         patch(
             "cellxgene_census_builder.build_soma.build_soma.create_dask_client", side_effect=proxy_create_dask_client
         ),
+        patch("psutil.virtual_memory", side_effect=proxy_psutil_virtual_memory),
     ):
         process_init(census_build_args)
         return_value = build(census_build_args, validate=validate)
