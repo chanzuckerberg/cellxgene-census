@@ -27,7 +27,7 @@ def test_open_anndata(datasets: list[Dataset]) -> None:
     The `datasets` used here have no raw layer.
     """
 
-    def _todense(X: npt.NDArray[np.float32] | sparse.sp_matrix) -> npt.NDArray[np.float32]:
+    def _todense(X: npt.NDArray[np.float32] | sparse.spmatrix) -> npt.NDArray[np.float32]:
         if isinstance(X, np.ndarray):
             return X
         else:
