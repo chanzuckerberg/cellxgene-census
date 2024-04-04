@@ -4,6 +4,7 @@
 test_that("test_load_obs_human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
 
@@ -16,6 +17,7 @@ test_that("test_load_obs_human", {
 test_that("test_load_var_human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
 
@@ -27,6 +29,7 @@ test_that("test_load_var_human", {
 test_that("test_load_obs_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
 
@@ -39,6 +42,7 @@ test_that("test_load_obs_mouse", {
 test_that("test_load_var_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
 
@@ -50,6 +54,7 @@ test_that("test_load_var_mouse", {
 test_that("test_incremental_read_obs_human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
 
@@ -61,6 +66,7 @@ test_that("test_incremental_read_obs_human", {
 test_that("test_incremental_read_var_human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
 
@@ -71,6 +77,7 @@ test_that("test_incremental_read_var_human", {
 test_that("test_incremental_read_obs_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
 
@@ -82,6 +89,7 @@ test_that("test_incremental_read_obs_mouse", {
 test_that("test_incremental_read_var_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
 
@@ -92,6 +100,7 @@ test_that("test_incremental_read_var_mouse", {
 test_that("test_incremental_read_X_human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
 
@@ -104,6 +113,7 @@ test_that("test_incremental_read_X_human", {
 test_that("test_incremental_read_X_human-large-buffer-size", {
   census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
 
@@ -116,6 +126,7 @@ test_that("test_incremental_read_X_human-large-buffer-size", {
 test_that("test_incremental_read_X_mouse", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
 
@@ -128,6 +139,7 @@ test_that("test_incremental_read_X_mouse", {
 test_that("test_incremental_read_X_mouse-large-buffer-size", {
   census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
 
@@ -140,6 +152,7 @@ test_that("test_incremental_read_X_mouse-large-buffer-size", {
 test_that("test_incremental_query_human_brain", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
   obs_value_filter <- "tissue == 'brain'"
@@ -158,6 +171,7 @@ test_that("test_incremental_query_human_brain", {
 test_that("test_incremental_query_human_aorta", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "homo_sapiens"
   obs_value_filter <- "tissue == 'aorta'"
@@ -176,6 +190,7 @@ test_that("test_incremental_query_human_aorta", {
 test_that("test_incremental_query_mouse_brain", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
   obs_value_filter <- "tissue == 'brain'"
@@ -194,6 +209,7 @@ test_that("test_incremental_query_mouse_brain", {
 test_that("test_incremental_query_mouse_aorta", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   organism <- "mus_musculus"
   obs_value_filter <- "tissue == 'aorta'"
@@ -212,6 +228,7 @@ test_that("test_incremental_query_mouse_aorta", {
 test_that("test_seurat_small-query", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -226,6 +243,7 @@ test_that("test_seurat_small-query", {
 test_that("test_seurat_10K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -240,6 +258,7 @@ test_that("test_seurat_10K-cells-human", {
 test_that("test_seurat_100K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -254,6 +273,7 @@ test_that("test_seurat_100K-cells-human", {
 test_that("test_seurat_250K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -268,6 +288,7 @@ test_that("test_seurat_250K-cells-human", {
 test_that("test_seurat_500K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -282,6 +303,7 @@ test_that("test_seurat_500K-cells-human", {
 test_that("test_seurat_750K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -296,6 +318,7 @@ test_that("test_seurat_750K-cells-human", {
 test_that("test_seurat_1M-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -310,6 +333,7 @@ test_that("test_seurat_1M-cells-human", {
 test_that("test_seurat_common-tissue", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -324,6 +348,7 @@ test_that("test_seurat_common-tissue", {
 test_that("test_seurat_common-tissue-large-buffer-size", {
   census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -338,6 +363,7 @@ test_that("test_seurat_common-tissue-large-buffer-size", {
 test_that("test_seurat_common-cell-type", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -353,6 +379,7 @@ test_that("test_seurat_common-cell-type", {
 test_that("test_seurat_common-cell-type-large-buffer-size", {
   census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -370,6 +397,7 @@ test_that("test_seurat_whole-enchilada-large-buffer-size", {
   if (FALSE) {
     census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
     on.exit(census$close(), add = TRUE)
+    on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
     test_args <- list(
       census = census,
@@ -386,6 +414,7 @@ test_that("test_seurat_whole-enchilada-large-buffer-size", {
 test_that("test_sce_small-query", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -400,6 +429,7 @@ test_that("test_sce_small-query", {
 test_that("test_sce_10K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -414,6 +444,7 @@ test_that("test_sce_10K-cells-human", {
 test_that("test_sce_100K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -428,6 +459,7 @@ test_that("test_sce_100K-cells-human", {
 test_that("test_sce_250K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -442,6 +474,7 @@ test_that("test_sce_250K-cells-human", {
 test_that("test_sce_500K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -456,6 +489,7 @@ test_that("test_sce_500K-cells-human", {
 test_that("test_sce_750K-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -470,6 +504,7 @@ test_that("test_sce_750K-cells-human", {
 test_that("test_sce_1M-cells-human", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -484,6 +519,7 @@ test_that("test_sce_1M-cells-human", {
 test_that("test_sce_common-tissue", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -498,6 +534,7 @@ test_that("test_sce_common-tissue", {
 test_that("test_sce_common-tissue-large-buffer-size", {
   census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -512,6 +549,7 @@ test_that("test_sce_common-tissue-large-buffer-size", {
 test_that("test_sce_common-cell-type", {
   census <- open_soma_latest_for_test()
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -527,6 +565,7 @@ test_that("test_sce_common-cell-type", {
 test_that("test_sce_common-cell-type-large-buffer-size", {
   census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
   on.exit(census$close(), add = TRUE)
+  on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
   test_args <- list(
     census = census,
@@ -544,6 +583,7 @@ test_that("test_sce_whole-enchilada-large-buffer-size", {
   if (FALSE) {
     census <- open_soma_latest_for_test(soma.init_buffer_bytes = paste(1 * 1024**3))
     on.exit(census$close(), add = TRUE)
+    on.exit(gc(verbose = TRUE, reset = FALSE, full = TRUE), add = TRUE)
 
     test_args <- list(
       census = census,
