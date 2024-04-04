@@ -9,3 +9,4 @@ What's new?
     :maxdepth: 1
     
     articles/2023/*
+    articles/2024/*
