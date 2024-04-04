@@ -6,6 +6,7 @@
 
 Contains methods to open publicly hosted versions of Census object and access its source datasets.
 """
+
 import logging
 import os.path
 import urllib.parse

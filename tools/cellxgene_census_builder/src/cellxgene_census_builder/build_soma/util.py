@@ -50,14 +50,3 @@ def get_git_commit_sha() -> str:
     repo = git.repo.base.Repo(search_parent_directories=True)
     hexsha: str = repo.head.object.hexsha
     return hexsha
-
-
-def is_git_repo_dirty() -> bool:
-    """Returns True if the git repo is dirty, i.e. there are uncommitted changes."""
-    import git  # Scoped import - this requires the git executable to exist on the machine
-
-    # work around https://github.com/gitpython-developers/GitPython/issues/1349
-    # by explicitly referencing git.repo.base.Repo instead of git.Repo
-    repo = git.repo.base.Repo(search_parent_directories=True)
-    is_dirty: bool = repo.is_dirty()
-    return is_dirty
