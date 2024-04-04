@@ -4,7 +4,7 @@
 
 *By:* *[Emanuele Bezzi](ebezzi@chanzuckerberg.com)* & [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)
 
-Starting from the `2024-04-01` Census build, a subset of the columns in the `obs` dataframe are now categorical instead of strings. 
+Starting with the `2024-04-01` Census build, a subset of the columns in the `obs` dataframe are now categorical instead of strings. 
 
 Overall users will observe a smaller memory footprint when loading Census data into memory. 🚀
 
