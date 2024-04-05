@@ -9,4 +9,12 @@ What's new?
     :maxdepth: 1
     
     articles/2023/*
+
+2024
+----------
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+    
     articles/2024/*
