@@ -24,7 +24,7 @@ class TissueMapper:
         """
         tissues: list[str] = self.ontology_parser.get_high_level_terms(tissue_ontology_term_id, self.tissues)
         if not tissues:
-            raise ValueError()
+            raise ValueError(f"No high-level tissue found for tissue: {tissue_ontology_term_id}")
         return tissues[0]
 
     def get_label_from_writable_id(self, ontology_term_id: str) -> str:
@@ -33,7 +33,7 @@ class TissueMapper:
         Example: "UBERON:0002048" returns "lung"
         Example: "UBERON_0002048" raises ValueError because the ID is not in writable form
         """
-        return self.ontology_parser.get_term_label(ontology_term_id)
+        return self.ontology_parser.get_term_label(ontology_term_id)  # type: ignore[no-any-return]
 
     @staticmethod
     def reformat_ontology_term_id(ontology_term_id: str, to_writable: bool = True) -> str:
