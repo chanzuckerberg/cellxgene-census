@@ -1,13 +1,13 @@
-"""NOTE: In the future, this code will be part of an ontology service library."""
-
 from cellxgene_ontology_guide import curated_ontology_term_lists
 from cellxgene_ontology_guide.entities import CuratedOntologyTermList
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 
+from .globals import CXG_SCHEMA_VERSION
+
 
 class TissueMapper:
     def __init__(self) -> None:
-        self.ontology_parser = OntologyParser()
+        self.ontology_parser = OntologyParser(f"v{CXG_SCHEMA_VERSION}")
         self.tissues = curated_ontology_term_lists.get_curated_ontology_term_list(
             CuratedOntologyTermList.TISSUE_GENERAL
         )
@@ -22,10 +22,11 @@ class TissueMapper:
             - If the input tissue is not found in the ontology, return the same as input.
                 - This could happen with something like "UBERON:0002048 (cell culture)"
         """
-        tissues: list[str] = self.ontology_parser.get_high_level_terms(tissue_ontology_term_id, self.tissues)
-        if not tissues:
-            raise ValueError(f"No high-level tissue found for tissue: {tissue_ontology_term_id}")
-        return tissues[0]
+        try:
+            tissues: list[str] = self.ontology_parser.get_high_level_terms(tissue_ontology_term_id, self.tissues)
+            return tissues[0]
+        except (IndexError, KeyError, ValueError):
+            return tissue_ontology_term_id
 
     def get_label_from_writable_id(self, ontology_term_id: str) -> str:
         """Returns the label from and ontology term id that is in writable form.

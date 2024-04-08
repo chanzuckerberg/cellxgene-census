@@ -1,7 +1,5 @@
 import unittest
 
-import pytest
-
 from cellxgene_census_builder.build_soma.tissue_mapper import TissueMapper
 
 
@@ -14,13 +12,11 @@ class TissueMapperTest(unittest.TestCase):
         expected_high_level_tissue = "UBERON:0002048"  # lung
         self.assertEqual(self.tissue_mapper.get_high_level_tissue(low_level_tissue), expected_high_level_tissue)
 
-    @pytest.mark.skip("Not sure if this makes sense")
     def test__high_level_tissue_retrieval_does_not_exist(self) -> None:
         low_level_tissue = "UBERON:noId"
         expected_high_level_tissue = "UBERON:noId"
         self.assertEqual(self.tissue_mapper.get_high_level_tissue(low_level_tissue), expected_high_level_tissue)
 
-    @pytest.mark.skip("Likely unsupported")
     def test__high_level_tissue_retrieval_suffix(self) -> None:
         low_level_tissue = "UBERON:0008951 (organoid)"  # lef lung lobe
         expected_high_level_tissue = "UBERON:0008951 (organoid)"  # lung
