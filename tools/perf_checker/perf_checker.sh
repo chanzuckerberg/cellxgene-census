@@ -14,7 +14,10 @@ pip install psutil; pip install gitpython; pip install somacore; pip install til
 pip install 'git+https://github.com/single-cell-data/TileDB-SOMA.git#subdirectory=profiler'
 
 # New benchmarks must be added to this list
-declare -a benchmarks=("./tools/perf_checker/test_anndata_export.py")
+declare -a benchmarks=("./tools/perf_checker/test_anndata_export.py",
+                       "./tools/perf_checker/test_data_frame.py",
+                       "./tools/perf_checker/test_experiment_axis.py",
+                       "./tools/perf_checker/test_sparse_array.py")
 
 # Running all benchmarks and checking performance changes
 for benchmark in ${benchmarks}
