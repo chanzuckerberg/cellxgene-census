@@ -570,6 +570,33 @@ def test__shuffle(soma_experiment: Experiment) -> None:
     assert X_values == soma_joinids
 
 
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
+def test__shuffle_chunks(soma_experiment: Experiment) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        shuffle=True,
+        soma_chunk_size=4,
+        shuffle_chunk_count=2,
+    )
+
+    all_rows = list(iter(dp))
+
+    soma_joinids = [row[1][0].item() for row in all_rows]
+    X_values = [row[0][0].item() for row in all_rows]
+
+    # same elements
+    assert set(soma_joinids) == set(range(16))
+    # not ordered! (...with a `1/16!` probability of being ordered)
+    assert soma_joinids != list(range(16))
+    # randomizes X in same order as obs
+    # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
+    assert X_values == soma_joinids
+
+
 @pytest.mark.experimental
 @pytest.mark.skip(reason="Not implemented")
 def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
