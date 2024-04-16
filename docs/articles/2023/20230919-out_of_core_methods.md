@@ -2,7 +2,7 @@
 
 *Published:* *September 18, 2023*
 
-*By:* *[Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
+*By:* *[Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)*
 
 The Census team is thrilled to officially announce memory-efficient implementations of some of the most widely used single-cell algorithms.
 
