@@ -129,10 +129,11 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         self.obs_column_names = obs_column_names
         if shuffle_chunk_count:
             assert shuffle_rng is not None
-            splits = len(obs_joinids_chunked) // min(len(obs_joinids_chunked), shuffle_chunk_count)
+            chunk_count = len(obs_joinids_chunked)
+            grouped_chunks_count = chunk_count // min(chunk_count, shuffle_chunk_count)
             self.obs_joinids_chunks_iter = (
-                shuffle_rng.permutation(np.concatenate(shuffle_chunks))
-                for shuffle_chunks in np.array_split(obs_joinids_chunked, splits)
+                shuffle_rng.permutation(np.concatenate(grouped_chunks))
+                for grouped_chunks in np.array_split(obs_joinids_chunked, grouped_chunks_count)
             )
         else:
             self.obs_joinids_chunks_iter = iter(obs_joinids_chunked)
