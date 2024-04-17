@@ -2,7 +2,7 @@
 
 *Published:* *April 4th, 2024*
 
-*By:* *[Emanuele Bezzi](ebezzi@chanzuckerberg.com)* & [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)
+*By:* *[Emanuele Bezzi](mailto:ebezzi@chanzuckerberg.com)* & [Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)
 
 Starting with the `2024-04-01` Census build, a subset of the columns in the `obs` dataframe are now categorical instead of strings.
 
