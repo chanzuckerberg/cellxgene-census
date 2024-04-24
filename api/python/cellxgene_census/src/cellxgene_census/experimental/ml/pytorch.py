@@ -13,6 +13,7 @@ import pandas as pd
 import psutil
 import pyarrow as pa
 import scipy
+import tiledb
 import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
@@ -25,7 +26,6 @@ from torch import distributed as dist
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 
-from ... import get_default_soma_context
 from ..util._eager_iter import _EagerIterator
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
@@ -92,11 +92,9 @@ class Stats:
 @contextmanager
 def _open_experiment(
     uri: str,
-    aws_region: Optional[str] = None,
+    context: Optional[soma.SOMATileDBContext] = None,
 ) -> soma.Experiment:
     """Internal method for opening a SOMA ``Experiment`` as a context manager."""
-    context = get_default_soma_context().replace(tiledb_config={"vfs.s3.region": aws_region} if aws_region else {})
-
     with soma.Experiment.open(uri, context=context) as exp:
         yield exp
 
@@ -456,7 +454,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             experimental
         """
         self.exp_uri = experiment.uri
-        self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
+        self.context_config = dict(experiment.context.tiledb_ctx.config())
         self.measurement_name = measurement_name
         self.layer_name = X_name
         self.obs_query = obs_query
@@ -482,7 +480,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
         pytorch_logger.debug("Initializing ExperimentDataPipe")
 
-        with _open_experiment(self.exp_uri, self.aws_region) as exp:
+        with _open_experiment(
+            self.exp_uri, soma.SOMATileDBContext(tiledb_config=tiledb.Config(self.context_config))
+        ) as exp:
             query = exp.axis_query(
                 measurement_name=self.measurement_name,
                 obs_query=self.obs_query,
@@ -573,7 +573,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             obs_joinids_chunked, partition, partitions
         )
 
-        with _open_experiment(self.exp_uri, self.aws_region) as exp:
+        with _open_experiment(
+            self.exp_uri, soma.SOMATileDBContext(tiledb_config=tiledb.Config(self.context_config))
+        ) as exp:
             obs_and_x_iter = _ObsAndXIterator(
                 obs=exp.obs,
                 X=exp.ms[self.measurement_name].X[self.layer_name],
