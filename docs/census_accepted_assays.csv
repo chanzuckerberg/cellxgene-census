@@ -100,7 +100,6 @@ EFO:0030031,SCOPE-chip
 EFO:0030061,mcSCRB-seq
 EFO:0030074,SORT-seq
 EFO:0030078,droplet-based single-cell RNA library preparation
-EFO:0030080,10x transcription profiling
 EFO:0700003,BD Rhapsody Whole Transcriptome Analysis
 EFO:0700004,BD Rhapsody Targeted mRNA
 EFO:0700010,TruDrop

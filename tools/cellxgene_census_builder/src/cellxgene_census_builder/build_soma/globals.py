@@ -11,7 +11,7 @@ from .schema_util import FieldSpec, TableSpec
 # DataFrame columns. True is enabled, False is disabled.
 USE_ARROW_DICTIONARY = True
 
-CENSUS_SCHEMA_VERSION = "2.0.0"
+CENSUS_SCHEMA_VERSION = "2.0.1"
 
 CXG_SCHEMA_VERSION = "5.0.0"  # the CELLxGENE schema version supported
 
@@ -353,7 +353,6 @@ RNA_SEQ = [
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0030074",  # SORT-seq
     "EFO:0030078",  # droplet-based single-cell RNA library preparation
-    "EFO:0030080",  # 10x transcription profiling
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
     "EFO:0700010",  # TruDrop
