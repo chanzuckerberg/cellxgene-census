@@ -35,6 +35,42 @@ ObsAndXDatum = Tuple[Tensor, Tensor]
 """Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s).
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
 
+# The following environment variables are available even if torch.distributed is not initialized, which is why we use them.
+WORLD_SIZE = int(os.environ.get("WORLD_SIZE", 1))
+RANK = int(os.environ.get("RANK", 0))
+
+def split_array_sizes(total_size: int, num_splits: int):
+    """"Returns an array of the sizes equivalent to calling np.array_split on 
+    an array of size total_size with num_splits splits.
+    
+    Same results as [len(x) for x in np.array_split(np.zeros(total_size), num_splits)],
+    without allocating an unnecessary temporary array.
+
+    """
+    rest = total_size % num_splits
+    
+    sizes = np.array([
+        total_size // num_splits + int(i < rest)
+        for i in range(num_splits)
+    ], dtype=np.int64)
+
+    assert sizes.sum() == total_size, (sizes.sum(), total_size)
+
+    return sizes
+    
+
+def split_array_only_idxs(array: np.ndarray, num_splits: int, idx: int):
+    """Returns the idx-th split of array, without creating the other splits.
+
+    Same results as `np.array_split(array, num_splits)[idx]`, without creating the
+    other unnecessary splits (views). We could just use `np.array_split(array, num_splits)[idx]` as
+    they are just views not copies, but it feels cleaner to avoid creating the other splits.
+
+    """
+    sizes = [0] + split_array_sizes(len(array), num_splits).cumsum().tolist()
+    out_ids = array[sizes[idx]:sizes[idx + 1]]
+    return out_ids
+
 
 @define
 class _SOMAChunk:
@@ -393,6 +429,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         return_sparse_X: bool = False,
         soma_chunk_size: Optional[int] = None,
         use_eager_fetch: bool = True,
+        drop_last: bool = True,
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -451,6 +488,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
                 parallel with client-side processing of the SOMA data, potentially improving overall performance at the
                 cost of doubling memory utilization. Defaults to ``True``.
+            drop_last:
+                In the distributed training setting, whether to drop up to ``world_size - 1`` rows of data that would
+                otherwise be returned in the last batch. This is necessary to ensure that each process receives the same
+                number of rows of data, which is required for the distributed training process to work correctly. 
 
         Lifecycle:
             experimental
@@ -472,6 +513,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._var_joinids = None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
+        self._drop_last = drop_last
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
@@ -497,6 +539,18 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             self._encoders = self._build_obs_encoders(query)
 
         self._initialized = True
+        
+        self._sizes = split_array_sizes(
+            total_size=len(self._obs_joinids), 
+            num_splits=WORLD_SIZE,
+        )
+        self._min_len = min(self._sizes)
+        self._max_len = max(self._sizes)
+        assert self._max_len - self._min_len <= 1, (self._max_len, self._min_len)
+        if self._drop_last:
+            self._size = self._min_len
+        else:
+            self._size = self._max_len
 
     @staticmethod
     def _subset_ids_to_partition(
@@ -533,15 +587,26 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         return partition, total_partitions
 
     def __iter__(self) -> Iterator[ObsAndXDatum]:
+        """
+        We spread the data between GPUs and then chunk it into soma_chunk_size batches, which is the
+        inverse from the original implementation. In the original implementation, different GPUs potentially
+        received different amounts of chunks. Instead, we spread the data between GPUs, and either pad or drop
+        the remainder so that all GPUs have the same number of samples. This garantees that all GPUs have the same
+        number of batches. At most, WORLD_SIZE - 1 samples are dropped or added as padding, which is totally fine.
+
+        """
         self._init()
         assert self._obs_joinids is not None
         assert self._var_joinids is not None
 
         if self.soma_chunk_size is None:
-            # set soma_chunk_size to utilize ~1 GiB of RAM per SOMA chunk; assumes 95% X data sparsity, 8 bytes for the
-            # X value and 8 bytes for the sparse matrix indices, and a 100% working memory overhead (2x).
+            # set soma_chunk_size to utilize ~1 GiB of RAM per SOMA chunk; 
+            # assumes 95% X data sparsity, 8 bytes for the
+            # X value and 8 bytes for the sparse matrix indices, 
+            # and a 100% working memory overhead (2x).
             X_row_memory_size = 0.05 * len(self._var_joinids) * 8 * 3 * 2
-            self.soma_chunk_size = int((1 * 1024**3) / X_row_memory_size)
+            self.soma_chunk_size = int((1 * 1024 ** 3 ) / X_row_memory_size)
+
         pytorch_logger.debug(f"Using {self.soma_chunk_size=}")
 
         if (
@@ -554,21 +619,43 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
             )
 
+        our_ids = split_array_only_idxs(
+            array=self._obs_joinids, 
+            num_splits=WORLD_SIZE, 
+            idx=RANK,
+        )
+        assert len(our_ids) == self._sizes[RANK], (len(our_ids), self._sizes[RANK])
+
+        # Either drop or pad the remainder so that all GPUs have the same number of samples.
+        if self._max_len != self._min_len:
+            if self._drop_last:
+                our_ids = our_ids[:self._min_len]
+            else:
+                padding_len = (self._max_len - len(our_ids))
+                assert 0 <= padding_len <= 1, padding_len
+                our_ids = np.concatenate([our_ids, our_ids[:padding_len]])
+                our_ids = np.array(our_ids, dtype=np.int64)
+                assert len(our_ids) == self._max_len, (len(our_ids), self._max_len)
+
         # chunk the obs joinids into batches of size soma_chunk_size
-        obs_joinids_chunked = self._chunk_ids(self._obs_joinids, self.soma_chunk_size)
+        obs_joinids_chunked = self._chunk_ids(our_ids, self.soma_chunk_size)
 
         # globally shuffle the chunks, if requested
         if self._shuffle_rng:
             self._shuffle_rng.shuffle(obs_joinids_chunked)
 
-        # subset to a single partition, as needed for distributed training and multi-processing datat loading
+        # Contrarily to the original implementation, _computation_partitions is not 
+        # a function of the RANK or of the WORLD_SIZE. The data has already been split,
+        # & each GPU has the same number of samples.
         worker_info = torch.utils.data.get_worker_info()
         partition, partitions = self._compute_partitions(
             loader_partition=worker_info.id if worker_info else 0,
             loader_partitions=worker_info.num_workers if worker_info else 1,
-            dist_partition=dist.get_rank() if dist.is_initialized() else 0,
-            num_dist_partitions=dist.get_world_size() if dist.is_initialized() else 1,
+            dist_partition=0,
+            num_dist_partitions=1,
         )
+
+        assert isinstance(our_ids, np.ndarray), type(our_ids).mro()
         obs_joinids_chunked_partition: List[npt.NDArray[np.int64]] = self._subset_ids_to_partition(
             obs_joinids_chunked, partition, partitions
         )
@@ -588,10 +675,18 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 shuffle_rng=self._shuffle_rng,
             )
 
-            yield from obs_and_x_iter
+            for obs_and_x in obs_and_x_iter:
+                x, obs = obs_and_x
+                if self.batch_size == 1:
+                    yield x.unsqueeze(0), obs.unsqueeze(0)
+                yield x, obs
 
             pytorch_logger.debug(
-                "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
+                "max process memory usage=" +
+                f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
+            )
+            pytorch_logger.debug(
+                f"Done with {type(self).__name__}.__iter__ for partition {partition + 1} of {partitions}"
             )
 
     @staticmethod
@@ -600,11 +695,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         pytorch_logger.debug(f"Shuffling {len(ids)} obs joinids into {num_chunks} chunks of {chunk_size}")
         return np.array_split(ids, num_chunks)
 
-    def __len__(self) -> int:
-        self._init()
-        assert self._obs_joinids is not None
-
-        return len(self._obs_joinids)
+    def __len__(self):
+        self._init() 
+        
+        return self._size
 
     def __getitem__(self, index: int) -> ObsAndXDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
