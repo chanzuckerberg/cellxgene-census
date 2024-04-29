@@ -1,6 +1,8 @@
 # census_embeddings_indexer
 
-This is a Docker+WDL pipeline for building [TileDB-Vector-Search](https://github.com/TileDB-Inc/TileDB-Vector-Search) indexes for Census cell embeddings, supporting cell similarity search in embedding space. The pipeline consumes one or more of the existing TileDB arrays for hosted and contributed [Census embeddings](https://cellxgene.cziscience.com/census-models) stored on S3. The resulting indexes are themselves TileDB groups to be stored on S3.
+This is a Docker+WDL pipeline to build [TileDB-Vector-Search](https://github.com/TileDB-Inc/TileDB-Vector-Search) indexes for Census cell embeddings, supporting cell similarity search in embedding space. It's meant to run on the AWS HealthOmics workflow service using the [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run) launcher (assuming account setup documented there).
+
+The pipeline consumes one or more of the existing TileDB arrays for hosted and contributed [Census embeddings](https://cellxgene.cziscience.com/census-models) stored on S3. The resulting indexes are themselves TileDB groups to be stored on S3.
 
 ```
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)

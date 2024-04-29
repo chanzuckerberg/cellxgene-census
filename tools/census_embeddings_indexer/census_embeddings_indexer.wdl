@@ -64,7 +64,7 @@ task indexer {
 
     runtime {
         cpu: cpu
-        memory: "~{2*cpu}G"
+        memory: "~{4*cpu}G"
         docker: docker
     }
 
