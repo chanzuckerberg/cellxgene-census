@@ -11,8 +11,8 @@ jobs:
   unit_tests_python_api:
     strategy:
       matrix:
-        os: [single-cell-8c64g-runner, macos-latest]
-        python-version: ["3.9", "3.10", "3.11"]
+        os: [single-cell-8c64g-runner]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: ${{matrix.os}}
 
