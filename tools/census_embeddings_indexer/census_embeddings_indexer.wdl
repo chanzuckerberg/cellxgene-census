@@ -26,7 +26,6 @@ task indexer {
         String embeddings_s3_uri
         String s3_region
         String embeddings_name = basename(embeddings_s3_uri)
-        Int partitions = 100
 
         String docker
         Int cpu = 32
@@ -36,6 +35,7 @@ task indexer {
         set -euxo pipefail
 
         python3 << 'EOF'
+        import math
         import tiledb
         import tiledb.vector_search as vs
 
@@ -44,21 +44,25 @@ task indexer {
 
         source_uri = "~{embeddings_s3_uri}".replace("s3_//", "s3://")
         with tiledb.open(source_uri, config=config) as emb_array:
-            emb_shape = emb_array.shape
+            N, M = emb_array.shape
+        input_vectors_per_work_item = 1_500_000_000 // M  # controls memory usage
 
         vs.ingest(
             config=config,
             source_uri=source_uri,
             source_type="TILEDB_SPARSE_ARRAY",
-            dimensions=emb_shape[1],
+            dimensions=M,
             index_type="IVF_FLAT",
             index_uri="./~{embeddings_name}",
-            partitions=~{partitions},
-            training_sampling_policy=vs.ingestion.TrainingSamplingPolicy.RANDOM
+            partitions=math.ceil(math.sqrt(N)),
+            training_sampling_policy=vs.ingestion.TrainingSamplingPolicy.RANDOM,
+            input_vectors_per_work_item=input_vectors_per_work_item,
+            input_vectors_per_work_item_during_sampling=input_vectors_per_work_item,
+            verbose=True,
         )
 
         final_index = vs.ivf_flat_index.IVFFlatIndex(uri="./~{embeddings_name}", memory_budget=1024*1048756)
-        assert final_index.size == emb_shape[0]
+        assert final_index.size == N
         EOF
     >>>
 

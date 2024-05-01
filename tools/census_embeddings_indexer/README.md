@@ -14,11 +14,14 @@ aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_
 docker push ${ECR_ENDPT}/omics:census_embeddings_indexer
 
 miniwdl-omics-run census_embeddings_indexer.wdl \
-    embeddings_s3_uris=s3_//cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/census_data/homo_sapiens/ms/RNA/obsm/scvi \
+    embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-czi-1 \
+    embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-czi-5 \
+    embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-1 \
+    embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-2 \
     s3_region=$AWS_DEFAULT_REGION \
     docker=${ECR_ENDPT}/omics:census_embeddings_indexer \
     --output-uri s3://mlin-census-scratch/census_embeddings_indexer/out/ \
     --role poweromics
 ```
 
-(The `embeddings_s3_uris=s3_//...` is a workaround for an AWS-side existence check that doesn't seem to work right on public buckets.)
+(The `embeddings_s3_uris=s3_//...` with `s3_//` instead of `s3://` is a workaround for an AWS-side existence check that doesn't seem to work right on public buckets.)
