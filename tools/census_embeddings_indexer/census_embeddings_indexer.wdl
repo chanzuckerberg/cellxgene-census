@@ -29,7 +29,7 @@ task indexer {
         Int partitions = 100
 
         String docker
-        Int cpu = 16
+        Int cpu = 32
     }
 
     command <<<
@@ -57,14 +57,14 @@ task indexer {
             training_sampling_policy=vs.ingestion.TrainingSamplingPolicy.RANDOM
         )
 
-        with vs.ivf_flat_index.IVFFlatIndex(uri="./~{embeddings_name}", memory_budget=1024*1048756) as final_index:
-            assert final_index.size == emb_shape[0]
+        final_index = vs.ivf_flat_index.IVFFlatIndex(uri="./~{embeddings_name}", memory_budget=1024*1048756)
+        assert final_index.size == emb_shape[0]
         EOF
     >>>
 
     runtime {
         cpu: cpu
-        memory: "~{4*cpu}G"
+        memory: "~{8*cpu}G"
         docker: docker
     }
 
