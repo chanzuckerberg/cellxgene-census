@@ -110,11 +110,11 @@ def pcopyfile(
         # read block into memory
         with copy.copy(filelike) as f:
             sleep_for_secs = 3
-            last_error: aiohttp.ClientPayloadError | None = None
+            last_error: aiohttp.ClientPayloadError | aiohttp.ClientResponseError | None = None
             for attempt in range(4):
                 try:
                     return (blk_off, read_block(f, blk_off, blk_len))
-                except (aiohttp.ClientPayloadError, ConnectionError) as e:
+                except (aiohttp.ClientPayloadError, aiohttp.ClientResponseError, ConnectionError) as e:
                     logger.error(f"Fetch of {from_url} failed: {str(e)}")
                     last_error = e
                     time.sleep(2**attempt * sleep_for_secs)
