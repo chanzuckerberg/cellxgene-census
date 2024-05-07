@@ -52,4 +52,4 @@ jobs:
 
       - name: Test with pytest (API, main tests)
         run: |
-          PYTHONPATH=. pytest -v -rP -m lts_compat_check ./api/python/cellxgene_census/tests/ --census_version ${{ matrix.census-build-version }}
+          PYTHONPATH=. pytest -v -rP -m lts_compat_check ./api/python/cellxgene_census/tests/test_lts_compat.py --census_version ${{ matrix.census-build-version }}
