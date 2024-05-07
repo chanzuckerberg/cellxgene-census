@@ -20,7 +20,7 @@ jobs:
           - "2023-12-15"
           - "2023-07-25"
           - "2023-05-15"
-        cellxgene-census-version:
+        py-pkg-version:
           - "~=1.8.0"
           - "~=1.9.0"
           - "~=1.10.0"
@@ -44,7 +44,7 @@ jobs:
           python -m pip install -U pip setuptools wheel
           pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
 
-          if [ {{matrix.cellxgene-census-version}} != "head-of-main" ]; then
+          if [ {{matrix.py-pkg-version}} == "head-of-main" ]; then
             pip install -e ./api/python/cellxgene_census/
           else
             pip install -U cellxgene_census==${{ matrix.py-pkg-version }}
