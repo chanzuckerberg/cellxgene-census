@@ -14,8 +14,7 @@ If you believe you have found a security issue, we would appreciate notification
 - `cd` to the root of this repository
 - `pip install -e api/python/cellxgene_census`
 - To install dependencies needed to work on the [experimental](./src/cellxgene_census/experimental/) portion of the API:
-  `pip install -e api/python/cellxgene_census[experimental]`.  
-   **NOTE**: It may be necessary to escape the '[' and ']' with a '\\' in some shell environments.
+  `pip install -e 'api/python/cellxgene_census[experimental]'`.
 - `pip install jupyterlab`
 - **Test it!** Either open up a new `jupyter` notebook or the `python` interpreter and run this code:
 
@@ -63,7 +62,3 @@ The "stable" release is currently 2023-12-15. Specify 'census_version="2023-12-1
 ```
 
 - Learn more about the Census API by going through the tutorials in the [notebooks](../notebooks/)
-
-## Release
-
-To release a new version of the Census API, follow the [release process](../../release_process.md)
