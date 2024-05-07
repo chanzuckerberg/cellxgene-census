@@ -43,7 +43,8 @@ jobs:
         run : |
           export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
           export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-          Rscript -e 'install.packages(c("cellxgene.census", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"))'
+          Rscript -e 'install.packages(c("cellxgene.census", "Seurat", "BiocManager", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"))'
+          Rscript -e 'BiocManager::install("SingleCellExperiment")'
       - name: run unit tests
         # [re-]fetch the cellxgene.census source package which includes the unit test code to run
         run: |
