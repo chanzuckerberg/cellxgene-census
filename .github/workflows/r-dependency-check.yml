@@ -27,24 +27,11 @@ jobs:
       - name: install packages (macOS)
         if: matrix.os == 'macos-latest'
         run: Rscript -e 'install.packages(c("igraph"), type="binary")'
-      - name: Misc openssl fixes
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install openssl@1.1
-          brew link --overwrite openssl@1.1
-      - name: install cellxgene.census and dependencies (Linux)
-        if: matrix.os != 'macos-latest'
+      - name: install cellxgene.census and dependencies
         # This should follow our user-facing instructions to install cellxgene.census.
         run: |
-            Rscript -e 'install.packages(c("cellxgene.census", "Seurat", "BiocManager", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"), type="source")'
+            Rscript -e 'install.packages(c("cellxgene.census", "Seurat", "BiocManager", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"))'
             Rscript -e 'BiocManager::install("SingleCellExperiment")'
-      - name: install cellxgene.census and dependencies (Mac)
-        if: matrix.os == 'macos-latest'
-        run : |
-          export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-          export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-          Rscript -e 'install.packages(c("cellxgene.census", "Seurat", "BiocManager", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"))'
-          Rscript -e 'BiocManager::install("SingleCellExperiment")'
       - name: run unit tests
         # [re-]fetch the cellxgene.census source package which includes the unit test code to run
         run: |
