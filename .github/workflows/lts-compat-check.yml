@@ -47,7 +47,7 @@ jobs:
           if [ {{matrix.py-pkg-version}} == "head-of-main" ]; then
             pip install -e ./api/python/cellxgene_census/
           else
-            pip install -U cellxgene_census==${{ matrix.py-pkg-version }}
+            pip install -U cellxgene_census${{ matrix.py-pkg-version }}
           fi
 
       - name: Test with pytest (API, main tests)
