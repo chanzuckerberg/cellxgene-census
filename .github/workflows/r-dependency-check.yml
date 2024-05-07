@@ -27,12 +27,9 @@ jobs:
       - name: install packages (macOS)
         if: matrix.os == 'macos-latest'
         run: Rscript -e 'install.packages(c("igraph"), type="binary")'
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-      - name: install openssl via Homebrew
+      - name: Fix xcode-select on macOS
         if: matrix.os == 'macos-latest'
-        run: brew install openssl
+        run: xcode-select --install
       - name: install cellxgene.census and dependencies (Linux)
         # This should follow our user-facing instructions to install cellxgene.census.
         run: |
