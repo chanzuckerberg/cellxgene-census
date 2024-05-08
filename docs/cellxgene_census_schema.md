@@ -1,6 +1,6 @@
 # CZ CELLxGENE Discover Census Schema
 
-**Version**: 2.0.0
+**Version**: 2.0.1
 
 **Last edited**: March, 2024.
 
