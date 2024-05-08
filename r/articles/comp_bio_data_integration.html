@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.13.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -199,7 +199,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindVariableFeatures.html" class="external-link">FindVariableFeatures</a></span><span class="op">(</span><span class="va">seurat_obj</span>, selection.method <span class="op">=</span> <span class="st">"vst"</span>, nfeatures <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span></span></code></pre></div>
 <p>And now perform PCA and UMAP</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seurat_obj</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj</span>, features <span class="op">=</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seurat_obj</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
@@ -244,7 +244,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s inspect the results by doing normalization and then UMAP visulization.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
 <span></span>
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ScaleData.html" class="external-link">ScaleData</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -295,36 +295,40 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span>
+<span><span class="co">#&gt; Warning: Layer counts isn't present in the assay object; returning NULL</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span>
+<span><span class="co">#&gt; Layer counts isn't present in the assay object; returning NULL</span></span>
 <span><span class="co">#&gt; Merging dataset 1 into 2</span></span>
 <span><span class="co">#&gt; Extracting anchors for merged samples</span></span>
 <span><span class="co">#&gt; Finding integration vectors</span></span>
 <span><span class="co">#&gt; Finding integration vector weights</span></span>
 <span><span class="co">#&gt; Integrating data</span></span>
+<span><span class="co">#&gt; Warning: Layer counts isn't present in the assay object; returning NULL</span></span>
 <span><span class="co">#&gt; Warning: Assay integrated changing from Assay to SCTAssay</span></span>
+<span><span class="co">#&gt; Warning: Layer counts isn't present in the assay object; returning NULL</span></span>
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span></code></pre></div>
 <p>And inspect the new results by UMAP.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
 <span></span>
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 01:35:47 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 01:35:47 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 01:35:47 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 01:35:47 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 20:18:51 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 20:18:51 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 20:18:51 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 20:18:51 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 01:35:49 Writing NN index file to temp file /tmp/RtmpJ4F1VZ/file114c72bfc11d8</span></span>
-<span><span class="co">#&gt; 01:35:49 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 01:35:53 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 01:35:54 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 01:35:55 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
-<span><span class="co">#&gt; 01:35:55 Commencing optimization for 200 epochs, with 410528 positive edges</span></span>
-<span><span class="co">#&gt; 01:36:00 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 20:18:53 Writing NN index file to temp file /tmp/RtmpYWm1dg/file1cda64fa1d739</span></span>
+<span><span class="co">#&gt; 20:18:53 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 20:18:56 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 20:18:56 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 20:18:57 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 20:18:58 Commencing optimization for 200 epochs, with 410528 positive edges</span></span>
+<span><span class="co">#&gt; 20:19:01 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
