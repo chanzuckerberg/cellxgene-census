@@ -442,6 +442,61 @@ def test_distributed__returns_data_partition_for_rank(
 
 @pytest.mark.experimental
 # noinspection PyTestParametrized
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,soma_chunk_size,rank,expected",
+    [
+        # rows equally divisible by world size
+        (9, 3, pytorch_x_value_gen, 3, 0, [8, 7, 6]),
+        (9, 3, pytorch_x_value_gen, 3, 1, [2, 1, 0]),
+        (9, 3, pytorch_x_value_gen, 3, 2, [5, 4, 3]),
+        # rows not equally divisible by world size, 1 extra row
+        (10, 3, pytorch_x_value_gen, 3, 0, [8, 9, 7, 6]),
+        (10, 3, pytorch_x_value_gen, 3, 1, [0, 1, 2]),
+        (10, 3, pytorch_x_value_gen, 3, 2, [3, 4, 5]),
+        # rows not equally divisible by world size, 2 extra rows
+        (11, 3, pytorch_x_value_gen, 3, 0, [9, 10, 7, 6]),
+        (11, 3, pytorch_x_value_gen, 3, 1, [8, 0, 2, 1]),
+        (11, 3, pytorch_x_value_gen, 3, 2, [3, 4, 5]),
+        # insufficient rows for world size (unlikely in practice!)
+        (2, 3, pytorch_x_value_gen, 3, 0, [0]),
+        (2, 3, pytorch_x_value_gen, 3, 1, [1]),
+        (2, 3, pytorch_x_value_gen, 3, 2, []),
+    ],
+)
+def test_distributed__returns_data_partition_for_rank_globally_shuffled(
+    soma_experiment: Experiment, soma_chunk_size: int, rank: int, expected: List[int]
+) -> None:
+    """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
+    using mocks to avoid having to do real PyTorch distributed setup."""
+
+    with patch("cellxgene_census.experimental.ml.pytorch.dist.is_initialized") as mock_dist_is_initialized, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_rank"
+    ) as mock_dist_get_rank, patch(
+        "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
+    ) as mock_dist_get_world_size:
+        mock_dist_is_initialized.return_value = True
+        mock_dist_get_rank.return_value = rank
+        mock_dist_get_world_size.return_value = 3
+
+        dp = ExperimentDataPipe(
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            obs_column_names=["label"],
+            soma_chunk_size=soma_chunk_size,
+            shuffle=True,
+            seed=2,
+        )
+        full_result = list(iter(dp))
+
+        soma_joinids = [t[1][0].item() for t in full_result]
+
+        print(f"{soma_joinids} == {expected}")
+        assert soma_joinids == expected
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(12, 3, pytorch_x_value_gen)])
 def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
     soma_experiment: Experiment,

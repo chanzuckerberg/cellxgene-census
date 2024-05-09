@@ -570,8 +570,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 num_dist_partitions=dist.get_world_size() if dist.is_initialized() else 1,
             )
 
-            # first unchunk (flatten), so that when we subset to a partition, we splitting on rows, not chunks (which would create more imbalanced partitions)
-            # flatten obs_joinids_chunked
+            # first unchunk (flatten), so that when we subset to a partition the splitting is performed on
+            # rows and not chunks, which would create more imbalanced partitions
             obs_joinids = np.concatenate(obs_joinids_chunked)
             obs_joinids_partition = self._subset_ids_to_partition(obs_joinids, partition, partitions)
             obs_joinids_chunked = self._chunk_ids(obs_joinids_partition, self.soma_chunk_size)
