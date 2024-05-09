@@ -388,11 +388,31 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
     assert sorted(soma_joinids) == list(range(6))
 
 
-@pytest.mark.experimental
+# @pytest.mark.experimental
 # noinspection PyTestParametrized
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,soma_chunk_size,rank,expected",
+    [
+        # rows equally divisible by world size
+        (9, 3, pytorch_x_value_gen, 3, 0, [0, 1, 2]),
+        (9, 3, pytorch_x_value_gen, 3, 1, [3, 4, 5]),
+        (9, 3, pytorch_x_value_gen, 3, 2, [6, 7, 8]),
+        # rows not equally divisible by world size, 1 extra row
+        (10, 3, pytorch_x_value_gen, 3, 0, [0, 1, 2, 3]),
+        (10, 3, pytorch_x_value_gen, 3, 1, [4, 5, 6]),
+        (10, 3, pytorch_x_value_gen, 3, 2, [7, 8, 9]),
+        # rows not equally divisible by world size, 2 extra rows
+        (11, 3, pytorch_x_value_gen, 3, 0, [0, 1, 2, 3]),
+        (11, 3, pytorch_x_value_gen, 3, 1, [4, 5, 6, 7]),
+        (11, 3, pytorch_x_value_gen, 3, 2, [8, 9, 10]),
+        # insufficient rows for world size (unlikely in practice!)
+        (2, 3, pytorch_x_value_gen, 3, 0, [0]),
+        (2, 3, pytorch_x_value_gen, 3, 1, [1]),
+        (2, 3, pytorch_x_value_gen, 3, 2, []),
+    ],
+)
 def test_distributed__returns_data_partition_for_rank(
-    soma_experiment: Experiment,
+    soma_experiment: Experiment, soma_chunk_size: int, rank: int, expected: List[int]
 ) -> None:
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
     using mocks to avoid having to do real PyTorch distributed setup."""
@@ -403,7 +423,7 @@ def test_distributed__returns_data_partition_for_rank(
         "cellxgene_census.experimental.ml.pytorch.dist.get_world_size"
     ) as mock_dist_get_world_size:
         mock_dist_is_initialized.return_value = True
-        mock_dist_get_rank.return_value = 1
+        mock_dist_get_rank.return_value = rank
         mock_dist_get_world_size.return_value = 3
 
         dp = ExperimentDataPipe(
@@ -411,7 +431,7 @@ def test_distributed__returns_data_partition_for_rank(
             measurement_name="RNA",
             X_name="raw",
             obs_column_names=["label"],
-            soma_chunk_size=2,
+            soma_chunk_size=soma_chunk_size,
         )
         full_result = list(iter(dp))
 
@@ -419,7 +439,8 @@ def test_distributed__returns_data_partition_for_rank(
 
         # Of the 6 obs rows, the PyTorch process of rank 1 should get [2, 3]
         # (rank 0 gets [0, 1], rank 2 gets [4, 5])
-        assert sorted(soma_joinids) == [2, 3]
+        print(soma_joinids)
+        assert sorted(soma_joinids) == expected
 
 
 @pytest.mark.experimental
