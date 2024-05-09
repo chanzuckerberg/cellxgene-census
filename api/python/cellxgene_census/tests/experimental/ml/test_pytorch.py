@@ -388,7 +388,7 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
     assert sorted(soma_joinids) == list(range(6))
 
 
-# @pytest.mark.experimental
+@pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize(
     "obs_range,var_range,X_value_gen,soma_chunk_size,rank,expected",
@@ -437,9 +437,6 @@ def test_distributed__returns_data_partition_for_rank(
 
         soma_joinids = [t[1][0].item() for t in full_result]
 
-        # Of the 6 obs rows, the PyTorch process of rank 1 should get [2, 3]
-        # (rank 0 gets [0, 1], rank 2 gets [4, 5])
-        print(soma_joinids)
         assert sorted(soma_joinids) == expected
 
 

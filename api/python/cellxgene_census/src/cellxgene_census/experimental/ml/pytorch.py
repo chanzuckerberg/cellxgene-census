@@ -553,29 +553,35 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 "(see https://github.com/pytorch/pytorch/issues/20248)"
             )
 
-        # subset to a single partition, as needed for distributed training and multi-processing dataset loading
-        worker_info = torch.utils.data.get_worker_info()
-        partition, partitions = self._compute_partitions(
-            loader_partition=worker_info.id if worker_info else 0,
-            loader_partitions=worker_info.num_workers if worker_info else 1,
-            dist_partition=dist.get_rank() if dist.is_initialized() else 0,
-            num_dist_partitions=dist.get_world_size() if dist.is_initialized() else 1,
-        )
-        obs_joinids_partition = self._subset_ids_to_partition(self._obs_joinids, partition, partitions)
-
         # chunk the obs joinids into batches of size soma_chunk_size
-        obs_joinids_chunked_partition = self._chunk_ids(obs_joinids_partition, self.soma_chunk_size)
+        obs_joinids_chunked = self._chunk_ids(self._obs_joinids, self.soma_chunk_size)
 
         # globally shuffle the chunks, if requested
         if self._shuffle_rng:
-            self._shuffle_rng.shuffle(obs_joinids_chunked_partition)
+            self._shuffle_rng.shuffle(obs_joinids_chunked)
+
+        # subset to a single partition, as needed for distributed training and multi-processing dataset loading
+        worker_info = torch.utils.data.get_worker_info()
+        if worker_info or dist.is_initialized():
+            partition, partitions = self._compute_partitions(
+                loader_partition=worker_info.id if worker_info else 0,
+                loader_partitions=worker_info.num_workers if worker_info else 1,
+                dist_partition=dist.get_rank() if dist.is_initialized() else 0,
+                num_dist_partitions=dist.get_world_size() if dist.is_initialized() else 1,
+            )
+
+            # first unchunk (flatten), so that when we subset to a partition, we splitting on rows, not chunks (which would create more imbalanced partitions)
+            # flatten obs_joinids_chunked
+            obs_joinids = np.concatenate(obs_joinids_chunked)
+            obs_joinids_partition = self._subset_ids_to_partition(obs_joinids, partition, partitions)
+            obs_joinids_chunked = self._chunk_ids(obs_joinids_partition, self.soma_chunk_size)
 
         with _open_experiment(self.exp_uri, self.aws_region) as exp:
             obs_and_x_iter = _ObsAndXIterator(
                 obs=exp.obs,
                 X=exp.ms[self.measurement_name].X[self.layer_name],
                 obs_column_names=self.obs_column_names,
-                obs_joinids_chunked=obs_joinids_chunked_partition,
+                obs_joinids_chunked=obs_joinids_chunked,
                 var_joinids=self._var_joinids,
                 batch_size=self.batch_size,
                 encoders=self.obs_encoders,
