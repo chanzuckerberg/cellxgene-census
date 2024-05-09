@@ -22,8 +22,8 @@ Imports:
   jsonlite,
   methods,
   stats,
-  tiledbsoma,
-  tiledb
+  tiledbsoma (>= 1.10.0), tiledbsoma (<= 1.10.99),
+  tiledb (>= 0.26.0), tiledb (<= 0.26.99),
 Suggests:
   bit64,
   knitr,
