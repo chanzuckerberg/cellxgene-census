@@ -36,6 +36,12 @@ on:
         required: false
         default: ""
         type: string
+      tiledbsoma_r_branch:
+        # e.g.
+        description: "Install tiledbsoma from a specific branch"
+        required: false
+        default: ""
+        type: string
 
 jobs:
   py_unit_tests:
@@ -109,6 +115,13 @@ jobs:
           working-directory: ./api/r/cellxgene.census
           extra-packages: any::rcmdcheck, any::remotes
           cache: true
+
+      - name: install tiledbsoma version override
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tiledbsoma_r_branch != ''
+        run: |
+          Rscript -e 'remove.packages(c("tiledb", "tiledbsoma"))'
+          Rscript -e 'install.packages("remotes")'
+          Rscript -e 'remotes::install_github("https://github.com/single-cell-data/TileDB-SOMA@${{ github.event.inputs.tiledbsoma_r_branch }}", subdir = "apis/r")'
 
       - name: testthat
         run: |
