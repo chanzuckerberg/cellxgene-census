@@ -254,7 +254,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-18 10:39:44 URL:https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz [7621991/7621991] -&gt; &#34;data/pbmc3k_filtered_gene_bc_matrices.tar.gz&#34; [1]
+2024-05-10 17:12:05 URL:https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz [7621991/7621991] -&gt; &#34;data/pbmc3k_filtered_gene_bc_matrices.tar.gz&#34; [1]
 </pre></div></div>
 </div>
 </section>
@@ -266,14 +266,19 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census.experimental</span>
 
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;homo_sapiens&quot;</span>
 
-<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
 
-<span class="n">scvi_info</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span>
-<span class="n">scvi_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">scvi_info</span><span class="p">[</span><span class="s2">&quot;CxG_embedding_info&quot;</span><span class="p">])</span>
+<span class="n">scvi_info</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">get_embedding_metadata_by_name</span><span class="p">(</span>
+    <span class="n">embedding_name</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">,</span>
+    <span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -291,24 +296,16 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&#39;s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/model.pt&#39;
+&#39;s3://cellxgene-contrib-public/models/scvi/2024-02-12/homo_sapiens/model.pt&#39;
 </pre></div></div>
 </div>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>aws<span class="w"> </span>s3<span class="w"> </span>cp<span class="w"> </span>--no-sign-request<span class="w">  </span>--no-progress<span class="w"> </span>--only-show-errors<span class="w"> </span>s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/model.pt<span class="w"> </span><span class="m">2023</span>-12-15-scvi-homo-sapiens/scvi.model/
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>aws<span class="w"> </span>s3<span class="w"> </span>cp<span class="w"> </span>--no-sign-request<span class="w"> </span>--no-progress<span class="w"> </span>--only-show-errors<span class="w"> </span>s3://cellxgene-contrib-public/models/scvi/2024-02-12/homo_sapiens/model.pt<span class="w"> </span><span class="m">2024</span>-02-12-scvi-homo-sapiens/scvi.model/
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/model.pt to 2023-12-15-scvi-homo-sapiens/scvi.model/model.pt
-</pre></div></div>
 </div>
 </section>
 </section>
@@ -351,7 +348,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15-scvi-homo-sapiens&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;2024-02-12-scvi-homo-sapiens&quot;</span>
 
 <span class="n">model_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">/scvi.model&quot;</span>
 <span class="n">scvi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SCVI</span><span class="o">.</span><span class="n">prepare_query_anndata</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">)</span>
@@ -363,8 +360,8 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-<span class="ansi-blue-fg">INFO    </span> File <span class="ansi-cyan-intense-fg ansi-bold">2023</span>-<span class="ansi-cyan-intense-fg ansi-bold">12</span>-<span class="ansi-cyan-intense-fg ansi-bold">15</span>-scvi-homo-sapiens/scvi.model/model.pt already downloaded
-<span class="ansi-blue-fg">INFO    </span> Found <span class="ansi-cyan-intense-fg ansi-bold">62.2</span>% reference vars in query data.
+INFO     File 2024-02-12-scvi-homo-sapiens/scvi.model/model.pt already downloaded
+INFO     Found 62.2% reference vars in query data.
 </pre></div></div>
 </div>
 <p>Load the query data into the model, set “is_trained” to True to trick the model into thinking it was already trained, and do a forward pass through the model to get the latent reprsentation of the query data.</p>
@@ -393,7 +390,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-<span class="ansi-blue-fg">INFO    </span> File <span class="ansi-cyan-intense-fg ansi-bold">2023</span>-<span class="ansi-cyan-intense-fg ansi-bold">12</span>-<span class="ansi-cyan-intense-fg ansi-bold">15</span>-scvi-homo-sapiens/scvi.model/model.pt already downloaded
+INFO     File 2024-02-12-scvi-homo-sapiens/scvi.model/model.pt already downloaded
 </pre></div></div>
 </div>
 <p>Run UMAP</p>
@@ -457,29 +454,32 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 </div>
 <p>Based on the expression of the provided marker genes, we can map the following Leiden clusters to these cell type labels:</p>
 <ul class="simple">
-<li><p>0,1 = CD4 T cells</p></li>
-<li><p>4,5 = CD14+ monocytes</p></li>
-<li><p>3 = B cells</p></li>
-<li><p>2,8 = CD8 T cells</p></li>
-<li><p>6 = NK cells</p></li>
+<li><p>2,3,4,5,10 = CD4 T cells</p></li>
+<li><p>0 = CD14+ monocytes</p></li>
+<li><p>1 = B cells</p></li>
+<li><p>6,9 = CD8 T cells</p></li>
+<li><p>8 = NK cells</p></li>
 <li><p>7 = FCGR3A+ Monocytes</p></li>
-<li><p>5 = dendritic cells</p></li>
-<li><p>9 = megakaryocytes</p></li>
+<li><p>11 = dendritic cells</p></li>
+<li><p>12 = megakaryocytes</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">original_cell_types</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CD8 T cells&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;B cells&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CD14+ monocytes&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dendritic cells&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;NK cells&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;FCGR3A+ Monocytes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;B cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CD8 T cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FCGR3A+ Monocytes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NK cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD8 T cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CD4 T cells&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dendritic cells&quot;</span><span class="p">,</span>
     <span class="s2">&quot;megakaryocytes&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 <span class="n">label_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">original_cell_types</span><span class="p">)),</span> <span class="n">original_cell_types</span><span class="p">))</span>
@@ -488,7 +488,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;original_cell_type&quot;</span><span class="p">])</span>
@@ -508,7 +508,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 <h2>Using the scVI pretrained model for <strong>cell cell type inference</strong>.<a class="headerlink" href="#Using-the-scVI-pretrained-model-for-cell-cell-type-inference." title="Permalink to this heading">¶</a></h2>
 <p>Fetch the reference scVI embeddings corresponding to some example PBMC data from Census</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
@@ -526,7 +526,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
     <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
     <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
     <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id in </span><span class="si">{</span><span class="n">dataset_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="n">obsm_layers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">],</span>
+    <span class="n">obs_embeddings</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="n">adata_census</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;feature_id&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -534,7 +534,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 </div>
 <p>Let’s run UMAP on a subset of the reference combined with the query dataset and plot the UMAP, coloring by dataset ID.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;QUERY&quot;</span>
@@ -558,12 +558,51 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 </div>
 <p>Fit a Random Forest Classifier on the reference scVI embedding fetched from Census and use it to predict cell type labels on the projected scVI embedding for the query dataset.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rfc</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">()</span>
 <span class="n">rfc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">adata_census</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">],</span> <span class="n">adata_census</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rfc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">])</span>
+
+<span class="c1"># let&#39;s get confidence scores</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">rfc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">])</span>
+<span class="n">confidence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">n_obs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">n_obs</span><span class="p">):</span>
+    <span class="n">confidence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">rfc</span><span class="o">.</span><span class="n">classes_</span> <span class="o">==</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([0.02, 0.  , 0.  , 0.52, 0.13, 0.  , 0.02, 0.  , 0.  , 0.13, 0.  ,
+       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 0.01, 0.  , 0.  , 0.  , 0.  ,
+       0.  , 0.11, 0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 0.02, 0.04])
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># let&#39;s get confidence scores</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">rfc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">])</span>
+<span class="n">confidence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">n_obs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">n_obs</span><span class="p">):</span>
+    <span class="n">confidence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">rfc</span><span class="o">.</span><span class="n">classes_</span> <span class="o">==</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]]</span>
+
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_type_probability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">confidence</span>
 </pre></div>
 </div>
 </div>
@@ -572,7 +611,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;original_cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;original_cell_type&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -580,12 +619,27 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_34_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_34_0.png" />
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_36_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_36_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;predicted_cell_type_probability&quot;</span><span class="p">,</span> <span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_37_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_37_0.png" />
 </div>
 </div>
 <p>Let’s look at the predicted cell type annotations on the combined query and reference datasets</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_combined</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -599,7 +653,7 @@ download: s3://cellxgene-contrib-public/models/scvi/2023-12-15/homo_sapiens/mode
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_36_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_36_0.png" />
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_39_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_scvi_model_use_39_0.png" />
 </div>
 </div>
 </section>

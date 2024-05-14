@@ -258,7 +258,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-15 14:09:38 URL:https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz [7621991/7621991] -&gt; &#34;data/pbmc3k_filtered_gene_bc_matrices.tar.gz&#34; [1]
+2024-05-10 17:53:27 URL:https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz [7621991/7621991] -&gt; &#34;data/pbmc3k_filtered_gene_bc_matrices.tar.gz&#34; [1]
 </pre></div></div>
 </div>
 </section>
@@ -270,14 +270,19 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census.experimental</span>
 
-<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;homo_sapiens&quot;</span>
 
-<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">)</span>
 
-<span class="n">geneformer_info</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span>
-<span class="n">geneformer_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">geneformer_info</span><span class="p">[</span><span class="s2">&quot;CxG_embedding_info&quot;</span><span class="p">])</span>
+<span class="n">geneformer_info</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">get_embedding_metadata_by_name</span><span class="p">(</span>
+    <span class="n">embedding_name</span><span class="o">=</span><span class="s2">&quot;geneformer&quot;</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">,</span>
+    <span class="n">census_version</span><span class="o">=</span><span class="n">census_version</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -404,13 +409,13 @@ Creating dataset.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "834af62ee9f54dbe98c1083f90a352b2", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "80da9e3dc4044fedb19e977493578b39", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3d73fa30975643bbb4a423b3d37a70eb", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "fa35b9c098fc4abaa9e99959b77db1f7", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 </section>
 <section id="Preparing-data-from-model">
@@ -603,6 +608,7 @@ Dataset({
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_label_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">predicted_logits</span> <span class="o">=</span> <span class="p">[</span><span class="n">predictions</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">predicted_label_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predicted_label_ids</span><span class="p">))]</span>
 <span class="n">predicted_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_mapping_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">predicted_label_ids</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -616,6 +622,7 @@ Dataset({
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predicted_labels</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_cell_subclass_probability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">predicted_logits</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">predicted_logits</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -678,15 +685,27 @@ Dataset({
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted Geneformer Annotations&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;predicted_cell_subclass_probability&quot;</span><span class="p">,</span> <span class="s2">&quot;predicted_cell_subclass&quot;</span><span class="p">],</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted Geneformer Annotations&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING: The title list is shorter than the number of panels. Using &#39;color&#39; value instead for some plots.
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_39_0.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_39_0.png" />
+<img alt="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_39_1.png" src="../../_images/notebooks_analysis_demo_comp_bio_geneformer_prediction_39_1.png" />
 </div>
 </div>
 </section>
@@ -740,7 +759,7 @@ Dataset({
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4a7549668929432f8a5ff1552ab9ee02", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9dbb0cbf2c064fc38338f18db98ca1e1", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <p>Then we simply re-order the embeddings based on <code class="docutils literal notranslate"><span class="pre">&quot;joinid&quot;</span></code> and then merge them to the original AnnData</p>
 <div class="nbinput nblast docutils container">
@@ -802,7 +821,7 @@ Dataset({
     <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
     <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
     <span class="n">obs_value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id in </span><span class="si">{</span><span class="n">dataset_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="n">obsm_layers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">],</span>
+    <span class="n">obs_embeddings</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geneformer&quot;</span><span class="p">],</span>
 <span class="p">)</span>
 </pre></div>
 </div>
