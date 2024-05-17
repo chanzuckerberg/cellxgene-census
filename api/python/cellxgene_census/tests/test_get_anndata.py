@@ -1,6 +1,7 @@
-from typing import List
+from typing import Any, List
 
 import numpy as np
+import pandas as pd
 import pytest
 import tiledbsoma as soma
 
@@ -12,7 +13,7 @@ def census() -> soma.Collection:
     return cellxgene_census.open_soma(census_version="latest")
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def lts_census() -> soma.Collection:
     return cellxgene_census.open_soma(census_version="stable")
 
@@ -264,3 +265,43 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
                 obsm_layers=["scvi"],
                 obs_embeddings=["scvi"],
             )
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param(
+            {
+                "coords": slice(100),
+                "column_names": [
+                    "soma_joinid",
+                    "cell_type",
+                    "tissue",
+                    "tissue_general",
+                    "assay",
+                ],
+            },
+            id="coords+column-names",
+        ),
+        pytest.param({"coords": slice(100, 300)}, id="coords"),
+        pytest.param({"value_filter": "tissue_general == 'vasculature'"}, id="value_filter"),
+    ],
+)
+def test_get_obs(lts_census: soma.Collection, query: dict[str, Any]) -> None:
+    def map_to_get_anndata_args(query: dict[str, Any]) -> dict[str, Any]:
+        result = {}
+        if "coords" in query:
+            result["obs_coords"] = query["coords"]
+        if "value_filter" in query:
+            result["obs_value_filter"] = query["value_filter"]
+        if "column_names" in query:
+            result["column_names"] = {"obs": query["column_names"]}
+        return result
+
+    adata_obs = cellxgene_census.get_anndata(lts_census, organism="Mus musculus", **map_to_get_anndata_args(query)).obs
+    only_obs = cellxgene_census.get_obs(lts_census, "Mus musculus", **query)
+    # account for a difference:
+    only_obs.index = only_obs.index.astype(str)
+
+    pd.testing.assert_frame_equal(adata_obs, only_obs)
