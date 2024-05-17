@@ -109,13 +109,14 @@ def get_anndata(
         raise ValueError("Cannot request both `varm_layers` and `var_embeddings` for the same embedding name")
 
     if column_names is not None:
-        if (obs_column_names is not None or var_column_names is not None):
-            raise ValueError("Both the deprecated 'column_names' argument and it's replacements were used. Please use 'obs_column_names' and 'var_column_names' only.")
+        if obs_column_names is not None or var_column_names is not None:
+            raise ValueError(
+                "Both the deprecated 'column_names' argument and it's replacements were used. Please use 'obs_column_names' and 'var_column_names' only."
+            )
         if "obs" in column_names:
             obs_column_names = column_names["obs"]
         if "var" in column_names:
             var_column_names = column_names["var"]
-
 
     with exp.axis_query(
         measurement_name,
