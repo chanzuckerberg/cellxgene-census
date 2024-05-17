@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Literal
 
 import numpy as np
 import pandas as pd
@@ -267,6 +267,18 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
             )
 
 
+def _map_to_get_anndata_args(query: dict[str, Any], axis: Literal["obs", "var"]) -> dict[str, Any]:
+    """Helper to map arguments of get_obs/ get_var to get_anndata."""
+    result = {}
+    if "coords" in query:
+        result[f"{axis}_coords"] = query["coords"]
+    if "value_filter" in query:
+        result[f"{axis}_value_filter"] = query["value_filter"]
+    if "column_names" in query:
+        result["column_names"] = {axis: query["column_names"]}
+    return result
+
+
 @pytest.mark.live_corpus
 @pytest.mark.parametrize(
     "query",
@@ -289,19 +301,37 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
     ],
 )
 def test_get_obs(lts_census: soma.Collection, query: dict[str, Any]) -> None:
-    def map_to_get_anndata_args(query: dict[str, Any]) -> dict[str, Any]:
-        result = {}
-        if "coords" in query:
-            result["obs_coords"] = query["coords"]
-        if "value_filter" in query:
-            result["obs_value_filter"] = query["value_filter"]
-        if "column_names" in query:
-            result["column_names"] = {"obs": query["column_names"]}
-        return result
-
-    adata_obs = cellxgene_census.get_anndata(lts_census, organism="Mus musculus", **map_to_get_anndata_args(query)).obs
+    adata_obs = cellxgene_census.get_anndata(
+        lts_census, organism="Mus musculus", **_map_to_get_anndata_args(query, "obs")
+    ).obs
     only_obs = cellxgene_census.get_obs(lts_census, "Mus musculus", **query)
     # account for a difference:
     only_obs.index = only_obs.index.astype(str)
 
     pd.testing.assert_frame_equal(adata_obs, only_obs)
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param(
+            {
+                "coords": slice(100),
+                "column_names": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
+            },
+            id="coords+column-names",
+        ),
+        pytest.param({"coords": slice(100, 300)}, id="coords"),
+        pytest.param({"value_filter": "feature_name in ['Gm53058', '0610010K14Rik']"}, id="value_filter"),
+    ],
+)
+def test_get_var(lts_census: soma.Collection, query: dict[str, Any]) -> None:
+    adata_var = cellxgene_census.get_anndata(
+        lts_census, organism="Mus musculus", obs_coords=slice(0), **_map_to_get_anndata_args(query, "var")
+    ).var
+    only_var = cellxgene_census.get_var(lts_census, "Mus musculus", **query)
+    # account for a difference:
+    only_var.index = only_var.index.astype(str)
+
+    pd.testing.assert_frame_equal(adata_var, only_var)

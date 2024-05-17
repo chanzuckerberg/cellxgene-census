@@ -7,7 +7,7 @@
 Methods to retrieve slices of the census as AnnData objects.
 """
 
-from typing import Optional, Sequence
+from typing import Literal, Optional, Sequence
 
 import anndata
 import pandas as pd
@@ -149,8 +149,9 @@ def get_anndata(
         return adata
 
 
-def get_obs(
+def _get_axis_metadata(
     census: soma.Collection,
+    axis: Literal["obs", "var"],
     organism: str,
     *,
     value_filter: Optional[str] = None,
@@ -159,7 +160,39 @@ def get_obs(
 ) -> pd.DataFrame:
     exp = _get_experiment(census, organism)
     coords = (slice(None),) if coords is None else (coords,)
+    if axis == "obs":
+        df = exp.obs
+    elif axis == "var":
+        df = exp.ms["RNA"].var
+    else:
+        raise ValueError(f"axis should be either 'obs' or 'var', but '{axis}' was passed")
     result: pd.DataFrame = (
-        exp.obs.read(coords=coords, column_names=column_names, value_filter=value_filter).concat().to_pandas()
+        df.read(coords=coords, column_names=column_names, value_filter=value_filter).concat().to_pandas()
     )
     return result
+
+
+def get_obs(
+    census: soma.Collection,
+    organism: str,
+    *,
+    value_filter: Optional[str] = None,
+    coords: Optional[SparseDFCoord] = slice(None),
+    column_names: Optional[Sequence[str]] = None,
+) -> pd.DataFrame:
+    return _get_axis_metadata(
+        census, "obs", organism, value_filter=value_filter, coords=coords, column_names=column_names
+    )
+
+
+def get_var(
+    census: soma.Collection,
+    organism: str,
+    *,
+    value_filter: Optional[str] = None,
+    coords: Optional[SparseDFCoord] = slice(None),
+    column_names: Optional[Sequence[str]] = None,
+) -> pd.DataFrame:
+    return _get_axis_metadata(
+        census, "var", organism, value_filter=value_filter, coords=coords, column_names=column_names
+    )

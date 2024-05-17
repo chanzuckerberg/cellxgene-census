@@ -21,7 +21,7 @@ For more information on the API, visit the `cellxgene_census repo`_. For more in
 
 from importlib import metadata
 
-from ._get_anndata import get_anndata, get_obs
+from ._get_anndata import get_anndata, get_obs, get_var
 from ._open import (
     download_source_h5ad,
     get_default_soma_context,
@@ -45,6 +45,7 @@ __all__ = [
     "download_source_h5ad",
     "get_anndata",
     "get_obs",
+    "get_var",
     "get_census_version_description",
     "get_census_version_directory",
     "get_census_mirror_directory",
