@@ -37,6 +37,8 @@ def get_anndata(
     column_names: Optional[soma.AxisColumnNames] = None,
     obs_embeddings: Optional[Sequence[str]] = (),
     var_embeddings: Optional[Sequence[str]] = (),
+    obs_column_names: Optional[Sequence[str]] | None = None,
+    var_column_names: Optional[Sequence[str]] | None = None,
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
@@ -106,6 +108,15 @@ def get_anndata(
     if varm_layers and var_embeddings and set(varm_layers) & set(var_embeddings):
         raise ValueError("Cannot request both `varm_layers` and `var_embeddings` for the same embedding name")
 
+    if column_names is not None:
+        if (obs_column_names is not None or var_column_names is not None):
+            raise ValueError("Both the deprecated 'column_names' argument and it's replacements were used. Please use 'obs_column_names' and 'var_column_names' only.")
+        if "obs" in column_names:
+            obs_column_names = column_names["obs"]
+        if "var" in column_names:
+            var_column_names = column_names["var"]
+
+
     with exp.axis_query(
         measurement_name,
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
@@ -113,7 +124,7 @@ def get_anndata(
     ) as query:
         adata = query.to_anndata(
             X_name=X_name,
-            column_names=column_names,
+            column_names={"obs": obs_column_names, "var": var_column_names},
             X_layers=X_layers,
             obsm_layers=obsm_layers,
             varm_layers=varm_layers,

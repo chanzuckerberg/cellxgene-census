@@ -1,6 +1,7 @@
 from typing import List
 
 import numpy as np
+import pandas as pd
 import pytest
 import tiledbsoma as soma
 
@@ -25,16 +26,14 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
             organism="Mus musculus",
             obs_value_filter="tissue_general == 'vasculature'",
             var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
-            column_names={
-                "obs": [
-                    "soma_joinid",
-                    "cell_type",
-                    "tissue",
-                    "tissue_general",
-                    "assay",
-                ],
-                "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
-            },
+            obs_column_names=[
+                "soma_joinid",
+                "cell_type",
+                "tissue",
+                "tissue_general",
+                "assay",
+            ],
+            var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
         )
 
     assert ad is not None
@@ -264,3 +263,64 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
                 obsm_layers=["scvi"],
                 obs_embeddings=["scvi"],
             )
+
+
+@pytest.mark.live_corpus
+def test_deprecated_column_api(census: soma.Collection) -> None:
+    """Testing for previous `column_names` argument.
+
+    See: https://github.com/chanzuckerberg/cellxgene-census/issues/1035
+    """
+    with census:
+        ad_curr = cellxgene_census.get_anndata(
+            census,
+            organism="Mus musculus",
+            obs_value_filter="tissue_general == 'vasculature'",
+            var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+            obs_column_names=[
+                "soma_joinid",
+                "cell_type",
+                "tissue",
+                "tissue_general",
+                "assay",
+            ],
+            var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
+        )
+        with pytest.warns(DeprecationWarning):
+            ad_prev = cellxgene_census.get_anndata(
+                census,
+                organism="Mus musculus",
+                obs_value_filter="tissue_general == 'vasculature'",
+                var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+                column_names={
+                    "obs": [
+                        "soma_joinid",
+                        "cell_type",
+                        "tissue",
+                        "tissue_general",
+                        "assay",
+                    ],
+                    "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
+                },
+            )
+        with pytest.raises(
+            ValueError, match=r"Both the deprecated 'column_names' argument and it's replacements were used."
+        ):
+            cellxgene_census.get_anndata(
+                census,
+                organism="Mus musculus",
+                obs_value_filter="tissue_general == 'vasculature'",
+                var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+                obs_column_names=[
+                    "soma_joinid",
+                    "cell_type",
+                ],
+                column_names={
+                    "obs": [
+                        "soma_joinid",
+                        "cell_type",
+                    ],
+                },
+            )
+    pd.testing.assert_frame_equal(ad_curr.obs, ad_prev.obs)
+    pd.testing.assert_frame_equal(ad_curr.var, ad_prev.var)
