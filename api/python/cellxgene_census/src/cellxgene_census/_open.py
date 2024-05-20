@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional, get_args
 
 import s3fs
 import tiledbsoma as soma
+from fsspec.callbacks import TqdmCallback
 
 from ._release_directory import (
     CensusLocator,
@@ -334,4 +335,8 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
         anon=True,
         cache_regions=True,
     )
-    fs.get_file(locator["uri"], to_path)
+    fs.get_file(
+        locator["uri"],
+        to_path,
+        callback=TqdmCallback(),
+    )
