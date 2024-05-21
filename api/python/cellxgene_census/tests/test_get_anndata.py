@@ -331,7 +331,7 @@ def test_get_var(lts_census: soma.Collection, query: Dict[str, Any]) -> None:
         lts_census, organism="Mus musculus", obs_coords=slice(0), **_map_to_get_anndata_args(query, "var")
     ).var
     only_var = cellxgene_census.get_var(lts_census, "Mus musculus", **query)
-    # account for a difference:
+    # AnnData instantiation converts the index to string, so we match that behaviour for comparisons sake
     only_var.index = only_var.index.astype(str)
 
     pd.testing.assert_frame_equal(adata_var, only_var)
