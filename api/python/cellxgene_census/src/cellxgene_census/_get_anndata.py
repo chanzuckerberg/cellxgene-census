@@ -8,6 +8,7 @@ Methods to retrieve slices of the census as AnnData objects.
 """
 
 from typing import Optional, Sequence
+from warnings import warn
 
 import anndata
 import tiledbsoma as soma
@@ -112,6 +113,12 @@ def get_anndata(
         if obs_column_names is not None or var_column_names is not None:
             raise ValueError(
                 "Both the deprecated 'column_names' argument and it's replacements were used. Please use 'obs_column_names' and 'var_column_names' only."
+            )
+        else:
+            warn(
+                "The argument `column_names` is deprecated and will be removed in a future release. Please use `obs_column_names` and `var_column_names` instead.",
+                FutureWarning,
+                stacklevel=2,
             )
         if "obs" in column_names:
             obs_column_names = column_names["obs"]
