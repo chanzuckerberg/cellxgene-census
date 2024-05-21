@@ -1,4 +1,4 @@
-from typing import Any, List, Literal
+from typing import Any, Dict, List, Literal
 
 import numpy as np
 import pandas as pd
@@ -267,7 +267,7 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
             )
 
 
-def _map_to_get_anndata_args(query: dict[str, Any], axis: Literal["obs", "var"]) -> dict[str, Any]:
+def _map_to_get_anndata_args(query: Dict[str, Any], axis: Literal["obs", "var"]) -> Dict[str, Any]:
     """Helper to map arguments of get_obs/ get_var to get_anndata."""
     result = {}
     if "coords" in query:
@@ -300,7 +300,7 @@ def _map_to_get_anndata_args(query: dict[str, Any], axis: Literal["obs", "var"])
         pytest.param({"value_filter": "tissue_general == 'vasculature'"}, id="value_filter"),
     ],
 )
-def test_get_obs(lts_census: soma.Collection, query: dict[str, Any]) -> None:
+def test_get_obs(lts_census: soma.Collection, query: Dict[str, Any]) -> None:
     adata_obs = cellxgene_census.get_anndata(
         lts_census, organism="Mus musculus", **_map_to_get_anndata_args(query, "obs")
     ).obs
@@ -326,7 +326,7 @@ def test_get_obs(lts_census: soma.Collection, query: dict[str, Any]) -> None:
         pytest.param({"value_filter": "feature_name in ['Gm53058', '0610010K14Rik']"}, id="value_filter"),
     ],
 )
-def test_get_var(lts_census: soma.Collection, query: dict[str, Any]) -> None:
+def test_get_var(lts_census: soma.Collection, query: Dict[str, Any]) -> None:
     adata_var = cellxgene_census.get_anndata(
         lts_census, organism="Mus musculus", obs_coords=slice(0), **_map_to_get_anndata_args(query, "var")
     ).var
