@@ -7,7 +7,9 @@
 Methods to retrieve slices of the census as AnnData objects.
 """
 
-from typing import Optional, Sequence
+from __future__ import annotations
+
+from typing import Sequence
 
 import anndata
 import tiledbsoma as soma
@@ -25,18 +27,18 @@ def get_anndata(
     organism: str,
     measurement_name: str = "RNA",
     X_name: str = "raw",
-    X_layers: Optional[Sequence[str]] = (),
-    obsm_layers: Optional[Sequence[str]] = (),
-    obsp_layers: Optional[Sequence[str]] = (),
-    varm_layers: Optional[Sequence[str]] = (),
-    varp_layers: Optional[Sequence[str]] = (),
-    obs_value_filter: Optional[str] = None,
-    obs_coords: Optional[SparseDFCoord] = None,
-    var_value_filter: Optional[str] = None,
-    var_coords: Optional[SparseDFCoord] = None,
-    column_names: Optional[soma.AxisColumnNames] = None,
-    obs_embeddings: Optional[Sequence[str]] = (),
-    var_embeddings: Optional[Sequence[str]] = (),
+    X_layers: Sequence[str] | None = (),
+    obsm_layers: Sequence[str] | None = (),
+    obsp_layers: Sequence[str] | None = (),
+    varm_layers: Sequence[str] | None = (),
+    varp_layers: Sequence[str] | None = (),
+    obs_value_filter: str | None = None,
+    obs_coords: SparseDFCoord | None = None,
+    var_value_filter: str | None = None,
+    var_coords: SparseDFCoord | None = None,
+    column_names: soma.AxisColumnNames | None = None,
+    obs_embeddings: Sequence[str] | None = (),
+    var_embeddings: Sequence[str] | None = (),
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.

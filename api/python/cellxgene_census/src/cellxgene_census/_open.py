@@ -7,10 +7,12 @@
 Contains methods to open publicly hosted versions of Census object and access its source datasets.
 """
 
+from __future__ import annotations
+
 import logging
 import os.path
 import urllib.parse
-from typing import Any, Dict, Optional, get_args
+from typing import Any, get_args
 
 import s3fs
 import tiledbsoma as soma
@@ -27,7 +29,7 @@ from ._util import _uri_join
 
 DEFAULT_CENSUS_VERSION = "stable"
 
-DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
+DEFAULT_TILEDB_CONFIGURATION: dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
     "soma.init_buffer_bytes": 1 * 1024**3,
@@ -66,7 +68,7 @@ def _resolve_census_locator(locator: CensusLocator, mirror: CensusMirror) -> Res
 
 def _open_soma(
     locator: ResolvedCensusLocator,
-    context: Optional[soma.options.SOMATileDBContext] = None,
+    context: soma.options.SOMATileDBContext | None = None,
 ) -> soma.Collection:
     """Private. Merge config defaults and return open census as a soma Collection/context."""
     # if no user-defined context, cellxgene_census defaults take precedence over SOMA defaults
@@ -80,7 +82,7 @@ def _open_soma(
     return soma.open(locator["uri"], mode="r", soma_type=soma.Collection, context=context)
 
 
-def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
+def get_default_soma_context(tiledb_config: dict[str, Any] | None = None) -> soma.options.SOMATileDBContext:
     """Return a :class:`tiledbsoma.SOMATileDBContext` with sensible defaults that can be further customized by the
     user. The customized context can then be passed to :func:`cellxgene_census.open_soma` with the ``context``
     argument or to :meth:`somacore.SOMAObject.open` with the ``context`` argument, such as
@@ -125,11 +127,11 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
 
 def open_soma(
     *,
-    census_version: Optional[str] = DEFAULT_CENSUS_VERSION,
-    mirror: Optional[str] = None,
-    uri: Optional[str] = None,
-    tiledb_config: Optional[Dict[str, Any]] = None,
-    context: Optional[soma.options.SOMATileDBContext] = None,
+    census_version: str | None = DEFAULT_CENSUS_VERSION,
+    mirror: str | None = None,
+    uri: str | None = None,
+    tiledb_config: dict[str, Any] | None = None,
+    context: soma.options.SOMATileDBContext | None = None,
 ) -> soma.Collection:
     """Open the Census by version or URI.
 
