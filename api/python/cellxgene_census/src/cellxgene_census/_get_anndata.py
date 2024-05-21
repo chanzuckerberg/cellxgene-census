@@ -37,8 +37,8 @@ def get_anndata(
     column_names: Optional[soma.AxisColumnNames] = None,
     obs_embeddings: Optional[Sequence[str]] = (),
     var_embeddings: Optional[Sequence[str]] = (),
-    obs_column_names: Optional[Sequence[str]] | None = None,
-    var_column_names: Optional[Sequence[str]] | None = None,
+    obs_column_names: Optional[Sequence[str]] = None,
+    var_column_names: Optional[Sequence[str]] = None,
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
