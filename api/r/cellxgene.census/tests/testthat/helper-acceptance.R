@@ -23,6 +23,8 @@ table_iter_is_ok <- function(tbl_iter, stop_after = NULL) {
     }
 
     n <- n + 1
+    rm(tbl)
+    gc()
   }
 
   return(TRUE)

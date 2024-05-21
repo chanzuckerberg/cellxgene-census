@@ -27,10 +27,10 @@ jobs:
       - name: install packages (macOS)
         if: matrix.os == 'macos-latest'
         run: Rscript -e 'install.packages(c("igraph"), type="binary")'
-      - name: install cellxgene.census and dependencies (Linux)
+      - name: install cellxgene.census and dependencies
         # This should follow our user-facing instructions to install cellxgene.census.
         run: |
-            Rscript -e 'install.packages(c("cellxgene.census", "Seurat", "BiocManager", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"), type="source")'
+            Rscript -e 'install.packages(c("cellxgene.census", "Seurat", "BiocManager", "testthat"), repos=c("https://chanzuckerberg.r-universe.dev", "https://cloud.r-project.org"))'
             Rscript -e 'BiocManager::install("SingleCellExperiment")'
       - name: run unit tests
         # [re-]fetch the cellxgene.census source package which includes the unit test code to run
