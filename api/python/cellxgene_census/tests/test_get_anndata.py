@@ -286,7 +286,7 @@ def test_deprecated_column_api(census: soma.Collection) -> None:
             ],
             var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
         )
-        with pytest.warns(DeprecationWarning):
+        with pytest.warns(FutureWarning):
             ad_prev = cellxgene_census.get_anndata(
                 census,
                 organism="Mus musculus",
