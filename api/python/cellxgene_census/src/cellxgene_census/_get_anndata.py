@@ -109,6 +109,7 @@ def get_anndata(
     if varm_layers and var_embeddings and set(varm_layers) & set(var_embeddings):
         raise ValueError("Cannot request both `varm_layers` and `var_embeddings` for the same embedding name")
 
+    # Backwards compat for old column_names argument
     if column_names is not None:
         if obs_column_names is not None or var_column_names is not None:
             raise ValueError(
