@@ -190,7 +190,7 @@ def get_obs(
         value_filter:
             Value filter for the ``obs`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
-        obs_coords:
+        coords:
             Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
         column_names:
@@ -222,7 +222,7 @@ def get_var(
         value_filter:
             Value filter for the ``var`` metadata. Value is a filter query written in the
             SOMA ``value_filter`` syntax.
-        obs_coords:
+        coords:
             Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
         column_names:
