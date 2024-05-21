@@ -180,6 +180,25 @@ def get_obs(
     coords: Optional[SparseDFCoord] = slice(None),
     column_names: Optional[Sequence[str]] = None,
 ) -> pd.DataFrame:
+    """Get the observation metadata for a query on the census.
+
+    Args:
+        census:
+            The census object, usually returned by :func:`open_soma`.
+        organism:
+            The organism to query, usually one of ``"Homo sapiens`` or ``"Mus musculus"``
+        value_filter:
+            Value filter for the ``obs`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+        obs_coords:
+            Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+        column_names:
+            Columns to fetch.
+
+    Returns:
+        A :class:`pandas.DataFrame` object containing metadata for the queried slice.
+    """
     return _get_axis_metadata(
         census, "obs", organism, value_filter=value_filter, coords=coords, column_names=column_names
     )
@@ -193,6 +212,25 @@ def get_var(
     coords: Optional[SparseDFCoord] = slice(None),
     column_names: Optional[Sequence[str]] = None,
 ) -> pd.DataFrame:
+    """Get the variable metadata for a query on the census.
+
+    Args:
+        census:
+            The census object, usually returned by :func:`open_soma`.
+        organism:
+            The organism to query, usually one of ``"Homo sapiens`` or ``"Mus musculus"``
+        value_filter:
+            Value filter for the ``var`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+        obs_coords:
+            Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+        column_names:
+            Columns to fetch.
+
+    Returns:
+        A :class:`pandas.DataFrame` object containing metadata for the queried slice.
+    """
     return _get_axis_metadata(
         census, "var", organism, value_filter=value_filter, coords=coords, column_names=column_names
     )
