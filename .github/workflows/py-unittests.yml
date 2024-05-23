@@ -14,6 +14,7 @@ concurrency:
 jobs:
   unit_tests_python_api:
     strategy:
+      fail-fast: false
       matrix:
         os: [single-cell-8c64g-runner, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
