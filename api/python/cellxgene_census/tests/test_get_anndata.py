@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List, Literal
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ def census() -> soma.Collection:
     return cellxgene_census.open_soma(census_version="latest")
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def lts_census() -> soma.Collection:
     return cellxgene_census.open_soma(census_version="stable")
 
@@ -271,8 +271,41 @@ def test_deprecated_column_api(census: soma.Collection) -> None:
 
     See: https://github.com/chanzuckerberg/cellxgene-census/issues/1035
     """
-    with census:
-        ad_curr = cellxgene_census.get_anndata(
+    ad_curr = cellxgene_census.get_anndata(
+        census,
+        organism="Mus musculus",
+        obs_value_filter="tissue_general == 'vasculature'",
+        var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+        obs_column_names=[
+            "soma_joinid",
+            "cell_type",
+            "tissue",
+            "tissue_general",
+            "assay",
+        ],
+        var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
+    )
+    with pytest.warns(FutureWarning):
+        ad_prev = cellxgene_census.get_anndata(
+            census,
+            organism="Mus musculus",
+            obs_value_filter="tissue_general == 'vasculature'",
+            var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+            column_names={
+                "obs": [
+                    "soma_joinid",
+                    "cell_type",
+                    "tissue",
+                    "tissue_general",
+                    "assay",
+                ],
+                "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
+            },
+        )
+    with pytest.raises(
+        ValueError, match=r"Both the deprecated 'column_names' argument and it's replacements were used."
+    ):
+        cellxgene_census.get_anndata(
             census,
             organism="Mus musculus",
             obs_value_filter="tissue_general == 'vasculature'",
@@ -280,47 +313,83 @@ def test_deprecated_column_api(census: soma.Collection) -> None:
             obs_column_names=[
                 "soma_joinid",
                 "cell_type",
-                "tissue",
-                "tissue_general",
-                "assay",
             ],
-            var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
-        )
-        with pytest.warns(FutureWarning):
-            ad_prev = cellxgene_census.get_anndata(
-                census,
-                organism="Mus musculus",
-                obs_value_filter="tissue_general == 'vasculature'",
-                var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
-                column_names={
-                    "obs": [
-                        "soma_joinid",
-                        "cell_type",
-                        "tissue",
-                        "tissue_general",
-                        "assay",
-                    ],
-                    "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
-                },
-            )
-        with pytest.raises(
-            ValueError, match=r"Both the deprecated 'column_names' argument and it's replacements were used."
-        ):
-            cellxgene_census.get_anndata(
-                census,
-                organism="Mus musculus",
-                obs_value_filter="tissue_general == 'vasculature'",
-                var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
-                obs_column_names=[
+            column_names={
+                "obs": [
                     "soma_joinid",
                     "cell_type",
                 ],
-                column_names={
-                    "obs": [
-                        "soma_joinid",
-                        "cell_type",
-                    ],
-                },
-            )
+            },
+        )
     pd.testing.assert_frame_equal(ad_curr.obs, ad_prev.obs)
     pd.testing.assert_frame_equal(ad_curr.var, ad_prev.var)
+
+
+def _map_to_get_anndata_args(query: Dict[str, Any], axis: Literal["obs", "var"]) -> Dict[str, Any]:
+    """Helper to map arguments of get_obs/ get_var to get_anndata."""
+    result = {}
+    if "coords" in query:
+        result[f"{axis}_coords"] = query["coords"]
+    if "value_filter" in query:
+        result[f"{axis}_value_filter"] = query["value_filter"]
+    if "column_names" in query:
+        result["column_names"] = {axis: query["column_names"]}
+    return result
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param(
+            {
+                "coords": slice(100),
+                "column_names": [
+                    "soma_joinid",
+                    "cell_type",
+                    "tissue",
+                    "tissue_general",
+                    "assay",
+                ],
+            },
+            id="coords+column-names",
+        ),
+        pytest.param({"coords": slice(100, 300)}, id="coords"),
+        pytest.param({"value_filter": "tissue_general == 'vasculature'"}, id="value_filter"),
+    ],
+)
+def test_get_obs(lts_census: soma.Collection, query: Dict[str, Any]) -> None:
+    adata_obs = cellxgene_census.get_anndata(
+        lts_census, organism="Mus musculus", **_map_to_get_anndata_args(query, "obs")
+    ).obs
+    only_obs = cellxgene_census.get_obs(lts_census, "Mus musculus", **query)
+    # account for a difference:
+    only_obs.index = only_obs.index.astype(str)
+
+    pd.testing.assert_frame_equal(adata_obs, only_obs)
+
+
+@pytest.mark.live_corpus
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param(
+            {
+                "coords": slice(100),
+                "column_names": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
+            },
+            id="coords+column-names",
+        ),
+        pytest.param({"coords": slice(100, 300)}, id="coords"),
+        pytest.param({"value_filter": "feature_name in ['Gm53058', '0610010K14Rik']"}, id="value_filter"),
+    ],
+)
+def test_get_var(lts_census: soma.Collection, query: Dict[str, Any]) -> None:
+    adata_var = cellxgene_census.get_anndata(
+        lts_census, organism="Mus musculus", obs_coords=slice(0), **_map_to_get_anndata_args(query, "var")
+    ).var
+    only_var = cellxgene_census.get_var(lts_census, "Mus musculus", **query)
+    # AnnData instantiation converts the index to string, so we match that behaviour for comparisons sake
+    only_var.index = only_var.index.astype(str)
+
+    pd.testing.assert_frame_equal(adata_var, only_var)
