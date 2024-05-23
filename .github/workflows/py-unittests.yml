@@ -7,9 +7,15 @@ on:
   push:
     branches: [main]
 
+# If a new commit is pushed, cancel the jobs from previous commits.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit_tests_python_api:
     strategy:
+      fail-fast: false  # Don't stop the workflow if one of the jobs fails
       matrix:
         os: [single-cell-8c64g-runner, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
