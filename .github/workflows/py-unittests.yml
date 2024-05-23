@@ -41,6 +41,8 @@ jobs:
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -e './api/python/cellxgene_census/[experimental]'
+      - name: Report Dependency Versions
+        run: pip list
       - name: Test with pytest (API, main tests)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
