@@ -289,7 +289,7 @@ def test_deprecated_column_api(census: soma.Collection) -> None:
             },
         )
     with pytest.raises(
-        ValueError, match=r"Both the deprecated 'column_names' argument and it's replacements were used."
+        ValueError, match=r"Both the deprecated 'column_names' argument and its replacements were used."
     ):
         cellxgene_census.get_anndata(
             census,

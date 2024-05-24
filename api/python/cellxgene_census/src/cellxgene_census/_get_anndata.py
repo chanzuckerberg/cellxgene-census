@@ -116,7 +116,7 @@ def get_anndata(
     if column_names is not None:
         if obs_column_names is not None or var_column_names is not None:
             raise ValueError(
-                "Both the deprecated 'column_names' argument and it's replacements were used. Please use 'obs_column_names' and 'var_column_names' only."
+                "Both the deprecated 'column_names' argument and its replacements were used. Please use 'obs_column_names' and 'var_column_names' only."
             )
         else:
             warn(
