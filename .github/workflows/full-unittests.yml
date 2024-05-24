@@ -38,7 +38,7 @@ on:
         type: string
       tiledbsoma_r_branch:
         # e.g.
-        description: "Install tiledbsoma from a specific branch"
+        description: "Install r-tiledbsoma from a specific branch"
         required: false
         default: ""
         type: string
