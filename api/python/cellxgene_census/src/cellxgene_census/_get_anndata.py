@@ -68,8 +68,6 @@ def get_anndata(
         var_coords:
             Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-        column_names:
-            Columns to fetch for ``obs`` and ``var`` dataframes.
         obsm_layers:
             Additional obsm layers to read and return in the ``obsm`` slot.
         obsp_layers:
@@ -86,6 +84,10 @@ def get_anndata(
             Additional embeddings to be returned as part of the ``varm`` slot.
             Use :func:`get_all_available_embeddings` to retrieve available embeddings
             for this Census version and organism.
+        obs_column_names:
+            Columns to fetch for ``obs`` dataframe.
+        var_column_names:
+            Columns to fetch for ``var`` dataframe.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
@@ -96,7 +98,7 @@ def get_anndata(
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
 
-        >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
+        >>> get_anndata(census, "Homo sapiens", obs_column_names=["tissue"])
 
         >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
     """
