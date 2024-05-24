@@ -16,8 +16,13 @@ workflow census_embeddings_indexer {
         }
     }
 
+    call make_one_directory {
+        input:
+        directories = indexer.index, docker
+    }
+
     output {
-        Array[Directory] indexes = indexer.index
+        Directory indexes = make_one_directory.directory
     }
 }
 
@@ -74,5 +79,31 @@ task indexer {
 
     output {
         Directory index = "~{embeddings_name}"
+    }
+}
+
+task make_one_directory {
+    input {
+        Array[Directory] directories
+        String directory_name = "indexes"
+        String docker
+    }
+
+    File manifest = write_lines(directories)
+
+    command <<<
+        set -euxo pipefail
+        mkdir -p '~{directory_name}'
+        while read -r dir; do
+            cp -r "$dir" '~{directory_name}'
+        done < '~{manifest}'
+    >>>
+
+    output {
+        Directory directory = directory_name
+    }
+
+    runtime {
+        docker: docker
     }
 }
