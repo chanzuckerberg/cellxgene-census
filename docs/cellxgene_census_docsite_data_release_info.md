@@ -5,7 +5,8 @@
 **Contents:**
 
 1. [What is a Census data release?](#what-is-a-census-data-release)
-2. [List of LTS Census data releases](#list-of-lts-census-data-releases)
+1. [List of LTS Census data releases](#list-of-lts-census-data-releases)
+1. [Compatibility with package versions](#compatibility-with-package-versions)
 
 ## What is a Census data release?
 
@@ -186,3 +187,17 @@ If you wish to use this data release, you can consider filtering out all of thes
 | Suspension type         | 2              | 2              |
 | Tissue                  | 227            | 51             |
 | Tissue general          | 61             | 27             |
+
+## Compatibility with package versions
+
+Due to the nature of the Census storage backend, the format version will change from time to time. Format upgrades are always backwards compatible, but they're not always forwards compatible, which means that reading a recent Census data version using an older version of the package might result in an error.
+We aim to guarantee the following policy:
+
+* Every Census package version released after an LTS will be able to read _every_ Census data release until the next LTS.
+
+The current LTS release (2023-12-15) is compatible with the following package versions:
+
+* 1.10.x
+* 1.11.x
+* 1.12.x
+* 1.13.x

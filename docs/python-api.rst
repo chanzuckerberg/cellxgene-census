@@ -25,6 +25,8 @@ Get slice as AnnData
     :nosignatures:
 
     cellxgene_census.get_anndata
+    cellxgene_census.get_obs
+    cellxgene_census.get_var
 
 Feature presence matrix
 -----------------------
