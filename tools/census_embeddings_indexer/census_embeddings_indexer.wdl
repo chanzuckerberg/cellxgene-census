@@ -5,6 +5,7 @@ workflow census_embeddings_indexer {
         # S3 folder URIs e.g.
         # s3_//cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/census_data/homo_sapiens/ms/RNA/obsm/scvi
         Array[String] embeddings_s3_uris        
+        String census_version
         String s3_region = "us-west-2"
         String docker
     }
@@ -18,7 +19,9 @@ workflow census_embeddings_indexer {
 
     call make_one_directory {
         input:
-        directories = indexer.index, docker
+        directories = indexer.index,
+        directory_name = census_version,
+        docker
     }
 
     output {
