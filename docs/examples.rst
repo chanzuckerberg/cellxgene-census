@@ -51,9 +51,8 @@ Gain a better understanding on the nature of the Census data and how it's organi
 .. toctree::
     :maxdepth: 1
     
-    notebooks/analysis_demo/census_duplicated_cells.ipynb
+    notebooks/api_demo/census_duplicated_cells.ipynb
     notebooks/analysis_demo/comp_bio_census_info.ipynb
-    notebooks/analysis_demo/census_summary_cell_counts.ipynb
     notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.ipynb
     notebooks/api_demo/census_datasets.ipynb
     notebooks/api_demo/census_dataset_presence.ipynb
@@ -81,7 +80,7 @@ Demonstrations of memory-efficient compute workflows that leverage the streaming
     
     notebooks/experimental/highly_variable_genes.ipynb
     notebooks/experimental/mean_variance.ipynb
-    notebooks/analysis_demo/census_compute_over_X.ipynb
+    notebooks/api_demo/census_compute_over_X.ipynb
 
 Scalable machine learning
 -------------------------
