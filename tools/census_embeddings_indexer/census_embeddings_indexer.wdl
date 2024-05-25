@@ -98,7 +98,7 @@ task make_one_directory {
         set -euxo pipefail
         mkdir -p '~{directory_name}'
         while read -r dir; do
-            cp -r "$dir" '~{directory_name}'
+            cp -r "$dir" '~{directory_name}/'
         done < '~{manifest}'
     >>>
 
@@ -108,5 +108,6 @@ task make_one_directory {
 
     runtime {
         docker: docker
+        memory: "4G"
     }
 }
