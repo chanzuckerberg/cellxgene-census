@@ -26,3 +26,5 @@ miniwdl-omics-run census_embeddings_indexer.wdl \
 ```
 
 (The `embeddings_s3_uris=s3_//...` with `s3_//` instead of `s3://` is a workaround for an AWS-side existence check that doesn't seem to work right on public buckets.)
+
+The Dockerfile has an argument for the TileDB-Vector-Search version to use. We should use the newest version that doesn't need a newer version of TileDB than the intended client tiledbsoma/cellxgene_census.
