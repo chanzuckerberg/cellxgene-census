@@ -31,7 +31,8 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma~=1.11.4",
+    # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
+    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@6569fc0#egg=tiledbsoma&subdirectory=apis/python/",
     "anndata",
     "numpy>=1.21,<2.0",
     "requests",
