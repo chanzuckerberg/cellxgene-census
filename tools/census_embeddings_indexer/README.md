@@ -15,9 +15,11 @@ docker push ${ECR_ENDPT}/omics:census_embeddings_indexer
 
 miniwdl-omics-run census_embeddings_indexer.wdl \
     embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-czi-1 \
+    embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-czi-4 \
     embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-czi-5 \
     embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-1 \
     embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-2 \
+    embeddings_s3_uris=s3_//cellxgene-contrib-public/contrib/cell-census/soma/2023-12-15/CxG-contrib-3 \
     census_version=2023-12-15 \
     s3_region=$AWS_DEFAULT_REGION \
     docker=${ECR_ENDPT}/omics:census_embeddings_indexer \
