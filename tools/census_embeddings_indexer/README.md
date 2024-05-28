@@ -4,7 +4,7 @@ This is a Docker+WDL pipeline to build [TileDB-Vector-Search](https://github.com
 
 The pipeline consumes one or more of the existing TileDB arrays for hosted and contributed [Census embeddings](https://cellxgene.cziscience.com/census-models) stored on S3. The resulting indexes are themselves TileDB groups to be stored on S3.
 
-```
+```bash
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 AWS_DEFAULT_REGION=$(aws configure get region)
 export ECR_ENDPT=${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com
