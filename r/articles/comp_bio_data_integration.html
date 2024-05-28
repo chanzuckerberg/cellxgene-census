@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.13.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.14.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -291,8 +291,9 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt; Finding anchors</span></span>
 <span><span class="co">#&gt;  Found 7190 anchors</span></span>
 <span><span class="co">#&gt; Filtering anchors</span></span>
-<span><span class="co">#&gt;  Retained 5063 anchors</span></span>
-<span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Retained 5063 anchors</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/IntegrateData.html" class="external-link">IntegrateData</a></span><span class="op">(</span>anchorset <span class="op">=</span> <span class="va">seurat_obj.anchors</span>, normalization.method <span class="op">=</span> <span class="st">"SCT"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span>
 <span><span class="co">#&gt; Warning: Layer counts isn't present in the assay object; returning NULL</span></span>
@@ -309,33 +310,33 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <span><span class="co">#&gt; Warning: Layer counts isn't present in the assay object; returning NULL</span></span>
 <span><span class="co">#&gt; Warning: Different cells and/or features from existing assay SCT</span></span></code></pre></div>
 <p>And inspect the new results by UMAP.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/DefaultAssay.html" class="external-link">DefaultAssay</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integrated"</span></span>
 <span></span>
 <span><span class="co"># Run the standard workflow for visualization and clustering</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, npcs <span class="op">=</span> <span class="fl">30</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">seurat_obj.combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"pca"</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 00:02:07 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
-<span><span class="co">#&gt; 00:02:07 Read 10153 rows and found 30 numeric columns</span></span>
-<span><span class="co">#&gt; 00:02:07 Using Annoy for neighbor search, n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 00:02:07 Building Annoy index with metric = cosine, n_trees = 50</span></span>
+<span><span class="co">#&gt; 23:56:21 UMAP embedding parameters a = 0.9922 b = 1.112</span></span>
+<span><span class="co">#&gt; 23:56:21 Read 10153 rows and found 30 numeric columns</span></span>
+<span><span class="co">#&gt; 23:56:21 Using Annoy for neighbor search, n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 23:56:21 Building Annoy index with metric = cosine, n_trees = 50</span></span>
 <span><span class="co">#&gt; 0%   10   20   30   40   50   60   70   80   90   100%</span></span>
 <span><span class="co">#&gt; [----|----|----|----|----|----|----|----|----|----|</span></span>
 <span><span class="co">#&gt; **************************************************|</span></span>
-<span><span class="co">#&gt; 00:02:09 Writing NN index file to temp file /tmp/RtmpoBOBHA/file24bacbc1f342</span></span>
-<span><span class="co">#&gt; 00:02:09 Searching Annoy index using 1 thread, search_k = 3000</span></span>
-<span><span class="co">#&gt; 00:02:12 Annoy recall = 100%</span></span>
-<span><span class="co">#&gt; 00:02:13 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
-<span><span class="co">#&gt; 00:02:14 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
-<span><span class="co">#&gt; 00:02:15 Commencing optimization for 200 epochs, with 410528 positive edges</span></span>
-<span><span class="co">#&gt; 00:02:19 Optimization finished</span></span></code></pre></div>
+<span><span class="co">#&gt; 23:56:23 Writing NN index file to temp file /tmp/RtmpsKixI5/file1cd2c4aac6d19</span></span>
+<span><span class="co">#&gt; 23:56:23 Searching Annoy index using 1 thread, search_k = 3000</span></span>
+<span><span class="co">#&gt; 23:56:26 Annoy recall = 100%</span></span>
+<span><span class="co">#&gt; 23:56:26 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30</span></span>
+<span><span class="co">#&gt; 23:56:27 Initializing from normalized Laplacian + noise (using RSpectra)</span></span>
+<span><span class="co">#&gt; 23:56:28 Commencing optimization for 200 epochs, with 410528 positive edges</span></span>
+<span><span class="co">#&gt; 23:56:31 Optimization finished</span></span></code></pre></div>
 <p>Plot the UMAP.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By assay</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"assay"</span><span class="op">)</span></span>
 <span><span class="va">p1</span></span></code></pre></div>
 <p><img src="comp_bio_data_integration_files/figure-html/unnamed-chunk-22-1.png" width="480" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By cell type</span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seurat_obj.combined</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"cell_type"</span><span class="op">)</span></span>
 <span><span class="va">p2</span></span></code></pre></div>
@@ -349,7 +350,7 @@ THIS VIGNETTE IS INSPIRED BY: https://github.com/chanzuckerberg/cellxgene-census
 <p>Therefore, the most comprehensive definition of batch in the Census can be accomplished by combining the cell metadata of <code>dataset_id</code>, <code>donor_id</code>, <code>assay_ontology_term_id</code> and <code>suspension_type</code>, the latter will encode the <code>EFO</code> ids for assay types.</p>
 <p>In our example, the two datasets that we used only contain cells from one assay each, and one suspension type for all of them. Thus it would not make a difference to include these metadata as part of batch.</p>
 <p>This how the implementation would look line</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># EXAMPLE, DON'T RUN.</span></span>
 <span></span>
 <span><span class="co"># split the dataset into a list of seurat objects for each dataset</span></span>

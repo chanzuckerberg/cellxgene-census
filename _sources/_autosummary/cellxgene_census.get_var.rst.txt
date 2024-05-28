@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_var
+==========================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_var

@@ -47,7 +47,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="cellxgene_census.get_census_version_description" href="cellxgene_census.get_census_version_description.html" />
-    <link rel="prev" title="cellxgene_census.get_anndata" href="cellxgene_census.get_anndata.html" /> 
+    <link rel="prev" title="cellxgene_census.get_var" href="cellxgene_census.get_var.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -121,7 +121,7 @@
                 
                 
                 <div class="version">
-                    v1.13.1
+                    v1.14.0
                 </div>
                 
             
@@ -207,8 +207,8 @@
 <h1>cellxgene_census.get_presence_matrix<a class="headerlink" href="#cellxgene-census-get-presence-matrix" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="cellxgene_census.get_presence_matrix">
-<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_presence_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">census</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Collection.html#tiledbsoma.Collection" title="(in TileDB-SOMA-Py)"><span class="pre">Collection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">organism</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'RNA'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix" title="(in SciPy v1.13.0)"><span class="pre">csr_matrix</span></a></span></span><a class="headerlink" href="#cellxgene_census.get_presence_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the feature dataset presence matrix and return as a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.13.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a>. The
+<span class="sig-prename descclassname"><span class="pre">cellxgene_census.</span></span><span class="sig-name descname"><span class="pre">get_presence_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">census</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Collection.html#tiledbsoma.Collection" title="(in TileDB-SOMA-Py)"><span class="pre">Collection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">organism</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'RNA'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix" title="(in SciPy v1.13.1)"><span class="pre">csr_matrix</span></a></span></span><a class="headerlink" href="#cellxgene_census.get_presence_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the feature dataset presence matrix and return as a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.13.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a>. The
 returned sparse matrix is indexed on the first dimension by the dataset <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values,
 and on the second dimension by the <code class="docutils literal notranslate"><span class="pre">var</span></code> <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values.</p>
 <dl class="field-list simple">
@@ -220,7 +220,7 @@ and on the second dimension by the <code class="docutils literal notranslate"><s
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.13.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a> object containing the presence matrix.</p>
+<dd class="field-even"><p>A <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.13.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a> object containing the presence matrix.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if the organism cannot be found.</p>
@@ -243,7 +243,7 @@ and on the second dimension by the <code class="docutils literal notranslate"><s
             
             </div>
             <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cellxgene_census.get_anndata.html" class="btn btn-neutral float-left" title="cellxgene_census.get_anndata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cellxgene_census.get_var.html" class="btn btn-neutral float-left" title="cellxgene_census.get_var" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="cellxgene_census.get_census_version_description.html" class="btn btn-neutral float-right" title="cellxgene_census.get_census_version_description" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

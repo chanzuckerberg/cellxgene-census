@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.13.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.14.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -345,20 +345,13 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                 orig.ident nCount_RNA nFeature_RNA cell_type tissue_general  disease</span></span>
-<span><span class="co">#&gt; cell13391229 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13393737 SeuratProject          1            1    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13394391 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13394897 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13395941 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt; cell13397408 SeuratProject          0            0    B cell           lung COVID-19</span></span>
-<span><span class="co">#&gt;                  sex</span></span>
-<span><span class="co">#&gt; cell13391229    male</span></span>
-<span><span class="co">#&gt; cell13393737 unknown</span></span>
-<span><span class="co">#&gt; cell13394391    male</span></span>
-<span><span class="co">#&gt; cell13394897 unknown</span></span>
-<span><span class="co">#&gt; cell13395941    male</span></span>
-<span><span class="co">#&gt; cell13397408 unknown</span></span></code></pre></div>
+<span><span class="co">#&gt;                 orig.ident cell_type tissue_general  disease     sex</span></span>
+<span><span class="co">#&gt; cell13391229 SeuratProject    B cell           lung COVID-19    male</span></span>
+<span><span class="co">#&gt; cell13393737 SeuratProject    B cell           lung COVID-19 unknown</span></span>
+<span><span class="co">#&gt; cell13394391 SeuratProject    B cell           lung COVID-19    male</span></span>
+<span><span class="co">#&gt; cell13394897 SeuratProject    B cell           lung COVID-19 unknown</span></span>
+<span><span class="co">#&gt; cell13395941 SeuratProject    B cell           lung COVID-19    male</span></span>
+<span><span class="co">#&gt; cell13397408 SeuratProject    B cell           lung COVID-19 unknown</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">$</span><span class="va">RNA</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 feature_name feature_length      nnz n_measured_obs</span></span>

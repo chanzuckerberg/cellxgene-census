@@ -48,7 +48,9 @@
 
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Learning about the CZ CELLxGENE Census" href="../analysis_demo/comp_bio_census_info.html" />
+    <link rel="prev" title="Exploring biologically relevant clusters in Census embeddings" href="../analysis_demo/comp_bio_embedding_exploration.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -122,7 +124,7 @@
                 
                 
                 <div class="version">
-                    v1.13.1
+                    v1.14.0
                 </div>
                 
             
@@ -140,7 +142,7 @@
                 
                 
                 
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
@@ -148,7 +150,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-using-integrated-embeddings-and-models">[NEW! 🚀] Using integrated embeddings and models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Understanding and filtering out duplicate cells</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Why-are-there-duplicate-cells-in-the-Census?">Why are there duplicate cells in the Census?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data">An example: duplicate cells in the Tabula Muris Senis data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Filtering-out-duplicate-cells">Filtering out duplicate cells</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_explore_and_load_lung_data.html">Exploring all data from a tissue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_datasets.html">Exploring the Census Datasets table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_summary_cell_counts.html">Exploring pre-calculated summary cell counts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
@@ -178,6 +201,7 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
       <li class="breadcrumb-item active">Understanding and filtering out duplicate cells</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/api_demo/census_duplicated_cells.ipynb.txt" rel="nofollow"> View page source</a>
@@ -594,7 +618,10 @@ soma_data: [[1,1,1,1,1,...,1,1,1,1,2]]
             </div>
             
             </div>
-            <footer>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../analysis_demo/comp_bio_embedding_exploration.html" class="btn btn-neutral float-left" title="Exploring biologically relevant clusters in Census embeddings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../analysis_demo/comp_bio_census_info.html" class="btn btn-neutral float-right" title="Learning about the CZ CELLxGENE Census" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

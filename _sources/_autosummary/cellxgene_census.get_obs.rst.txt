@@ -1,0 +1,6 @@
+﻿cellxgene\_census.get\_obs
+==========================
+
+.. currentmodule:: cellxgene_census
+
+.. autofunction:: get_obs

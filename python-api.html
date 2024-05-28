@@ -121,7 +121,7 @@
                 
                 
                 <div class="version">
-                    v1.13.1
+                    v1.14.0
                 </div>
                 
             
@@ -156,6 +156,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#get-slice-as-anndata">Get slice as AnnData</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html">cellxgene_census.get_anndata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_obs.html">cellxgene_census.get_obs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/cellxgene_census.get_var.html">cellxgene_census.get_var</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#feature-presence-matrix">Feature presence matrix</a><ul>
@@ -268,7 +270,13 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata" title="cellxgene_census.get_anndata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata</span></code></a></p></td>
-<td><p>Convenience wrapper around <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.1.dev50+g7f483d9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
+<td><p>Convenience wrapper around <a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/_autosummary/tiledbsoma.Experiment.html#tiledbsoma.Experiment" title="(in TileDB-SOMA-Py)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tiledbsoma.Experiment</span></code></a> query, to build and execute a query, and return it as an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.1.dev50+g77581cc)"><code class="xref py py-class docutils literal notranslate"><span class="pre">anndata.AnnData</span></code></a> object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_obs.html#cellxgene_census.get_obs" title="cellxgene_census.get_obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_obs</span></code></a></p></td>
+<td><p>Get the observation metadata for a query on the census.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_var.html#cellxgene_census.get_var" title="cellxgene_census.get_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_var</span></code></a></p></td>
+<td><p>Get the variable metadata for a query on the census.</p></td>
 </tr>
 </tbody>
 </table>
@@ -278,7 +286,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cellxgene_census.get_presence_matrix.html#cellxgene_census.get_presence_matrix" title="cellxgene_census.get_presence_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellxgene_census.get_presence_matrix</span></code></a></p></td>
-<td><p>Read the feature dataset presence matrix and return as a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.13.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a>.</p></td>
+<td><p>Read the feature dataset presence matrix and return as a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_array.html#scipy.sparse.csr_array" title="(in SciPy v1.13.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_array</span></code></a>.</p></td>
 </tr>
 </tbody>
 </table>

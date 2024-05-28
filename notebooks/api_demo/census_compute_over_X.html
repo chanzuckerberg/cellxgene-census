@@ -48,7 +48,9 @@
 
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Training a PyTorch Model" href="../experimental/pytorch.html" />
+    <link rel="prev" title="Out-of-core (incremental) mean and variance calculation" href="../experimental/mean_variance.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -122,7 +124,7 @@
                 
                 
                 <div class="version">
-                    v1.13.1
+                    v1.14.0
                 </div>
                 
             
@@ -140,7 +142,7 @@
                 
                 
                 
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
@@ -148,7 +150,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#new-using-integrated-embeddings-and-models">[NEW! 🚀] Using integrated embeddings and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../experimental/highly_variable_genes.html">Experimental Highly Variable Genes API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental/mean_variance.html">Out-of-core (incremental) mean and variance calculation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Computing on X using online (incremental) algorithms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Incremental-count-and-mean-calculation.">Incremental count and mean calculation.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Incremental-variance-calculation">Incremental variance calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Counting-cells-per-gene,-grouped-by-dataset_id">Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
 </ul>
@@ -178,6 +198,7 @@
             <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
       <li class="breadcrumb-item active">Computing on X using online (incremental) algorithms</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/notebooks/api_demo/census_compute_over_X.ipynb.txt" rel="nofollow"> View page source</a>
@@ -861,7 +882,10 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
             </div>
             
             </div>
-            <footer>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../experimental/mean_variance.html" class="btn btn-neutral float-left" title="Out-of-core (incremental) mean and variance calculation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../experimental/pytorch.html" class="btn btn-neutral float-right" title="Training a PyTorch Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

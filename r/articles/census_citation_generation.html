@@ -32,7 +32,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.13.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.14.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,12 +135,12 @@
 <span><span class="va">census_release_info</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">census_release_info</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   soma_joinid                      label      value</span></span>
-<span><span class="co">#&gt; 1           0      census_schema_version      2.0.0</span></span>
-<span><span class="co">#&gt; 2           1          census_build_date 2024-05-06</span></span>
+<span><span class="co">#&gt; 1           0      census_schema_version      2.0.1</span></span>
+<span><span class="co">#&gt; 2           1          census_build_date 2024-05-27</span></span>
 <span><span class="co">#&gt; 3           2     dataset_schema_version      5.0.0</span></span>
-<span><span class="co">#&gt; 4           3           total_cell_count  114856463</span></span>
-<span><span class="co">#&gt; 5           4          unique_cell_count   60178480</span></span>
-<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      17470</span></span>
+<span><span class="co">#&gt; 4           3           total_cell_count  115661967</span></span>
+<span><span class="co">#&gt; 5           4          unique_cell_count   60703793</span></span>
+<span><span class="co">#&gt; 6           5 number_donors_homo_sapiens      17671</span></span>
 <span><span class="co">#&gt; 7           6 number_donors_mus_musculus       4216</span></span></code></pre></div>
 <p>Then we load the dataset table which contains a column <code>"citation"</code> for each dataset included in Census.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
