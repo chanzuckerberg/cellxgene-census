@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional, get_args
 
 import s3fs
 import tiledbsoma as soma
-from fsspec.callbacks import TqdmCallback
+from fsspec.callbacks import NoOpCallback, TqdmCallback
 
 from ._release_directory import (
     CensusLocator,
@@ -298,7 +298,9 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS
     return locator
 
 
-def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> None:
+def download_source_h5ad(
+    dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION, progress_bar: bool = True
+) -> None:
     """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
     file name.
 
@@ -309,6 +311,8 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
             The file name where the downloaded H5AD will be written. Must not already exist.
         census_version:
             The census version name. Defaults to ``"stable"``.
+        progress_bar:
+            Whether to display a progress bar. Defaults to ``True``.
 
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite an existing file), or is not a file.
@@ -327,6 +331,13 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     if to_path.endswith("/"):
         raise ValueError("Specify to_path as a file name, not a directory name.")
 
+    if progress_bar:
+        callback = TqdmCallback(
+            tqdm_kwargs={"unit": "B", "unit_scale": True, "unit_divisor": 1024, "desc": "Downloading"}
+        )
+    else:
+        callback = NoOpCallback()
+
     locator = get_source_h5ad_uri(dataset_id, census_version=census_version)
     protocol = urllib.parse.urlparse(locator["uri"]).scheme
     assert protocol == "s3"
@@ -338,5 +349,5 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     fs.get_file(
         locator["uri"],
         to_path,
-        callback=TqdmCallback(),
+        callback=callback,
     )
