@@ -36,8 +36,8 @@ dependencies= [
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
-    # "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@6569fc0#egg=tiledbsoma&subdirectory=apis/python/",
-    "tiledbsoma==1.9.3",
+    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@7c456b6#egg=tiledbsoma&subdirectory=apis/python/",
+    # "tiledbsoma==1.9.3",
     # TODO (spatial): Uncomment line below to install "cellxgene-census" at an appropriate version when tiledbsoma spatial code has been released 
     # "cellxgene-census==1.12.0",
     "cellxgene-ontology-guide==0.6.1",
