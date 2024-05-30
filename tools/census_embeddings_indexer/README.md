@@ -6,8 +6,9 @@ The pipeline consumes one or more of the existing TileDB arrays for hosted and c
 
 ```bash
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-AWS_DEFAULT_REGION=$(aws configure get region)
-export ECR_ENDPT=${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com
+export AWS_DEFAULT_REGION=$(aws configure get region)
+export ECR_ENDPT=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+export WDL_OUTPUT_BUCKET=mlin-census-screatch
 
 docker build -t ${ECR_ENDPT}/omics:census_embeddings_indexer .
 aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_ENDPT"
@@ -23,7 +24,7 @@ miniwdl-omics-run census_embeddings_indexer.wdl \
     census_version=2023-12-15 \
     s3_region=$AWS_DEFAULT_REGION \
     docker=${ECR_ENDPT}/omics:census_embeddings_indexer \
-    --output-uri s3://mlin-census-scratch/census_embeddings_indexer/out/ \
+    --output-uri s3://${WDL_OUTPUT_BUCKET}/census_embeddings_indexer/out/ \
     --role poweromics
 ```
 
