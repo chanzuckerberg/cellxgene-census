@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies= [
     "typing_extensions==4.10.0",
-    "pyarrow==15.0.2",
+    "pyarrow",
     "pandas[performance]==2.2.1",
     "anndata==0.10.6",
     "numpy==1.26.4",
@@ -35,7 +35,7 @@ dependencies= [
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
-    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@78ff65f#egg=tiledbsoma&subdirectory=apis/python/",
+    "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@16f481f#egg=tiledbsoma&subdirectory=apis/python/",
     # TODO (spatial): Uncomment line below to install "cellxgene-census" at an appropriate version when tiledbsoma spatial code has been released 
     # "cellxgene-census==1.12.0",
     "cellxgene-ontology-guide==0.6.1",
