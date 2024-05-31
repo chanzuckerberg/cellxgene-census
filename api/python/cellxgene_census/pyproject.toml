@@ -52,6 +52,13 @@ experimental = [
     #"git+https://huggingface.co/ctheodoris/Geneformer",
     # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
 ]
+doc = [
+    "nbsphinx",
+    "myst-parser",
+    "sphinx-rtd-theme",
+    "gitpython",
+    "sphinx<7.0.0",
+]
 
 [project.urls]
 homepage = "https://github.com/chanzuckerberg/cellxgene-census"

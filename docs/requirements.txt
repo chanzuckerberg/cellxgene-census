@@ -1,5 +1,0 @@
-nbsphinx
-myst-parser
-sphinx-rtd-theme
-gitpython
-sphinx<7.0.0
