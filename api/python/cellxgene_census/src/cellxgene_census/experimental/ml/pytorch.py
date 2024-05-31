@@ -1,24 +1,26 @@
 import gc
 import logging
 import os
+import typing
 from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import psutil
 import pyarrow as pa
-import scipy
 import tiledbsoma as soma
 import torch
 import torchdata.datapipes.iter as pipes
 from attr import define
 from numpy.random import Generator
+from pyarrow import Table
 from scipy import sparse
+from scipy.sparse import coo_matrix, csr_matrix
 from sklearn.preprocessing import LabelEncoder
 from torch import Tensor
 from torch import distributed as dist
@@ -36,6 +38,14 @@ ObsAndXDatum = Tuple[Tensor, Tensor]
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
 
 
+# Various "methods" for converting from TileDB COO (on disk) to `torch.Tensor`
+Method = Literal["np.array", "scipy.csr", "scipy.coo"]
+
+
+# "Chunk" of X data, returned by each `Method` above
+ChunkX = Union[np.array, csr_matrix, coo_matrix]
+
+
 @define
 class _SOMAChunk:
     """Return type of ``_ObsAndXSOMAIterator`` that pairs a chunk of ``obs`` rows with the respective rows from the ``X``
@@ -46,7 +56,7 @@ class _SOMAChunk:
     """
 
     obs: pd.DataFrame
-    X: scipy.sparse.spmatrix
+    X: ChunkX
     stats: "Stats"
 
     def __len__(self) -> int:
@@ -72,7 +82,7 @@ class Stats:
     nnz: int = 0
     """The total number of values retrieved"""
 
-    elapsed: int = 0
+    elapsed: float = 0
     """The total elapsed time in seconds for retrieving all batches"""
 
     n_soma_chunks: int = 0
@@ -101,6 +111,19 @@ def _open_experiment(
         yield exp
 
 
+def tables_to_np(
+    tables: Iterator[Tuple[Table, any]], shape: Tuple[int, int]
+) -> typing.Generator[Tuple[np.ndarray, any, int], None, None]:
+    for tbl, indices in tables:
+        row_indices_np = np.array(tbl.columns[0])
+        col_indices_np = np.array(tbl.columns[1])
+        data_np = np.array(tbl.columns[2])
+        nnz = len(data_np)
+        dense_matrix = np.zeros(shape, dtype=data_np.dtype)
+        dense_matrix[row_indices_np, col_indices_np] = data_np
+        yield dense_matrix, indices, nnz
+
+
 class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
     """Iterates the SOMA chunks of corresponding ``obs`` and ``X`` data. This is an internal class,
     not intended for public use.
@@ -123,6 +146,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         var_joinids: npt.NDArray[np.int64],
         shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
+        method: Method = "scipy.csr",
     ):
         self.obs = obs
         self.X = X
@@ -145,6 +169,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
             self.obs_joinids_chunks_iter = iter(obs_joinids_chunked)
         self.var_joinids = var_joinids
         self.shuffle_chunk_count = shuffle_chunk_count
+        self.method = method
 
     def __next__(self) -> _SOMAChunk:
         pytorch_logger.debug("Retrieving next SOMA chunk...")
@@ -173,18 +198,33 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
 
         # note: the `blockwise` call is employed for its ability to reindex the axes of the sparse matrix,
         # but the blockwise iteration feature is not used (block_size is set to retrieve the chunk as a single block)
-        scipy_iter = (
-            self.X.read(coords=(obs_joinids_chunk, self.var_joinids))
-            .blockwise(axis=0, size=len(obs_joinids_chunk), eager=False)
-            .scipy(compress=True)
+        blockwise_iter = self.X.read(coords=(obs_joinids_chunk, self.var_joinids)).blockwise(
+            axis=0, size=len(obs_joinids_chunk), eager=False
         )
-        X_batch, _ = next(scipy_iter)
+
+        method = self.method
+        if method == "np.array":
+            batch_iter = tables_to_np(blockwise_iter.tables(), shape=(obs_batch.shape[0], len(self.var_joinids)))
+        elif method == "scipy.coo":
+            batch_iter = blockwise_iter.scipy(compress=False)
+        elif method == "scipy.csr":
+            batch_iter = blockwise_iter.scipy(compress=True)
+        else:
+            raise ValueError(f"Invalid format: {method}")
+
+        res = next(batch_iter)
+        X_batch: ChunkX = res[0]
+        if isinstance(X_batch, np.ndarray):
+            nnz = res[2]
+        else:
+            nnz = X_batch.nnz
         assert obs_batch.shape[0] == X_batch.shape[0]
 
+        end_time = time()
         stats = Stats()
         stats.n_obs += X_batch.shape[0]
-        stats.nnz += X_batch.nnz
-        stats.elapsed += int(time() - start_time)
+        stats.nnz += nnz
+        stats.elapsed += end_time - start_time
         stats.n_soma_chunks += 1
 
         pytorch_logger.debug(f"Retrieved SOMA chunk: {stats}")
@@ -208,17 +248,19 @@ def list_split(arr_list: List[Any], sublist_len: int) -> List[List[Any]]:
     return result
 
 
-def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:  # noqa: D103
+def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any], float]:  # noqa: D103
     proc = psutil.Process(os.getpid())
 
     pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
+    start = time()
     gc.collect()
+    gc_elapsed = time() - start
     post_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
 
     pytorch_logger.debug(f"gc:  pre={pre_gc}")
     pytorch_logger.debug(f"gc: post={post_gc}")
 
-    return pre_gc, post_gc
+    return pre_gc, post_gc, gc_elapsed
 
 
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
@@ -254,9 +296,17 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         use_eager_fetch: bool,
         shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
+        method: Method = "scipy.csr",
     ) -> None:
         self.soma_chunk_iter = _ObsAndXSOMAIterator(
-            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_chunk_count, shuffle_rng
+            obs,
+            X,
+            obs_column_names,
+            obs_joinids_chunked,
+            var_joinids,
+            shuffle_chunk_count,
+            shuffle_rng,
+            method=method,
         )
         if use_eager_fetch:
             self.soma_chunk_iter = _EagerIterator(self.soma_chunk_iter)
@@ -266,19 +316,26 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.return_sparse_X = return_sparse_X
         self.encoders = encoders
         self.stats = stats
+        self.gc_elapsed = 0
         self.max_process_mem_usage_bytes = 0
         self.X_dtype = X.schema[2].type.to_pandas_dtype()
 
     def __next__(self) -> ObsAndXDatum:
         """Read the next torch batch, possibly across multiple soma chunks."""
         obs: pd.DataFrame = pd.DataFrame()
-        X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)), dtype=self.X_dtype)
+        X: ChunkX = csr_matrix((0, len(self.var_joinids)), dtype=self.X_dtype)
+        first = True
 
         while len(obs) < self.batch_size:
             try:
                 obs_partial, X_partial = self._read_partial_torch_batch(self.batch_size - len(obs))
-                obs = pd.concat([obs, obs_partial], axis=0)
-                X = sparse.vstack([X, X_partial])
+                if first:
+                    obs = obs_partial
+                    X = X_partial
+                    first = False
+                else:
+                    obs = pd.concat([obs, obs_partial], axis=0)
+                    X = sparse.vstack([X, X_partial])
             except StopIteration:
                 break
 
@@ -298,7 +355,9 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
         if not self.return_sparse_X:
-            X_tensor = torch.from_numpy(X.todense())
+            if isinstance(X, (csr_matrix, coo_matrix)):
+                X = X.todense()
+            X_tensor = torch.from_numpy(X)
         else:
             coo = X.tocoo()
 
@@ -315,7 +374,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
         return X_tensor, obs_tensor
 
-    def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
+    def _read_partial_torch_batch(self, batch_size: int) -> Tuple[pd.DataFrame, ChunkX]:
         """Reads a torch-size batch of data from the current SOMA chunk, returning a torch-size batch whose size may
         contain fewer rows than the requested ``batch_size``. This can happen when the remaining rows in the current
         SOMA chunk are fewer than the requested ``batch_size``.
@@ -323,17 +382,20 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         if self.soma_chunk is None or not (0 <= self.i < len(self.soma_chunk)):
             # GC memory from previous soma_chunk
             self.soma_chunk = None
-            mem_info = run_gc()
-            self.max_process_mem_usage_bytes = max(self.max_process_mem_usage_bytes, mem_info[0][0].uss)
+            pre_gc, _, gc_elapsed = run_gc()
+            self.max_process_mem_usage_bytes = max(self.max_process_mem_usage_bytes, pre_gc[0].uss)
 
             self.soma_chunk: _SOMAChunk = next(self.soma_chunk_iter)
             self.stats += self.soma_chunk.stats
+            self.gc_elapsed += gc_elapsed
             self.i = 0
 
-            pytorch_logger.debug(f"Retrieved SOMA chunk totals: {self.stats}")
+            pytorch_logger.debug(
+                f"Retrieved SOMA chunk totals: {self.stats}, gc_elapsed={timedelta(seconds=self.gc_elapsed)}"
+            )
 
         obs_batch = self.soma_chunk.obs
-        X_batch = self.soma_chunk.X
+        X_chunk = self.soma_chunk.X
 
         safe_batch_size = min(batch_size, len(obs_batch) - self.i)
         slice_ = slice(self.i, self.i + safe_batch_size)
@@ -343,12 +405,22 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         assert obs_rows.index.is_unique
         assert safe_batch_size == obs_rows.shape[0]
 
-        X_csr_scipy = X_batch[slice_]
-        assert obs_rows.shape[0] == X_csr_scipy.shape[0]
+        if isinstance(X_chunk, coo_matrix):
+            start = np.searchsorted(X_chunk.row, slice_.start)
+            stop = np.searchsorted(X_chunk.row, slice_.stop)
+            data = X_chunk.data[start:stop]
+            row = X_chunk.row[start:stop] - slice_.start
+            col = X_chunk.col[start:stop]
+            shape = (slice_.stop - slice_.start, X_chunk.shape[1])
+            X_batch = coo_matrix((data, (row, col)), shape=shape)
+        else:
+            X_batch = X_chunk[slice_]
+
+        assert obs_rows.shape[0] == X_batch.shape[0]
 
         self.i += safe_batch_size
 
-        return obs_rows, X_csr_scipy
+        return obs_rows, X_batch
 
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
@@ -419,6 +491,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         soma_chunk_size: Optional[int] = 64,
         use_eager_fetch: bool = True,
         shuffle_chunk_count: Optional[int] = 2000,
+        method: Method = "scipy.csr",
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -498,6 +571,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
+        self.method = method
+        self.max_process_mem_usage_bytes = 0
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
@@ -613,12 +688,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 use_eager_fetch=self.use_eager_fetch,
                 shuffle_rng=self._shuffle_rng,
                 shuffle_chunk_count=self._shuffle_chunk_count,
+                method=self.method,
             )
 
             yield from obs_and_x_iter
 
+            self.max_process_mem_usage_bytes = obs_and_x_iter.max_process_mem_usage_bytes
             pytorch_logger.debug(
-                "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
+                "max process memory usage=" f"{self.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
             )
 
     @staticmethod
