@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -210,7 +219,7 @@
             <div itemprop="articleBody">
                 
   <section id="Computing-on-X-using-online-(incremental)-algorithms">
-<h1>Computing on X using online (incremental) algorithms<a class="headerlink" href="#Computing-on-X-using-online-(incremental)-algorithms" title="Permalink to this heading">¶</a></h1>
+<h1>Computing on X using online (incremental) algorithms<a class="headerlink" href="#Computing-on-X-using-online-(incremental)-algorithms" title="Permalink to this heading"></a></h1>
 <p>This tutorial showcases computing a variety of per-gene and per-cell statistics for a user-defined query using out-of-core operations.</p>
 <p><em>NOTE</em>: when query results are small enough to fit in memory, it may be easier to use the <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> Query class to extract an AnnData, and then just compute over that. This tutorial shows means of incrementally processing larger-than-core (RAM) data, where incremental (online) algorithms are used.</p>
 <p><strong>Contents</strong></p>
@@ -233,7 +242,7 @@
 </div>
 </div>
 <section id="Incremental-count-and-mean-calculation.">
-<h2>Incremental count and mean calculation.<a class="headerlink" href="#Incremental-count-and-mean-calculation." title="Permalink to this heading">¶</a></h2>
+<h2>Incremental count and mean calculation.<a class="headerlink" href="#Incremental-count-and-mean-calculation." title="Permalink to this heading"></a></h2>
 <p>Many statistics, such as <code class="docutils literal notranslate"><span class="pre">mean</span></code>, are easy to calculate incrementally. This cell demonstrates a query on the <code class="docutils literal notranslate"><span class="pre">X['raw']</span></code> sparse nD array, which will return results in batches. Accumulate the sum and count incrementally, into <code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_n</span></code>, and then compute mean.</p>
 <p>First define a query - in this case a slice over the obs axis for cells with a specific tissue &amp; sex value, and all genes on the var axis. The <code class="docutils literal notranslate"><span class="pre">query.X()</span></code> method returns an iterator of results, each as a PyArrow Table. Each table will contain the sparse X data and obs/var coordinates, using standard SOMA names:</p>
 <ul class="simple">
@@ -425,7 +434,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Incremental-variance-calculation">
-<h2>Incremental variance calculation<a class="headerlink" href="#Incremental-variance-calculation" title="Permalink to this heading">¶</a></h2>
+<h2>Incremental variance calculation<a class="headerlink" href="#Incremental-variance-calculation" title="Permalink to this heading"></a></h2>
 <p>Other statistics are not as simple when implemented as an online algorithm. This cell demonstrates an implementation of an online computation of <code class="docutils literal notranslate"><span class="pre">variance</span></code>, using <a class="reference external" href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">Welford’s online calculation of mean and variance</a>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -669,7 +678,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Counting-cells-per-gene,-grouped-by-dataset_id">
-<h2>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code><a class="headerlink" href="#Counting-cells-per-gene,-grouped-by-dataset_id" title="Permalink to this heading">¶</a></h2>
+<h2>Counting cells per gene, grouped by <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code><a class="headerlink" href="#Counting-cells-per-gene,-grouped-by-dataset_id" title="Permalink to this heading"></a></h2>
 <p>This example demonstrates a more complex example where the goal is to count the number of cells per gene, grouped by cell dataset_id. The result is a Pandas DataFrame indexed by <code class="docutils literal notranslate"><span class="pre">obs.dataset_id</span></code> and <code class="docutils literal notranslate"><span class="pre">var.feature_id</span></code>, containing the number of cells per pair.</p>
 <p>This example does not use positional indexing, but rather demonstrates the use of Pandas DataFrame <code class="docutils literal notranslate"><span class="pre">join</span></code> to join on the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>. For the sake of this example we will query only 4 genes, but this can be expanded to all genes.</p>
 <div class="nbinput docutils container">

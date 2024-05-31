@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -209,7 +218,7 @@
             <div itemprop="articleBody">
                 
   <section id="Experimental-Highly-Variable-Genes-API">
-<h1>Experimental Highly Variable Genes API<a class="headerlink" href="#Experimental-Highly-Variable-Genes-API" title="Permalink to this heading">¶</a></h1>
+<h1>Experimental Highly Variable Genes API<a class="headerlink" href="#Experimental-Highly-Variable-Genes-API" title="Permalink to this heading"></a></h1>
 <p>This tutorial describes use of the <code class="docutils literal notranslate"><span class="pre">cellxgene_census.experimental.pp</span></code> API for finding highly variable genes (HVGs) in the Census. The HVG algorithm implements the ranked normalized variance method <code class="docutils literal notranslate"><span class="pre">seurat_v3</span></code> described in <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html#scanpy.pp.highly_variable_genes">scanpy.pp.highly_variable_genes</a>.</p>
 <p>There are two API available:</p>
 <ul class="simple">
@@ -243,7 +252,7 @@
 </div>
 </div>
 <section id="get_highly_variable_genes">
-<h2>get_highly_variable_genes<a class="headerlink" href="#get_highly_variable_genes" title="Permalink to this heading">¶</a></h2>
+<h2>get_highly_variable_genes<a class="headerlink" href="#get_highly_variable_genes" title="Permalink to this heading"></a></h2>
 <p>This convenience function will meet most use cases, and is a wrapper around <code class="docutils literal notranslate"><span class="pre">highly_variable_genes</span></code>. This demonstration requests the top 500 genes from the Mouse census where <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> is <code class="docutils literal notranslate"><span class="pre">heart</span></code>, and joins with the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe.</p>
 <p>The HVGs returned by get_highly_variable_genes are indexed by their <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>. Join with the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe to have a merged view of var metadata.</p>
 <div class="nbinput docutils container">
@@ -768,7 +777,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="highly_variable_genes">
-<h2>highly_variable_genes<a class="headerlink" href="#highly_variable_genes" title="Permalink to this heading">¶</a></h2>
+<h2>highly_variable_genes<a class="headerlink" href="#highly_variable_genes" title="Permalink to this heading"></a></h2>
 <p>This API provides the same function as <code class="docutils literal notranslate"><span class="pre">get_highly_variable_genes</span></code>, but accepts any <code class="docutils literal notranslate"><span class="pre">tiledbsoma.ExperimentAxisQuery</span></code>. It is intended for more advanced users who wish to use create and manage their own queries.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:

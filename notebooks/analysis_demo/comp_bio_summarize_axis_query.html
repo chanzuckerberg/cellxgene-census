@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -210,7 +219,7 @@
             <div itemprop="articleBody">
                 
   <section id="Summarizing-cell-and-gene-metadata">
-<h1>Summarizing cell and gene metadata<a class="headerlink" href="#Summarizing-cell-and-gene-metadata" title="Permalink to this heading">¶</a></h1>
+<h1>Summarizing cell and gene metadata<a class="headerlink" href="#Summarizing-cell-and-gene-metadata" title="Permalink to this heading"></a></h1>
 <p>This notebook provides examples for basic axis metadata handling using Pandas. The Census stores <code class="docutils literal notranslate"><span class="pre">obs</span></code> (cell) and <code class="docutils literal notranslate"><span class="pre">var</span></code> (gene) metadata in <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> objects via the <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA API</a> (<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">documentation</a>), which can be queried and read as a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> using <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code>.</p>
 <p>Note that Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> is an in-memory object, therefore queries should be small enough for results to fit in memory.</p>
 <p><strong>Contents</strong></p>
@@ -226,7 +235,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Opening-the-Census">
-<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census. If you open the Census, you should close it. <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> returns a context, so you can open/close it in several ways, like a Python file handle. The context manager is preferred, as it will automatically close upon an error raise.</p>
 <p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
 <div class="nbinput docutils container">
@@ -255,7 +264,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Summarizing-cell-metadata">
-<h2>Summarizing cell metadata<a class="headerlink" href="#Summarizing-cell-metadata" title="Permalink to this heading">¶</a></h2>
+<h2>Summarizing cell metadata<a class="headerlink" href="#Summarizing-cell-metadata" title="Permalink to this heading"></a></h2>
 <p>Once the Census is open you can use its <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code> methods as it is itself a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. You can thus access the metadata <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> objects encoding cell and gene metadata.</p>
 <p>Tips:</p>
 <ul class="simple">
@@ -264,7 +273,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <li><p>You can also further refine query results by using a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code>, which will filter the census for matching records.</p></li>
 </ul>
 <section id="Example:-Summarize-all-cell-types">
-<h3>Example: Summarize all cell types<a class="headerlink" href="#Example:-Summarize-all-cell-types" title="Permalink to this heading">¶</a></h3>
+<h3>Example: Summarize all cell types<a class="headerlink" href="#Example:-Summarize-all-cell-types" title="Permalink to this heading"></a></h3>
 <p>This example reads the cell metadata (<code class="docutils literal notranslate"><span class="pre">obs</span></code>) into a Pandas DataFrame, and summarizes in a variety of ways using Pandas API.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -315,7 +324,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Example:-Summarize-a-subset-of-cell-types,-selected-with-a-value_filter">
-<h3>Example: Summarize a subset of cell types, selected with a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code><a class="headerlink" href="#Example:-Summarize-a-subset-of-cell-types,-selected-with-a-value_filter" title="Permalink to this heading">¶</a></h3>
+<h3>Example: Summarize a subset of cell types, selected with a <code class="docutils literal notranslate"><span class="pre">value_filter</span></code><a class="headerlink" href="#Example:-Summarize-a-subset-of-cell-types,-selected-with-a-value_filter" title="Permalink to this heading"></a></h3>
 <p>This example utilizes a SOMA “value filter” to read the subset of cells with <code class="docutils literal notranslate"><span class="pre">tissue_ontology_term_id</span></code> equal to <code class="docutils literal notranslate"><span class="pre">UBERON:0002048</span></code> (lung tissue), and summarizes the query result using Pandas.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -424,7 +433,7 @@ Name: count, dtype: int64
 </section>
 </section>
 <section id="Full-Census-metadata-stats">
-<h2>Full Census metadata stats<a class="headerlink" href="#Full-Census-metadata-stats" title="Permalink to this heading">¶</a></h2>
+<h2>Full Census metadata stats<a class="headerlink" href="#Full-Census-metadata-stats" title="Permalink to this heading"></a></h2>
 <p>This example queries all organisms in the Census, and summarizes the diversity of various metadata lables.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:

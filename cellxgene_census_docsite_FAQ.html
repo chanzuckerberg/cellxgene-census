@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -126,6 +128,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -204,7 +213,7 @@
             <div itemprop="articleBody">
                 
   <section id="faq">
-<h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading">¶</a></h1>
+<h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading"></a></h1>
 <p>Last updated: Jan, 2024.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#why-should-i-use-the-census"><span class="std std-ref">Why should I use the Census?</span></a></p></li>
@@ -224,7 +233,7 @@
 <li><p>Why do I get an error when running import cellxgene_census on Databricks?</p></li>
 </ul>
 <section id="why-should-i-use-the-census">
-<h2>Why should I use the Census?<a class="headerlink" href="#why-should-i-use-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>Why should I use the Census?<a class="headerlink" href="#why-should-i-use-the-census" title="Permalink to this heading"></a></h2>
 <p>The Census provides efficient low-latency access via Python and R APIs to most single-cell RNA data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To accelerate computational research, the Census enables researchers to:</p>
 <ul class="simple">
 <li><p>Access slices of data from more than 500 single-cell datasets spanning about 33M unique cells (50M total) from &gt;60K genes from human or mice.</p></li>
@@ -243,15 +252,15 @@
 <p>If you’d like to perform any of the above tasks, you can access web downloads directly from the <a class="reference external" href="https://cellxgene.cziscience.com/datasets">CZ CELLxGENE Discover Datasets</a> feature. <a class="reference external" href="https://cellxgene.cziscience.com/docs/03__Download%20Published%20Data">Click here</a> for more information about downloading published data on CELLxGENE Discover.</p>
 </section>
 <section id="what-data-is-contained-in-the-census">
-<h2>What data is contained in the Census?<a class="headerlink" href="#what-data-is-contained-in-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>What data is contained in the Census?<a class="headerlink" href="#what-data-is-contained-in-the-census" title="Permalink to this heading"></a></h2>
 <p>Most RNA non-spatial data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> is included. You can see a general description of these data and their organization in the <a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">schema description</span></a> or you can use the APIs to explore the data as indicated in this <a class="reference internal" href="notebooks/analysis_demo/comp_bio_census_info.html"><span class="std std-doc">tutorial</span></a>.</p>
 </section>
 <section id="how-do-i-cite-the-use-of-the-census-for-a-publication">
-<h2>How do I cite the use of the Census for a publication?<a class="headerlink" href="#how-do-i-cite-the-use-of-the-census-for-a-publication" title="Permalink to this heading">¶</a></h2>
+<h2>How do I cite the use of the Census for a publication?<a class="headerlink" href="#how-do-i-cite-the-use-of-the-census-for-a-publication" title="Permalink to this heading"></a></h2>
 <p>Please follow the <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citation guidelines</a> offered by CZ CELLxGENE Discover.</p>
 </section>
 <section id="why-does-the-census-not-have-a-normalized-layer-or-embeddings">
-<h2>Why does the Census not have a normalized layer or embeddings?<a class="headerlink" href="#why-does-the-census-not-have-a-normalized-layer-or-embeddings" title="Permalink to this heading">¶</a></h2>
+<h2>Why does the Census not have a normalized layer or embeddings?<a class="headerlink" href="#why-does-the-census-not-have-a-normalized-layer-or-embeddings" title="Permalink to this heading"></a></h2>
 <p>The Census does not have normalized counts or embeddings because:</p>
 <ul class="simple">
 <li><p>The original normalized values and embeddings are not harmonized or integrated across datasets and are therefore numerically incompatible.</p></li>
@@ -260,7 +269,7 @@
 <p>If you have any suggestions for methods that our team should explore, please share them with us via a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&amp;amp;labels=user+request&amp;amp;template=feature-request.md&amp;amp;title=">feature request in the github repository</a>.</p>
 </section>
 <section id="how-does-the-census-differentiate-from-other-tools">
-<h2>How does the Census differentiate from other tools?<a class="headerlink" href="#how-does-the-census-differentiate-from-other-tools" title="Permalink to this heading">¶</a></h2>
+<h2>How does the Census differentiate from other tools?<a class="headerlink" href="#how-does-the-census-differentiate-from-other-tools" title="Permalink to this heading"></a></h2>
 <p>The Census differentiates from existing single-cell tools by providing fast, efficient access to the largest corpus of standardized single-cell data from CZ CELLxGENE Discover via <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA/issues/new/choose">TileDB-SOMA</a>.  Thus, single-cell data from about 33M unique cells (50M total) across &gt;60 K genes, with 11 standardized cell metadata variables and harmonized GENCODE annotations are ready for:</p>
 <ul class="simple">
 <li><p>Opening and reading data at low latency from the cloud.</p></li>
@@ -272,15 +281,15 @@
 </ul>
 </section>
 <section id="can-i-query-human-and-mouse-data-in-a-single-query">
-<h2>Can I query human and mouse data in a single query?<a class="headerlink" href="#can-i-query-human-and-mouse-data-in-a-single-query" title="Permalink to this heading">¶</a></h2>
+<h2>Can I query human and mouse data in a single query?<a class="headerlink" href="#can-i-query-human-and-mouse-data-in-a-single-query" title="Permalink to this heading"></a></h2>
 <p>It is not possible to query both mouse and human data in a single query. This is due to the data from these organisms using different <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#required-gene-annotations">organism-specific gene annotations</a>.</p>
 </section>
 <section id="where-are-the-census-data-hosted">
-<h2>Where are the Census data hosted?<a class="headerlink" href="#where-are-the-census-data-hosted" title="Permalink to this heading">¶</a></h2>
+<h2>Where are the Census data hosted?<a class="headerlink" href="#where-are-the-census-data-hosted" title="Permalink to this heading"></a></h2>
 <p>The Census data is publicly hosted free-of-cost in an Amazon Web Services (AWS) S3 bucket in the <a class="reference external" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions"><code class="docutils literal notranslate"><span class="pre">us-west-2</span></code> region</a>.</p>
 </section>
 <section id="can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built">
-<h2>Can I retrieve the original H5AD datasets from which the Census was built?<a class="headerlink" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built" title="Permalink to this heading">¶</a></h2>
+<h2>Can I retrieve the original H5AD datasets from which the Census was built?<a class="headerlink" href="#can-i-retrieve-the-original-h5ad-datasets-from-which-the-census-was-built" title="Permalink to this heading"></a></h2>
 <p>Yes, you can use the API function <code class="docutils literal notranslate"><span class="pre">download_source_h5ad</span></code> to do so. For usage, please see the reference documentation at the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">doc-site</a> or directly from Python or R:</p>
 <p>Python</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
@@ -294,7 +303,7 @@
 </div>
 </section>
 <section id="how-can-i-increase-the-performance-of-my-queries">
-<h2>How can I increase the performance of my queries?<a class="headerlink" href="#how-can-i-increase-the-performance-of-my-queries" title="Permalink to this heading">¶</a></h2>
+<h2>How can I increase the performance of my queries?<a class="headerlink" href="#how-can-i-increase-the-performance-of-my-queries" title="Permalink to this heading"></a></h2>
 <p>Since the access patterns are via the internet, usually the main limiting step for data queries is bandwidth and client location. We recommend the following tactics to increase query efficiency:</p>
 <ul class="simple">
 <li><p>Utilize a computer connected to high-speed internet.</p></li>
@@ -304,7 +313,7 @@
 </ul>
 </section>
 <section id="can-i-use-conda-to-install-the-census-python-api">
-<h2>Can I use conda to install the Census Python API?<a class="headerlink" href="#can-i-use-conda-to-install-the-census-python-api" title="Permalink to this heading">¶</a></h2>
+<h2>Can I use conda to install the Census Python API?<a class="headerlink" href="#can-i-use-conda-to-install-the-census-python-api" title="Permalink to this heading"></a></h2>
 <p>There is not a conda package available for <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code>. However you can use conda in combination with <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install the package in a conda environment:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>census_env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
 conda<span class="w"> </span>activate<span class="w"> </span>census_env
@@ -313,24 +322,24 @@ pip<span class="w"> </span>install<span class="w"> </span>cellxgene-census
 </div>
 </section>
 <section id="how-can-i-ask-for-support">
-<h2>How can I ask for support?<a class="headerlink" href="#how-can-i-ask-for-support" title="Permalink to this heading">¶</a></h2>
+<h2>How can I ask for support?<a class="headerlink" href="#how-can-i-ask-for-support" title="Permalink to this heading"></a></h2>
 <p>You can either submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a>, or for quick support, you can join the CZI Science Community on Slack (<a class="reference external" href="https://czi.co/science-slack">czi.co/science-slack</a>) and ask questions in the <code class="docutils literal notranslate"><span class="pre">#cellxgene-census-users</span></code> channel.</p>
 </section>
 <section id="how-can-i-ask-for-new-features">
-<h2>How can I ask for new features?<a class="headerlink" href="#how-can-i-ask-for-new-features" title="Permalink to this heading">¶</a></h2>
+<h2>How can I ask for new features?<a class="headerlink" href="#how-can-i-ask-for-new-features" title="Permalink to this heading"></a></h2>
 <p>You can submit a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new?assignees=&amp;amp;labels=user+request&amp;amp;template=feature-request.md&amp;amp;title=">feature request in the github repository</a>.</p>
 </section>
 <section id="how-can-i-contribute-my-data-to-the-census">
-<h2>How can I contribute my data to the Census?<a class="headerlink" href="#how-can-i-contribute-my-data-to-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>How can I contribute my data to the Census?<a class="headerlink" href="#how-can-i-contribute-my-data-to-the-census" title="Permalink to this heading"></a></h2>
 <p>To inquire about submitting your data to CZ CELLxGENE Discover, <a class="reference external" href="https://cellxgene.cziscience.com/docs/032__Contribute%20and%20Publish%20Data">click here</a>. If your data request is accepted, the data will automatically be included in the Census if it meets the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#data-included">biological criteria defined in the Census schema</a>.</p>
 </section>
 <section id="why-do-i-get-an-arrayschema-error-when-opening-the-census">
-<h2>Why do I get an <code class="docutils literal notranslate"><span class="pre">ArraySchema</span></code> error when opening the Census?<a class="headerlink" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>Why do I get an <code class="docutils literal notranslate"><span class="pre">ArraySchema</span></code> error when opening the Census?<a class="headerlink" href="#why-do-i-get-an-arrayschema-error-when-opening-the-census" title="Permalink to this heading"></a></h2>
 <p>You may get this error if you are trying to open a Census data build with an old version of the Census API. Please update your Python or R Census package.</p>
 <p>If the error persists please file a <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues/new/choose">github issue</a>.</p>
 </section>
 <section id="why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks">
-<h2>Why do I get an error when running <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">cellxgene_census</span></code> on Databricks?<a class="headerlink" href="#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks" title="Permalink to this heading">¶</a></h2>
+<h2>Why do I get an error when running <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">cellxgene_census</span></code> on Databricks?<a class="headerlink" href="#why-do-i-get-an-error-when-running-import-cellxgene-census-on-databricks" title="Permalink to this heading"></a></h2>
 <p>This can occur if the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> Python package is installed in a Databricks notebook using <code class="docutils literal notranslate"><span class="pre">%sh</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cellxgene_census</span></code>. This command does <em>not</em> restart the Python process after installing <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> and any pip package dependencies that were pre-installed by the Databricks Runtime environment but upgraded for <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> will not be reloaded with their new version. You may see <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">pyarrow</span></code> related errors, for example.</p>
 <p>To fix, simply install using one of the following Databricks notebook “magic” commands:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>cellxgene-census

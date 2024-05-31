@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -214,7 +223,7 @@
             <div itemprop="articleBody">
                 
   <section id="Exploring-all-data-from-a-tissue">
-<h1>Exploring all data from a tissue<a class="headerlink" href="#Exploring-all-data-from-a-tissue" title="Permalink to this heading">¶</a></h1>
+<h1>Exploring all data from a tissue<a class="headerlink" href="#Exploring-all-data-from-a-tissue" title="Permalink to this heading"></a></h1>
 <p>This tutorial provides a series of examples for how to explore and query the Census in the context of a single tissue, lung. We will summarize cell and gene metadata, then fetch the single-cell expression counts and perform some basic data explorations via <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/">Scanpy</a></p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -230,7 +239,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Learning-about-the-lung-data-in-the-Census">
-<h2>Learning about the lung data in the Census<a class="headerlink" href="#Learning-about-the-lung-data-in-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Learning about the lung data in the Census<a class="headerlink" href="#Learning-about-the-lung-data-in-the-Census" title="Permalink to this heading"></a></h2>
 <p>First we will open the Census. If you are not familiar with the basics of the Census API you should take a look at notebook <a class="reference external" href="https://cellxgene-census.readthedocs.io/en/latest/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -314,7 +323,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <p>There you can see the total of cells of under <code class="docutils literal notranslate"><span class="pre">total_cell_count</span></code> and the unique number cells under <code class="docutils literal notranslate"><span class="pre">unique_cell_count</span></code> (i.e. after removing cells that were included in multiple datasets).</p>
 <p>Let’s now take a look at the cell and gene information of this slice of the Census.</p>
 <section id="Learning-about-cells-of-lung-data">
-<h3>Learning about cells of lung data<a class="headerlink" href="#Learning-about-cells-of-lung-data" title="Permalink to this heading">¶</a></h3>
+<h3>Learning about cells of lung data<a class="headerlink" href="#Learning-about-cells-of-lung-data" title="Permalink to this heading"></a></h3>
 <p>Let’s load the cell metadata for all lung cells and select only the unique cells using <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -648,7 +657,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 <p>You can see that the number or rows represents the total number of unique lung cells in the Census. Now let’s take a deeper dive into the characteristics of these cells.</p>
 <section id="Datasets">
-<h4>Datasets<a class="headerlink" href="#Datasets" title="Permalink to this heading">¶</a></h4>
+<h4>Datasets<a class="headerlink" href="#Datasets" title="Permalink to this heading"></a></h4>
 <p>First let’s start by looking at what are the datasets and collections from <a class="reference external" href="https://cellxgene.cziscience.com/collections">CELLxGENE Discover</a> contributing to lung. For this we will use the dataset table at <code class="docutils literal notranslate"><span class="pre">census[&quot;census-info&quot;][&quot;datasets&quot;]</span></code> that contains metadata of all datasets used to build this Census.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -1011,7 +1020,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </ol>
 </section>
 <section id="Assays">
-<h4>Assays<a class="headerlink" href="#Assays" title="Permalink to this heading">¶</a></h4>
+<h4>Assays<a class="headerlink" href="#Assays" title="Permalink to this heading"></a></h4>
 <p>Let’s use similar logic to take a look at all the assays available for human lung data. This tells us that most assays are from 10x technologies and sci-RNA-seq.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -1047,7 +1056,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Disease">
-<h4>Disease<a class="headerlink" href="#Disease" title="Permalink to this heading">¶</a></h4>
+<h4>Disease<a class="headerlink" href="#Disease" title="Permalink to this heading"></a></h4>
 <p>And now let’s take a look at diseased cell counts, with <code class="docutils literal notranslate"><span class="pre">normal</span></code> indicating non-diseased cells.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -1084,7 +1093,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Sex">
-<h4>Sex<a class="headerlink" href="#Sex" title="Permalink to this heading">¶</a></h4>
+<h4>Sex<a class="headerlink" href="#Sex" title="Permalink to this heading"></a></h4>
 <p>There doesn’t seem to be strong biases for sex.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -1109,7 +1118,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Cell-vs-nucleus">
-<h4>Cell vs nucleus<a class="headerlink" href="#Cell-vs-nucleus" title="Permalink to this heading">¶</a></h4>
+<h4>Cell vs nucleus<a class="headerlink" href="#Cell-vs-nucleus" title="Permalink to this heading"></a></h4>
 <p>The majority of data are from cells and not nucleus.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -1133,7 +1142,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Cell-types">
-<h4>Cell types<a class="headerlink" href="#Cell-types" title="Permalink to this heading">¶</a></h4>
+<h4>Cell types<a class="headerlink" href="#Cell-types" title="Permalink to this heading"></a></h4>
 <p>Let’s take a look at the counts of the top 20 cell types.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -1175,7 +1184,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Sub-tissues">
-<h4>Sub-tissues<a class="headerlink" href="#Sub-tissues" title="Permalink to this heading">¶</a></h4>
+<h4>Sub-tissues<a class="headerlink" href="#Sub-tissues" title="Permalink to this heading"></a></h4>
 <p>We can look at the original tissue annotations that were mapped to “lung”.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1209,7 +1218,7 @@ Name: count, dtype: int64
 </section>
 </section>
 <section id="Learning-about-genes-of-lung-data">
-<h3>Learning about genes of lung data<a class="headerlink" href="#Learning-about-genes-of-lung-data" title="Permalink to this heading">¶</a></h3>
+<h3>Learning about genes of lung data<a class="headerlink" href="#Learning-about-genes-of-lung-data" title="Permalink to this heading"></a></h3>
 <p>Let’s load the gene metadata of the Census.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -1750,7 +1759,7 @@ array([17811, 50259, 44150, 34265, 22447, 23642, 26347, 20921, 24672,
 <p>The number of rows represents the genes that were measured in all lung datasets.</p>
 </section>
 <section id="Summary-of-lung-metadata">
-<h3>Summary of lung metadata<a class="headerlink" href="#Summary-of-lung-metadata" title="Permalink to this heading">¶</a></h3>
+<h3>Summary of lung metadata<a class="headerlink" href="#Summary-of-lung-metadata" title="Permalink to this heading"></a></h3>
 <p>In the previous sections, using the Census we learned the following information:</p>
 <ul class="simple">
 <li><p>The total number of unique lung cells and their composition for:</p>
@@ -1767,7 +1776,7 @@ array([17811, 50259, 44150, 34265, 22447, 23642, 26347, 20921, 24672,
 </section>
 </section>
 <section id="Fetching-all-single-cell-human-lung-data-from-the-Census">
-<h2>Fetching all single-cell human lung data from the Census<a class="headerlink" href="#Fetching-all-single-cell-human-lung-data-from-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Fetching all single-cell human lung data from the Census<a class="headerlink" href="#Fetching-all-single-cell-human-lung-data-from-the-Census" title="Permalink to this heading"></a></h2>
 <p>Since loading the entire lung data is resource-intensive, for the sake of this exercise let’s load a subset of the lung data into an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object and perform some exploratory analysis.</p>
 <p>We will subset to 100,000 random unique cells using the <code class="docutils literal notranslate"><span class="pre">lung_obs</span></code> <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> we previously created.</p>
 <div class="nbinput nblast docutils container">
@@ -1827,7 +1836,7 @@ AnnData object with n_obs × n_vars = 100000 × 11595
 </div>
 </section>
 <section id="Calculating-QC-metrics-of-the-lung-data">
-<h2>Calculating QC metrics of the lung data<a class="headerlink" href="#Calculating-QC-metrics-of-the-lung-data" title="Permalink to this heading">¶</a></h2>
+<h2>Calculating QC metrics of the lung data<a class="headerlink" href="#Calculating-QC-metrics-of-the-lung-data" title="Permalink to this heading"></a></h2>
 <p>Now let’s take a look at some QC metrics</p>
 <p><strong>Top genes per cell</strong></p>
 <div class="nbinput docutils container">
@@ -1902,7 +1911,7 @@ AnnData object with n_obs × n_vars = 100000 × 11595
 </div>
 </section>
 <section id="Creating-a-normalized-expression-layer-and-embeddings">
-<h2>Creating a normalized expression layer and embeddings<a class="headerlink" href="#Creating-a-normalized-expression-layer-and-embeddings" title="Permalink to this heading">¶</a></h2>
+<h2>Creating a normalized expression layer and embeddings<a class="headerlink" href="#Creating-a-normalized-expression-layer-and-embeddings" title="Permalink to this heading"></a></h2>
 <p>Let’s perform a bread and butter normalization and take a look at UMAP embeddings, but for all the data below we’ll exclude Smart-seq2 as this requires an extra step to normalize based on gene lengths</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:

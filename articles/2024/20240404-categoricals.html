@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -127,6 +129,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -200,14 +209,14 @@
             <div itemprop="articleBody">
                 
   <section id="census-supports-categoricals-for-cell-metadata">
-<h1>Census supports categoricals for cell metadata<a class="headerlink" href="#census-supports-categoricals-for-cell-metadata" title="Permalink to this heading">¶</a></h1>
+<h1>Census supports categoricals for cell metadata<a class="headerlink" href="#census-supports-categoricals-for-cell-metadata" title="Permalink to this heading"></a></h1>
 <p><em>Published:</em> <em>April 4th, 2024</em></p>
 <p><em>By:</em> <em><a class="reference external" href="mailto:ebezzi&#37;&#52;&#48;chanzuckerberg&#46;com">Emanuele Bezzi</a></em> &amp; <a class="reference external" href="mailto:pgarcia-nieto&#37;&#52;&#48;chanzuckerberg&#46;com">Pablo Garcia-Nieto</a></p>
 <p>Starting with the <code class="docutils literal notranslate"><span class="pre">2024-04-01</span></code> Census build, a subset of the columns in the <code class="docutils literal notranslate"><span class="pre">obs</span></code> dataframe are now categorical instead of strings.</p>
 <p>Overall users will observe a smaller memory footprint when loading Census data into memory. 🚀</p>
 <p>However, this may break some existing pipelines as explained below.</p>
 <section id="potential-breaking-changes">
-<h2>Potential breaking changes<a class="headerlink" href="#potential-breaking-changes" title="Permalink to this heading">¶</a></h2>
+<h2>Potential breaking changes<a class="headerlink" href="#potential-breaking-changes" title="Permalink to this heading"></a></h2>
 <p>For <strong>Python users</strong>, note that Pandas will encode these columns as <code class="docutils literal notranslate"><span class="pre">pandas.Categorical</span></code>  for which some downstream operations may need to be adapted. See <a class="reference external" href="https://pandas.pydata.org/docs/user_guide/categorical.html#operations">this link</a> for more details. In particular:</p>
 <blockquote>
 <div><p>Series methods like Series.value_counts() will use all categories, even if some categories are not present in the data</p>
@@ -220,7 +229,7 @@
 <p>For <strong>Python and R users</strong> interfacing with <code class="docutils literal notranslate"><span class="pre">arrow</span></code>, these columns will be encoded as <code class="docutils literal notranslate"><span class="pre">dictionary</span></code>, see more details for R in <a class="reference external" href="https://arrow.apache.org/docs/r/reference/dictionary.html">this link</a> and Python in <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.dictionary.html">this link</a>.</p>
 </section>
 <section id="identifying-the-obs-columns-encoded-as-categorical">
-<h2>Identifying the <code class="docutils literal notranslate"><span class="pre">obs</span></code> columns encoded as categorical<a class="headerlink" href="#identifying-the-obs-columns-encoded-as-categorical" title="Permalink to this heading">¶</a></h2>
+<h2>Identifying the <code class="docutils literal notranslate"><span class="pre">obs</span></code> columns encoded as categorical<a class="headerlink" href="#identifying-the-obs-columns-encoded-as-categorical" title="Permalink to this heading"></a></h2>
 <p>Users can always check the the type of each cell metadata variable by inspecting the schema of <code class="docutils literal notranslate"><span class="pre">obs</span></code>. Categoricals will be shown as <code class="docutils literal notranslate"><span class="pre">dictionary</span></code>.</p>
 <p>In Python:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>

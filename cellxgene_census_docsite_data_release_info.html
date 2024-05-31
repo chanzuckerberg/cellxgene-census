@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -127,6 +129,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -219,7 +228,7 @@
             <div itemprop="articleBody">
                 
   <section id="census-data-releases">
-<h1>Census data releases<a class="headerlink" href="#census-data-releases" title="Permalink to this heading">¶</a></h1>
+<h1>Census data releases<a class="headerlink" href="#census-data-releases" title="Permalink to this heading"></a></h1>
 <p><strong>Last edited</strong>: December 15th, 2023.</p>
 <p><strong>Contents:</strong></p>
 <ol class="arabic simple">
@@ -228,12 +237,12 @@
 <li><p><a class="reference internal" href="#compatibility-with-package-versions"><span class="std std-ref">Compatibility with package versions</span></a></p></li>
 </ol>
 <section id="what-is-a-census-data-release">
-<h2>What is a Census data release?<a class="headerlink" href="#what-is-a-census-data-release" title="Permalink to this heading">¶</a></h2>
+<h2>What is a Census data release?<a class="headerlink" href="#what-is-a-census-data-release" title="Permalink to this heading"></a></h2>
 <p>It is a Census build that is publicly hosted online. A Census build is
 a <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a> collection with the Census data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> as specified in the <a class="reference internal" href="cellxgene_census_docsite_schema.html"><span class="std std-doc">Census schema</span></a>.</p>
 <p>Any given Census build is named with a unique tag, normally the date of build, e.g., <code class="docutils literal notranslate"><span class="pre">&quot;2023-05-15&quot;</span></code>.</p>
 <section id="long-term-supported-lts-census-releases">
-<h3>Long-term supported (LTS) Census releases<a class="headerlink" href="#long-term-supported-lts-census-releases" title="Permalink to this heading">¶</a></h3>
+<h3>Long-term supported (LTS) Census releases<a class="headerlink" href="#long-term-supported-lts-census-releases" title="Permalink to this heading"></a></h3>
 <p>To enable data stability and scientific reproducibility, <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> plans to perform regular LTS Census data releases:</p>
 <ul class="simple">
 <li><p>Published online every six months for public access, starting on May 15, 2023.</p></li>
@@ -252,7 +261,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </div>
 </section>
 <section id="weekly-census-releases-latest">
-<h3>Weekly Census releases (latest)<a class="headerlink" href="#weekly-census-releases-latest" title="Permalink to this heading">¶</a></h3>
+<h3>Weekly Census releases (latest)<a class="headerlink" href="#weekly-census-releases-latest" title="Permalink to this heading"></a></h3>
 <p><a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> ingests a handful of new datasets every week. To quickly enable access to these new data via the Census, CZ CELLxGENE Discover plans to perform weekly Census data releases:</p>
 <ul class="simple">
 <li><p>Available for public access for 1 month.</p></li>
@@ -271,12 +280,12 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </section>
 </section>
 <section id="list-of-lts-census-data-releases">
-<h2>List of LTS Census data releases<a class="headerlink" href="#list-of-lts-census-data-releases" title="Permalink to this heading">¶</a></h2>
+<h2>List of LTS Census data releases<a class="headerlink" href="#list-of-lts-census-data-releases" title="Permalink to this heading"></a></h2>
 <section id="lts-2023-12-15">
-<h3>LTS 2023-12-15<a class="headerlink" href="#lts-2023-12-15" title="Permalink to this heading">¶</a></h3>
+<h3>LTS 2023-12-15<a class="headerlink" href="#lts-2023-12-15" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2023-12-15&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
 <section id="version-information">
-<h4>Version information<a class="headerlink" href="#version-information" title="Permalink to this heading">¶</a></h4>
+<h4>Version information<a class="headerlink" href="#version-information" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -300,7 +309,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="cell-and-donor-counts">
-<h4>Cell and donor counts<a class="headerlink" href="#cell-and-donor-counts" title="Permalink to this heading">¶</a></h4>
+<h4>Cell and donor counts<a class="headerlink" href="#cell-and-donor-counts" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -325,7 +334,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="cell-metadata">
-<h4>Cell metadata<a class="headerlink" href="#cell-metadata" title="Permalink to this heading">¶</a></h4>
+<h4>Cell metadata<a class="headerlink" href="#cell-metadata" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -374,7 +383,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="cell-embbedings">
-<h4>Cell embbedings<a class="headerlink" href="#cell-embbedings" title="Permalink to this heading">¶</a></h4>
+<h4>Cell embbedings<a class="headerlink" href="#cell-embbedings" title="Permalink to this heading"></a></h4>
 <p>Find out more in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p>Available <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slots:</p>
 <table class="docutils align-default">
@@ -398,10 +407,10 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </section>
 </section>
 <section id="lts-2023-07-25">
-<h3>LTS 2023-07-25<a class="headerlink" href="#lts-2023-07-25" title="Permalink to this heading">¶</a></h3>
+<h3>LTS 2023-07-25<a class="headerlink" href="#lts-2023-07-25" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2023-07-25&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
 <section id="id1">
-<h4>Version information<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<h4>Version information<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -425,7 +434,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="id2">
-<h4>Cell and donor counts<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<h4>Cell and donor counts<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -450,7 +459,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="id3">
-<h4>Cell metadata<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
+<h4>Cell metadata<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -500,19 +509,19 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </section>
 </section>
 <section id="lts-2023-05-15">
-<h3>LTS 2023-05-15<a class="headerlink" href="#lts-2023-05-15" title="Permalink to this heading">¶</a></h3>
+<h3>LTS 2023-05-15<a class="headerlink" href="#lts-2023-05-15" title="Permalink to this heading"></a></h3>
 <p>Open this data release by specifying <code class="docutils literal notranslate"><span class="pre">census_version</span> <span class="pre">=</span> <span class="pre">&quot;2023-05-15&quot;</span></code> in future calls to <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code>.</p>
 <section id="errata">
-<h4>🔴 Errata 🔴<a class="headerlink" href="#errata" title="Permalink to this heading">¶</a></h4>
+<h4>🔴 Errata 🔴<a class="headerlink" href="#errata" title="Permalink to this heading"></a></h4>
 <section id="duplicate-observations-with-is-primary-data-true">
-<h5>Duplicate observations with  <code class="docutils literal notranslate"><span class="pre">is_primary_data</span> <span class="pre">=</span> <span class="pre">True</span></code><a class="headerlink" href="#duplicate-observations-with-is-primary-data-true" title="Permalink to this heading">¶</a></h5>
+<h5>Duplicate observations with  <code class="docutils literal notranslate"><span class="pre">is_primary_data</span> <span class="pre">=</span> <span class="pre">True</span></code><a class="headerlink" href="#duplicate-observations-with-is-primary-data-true" title="Permalink to this heading"></a></h5>
 <p>In order to prevent duplicate data in analyses, each observation (cell) should be marked <code class="docutils literal notranslate"><span class="pre">is_primary</span> <span class="pre">data</span> <span class="pre">=</span> <span class="pre">True</span></code> exactly once in the Census. Since this LTS release, 243,569 observations have been identified that are represented at least twice with <code class="docutils literal notranslate"><span class="pre">is_primary_data</span> <span class="pre">=</span> <span class="pre">True</span></code>.</p>
 <p>This issue will be corrected in the following LTS data release, by identifying and marking only one cell out of the duplicates as  <code class="docutils literal notranslate"><span class="pre">is_primary_data</span> <span class="pre">=</span> <span class="pre">True</span></code>.</p>
 <p>If you wish to use this data release, you can consider filtering out all of these 243,569 cells by using the <code class="docutils literal notranslate"><span class="pre">soma_joinids</span></code> provided in this file <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/raw/773edab79bbdc78eccb26ec4f8211a9b4c98a71a/tools/cell_dup_check/duplicate_cells_census_LTS_2023-05-15.csv.zip">duplicate_cells_census_LTS_2023-05-15.csv.zip</a>. You can filter specific cells by using the <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> or <code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> of the querying API functions, for more information follow this <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">tutorial</a>.</p>
 </section>
 </section>
 <section id="id4">
-<h4>Version information<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
+<h4>Version information<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Information</p></th>
@@ -536,7 +545,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="id5">
-<h4>Cell and donor counts<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
+<h4>Cell and donor counts<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -561,7 +570,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </table>
 </section>
 <section id="id6">
-<h4>Cell metadata<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h4>
+<h4>Cell metadata<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Category</p></th>
@@ -612,7 +621,7 @@ a <a class="reference external" href="https://github.com/single-cell-data/TileDB
 </section>
 </section>
 <section id="compatibility-with-package-versions">
-<h2>Compatibility with package versions<a class="headerlink" href="#compatibility-with-package-versions" title="Permalink to this heading">¶</a></h2>
+<h2>Compatibility with package versions<a class="headerlink" href="#compatibility-with-package-versions" title="Permalink to this heading"></a></h2>
 <p>Due to the nature of the Census storage backend, the format version will change from time to time. Format upgrades are always backwards compatible, but they’re not always forwards compatible, which means that reading a recent Census data version using an older version of the package might result in an error.
 We aim to guarantee the following policy:</p>
 <ul class="simple">

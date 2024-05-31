@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -127,6 +129,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -203,7 +212,7 @@
             <div itemprop="articleBody">
                 
   <section id="r-package-cellxgene-census-v1-is-out">
-<h1>R package <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> V1 is out!<a class="headerlink" href="#r-package-cellxgene-census-v1-is-out" title="Permalink to this heading">¶</a></h1>
+<h1>R package <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> V1 is out!<a class="headerlink" href="#r-package-cellxgene-census-v1-is-out" title="Permalink to this heading"></a></h1>
 <p><em>Published:</em> <em>August 7th, 2023</em></p>
 <p><em>By:</em> <em><a class="reference external" href="mailto:pgarcia-nieto&#37;&#52;&#48;chanzuckerberg&#46;com">Pablo Garcia-Nieto</a></em></p>
 <p>The Census team is pleased to announce the release of the R package <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code>. 🎉 🎉</p>
@@ -211,7 +220,7 @@
 <p>With <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> in a few seconds users can access any slice of Census data using cell or gene filters across hundreds of datasets. The data can be fetched in an iterative fashion for bigger-than-memory slices of data, or quickly exported to basic R structures, and <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> or <a class="reference external" href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html">SingleCellExperiment</a> for downstream analysis.</p>
 <p><img alt="image" src="../../_images/20230808-r_api_release.svg" /></p>
 <section id="installation-and-usage">
-<h2>Installation and usage<a class="headerlink" href="#installation-and-usage" title="Permalink to this heading">¶</a></h2>
+<h2>Installation and usage<a class="headerlink" href="#installation-and-usage" title="Permalink to this heading"></a></h2>
 <p>Users can install <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> and its dependencies following the <a class="reference internal" href="../../cellxgene_census_docsite_installation.html"><span class="std std-doc">installation instructions</span></a>.</p>
 <p>To learn more about the package please make sure to check out the following resources:</p>
 <ul class="simple">
@@ -221,17 +230,17 @@
 </ul>
 </section>
 <section id="census-r-package-is-made-possible-by-tiledbsoma">
-<h2>Census R package is made possible by <code class="docutils literal notranslate"><span class="pre">tiledbsoma</span></code><a class="headerlink" href="#census-r-package-is-made-possible-by-tiledbsoma" title="Permalink to this heading">¶</a></h2>
+<h2>Census R package is made possible by <code class="docutils literal notranslate"><span class="pre">tiledbsoma</span></code><a class="headerlink" href="#census-r-package-is-made-possible-by-tiledbsoma" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> package relies on <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA</a> R’s package <code class="docutils literal notranslate"><span class="pre">tiledbsoma</span></code> for all of its data access capabilities as shown in the next section.</p>
 <p>CZI and TileDB have worked closely on the development of <code class="docutils literal notranslate"><span class="pre">tiledbsoma</span></code> and recently upgraded it from beta to its first stable version. Release notes can be found <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA/releases/tag/1.4.0">here</a>.</p>
 </section>
 <section id="efficient-access-to-single-cell-data-for-33m-cells-from-r">
-<h2>Efficient access to single-cell data for &gt;33M cells from R<a class="headerlink" href="#efficient-access-to-single-cell-data-for-33m-cells-from-r" title="Permalink to this heading">¶</a></h2>
+<h2>Efficient access to single-cell data for &gt;33M cells from R<a class="headerlink" href="#efficient-access-to-single-cell-data-for-33m-cells-from-r" title="Permalink to this heading"></a></h2>
 <p>Census hosts ever-growing <a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html"><span class="std std-doc">data releases</span></a> from CZ CELLxGENE Discover, representing the largest aggregation of standardized single-cell data.</p>
 <p>Census data are accompanied by cell and gene metadata that have been standardized on ontologies across all datasets hosted in CZ CELLxGENE Discover. For example all cell types and tissues have been mapped to a value of the CL and UBERON ontologies, respectively. You can find more about the data in the <a class="reference internal" href="../../cellxgene_census_docsite_schema.html"><span class="std std-doc">Census data and schema</span></a> page.</p>
 <p>With the <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> R package, researchers can have access to all of these data and metadata directly from an R session with the following capabilities:</p>
 <section id="easy-to-use-handles-to-the-cloud-hosted-census-data">
-<h3>Easy-to-use handles to the cloud-hosted Census data<a class="headerlink" href="#easy-to-use-handles-to-the-cloud-hosted-census-data" title="Permalink to this heading">¶</a></h3>
+<h3>Easy-to-use handles to the cloud-hosted Census data<a class="headerlink" href="#easy-to-use-handles-to-the-cloud-hosted-census-data" title="Permalink to this heading"></a></h3>
 <p>From R users can get a handle to the data by opening the Census.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
 
@@ -244,7 +253,7 @@
 </div>
 </section>
 <section id="querying-and-reading-single-cell-metadata-from-census">
-<h3>Querying and reading single-cell metadata from Census<a class="headerlink" href="#querying-and-reading-single-cell-metadata-from-census" title="Permalink to this heading">¶</a></h3>
+<h3>Querying and reading single-cell metadata from Census<a class="headerlink" href="#querying-and-reading-single-cell-metadata-from-census" title="Permalink to this heading"></a></h3>
 <p>Following our <a class="reference internal" href="../../cellxgene_census_docsite_schema.html"><span class="std std-doc">Census data and schema</span></a>, users can navigate and query Census data and metadata by using any combination of gene and cell filters.</p>
 <p>For example, reading a slice of the human cell metadata for more than 300K cells with Microglial cells or Neurons from female donors:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
@@ -271,7 +280,7 @@
 </div>
 </section>
 <section id="exporting-census-slices-to-seurat-and-singlecellexperiment">
-<h3>Exporting Census slices to <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> and <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code><a class="headerlink" href="#exporting-census-slices-to-seurat-and-singlecellexperiment" title="Permalink to this heading">¶</a></h3>
+<h3>Exporting Census slices to <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> and <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code><a class="headerlink" href="#exporting-census-slices-to-seurat-and-singlecellexperiment" title="Permalink to this heading"></a></h3>
 <p>Similarly, users can query both the single-cell data along with its metadata and export them to  <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> or <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> objects for downstream analysis:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
 
@@ -305,7 +314,7 @@
 </div>
 </section>
 <section id="streaming-data-incrementally-in-chunks">
-<h3>Streaming data incrementally in chunks<a class="headerlink" href="#streaming-data-incrementally-in-chunks" title="Permalink to this heading">¶</a></h3>
+<h3>Streaming data incrementally in chunks<a class="headerlink" href="#streaming-data-incrementally-in-chunks" title="Permalink to this heading"></a></h3>
 <p>Sometimes Census queries can be too large to be loaded in memory. TileDB-SOMA allows users to query Census data in an incremental fashion using iterators.</p>
 <p>To find out more about iterable-based queries you can check out the following resources:</p>
 <ul class="simple">

@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -213,7 +222,7 @@
             <div itemprop="articleBody">
                 
   <section id="Understanding-and-filtering-out-duplicate-cells">
-<h1>Understanding and filtering out duplicate cells<a class="headerlink" href="#Understanding-and-filtering-out-duplicate-cells" title="Permalink to this heading">¶</a></h1>
+<h1>Understanding and filtering out duplicate cells<a class="headerlink" href="#Understanding-and-filtering-out-duplicate-cells" title="Permalink to this heading"></a></h1>
 <p>This tutorial provides an explanation for the existence of duplicate cells in the Census, and it showcases different ways to handle these cells when performing queries on the Census using the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> cell metadata variable.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -228,7 +237,7 @@
 </li>
 </ol>
 <section id="Why-are-there-duplicate-cells-in-the-Census?">
-<h2>Why are there duplicate cells in the Census?<a class="headerlink" href="#Why-are-there-duplicate-cells-in-the-Census?" title="Permalink to this heading">¶</a></h2>
+<h2>Why are there duplicate cells in the Census?<a class="headerlink" href="#Why-are-there-duplicate-cells-in-the-Census?" title="Permalink to this heading"></a></h2>
 <p>Duplicate cells are labeled on the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> cell metadata variable as <code class="docutils literal notranslate"><span class="pre">False</span></code>. To learn more about this please take a look at the corresponding <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#is_primary_data">section of the dataset schema</a>.</p>
 <p>The Census data is a concatenation of most RNA data from CZ CELLxGENE Discover and these data are ingested one dataset at a time. You can take a look at what data is included in the Census <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html">here</a>.</p>
 <p>In some cases data from the same cell exists in different datasets, therefore cells can be duplicated throughout CELLxGENE Discover and by extension the Census.</p>
@@ -248,7 +257,7 @@
 <p>The Census has all of these data to allow for the execution of dataset-based queries, which would be otherwise be limited if only non-duplicate cells were included.</p>
 </section>
 <section id="An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data">
-<h2>An example: duplicate cells in the Tabula Muris Senis data<a class="headerlink" href="#An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data" title="Permalink to this heading">¶</a></h2>
+<h2>An example: duplicate cells in the Tabula Muris Senis data<a class="headerlink" href="#An-example:-duplicate-cells-in-the-Tabula-Muris-Senis-data" title="Permalink to this heading"></a></h2>
 <p>Let’s take a look at an example from the Census using the Tabula Muris Senis data. Some of its datasets contain duplicated cells.</p>
 <p>We can obtain cell metadata for the <strong>main</strong> Tabula Muris Senis dataset: “All - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x”, which contains the original (non-duplicated) cells.</p>
 <p>And remember we must include the <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> column.</p>
@@ -364,12 +373,12 @@ Name: count, dtype: int64
 </ol>
 </section>
 <section id="Filtering-out-duplicate-cells">
-<h2>Filtering out duplicate cells<a class="headerlink" href="#Filtering-out-duplicate-cells" title="Permalink to this heading">¶</a></h2>
+<h2>Filtering out duplicate cells<a class="headerlink" href="#Filtering-out-duplicate-cells" title="Permalink to this heading"></a></h2>
 <p>In some cases you may be interested in getting all cells for a specific biological context, for example <em>“all natural killer cells from blood of female cells with COVID-19”</em> but you need to be aware that there is a chance you end up with some duplicate cells.</p>
 <p>We therefore recommend that you always look at <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> and use that information based on your needs.</p>
 <p>If you know <em>a priori</em> that you don’t want duplicated cells this section shows you how to efficiently exclude them from your queries.</p>
 <section id="Filtering-out-duplicate-cells-when-reading-the-obs-data-frame.">
-<h3>Filtering out duplicate cells when reading the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame.<a class="headerlink" href="#Filtering-out-duplicate-cells-when-reading-the-obs-data-frame." title="Permalink to this heading">¶</a></h3>
+<h3>Filtering out duplicate cells when reading the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame.<a class="headerlink" href="#Filtering-out-duplicate-cells-when-reading-the-obs-data-frame." title="Permalink to this heading"></a></h3>
 <p>Let’s say you are interested in looking at the cell metadata of <em>“all natural killer cells from blood of female cells with COVID-19”</em> but you want to exclude duplicate cells, then you can use <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> when reading the data frame to only include cells with <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> as <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 <p>Let’s first read the cell metadata including <strong>all</strong> cells:</p>
 <div class="nbinput docutils container">
@@ -459,7 +468,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <p>You can see a clear reduction in the number of cells.</p>
 </section>
 <section id="Filtering-out-duplicate-cells-when-creating-an-AnnData">
-<h3>Filtering out duplicate cells when creating an AnnData<a class="headerlink" href="#Filtering-out-duplicate-cells-when-creating-an-AnnData" title="Permalink to this heading">¶</a></h3>
+<h3>Filtering out duplicate cells when creating an AnnData<a class="headerlink" href="#Filtering-out-duplicate-cells-when-creating-an-AnnData" title="Permalink to this heading"></a></h3>
 <p>You can also utilize <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> on the <code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> of <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code>.</p>
 <p>Let’s repeat the process above. First querying by including <strong>all</strong> cells. To reduce the bandwidth and memory usage, let’s just fetch data for one gene.</p>
 <div class="nbinput docutils container">
@@ -550,7 +559,7 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <p>In this case you can also observe a clear reduction in the number of cells.</p>
 <section id="Filtering-out-duplicate-cells-for-out-of-core-operations.">
-<h4>Filtering out duplicate cells for out-of-core operations.<a class="headerlink" href="#Filtering-out-duplicate-cells-for-out-of-core-operations." title="Permalink to this heading">¶</a></h4>
+<h4>Filtering out duplicate cells for out-of-core operations.<a class="headerlink" href="#Filtering-out-duplicate-cells-for-out-of-core-operations." title="Permalink to this heading"></a></h4>
 <p>Finally we can utilize <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> on the <code class="docutils literal notranslate"><span class="pre">value_filter</span></code> of <code class="docutils literal notranslate"><span class="pre">obs</span></code> of an “Axis Query” to perform out-of-core operations.</p>
 <p>In this example we only include the version with duplicated cells removed.</p>
 <div class="nbinput docutils container">

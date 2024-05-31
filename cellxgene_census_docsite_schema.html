@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -127,6 +129,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -197,7 +206,7 @@
             <div itemprop="articleBody">
                 
   <section id="census-data-and-schema">
-<h1>Census data and schema<a class="headerlink" href="#census-data-and-schema" title="Permalink to this heading">¶</a></h1>
+<h1>Census data and schema<a class="headerlink" href="#census-data-and-schema" title="Permalink to this heading"></a></h1>
 <p>This page provides a user-friendly overview of the Census contents and its schema, in case you are interested you can find the full schema specification <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md">here</a>.</p>
 <p><strong>Contents:</strong></p>
 <ol class="arabic simple">
@@ -206,7 +215,7 @@
 <li><p><a class="reference internal" href="#soma-objects"><span class="std std-ref">SOMA objects</span></a></p></li>
 </ol>
 <section id="schema">
-<h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading">¶</a></h2>
+<h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading"></a></h2>
 <p>The Census is a collection of a variety of <strong><a class="reference internal" href="#soma-objects"><span class="std std-ref">SOMA objects</span></a></strong> organized with the following hierarchy.</p>
 <p><img alt="image" src="_images/cellxgene_census_docsite_model.svg" /></p>
 <p>As you can see the Census data is a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code> with two high-level items:</p>
@@ -215,7 +224,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code> for the single-cell data and metadata.</p></li>
 </ol>
 <section id="census-summary-info-census-info">
-<h3>Census summary info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code><a class="headerlink" href="#census-summary-info-census-info" title="Permalink to this heading">¶</a></h3>
+<h3>Census summary info <code class="docutils literal notranslate"><span class="pre">&quot;census_info&quot;</span></code><a class="headerlink" href="#census-summary-info-census-info" title="Permalink to this heading"></a></h3>
 <p>A <code class="docutils literal notranslate"><span class="pre">SOMAcollection</span></code> with tables providing information of the census as a whole, it has the following items:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;summary&quot;</span></code>: high-level information of this Census, e.g. build date, total cell count, etc.</p></li>
@@ -224,7 +233,7 @@
 </ul>
 </section>
 <section id="census-single-cell-data-census-data">
-<h3>Census single-cell data <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code><a class="headerlink" href="#census-single-cell-data-census-data" title="Permalink to this heading">¶</a></h3>
+<h3>Census single-cell data <code class="docutils literal notranslate"><span class="pre">&quot;census_data&quot;</span></code><a class="headerlink" href="#census-single-cell-data-census-data" title="Permalink to this heading"></a></h3>
 <p>Data for each organism is stored in independent <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> objects which are a specialized form of a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. Each of these store a data matrix (cell by genes), cell metadata, gene metadata, and feature presence matrix:</p>
 <p>This is how the data is organized for one organism – <em>Homo sapiens</em>:</p>
 <ul class="simple">
@@ -236,7 +245,7 @@
 </section>
 </section>
 <section id="data-included-in-the-census">
-<h2>Data included in the Census<a class="headerlink" href="#data-included-in-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>Data included in the Census<a class="headerlink" href="#data-included-in-the-census" title="Permalink to this heading"></a></h2>
 <p>All data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a> that adheres to the following criteria is included in the Census:</p>
 <ul class="simple">
 <li><p>Cells from human or mouse.</p></li>
@@ -251,7 +260,7 @@
 </ul>
 </section>
 <section id="soma-objects">
-<h2>SOMA objects<a class="headerlink" href="#soma-objects" title="Permalink to this heading">¶</a></h2>
+<h2>SOMA objects<a class="headerlink" href="#soma-objects" title="Permalink to this heading"></a></h2>
 <p>You can find the full SOMA specification <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md#foundational-types">here</a>.</p>
 <p>The following is short description of the main SOMA objects used by the Census:</p>
 <ul class="simple">

@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -216,7 +225,7 @@
             <div itemprop="articleBody">
                 
   <section id="Learning-about-the-CZ-CELLxGENE-Census">
-<h1>Learning about the CZ CELLxGENE Census<a class="headerlink" href="#Learning-about-the-CZ-CELLxGENE-Census" title="Permalink to this heading">¶</a></h1>
+<h1>Learning about the CZ CELLxGENE Census<a class="headerlink" href="#Learning-about-the-CZ-CELLxGENE-Census" title="Permalink to this heading"></a></h1>
 <p>This notebook showcases the Census contents and how to obtain high-level information about it. It covers the organization of data within the Census, what cell and gene metadata are available, and it provides simple demonstrations to summarize cell counts across cell metadata.</p>
 <p><strong>Contents</strong></p>
 <ul class="simple">
@@ -229,7 +238,7 @@
 </ul>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Opening-the-Census">
-<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census. If you open the census, you should close it. <code class="docutils literal notranslate"><span class="pre">open_soma()</span></code> returns a context, so you can open/close it in several ways, like a Python file handle. The context manager is preferred, as it will automatically close upon an error raise.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -276,15 +285,15 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Census-organization">
-<h2>Census organization<a class="headerlink" href="#Census-organization" title="Permalink to this heading">¶</a></h2>
+<h2>Census organization<a class="headerlink" href="#Census-organization" title="Permalink to this heading"></a></h2>
 <p>The <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_schema.html">Census schema</a> defines the structure of the Census. In short, you can think of the Census as a structured collection of items that stores different pieces of information. All of these items and the parent collection are SOMA objects of various types and can all be accessed with the <a class="reference external" href="https://github.com/single-cell-data/TileDB-SOMA">TileDB-SOMA API</a>
 (<a class="reference external" href="https://tiledbsoma.readthedocs.io/en/latest/">documentation</a>).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> package contains some convenient wrappers of the <code class="docutils literal notranslate"><span class="pre">TileDB-SOMA</span></code> API. An example of this is the function we used to open the Census: <code class="docutils literal notranslate"><span class="pre">cellxgene_census.open_soma()</span></code></p>
 <section id="Main-Census-components">
-<h3>Main Census components<a class="headerlink" href="#Main-Census-components" title="Permalink to this heading">¶</a></h3>
+<h3>Main Census components<a class="headerlink" href="#Main-Census-components" title="Permalink to this heading"></a></h3>
 <p>With the command above you created <code class="docutils literal notranslate"><span class="pre">census</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. It is analogous to a Python dictionary, and it has two items: <code class="docutils literal notranslate"><span class="pre">census_info</span></code> and <code class="docutils literal notranslate"><span class="pre">census_data</span></code>.</p>
 <section id="Census-summary-info">
-<h4>Census summary info<a class="headerlink" href="#Census-summary-info" title="Permalink to this heading">¶</a></h4>
+<h4>Census summary info<a class="headerlink" href="#Census-summary-info" title="Permalink to this heading"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">census[&quot;census_info&quot;]</span></code> A collection of tables providing information of the census as a whole.</p>
 <ul>
@@ -296,7 +305,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </ul>
 </section>
 <section id="Census-data">
-<h4>Census data<a class="headerlink" href="#Census-data" title="Permalink to this heading">¶</a></h4>
+<h4>Census data<a class="headerlink" href="#Census-data" title="Permalink to this heading"></a></h4>
 <p>Data for each organism is stored in independent <code class="docutils literal notranslate"><span class="pre">SOMAExperiment</span></code> objects which are a specialized form of a <code class="docutils literal notranslate"><span class="pre">SOMACollection</span></code>. Each of these store a data matrix (cell by genes), cell metadata, gene metadata, and some other useful components not covered in this notebook.</p>
 <p>This is how the data is organized for one organism – <em>Homo sapiens</em>:</p>
 <ul class="simple">
@@ -308,7 +317,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </section>
 </section>
 <section id="Cell-metadata">
-<h2>Cell metadata<a class="headerlink" href="#Cell-metadata" title="Permalink to this heading">¶</a></h2>
+<h2>Cell metadata<a class="headerlink" href="#Cell-metadata" title="Permalink to this heading"></a></h2>
 <p>You can obtain all cell metadata variables by directly querying the columns of the corresponding <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code>.</p>
 <p>All of these variables can be used for querying the Census in case you want to work with specific cells.</p>
 <div class="nbinput docutils container">
@@ -358,7 +367,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </ul>
 </section>
 <section id="Gene-metadata">
-<h2>Gene metadata<a class="headerlink" href="#Gene-metadata" title="Permalink to this heading">¶</a></h2>
+<h2>Gene metadata<a class="headerlink" href="#Gene-metadata" title="Permalink to this heading"></a></h2>
 <p>Similarly, we can obtain all gene metadata variables by directly querying the columns of the corresponding <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code>.</p>
 <p>These are the variables you can use for querying the Census in case there are specific genes you are interested in.</p>
 <div class="nbinput docutils container">
@@ -472,7 +481,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Census-summary-content-tables">
-<h2>Census summary content tables<a class="headerlink" href="#Census-summary-content-tables" title="Permalink to this heading">¶</a></h2>
+<h2>Census summary content tables<a class="headerlink" href="#Census-summary-content-tables" title="Permalink to this heading"></a></h2>
 <p>You can take a quick look at the high-level Census information by looking at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_info&quot;][&quot;summary&quot;]</span></code></p>
 <p>Of special interest are the <code class="docutils literal notranslate"><span class="pre">label</span></code>-<code class="docutils literal notranslate"><span class="pre">value</span></code> combinations for :</p>
 <ul class="simple">
@@ -481,7 +490,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <li><p><code class="docutils literal notranslate"><span class="pre">number_donors_homo_sapiens</span></code> and <code class="docutils literal notranslate"><span class="pre">number_donors_mus_musculus</span></code> are the number of individuals for human and mouse. These are not guaranteed to be unique as one individual ID may be present or identical in different datasets.</p></li>
 </ul>
 <section id="Cell-counts-by-cell-metadata">
-<h3>Cell counts by cell metadata<a class="headerlink" href="#Cell-counts-by-cell-metadata" title="Permalink to this heading">¶</a></h3>
+<h3>Cell counts by cell metadata<a class="headerlink" href="#Cell-counts-by-cell-metadata" title="Permalink to this heading"></a></h3>
 <p>By looking at <code class="docutils literal notranslate"><span class="pre">census[&quot;summary_cell_counts&quot;]</span></code> you can get a general idea of cell counts stratified by <strong>some relevant</strong> cell metadata. Not all cell metadata is included in this table, you can take a look at all cell and gene metadata available in the sections below “Cell metadata” and “Gene metadata”.</p>
 <p>The line below retrieves this table and casts it into a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p>
 <div class="nbinput docutils container">
@@ -645,7 +654,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <p>For each combination of <code class="docutils literal notranslate"><span class="pre">organism</span></code> and values for each <code class="docutils literal notranslate"><span class="pre">category</span></code> of cell metadata you can take a look at <code class="docutils literal notranslate"><span class="pre">total_cell_count</span></code> and <code class="docutils literal notranslate"><span class="pre">unique_cell_count</span></code> for the cell counts of that combination.</p>
 <p>The values for each <code class="docutils literal notranslate"><span class="pre">category</span></code> are specified in <code class="docutils literal notranslate"><span class="pre">ontology_term_id</span></code> and <code class="docutils literal notranslate"><span class="pre">label</span></code>, which are the value’s IDs and labels, respectively.</p>
 <section id="Example:-cell-metadata-included-in-the-summary-counts-table">
-<h4>Example: cell metadata included in the summary counts table<a class="headerlink" href="#Example:-cell-metadata-included-in-the-summary-counts-table" title="Permalink to this heading">¶</a></h4>
+<h4>Example: cell metadata included in the summary counts table<a class="headerlink" href="#Example:-cell-metadata-included-in-the-summary-counts-table" title="Permalink to this heading"></a></h4>
 <p>To get all the available cell metadata in the summary counts table you can do the following. Remember this is not all the cell metadata available, as some variables were omitted in the creation of this table.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -685,7 +694,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Example:-cell-counts-for-each-sequencing-assay-in-human-data">
-<h4>Example: cell counts for each sequencing assay in human data<a class="headerlink" href="#Example:-cell-counts-for-each-sequencing-assay-in-human-data" title="Permalink to this heading">¶</a></h4>
+<h4>Example: cell counts for each sequencing assay in human data<a class="headerlink" href="#Example:-cell-counts-for-each-sequencing-assay-in-human-data" title="Permalink to this heading"></a></h4>
 <p>To get the cell counts for each sequencing assay type in human data, you can perform the following <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> operations:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -925,7 +934,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Example:-number-of-microglial-cells-in-the-Census">
-<h4>Example: number of microglial cells in the Census<a class="headerlink" href="#Example:-number-of-microglial-cells-in-the-Census" title="Permalink to this heading">¶</a></h4>
+<h4>Example: number of microglial cells in the Census<a class="headerlink" href="#Example:-number-of-microglial-cells-in-the-Census" title="Permalink to this heading"></a></h4>
 <p>If you have a specific term from any of the categories shown above you can directly find out the number of cells for that term.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -996,7 +1005,7 @@ Name: count, dtype: int64
 </section>
 </section>
 <section id="Understanding-Census-contents-beyond-the-summary-tables">
-<h2>Understanding Census contents beyond the summary tables<a class="headerlink" href="#Understanding-Census-contents-beyond-the-summary-tables" title="Permalink to this heading">¶</a></h2>
+<h2>Understanding Census contents beyond the summary tables<a class="headerlink" href="#Understanding-Census-contents-beyond-the-summary-tables" title="Permalink to this heading"></a></h2>
 <p>While using the pre-computed tables in <code class="docutils literal notranslate"><span class="pre">census[&quot;census_info&quot;]</span></code> is an easy and quick way to understand the contents of the Census, it falls short if you want to learn more about certain slices of the Census.</p>
 <p>For example, you may want to learn more about:</p>
 <ul class="simple">
@@ -1007,7 +1016,7 @@ Name: count, dtype: int64
 </ul>
 <p>All of these questions can be answered by directly querying the cell metadata as shown in the examples below.</p>
 <section id="Example:-all-cell-types-available-in-human">
-<h3>Example: all cell types available in human<a class="headerlink" href="#Example:-all-cell-types-available-in-human" title="Permalink to this heading">¶</a></h3>
+<h3>Example: all cell types available in human<a class="headerlink" href="#Example:-all-cell-types-available-in-human" title="Permalink to this heading"></a></h3>
 <p>To exemplify the process of accessing and slicing cell metadata for summary stats, let’s start with a trivial example and take a look at all human cell types available in the Census:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -1190,7 +1199,7 @@ Name: count, Length: 599, dtype: int64
 <p>The examples below are more complex and can only be achieved by accessing the cell metadata.</p>
 </section>
 <section id="Example:-cell-types-available-in-human-liver">
-<h3>Example: cell types available in human liver<a class="headerlink" href="#Example:-cell-types-available-in-human-liver" title="Permalink to this heading">¶</a></h3>
+<h3>Example: cell types available in human liver<a class="headerlink" href="#Example:-cell-types-available-in-human-liver" title="Permalink to this heading"></a></h3>
 <p>Similar to the example above, we can learn what cell types are available for a specific tissue, e.g. liver.</p>
 <p>To achieve this goal we just need to limit our cell metadata to that tissue. We will use the information in the cell metadata variable <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>. This variable contains the high-level tissue label for all cells in the Census:</p>
 <div class="nbinput docutils container">
@@ -1232,7 +1241,7 @@ Name: count, Length: 126, dtype: int64
 <p>These are the cell types and their cell counts in the human liver.</p>
 </section>
 <section id="Example:-diseased-T-cells-in-human-tissues">
-<h3>Example: diseased T cells in human tissues<a class="headerlink" href="#Example:-diseased-T-cells-in-human-tissues" title="Permalink to this heading">¶</a></h3>
+<h3>Example: diseased T cells in human tissues<a class="headerlink" href="#Example:-diseased-T-cells-in-human-tissues" title="Permalink to this heading"></a></h3>
 <p>In this example we are going to get the counts for all diseased cells annotated as T cells. For the sake of the example we will focus on “CD8-positive, alpha-beta T cell” and “CD4-positive, alpha-beta T cell”:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:

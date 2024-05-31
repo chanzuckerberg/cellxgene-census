@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -213,7 +222,7 @@
             <div itemprop="articleBody">
                 
   <section id="Exploring-the-Census-Datasets-table">
-<h1>Exploring the Census Datasets table<a class="headerlink" href="#Exploring-the-Census-Datasets-table" title="Permalink to this heading">¶</a></h1>
+<h1>Exploring the Census Datasets table<a class="headerlink" href="#Exploring-the-Census-Datasets-table" title="Permalink to this heading"></a></h1>
 <p>This tutorial demonstrates basic use of the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe that contains metadata of the Census source datasets. This metadata can be joined to the cell metadata dataframe (<code class="docutils literal notranslate"><span class="pre">obs</span></code>) via the column <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>,</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -223,7 +232,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Fetching-the-datasets-table">
-<h2>Fetching the datasets table<a class="headerlink" href="#Fetching-the-datasets-table" title="Permalink to this heading">¶</a></h2>
+<h2>Fetching the datasets table<a class="headerlink" href="#Fetching-the-datasets-table" title="Permalink to this heading"></a></h2>
 <p>Each Census contains a top-level dataframe itemizing the datasets contained therein. You can read this into a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -445,7 +454,7 @@ Found 61656118 cells in all datasets.
 </div>
 </section>
 <section id="Fetching-the-expression-data-from-a-single-dataset">
-<h2>Fetching the expression data from a single dataset<a class="headerlink" href="#Fetching-the-expression-data-from-a-single-dataset" title="Permalink to this heading">¶</a></h2>
+<h2>Fetching the expression data from a single dataset<a class="headerlink" href="#Fetching-the-expression-data-from-a-single-dataset" title="Permalink to this heading"></a></h2>
 <p>Lets pick one dataset to slice out of the census, and turn into an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> in-memory object. This can be used with the <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/">ScanPy</a> toolchain. You can also save this AnnData locally using the AnnData <a class="reference external" href="https://anndata.readthedocs.io/en/latest/api.html#writing">write</a> API.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -538,7 +547,7 @@ AnnData object with n_obs × n_vars = 40220 × 52392
 </div>
 </section>
 <section id="Downloading-the-original-source-H5AD-file-of-a-dataset.">
-<h2>Downloading the original source H5AD file of a dataset.<a class="headerlink" href="#Downloading-the-original-source-H5AD-file-of-a-dataset." title="Permalink to this heading">¶</a></h2>
+<h2>Downloading the original source H5AD file of a dataset.<a class="headerlink" href="#Downloading-the-original-source-H5AD-file-of-a-dataset." title="Permalink to this heading"></a></h2>
 <p>You can download the original H5AD file for any given dataset. This is the same H5AD you can download from the <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>, and may contain additional data-submitter provided information which was not included in the Census.</p>
 <p>To do this you can fetch the location in the cloud or directly download to your system using the <code class="docutils literal notranslate"><span class="pre">cellxgene-census</span></code></p>
 <div class="nbinput nblast docutils container">

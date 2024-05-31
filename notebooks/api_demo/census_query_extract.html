@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -212,7 +221,7 @@
             <div itemprop="articleBody">
                 
   <section id="Querying-and-fetching-the-single-cell-data-and-cell/gene-metadata.">
-<h1>Querying and fetching the single-cell data and cell/gene metadata.<a class="headerlink" href="#Querying-and-fetching-the-single-cell-data-and-cell/gene-metadata." title="Permalink to this heading">¶</a></h1>
+<h1>Querying and fetching the single-cell data and cell/gene metadata.<a class="headerlink" href="#Querying-and-fetching-the-single-cell-data-and-cell/gene-metadata." title="Permalink to this heading"></a></h1>
 <p>This tutorial showcases the easiest ways to query the expression data and cell/gene metadata from the Census, and load them into common in-memory Python objects, including <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> and <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code>.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -223,7 +232,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Opening-the-census">
-<h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -246,7 +255,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <p>You can learn more about the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documentation via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
 </section>
 <section id="Querying-expression-data">
-<h2>Querying expression data<a class="headerlink" href="#Querying-expression-data" title="Permalink to this heading">¶</a></h2>
+<h2>Querying expression data<a class="headerlink" href="#Querying-expression-data" title="Permalink to this heading"></a></h2>
 <p>A convenient way to query and fetch expression data is to use the <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code> method of the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
 <p>The method will return an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
 <ul class="simple">
@@ -486,7 +495,7 @@ AnnData object with n_obs × n_vars = 2313 × 2
 <p>Don’t forget to close the census!</p>
 </section>
 <section id="Querying-cell-metadata-(obs)">
-<h2>Querying cell metadata (obs)<a class="headerlink" href="#Querying-cell-metadata-(obs)" title="Permalink to this heading">¶</a></h2>
+<h2>Querying cell metadata (obs)<a class="headerlink" href="#Querying-cell-metadata-(obs)" title="Permalink to this heading"></a></h2>
 <p>The human gene metadata of the Census, for RNA assays, is located at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].obs</span></code>. This is a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> and as such it can be materialized as a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> via the methods <code class="docutils literal notranslate"><span class="pre">read().concat().to_pandas()</span></code>.</p>
 <p>The mouse cell metadata is at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;mus_musculus&quot;].obs</span></code>.</p>
 <p>For slicing the cell metadata there are two relevant arguments that can be passed through <code class="docutils literal notranslate"><span class="pre">read()</span></code>:</p>
@@ -972,7 +981,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Querying-gene-metadata-(var)">
-<h2>Querying gene metadata (var)<a class="headerlink" href="#Querying-gene-metadata-(var)" title="Permalink to this heading">¶</a></h2>
+<h2>Querying gene metadata (var)<a class="headerlink" href="#Querying-gene-metadata-(var)" title="Permalink to this heading"></a></h2>
 <p>The human gene metadata of the Census is located at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].ms[&quot;RNA&quot;].var</span></code>. Similarly to the cell metadata, it is a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> and thus we can also use its method <code class="docutils literal notranslate"><span class="pre">read()</span></code>.</p>
 <p>The mouse gene metadata is at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;mus_musculus&quot;].ms[&quot;RNA&quot;].var</span></code>.</p>
 <p>Let’s take a look at the metadata available for column selection and row filtering.</p>

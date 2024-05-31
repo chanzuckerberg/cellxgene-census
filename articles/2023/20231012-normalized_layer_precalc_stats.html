@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -127,6 +129,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -203,7 +212,7 @@
             <div itemprop="articleBody">
                 
   <section id="introducing-a-normalized-layer-and-pre-calculated-cell-and-gene-statistics-in-census">
-<h1>Introducing a normalized layer and pre-calculated cell and gene statistics in Census<a class="headerlink" href="#introducing-a-normalized-layer-and-pre-calculated-cell-and-gene-statistics-in-census" title="Permalink to this heading">¶</a></h1>
+<h1>Introducing a normalized layer and pre-calculated cell and gene statistics in Census<a class="headerlink" href="#introducing-a-normalized-layer-and-pre-calculated-cell-and-gene-statistics-in-census" title="Permalink to this heading"></a></h1>
 <!-- markdownlint-disable MD036 -->
 <p><em>Published: October 12, 2023</em></p>
 <p><em>By: <a class="reference external" href="mailto:mlombardo&#37;&#52;&#48;chanzuckerberg&#46;com">Maximilian Lombardo</a> and <a class="reference external" href="mailto:pgarcia-nieto&#37;&#52;&#48;chanzuckerberg&#46;com">Pablo Garcia-Nieto</a></em></p>
@@ -218,15 +227,15 @@
 <p>These features are currently exclusive to the “latest” versions of the Census data release and they will be available in the next LTS data release. We invite your feedback as you explore these novel functionalities.</p>
 <p>Keep on reading to find out more about these features!</p>
 <section id="description-of-new-data-added-to-census">
-<h2>Description of new data added to Census<a class="headerlink" href="#description-of-new-data-added-to-census" title="Permalink to this heading">¶</a></h2>
+<h2>Description of new data added to Census<a class="headerlink" href="#description-of-new-data-added-to-census" title="Permalink to this heading"></a></h2>
 <p>All of the following changes were introduced in the Census schema V1.1.0.</p>
 <section id="added-a-new-library-size-normalized-layer">
-<h3>Added a new library-size normalized layer<a class="headerlink" href="#added-a-new-library-size-normalized-layer" title="Permalink to this heading">¶</a></h3>
+<h3>Added a new library-size normalized layer<a class="headerlink" href="#added-a-new-library-size-normalized-layer" title="Permalink to this heading"></a></h3>
 <p>We have introduced a library-size normalized X layer for the RNA measurements of both the human and mouse experiments available as <code class="docutils literal notranslate"><span class="pre">X[&quot;normalized&quot;]</span></code>.  The normalized layer is built by dividing each value in the raw count matrix by its corresponding row sum (i.e. size normalization).</p>
 <p>To reduce data size and improve performance, normalized values are stored with a reduced floating point precision. In addition, to ensure that small count values do not round to zero, a small sigma has been added. You will see the effect of these artifacts in row (per-cell) values not summing to precisely 1.0.</p>
 </section>
 <section id="enhanced-gene-metadata">
-<h3>Enhanced gene metadata<a class="headerlink" href="#enhanced-gene-metadata" title="Permalink to this heading">¶</a></h3>
+<h3>Enhanced gene metadata<a class="headerlink" href="#enhanced-gene-metadata" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">ms[&quot;RNA&quot;].var</span></code> DataFrame for both the human and mouse experiments has been enriched with two new metadata fields:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">nnz</span></code> — the number of explicitly stored values, effectively the number of cells expressing this gene.</p></li>
@@ -234,7 +243,7 @@
 </ul>
 </section>
 <section id="enhanced-cell-metadata">
-<h3>Enhanced cell metadata<a class="headerlink" href="#enhanced-cell-metadata" title="Permalink to this heading">¶</a></h3>
+<h3>Enhanced cell metadata<a class="headerlink" href="#enhanced-cell-metadata" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">obs</span></code> DataFrame for both the human and mouse experiments is now augmented with the following new metadata, allowing users to forego common calculations used in early data pre-processing. For each cell:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">raw_sum</span></code> — the sum of the raw counts, derived from <code class="docutils literal notranslate"><span class="pre">X[&quot;raw&quot;]</span></code>.</p></li>
@@ -246,9 +255,9 @@
 </section>
 </section>
 <section id="how-to-use-the-new-features">
-<h2>How to use the new features<a class="headerlink" href="#how-to-use-the-new-features" title="Permalink to this heading">¶</a></h2>
+<h2>How to use the new features<a class="headerlink" href="#how-to-use-the-new-features" title="Permalink to this heading"></a></h2>
 <section id="exporting-the-normalized-data-to-existing-single-cell-toolkits">
-<h3>Exporting the normalized data to existing single-cell toolkits<a class="headerlink" href="#exporting-the-normalized-data-to-existing-single-cell-toolkits" title="Permalink to this heading">¶</a></h3>
+<h3>Exporting the normalized data to existing single-cell toolkits<a class="headerlink" href="#exporting-the-normalized-data-to-existing-single-cell-toolkits" title="Permalink to this heading"></a></h3>
 <p>In Python, the normalized data can be exported into AnnData specifying the <code class="docutils literal notranslate"><span class="pre">X_name</span> <span class="pre">=</span> <span class="pre">&quot;normalized&quot;</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">cellxgene.get_anndata()</span></code> method.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
@@ -300,7 +309,7 @@
 </div>
 </section>
 <section id="accessing-library-size-normalized-data-layer-via-tiledb-soma">
-<h3>Accessing library-size normalized data layer via TileDB-SOMA<a class="headerlink" href="#accessing-library-size-normalized-data-layer-via-tiledb-soma" title="Permalink to this heading">¶</a></h3>
+<h3>Accessing library-size normalized data layer via TileDB-SOMA<a class="headerlink" href="#accessing-library-size-normalized-data-layer-via-tiledb-soma" title="Permalink to this heading"></a></h3>
 <p>For memory-efficient data retrieval, you can use TileDB-SOMA as outlined below. In Python this looks like the following.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
 <span class="kn">import</span> <span class="nn">cellxgene_census</span>
@@ -356,7 +365,7 @@
 </div>
 </section>
 <section id="utilizing-pre-calculated-stats-for-querying-obs-and-var">
-<h3>Utilizing pre-calculated stats for querying <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code><a class="headerlink" href="#utilizing-pre-calculated-stats-for-querying-obs-and-var" title="Permalink to this heading">¶</a></h3>
+<h3>Utilizing pre-calculated stats for querying <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code><a class="headerlink" href="#utilizing-pre-calculated-stats-for-querying-obs-and-var" title="Permalink to this heading"></a></h3>
 <p>To filter cells or genes based on pre-calculated statistics and export to AnnData, you can use the new metadata variables as value filters.</p>
 <p>For example, you can add a filter to query cells with more than 500 genes expressed, along with other filters. In Python this looks like the following.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
@@ -409,7 +418,7 @@
 </section>
 </section>
 <section id="help-us-improve-these-data-additions">
-<h2>Help us improve these data additions<a class="headerlink" href="#help-us-improve-these-data-additions" title="Permalink to this heading">¶</a></h2>
+<h2>Help us improve these data additions<a class="headerlink" href="#help-us-improve-these-data-additions" title="Permalink to this heading"></a></h2>
 <p>We encourage you to engage with these new features in the Census API and share your feedback. This input is invaluable for the ongoing enhancement of the Census project.</p>
 <p>For further information on any new feature, please reach out to us at <a class="reference internal" href="#soma&#64;chanzuckerberg.com"><span class="xref myst">soma&#64;chanzuckerberg.com</span></a>. To report issues or for additional feedback, refer to our <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/issues">Census GitHub repository</a>.</p>
 </section>

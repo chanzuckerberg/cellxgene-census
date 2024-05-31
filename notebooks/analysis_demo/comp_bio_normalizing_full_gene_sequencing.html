@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -211,7 +220,7 @@
             <div itemprop="articleBody">
                 
   <section id="Normalizing-full-length-gene-sequencing-data">
-<h1>Normalizing full-length gene sequencing data<a class="headerlink" href="#Normalizing-full-length-gene-sequencing-data" title="Permalink to this heading">¶</a></h1>
+<h1>Normalizing full-length gene sequencing data<a class="headerlink" href="#Normalizing-full-length-gene-sequencing-data" title="Permalink to this heading"></a></h1>
 <p>This tutorial shows you how to fetch full-length gene sequencing data from the Census and normalize it to account for gene length.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -222,7 +231,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>. For this notebook we will focus on individual datasets, therefore we can ignore this variable.</p>
 <section id="Opening-the-census">
-<h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading">¶</a></h2>
+<h2>Opening the census<a class="headerlink" href="#Opening-the-census" title="Permalink to this heading"></a></h2>
 <p>First we open the Census, if you are not familiar with the basics of the Census API you should take a look at notebook <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/analysis_demo/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -247,7 +256,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <p>You can learn more about the all of the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> methods by accessing their corresponding documention via <code class="docutils literal notranslate"><span class="pre">help()</span></code>. For example <code class="docutils literal notranslate"><span class="pre">help(cellxgene_census.open_soma)</span></code>.</p>
 </section>
 <section id="Fetching-full-length-example-sequencing-data-(Smart-Seq)">
-<h2>Fetching full-length example sequencing data (Smart-Seq)<a class="headerlink" href="#Fetching-full-length-example-sequencing-data-(Smart-Seq)" title="Permalink to this heading">¶</a></h2>
+<h2>Fetching full-length example sequencing data (Smart-Seq)<a class="headerlink" href="#Fetching-full-length-example-sequencing-data-(Smart-Seq)" title="Permalink to this heading"></a></h2>
 <p>Let’s get some example data, in this case we’ll fetch all cells from a relatively small dataset derived from the Smart-Seq2 technology which performs full-length gene sequencing:</p>
 <ul class="simple">
 <li><p>Collection: <a class="reference external" href="https://cellxgene.cziscience.com/collections/0b9d8a04-bb9d-44da-aa27-705bb65b54eb">Tabula Muris Senis</a></p></li>
@@ -366,7 +375,7 @@ Name: count, dtype: int64
 </div>
 </section>
 <section id="Normalizing-expression-to-account-for-gene-length">
-<h2>Normalizing expression to account for gene length<a class="headerlink" href="#Normalizing-expression-to-account-for-gene-length" title="Permalink to this heading">¶</a></h2>
+<h2>Normalizing expression to account for gene length<a class="headerlink" href="#Normalizing-expression-to-account-for-gene-length" title="Permalink to this heading"></a></h2>
 <p>By default <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code> fetches all genes in the Census. So let’s first identify the genes that were measured in this dataset and subset the <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> to only include those.</p>
 <p>To this goal we can use the “Dataset Presence Matrix” in <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;mus_musculus&quot;].ms[&quot;RNA&quot;][&quot;feature_dataset_presence_matrix&quot;]</span></code>. This is a boolean matrix <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">x</span> <span class="pre">M</span></code> where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of datasets and <code class="docutils literal notranslate"><span class="pre">M</span></code> is the number of genes in the Census, <code class="docutils literal notranslate"><span class="pre">True</span></code> indicates that a gene was measured in a dataset.</p>
 <div class="nbinput docutils container">
@@ -480,7 +489,7 @@ array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
 <p>All done! You can see that we now have real numbers instead of integers.</p>
 </section>
 <section id="Validation-through-clustering-exploration">
-<h2>Validation through clustering exploration<a class="headerlink" href="#Validation-through-clustering-exploration" title="Permalink to this heading">¶</a></h2>
+<h2>Validation through clustering exploration<a class="headerlink" href="#Validation-through-clustering-exploration" title="Permalink to this heading"></a></h2>
 <p>Let’s perform some basic clustering analysis to see if cell types cluster as expected using the normalized counts.</p>
 <p>First we do some basic filtering of cells and genes.</p>
 <div class="nbinput nblast docutils container">

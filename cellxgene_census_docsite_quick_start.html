@@ -35,6 +35,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -127,6 +129,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -203,7 +212,7 @@
             <div itemprop="articleBody">
                 
   <section id="quick-start">
-<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
+<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading"></a></h1>
 <p>This page provides details to start using the Census. Click <a class="reference internal" href="examples.html"><span class="std std-doc">here</span></a> for more detailed Python tutorials (R vignettes coming soon).</p>
 <p><strong>Contents:</strong></p>
 <ol class="arabic simple">
@@ -212,11 +221,11 @@
 <li><p><a class="reference internal" href="#r-quick-start"><span class="xref myst">R quick start</span></a>.</p></li>
 </ol>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
 <p>Install the Census API by following <a class="reference internal" href="cellxgene_census_docsite_installation.html"><span class="std std-doc">these instructions.</span></a></p>
 </section>
 <section id="python-quick-start">
-<h2>Python quick start<a class="headerlink" href="#python-quick-start" title="Permalink to this heading">¶</a></h2>
+<h2>Python quick start<a class="headerlink" href="#python-quick-start" title="Permalink to this heading"></a></h2>
 <p>Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via <code class="docutils literal notranslate"><span class="pre">help()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
@@ -226,7 +235,7 @@
 </pre></div>
 </div>
 <section id="querying-a-slice-of-cell-metadata">
-<h3>Querying a slice of cell metadata<a class="headerlink" href="#querying-a-slice-of-cell-metadata" title="Permalink to this heading">¶</a></h3>
+<h3>Querying a slice of cell metadata<a class="headerlink" href="#querying-a-slice-of-cell-metadata" title="Permalink to this heading"></a></h3>
 <p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
@@ -267,7 +276,7 @@
 </div>
 </section>
 <section id="obtaining-a-slice-as-anndata">
-<h3>Obtaining a slice as AnnData<a class="headerlink" href="#obtaining-a-slice-as-anndata" title="Permalink to this heading">¶</a></h3>
+<h3>Obtaining a slice as AnnData<a class="headerlink" href="#obtaining-a-slice-as-anndata" title="Permalink to this heading"></a></h3>
 <p>The following creates an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object on-demand with the same cell filtering criteria as above and filtering only the genes <code class="docutils literal notranslate"><span class="pre">ENSG00000161798</span></code>, <code class="docutils literal notranslate"><span class="pre">ENSG00000188229</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
@@ -291,7 +300,7 @@
 </div>
 </section>
 <section id="memory-efficient-queries">
-<h3>Memory-efficient queries<a class="headerlink" href="#memory-efficient-queries" title="Permalink to this heading">¶</a></h3>
+<h3>Memory-efficient queries<a class="headerlink" href="#memory-efficient-queries" title="Permalink to this heading"></a></h3>
 <p>This example provides a demonstration to access the data for larger-than-memory operations using <strong>TileDB-SOMA</strong> operations.</p>
 <p>First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — <code class="docutils literal notranslate"><span class="pre">query.close()</span></code> — or called in a context manager — <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">...</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
@@ -330,7 +339,7 @@
 </section>
 </section>
 <section id="r-quick-start">
-<h2>R quick start<a class="headerlink" href="#r-quick-start" title="Permalink to this heading">¶</a></h2>
+<h2>R quick start<a class="headerlink" href="#r-quick-start" title="Permalink to this heading"></a></h2>
 <p>Below are 3 examples of common operations you can do with the Census. As a reminder, the reference documentation for the API can be accessed via <code class="docutils literal notranslate"><span class="pre">?</span></code>:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
 
@@ -338,7 +347,7 @@
 </pre></div>
 </div>
 <section id="id1">
-<h3>Querying a slice of cell metadata<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>Querying a slice of cell metadata<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>The following reads the cell metadata and filters <code class="docutils literal notranslate"><span class="pre">female</span></code> cells of cell type <code class="docutils literal notranslate"><span class="pre">microglial</span> <span class="pre">cell</span></code> or <code class="docutils literal notranslate"><span class="pre">neuron</span></code>, and selects the columns <code class="docutils literal notranslate"><span class="pre">assay</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue</span></code>, <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code>, <code class="docutils literal notranslate"><span class="pre">suspension_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">disease</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene.census</span></code> package uses <a class="reference external" href="https://r6.r-lib.org/articles/Introduction.html">R6</a> classes and we recommend you to get familiar with their usage.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
@@ -385,7 +394,7 @@
 </div>
 </section>
 <section id="obtaining-a-slice-as-a-seurat-or-singlecellexperiment-object">
-<h3>Obtaining a slice as a <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> or <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> object<a class="headerlink" href="#obtaining-a-slice-as-a-seurat-or-singlecellexperiment-object" title="Permalink to this heading">¶</a></h3>
+<h3>Obtaining a slice as a <code class="docutils literal notranslate"><span class="pre">Seurat</span></code> or <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> object<a class="headerlink" href="#obtaining-a-slice-as-a-seurat-or-singlecellexperiment-object" title="Permalink to this heading"></a></h3>
 <p>The following creates a Seurat object on-demand with a smaller set of cells and filtering only the genes <code class="docutils literal notranslate"><span class="pre">ENSG00000161798</span></code>, <code class="docutils literal notranslate"><span class="pre">ENSG00000188229</span></code>.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="s">&quot;Seurat&quot;</span><span class="p">)</span>
@@ -444,7 +453,7 @@ altExpNames<span class="o">(</span><span class="m">0</span><span class="o">)</sp
 </div>
 </section>
 <section id="id2">
-<h3>Memory-efficient queries<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>Memory-efficient queries<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>This example provides a demonstration to access the data for larger-than-memory operations using <strong>TileDB-SOMA</strong> operations.</p>
 <p>First we initiate a lazy-evaluation query to access all brain and male cells from human. This query needs to be closed — <code class="docutils literal notranslate"><span class="pre">query$close()</span></code>.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="s">&quot;cellxgene.census&quot;</span><span class="p">)</span>

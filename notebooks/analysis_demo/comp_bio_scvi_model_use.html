@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -212,7 +221,7 @@
             <div itemprop="articleBody">
                 
   <section id="scVI-for-cell-type-prediction-and-data-projection">
-<h1>scVI for cell type prediction and data projection<a class="headerlink" href="#scVI-for-cell-type-prediction-and-data-projection" title="Permalink to this heading">¶</a></h1>
+<h1>scVI for cell type prediction and data projection<a class="headerlink" href="#scVI-for-cell-type-prediction-and-data-projection" title="Permalink to this heading"></a></h1>
 <p>This notebook provides examples to utilize the pretrained scVI model with user data. For more information on the model please refer to the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p><strong>IMPORTANT:</strong> This tutorial requires cellxgene-census package version 1.9.1 or later.</p>
 <p><strong>Contents</strong></p>
@@ -224,9 +233,9 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Requirements">
-<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading"></a></h2>
 <section id="System-requirements">
-<h3>System requirements<a class="headerlink" href="#System-requirements" title="Permalink to this heading">¶</a></h3>
+<h3>System requirements<a class="headerlink" href="#System-requirements" title="Permalink to this heading"></a></h3>
 <p>To run this notebook the following are required:</p>
 <ul class="simple">
 <li><p>Unix system.</p></li>
@@ -237,7 +246,7 @@
 </ul>
 </section>
 <section id="Downloading-example-data">
-<h3>Downloading example data<a class="headerlink" href="#Downloading-example-data" title="Permalink to this heading">¶</a></h3>
+<h3>Downloading example data<a class="headerlink" href="#Downloading-example-data" title="Permalink to this heading"></a></h3>
 <p>Throughout the notebook the 10X PBMC 3K dataset will be used, you can download it via the following shell commands.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -259,7 +268,7 @@
 </div>
 </section>
 <section id="Downloading-the-trained-scVI-model">
-<h3>Downloading the trained scVI model<a class="headerlink" href="#Downloading-the-trained-scVI-model" title="Permalink to this heading">¶</a></h3>
+<h3>Downloading the trained scVI model<a class="headerlink" href="#Downloading-the-trained-scVI-model" title="Permalink to this heading"></a></h3>
 <p>The model is currently hosted in S3, you can find out more deatails in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p>Additional information, including its S3 URI, is also included in the metadata of the corresponding embeddings inside Census. These metadata can be obtained as follows.</p>
 <div class="nbinput nblast docutils container">
@@ -310,7 +319,7 @@
 </section>
 </section>
 <section id="Using-the-scVI-pretrained-model-for-data-projection">
-<h2>Using the scVI pretrained model for <strong>data projection</strong><a class="headerlink" href="#Using-the-scVI-pretrained-model-for-data-projection" title="Permalink to this heading">¶</a></h2>
+<h2>Using the scVI pretrained model for <strong>data projection</strong><a class="headerlink" href="#Using-the-scVI-pretrained-model-for-data-projection" title="Permalink to this heading"></a></h2>
 <p>Import all the required packages for this demonstration</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -505,7 +514,7 @@ INFO     File 2024-02-12-scvi-homo-sapiens/scvi.model/model.pt already downloade
 <p>Display the scatter plot</p>
 </section>
 <section id="Using-the-scVI-pretrained-model-for-cell-cell-type-inference.">
-<h2>Using the scVI pretrained model for <strong>cell cell type inference</strong>.<a class="headerlink" href="#Using-the-scVI-pretrained-model-for-cell-cell-type-inference." title="Permalink to this heading">¶</a></h2>
+<h2>Using the scVI pretrained model for <strong>cell cell type inference</strong>.<a class="headerlink" href="#Using-the-scVI-pretrained-model-for-cell-cell-type-inference." title="Permalink to this heading"></a></h2>
 <p>Fetch the reference scVI embeddings corresponding to some example PBMC data from Census</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:

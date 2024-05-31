@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -210,7 +219,7 @@
             <div itemprop="articleBody">
                 
   <section id="Generating-citations-for-Census-slices">
-<h1>Generating citations for Census slices<a class="headerlink" href="#Generating-citations-for-Census-slices" title="Permalink to this heading">¶</a></h1>
+<h1>Generating citations for Census slices<a class="headerlink" href="#Generating-citations-for-Census-slices" title="Permalink to this heading"></a></h1>
 <p>This notebook demonstrates how to generate a citation string for all datasets contained in a Census slice.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -224,7 +233,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Requirements">
-<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading"></a></h2>
 <p>This notebook requires:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> Python package.</p></li>
@@ -232,7 +241,7 @@
 </ul>
 </section>
 <section id="Generating-citation-strings">
-<h2>Generating citation strings<a class="headerlink" href="#Generating-citation-strings" title="Permalink to this heading">¶</a></h2>
+<h2>Generating citation strings<a class="headerlink" href="#Generating-citation-strings" title="Permalink to this heading"></a></h2>
 <p>First we open a handle to the Census data. To ensure we open a data release with schema version 1.3.0 or greater, we use <code class="docutils literal notranslate"><span class="pre">census_version=&quot;latest&quot;</span></code></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -352,7 +361,7 @@ Name: citation, Length: 700, dtype: object
 </div>
 <p>And now we can use the column <code class="docutils literal notranslate"><span class="pre">&quot;dataset_id&quot;</span></code> present in both the dataset table and the Census cell metadata to create citation strings for any Census slice.</p>
 <section id="Via-cell-metadata-query">
-<h3>Via cell metadata query<a class="headerlink" href="#Via-cell-metadata-query" title="Permalink to this heading">¶</a></h3>
+<h3>Via cell metadata query<a class="headerlink" href="#Via-cell-metadata-query" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -389,7 +398,7 @@ Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://da
 </div>
 </section>
 <section id="Via-AnnData-query">
-<h3>Via AnnData query<a class="headerlink" href="#Via-AnnData-query" title="Permalink to this heading">¶</a></h3>
+<h3>Via AnnData query<a class="headerlink" href="#Via-AnnData-query" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>

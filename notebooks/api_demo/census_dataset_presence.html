@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -216,7 +225,7 @@
             <div itemprop="articleBody">
                 
   <section id="Genes-measured-in-each-cell-(dataset-presence-matrix)">
-<h1>Genes measured in each cell (dataset presence matrix)<a class="headerlink" href="#Genes-measured-in-each-cell-(dataset-presence-matrix)" title="Permalink to this heading">¶</a></h1>
+<h1>Genes measured in each cell (dataset presence matrix)<a class="headerlink" href="#Genes-measured-in-each-cell-(dataset-presence-matrix)" title="Permalink to this heading"></a></h1>
 <p>The Census is a compilation of cells from multiple datasets that may differ by the sets of genes they measure. This notebook describes the way to identify the genes measured per dataset.</p>
 <p>The presence matrix is a sparse boolean array, indicating which features (var) were present in each dataset. The array has dimensions [n_datasets, n_var], and is stored in the SOMA Measurement <code class="docutils literal notranslate"><span class="pre">varp</span></code> collection. The first dimension is indexed by the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">census_datasets</span></code> dataframe. The second is indexed by the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> in the <code class="docutils literal notranslate"><span class="pre">var</span></code> dataframe of the measurement.</p>
 <p>As a reminder the <code class="docutils literal notranslate"><span class="pre">obs</span></code> data frame has a column <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> that can be used to link any cell in the Census to the presence matrix.</p>
@@ -231,7 +240,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Opening-the-Census">
-<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Opening the Census<a class="headerlink" href="#Opening-the-Census" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> python package contains a convenient API to open the latest version of the Census.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -253,7 +262,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Fetching-the-IDs-of-the-Census-datasets">
-<h2>Fetching the IDs of the Census datasets<a class="headerlink" href="#Fetching-the-IDs-of-the-Census-datasets" title="Permalink to this heading">¶</a></h2>
+<h2>Fetching the IDs of the Census datasets<a class="headerlink" href="#Fetching-the-IDs-of-the-Census-datasets" title="Permalink to this heading"></a></h2>
 <p>Let’s grab a table of all the datasets included in the Census and use this table in combination with the presence matrix below.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -432,7 +441,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Fetching-the-dataset-presence-matrix">
-<h2>Fetching the dataset presence matrix<a class="headerlink" href="#Fetching-the-dataset-presence-matrix" title="Permalink to this heading">¶</a></h2>
+<h2>Fetching the dataset presence matrix<a class="headerlink" href="#Fetching-the-dataset-presence-matrix" title="Permalink to this heading"></a></h2>
 <p>Now let’s fetch the dataset presence matrix.</p>
 <p>For convenience, read the entire presence matrix (for Homo sapiens) into a SciPy array. There is a convenience API providing this capability, returning the matrix in a <code class="docutils literal notranslate"><span class="pre">scipy.sparse.array</span></code>.</p>
 <div class="nbinput docutils container">
@@ -580,7 +589,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Identifying-genes-measured-in-a-specific-dataset.">
-<h2>Identifying genes measured in a specific dataset.<a class="headerlink" href="#Identifying-genes-measured-in-a-specific-dataset." title="Permalink to this heading">¶</a></h2>
+<h2>Identifying genes measured in a specific dataset.<a class="headerlink" href="#Identifying-genes-measured-in-a-specific-dataset." title="Permalink to this heading"></a></h2>
 <p>Now that we have the dataset table, the genes metadata table, and the dataset presence matrix, we can check if a gene or set of genes were measured in a specific dataset.</p>
 <p><strong>Important:</strong> the presence matrix is indexed by soma_joinid, and is <em>NOT</em> positionally indexed. In other words:</p>
 <ul class="simple">
@@ -609,7 +618,7 @@ Feature is present.
 </div>
 </section>
 <section id="Identifying-datasets-that-measured-specific-genes">
-<h2>Identifying datasets that measured specific genes<a class="headerlink" href="#Identifying-datasets-that-measured-specific-genes" title="Permalink to this heading">¶</a></h2>
+<h2>Identifying datasets that measured specific genes<a class="headerlink" href="#Identifying-datasets-that-measured-specific-genes" title="Permalink to this heading"></a></h2>
 <p>Similarly, we can determine the datasets that measured a specific gene or set of genes.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -1129,7 +1138,7 @@ Feature is present.
 </div>
 </section>
 <section id="Identifying-all-genes-measured-in-a-dataset">
-<h2>Identifying all genes measured in a dataset<a class="headerlink" href="#Identifying-all-genes-measured-in-a-dataset" title="Permalink to this heading">¶</a></h2>
+<h2>Identifying all genes measured in a dataset<a class="headerlink" href="#Identifying-all-genes-measured-in-a-dataset" title="Permalink to this heading"></a></h2>
 <p>Finally, we can find the set of genes that were measured in the cells of a given dataset.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:

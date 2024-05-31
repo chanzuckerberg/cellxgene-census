@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -212,7 +221,7 @@
             <div itemprop="articleBody">
                 
   <section id="Access-CELLxGENE-collaboration-embeddings-(scVI,-Geneformer)">
-<h1>Access CELLxGENE collaboration embeddings (scVI, Geneformer)<a class="headerlink" href="#Access-CELLxGENE-collaboration-embeddings-(scVI,-Geneformer)" title="Permalink to this heading">¶</a></h1>
+<h1>Access CELLxGENE collaboration embeddings (scVI, Geneformer)<a class="headerlink" href="#Access-CELLxGENE-collaboration-embeddings-(scVI,-Geneformer)" title="Permalink to this heading"></a></h1>
 <p>This notebook demonstrates basic access to CELLxGENE collaboration embeddings of CELLxGENE Discover Census. Currently, embeddings from scVI and a fine-tuned Geneformer model are maintained by CELLxGENE Discover. There are other CELLxGENE-hosted embeddings contributed by the community to CELLxGENE Discover, find out more about these in the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p><strong>IMPORTANT:</strong> This tutorial requires cellxgene-census package version 1.9.1 or later.</p>
 <p><strong>Contents</strong></p>
@@ -223,7 +232,7 @@
 </ol>
 <p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 <section id="Quick-start">
-<h2>Quick start<a class="headerlink" href="#Quick-start" title="Permalink to this heading">¶</a></h2>
+<h2>Quick start<a class="headerlink" href="#Quick-start" title="Permalink to this heading"></a></h2>
 <p>CELLxGENE collaboration embeddings can easily be exported into an AnnData as shown below for any slice of Census. This example queries all cells from tongue tissue.</p>
 <p>⚠️ Note that Geneformer embeddings are only available for human data</p>
 <div class="nbinput nblast docutils container">
@@ -285,7 +294,7 @@ AxisArrays with keys: scvi, geneformer
 </div>
 </section>
 <section id="Storage-format">
-<h2>Storage format<a class="headerlink" href="#Storage-format" title="Permalink to this heading">¶</a></h2>
+<h2>Storage format<a class="headerlink" href="#Storage-format" title="Permalink to this heading"></a></h2>
 <p>Each embedding is encoded as a SOMA SparseNDArray, where:</p>
 <ul class="simple">
 <li><p>dimension 0 (<code class="docutils literal notranslate"><span class="pre">soma_dim_0</span></code>) encodes the cell (obs) <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> value</p></li>
@@ -296,17 +305,17 @@ AxisArrays with keys: scvi, geneformer
 <p>Embedding values, while stored as a float32, are precision reduced. Currently they are equivalent to a bfloat16, i.e., have 8 bits of exponent and 7 bits of mantissa.</p>
 </section>
 <section id="Query-cells-and-load-associated-embeddings">
-<h2>Query cells and load associated embeddings<a class="headerlink" href="#Query-cells-and-load-associated-embeddings" title="Permalink to this heading">¶</a></h2>
+<h2>Query cells and load associated embeddings<a class="headerlink" href="#Query-cells-and-load-associated-embeddings" title="Permalink to this heading"></a></h2>
 <p>This section demonstrates several methods to query cells from the Census by <code class="docutils literal notranslate"><span class="pre">obs</span></code> metadata, and then fetch embeddings associated with each cell.</p>
 <section id="Loading-embeddings-into-an-AnnData-obsm-slot">
-<h3>Loading embeddings into an AnnData <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot<a class="headerlink" href="#Loading-embeddings-into-an-AnnData-obsm-slot" title="Permalink to this heading">¶</a></h3>
+<h3>Loading embeddings into an AnnData <code class="docutils literal notranslate"><span class="pre">obsm</span></code> slot<a class="headerlink" href="#Loading-embeddings-into-an-AnnData-obsm-slot" title="Permalink to this heading"></a></h3>
 <p>There are two main ways to load CELLxGENE collaboration embeddings into an AnnData.</p>
 <ol class="arabic simple">
 <li><p>Via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code>.</p></li>
 <li><p>With a lazy query via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>.</p></li>
 </ol>
 <section id="AnnData-embeddings-via-cellxgene_census.get_anndata()">
-<h4>AnnData embeddings via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code><a class="headerlink" href="#AnnData-embeddings-via-cellxgene_census.get_anndata()" title="Permalink to this heading">¶</a></h4>
+<h4>AnnData embeddings via <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_anndata()</span></code><a class="headerlink" href="#AnnData-embeddings-via-cellxgene_census.get_anndata()" title="Permalink to this heading"></a></h4>
 <p>This is the simplest way of getting the embeddings. In this example we create an AnnData for all “central nervous system” cells.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -374,7 +383,7 @@ AxisArrays with keys: scvi, geneformer
 </div>
 </section>
 <section id="AnnData-embeddings-via-ExperimentAxisQuery">
-<h4>AnnData embeddings via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code><a class="headerlink" href="#AnnData-embeddings-via-ExperimentAxisQuery" title="Permalink to this heading">¶</a></h4>
+<h4>AnnData embeddings via <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code><a class="headerlink" href="#AnnData-embeddings-via-ExperimentAxisQuery" title="Permalink to this heading"></a></h4>
 <p>Using an <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code> to get embeddings into an AnnData has the main advantage of inspecting the query in a lazy manner before loading all data into AnnData.</p>
 <p>As a reminder this class offers a lazy interface to query Census based on cell and gene metadata, and provides access to the correspondong expression data, cell/gene metadata, and the embeddings.</p>
 <p>Let’s initiate a lazy query with the same filters as the previous example.</p>
@@ -484,7 +493,7 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </section>
 </section>
 <section id="Load-an-embedding-into-a-dense-NumPy-array">
-<h3>Load an embedding into a dense NumPy array<a class="headerlink" href="#Load-an-embedding-into-a-dense-NumPy-array" title="Permalink to this heading">¶</a></h3>
+<h3>Load an embedding into a dense NumPy array<a class="headerlink" href="#Load-an-embedding-into-a-dense-NumPy-array" title="Permalink to this heading"></a></h3>
 <p>To load a embeddinng into a stand-alone numpy array you can select cells from the Census based on obs metadata, then given the resulting cells, use the <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> values to download an embedding, and finally save as a dense NDArray.</p>
 <p>Let’s first select cells based on cell metadata.</p>
 <div class="nbinput nblast docutils container">

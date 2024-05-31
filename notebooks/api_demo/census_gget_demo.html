@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -213,7 +222,7 @@
             <div itemprop="articleBody">
                 
   <section id="Querying-data-using-the-gget-cellxgene-module">
-<h1>Querying data using the gget cellxgene module<a class="headerlink" href="#Querying-data-using-the-gget-cellxgene-module" title="Permalink to this heading">¶</a></h1>
+<h1>Querying data using the gget cellxgene module<a class="headerlink" href="#Querying-data-using-the-gget-cellxgene-module" title="Permalink to this heading"></a></h1>
 <p><em>By Laura Luebbert, lauraluebbert&#64;caltech.edu.</em></p>
 <p><a class="reference external" href="https://github.com/pachterlab/gget">gget</a> is a free, open-source command-line tool and Python package that enables efficient querying of genomic databases. gget consists of a collection of separate but interoperable modules, each designed to facilitate one type of database querying in a single line of code.</p>
 <p>The <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> module builds on the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">CZ CELLxGENE Discover Census</a> to query data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. This notebook briefly introduces the <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> module by providing one simple example for each supported query type.</p>
@@ -228,7 +237,7 @@
 <li><p>Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line.</p></li>
 </ol>
 <section id="Install-gget-and-set-up-cellxgene-module">
-<h2>Install gget and set up cellxgene module<a class="headerlink" href="#Install-gget-and-set-up-cellxgene-module" title="Permalink to this heading">¶</a></h2>
+<h2>Install gget and set up cellxgene module<a class="headerlink" href="#Install-gget-and-set-up-cellxgene-module" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -332,7 +341,7 @@ cellxgene(species=&#39;homo_sapiens&#39;, gene=None, ensembl=False, column_names
 </div>
 </section>
 <section id="Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)">
-<h2>Fetch an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object by selecting gene(s), tissue(s) and cell type(s)<a class="headerlink" href="#Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)" title="Permalink to this heading">¶</a></h2>
+<h2>Fetch an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object by selecting gene(s), tissue(s) and cell type(s)<a class="headerlink" href="#Fetch-an-AnnData-object-by-selecting-gene(s),-tissue(s)-and-cell-type(s)" title="Permalink to this heading"></a></h2>
 <p>You can use all of the options listed above to filter for data of interest. Here, we will demonstrate the module by fetching a small dataset containing only three genes and two lung cell types:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -609,7 +618,7 @@ AnnData object with n_obs × n_vars = 3679 × 3
 </div>
 </section>
 <section id="Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression">
-<h2>Plot a dot plot similar to those shown on the CZ CELLxGENE Discover <a class="reference external" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a><a class="headerlink" href="#Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression" title="Permalink to this heading">¶</a></h2>
+<h2>Plot a dot plot similar to those shown on the CZ CELLxGENE Discover <a class="reference external" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a><a class="headerlink" href="#Plot-a-dot-plot-similar-to-those-shown-on-the-CZ-CELLxGENE-Discover-Gene-Expression" title="Permalink to this heading"></a></h2>
 <p>Using the data we just fetched, we can plot a dot plot using <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/">scanpy</a>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -653,7 +662,7 @@ AnnData object with n_obs × n_vars = 3679 × 3
 </div>
 </section>
 <section id="Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)">
-<h2>Fetch only cell metadata (corresponds to AnnData.obs)<a class="headerlink" href="#Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)" title="Permalink to this heading">¶</a></h2>
+<h2>Fetch only cell metadata (corresponds to AnnData.obs)<a class="headerlink" href="#Fetch-only-cell-metadata-(corresponds-to-AnnData.obs)" title="Permalink to this heading"></a></h2>
 <p>By setting <code class="docutils literal notranslate"><span class="pre">meta_only=True</span></code> and again filtering by the cell metadata attributes listed above, you can also fetch only the cell metadata:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -842,7 +851,7 @@ Fri Jul 28 16:16:44 2023 INFO Fetching metadata from CZ CELLxGENE Discover...
 </div>
 </section>
 <section id="Use-gget-cellxgene-from-the-command-line">
-<h2>Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line<a class="headerlink" href="#Use-gget-cellxgene-from-the-command-line" title="Permalink to this heading">¶</a></h2>
+<h2>Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line<a class="headerlink" href="#Use-gget-cellxgene-from-the-command-line" title="Permalink to this heading"></a></h2>
 <p>All gget modules support use from the command line. Note that the command line interface requires the <code class="docutils literal notranslate"><span class="pre">-o/--out</span></code> argument to specify a path to save the fetched data. Here are the command line versions of the queries demonstrated above:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:

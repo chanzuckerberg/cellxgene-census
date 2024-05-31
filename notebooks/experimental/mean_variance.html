@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -209,7 +218,7 @@
             <div itemprop="articleBody">
                 
   <section id="Out-of-core-(incremental)-mean-and-variance-calculation">
-<h1>Out-of-core (incremental) mean and variance calculation<a class="headerlink" href="#Out-of-core-(incremental)-mean-and-variance-calculation" title="Permalink to this heading">¶</a></h1>
+<h1>Out-of-core (incremental) mean and variance calculation<a class="headerlink" href="#Out-of-core-(incremental)-mean-and-variance-calculation" title="Permalink to this heading"></a></h1>
 <p>This tutorial describes use of the cellxgene_census.experimental.pp API for calculating out-of-core mean and variance in the Census. The variance calculation is performed using <a class="reference external" href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">Welford’s online algorithm</a>.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -217,7 +226,7 @@
 <li><p>Example: calculate mean and variance for a slice of the Census.</p></li>
 </ol>
 <section id="The-mean-and-variance-API">
-<h2>The mean and variance API<a class="headerlink" href="#The-mean-and-variance-API" title="Permalink to this heading">¶</a></h2>
+<h2>The mean and variance API<a class="headerlink" href="#The-mean-and-variance-API" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">mean_variance()</span></code> calculates the mean and the variance for an <code class="docutils literal notranslate"><span class="pre">ExperimentAxisQuery</span></code>. The following additional arguments are supported:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">layer</span></code>: the X layer used for the calculation, defaults to <code class="docutils literal notranslate"><span class="pre">raw</span></code></p></li>
@@ -240,7 +249,7 @@
 </div>
 </section>
 <section id="Example:-calculate-mean-and-variance-for-a-slice-of-the-Census">
-<h2>Example: calculate mean and variance for a slice of the Census<a class="headerlink" href="#Example:-calculate-mean-and-variance-for-a-slice-of-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Example: calculate mean and variance for a slice of the Census<a class="headerlink" href="#Example:-calculate-mean-and-variance-for-a-slice-of-the-Census" title="Permalink to this heading"></a></h2>
 <p>As an example, we’ll calculate the mean and variance along the <code class="docutils literal notranslate"><span class="pre">obs</span></code> axis for a subset of cells from the Mouse census.</p>
 <p>The return value will be a Pandas dataframe indexed by <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code> (in this case, it will be relative to <code class="docutils literal notranslate"><span class="pre">obs</span></code>) and will contain the <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">variance</span></code> columns.</p>
 <div class="nbinput docutils container">

@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -212,7 +221,7 @@
             <div itemprop="articleBody">
                 
   <section id="Training-a-PyTorch-Model">
-<h1>Training a PyTorch Model<a class="headerlink" href="#Training-a-PyTorch-Model" title="Permalink to this heading">¶</a></h1>
+<h1>Training a PyTorch Model<a class="headerlink" href="#Training-a-PyTorch-Model" title="Permalink to this heading"></a></h1>
 <p>This tutorial shows how to train a Logistic Regression model in PyTorch using the Census API’s <code class="docutils literal notranslate"><span class="pre">experimental.ml.ExperimentDataPipe</span></code> class. This is intended only to demonstrate the use of the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, and not as an example of how to train a biologically useful model.</p>
 <p>This tutorial assumes a basic familiarity with PyTorch and the Census API. See the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/api_demo/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a> notebook tutorial for a quick primer on Census API usage.</p>
 <p><strong>Contents</strong></p>
@@ -224,7 +233,7 @@
 <li><p><a class="reference internal" href="#Make-predictions-with-the-model"><span class="std std-ref">Make predictions with the model</span></a></p></li>
 </ul>
 <section id="Open-the-Census">
-<h2>Open the Census<a class="headerlink" href="#Open-the-Census" title="Permalink to this heading">¶</a></h2>
+<h2>Open the Census<a class="headerlink" href="#Open-the-Census" title="Permalink to this heading"></a></h2>
 <p>First, obtain a handle to the Census data, in the usual manner:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
@@ -246,7 +255,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </section>
 <section id="Create-an-ExperimentDataPipe">
-<h2>Create an ExperimentDataPipe<a class="headerlink" href="#Create-an-ExperimentDataPipe" title="Permalink to this heading">¶</a></h2>
+<h2>Create an ExperimentDataPipe<a class="headerlink" href="#Create-an-ExperimentDataPipe" title="Permalink to this heading"></a></h2>
 <p>To train a model in PyTorch using this <code class="docutils literal notranslate"><span class="pre">census</span></code> data object, first instantiate an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> as follows:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
@@ -271,12 +280,12 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </div>
 </div>
 <section id="ExperimentDataPipe-class-explained">
-<h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class explained<a class="headerlink" href="#ExperimentDataPipe-class-explained" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class explained<a class="headerlink" href="#ExperimentDataPipe-class-explained" title="Permalink to this heading"></a></h3>
 <p>This class provides an implementation of PyTorch’s <a class="reference external" href="https://pytorch.org/data/main/torchdata.datapipes.iter.html">DataPipe interface</a>, which defines a common mechanism for wrapping and accessing training data from any underlying source. The <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class encapsulates the details of querying and retrieving Census data from a single SOMA <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> and returning it to the caller as PyTorch Tensors. Most importantly, it retrieves the data lazily from the Census in batches,
 avoiding having to load the entire training dataset into memory at once. (Note: PyTorch also provides <code class="docutils literal notranslate"><span class="pre">DataSet</span></code> as a legacy interface for wrapping and accessing training data sources, but a <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code> can be used interchangeably.)</p>
 </section>
 <section id="ExperimentDataPipe-parameters-explained">
-<h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> parameters explained<a class="headerlink" href="#ExperimentDataPipe-parameters-explained" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> parameters explained<a class="headerlink" href="#ExperimentDataPipe-parameters-explained" title="Permalink to this heading"></a></h3>
 <p>The constructor only requires a single parameter, <code class="docutils literal notranslate"><span class="pre">experiment</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">soma.Experiment</span></code> containing the data of the organism to be used for training.</p>
 <p>To retrieve a subset of the Experiment’s data, along either the <code class="docutils literal notranslate"><span class="pre">obs</span></code> or <code class="docutils literal notranslate"><span class="pre">var</span></code> axes, you may specify query filters via the <code class="docutils literal notranslate"><span class="pre">obs_query</span></code> and <code class="docutils literal notranslate"><span class="pre">var_query</span></code> parameters, which are both <code class="docutils literal notranslate"><span class="pre">soma.AxisQuery</span></code> objects.</p>
 <p>The values for the prediction label(s) that you intend to use for training are specified via the <code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> array.</p>
@@ -306,7 +315,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 </section>
 </section>
 <section id="Split-the-dataset">
-<h2>Split the dataset<a class="headerlink" href="#Split-the-dataset" title="Permalink to this heading">¶</a></h2>
+<h2>Split the dataset<a class="headerlink" href="#Split-the-dataset" title="Permalink to this heading"></a></h2>
 <p>You may split the overall dataset into the typical training, validation, and test sets by using the PyTorch <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.RandomSplitter.html#torchdata.datapipes.iter.RandomSplitter">RandomSplitter</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Using PyTorch’s functional form for chaining <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>s, this is done as follows:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
@@ -318,7 +327,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 </section>
 <section id="Create-the-DataLoader">
-<h2>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading">¶</a></h2>
+<h2>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading"></a></h2>
 <p>With the full set of DataPipe operations chained together, we can now instantiate a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> on the training data.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
@@ -331,7 +340,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <p>Alternately, you can instantiate a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> object directly via its constructor. However, many of the parameters are not usable with iterable-style DataPipes, which is the case for <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>. In particular, the <code class="docutils literal notranslate"><span class="pre">shuffle</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> parameters should not be specified. Using <code class="docutils literal notranslate"><span class="pre">experiment_dataloader</span></code> helps enforce correct usage.</p>
 </section>
 <section id="Define-the-model">
-<h2>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading">¶</a></h2>
+<h2>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading"></a></h2>
 <p>With the training data retrieval code now in place, we can move on to defining a simple logistic regression model, using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.nn.Linear</span></code> class:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
@@ -426,7 +435,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <p>Note that cell type values are integer-encoded values, which can be decoded using <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders</span></code> (more on this below).</p>
 </section>
 <section id="Train-the-model">
-<h2>Train the model<a class="headerlink" href="#Train-the-model" title="Permalink to this heading">¶</a></h2>
+<h2>Train the model<a class="headerlink" href="#Train-the-model" title="Permalink to this heading"></a></h2>
 <p>Finally, we are ready to train the model. Here we instantiate the model, a loss function, and an optimization method and then iterate through the desired number of training epochs. Note how the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> is passed into <code class="docutils literal notranslate"><span class="pre">train_epoch</span></code>, where for each epoch it will provide a new iterator through the training dataset.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
@@ -470,7 +479,7 @@ Epoch 10: Train Loss: 0.0136101 Accuracy 0.8923
 </div>
 </section>
 <section id="Make-predictions-with-the-model">
-<h2>Make predictions with the model<a class="headerlink" href="#Make-predictions-with-the-model" title="Permalink to this heading">¶</a></h2>
+<h2>Make predictions with the model<a class="headerlink" href="#Make-predictions-with-the-model" title="Permalink to this heading"></a></h2>
 <p>To make predictions with the model, we first create a new <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> using the <code class="docutils literal notranslate"><span class="pre">test_datapipe</span></code>, which provides the “test” split of the original dataset. For this example, we will only make predictions on a single batch of data from the test split.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:

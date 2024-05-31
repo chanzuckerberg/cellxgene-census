@@ -36,6 +36,8 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -130,6 +132,13 @@
             
 
             
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
             
             </div>
@@ -216,7 +225,7 @@
             <div itemprop="articleBody">
                 
   <section id="Exploring-biologically-relevant-clusters-in-Census-embeddings">
-<h1>Exploring biologically relevant clusters in Census embeddings<a class="headerlink" href="#Exploring-biologically-relevant-clusters-in-Census-embeddings" title="Permalink to this heading">¶</a></h1>
+<h1>Exploring biologically relevant clusters in Census embeddings<a class="headerlink" href="#Exploring-biologically-relevant-clusters-in-Census-embeddings" title="Permalink to this heading"></a></h1>
 <p>In this notebook, we explore biologically relevant clusters in Census embeddings using UMAP as a visualization tool. This demonstration assumes knowledge of how to access both, collaboration and hosted (community) Census embeddings. To learn the basics on accessing these data please visit the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census model page</a>.</p>
 <p><strong>IMPORTANT:</strong> This tutorial requires cellxgene-census package version 1.9.1 or later.</p>
 <p><strong>Contents</strong></p>
@@ -233,7 +242,7 @@
 <div><p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable is_primary_data which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
 </div></blockquote>
 <section id="Background">
-<h2>Background<a class="headerlink" href="#Background" title="Permalink to this heading">¶</a></h2>
+<h2>Background<a class="headerlink" href="#Background" title="Permalink to this heading"></a></h2>
 <p>The journey from a gene expression matrix to a 2D scatterplot involves numerous highly nonlinear transformations. Such transformations can introduce artifacts that affect both the global and local structures in the visualized manifold.</p>
 <p>Common issues like overclustering and clustering by batch are typical artifacts resulting from these dimensionality reduction methods. With that in mind, these embeddings and their UMAP visualizations are best used as tools for generating hypotheses. They should not be the final word in analysis. Instead, we recommend focusing on the full representation of the embedding matrices and ultimately returning to the underlying gene expressions to investigate the reasons behind the observed clustering
 patterns.</p>
@@ -247,7 +256,7 @@ technical biases or a combination of both biological and technical factors. Comp
 </ol>
 </section>
 <section id="Requirements">
-<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#Requirements" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>cellxgene-census</p></li>
 <li><p>scanpy</p></li>
@@ -260,7 +269,7 @@ technical biases or a combination of both biological and technical factors. Comp
 </ul>
 </section>
 <section id="Imports-and-function-definitions">
-<h2>Imports and function definitions<a class="headerlink" href="#Imports-and-function-definitions" title="Permalink to this heading">¶</a></h2>
+<h2>Imports and function definitions<a class="headerlink" href="#Imports-and-function-definitions" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -337,9 +346,9 @@ technical biases or a combination of both biological and technical factors. Comp
 </div>
 </section>
 <section id="Melanocytes-in-eye">
-<h2>Melanocytes in eye<a class="headerlink" href="#Melanocytes-in-eye" title="Permalink to this heading">¶</a></h2>
+<h2>Melanocytes in eye<a class="headerlink" href="#Melanocytes-in-eye" title="Permalink to this heading"></a></h2>
 <section id="Sample-and-fetch-150k-cells-from-eye-tissue">
-<h3>Sample and fetch 150k cells from eye tissue<a class="headerlink" href="#Sample-and-fetch-150k-cells-from-eye-tissue" title="Permalink to this heading">¶</a></h3>
+<h3>Sample and fetch 150k cells from eye tissue<a class="headerlink" href="#Sample-and-fetch-150k-cells-from-eye-tissue" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -402,7 +411,7 @@ Generating UMAP for uce
 </div>
 </section>
 <section id="Observations">
-<h3>Observations<a class="headerlink" href="#Observations" title="Permalink to this heading">¶</a></h3>
+<h3>Observations<a class="headerlink" href="#Observations" title="Permalink to this heading"></a></h3>
 <p>In the study of melanocytes within the eye, the following observations are made across various embeddings:</p>
 <ul class="simple">
 <li><p>Melanocytes are distinctly clustered in all embeddings, with OCA2 as a noted marker.</p></li>
@@ -511,7 +520,7 @@ melanocyte cluster.</p></li>
 </section>
 </section>
 <section id="Retinal-bipolar-neurons-in-eye">
-<h2>Retinal bipolar neurons in eye<a class="headerlink" href="#Retinal-bipolar-neurons-in-eye" title="Permalink to this heading">¶</a></h2>
+<h2>Retinal bipolar neurons in eye<a class="headerlink" href="#Retinal-bipolar-neurons-in-eye" title="Permalink to this heading"></a></h2>
 <p>In a more detailed analysis of retinal bipolar neurons in the eye, we focus on subclustering within this cell type across various embeddings. This involves rerunning UMAP specifically for retinal bipolar neurons and applying Leiden clustering to each embedding. Additionally, we employ <a class="reference external" href="https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html">HDBSCAN</a>, a density-based clustering algorithm, on a full pairwise Euclidean distance matrix calculated from each embedding to compare the
 clustering results.</p>
 <p>Key findings from this analysis include:</p>
@@ -693,9 +702,9 @@ uce           0.012763  0.096839  0.345248  1.000000
 </div>
 </section>
 <section id="Dopaminergic-neurons-in-brain">
-<h2>Dopaminergic neurons in brain<a class="headerlink" href="#Dopaminergic-neurons-in-brain" title="Permalink to this heading">¶</a></h2>
+<h2>Dopaminergic neurons in brain<a class="headerlink" href="#Dopaminergic-neurons-in-brain" title="Permalink to this heading"></a></h2>
 <section id="Sample-and-fetch-150k-cells-from-brain-tissue">
-<h3>Sample and fetch 150k cells from brain tissue<a class="headerlink" href="#Sample-and-fetch-150k-cells-from-brain-tissue" title="Permalink to this heading">¶</a></h3>
+<h3>Sample and fetch 150k cells from brain tissue<a class="headerlink" href="#Sample-and-fetch-150k-cells-from-brain-tissue" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -755,7 +764,7 @@ Generating UMAP for uce
 </div>
 </section>
 <section id="id1">
-<h3>Observations<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>Observations<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>Here, we visualize a randomly selected subset of cells in the brain from CELLxGENE Census. We can observe that dopaminergic neurons, marked by TH expression, separate into distinct clusters in Geneformer and SCVI latent spaces, whereas in UCE and scGPT embeddings, they are grouped at one end of a larger neuron cluster.</p>
 <p>All embeddings show a tendency to cluster by assay, indicating a consistent pattern across different models. Conditions like glioblastoma are clearly separated in all embeddings, while pilocytic astrocytoma is distinctly clustered in Geneformer and UCE and more mixed in others.</p>
 <p>In the UCE embedding, we observe many small satellite glioblastoma clusters outside the main cluster that do not have distinct gene expression signatures. This is similar to what we observed previously in the eye (e.g. for the retinal bipolar neurons).</p>
@@ -807,9 +816,9 @@ Generating UMAP for uce
 </section>
 </section>
 <section id="Pulmonary-ionocytes-in-lung-(Tabula-Sapiens)">
-<h2>Pulmonary ionocytes in lung (Tabula Sapiens)<a class="headerlink" href="#Pulmonary-ionocytes-in-lung-(Tabula-Sapiens)" title="Permalink to this heading">¶</a></h2>
+<h2>Pulmonary ionocytes in lung (Tabula Sapiens)<a class="headerlink" href="#Pulmonary-ionocytes-in-lung-(Tabula-Sapiens)" title="Permalink to this heading"></a></h2>
 <section id="Fetch-lung-cells-from-Tabula-Sapiens">
-<h3>Fetch lung cells from Tabula Sapiens<a class="headerlink" href="#Fetch-lung-cells-from-Tabula-Sapiens" title="Permalink to this heading">¶</a></h3>
+<h3>Fetch lung cells from Tabula Sapiens<a class="headerlink" href="#Fetch-lung-cells-from-Tabula-Sapiens" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -841,7 +850,7 @@ Generating UMAP for uce
 </div>
 </section>
 <section id="id2">
-<h3>Observations<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>Observations<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>For the case study focusing on pulmonary ionocytes in lung tissue, as part of the Tabula Sapiens project, the following observations are noted:</p>
 <ul class="simple">
 <li><p>In all embeddings, except for SCVI, a clear separation is seen between SmartSeq data and 10x data. The distinction is most pronounced in the scGPT embedding.</p></li>
