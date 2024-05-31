@@ -14,7 +14,7 @@ if __name__ == "__main__":
     with open(file) as f:
         config = yaml.safe_load(f)
 
-    census = cellxgene_census.open_soma(census_version="2023-12-15")
+    census = cellxgene_census.open_soma(census_version="2024-05-20")
 
     census_config = config.get("census")
     experiment_name = census_config.get("organism")
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     adata.var.set_index("feature_id", inplace=True)
 
-    idx = query.obs(column_names=["soma_joinid"]).concat().to_pandas().index.to_numpy()
+    idx = query.obs(column_names=["soma_joinid"]).concat().to_pandas().to_numpy()
 
     del census, query, hv, hv_idx
     gc.collect()
