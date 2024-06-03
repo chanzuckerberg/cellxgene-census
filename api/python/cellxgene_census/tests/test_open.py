@@ -2,6 +2,7 @@ import os
 import pathlib
 import re
 import time
+from typing import TYPE_CHECKING
 from unittest.mock import ANY, patch
 
 import anndata
@@ -19,6 +20,10 @@ from cellxgene_census._release_directory import (
     CELL_CENSUS_RELEASE_DIRECTORY_URL,
     CensusLocator,
 )
+
+if TYPE_CHECKING:
+    # You're not supposed to import this, but mypy demands it
+    pass
 
 
 @pytest.mark.live_corpus
@@ -410,6 +415,25 @@ def test_download_source_h5ad_errors(tmp_path: pathlib.Path, small_dataset_id: s
 
     with pytest.raises(ValueError):
         cellxgene_census.download_source_h5ad(small_dataset_id, "/tmp/dirname/", census_version="latest")
+
+
+@pytest.mark.parametrize("progress_bar", [True, False])
+def test_download_h5ad_progress_bar(  # type: ignore[no-untyped-def]
+    capsys,
+    tmp_path: pathlib.Path,
+    small_dataset_id: str,
+    progress_bar: bool,
+) -> None:
+    adata_path = tmp_path / "adata.h5ad"
+    _ = capsys.readouterr()  # Clearing any previously captured output
+    cellxgene_census.download_source_h5ad(
+        small_dataset_id, adata_path.as_posix(), census_version="latest", progress_bar=progress_bar
+    )
+    captured = capsys.readouterr()
+    if progress_bar:
+        assert ("Downloading" in captured.err) and ("100%" in captured.err)
+    else:
+        assert captured.err == ""
 
 
 @pytest.mark.live_corpus

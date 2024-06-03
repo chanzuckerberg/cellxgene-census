@@ -66,9 +66,7 @@ source_suffix = ['.rst', '.md']
 # Inject custom css files in `/_static/css/*`
 html_static_path = ['_static']
 
-import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 html_js_files = [
     ('https://plausible.io/js/script.js', {"data-domain": "chanzuckerberg.github.io/cellxgene-census", "defer": "defer"}),

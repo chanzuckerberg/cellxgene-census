@@ -12,11 +12,11 @@ from scipy.sparse import coo_matrix, spmatrix
 from somacore import AxisQuery
 from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
-from torch.utils.data._utils.worker import WorkerInfo
 
 # conditionally import torch, as it will not be available in all test environments
 try:
     from torch import Tensor, float32
+    from torch.utils.data._utils.worker import WorkerInfo
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
@@ -610,17 +610,15 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 
 
 @pytest.mark.experimental
-@patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe")
-def test_experiment_dataloader__unsupported_params__fails(
-    dummy_exp_data_pipe: ExperimentDataPipe,
-) -> None:
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, sampler=[])
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
+def test_experiment_dataloader__unsupported_params__fails() -> None:
+    with patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe") as dummy_exp_data_pipe:
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, sampler=[])
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)

@@ -23,6 +23,9 @@ jobs:
       matrix:
         os: [single-cell-8c64g-runner, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.8"
 
     runs-on: ${{matrix.os}}
 
@@ -60,7 +63,7 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
-          pip install -U -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          GIT_CLONE_PROTECTION_ACTIVE=false pip install -U -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -U cellxgene-census[experimental]
 
           # dump pip config for logs

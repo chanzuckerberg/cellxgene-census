@@ -11,13 +11,9 @@ from .schema_util import FieldSpec, TableSpec
 # DataFrame columns. True is enabled, False is disabled.
 USE_ARROW_DICTIONARY = True
 
-CENSUS_SCHEMA_VERSION = "2.0.0"
+CENSUS_SCHEMA_VERSION = "2.0.1"
 
 CXG_SCHEMA_VERSION = "5.0.0"  # the CELLxGENE schema version supported
-
-# NOTE: The UBERON ontology URL needs to manually updated if the CXG Dataset Schema is updated. This is a temporary
-# hassle, however, since the TissueMapper, which relies upon this ontology, will eventually be removed from the Builder
-CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2024-01-18/uberon.owl"
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -256,11 +252,7 @@ CENSUS_X_LAYERS_PLATFORM_CONFIG = {
 # terms are excluded from the Census.
 RNA_SEQ = [
     "EFO:0003755",  # FL-cDNA
-    "EFO:0004158",  # random RNA-Seq across whole transcriptome
-    "EFO:0005684",  # RNA-seq of coding RNA from single cells
-    "EFO:0005685",  # RNA-seq of non coding RNA from single cells
-    "EFO:0008440",  # tag based single cell RNA sequencing
-    "EFO:0008441",  # full length single cell RNA sequencing
+    "EFO:0008440",  #
     "EFO:0008640",  # 3'T-fill
     "EFO:0008641",  # 3’-end-seq
     "EFO:0008643",  # 3′-Seq
@@ -300,7 +292,6 @@ RNA_SEQ = [
     "EFO:0008898",  # RNET-seq
     "EFO:0008903",  # SC3-seq
     "EFO:0008908",  # SCI-seq
-    "EFO:0008913",  # single-cell RNA sequencing
     "EFO:0008919",  # Seq-Well
     "EFO:0008929",  # SMA
     "EFO:0008930",  # Smart-seq
@@ -320,9 +311,6 @@ RNA_SEQ = [
     "EFO:0008978",  # TSS Sequencing
     "EFO:0008980",  # UMI Method
     "EFO:0009309",  # Div-Seq
-    "EFO:0009809",  # single nucleus RNA sequencing
-    "EFO:0009810",  # full length single nucleus RNA sequencing
-    "EFO:0009811",  # tag based single nucleus RNA sequencing
     "EFO:0009899",  # 10x 3' v2
     "EFO:0009900",  # 10x 5' v2
     "EFO:0009901",  # 10x 3' v1
@@ -357,7 +345,6 @@ RNA_SEQ = [
     "EFO:0030061",  # mcSCRB-seq
     "EFO:0030074",  # SORT-seq
     "EFO:0030078",  # droplet-based single-cell RNA library preparation
-    "EFO:0030080",  # 10x transcription profiling
     "EFO:0700003",  # BD Rhapsody Whole Transcriptome Analysis
     "EFO:0700004",  # BD Rhapsody Targeted mRNA
     "EFO:0700010",  # TruDrop
