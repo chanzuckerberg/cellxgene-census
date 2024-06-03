@@ -596,6 +596,10 @@ def test__shuffle_chunks(soma_experiment: Experiment) -> None:
     # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
     assert X_values == soma_joinids
 
+    # If shuffle_chunk_count is defined, each batch should contain elements from different chunks
+    batches = [soma_joinids[i : i + 4] for i in range(0, len(all_rows), 4)]
+    assert any(max(batch) - min(batch) > 3 for batch in batches)
+
 
 @pytest.mark.experimental
 @pytest.mark.skip(reason="Not implemented")
