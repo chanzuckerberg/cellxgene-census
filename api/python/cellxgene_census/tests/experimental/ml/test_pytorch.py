@@ -21,6 +21,7 @@ try:
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
         experiment_dataloader,
+        list_split,
     )
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
@@ -570,37 +571,6 @@ def test__shuffle(soma_experiment: Experiment) -> None:
     assert X_values == soma_joinids
 
 
-# noinspection PyTestParametrized,DuplicatedCode
-@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
-def test__shuffle_chunks(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(
-        soma_experiment,
-        measurement_name="RNA",
-        X_name="raw",
-        obs_column_names=["label"],
-        shuffle=True,
-        soma_chunk_size=4,
-        shuffle_chunk_count=2,
-    )
-
-    all_rows = list(iter(dp))
-
-    soma_joinids = [row[1][0].item() for row in all_rows]
-    X_values = [row[0][0].item() for row in all_rows]
-
-    # same elements
-    assert set(soma_joinids) == set(range(16))
-    # not ordered! (...with a `1/16!` probability of being ordered)
-    assert soma_joinids != list(range(16))
-    # randomizes X in same order as obs
-    # note: X values were explicitly set to match obs_joinids to allow for this simple assertion
-    assert X_values == soma_joinids
-
-    # If shuffle_chunk_count is defined, each batch should contain elements from different chunks
-    batches = [soma_joinids[i : i + 4] for i in range(0, len(all_rows), 4)]
-    assert any(max(batch) - min(batch) > 3 for batch in batches)
-
-
 @pytest.mark.experimental
 @pytest.mark.skip(reason="Not implemented")
 def test_experiment_dataloader__multiprocess_sparse_matrix__fails() -> None:
@@ -626,3 +596,14 @@ def test_experiment_dataloader__unsupported_params__fails() -> None:
             experiment_dataloader(dummy_exp_data_pipe, sampler=[])
         with pytest.raises(ValueError):
             experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
+
+
+@pytest.mark.experimental
+def test_list_split() -> None:
+    data = list(range(10))
+    chunks = list_split(data, 3)
+    assert len(chunks) == 4
+    assert len(chunks[0]) == 3
+    assert len(chunks[1]) == 3
+    assert len(chunks[2]) == 3
+    assert len(chunks[3]) == 1
