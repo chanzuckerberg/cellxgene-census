@@ -476,8 +476,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 parallel with client-side processing of the SOMA data, potentially improving overall performance at the
                 cost of doubling memory utilization. Defaults to ``True``.
             shuffle_chunk_count:
-                The number contiguous blocks (chunks) of rows to read at random and then concatenated and shuffled.
-                Larger number for `shuffle_chunk_count` correspond to more randomness in the shuffling.
+                The number of contiguous blocks (chunks) of rows sampled to then concatenate and shuffle.
+                Larger numbers correspond to more randomness per training batch.
 
         Lifecycle:
             experimental
