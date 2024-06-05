@@ -21,6 +21,7 @@ try:
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
         experiment_dataloader,
+        list_split,
     )
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
@@ -595,3 +596,14 @@ def test_experiment_dataloader__unsupported_params__fails() -> None:
             experiment_dataloader(dummy_exp_data_pipe, sampler=[])
         with pytest.raises(ValueError):
             experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
+
+
+@pytest.mark.experimental
+def test_list_split() -> None:
+    data = list(range(10))
+    chunks = list_split(data, 3)
+    assert len(chunks) == 4
+    assert len(chunks[0]) == 3
+    assert len(chunks[1]) == 3
+    assert len(chunks[2]) == 3
+    assert len(chunks[3]) == 1
