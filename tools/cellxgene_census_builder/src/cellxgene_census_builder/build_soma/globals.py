@@ -329,6 +329,7 @@ RNA_SEQ = [
     "EFO:0010713",  # 10x immune profiling
     "EFO:0010714",  # 10x TCR enrichment
     "EFO:0010715",  # 10x Ig enrichment
+    "EFO:0010961",  # Visium Spatial Gene Expression
     "EFO:0010964",  # barcoded plate-based single cell RNA-seq
     "EFO:0011025",  # 10x 5' v1
     "EFO:0022396",  # TruSeq
