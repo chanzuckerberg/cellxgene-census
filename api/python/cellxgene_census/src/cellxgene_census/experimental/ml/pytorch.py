@@ -192,7 +192,9 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
 
 
 def list_split(arr_list: List[Any], sublist_len: int) -> List[List[Any]]:
-    """Splits a python list into a list of sublists where each sublist is of size `sublist_len`."""
+    """Splits a python list into a list of sublists where each sublist is of size `sublist_len`.
+    TODO: Replace with `itertools.batched` when Python 3.12 becomes the minimum supported version.
+    """
     i = 0
     result = []
     while i < len(arr_list):
