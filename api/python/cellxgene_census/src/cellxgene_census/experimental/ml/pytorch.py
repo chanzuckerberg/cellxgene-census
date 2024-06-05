@@ -382,8 +382,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     def __init__(
         self,
         experiment: soma.Experiment,
-        measurement_name: str = "raw",
-        X_name: str = "X",
+        measurement_name: str = "RNA",
+        X_name: str = "raw",
         obs_query: Optional[soma.AxisQuery] = None,
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
@@ -400,9 +400,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             experiment:
                 The :class:`tiledbsoma.Experiment` from which to read data.
             measurement_name:
-                The name of the :class:`tiledbsoma.Measurement` to read. Defaults to ``"raw"``.
+                The name of the :class:`tiledbsoma.Measurement` to read. Defaults to ``"RNA"``.
             X_name:
-                The name of the X layer to read. Defaults to ``"X"``.
+                The name of the X layer to read. Defaults to ``"raw"``.
             obs_query:
                 The query used to filter along the ``obs`` axis. If not specified, all ``obs`` and ``X`` data will
                 be returned, which can be very large.
