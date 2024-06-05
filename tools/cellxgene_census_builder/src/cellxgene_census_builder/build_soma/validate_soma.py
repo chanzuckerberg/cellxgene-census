@@ -1111,7 +1111,7 @@ def validate(args: CensusBuildArgs) -> int:
     with create_dask_client(args, n_workers=n_workers, threads_per_worker=1, memory_limit=None) as client:
         assert all(r.result() for r in distributed.wait(validate_soma(args, client)).done)
         shutdown_dask_cluster(client)
-        logging.info("Validation complete.")
+        logger.info("Validation complete.")
 
     assert validate_consolidation(args)
     logger.info("Validating correct consolidation and vacuuming - complete")
