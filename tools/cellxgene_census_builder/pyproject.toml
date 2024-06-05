@@ -34,6 +34,8 @@ dependencies= [
     # recent cellxgene-census _readers_ are able to read the results of a Census build (writer).
     # The compatibility matrix is defined here:
     #    https://github.com/TileDB-Inc/TileDB/blob/dev/format_spec/FORMAT_SPEC.md
+    # TODO (spatial): tiledbsoma pin to a PyPI release is temporarily commented out in favor git commit pin
+    # "tiledbsoma==1.9.3",
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
     "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@fc5f8e7#egg=tiledbsoma&subdirectory=apis/python/",
     # TODO (spatial): Uncomment line below to install "cellxgene-census" at an appropriate version when tiledbsoma spatial code has been released 
