@@ -57,6 +57,7 @@ Gain a better understanding on the nature of the Census data and how it's organi
     notebooks/api_demo/census_datasets.ipynb
     notebooks/api_demo/census_dataset_presence.ipynb
     notebooks/api_demo/census_summary_cell_counts.ipynb
+    notebooks/api_demo/census_and_cell_guide_example.ipynb
    
 Analyzing Census data
 ---------------------

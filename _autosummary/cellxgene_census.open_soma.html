@@ -123,7 +123,7 @@
                 
                 
                 <div class="version">
-                    v1.14.0
+                    v1.14.1
                 </div>
                 
             
@@ -325,100 +325,8 @@ close the Census upon exit of the context.</p>
         </section>
 
     </div>
-    <!-- Newsletter Banner -->
-    <div role="banner" id="newsletter-banner">
-      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
-      <div id="newsletter-banner-close-button" role="button">X</div>
-    </div>
-    <!-- Newsletter Modal -->
-    <dialog id="newsletter-modal">
-      <div id="newsletter-header">
-        <img id="newsletter-logo" src="../_static/img/cellxGene-newsletter-logo.svg" />
-        <div id="newsletter-close-button" role="button">X</div>
-      </div>
-      <div id="newsletter-content">
-        <div id="newsletter-callout">Join Our Newsletter</div>
-        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
-        <!-- HubSpot Form target -->
-        <div id="newsletter-form-container"></div>
-      </div>
 
-      <div id="newsletter-footnote">Unsubscribe at any time.</div>
-    </dialog>
-  </div>
   
-
-  <script>
-    // (thuang): 30 days
-    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
-
-    var script = document.createElement('script');
-    script.src = 'https://js.hsforms.net/forms/v2.js';
-    script.defer = true;
-    document.head.appendChild(script);
-
-    // Run the code once the script is loaded
-    script.onload = async function() {
-      await hbspt.forms.create({
-        region: "na1",
-        portalId: "7272273",
-        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
-        target: '#newsletter-form-container',
-        onFormReady() {
-          // get element by type "email"
-          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
-          emailInput.setAttribute('placeholder', 'Enter email address');
-
-          // remove the label element for emailInput
-          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
-          emailLabel.remove();
-        },
-        submitText: 'Subscribe',
-      });
-    };
-
-    checkNewsletterBanner();
-
-    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
-      document.querySelector('#newsletter-banner').remove();
-      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
-    });
-
-    const modal = document.querySelector('#newsletter-modal');
-
-    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
-      modal.showModal();
-    });
-
-    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
-      modal.close();
-    });
-
-    function checkNewsletterBanner() {
-      /**
-       * (thuang): Use LocalStorage to store dismissed state for 30 days
-       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
-       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
-       * And vice versa.
-       */
-      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
-
-      if (newsletterBannerDismissed) {
-        return;
-      }
-
-      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
-        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
-      }
-
-      const newsletterBanner = document.querySelector('#newsletter-banner');
-
-      if (!newsletterBannerDismissed) {
-        newsletterBanner.style.display = 'flex';
-      }
-    }
-  </script>
 
   
   

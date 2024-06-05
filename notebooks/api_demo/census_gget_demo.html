@@ -126,7 +126,7 @@
                 
                 
                 <div class="version">
-                    v1.14.0
+                    v1.14.1
                 </div>
                 
             
@@ -223,10 +223,10 @@
                 
   <section id="Querying-data-using-the-gget-cellxgene-module">
 <h1>Querying data using the gget cellxgene module<a class="headerlink" href="#Querying-data-using-the-gget-cellxgene-module" title="Permalink to this heading"></a></h1>
-<p><em>By Laura Luebbert, lauraluebbert&#64;caltech.edu.</em></p>
+<p><em>By Laura Luebbert, lauralubbert&#64;gmail.com.</em></p>
 <p><a class="reference external" href="https://github.com/pachterlab/gget">gget</a> is a free, open-source command-line tool and Python package that enables efficient querying of genomic databases. gget consists of a collection of separate but interoperable modules, each designed to facilitate one type of database querying in a single line of code.</p>
-<p>The <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> module builds on the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">CZ CELLxGENE Discover Census</a> to query data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. This notebook briefly introduces the <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> module by providing one simple example for each supported query type.</p>
-<p>If you use gget cellxgene in a publication, please <a class="reference external" href="https://pachterlab.github.io/gget/cite.html">cite gget</a> in addition to <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citing CZ CELLxGENE</a>.</p>
+<p>The <a class="reference external" href="https://pachterlab.github.io/gget/en/cellxgene.html">gget cellxgene</a> module builds on the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/">CZ CELLxGENE Discover Census</a> to query data from <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. This notebook briefly introduces the <a class="reference external" href="https://pachterlab.github.io/gget/en/cellxgene.html">gget cellxgene</a> module by providing one simple example for each supported query type.</p>
+<p>If you use gget cellxgene in a publication, please <a class="reference external" href="https://pachterlab.github.io/gget/en/cite.html">cite gget</a> in addition to <a class="reference external" href="https://cellxgene.cziscience.com/docs/08__Cite%20cellxgene%20in%20your%20publications">citing CZ CELLxGENE</a>.</p>
 <p>You can also <a class="reference external" href="https://colab.research.google.com/github/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_gget_demo.ipynb">open this notebook in Google Colab</a>.</p>
 <p><strong>Contents</strong></p>
 <ol class="arabic simple">
@@ -234,7 +234,7 @@
 <li><p>Fetch an <a class="reference external" href="https://anndata.readthedocs.io/en/latest/">AnnData</a> object by selecting gene(s), tissue(s) and cell type(s).</p></li>
 <li><p>Plot a dot plot similar to those shown on the CZ CELLxGENE Discover <a class="reference external" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>.</p></li>
 <li><p>Fetch only cell metadata (corresponds to AnnData.obs).</p></li>
-<li><p>Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line.</p></li>
+<li><p>Use <a class="reference external" href="https://pachterlab.github.io/gget/en/cellxgene.html">gget cellxgene</a> from the command line.</p></li>
 </ol>
 <section id="Install-gget-and-set-up-cellxgene-module">
 <h2>Install gget and set up cellxgene module<a class="headerlink" href="#Install-gget-and-set-up-cellxgene-module" title="Permalink to this heading"></a></h2>
@@ -851,7 +851,7 @@ Fri Jul 28 16:16:44 2023 INFO Fetching metadata from CZ CELLxGENE Discover...
 </div>
 </section>
 <section id="Use-gget-cellxgene-from-the-command-line">
-<h2>Use <a class="reference external" href="https://pachterlab.github.io/gget/cellxgene.html">gget cellxgene</a> from the command line<a class="headerlink" href="#Use-gget-cellxgene-from-the-command-line" title="Permalink to this heading"></a></h2>
+<h2>Use <a class="reference external" href="https://pachterlab.github.io/gget/en/cellxgene.html">gget cellxgene</a> from the command line<a class="headerlink" href="#Use-gget-cellxgene-from-the-command-line" title="Permalink to this heading"></a></h2>
 <p>All gget modules support use from the command line. Note that the command line interface requires the <code class="docutils literal notranslate"><span class="pre">-o/--out</span></code> argument to specify a path to save the fetched data. Here are the command line versions of the queries demonstrated above:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -901,100 +901,8 @@ Fri Jul 28 16:16:44 2023 INFO Fetching metadata from CZ CELLxGENE Discover...
         </section>
 
     </div>
-    <!-- Newsletter Banner -->
-    <div role="banner" id="newsletter-banner">
-      <span id="newsletter-subscribe-button" role="button">Subscribe</span>&nbsp;to our newsletter to receive updates about new features.
-      <div id="newsletter-banner-close-button" role="button">X</div>
-    </div>
-    <!-- Newsletter Modal -->
-    <dialog id="newsletter-modal">
-      <div id="newsletter-header">
-        <img id="newsletter-logo" src="../../_static/img/cellxGene-newsletter-logo.svg" />
-        <div id="newsletter-close-button" role="button">X</div>
-      </div>
-      <div id="newsletter-content">
-        <div id="newsletter-callout">Join Our Newsletter</div>
-        <div id="newsletter-description">Get a quarterly email with the latest CELLxGENE features and data.</div>
-        <!-- HubSpot Form target -->
-        <div id="newsletter-form-container"></div>
-      </div>
 
-      <div id="newsletter-footnote">Unsubscribe at any time.</div>
-    </dialog>
-  </div>
   
-
-  <script>
-    // (thuang): 30 days
-    const NEWSLETTER_BANNER_DISMISSED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-    const NEWSLETTER_BANNER_DISMISSED_KEY = "newsletterBannerDismissed"
-
-    var script = document.createElement('script');
-    script.src = 'https://js.hsforms.net/forms/v2.js';
-    script.defer = true;
-    document.head.appendChild(script);
-
-    // Run the code once the script is loaded
-    script.onload = async function() {
-      await hbspt.forms.create({
-        region: "na1",
-        portalId: "7272273",
-        formId: "eb65b811-0451-414d-8304-7b9b6f468ce5",
-        target: '#newsletter-form-container',
-        onFormReady() {
-          // get element by type "email"
-          const emailInput = document.querySelector('#email-eb65b811-0451-414d-8304-7b9b6f468ce5');
-          emailInput.setAttribute('placeholder', 'Enter email address');
-
-          // remove the label element for emailInput
-          const emailLabel = document.querySelector('#label-email-eb65b811-0451-414d-8304-7b9b6f468ce5');
-          emailLabel.remove();
-        },
-        submitText: 'Subscribe',
-      });
-    };
-
-    checkNewsletterBanner();
-
-    document.querySelector('#newsletter-banner-close-button').addEventListener('click', () => {
-      document.querySelector('#newsletter-banner').remove();
-      localStorage.setItem(NEWSLETTER_BANNER_DISMISSED_KEY, Date.now());
-    });
-
-    const modal = document.querySelector('#newsletter-modal');
-
-    document.querySelector('#newsletter-subscribe-button').addEventListener('click', () => {
-      modal.showModal();
-    });
-
-    document.querySelector('#newsletter-close-button').addEventListener('click', () => {
-      modal.close();
-    });
-
-    function checkNewsletterBanner() {
-      /**
-       * (thuang): Use LocalStorage to store dismissed state for 30 days
-       * NOTE: Currently Census doc page doesn't share the same domain as the main site,
-       * so dismissing the banner on the main site won't dismiss it on the Census doc page.
-       * And vice versa.
-       */
-      const newsletterBannerDismissed = localStorage.getItem('newsletterBannerDismissed');
-
-      if (newsletterBannerDismissed) {
-        return;
-      }
-
-      if (newsletterBannerDismissed && Date.now() - newsletterBannerDismissed > NEWSLETTER_BANNER_DISMISSED_TTL_MS) {
-        localStorage.removeItem(NEWSLETTER_BANNER_DISMISSED_KEY);
-      }
-
-      const newsletterBanner = document.querySelector('#newsletter-banner');
-
-      if (!newsletterBannerDismissed) {
-        newsletterBanner.style.display = 'flex';
-      }
-    }
-  </script>
 
   
   
