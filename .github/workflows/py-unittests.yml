@@ -40,7 +40,7 @@ jobs:
           python -m pip install -U pip setuptools wheel
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
-          pip install -e './api/python/cellxgene_census/[experimental]' "pyarrow~=14.0"  # TODO: remove pyarrow specification
+          pip install -e './api/python/cellxgene_census/[experimental]'
       - name: Report Dependency Versions
         run: pip list
       - name: Test with pytest (API, main tests)
