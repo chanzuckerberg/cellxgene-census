@@ -4,6 +4,7 @@
 import os
 import sys
 import shutil
+import anndata
 import logging
 import tempfile
 import argparse
@@ -47,54 +48,52 @@ def main(argv):
             # TODO: verify schema compatibility
             pass
 
+    # Get 33L model
     model_path = uce_33l_model_file("./", "./UCE/")
     uce_dir="./UCE/"
+    
+    # Run UCE 
+    dataset_path = prepare_dataset(args.dataset_dir, args.part)
+    dataset_filename = os.path.basename(dataset_path)
 
-    with tempfile.TemporaryDirectory() as scratch_dir:
-        # prepare the dataset, taking only one shard of it if so instructed
-        dataset_path = prepare_dataset(args.dataset_dir, args.part)
-        dataset_filename = os.path.basename(dataset_path)
+    if not os.path.exists(os.path.join(uce_dir, dataset_filename)):
+        os.makedirs(os.path.join(uce_dir, dataset_filename))
 
-        if not os.path.exists(os.path.join(uce_dir, dataset_filename)):
-            os.makedirs(os.path.join(uce_dir, dataset_filename))
+    dataset_path_uce = uce(
+        dataset_path,
+        uce_dir=uce_dir,
+        relative_work_dir=dataset_filename,
+        uce_33l_model_file=model_path,
+    )
+    
+    # Move adata to final location and clean up other output files
+    shutil.move(os.path.join(uce_dir, dataset_path_uce), os.path.join(args.output_dir, dataset_filename))
+    shutil.rmtree(os.path.join(uce_dir, dataset_filename))
+    
+    logger.info("Extracting embeddings...")
+    adata = anndata.read(os.path.join(args.output_dir, dataset_filename))
 
-        dataset_path_uce = uce(
-            dataset_path,
-            uce_dir=uce_dir,
-            relative_work_dir=dataset_filename,
-            uce_33l_model_file=model_path,
-        )
+    # TODO generate embs
 
-        shutil.move(os.path.join(uce_dir, dataset_path_uce), os.path.join(args.output_dir, dataset_filename))
+    if args.tiledbsoma:
+        import numpy as np
+        import pyarrow as pa
+        from scipy.sparse import coo_matrix
 
-        logger.info("Extracting embeddings...")
-
-        # TODO generate embs
-
-        if False:
-            if args.tiledbsoma:
-                import numpy as np
-                import pyarrow as pa
-                from scipy.sparse import coo_matrix
-
-                # NOTE: embs_df has columns -named- 0, 1, ..., 511 as well as the requested features.
-                embedding_dim = embs_df.shape[1] - len(args.features)
-                logger.info(f"writing to tiledbsoma.SparseNDArray at {args.outfile}, embedding_dim={embedding_dim}...")
-                with tiledbsoma.SparseNDArray.open(args.outfile, "w", context=tiledbsoma_context) as array:
-                    dim0 = np.repeat(embs_df["soma_joinid"].values, embedding_dim)
-                    dim1 = np.tile(np.arange(embedding_dim), len(embs_df))
-                    data = embs_df.loc[:, range(embedding_dim)].values.flatten()
-                    array.write(pa.SparseCOOTensor.from_scipy(coo_matrix((data, (dim0, dim1)))))
-            else:
-                logger.info(f"writing {args.outfile}...")
-                # reorder embs_df columns and write to TSV
-                cols = embs_df.columns.tolist()
-                emb_cols = [col for col in cols if isinstance(col, int)]
-                anno_cols = [col for col in cols if not isinstance(col, int)]
-                embs_df = embs_df[anno_cols + emb_cols].set_index("soma_joinid").sort_index()
-                embs_df.to_csv(args.outfile, sep="\t", header=True, index=True, index_label="soma_joinid")
-
-        logger.info("SUCCESS")
+        # NOTE: embs_df has columns -named- 0, 1, ..., 511 as well as the requested features.
+        embedding_dim = embs_df.shape[1] - len(args.features)
+        logger.info(f"writing to tiledbsoma.SparseNDArray at {args.outfile}, embedding_dim={embedding_dim}...")
+        with tiledbsoma.SparseNDArray.open(args.outfile, "w", context=tiledbsoma_context) as array:
+            dim0 = np.repeat(embs_df["soma_joinid"].values, embedding_dim)
+            dim1 = np.tile(np.arange(embedding_dim), len(embs_df))
+            data = embs_df.loc[:, range(embedding_dim)].values.flatten()
+            array.write(pa.SparseCOOTensor.from_scipy(coo_matrix((data, (dim0, dim1)))))
+    else:
+        # TODO implement to csv, for Census LTS this is not needed. Leaving it as an option for
+        # consistency with Geneformer pipeline.
+        raise NotImplementedError("only tiledbsoma output is supported, please add --tiledbsoma flag to call.")
+    
+    logger.info("SUCCESS")
 
 
 def parse_arguments(argv):
@@ -115,8 +114,11 @@ def parse_arguments(argv):
         action="store_true",
         help="outfile is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
     )
-    parser.add_argument("output_dir", type=str, help="output directory (must not already exist)")
-
+    parser.add_argument(
+        "--output-dir", 
+        type=str, 
+        help="output directory for resulting anndatas (must not already exist)"
+    )
 
     args = parser.parse_args(argv[1:])
 
