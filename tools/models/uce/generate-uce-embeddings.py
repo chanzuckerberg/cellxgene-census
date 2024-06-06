@@ -56,7 +56,7 @@ def main(argv):
         dataset_path_uce = uce(
             dataset_path,
             uce_dir="./UCE/",
-            work_dir=scratch_dir,
+            work_dir="./",#scratch_dir,
             uce_33l_model_file=model_path,
         )
 
