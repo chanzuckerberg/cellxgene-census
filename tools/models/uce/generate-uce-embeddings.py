@@ -99,12 +99,16 @@ def main(argv):
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description="Generate UCE embeddings for given cells dataset")
-    parser.add_argument("dataset_dir", type=str, help="directory with saved anndatas")
     parser.add_argument(
         "--part",
         type=int,
         default=0,
         help="process only one shard of the data (zero-based index)"
+    )
+    parser.add_argument(
+        "--dataset_dir",
+        type=str,
+        help="directory with saved anndatas with format 'anndata_uce_{part}.h5ad'"
     )
     parser.add_argument(
         "--tiledbsoma",
