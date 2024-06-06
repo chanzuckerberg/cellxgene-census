@@ -1,3 +1,4 @@
 [submodule "tools/models/uce/UCE"]
 	path = tools/models/uce/UCE
-	url = https://github.com/snap-stanford/UCE
+    url = https://github.com/snap-stanford/UCE
+    ignore = dirty
