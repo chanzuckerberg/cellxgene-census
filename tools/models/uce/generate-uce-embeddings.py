@@ -48,19 +48,24 @@ def main(argv):
             pass
 
     model_path = uce_33l_model_file("./", "./UCE/")
+    uce_dir="./UCE/"
 
     with tempfile.TemporaryDirectory() as scratch_dir:
         # prepare the dataset, taking only one shard of it if so instructed
         dataset_path = prepare_dataset(args.dataset_dir, args.part)
+        dataset_filename = os.path.basename(dataset_path)
+
+        if not os.path.exists(os.path.join(uce_dir, dataset_filename)):
+            os.makedirs(os.path.join(uce_dir, dataset_filename))
 
         dataset_path_uce = uce(
             dataset_path,
-            uce_dir="./UCE/",
-            work_dir="./",#scratch_dir,
+            uce_dir=uce_dir,
+            relative_work_dir=dataset_filename,
             uce_33l_model_file=model_path,
         )
 
-        shutil.move(dataset_path_uce, os.path.join(args.output_dir, os.path.basename(dataset_path)))
+        shutil.move(dataset_path_uce, os.path.join(args.output_dir, dataset_filename))
 
         logger.info("Extracting embeddings...")
 
@@ -122,7 +127,7 @@ def prepare_dataset(dataset_dir, part):
     return dataset_path
 
 
-def uce(h5ad, uce_dir, work_dir, uce_33l_model_file, args=None):
+def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, args=None):
     """
     Author: Mike Lin
     Run UCE eval_single_anndata.py.
@@ -143,7 +148,7 @@ def uce(h5ad, uce_dir, work_dir, uce_33l_model_file, args=None):
             "--adata_path",
             h5ad,
             "--dir",
-            (work_dir + "/" if not work_dir.endswith("/") else work_dir),
+            (relative_work_dir + "/" if not relative_work_dir.endswith("/") else relative_work_dir),
             "--nlayers",
             "33",
             "--model_loc",
