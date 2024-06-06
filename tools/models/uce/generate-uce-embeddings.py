@@ -143,7 +143,7 @@ def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, args=None):
       newer than the input h5ad)
     """
     args = args or []
-    name = os.path.splitext(h5ad)[0]
+    name = os.path.splitext(os.path.basename(h5ad))[0]
     h5ad = os.path.join("../", h5ad)
     subprocess.run(
         [
