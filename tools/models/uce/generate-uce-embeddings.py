@@ -65,7 +65,7 @@ def main(argv):
             uce_33l_model_file=model_path,
         )
 
-        shutil.move(dataset_path_uce, os.path.join(args.output_dir, dataset_filename))
+        shutil.move(os.path.join(uce_dir, dataset_path_uce), os.path.join(args.output_dir, dataset_filename))
 
         logger.info("Extracting embeddings...")
 
