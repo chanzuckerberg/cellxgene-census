@@ -450,7 +450,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The randomness of the shuffling is therefore determined by the
                 (``soma_chunk_size``, ``shuffle_chunk_count``) selection. The default values have been determined
                 to yield a good trade-off between randomness and performance. Further tuning may be required for
-                different type of models.
+                different type of models. Note that memory usage is correlated to the product
+                ``soma_chunk_size * shuffle_chunk_count``.
             seed:
                 The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
                 :class:`torch.nn.parallel.DistributedDataParallel` to ensure data partitions are disjoint across worker
