@@ -413,12 +413,12 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
-        shuffle: bool = False,
+        shuffle: bool = True,
         seed: Optional[int] = None,
         return_sparse_X: bool = False,
-        soma_chunk_size: Optional[int] = None,
+        soma_chunk_size: Optional[int] = 64,
         use_eager_fetch: bool = True,
-        shuffle_chunk_count: Optional[int] = None,
+        shuffle_chunk_count: Optional[int] = 2000,
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -443,18 +443,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 ``1`` will result in :class:`torch.Tensor` of rank 1 being returns (a single row); larger values will
                 result in :class:`torch.Tensor`\ s of rank 2 (multiple rows).
             shuffle:
-                Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``False`` (no shuffling).
-                For performance reasons, shuffling is performed in two steps: 1) a global shuffling, where contiguous
-                rows are grouped into chunks and the order of the chunks is randomized, and then 2) a local
-                shuffling, where the rows within each chunk are shuffled. Since this class must retrieve data
-                in chunks (to keep memory requirements to a fixed size), global shuffling ensures that a given row in
-                the shuffled result can originate from any position in the non-shuffled result ordering. If shuffling
-                only occurred within each chunk (i.e. "local" shuffling), the first chunk's rows would always be
-                returned first, the second chunk's rows would always be returned second, and so on. The chunk size is
-                determined by the ``soma_chunk_size`` parameter. Note that rows within a chunk will maintain
-                proximity, even after shuffling, so some experimentation may be required to ensure the shuffling is
-                sufficient for the model training process. To this end, the ``soma_chunk_size`` can be treated as a
-                hyperparameter that can be tuned.
+                Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``True``.
+                For performance reasons, shuffling is not performed globally across all rows, but rather in chunks.
+                More specifically, we select ``shuffle_chunk_count`` non contiguous chunks across all the dataset,
+                concatenate them and shuffle the resulting array.
+                The randomness of the shuffling is therefore determined by the
+                (``soma_chunk_size``, ``shuffle_chunk_count``) selection. The default values have been determined
+                to yield a good trade-off between randomness and performance. Further tuning may be required for
+                different type of models.
             seed:
                 The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
                 :class:`torch.nn.parallel.DistributedDataParallel` to ensure data partitions are disjoint across worker
@@ -468,10 +464,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The number of ``obs``/``X`` rows to retrieve when reading data from SOMA. This impacts two aspects of
                 this class's behavior: 1) The maximum memory utilization, with larger values providing
                 better read performance, but also requiring more memory; 2) The granularity of the global shuffling
-                step (see ``shuffle`` parameter for details). If not specified, the value is set to utilize ~1 GiB of
-                RAM per SOMA chunk read, based upon the number of ``var`` columns (cells/features) being requested
-                and assuming X data sparsity of 95%; the number of rows per chunk will depend on the number of
-                ``var`` columns being read.
+                step (see ``shuffle`` parameter for details). The default value of 64 works well in conjunction
+                with the default ``shuffle_chunk_count`` value.
             use_eager_fetch:
                 Fetch the next SOMA chunk of ``obs`` and ``X`` data immediately after a previously fetched SOMA chunk is made
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
@@ -480,6 +474,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             shuffle_chunk_count:
                 The number of contiguous blocks (chunks) of rows sampled to then concatenate and shuffle.
                 Larger numbers correspond to more randomness per training batch.
+                If ``shuffle == False``, this parameter is ignored. Defaults to ``2000``.
 
         Lifecycle:
             experimental
@@ -499,7 +494,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._encoders = None
         self._obs_joinids = None
         self._var_joinids = None
-        self._shuffle_chunk_count = (shuffle_chunk_count or 1) if shuffle else None
+        self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
 
