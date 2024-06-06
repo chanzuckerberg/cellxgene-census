@@ -16,6 +16,9 @@ logger = logging.getLogger(os.path.basename(__file__))
 def main(argv):
     args = parse_arguments(argv)
 
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+
     tiledbsoma_context = None
     if args.tiledbsoma:
         # prep tiledbsoma (and fail fast if there's a problem)
@@ -56,6 +59,8 @@ def main(argv):
             work_dir=scratch_dir,
             uce_33l_model_file=model_path,
         )
+
+        shutil.move(dataset_path_uce, os.path.join(args.output_dir, os.path.basename(dataset_path)))
 
         logger.info("Extracting embeddings...")
 
@@ -101,6 +106,8 @@ def parse_arguments(argv):
         action="store_true",
         help="outfile is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
     )
+    parser.add_argument("output_dir", type=str, help="output directory (must not already exist)")
+
 
     args = parser.parse_args(argv[1:])
 
