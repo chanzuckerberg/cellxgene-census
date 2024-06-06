@@ -1,0 +1,3 @@
+[submodule "tools/models/uce/UCE"]
+	path = tools/models/uce/UCE
+	url = https://github.com/snap-stanford/UCE
