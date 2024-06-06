@@ -445,8 +445,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             shuffle:
                 Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``True``.
                 For performance reasons, shuffling is not performed globally across all rows, but rather in chunks.
-                More specifically, we select ``shuffle_chunk_count`` non contiguous chunks across all the dataset,
-                concatenate them and shuffle the resulting array.
+                More specifically, we select ``shuffle_chunk_count`` non-contiguous chunks across all the observations
+                in the query, concatenate the chunks and shuffle the associated observations.
                 The randomness of the shuffling is therefore determined by the
                 (``soma_chunk_size``, ``shuffle_chunk_count``) selection. The default values have been determined
                 to yield a good trade-off between randomness and performance. Further tuning may be required for
