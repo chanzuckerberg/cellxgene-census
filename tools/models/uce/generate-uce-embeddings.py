@@ -106,7 +106,7 @@ def parse_arguments(argv):
         help="process only one shard of the data (zero-based index)"
     )
     parser.add_argument(
-        "--dataset_dir",
+        "--dataset-dir",
         type=str,
         help="directory with saved anndatas with format 'anndata_uce_{part}.h5ad'"
     )
