@@ -159,7 +159,7 @@ def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, args=None):
         check=True,
     )
     # read output h5ad
-    out_file = os.path.join(work_dir, f"{name}_uce_adata.h5ad")
+    out_file = os.path.join(relative_work_dir, f"{name}_uce_adata.h5ad")
     return out_file
 
 
