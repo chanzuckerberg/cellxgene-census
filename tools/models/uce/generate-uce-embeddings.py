@@ -73,8 +73,6 @@ def main(argv):
     logger.info("Extracting embeddings...")
     adata = anndata.read(os.path.join(args.output_dir, dataset_filename))
 
-    # TODO generate embs
-
     if args.tiledbsoma:
         import numpy as np
         import pyarrow as pa
