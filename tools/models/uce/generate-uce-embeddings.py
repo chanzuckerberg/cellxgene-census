@@ -6,7 +6,6 @@ import sys
 import shutil
 import anndata
 import logging
-import tempfile
 import argparse
 import subprocess
 
@@ -24,8 +23,8 @@ def main(argv):
     if args.tiledbsoma:
         # prep tiledbsoma (and fail fast if there's a problem)
         import boto3
-        import tiledb
         import tiledbsoma
+        import tiledb
 
         logger.info(f"loaded tiledbsoma=={tiledbsoma.__version__} tiledb=={tiledb.__version__}")
 
@@ -44,13 +43,13 @@ def main(argv):
             )
         )
 
-        with tiledbsoma.SparseNDArray.open(args.outfile, "r", context=tiledbsoma_context):
+        with tiledbsoma.SparseNDArray.open(args.output_file, "r", context=tiledbsoma_context):
             # TODO: verify schema compatibility
             pass
 
     # Get 33L model
     model_path = uce_33l_model_file("./", "./UCE/")
-    uce_dir="./UCE/"
+    uce_dir = "./UCE/"
     
     # Run UCE 
     dataset_path = prepare_dataset(args.dataset_dir, args.part)
@@ -64,6 +63,7 @@ def main(argv):
         uce_dir=uce_dir,
         relative_work_dir=dataset_filename,
         uce_33l_model_file=model_path,
+        emb_dim=args.emb_dim,
     )
     
     # Move adata to final location and clean up other output files
@@ -71,7 +71,7 @@ def main(argv):
     shutil.rmtree(os.path.join(uce_dir, dataset_filename))
     
     logger.info("Extracting embeddings...")
-    adata = anndata.read(os.path.join(args.output_dir, dataset_filename))
+    adata = anndata.read_h5ad(os.path.join(args.output_dir, dataset_filename))
 
     if args.tiledbsoma:
         import numpy as np
@@ -79,12 +79,12 @@ def main(argv):
         from scipy.sparse import coo_matrix
 
         # NOTE: embs_df has columns -named- 0, 1, ..., 511 as well as the requested features.
-        embedding_dim = embs_df.shape[1] - len(args.features)
-        logger.info(f"writing to tiledbsoma.SparseNDArray at {args.outfile}, embedding_dim={embedding_dim}...")
-        with tiledbsoma.SparseNDArray.open(args.outfile, "w", context=tiledbsoma_context) as array:
-            dim0 = np.repeat(embs_df["soma_joinid"].values, embedding_dim)
-            dim1 = np.tile(np.arange(embedding_dim), len(embs_df))
-            data = embs_df.loc[:, range(embedding_dim)].values.flatten()
+        embedding_dim = adata.obsm["X_uce"].shape[1]
+        logger.info(f"writing to tiledbsoma.SparseNDArray at {args.output_file}, embedding_dim={embedding_dim}...")
+        with tiledbsoma.SparseNDArray.open(args.output_file, "w", context=tiledbsoma_context) as array:
+            dim0 = np.repeat(adata.obs["soma_joinid"].values, embedding_dim)
+            dim1 = np.tile(np.arange(embedding_dim), len(adata))
+            data = adata.obsm["X_uce"].flatten()
             array.write(pa.SparseCOOTensor.from_scipy(coo_matrix((data, (dim0, dim1)))))
     else:
         # TODO implement to csv, for Census LTS this is not needed. Leaving it as an option for
@@ -95,27 +95,42 @@ def main(argv):
 
 
 def parse_arguments(argv):
-    parser = argparse.ArgumentParser(description="Generate UCE embeddings for given cells dataset")
+    parser = argparse.ArgumentParser(description="Generate UCE embeddings for an anndata")
     parser.add_argument(
         "--part",
         type=int,
         default=0,
-        help="process only one shard of the data (zero-based index)"
+        help="process only one shard of the data (zero-based index)",
+        required=True,
+    )
+    parser.add_argument(
+        "--emb-dim",
+        type=int,
+        default=1280,
+        help="number of columns for array",
     )
     parser.add_argument(
         "--dataset-dir",
         type=str,
-        help="directory with saved anndatas with format 'anndata_uce_{part}.h5ad'"
+        help="directory with saved anndatas with format 'anndata_uce_{part}.h5ad'",
+        required=True,
     )
     parser.add_argument(
         "--tiledbsoma",
         action="store_true",
-        help="outfile is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
+        help="output_file is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
     )
     parser.add_argument(
         "--output-dir", 
         type=str, 
-        help="output directory for resulting anndatas (must not already exist)"
+        help="output directory for resulting anndatas (must not already exist)",
+        required=True,
+    )
+
+    parser.add_argument(
+        "output_file",
+        type=str,
+        help="URI location of destination tiledbsoma array, other formats not supported",
     )
 
     args = parser.parse_args(argv[1:])
@@ -131,7 +146,7 @@ def prepare_dataset(dataset_dir, part):
     return dataset_path
 
 
-def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, args=None):
+def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, emb_dim, args=None):
     """
     Author: Mike Lin
     Run UCE eval_single_anndata.py.
@@ -157,6 +172,8 @@ def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, args=None):
             "33",
             "--model_loc",
             uce_33l_model_file,
+            "--output_dim",
+            str(emb_dim),
             *args,
         ],
         cwd=uce_dir,
