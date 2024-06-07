@@ -25,6 +25,7 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CENSUS_SPATIAL_NAME,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
@@ -153,7 +154,7 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     root_collection.metadata["git_commit_sha"] = sha
 
     # Create sub-collections for experiments, etc.
-    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
+    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME, CENSUS_SPATIAL_NAME]:
         root_collection.add_new_collection(n)
 
     return root_collection
@@ -198,7 +199,14 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: list
         populate_root_collection(root_collection)
 
         for e in experiment_builders:
-            e.create(census_data=root_collection[CENSUS_DATA_NAME])
+            # TODO (spatial): Confirm the decision that we are clearly separating
+            # experiments containing spatial assays from experiments not containing
+            # spatial assays. That is, an experiment should never contain assays from
+            # spatial and non-spatial modalities
+            if e.specification.is_exclusively_spatial():
+                e.create(census_data=root_collection[CENSUS_SPATIAL_NAME])
+            else:
+                e.create(census_data=root_collection[CENSUS_DATA_NAME])
 
         logger.info("Build step 2 - Create root collection - finished")
         return root_collection

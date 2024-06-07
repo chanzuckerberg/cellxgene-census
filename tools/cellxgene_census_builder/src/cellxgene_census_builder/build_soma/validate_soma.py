@@ -38,6 +38,7 @@ from .globals import (
     CENSUS_OBS_STATS_COLUMNS,
     CENSUS_OBS_TABLE_SPEC,
     CENSUS_SCHEMA_VERSION,
+    CENSUS_SPATIAL_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_NAME,
     CENSUS_SUMMARY_CELL_COUNTS_TABLE_SPEC,
     CENSUS_SUMMARY_NAME,
@@ -82,9 +83,18 @@ def assert_all(__iterable: Iterable[object]) -> bool:
     return r
 
 
+def get_census_data_collection_name(eb: ExperimentSpecification) -> str:
+    return CENSUS_SPATIAL_NAME if eb.is_exclusively_spatial() else CENSUS_DATA_NAME
+
+
+def get_experiment_uri(base_uri: str, eb: ExperimentSpecification) -> str:
+    census_data_collection_name = get_census_data_collection_name(eb)
+    return urlcat(base_uri, census_data_collection_name, eb.name)
+
+
 def open_experiment(base_uri: str, eb: ExperimentSpecification) -> soma.Experiment:
     """Helper function that knows the Census schema path conventions."""
-    return soma.Experiment.open(urlcat(base_uri, CENSUS_DATA_NAME, eb.name), mode="r")
+    return soma.Experiment.open(get_experiment_uri(base_uri, eb), mode="r")
 
 
 def get_experiment_shape(base_uri: str, specs: list[ExperimentSpecification]) -> dict[str, tuple[int, int]]:
@@ -230,9 +240,10 @@ def validate_axis_dataframes_global_ids(
                 .concat()
                 .to_pandas()
             )
-            assert eb_info[eb.name].n_obs == len(census_obs_df) == exp.obs.count
-            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb.name].n_obs)
-            assert eb_info[eb.name].dataset_ids == set(census_obs_df.dataset_id.unique())
+            eb_info_key = get_experiment_uri(soma_path, eb)
+            assert eb_info[eb_info_key].n_obs == len(census_obs_df) == exp.obs.count
+            assert (len(census_obs_df) == 0) or (census_obs_df.soma_joinid.max() + 1 == eb_info[eb_info_key].n_obs)
+            assert eb_info[eb_info_key].dataset_ids == set(census_obs_df.dataset_id.unique())
 
             # Validate that all obs soma_joinids are unique and in the range [0, n).
             obs_unique_joinids = np.unique(census_obs_df.soma_joinid.to_numpy())
@@ -254,13 +265,13 @@ def validate_axis_dataframes_global_ids(
             del census_obs_df, obs_unique_joinids
 
             # var
-            n_vars = len(eb_info[eb.name].vars)
+            n_vars = len(eb_info[eb_info_key].vars)
 
             census_var_df = (
                 exp.ms[MEASUREMENT_RNA_NAME].var.read(column_names=["feature_id", "soma_joinid"]).concat().to_pandas()
             )
             assert n_vars == len(census_var_df) == exp.ms[MEASUREMENT_RNA_NAME].var.count
-            assert eb_info[eb.name].vars == set(census_var_df.feature_id.array)
+            assert eb_info[eb_info_key].vars == set(census_var_df.feature_id.array)
             assert (len(census_var_df) == 0) or (census_var_df.soma_joinid.max() + 1 == n_vars)
 
             # Validate that all var soma_joinids are unique and in the range [0, n).
@@ -289,7 +300,7 @@ def validate_axis_dataframes(
         eb_info: dict[str, EbInfo] = {}
         for eb in experiment_specifications:
             with soma.Collection.open(soma_path, context=SOMA_TileDB_Context()) as census:
-                census_data = census[CENSUS_DATA_NAME]
+                census_data_collection = census[get_census_data_collection_name(eb)]
                 dataset_id = dataset.dataset_id
                 ad = open_anndata(
                     dataset,
@@ -298,8 +309,16 @@ def validate_axis_dataframes(
                     var_column_names=CXG_VAR_COLUMNS_READ,
                     filter_spec=eb.anndata_cell_filter_spec,
                 )
-                eb_info[eb.name] = EbInfo()
-                se = census_data[eb.name]
+                se = census_data_collection[eb.name]
+
+                # NOTE: Since we are validating data for each experiment, we
+                # use the experiment uri as the key for the data that must be validated.
+                # Using just the experiment spec name would cause collisions as in the case
+                # of spatial and non-spatial experiments with the same name (experiment spec name)
+                # but stored under different census root collections
+                eb_info_key = get_experiment_uri(soma_path, eb)
+                eb_info[eb_info_key] = EbInfo()
+
                 dataset_obs = (
                     se.obs.read(
                         column_names=list(CENSUS_OBS_TABLE_SPEC.field_names()),
@@ -326,11 +345,13 @@ def validate_axis_dataframes(
                     if isinstance(dataset_obs[key].dtype, pd.CategoricalDtype):
                         dataset_obs[key] = dataset_obs[key].astype(dataset_obs[key].cat.categories.dtype)
 
-                assert len(dataset_obs) == len(ad.obs), f"{dataset.dataset_id}/{eb.name} obs length mismatch"
+                assert (
+                    len(dataset_obs) == len(ad.obs)
+                ), f"{dataset.dataset_id}/{eb.name} obs length mismatch soma experiment obs len: {len(dataset_obs)} != anndata obs len: {len(ad.obs)}"
                 if ad.n_obs > 0:
-                    eb_info[eb.name].n_obs += ad.n_obs
-                    eb_info[eb.name].dataset_ids.add(dataset_id)
-                    eb_info[eb.name].vars |= set(ad.var.index.array)
+                    eb_info[eb_info_key].n_obs += ad.n_obs
+                    eb_info[eb_info_key].dataset_ids.add(dataset_id)
+                    eb_info[eb_info_key].vars |= set(ad.var.index.array)
                     ad_obs = ad.obs[list(set(CXG_OBS_TERM_COLUMNS) - set(CENSUS_OBS_STATS_COLUMNS))].reset_index(
                         drop=True
                     )
@@ -343,11 +364,11 @@ def validate_axis_dataframes(
     def reduce_eb_info(results: Sequence[dict[str, EbInfo]]) -> dict[str, EbInfo]:
         eb_info = {}
         for res in results:
-            for name, info in res.items():
-                if name not in eb_info:
-                    eb_info[name] = copy.copy(info)
+            for eb_info_key, info in res.items():
+                if eb_info_key not in eb_info:
+                    eb_info[eb_info_key] = copy.copy(info)
                 else:
-                    eb_info[name].update(info)
+                    eb_info[eb_info_key].update(info)
         return eb_info
 
     eb_info = (
@@ -815,8 +836,9 @@ def validate_X_layers_schema(
         with open_experiment(soma_path, eb) as exp:
             assert soma.Collection.exists(exp.ms[MEASUREMENT_RNA_NAME].X.uri)
 
-            n_obs = eb_info[eb.name].n_obs
-            n_vars = eb_info[eb.name].n_vars
+            eb_info_key = get_experiment_uri(soma_path, eb)
+            n_obs = eb_info[eb_info_key].n_obs
+            n_vars = eb_info[eb_info_key].n_vars
             assert n_obs == exp.obs.count
             assert n_vars == exp.ms[MEASUREMENT_RNA_NAME].var.count
 
@@ -1011,8 +1033,9 @@ def validate_soma_bounding_box(
     # first, confirm we set shape correctly, as the code uses it as the max bounding box
     for eb in experiment_specifications:
         with open_experiment(soma_path, eb) as exp:
-            n_obs = eb_info[eb.name].n_obs
-            n_vars = eb_info[eb.name].n_vars
+            eb_info_key = get_experiment_uri(soma_path, eb)
+            n_obs = eb_info[eb_info_key].n_obs
+            n_vars = eb_info[eb_info_key].n_vars
             for layer_name in exp.ms[MEASUREMENT_RNA_NAME].X:
                 assert exp.ms[MEASUREMENT_RNA_NAME].X[layer_name].shape == (n_obs, n_vars)
             if "feature_dataset_presence_matrix" in exp.ms[MEASUREMENT_RNA_NAME]:

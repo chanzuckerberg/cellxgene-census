@@ -52,6 +52,9 @@ CENSUS_INFO_NAME = "census_info"
 # top-level SOMA collection
 CENSUS_DATA_NAME = "census_data"
 
+# top-level SOMA collection
+CENSUS_SPATIAL_NAME = "census_spatial"
+
 # "census_info"/"summary_cell_counts" SOMA Dataframe
 CENSUS_SUMMARY_CELL_COUNTS_NAME = "summary_cell_counts"  # object name
 
@@ -329,7 +332,6 @@ RNA_SEQ = [
     "EFO:0010713",  # 10x immune profiling
     "EFO:0010714",  # 10x TCR enrichment
     "EFO:0010715",  # 10x Ig enrichment
-    "EFO:0010961",  # Visium Spatial Gene Expression
     "EFO:0010964",  # barcoded plate-based single cell RNA-seq
     "EFO:0011025",  # 10x 5' v1
     "EFO:0022396",  # TruSeq
@@ -351,6 +353,12 @@ RNA_SEQ = [
     "EFO:0700010",  # TruDrop
     "EFO:0700011",  # GEXSCOPE technology
     "EFO:0700016",  # Smart-seq v4
+]
+
+# list of EFO terms that correspond to SPATIAL modality/measurement. These terms
+# define the inclusive filter applied to obs.assay_ontology_term_id. All other
+ALLOWED_SPATIAL_ASSAYS = [
+    "EFO:0010961",  # Visium Spatial Gene Expression
 ]
 
 # Full-gene assays have special handling in the "normalized" X layers
