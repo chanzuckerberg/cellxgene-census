@@ -40,6 +40,7 @@ The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2.
 
 # Various "methods" for converting from TileDB COO (on disk) to `torch.Tensor`
 Method = Literal["np.array", "scipy.csr"]
+METHODS = ["np.array", "scipy.csr"]
 
 
 # "Chunk" of X data, returned by each `Method` above
