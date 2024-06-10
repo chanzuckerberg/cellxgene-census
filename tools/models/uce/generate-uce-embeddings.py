@@ -8,7 +8,10 @@ import anndata
 import logging
 import argparse
 import subprocess
-
+import tiledbsoma
+import cellxgene_census
+import boto3
+import tiledb
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(os.path.basename(__file__))
@@ -19,12 +22,11 @@ def main(argv):
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
+    if not os.path.exists(args.output_dir_census):
+        os.makedirs(args.output_dir_census)
+
     tiledbsoma_context = None
     if args.tiledbsoma:
-        # prep tiledbsoma (and fail fast if there's a problem)
-        import boto3
-        import tiledbsoma
-        import tiledb
 
         logger.info(f"loaded tiledbsoma=={tiledbsoma.__version__} tiledb=={tiledb.__version__}")
 
@@ -47,13 +49,30 @@ def main(argv):
             # TODO: verify schema compatibility
             pass
 
+    # open human census
+    logger.info("Generating anndata slice from Census")
+    dataset_filename = f"anndata_uce_{args.part}.h5ad"
+    dataset_path = (os.path.join(args.output_dir_census, dataset_filename))
+    with cellxgene_census.open_soma(census_version=args.census_version) as census:
+
+        # select the cell id's to include
+        coords = get_soma_joinid_slice(census["census_data"]["homo_sapiens"], args.part, args.parts)
+
+        adata_census = cellxgene_census.get_anndata(
+            census,
+            "homo_sapiens",
+            "RNA",
+            obs_coords=coords,
+            column_names={"obs": ["soma_joinid"]},
+        )
+
+        adata_census.var_names = adata_census.var["feature_name"]
+        adata_census.write_h5ad(dataset_path)
+
     # Get 33L model
+    logger.info("Zero-shot through UCE")
     model_path = uce_33l_model_file("./", "./UCE/")
     uce_dir = "./UCE/"
-    
-    # Run UCE 
-    dataset_path = prepare_dataset(args.dataset_dir, args.part)
-    dataset_filename = os.path.basename(dataset_path)
 
     if not os.path.exists(os.path.join(uce_dir, dataset_filename)):
         os.makedirs(os.path.join(uce_dir, dataset_filename))
@@ -70,7 +89,7 @@ def main(argv):
     shutil.move(os.path.join(uce_dir, dataset_path_uce), os.path.join(args.output_dir, dataset_filename))
     shutil.rmtree(os.path.join(uce_dir, dataset_filename))
     
-    logger.info("Extracting embeddings...")
+    logger.info("Writing embeddings")
     adata = anndata.read_h5ad(os.path.join(args.output_dir, dataset_filename))
 
     if args.tiledbsoma:
@@ -104,16 +123,24 @@ def parse_arguments(argv):
         required=True,
     )
     parser.add_argument(
+        "--parts",
+        type=int,
+        default=1000,
+        help="Number of total data partitions for Census, effectively number of H5AD files that will be created.",
+        required = True,
+    )
+    parser.add_argument(
+        "-v",
+        "--census-version",
+        type=str,
+        default="latest",
+        help='Census release to query (default: "latest")',
+    )
+    parser.add_argument(
         "--emb-dim",
         type=int,
         default=1280,
         help="number of columns for array",
-    )
-    parser.add_argument(
-        "--dataset-dir",
-        type=str,
-        help="directory with saved anndatas with format 'anndata_uce_{part}.h5ad'",
-        required=True,
     )
     parser.add_argument(
         "--tiledbsoma",
@@ -121,12 +148,18 @@ def parse_arguments(argv):
         help="output_file is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
     )
     parser.add_argument(
-        "--output-dir", 
-        type=str, 
-        help="output directory for resulting anndatas (must not already exist)",
+        "--output-dir-census",
+        type=str,
+        help="output directory for resulting anndatas from Census without UCE embeddings with format\
+        'anndata_uce_{part}.h5ad'",
         required=True,
     )
-
+    parser.add_argument(
+        "--output-dir", 
+        type=str, 
+        help="output directory for resulting anndatas with UCE embeddings",
+        required=True,
+    )
     parser.add_argument(
         "output_file",
         type=str,
@@ -135,15 +168,27 @@ def parse_arguments(argv):
 
     args = parser.parse_args(argv[1:])
 
+    if not (args.part >= 0 and args.parts is not None and args.parts > args.part):
+        parser.error("--part must be nonnegative and less than --parts")
+
     logger.info("arguments: " + str(vars(args)))
     return args
 
 
-def prepare_dataset(dataset_dir, part):
-    dataset_path = os.path.join(dataset_dir, f"anndata_uce_{part}.h5ad")
-    if not os.path.isfile(dataset_path):
-        raise FileExistsError(f"{dataset_path} file does not exist")
-    return dataset_path
+def get_soma_joinid_slice(soma_experiment: tiledbsoma.Experiment, part, parts):
+    """"Gets list of contiguous soma joinids for the corresponding part in the context of the total numboer of parts.
+    Assumes soma joinids are an incremental list of integers starting a 0.
+    """
+
+    n_obs = len(soma_experiment.obs)
+    part_size = int(n_obs/parts)
+    start = part * part_size
+    end = start + part_size - 1
+
+    if part == parts:
+        end = n_obs - 1 # tiledbsoma slices are inclusive in both ends
+
+    return slice(start, end)
 
 
 def uce(h5ad, uce_dir, relative_work_dir, uce_33l_model_file, emb_dim, args=None):
