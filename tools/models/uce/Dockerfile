@@ -23,6 +23,10 @@ RUN pip install accelerate
 COPY UCE/ ./UCE/
 COPY small_census_anndata.h5ad ./UCE/small_census_anndata.h5ad
 
+# Donwloading 33L model
+RUN mkdir -p ./UCE/model_files/
+RUN wget -O ./UCE/model_files/33l_8ep_1024t_1280.torch https://figshare.com/ndownloader/files/43423236
+
 # UCE smoke test and download files for UCE 
 RUN cd ./UCE/ && python3 eval_single_anndata.py --adata_path ./small_census_anndata.h5ad
 
