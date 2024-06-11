@@ -18,12 +18,6 @@ NPROC = multiprocessing.cpu_count()
 def main(argv):
     args = parse_arguments(argv)
 
-    if os.path.exists(args.output_file):
-        logger.error("output directory already exists: " + args.output_file)
-        raise FileExistsError()
-
-    print((args.output_file))
-
     tiledbsoma.SparseNDArray.create(
         args.output_file,
         type=pa.float32(),

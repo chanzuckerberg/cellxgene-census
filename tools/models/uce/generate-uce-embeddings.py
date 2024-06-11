@@ -71,7 +71,7 @@ def main(argv):
 
     # Get 33L model
     logger.info("Zero-shot through UCE")
-    model_path = uce_33l_model_file("./", "./UCE/")
+    model_path = "./model_files/33l_8ep_1024t_1280.torch"
     uce_dir = "./UCE/"
 
     if not os.path.exists(os.path.join(uce_dir, dataset_filename)):
