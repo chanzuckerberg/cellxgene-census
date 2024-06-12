@@ -534,7 +534,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The number of contiguous blocks (chunks) of rows sampled to then concatenate and shuffle.
                 Larger numbers correspond to more randomness per training batch.
             encoders:
-                Specify custom encoders to be used. If not specified, a LabelEncoder will be created and
+                Specify custom encoders to be used. If not specified, a DefaultEncoder will be created and
                 used for each column in ``obs_column_names``.
 
         Lifecycle:
