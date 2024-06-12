@@ -13,7 +13,7 @@ USE_ARROW_DICTIONARY = True
 
 CENSUS_SCHEMA_VERSION = "2.0.1"
 
-CXG_SCHEMA_VERSION = "5.0.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "5.1.0"  # the CELLxGENE schema version supported
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
