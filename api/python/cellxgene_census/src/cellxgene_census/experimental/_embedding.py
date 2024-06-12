@@ -17,6 +17,8 @@ import pyarrow as pa
 import requests
 import tiledbsoma as soma
 
+from cellxgene_census._util import _user_agent
+
 from .._open import get_default_soma_context, open_soma
 from .._release_directory import CensusVersionDescription, CensusVersionName, get_census_version_directory
 
@@ -181,7 +183,7 @@ def get_embedding_metadata_by_name(
         ValueError: if no embeddings are found for the specified query parameters.
 
     """
-    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
+    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
     manifest = cast(Dict[str, Dict[str, Any]], response.json())
@@ -224,7 +226,7 @@ def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
         }]
 
     """
-    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
+    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
     embeddings = []
@@ -252,7 +254,7 @@ def get_all_census_versions_with_embedding(
     Returns:
         A list of census versions that contain the specified embedding.
     """
-    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
+    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
     manifest = response.json()

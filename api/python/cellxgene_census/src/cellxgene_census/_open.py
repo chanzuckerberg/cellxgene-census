@@ -24,7 +24,7 @@ from ._release_directory import (
     _get_census_mirrors,
     get_census_version_description,
 )
-from ._util import _uri_join
+from ._util import _uri_join, _user_agent
 
 DEFAULT_CENSUS_VERSION = "stable"
 
@@ -120,7 +120,9 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
     Lifecycle:
         experimental
     """
-    tiledb_config = dict(DEFAULT_TILEDB_CONFIGURATION, **(tiledb_config or {}))
+    tiledb_config = dict(
+        DEFAULT_TILEDB_CONFIGURATION, **{"vfs.s3.custom_headers.User-Agent": _user_agent()}, **(tiledb_config or {})
+    )
     return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
 
 
@@ -345,6 +347,8 @@ def download_source_h5ad(
     fs = s3fs.S3FileSystem(
         anon=True,
         cache_regions=True,
+        config_kwargs={"user_agent": _user_agent()},
+        use_ssl=False,  # TODO: remove for prod, currently just lets me see headers on proxy
     )
     fs.get_file(
         locator["uri"],
