@@ -1,3 +1,4 @@
+import abc
 import gc
 import logging
 import os
@@ -11,7 +12,6 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import psutil
-import pyarrow as pa
 import scipy
 import tiledbsoma as soma
 import torch
@@ -34,6 +34,52 @@ pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 ObsAndXDatum = Tuple[Tensor, Tensor]
 """Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s).
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
+
+
+class Encoder(abc.ABC):
+    """Base class for obs encoders.
+    To define a custom encoder, two methods must be implemented:
+
+    - ``register``: defines how the encoder will be fitted to the data.
+    - ``transform``: defines how the encoder will be applied to the data
+      in order to create an obs_tensor.
+
+    See the implementation of ``DefaultEncoder`` for an example.
+    """
+
+    @abc.abstractmethod
+    def register(self, obs: pd.DataFrame) -> None:
+        pass
+
+    @abc.abstractmethod
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        pass
+
+    @property
+    def name(self) -> str:
+        return self.__class__.__name__
+
+
+class DefaultEncoder(Encoder):
+    """Default encoder based on LabelEncoder."""
+
+    def __init__(self, col: str) -> None:
+        self._encoder = LabelEncoder()
+        self.col = col
+
+    def register(self, obs: pd.DataFrame) -> None:
+        self._encoder.fit(obs[self.col].unique())
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self._encoder.transform(df[self.col])  # type: ignore
+
+    @property
+    def name(self) -> str:
+        return self.col
+
+    @property
+    def classes_(self):  # type: ignore
+        return self._encoder.classes_
 
 
 @define
@@ -164,6 +210,8 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         )
         assert obs_batch.shape[0] == obs_joinids_chunk.shape[0]
 
+        # print("obs_batch", obs_batch)
+
         # handle case of empty result (first batch has 0 rows)
         if len(obs_batch) == 0:
             raise StopIteration
@@ -248,7 +296,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         obs_joinids_chunked: List[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
         batch_size: int,
-        encoders: Dict[str, LabelEncoder],
+        encoders: List[Encoder],
         stats: Stats,
         return_sparse_X: bool,
         use_eager_fetch: bool,
@@ -256,7 +304,13 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         shuffle_rng: Optional[Generator] = None,
     ) -> None:
         self.soma_chunk_iter = _ObsAndXSOMAIterator(
-            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_chunk_count, shuffle_rng
+            obs,
+            X,
+            obs_column_names,
+            obs_joinids_chunked,
+            var_joinids,
+            shuffle_chunk_count,
+            shuffle_rng,
         )
         if use_eager_fetch:
             self.soma_chunk_iter = _EagerIterator(self.soma_chunk_iter)
@@ -285,14 +339,10 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         if len(obs) == 0:
             raise StopIteration
 
-        obs_encoded = pd.DataFrame(
-            data={"soma_joinid": obs.index},
-            columns=["soma_joinid"] + obs.columns.tolist(),
-            dtype=np.int64,
-        )
-        # TODO: Encode the entire SOMA chunk at once in _read_partial_torch_batch()
-        for col, enc in self.encoders.items():
-            obs_encoded[col] = enc.transform(obs[col])
+        obs_encoded = pd.DataFrame()
+
+        for enc in self.encoders:
+            obs_encoded[enc.name] = enc.transform(obs)
 
         # `to_numpy()` avoids copying the numpy array data
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
@@ -396,7 +446,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     _var_joinids: Optional[npt.NDArray[np.int64]]
 
-    _encoders: Optional[Encoders]
+    _encoders: List[Encoder]
 
     _stats: Stats
 
@@ -419,6 +469,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         soma_chunk_size: Optional[int] = None,
         use_eager_fetch: bool = True,
         shuffle_chunk_count: Optional[int] = None,
+        encoders: Optional[List[Encoder]] = None,
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -480,6 +531,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             shuffle_chunk_count:
                 The number of contiguous blocks (chunks) of rows sampled to then concatenate and shuffle.
                 Larger numbers correspond to more randomness per training batch.
+            encoders:
+                Specify custom encoders to be used. If not specified, a LabelEncoder will be created and
+                used for each column in ``obs_column_names``.
 
         Lifecycle:
             experimental
@@ -496,7 +550,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.soma_chunk_size = soma_chunk_size
         self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
-        self._encoders = None
+        self._custom_encoders = encoders
+        self._encoders = []
         self._obs_joinids = None
         self._var_joinids = None
         self._shuffle_chunk_count = (shuffle_chunk_count or 1) if shuffle else None
@@ -611,7 +666,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 obs_joinids_chunked=obs_joinids_chunked_partition,
                 var_joinids=self._var_joinids,
                 batch_size=self.batch_size,
-                encoders=self.obs_encoders,
+                encoders=self._encoders,
                 stats=self._stats,
                 return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
@@ -640,16 +695,24 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     def __getitem__(self, index: int) -> ObsAndXDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
 
-    def _build_obs_encoders(self, query: soma.ExperimentAxisQuery) -> Encoders:
+    def _build_obs_encoders(self, query: soma.ExperimentAxisQuery) -> List[Encoder]:
         pytorch_logger.debug("Initializing encoders")
 
-        obs = query.obs(column_names=self.obs_column_names).concat()
-        encoders = {}
-        for col in self.obs_column_names:
-            if obs[col].type in (pa.string(), pa.large_string()):
-                enc = LabelEncoder()
-                enc.fit(obs[col].combine_chunks().unique())
-                encoders[col] = enc
+        encoders = []
+        obs = query.obs(column_names=self.obs_column_names).concat().to_pandas()
+
+        if self._custom_encoders:
+            # Register all the custom encoders with obs
+            for enc in self._custom_encoders:
+                enc.register(obs)
+                encoders.append(enc)
+        else:
+            # Create one DefaultEncoder for each column, and register it with obs
+            for col in self.obs_column_names:
+                if obs[col].dtype in [object]:
+                    enc = DefaultEncoder(col)
+                    enc.register(obs)
+                    encoders.append(enc)
 
         return encoders
 
@@ -700,7 +763,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._init()
         assert self._encoders is not None
 
-        return self._encoders
+        # return self._encoders
+        return {enc.name: enc for enc in self._encoders}
 
 
 # Note: must be a top-level function (and not a lambda), to play nice with multiprocessing pickling
