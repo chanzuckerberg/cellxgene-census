@@ -49,10 +49,12 @@ class Encoder(abc.ABC):
 
     @abc.abstractmethod
     def register(self, obs: pd.DataFrame) -> None:
+        """Register the encoder with obs."""
         pass
 
     @abc.abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Transform the obs DataFrame into a DataFrame of encoded values."""
         pass
 
     @property
@@ -554,6 +556,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._encoders = []
         self._obs_joinids = None
         self._var_joinids = None
+
         self._shuffle_chunk_count = (shuffle_chunk_count or 1) if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
