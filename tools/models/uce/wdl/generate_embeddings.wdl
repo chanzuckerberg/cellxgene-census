@@ -6,7 +6,8 @@ workflow scatter_generate_embeddings {
         String s3_region = "us-west-2"
 	Int parts = 1400000
 	Int emb_dim = 1280 #TODO not hardcode
-        String docker = "uce"
+        String docker
+        #String docker = "uce"
     }
 
     # work around any tooling that might try to verify pre-existence of the output URI when
