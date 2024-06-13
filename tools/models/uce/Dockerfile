@@ -25,10 +25,15 @@ COPY small_census_anndata.h5ad ./UCE/small_census_anndata.h5ad
 
 # Donwloading 33L model
 RUN mkdir -p ./UCE/model_files/
-RUN wget -O ./UCE/model_files/33l_8ep_1024t_1280.torch https://figshare.com/ndownloader/files/43423236
+#RUN wget -O ./UCE/model_files/33l_8ep_1024t_1280.torch https://figshare.com/ndownloader/files/43423236
 
 # UCE smoke test and download files for UCE 
-RUN cd ./UCE/ && python3 eval_single_anndata.py --adata_path ./small_census_anndata.h5ad
+RUN cd ./UCE/ && \
+   python3 eval_single_anndata.py --adata_path ./small_census_anndata.h5ad && \
+   mv ./model_files/new_species_protein_embeddings.csv ./ && \
+   rm -r ./model_files/ && \
+   mkdir -p model_files && \
+   mv ./new_species_protein_embeddings.csv ./model_files/new_species_protein_embeddings.csv
 
 RUN apt update && apt install -y python3-venv 
 RUN pip install owlready2 boto3
