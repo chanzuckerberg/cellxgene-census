@@ -212,8 +212,6 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         )
         assert obs_batch.shape[0] == obs_joinids_chunk.shape[0]
 
-        # print("obs_batch", obs_batch)
-
         # handle case of empty result (first batch has 0 rows)
         if len(obs_batch) == 0:
             raise StopIteration
@@ -535,7 +533,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 Larger numbers correspond to more randomness per training batch.
             encoders:
                 Specify custom encoders to be used. If not specified, a LabelEncoder will be created and
-                used for each column in ``obs_column_names``.
+                used for each column in ``obs_column_names``. If specified, only columns for which an encoder
+                has been registered will be returned in the ``obs`` tensor.
 
         Lifecycle:
             experimental
@@ -766,7 +765,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._init()
         assert self._encoders is not None
 
-        # return self._encoders
         return {enc.name: enc for enc in self._encoders}
 
 
