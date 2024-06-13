@@ -352,7 +352,7 @@ def get_census_version_directory(
                 }
             }
     """
-    response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, headers={"User-Agent": _user_agent()})
+    response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, headers={"User-Agent": _user_agent()}, verify=False)
     response.raise_for_status()
 
     directory: CensusDirectory = cast(CensusDirectory, response.json())
@@ -427,6 +427,6 @@ def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
 
 
 def _get_census_mirrors() -> CensusMirrors:
-    response = requests.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, headers={"User-Agent": _user_agent()})
+    response = requests.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, headers={"User-Agent": _user_agent()}, verify=False)
     response.raise_for_status()
     return cast(CensusMirrors, response.json())

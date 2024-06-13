@@ -183,7 +183,7 @@ def get_embedding_metadata_by_name(
         ValueError: if no embeddings are found for the specified query parameters.
 
     """
-    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
+    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()}, verify=False)
     response.raise_for_status()
 
     manifest = cast(Dict[str, Dict[str, Any]], response.json())
@@ -226,7 +226,7 @@ def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
         }]
 
     """
-    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
+    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()}, verify=False)
     response.raise_for_status()
 
     embeddings = []
@@ -254,7 +254,7 @@ def get_all_census_versions_with_embedding(
     Returns:
         A list of census versions that contain the specified embedding.
     """
-    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
+    response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()}, verify=False)
     response.raise_for_status()
 
     manifest = response.json()

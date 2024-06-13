@@ -69,9 +69,9 @@ def _proxied_soma_context(port: int) -> "soma.options.SOMATileDBContext":
 
     # Directing request through proxy so we can check the headers
     tiledb_config = DEFAULT_TILEDB_CONFIGURATION.copy()
-    tiledb_config["vfs.s3.scheme"] = "http"
+    # tiledb_config["vfs.s3.scheme"] = "http"
     tiledb_config["vfs.s3.proxy_host"] = "localhost"
-    tiledb_config["vfs.s3.proxy_scheme"] = "http"
+    # tiledb_config["vfs.s3.proxy_scheme"] = "http"
     tiledb_config["vfs.s3.proxy_port"] = str(port)
     # tiledb_config["vfs.s3.ca_file"] = f"{_BASE_CERT_DIR}/ca-cert.pem"
     tiledb_config["vfs.s3.verify_ssl"] = "false"
@@ -166,23 +166,23 @@ def proxy_server(tmp_path: Path):
         proxy.TestCase.wait_for_server(proxy_obj.flags.port)
         # Now that proxy is set up, set relevant environment variables/ constants
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr(
-                cellxgene_census._release_directory,
-                "CELL_CENSUS_RELEASE_DIRECTORY_URL",
-                "http://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json",
-            )
-            mp.setattr(
-                cellxgene_census._release_directory,
-                "CELL_CENSUS_MIRRORS_DIRECTORY_URL",
-                "http://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json",
-            )
-            mp.setattr(
-                cellxgene_census.experimental._embedding,
-                "CELL_CENSUS_EMBEDDINGS_MANIFEST_URL",
-                "http://contrib.cellxgene.cziscience.com/contrib/cell-census/contributions.json",
-            )
+            # mp.setattr(
+            #     cellxgene_census._release_directory,
+            #     "CELL_CENSUS_RELEASE_DIRECTORY_URL",
+            #     "http://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json",
+            # )
+            # mp.setattr(
+            #     cellxgene_census._release_directory,
+            #     "CELL_CENSUS_MIRRORS_DIRECTORY_URL",
+            #     "http://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json",
+            # )
+            # mp.setattr(
+            #     cellxgene_census.experimental._embedding,
+            #     "CELL_CENSUS_EMBEDDINGS_MANIFEST_URL",
+            #     "http://contrib.cellxgene.cziscience.com/contrib/cell-census/contributions.json",
+            # )
             mp.setenv("HTTP_PROXY", f"http://localhost:{proxy_obj.flags.port}")
-            # mp.setenv("HTTPS_PROXY", f"https://localhost:{proxy_obj.flags.port}")
+            mp.setenv("HTTPS_PROXY", f"http://localhost:{proxy_obj.flags.port}")
             yield ProxyInstance(proxy_obj, logpth, soma_context=_proxied_soma_context(proxy_obj.flags.port))
 
     # Validate results in cleanup
