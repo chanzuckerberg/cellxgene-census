@@ -123,15 +123,19 @@ class ProxyInstance:
 
 
 @pytest.fixture
-def proxy_server(tmp_path: Path):
+def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
     # Set up
     from proxy.plugin import CacheResponsesPlugin
 
-    import cellxgene_census._release_directory
-    import cellxgene_census.experimental._embedding
-
     logpth = tmp_path / "proxy.log"
+    # key_file, cert_file, signing_keyfile = ca_certificates
+    key_file, cert_file, signing_keyfile = (
+        Path(_BASE_CERT_DIR) / p for p in ("ca-key.pem", "ca-cert.pem", "ca-signing-key.pem")
+    )
 
+    # key_file, cert_file, signing_keyfile = (Path('/tmp/pytest-of-ubuntu/pytest-187/ca-certificates0/ca-key.pem'), Path('/tmp/pytest-of-ubuntu/pytest-187/ca-certificates0/ca-cert.pem'), Path('/tmp/pytest-of-ubuntu/pytest-187/ca-certificates0/ca-signing-key.pem'))
+    assert all(p.is_file() for p in (key_file, cert_file, signing_keyfile))
+    print((key_file, cert_file, signing_keyfile))
     # Copied from TestCase setup from proxy.py: https://github.com/abhinavsingh/proxy.py/blob/develop/proxy/testing/test_case.py#L23
 
     PROXY_PY_STARTUP_FLAGS = [
@@ -147,11 +151,11 @@ def proxy_server(tmp_path: Path):
         "cellxgene_census._testing.ProxyPlugin",
         # Not sure why these are neccesary, but I can't see the tiledb headers without these lines
         "--ca-key-file",
-        f"{_BASE_CERT_DIR}/ca-key.pem",
+        str(key_file),
         "--ca-cert-file",
-        f"{_BASE_CERT_DIR}/ca-cert.pem",
+        str(cert_file),
         "--ca-signing-key-file",
-        f"{_BASE_CERT_DIR}/ca-signing-key.pem",
+        str(signing_keyfile),
         # Proxy.py doesn't seem to be generating any logs, so I am writing all these via the ProxyPlugin
         "--log-file",
         str(logpth),
@@ -197,3 +201,23 @@ def proxy_server(tmp_path: Path):
         user_agent = headers["user-agent"]
         assert "cellxgene-census-python" in user_agent
     # pylint: disable=unnecessary-dunder-call
+
+
+@pytest.fixture(scope="session")
+def ca_certificates(tmp_path_factory) -> tuple[Path, Path, Path]:
+    # Adapted from https://github.com/abhinavsingh/proxy.py/blob/a7077cf8db3bb66a6667a9d968a401e8f805e092/Makefile#L68C1-L82C49
+    # TODO: Figure out if we can remove this. Currently seems neccesary for intercepting tiledb s3 requests
+    cert_dir = tmp_path_factory.mktemp("ca-certificates")
+    KEY_FILE = cert_dir / "ca-key.pem"
+    CERT_FILE = cert_dir / "ca-cert.pem"
+    SIGNING_KEY_FILE = cert_dir / "ca-signing-key.pem"
+    assert proxy.common.pki.gen_private_key(key_path=KEY_FILE, password="proxy.py")
+    assert proxy.common.pki.remove_passphrase(key_in_path=KEY_FILE, password="proxy.py", key_out_path=KEY_FILE)
+    assert proxy.common.pki.gen_public_key(
+        public_key_path=CERT_FILE, private_key_path=KEY_FILE, private_key_password="proxy.py", subject="/CN=localhost"
+    )
+    assert proxy.common.pki.gen_private_key(key_path=SIGNING_KEY_FILE, password="proxy.py")
+    assert proxy.common.pki.remove_passphrase(
+        key_in_path=SIGNING_KEY_FILE, password="proxy.py", key_out_path=SIGNING_KEY_FILE
+    )
+    return (KEY_FILE, CERT_FILE, SIGNING_KEY_FILE)
