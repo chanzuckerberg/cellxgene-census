@@ -4,8 +4,9 @@ workflow scatter_generate_embeddings {
     input {
         String output_uri = "s3://pablo-tmp-west-coast-2/uce/emb_test/"
         String s3_region = "us-west-2"
-	Int parts = 1400000
-	Int emb_dim = 1280 #TODO not hardcode
+        String s3_model = ""
+        Int parts = 1400000
+        Int emb_dim = 1280 #TODO not hardcode
         String docker
         #String docker = "uce"
     }
@@ -24,7 +25,7 @@ workflow scatter_generate_embeddings {
     scatter (part in range(1)) {
         call generate_embeddings after init_embeddings_array {
             input:
-            uri = output_uri2, s3_region, docker, emb_dim, part, parts
+            uri = output_uri2, s3_region, s3_model, docker, emb_dim, part, parts
         }
     }
 
@@ -60,16 +61,18 @@ task generate_embeddings {
     input {
         String uri
         String s3_region
+        String s3_model
         String docker
         Int emb_dim
-	Int part
-	Int parts
+        Int part
+        Int parts
     }
 
     command <<<
         set -euo pipefail
         export AWS_DEFAULT_REGION='~{s3_region}'
         cd /census-uce/
+        aws s3 cp '~{s3_model}' ./UCE/model_files/
         python3 ./generate-uce-embeddings.py \
             --part '~{part}' --parts '~{parts}' --emb-dim '~{emb_dim}' \
             --tiledbsoma --output-dir-census tmp_census --output-dir tmp_census_uce \
@@ -84,5 +87,3 @@ task generate_embeddings {
 
     output {}
 }
-
-
