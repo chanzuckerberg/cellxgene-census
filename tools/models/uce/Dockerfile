@@ -12,6 +12,12 @@ FROM nvcr.io/nvidia/pytorch:23.10-py3
 RUN mkdir /census-uce
 WORKDIR /census-uce
 
+# Install aws CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+   unzip awscliv2.zip && \
+   ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update && \
+   rm -r ./aws awscliv2.zip
+
 # Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
 # compatibility with the Census embeddings curator
 ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.4.4
