@@ -92,7 +92,7 @@ def _get_embedding(
                 raise ValueError("Census and embedding mismatch - measurement_name does not exist")
 
         embedding_shape = (len(obs_soma_joinids), E.shape[1])
-        embedding = np.full(embedding_shape, np.NaN, dtype=np.float32, order="C")
+        embedding: npt.NDArray[np.float32] = np.full(embedding_shape, np.NaN, dtype=np.float32, order="C")
 
         obs_indexer = soma.IntIndexer(obs_soma_joinids, context=E.context)
         for tbl in E.read(coords=(obs_soma_joinids,)).tables():

@@ -50,7 +50,8 @@ def find_nearest_obs(
             :func:`get_embedding_metadata_by_name`.
         query:
             AnnData object with an obsm layer embedding the query cells. The obsm layer name
-            matches ``embedding_metadata["embedding_name"]`` (e.g. scvi, geneformer).
+            matches ``embedding_metadata["embedding_name"]`` (e.g. scvi, geneformer). The layer
+            shape matches the number of query cells and the number of features in the embedding.
         k:
             Number of nearest neighbors to return for each query obs.
         nprobe:
