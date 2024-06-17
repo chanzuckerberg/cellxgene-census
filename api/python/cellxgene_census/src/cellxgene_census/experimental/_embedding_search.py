@@ -75,7 +75,7 @@ def find_nearest_obs(
     index_uri = CENSUS_EMBEDDINGS_INDEX_URI_FSTR.format(
         census_version=embedding_metadata["census_version"], embedding_id=embedding_metadata["id"]
     )
-    config = DEFAULT_TILEDB_CONFIGURATION.copy()
+    config = {k: str(v) for k, v in DEFAULT_TILEDB_CONFIGURATION.items()}
     config["vfs.s3.region"] = CENSUS_EMBEDDINGS_INDEX_REGION
     memory_vectors = memory_GiB * (2**30) // (4 * n_features)  # number of float32 vectors
     index = vs.ivf_flat_index.IVFFlatIndex(uri=index_uri, config=config, memory_budget=memory_vectors)
