@@ -7,4 +7,5 @@ __all__ = [
     "ExperimentDataPipe",
     "experiment_dataloader",
     "Encoder",
+    "CensusSCVIDataModule",
 ]
