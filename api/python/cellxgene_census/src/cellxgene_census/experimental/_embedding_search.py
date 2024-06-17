@@ -10,7 +10,7 @@ import pandas as pd
 import tiledb.vector_search as vs
 import tiledbsoma as soma
 
-from .._open import open_soma
+from .._open import DEFAULT_TILEDB_CONFIGURATION, open_soma
 
 CENSUS_EMBEDDINGS_INDEX_URI_FSTR = (
     "s3://cellxgene-contrib-public/contrib/cell-census/soma/{census_version}/indexes/{embedding_id}"
@@ -74,12 +74,10 @@ def find_nearest_obs(
     index_uri = CENSUS_EMBEDDINGS_INDEX_URI_FSTR.format(
         census_version=embedding_metadata["census_version"], embedding_id=embedding_metadata["id"]
     )
+    config = DEFAULT_TILEDB_CONFIGURATION.copy()
+    config["vfs.s3.region"] = CENSUS_EMBEDDINGS_INDEX_REGION
     memory_vectors = memory_GiB * (2**30) // (4 * n_features)  # number of float32 vectors
-    index = vs.ivf_flat_index.IVFFlatIndex(
-        uri=index_uri,
-        config={"vfs.s3.region": CENSUS_EMBEDDINGS_INDEX_REGION, "vfs.s3.no_sign_request": "true"},
-        memory_budget=memory_vectors,
-    )
+    index = vs.ivf_flat_index.IVFFlatIndex(uri=index_uri, config=config, memory_budget=memory_vectors)
     distances, neighbor_ids = index.query(query.obsm[embedding_name], k=k, nprobe=nprobe, **kwargs)
 
     return NeighborObs(distances=distances, neighbor_ids=neighbor_ids)
