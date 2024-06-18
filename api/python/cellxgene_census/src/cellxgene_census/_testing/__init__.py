@@ -1,13 +1,20 @@
 """This module defines a plugin class that logs each request to the logfile."""
 
 import json
+import sys
+import traceback
 from pathlib import Path
 from pprint import pprint
-import traceback
-
-import sys
 
 import proxy
+from proxy.common.flag import flags
+
+flags.add_argument(
+    "--request-logfile",
+    type=str,
+    default="",
+    help="Where to log the requests to.",
+)
 
 
 class ProxyPlugin(proxy.http.proxy.HttpProxyBasePlugin):
@@ -16,7 +23,7 @@ class ProxyPlugin(proxy.http.proxy.HttpProxyBasePlugin):
         # return request
         # print(request.headers,)
         try:
-            with Path(self.flags.log_file).open("a") as f:
+            with Path(self.flags.request_logfile).open("a") as f:
                 record = {
                     "method": request.method.decode(),
                     "url": str(request._url),
@@ -36,13 +43,13 @@ class ProxyPlugin(proxy.http.proxy.HttpProxyBasePlugin):
             traceback.print_exception(e)
             raise e
         return request
-    
+
     # def handle_upstream_chunk(self, chunk):
     #     print("Response:")
     #     as_bytes = bytes(chunk)
     #     if len(as_bytes) > 1000:
     #         print(as_bytes[:300])
     #     else:
-    #         print(as_bytes) 
+    #         print(as_bytes)
     #     print()
     #     return chunk

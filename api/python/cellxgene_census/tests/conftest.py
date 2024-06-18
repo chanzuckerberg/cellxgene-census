@@ -116,7 +116,7 @@ def proxy_server(tmp_path_factory: Path, ca_certificates: tuple[Path, Path, Path
         # str(signing_keyfile),
         # str(signing_keyfile_orig),
         # Proxy.py doesn't seem to be generating any logs, so I am writing all these via the ProxyPlugin
-        "--log-file",
+        "--request-logfile",
         str(logpth),
         # "--log-level", "DEBUG",
     ]
