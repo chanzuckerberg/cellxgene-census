@@ -38,11 +38,16 @@ The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2.
 
 class Encoder(abc.ABC):
     """Base class for obs encoders.
-    To define a custom encoder, two methods must be implemented:
+
+    To define a custom encoder, four methods must be implemented:
 
     - ``register``: defines how the encoder will be fitted to the data.
     - ``transform``: defines how the encoder will be applied to the data
       in order to create an obs_tensor.
+    - ``inverse_transform``: defines how to decode the encoded values back
+      to the original values.
+    - ``name``: The name of the encoder. This will be used as the key in the
+      dictionary of encoders.
 
     See the implementation of ``DefaultEncoder`` for an example.
     """
@@ -57,9 +62,16 @@ class Encoder(abc.ABC):
         """Transform the obs DataFrame into a DataFrame of encoded values."""
         pass
 
+    @abc.abstractmethod
+    def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
+        """Inverse transform the encoded values back to the original values."""
+        pass
+
+    @abc.abstractmethod
     @property
     def name(self) -> str:
-        return self.__class__.__name__
+        """Name of the encoder."""
+        pass
 
 
 class DefaultEncoder(Encoder):
@@ -70,17 +82,25 @@ class DefaultEncoder(Encoder):
         self.col = col
 
     def register(self, obs: pd.DataFrame) -> None:
+        """Register the encoder with obs."""
         self._encoder.fit(obs[self.col].unique())
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Transform the obs DataFrame into a DataFrame of encoded values."""
         return self._encoder.transform(df[self.col])  # type: ignore
+
+    def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
+        """Inverse transform the encoded values back to the original values."""
+        return self._encoder.inverse_transform(encoded_values)  # type: ignore
 
     @property
     def name(self) -> str:
+        """Name of the encoder."""
         return self.col
 
     @property
     def classes_(self):  # type: ignore
+        """Classes of the encoder."""
         return self._encoder.classes_
 
 
