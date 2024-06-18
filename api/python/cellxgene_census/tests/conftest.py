@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import proxy
@@ -55,42 +56,6 @@ def small_mem_context() -> soma.SOMATileDBContext:
     return get_default_soma_context(tiledb_config={"soma.init_buffer_bytes": 32 * 1024**2})
 
 
-_BASE_CERT_DIR = "/home/ubuntu/github/proxy.py"
-
-
-# Fixtures for census objects
-@pytest.fixture(scope="session")
-def proxied_soma_context() -> "soma.options.SOMATileDBContext":
-    return _proxied_soma_context(8899)
-
-
-def _proxied_soma_context(port: int) -> "soma.options.SOMATileDBContext":
-    from cellxgene_census._open import DEFAULT_TILEDB_CONFIGURATION, get_default_soma_context
-
-    # Directing request through proxy so we can check the headers
-    tiledb_config = DEFAULT_TILEDB_CONFIGURATION.copy()
-    # tiledb_config["vfs.s3.scheme"] = "http"
-    tiledb_config["vfs.s3.proxy_host"] = "localhost"
-    # tiledb_config["vfs.s3.proxy_scheme"] = "http"
-    tiledb_config["vfs.s3.proxy_port"] = str(port)
-    # tiledb_config["vfs.s3.ca_file"] = f"{_BASE_CERT_DIR}/ca-cert.pem"
-    tiledb_config["vfs.s3.verify_ssl"] = "false"
-
-    return get_default_soma_context(tiledb_config)
-
-
-# @pytest.fixture()
-# def http_urls():
-#     import cellxgene_census._release_directory, cellxgene_census.experimental._embedding
-
-#     with pytest.MonkeyPatch.context() as mp:
-#         mp.setattr(cellxgene_census._release_directory, "CELL_CENSUS_RELEASE_DIRECTORY_URL", "http://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json")
-#         mp.setattr(cellxgene_census._release_directory, "CELL_CENSUS_MIRRORS_DIRECTORY_URL", "http://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json")
-#         mp.setattr(cellxgene_census.experimental._embedding, "CELL_CENSUS_EMBEDDINGS_MANIFEST_URL", "http://contrib.cellxgene.cziscience.com/contrib/cell-census/contributions.json")
-#         mp.setenv("HTTP_PROXY", "http://localhost:8899")
-#         yield
-
-
 @pytest.fixture(scope="session")
 def census() -> soma.Collection:
     import cellxgene_census
@@ -105,25 +70,18 @@ def lts_census() -> soma.Collection:
     return cellxgene_census.open_soma(census_version="stable")
 
 
-# @pytest.fixture():
-# def test_request_context():
-#     from unittest.mock import patch
-#     with patch("cellxgene_census.")
-
-
 class ProxyInstance:
-    def __init__(self, proxy_obj: proxy.Proxy, logpth: Path, soma_context):
+    def __init__(self, proxy_obj: proxy.Proxy, logpth: Path):
         self.proxy = proxy_obj
         self.logpth = logpth
-        self.soma_context = soma_context
 
     @property
     def port(self) -> int:
         return self.proxy.flags.port
 
 
-@pytest.fixture
-def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
+@pytest.fixture(scope="session")
+def proxy_server(tmp_path_factory: Path, ca_certificates: tuple[Path, Path, Path]):
     # Set up
     from functools import partial
 
@@ -132,17 +90,12 @@ def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
 
     import cellxgene_census
 
+    tmp_path = tmp_path_factory.mktemp("proxy_logs")
     logpth = tmp_path / "proxy.log"
-    # key_file, cert_file, signing_keyfile = ca_certificates
-    key_file, cert_file, signing_keyfile = (
-        Path(_BASE_CERT_DIR) / p for p in ("ca-key.pem", "ca-cert.pem", "ca-signing-key.pem")
-    )
-
-    # key_file, cert_file, signing_keyfile = (Path('/tmp/pytest-of-ubuntu/pytest-187/ca-certificates0/ca-key.pem'), Path('/tmp/pytest-of-ubuntu/pytest-187/ca-certificates0/ca-cert.pem'), Path('/tmp/pytest-of-ubuntu/pytest-187/ca-certificates0/ca-signing-key.pem'))
+    key_file, cert_file, signing_keyfile = ca_certificates
     assert all(p.is_file() for p in (key_file, cert_file, signing_keyfile))
-    print((key_file, cert_file, signing_keyfile))
-    # Copied from TestCase setup from proxy.py: https://github.com/abhinavsingh/proxy.py/blob/develop/proxy/testing/test_case.py#L23
 
+    # Copied from TestCase setup from proxy.py: https://github.com/abhinavsingh/proxy.py/blob/develop/proxy/testing/test_case.py#L23
     PROXY_PY_STARTUP_FLAGS = [
         "--num-workers",
         "1",
@@ -159,8 +112,9 @@ def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
         str(key_file),
         "--ca-cert-file",
         str(cert_file),
-        "--ca-signing-key-file",
-        str(signing_keyfile),
+        # "--ca-signing-key-file",
+        # str(signing_keyfile),
+        # str(signing_keyfile_orig),
         # Proxy.py doesn't seem to be generating any logs, so I am writing all these via the ProxyPlugin
         "--log-file",
         str(logpth),
@@ -173,18 +127,11 @@ def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
     with proxy_obj:
         assert proxy_obj.acceptors
         proxy.TestCase.wait_for_server(proxy_obj.flags.port)
-        # Now that proxy is set up, set relevant environment variables/ constants
+        proxy_instance = ProxyInstance(proxy_obj, logpth)
+
+        # Now that proxy is set up, set relevant environment variables/ constants to make all request making libraries use proxy
         with pytest.MonkeyPatch.context() as mp:
-            # mp.setattr(
-            #     cellxgene_census._release_directory,
-            #     "CELL_CENSUS_RELEASE_DIRECTORY_URL",
-            #     "http://census.cellxgene.cziscience.com/cellxgene-census/v1/release.json",
-            # )
-            # mp.setattr(
-            #     cellxgene_census._release_directory,
-            #     "CELL_CENSUS_MIRRORS_DIRECTORY_URL",
-            #     "http://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json",
-            # )
+            # s3fs
             mp.setattr(
                 cellxgene_census._open,
                 "DEFAULT_S3FS_KWARGS",
@@ -194,25 +141,66 @@ def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
                     "use_ssl": False,  # So we can inspect the requests on the proxy
                 },
             )
+            # Tiledb
+            tiledb_config = cellxgene_census._open.DEFAULT_TILEDB_CONFIGURATION.copy()
+            tiledb_config["vfs.s3.proxy_host"] = "localhost"
+            # tiledb_config["vfs.s3.proxy_scheme"] = "http"
+            tiledb_config["vfs.s3.proxy_port"] = str(proxy_instance.port)
+            # tiledb_config["vfs.s3.ca_file"] = f"{_BASE_CERT_DIR}/ca-cert.pem"
+            tiledb_config["vfs.s3.verify_ssl"] = "false"
+            mp.setattr(
+                cellxgene_census._open,
+                "DEFAULT_TILEDB_CONFIGURATION",
+                tiledb_config,
+            )
             # Patching requests to let us see the header requests on the proxy
             # Alternative approaches include: this library managing it's own session, which we patch here to have patch=False
             mp.setattr(requests, "get", partial(requests.request, "get", verify=False))
             mp.setenv("HTTP_PROXY", f"http://localhost:{proxy_obj.flags.port}")
             mp.setenv("HTTPS_PROXY", f"http://localhost:{proxy_obj.flags.port}")
-            yield ProxyInstance(proxy_obj, logpth, soma_context=_proxied_soma_context(proxy_obj.flags.port))
 
-    # Validate results in cleanup
-    with logpth.open("r") as f:
+            yield proxy_instance
+
+
+@pytest.fixture()
+def proxy_instance(proxy_server, test_specific_useragent):
+    """Test specific fixture exposing the proxy server.
+
+    While a proxy server is started for every test session, this fixture
+    captures only the output that is written for a specific tests. These
+    logged requests are checked to make sure have the correct headers.
+    """
+    # If logs have already been written, count how many
+    if proxy_server.logpth.is_file():
+        with proxy_server.logpth.open("r") as f:
+            prev_lines = len(f.readlines())
+    else:
+        prev_lines = 0
+
+    # Run test
+    yield proxy_server
+
+    # For each new log written by the test, check that the correct headers were written
+    with proxy_server.logpth.open("r") as f:
         records = [json.loads(line) for line in f.readlines()]
+    records = records[prev_lines:]
     assert len(records) > 0
     for record in records:
         if record["method"] == "CONNECT":
-            # TODO: IDK why this is happening, figure out later
             continue
         headers = record["headers"]
         user_agent = headers["user-agent"]
         assert "cellxgene-census-python" in user_agent
-    # pylint: disable=unnecessary-dunder-call
+        assert test_specific_useragent in user_agent
+
+
+@pytest.fixture
+def test_specific_useragent() -> str:
+    """Sets custom user agent addendum for every test so they can be uniqueley identified."""
+    current_test_name = os.environ["PYTEST_CURRENT_TEST"]
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("CELLXGENE_CENSUS_USERAGENT", current_test_name)
+        yield current_test_name
 
 
 @pytest.fixture(scope="session")

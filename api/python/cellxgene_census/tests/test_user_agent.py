@@ -60,13 +60,12 @@ def small_dataset_id() -> str:
 #     self.assertTrue(True)
 
 
-def test_download_w_proxy_fixture(small_dataset_id, proxy_server, tmp_path):
+def test_download_w_proxy_fixture(small_dataset_id, proxy_instance, tmp_path):
+    # Use of proxy_instance forces test to use a proxy and will check headers of requests made via that proxy
     adata_path = tmp_path / "adata.h5ad"
     cellxgene_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="latest")
-    assert False
 
 
-def test_query_w_proxy_fixture(proxy_server):
-    with cellxgene_census.open_soma(census_version="stable", context=proxy_server.soma_context) as census:
+def test_query_w_proxy_fixture(proxy_instance):
+    with cellxgene_census.open_soma(census_version="stable") as census:
         _ = cellxgene_census.get_obs(census, "Mus musculus", coords=slice(100, 300))
-    assert False
