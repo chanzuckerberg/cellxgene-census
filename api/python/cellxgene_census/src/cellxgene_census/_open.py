@@ -28,6 +28,10 @@ from ._util import _uri_join, _user_agent
 
 DEFAULT_CENSUS_VERSION = "stable"
 
+DEFAULT_S3FS_KWARGS = {
+    "anon": True,
+    "cache_regions": True,
+}
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
@@ -345,10 +349,8 @@ def download_source_h5ad(
     assert protocol == "s3"
 
     fs = s3fs.S3FileSystem(
-        anon=True,
-        cache_regions=True,
         config_kwargs={"user_agent": _user_agent()},
-        use_ssl=False,  # TODO: remove for prod, currently just lets me see headers on proxy
+        **DEFAULT_S3FS_KWARGS,
     )
     fs.get_file(
         locator["uri"],

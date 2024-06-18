@@ -125,7 +125,12 @@ class ProxyInstance:
 @pytest.fixture
 def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
     # Set up
+    from functools import partial
+
+    import requests
     from proxy.plugin import CacheResponsesPlugin
+
+    import cellxgene_census
 
     logpth = tmp_path / "proxy.log"
     # key_file, cert_file, signing_keyfile = ca_certificates
@@ -180,11 +185,18 @@ def proxy_server(tmp_path: Path, ca_certificates: tuple[Path, Path, Path]):
             #     "CELL_CENSUS_MIRRORS_DIRECTORY_URL",
             #     "http://census.cellxgene.cziscience.com/cellxgene-census/v1/mirrors.json",
             # )
-            # mp.setattr(
-            #     cellxgene_census.experimental._embedding,
-            #     "CELL_CENSUS_EMBEDDINGS_MANIFEST_URL",
-            #     "http://contrib.cellxgene.cziscience.com/contrib/cell-census/contributions.json",
-            # )
+            mp.setattr(
+                cellxgene_census._open,
+                "DEFAULT_S3FS_KWARGS",
+                {
+                    "anon": True,
+                    "cache_regions": True,
+                    "use_ssl": False,  # So we can inspect the requests on the proxy
+                },
+            )
+            # Patching requests to let us see the header requests on the proxy
+            # Alternative approaches include: this library managing it's own session, which we patch here to have patch=False
+            mp.setattr(requests, "get", partial(requests.request, "get", verify=False))
             mp.setenv("HTTP_PROXY", f"http://localhost:{proxy_obj.flags.port}")
             mp.setenv("HTTPS_PROXY", f"http://localhost:{proxy_obj.flags.port}")
             yield ProxyInstance(proxy_obj, logpth, soma_context=_proxied_soma_context(proxy_obj.flags.port))
