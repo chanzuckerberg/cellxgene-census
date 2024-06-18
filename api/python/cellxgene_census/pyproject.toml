@@ -41,7 +41,7 @@ dependencies= [
 
 [project.optional-dependencies]
 experimental = [
-    "torch~=2.2.0",
+    "torch",
     "torchdata~=0.7",
     "scikit-learn~=1.0",
     "scikit-misc>=0.2",  # scikit-misc 0.3 dropped Python 3.8 support
