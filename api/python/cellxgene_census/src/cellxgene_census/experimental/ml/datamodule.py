@@ -1,3 +1,5 @@
+import functools
+
 import pandas as pd
 import torch
 from lightning.pytorch import LightningDataModule
@@ -6,7 +8,7 @@ from .pytorch import Encoder, ExperimentDataPipe, experiment_dataloader
 
 
 class BatchEncoder(Encoder):
-    """Concatenates and encodes several columns."""
+    """An encoder that concatenates and encodes several obs columns."""
 
     def __init__(self, cols: list[str]):
         self.cols = cols
@@ -14,16 +16,15 @@ class BatchEncoder(Encoder):
 
         self._encoder = LabelEncoder()
 
-    def transform(self, df: pd.DataFrame):
-        import functools
+    def _join_cols(self, df: pd.DataFrame):
+        return functools.reduce(lambda a, b: a + b, [df[c].astype(str) for c in self.cols])
 
-        arr = functools.reduce(lambda a, b: a + b, [df[c].astype(str) for c in self.cols])
+    def transform(self, df: pd.DataFrame):
+        arr = self._join_cols(df)
         return self._encoder.transform(arr)
 
     def register(self, obs: pd.DataFrame):
-        import functools
-
-        arr = functools.reduce(lambda a, b: a + b, [obs[c].astype(str) for c in self.cols])
+        arr = self._join_cols(obs)
         self._encoder.fit(arr.unique())
 
     @property
@@ -36,7 +37,7 @@ class BatchEncoder(Encoder):
 
 
 class CensusSCVIDataModule(LightningDataModule):
-    """Lightning data module for CxG Census.
+    """Lightning data module for training an scVI model using the ExperimentDataPipe.
 
     Parameters
     ----------
