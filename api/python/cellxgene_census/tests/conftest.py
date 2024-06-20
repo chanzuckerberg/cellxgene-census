@@ -86,16 +86,11 @@ class ProxyInstance:
         return self.proxy.flags.port
 
 
-# TODO: It would be nice to have this fixture be scoped to each test worker so that we don't need to go through the overhead of starting the server for every test it's used in.
-# However, settng scope="session" currently leads to segfaults, it has some relation to garbage collection.
 @pytest.fixture(scope="session")
-# @pytest.fixture()
 def proxy_server(
-    # tmp_path: Path,
     tmp_path_factory: Path,
     ca_certificates: tuple[Path, Path, Path],
 ):
-    # Set up
     from proxy.plugin import CacheResponsesPlugin
 
     import cellxgene_census
@@ -105,7 +100,7 @@ def proxy_server(
     key_file, cert_file, signing_keyfile = ca_certificates
     assert all(p.is_file() for p in (key_file, cert_file, signing_keyfile))
 
-    # Copied from TestCase setup from proxy.py: https://github.com/abhinavsingh/proxy.py/blob/develop/proxy/testing/test_case.py#L23
+    # Adapted from TestCase setup from proxy.py: https://github.com/abhinavsingh/proxy.py/blob/develop/proxy/testing/test_case.py#L23
     PROXY_PY_STARTUP_FLAGS = [
         "--num-workers",
         "1",
@@ -117,18 +112,12 @@ def proxy_server(
         "0",
         "--plugin",
         "cellxgene_census._testing.ProxyPlugin",
-        # Not sure why these are neccesary, but I can't see the tiledb headers without these lines
         "--ca-key-file",
         str(key_file),
         "--ca-cert-file",
         str(cert_file),
-        # "--ca-signing-key-file",
-        # str(signing_keyfile),
-        # str(signing_keyfile_orig),
-        # Proxy.py doesn't seem to be generating any logs, so I am writing all these via the ProxyPlugin
         "--request-logfile",
         str(logpth),
-        # "--log-level", "DEBUG",
     ]
     proxy_obj = proxy.Proxy(PROXY_PY_STARTUP_FLAGS)
     proxy_obj.flags.plugins[b"HttpProxyBasePlugin"].append(
@@ -141,6 +130,10 @@ def proxy_server(
 
         # Now that proxy is set up, set relevant environment variables/ constants to make all request making libraries use proxy
         with pytest.MonkeyPatch.context() as mp:
+            # Both requests and s3fs use these environment variables:
+            mp.setenv("HTTP_PROXY", f"http://localhost:{proxy_obj.flags.port}")
+            mp.setenv("HTTPS_PROXY", f"http://localhost:{proxy_obj.flags.port}")
+
             # s3fs
             mp.setattr(
                 cellxgene_census._open,
@@ -151,23 +144,20 @@ def proxy_server(
                     "use_ssl": False,  # So we can inspect the requests on the proxy
                 },
             )
+
+            # Requests
+            mp.setattr(requests, "get", partial(requests.request, "get", verify=False))
+
             # Tiledb
             tiledb_config = cellxgene_census._open.DEFAULT_TILEDB_CONFIGURATION.copy()
             tiledb_config["vfs.s3.proxy_host"] = "localhost"
-            # tiledb_config["vfs.s3.proxy_scheme"] = "http"
             tiledb_config["vfs.s3.proxy_port"] = str(proxy_instance.port)
-            # tiledb_config["vfs.s3.ca_file"] = f"{_BASE_CERT_DIR}/ca-cert.pem"
             tiledb_config["vfs.s3.verify_ssl"] = "false"
             mp.setattr(
                 cellxgene_census._open,
                 "DEFAULT_TILEDB_CONFIGURATION",
                 tiledb_config,
             )
-            # Patching requests to let us see the header requests on the proxy
-            # Alternative approaches include: this library managing it's own session, which we patch here to have patch=False
-            mp.setattr(requests, "get", partial(requests.request, "get", verify=False))
-            mp.setenv("HTTP_PROXY", f"http://localhost:{proxy_obj.flags.port}")
-            mp.setenv("HTTPS_PROXY", f"http://localhost:{proxy_obj.flags.port}")
 
             yield proxy_instance
 
