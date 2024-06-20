@@ -111,7 +111,7 @@ def proxy_server(
         "--port",
         "0",
         "--plugin",
-        "cellxgene_census._testing.ProxyPlugin",
+        "cellxgene_census._testing.logger_proxy.RequestLoggerPlugin",
         "--ca-key-file",
         str(key_file),
         "--ca-cert-file",
