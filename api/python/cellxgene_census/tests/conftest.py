@@ -1,12 +1,18 @@
 import json
+import multiprocessing
 import os
+from functools import partial
 from pathlib import Path
 
 import proxy
 import pytest
+import requests
 import tiledbsoma as soma
 
 TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
+
+# tiledb will complain if this isn't set and a process is spawned. May cause segfaults on the proxy test if this isn't set.
+multiprocessing.set_start_method("spawn", force=True)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -80,12 +86,16 @@ class ProxyInstance:
         return self.proxy.flags.port
 
 
+# TODO: It would be nice to have this fixture be scoped to each test worker so that we don't need to go through the overhead of starting the server for every test it's used in.
+# However, settng scope="session" currently leads to segfaults, it has some relation to garbage collection.
 @pytest.fixture(scope="session")
-def proxy_server(tmp_path_factory: Path, ca_certificates: tuple[Path, Path, Path]):
+# @pytest.fixture()
+def proxy_server(
+    # tmp_path: Path,
+    tmp_path_factory: Path,
+    ca_certificates: tuple[Path, Path, Path],
+):
     # Set up
-    from functools import partial
-
-    import requests
     from proxy.plugin import CacheResponsesPlugin
 
     import cellxgene_census
