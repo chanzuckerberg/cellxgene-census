@@ -61,7 +61,8 @@ def proxy_server(
     tmp_path = tmp_path_factory.mktemp("proxy_logs")
     # proxy.py can override passed ca-key-file and ca-cert-file with cached ones. So we create a fresh cache for each proxy server
     cert_cache_dir = tmp_path_factory.mktemp("certificates_cache")
-    logpth = tmp_path / "proxy.log"
+    proxy_log_file = tmp_path / "proxy.log"
+    request_log_file = tmp_path / "proxy_requests.log"
     key_file, cert_file, signing_keyfile = ca_certificates
     assert all(p.is_file() for p in (key_file, cert_file, signing_keyfile))
 
@@ -85,14 +86,16 @@ def proxy_server(
         str(signing_keyfile),
         "--ca-cert-dir",
         str(cert_cache_dir),
-        "--request-logfile",
-        str(logpth),
+        "--log-file",
+        str(proxy_log_file),
+        "--request-log-file",
+        str(request_log_file),
     ]
     proxy_obj = proxy.Proxy(PROXY_PY_STARTUP_FLAGS)
     with proxy_obj:
         assert proxy_obj.acceptors
         proxy.TestCase.wait_for_server(proxy_obj.flags.port)
-        proxy_instance = ProxyInstance(proxy_obj, logpth)
+        proxy_instance = ProxyInstance(proxy_obj, request_log_file)
 
         # Now that proxy is set up, set relevant environment variables/ constants to make all request making libraries use proxy
         with pytest.MonkeyPatch.context() as mp:
@@ -165,7 +168,6 @@ def collect_proxy_requests(proxy_server: ProxyInstance):
 
 @pytest.fixture(scope="session")
 def small_dataset_id() -> str:
-    # TODO: REMOVE, copied from test_open
     with cellxgene_census.open_soma(census_version="latest") as census:
         census_datasets = census["census_info"]["datasets"].read().concat().to_pandas()
 

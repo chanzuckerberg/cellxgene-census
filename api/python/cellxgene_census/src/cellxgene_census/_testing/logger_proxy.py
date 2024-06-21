@@ -8,7 +8,7 @@ import proxy
 from proxy.common.flag import flags
 
 flags.add_argument(
-    "--request-logfile",
+    "--request-log-file",
     type=str,
     default="",
     help="Where to log the requests to.",
@@ -19,7 +19,7 @@ class RequestLoggerPlugin(proxy.http.proxy.HttpProxyBasePlugin):  # type: ignore
     def handle_client_request(self, request: proxy.http.parser.HttpParser) -> proxy.http.parser.HttpParser:
         # If anything fails in here, it just fails to respond
         try:
-            with Path(self.flags.request_logfile).open("a") as f:
+            with Path(self.flags.request_log_file).open("a") as f:
                 record = {
                     "method": request.method.decode(),
                     "url": str(request._url),
@@ -27,9 +27,6 @@ class RequestLoggerPlugin(proxy.http.proxy.HttpProxyBasePlugin):  # type: ignore
 
                 if request.headers:
                     record["headers"] = {k2.decode().lower(): v.decode() for _, (k2, v) in request.headers.items()}
-                print("Request:")
-                print(record)
-                print()
                 f.write(f"{json.dumps(record)}\n")
         except Exception as e:
             # Making sure there is some visible output
