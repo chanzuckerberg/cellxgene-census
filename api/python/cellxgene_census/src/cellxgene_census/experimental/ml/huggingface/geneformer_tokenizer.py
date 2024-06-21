@@ -63,6 +63,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         special_token: bool = False,
         token_dictionary_file: str = "",
         gene_median_file: str = "",
+        gene_mapping_file: str = "",
         **kwargs: Any,
     ) -> None:
         """- `experiment`: Census Experiment to query
@@ -74,6 +75,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
+        - `gene_mapping_file`: optional pickle file with mapping for Census gene IDs to model's
         """
         if obs_attributes:  # old name of obs_column_names
             obs_column_names = obs_attributes
@@ -81,7 +83,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self.max_input_tokens = max_input_tokens
         self.special_token = special_token
         self.obs_column_names = set(obs_column_names) if obs_column_names else set()
-        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
+        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file, gene_mapping_file)
         super().__init__(
             experiment,
             measurement_name="RNA",
@@ -94,6 +96,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         experiment: tiledbsoma.Experiment,
         token_dictionary_file: str,
         gene_median_file: str,
+        gene_mapping_file: str,
     ) -> None:
         """Load (1) the experiment's genes dataframe and (2) Geneformer's static data
         files for gene tokens and median expression; then, intersect them to compute
@@ -121,6 +124,11 @@ class GeneformerTokenizer(CellDatasetBuilder):
         with open(gene_median_file, "rb") as f:
             gene_median_dict = pickle.load(f)
 
+        gene_mapping = None
+        if gene_mapping_file:
+            with open(gene_mapping_file, "rb") as f:
+                gene_mapping = pickle.load(f)
+
         # compute model_gene_{ids,tokens,medians} by joining genes_df with Geneformer's
         # dicts
         model_gene_ids = []
@@ -128,6 +136,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         model_gene_medians = []
         for gene_id, row in genes_df.iterrows():
             ensg = row["feature_id"]  # ENSG... gene id, which keys Geneformer's dicts
+            if gene_mapping is not None:
+                ensg = gene_mapping.get(ensg, ensg)
             if ensg in gene_token_dict:
                 model_gene_ids.append(gene_id)
                 model_gene_tokens.append(gene_token_dict[ensg])
