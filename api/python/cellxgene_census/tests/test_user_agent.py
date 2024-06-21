@@ -4,12 +4,16 @@ import json
 import os
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 import proxy
 import pytest
 import requests
 from urllib3.exceptions import InsecureRequestWarning
+
+if TYPE_CHECKING:
+    from _pytest.tmpdir import TempPathFactory
 
 import cellxgene_census
 
@@ -28,7 +32,7 @@ class ProxyInstance:
 
 
 @pytest.fixture(scope="session")
-def ca_certificates(tmp_path_factory) -> tuple[Path, Path, Path]:
+def ca_certificates(tmp_path_factory: TempPathFactory) -> tuple[Path, Path, Path]:
     # Adapted from https://github.com/abhinavsingh/proxy.py/blob/a7077cf8db3bb66a6667a9d968a401e8f805e092/Makefile#L68C1-L82C49
     # TODO: Figure out if we can remove this. Currently seems neccesary for intercepting tiledb s3 requests
     cert_dir = tmp_path_factory.mktemp("ca-certificates")
@@ -49,7 +53,7 @@ def ca_certificates(tmp_path_factory) -> tuple[Path, Path, Path]:
 
 @pytest.fixture(scope="session")
 def proxy_server(
-    tmp_path_factory: Path,
+    tmp_path_factory: TempPathFactory,
     ca_certificates: tuple[Path, Path, Path],
 ):
     import cellxgene_census
@@ -134,7 +138,7 @@ def test_specific_useragent() -> str:
 
 
 @pytest.fixture()
-def collect_proxy_requests(proxy_server):
+def collect_proxy_requests(proxy_server: ProxyInstance):
     """Test specific fixture exposing the proxy server.
 
     While a proxy server is started for every test session, this fixture
@@ -195,7 +199,7 @@ def check_proxy_records(records: list[dict], *, custom_user_agent: None | str = 
     assert n_records >= min_records, f"Fewer than min_records ({min_records}) were found."
 
 
-def test_proxy_fixture(collect_proxy_requests):
+def test_proxy_fixture(collect_proxy_requests: Callable[[], list[dict]]):
     """Test that our proxy testing setup is working as expected."""
     # Should just be downloading a json
     with pytest.warns(InsecureRequestWarning):
@@ -211,7 +215,12 @@ def test_proxy_fixture(collect_proxy_requests):
     assert "cellxgene-census-python" in records[1]["headers"]["user-agent"]
 
 
-def test_download_w_proxy_fixture(small_dataset_id, collect_proxy_requests, tmp_path, test_specific_useragent):
+def test_download_w_proxy_fixture(
+    small_dataset_id: str,
+    collect_proxy_requests: Callable[[], list[dict]],
+    tmp_path: Path,
+    test_specific_useragent: str,
+):
     # Use of collect_proxy_requests forces test to use a proxy and will check headers of requests made via that proxy
     adata_path = tmp_path / "adata.h5ad"
     cellxgene_census.download_source_h5ad(small_dataset_id, adata_path.as_posix(), census_version="latest")
@@ -224,7 +233,7 @@ def test_download_w_proxy_fixture(small_dataset_id, collect_proxy_requests, tmp_
     )
 
 
-def test_query_w_proxy_fixture(collect_proxy_requests):
+def test_query_w_proxy_fixture(collect_proxy_requests: Callable[[], list[dict]]):
     with cellxgene_census.open_soma(census_version="stable") as census:
         _ = cellxgene_census.get_obs(census, "Mus musculus", coords=slice(100, 300))
 
@@ -235,7 +244,7 @@ def test_query_w_proxy_fixture(collect_proxy_requests):
     )
 
 
-def test_embedding_headers(collect_proxy_requests):
+def test_embedding_headers(collect_proxy_requests: Callable[[], list[dict]]):
     import cellxgene_census.experimental
 
     CENSUS_VERSION = "2023-12-15"
