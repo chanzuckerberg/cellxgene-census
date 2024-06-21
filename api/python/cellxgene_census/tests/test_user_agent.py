@@ -29,11 +29,11 @@ def proxy_server(
     tmp_path_factory: Path,
     ca_certificates: tuple[Path, Path, Path],
 ):
-    from proxy.plugin import CacheResponsesPlugin
-
     import cellxgene_census
 
     tmp_path = tmp_path_factory.mktemp("proxy_logs")
+    # proxy.py can override passed ca-key-file and ca-cert-file with cached ones. So we create a fresh cache for each proxy server
+    cert_cache_dir = tmp_path_factory.mktemp("certificates_cache")
     logpth = tmp_path / "proxy.log"
     key_file, cert_file, signing_keyfile = ca_certificates
     assert all(p.is_file() for p in (key_file, cert_file, signing_keyfile))
@@ -54,13 +54,14 @@ def proxy_server(
         str(key_file),
         "--ca-cert-file",
         str(cert_file),
+        "--ca-signing-key-file",
+        str(signing_keyfile),
+        "--ca-cert-dir",
+        str(cert_cache_dir),
         "--request-logfile",
         str(logpth),
     ]
     proxy_obj = proxy.Proxy(PROXY_PY_STARTUP_FLAGS)
-    proxy_obj.flags.plugins[b"HttpProxyBasePlugin"].append(
-        CacheResponsesPlugin,
-    )
     with proxy_obj:
         assert proxy_obj.acceptors
         proxy.TestCase.wait_for_server(proxy_obj.flags.port)
@@ -215,6 +216,4 @@ def test_query_w_proxy_fixture(proxy_instance):
         _ = cellxgene_census.get_obs(census, "Mus musculus", coords=slice(100, 300))
 
     records = proxy_instance()
-    print(records)
     check_proxy_records(records)
-    assert False
