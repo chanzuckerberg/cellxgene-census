@@ -90,6 +90,7 @@ def load_manifest_from_CxG() -> list[Dataset]:
             collection_id=dataset["collection_id"],
             collection_name=null_to_empty_str(dataset["collection_name"]),
             collection_doi=null_to_empty_str(dataset["collection_doi"]),
+            collection_doi_label=null_to_empty_str(dataset.get("collection_doi_label")),
             asset_h5ad_filesize=asset_h5ad_filesize,
             schema_version=schema_version,
             dataset_version_id=null_to_empty_str(dataset["dataset_version_id"]),
