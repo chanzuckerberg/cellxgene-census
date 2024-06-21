@@ -1,4 +1,4 @@
-"""This module defines a plugin class that logs each request to the logfile."""
+"""This module defines a plugin class that logs each request to a logfile."""
 
 import json
 import traceback
