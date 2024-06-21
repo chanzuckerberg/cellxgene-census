@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import json
 import os
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
 import proxy
@@ -11,9 +12,6 @@ import requests
 from urllib3.exceptions import InsecureRequestWarning
 
 import cellxgene_census
-
-if TYPE_CHECKING:
-    pass
 
 # We are forcing the requests to be insecure so we can intercept them.
 pytestmark = pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
