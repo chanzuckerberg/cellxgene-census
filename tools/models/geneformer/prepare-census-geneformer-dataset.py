@@ -35,7 +35,7 @@ def main(argv):
     if "://" in args.census_version:
         census_uri = args.census_version
     else:
-        census_uri = cellxgene_census.get_census_version_description(census_uri)["soma"]["uri"]
+        census_uri = cellxgene_census.get_census_version_description(args.census_version)["soma"]["uri"]
         logger.info(f"resolved census version {args.census_version} to {census_uri}")
     with cellxgene_census.open_soma(uri=census_uri) as census:
         obs_df = select_cells(
@@ -135,17 +135,21 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
 
     # annotate cell subclasses
     logger.info("annotating cell subclasses...")
-    mapper = CellSubclassMapper(map_orphans_to_class=True)
-    obs_df["cell_subclass_ontology_term_id"] = obs_df["cell_type_ontology_term_id"].map(
-        # if CellSubclassMapper doesn't find a subclass, just use the cell type itself
-        lambda it: mapper.get_top_high_level_term(it) or it
-    )
-    obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
-    subclass_counts = Counter(obs_df["cell_subclass"])
-    logger.info(
-        f"cell subclasses ({len(subclass_counts)}): {json.dumps(subclass_counts)}"
-        + f" (compare to {len(obs_df['cell_type_ontology_term_id'].unique())} cell_types)"
-    )
+    subclass_counts = None
+    try:
+        mapper = CellSubclassMapper(map_orphans_to_class=True)
+        obs_df["cell_subclass_ontology_term_id"] = obs_df["cell_type_ontology_term_id"].map(
+            # if CellSubclassMapper doesn't find a subclass, just use the cell type itself
+            lambda it: mapper.get_top_high_level_term(it) or it
+        )
+        obs_df["cell_subclass"] = obs_df["cell_subclass_ontology_term_id"].map(lambda it: mapper.get_label_from_id(it))
+        subclass_counts = Counter(obs_df["cell_subclass"])
+        logger.info(
+            f"cell subclasses ({len(subclass_counts)}): {json.dumps(subclass_counts)}"
+            + f" (compare to {len(obs_df['cell_type_ontology_term_id'].unique())} cell_types)"
+        )
+    except Exception:
+        logger.exception("failed to annotate cell subclasses")
 
     # further downsample by sampling_column, if requested
     if N:
@@ -155,8 +159,9 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
         obs_df = obs_df.groupby(sampling_column).apply(lambda x: x.sample(min(len(x), N)))
         sampling_counts = Counter(obs_df[sampling_column])
         logger.info(f"after downsampling to at most {N} examples per {sampling_column}: {json.dumps(sampling_counts)}")
-        subclass_counts = Counter(obs_df["cell_subclass"])
-        logger.info(f"downsampled cell subclasses ({len(subclass_counts)}): {json.dumps(subclass_counts)}")
+        if subclass_counts is not None:
+            subclass_counts = Counter(obs_df["cell_subclass"])
+            logger.info(f"downsampled cell subclasses ({len(subclass_counts)}): {json.dumps(subclass_counts)}")
 
     obs_df.set_index("soma_joinid", inplace=True)
     return obs_df

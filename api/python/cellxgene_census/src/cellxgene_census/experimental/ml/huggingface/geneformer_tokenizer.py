@@ -154,7 +154,9 @@ class GeneformerTokenizer(CellDatasetBuilder):
         assert np.all(self.model_gene_medians > 0)
         # Geneformer models protein-coding and miRNA genes, so the intersection should
         # be somewhere a little north of 20K.
-        assert len(self.model_gene_ids) > 20_000
+        assert (
+            len(self.model_gene_ids) > 20_000
+        ), f"Mismatch between Census gene IDs and Geneformer token dicts (only {len(self.model_gene_ids)} common genes)"
 
         # Precompute a vector by which we'll multiply each cell's expression vector.
         # The denominator normalizes by Geneformer's median expression values.

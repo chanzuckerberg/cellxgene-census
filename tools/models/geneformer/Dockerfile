@@ -9,6 +9,7 @@ FROM nvcr.io/nvidia/cuda:11.8.0-runtime-ubuntu22.04
 # compatibility with the Census embeddings curator
 ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
 ARG GENEFORMER_VERSION=471eefc
+ARG CELLXGENE_CENSUS_VERSION=main
 
 RUN apt update && apt install -y build-essential python3-pip python3-venv git-lfs pigz libcurl4-openssl-dev
 RUN git lfs install
@@ -24,7 +25,8 @@ RUN pip uninstall -y transformer-engine
 
 RUN mkdir /census-geneformer
 WORKDIR /census-geneformer
-RUN git clone https://github.com/chanzuckerberg/cellxgene-census.git
+RUN git clone https://github.com/chanzuckerberg/cellxgene-census.git \
+        && git -C cellxgene-census checkout ${CELLXGENE_CENSUS_VERSION}
 RUN pip install cellxgene-census/api/python/cellxgene_census
 RUN git clone --recursive https://huggingface.co/ctheodoris/Geneformer \
         && git -C Geneformer checkout ${GENEFORMER_VERSION}
@@ -39,6 +41,7 @@ RUN python3 -m venv --system-site-packages embeddings_tiledbsoma_venv && \
     . embeddings_tiledbsoma_venv/bin/activate && \
     pip install tiledbsoma==${EMBEDDINGS_TILEDBSOMA_VERSION}
 
-COPY *.py ./
+COPY gf-95m ./gf-95m/
 COPY helpers ./helpers
+COPY *.py ./
 COPY finetune-geneformer.config.yml .
