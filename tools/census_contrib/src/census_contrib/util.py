@@ -5,9 +5,10 @@ import logging
 import math
 import pathlib
 import urllib
+from collections.abc import Generator, Iterator, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor
 from importlib.metadata import metadata
-from typing import Any, Dict, Generator, Iterator, Optional, Sequence, Tuple, TypeVar, Union, cast
+from typing import Any, TypeVar, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -20,8 +21,7 @@ from packaging.version import Version
 
 @functools.cache
 def has_blockwise_iterator() -> bool:
-    """
-    Feature flag. Return true if the tiledbsoma SparseNDArray contains the blockwise iterator.
+    """Feature flag. Return true if the tiledbsoma SparseNDArray contains the blockwise iterator.
     Introduced in version 1.5.
     """
     return cast(bool, Version(metadata("tiledbsoma")["Version"]) >= Version("1.5.0"))
@@ -36,14 +36,12 @@ MAX_NNZ_GOAL = DEFAULT_READ_BUFFER_SIZE // 8  # sizeof(int64) - worst case size
 
 
 def blocksize(n_features: int, nnz_goal: int = MAX_NNZ_GOAL) -> int:
-    """
-    Given an nnz goal, and n_features, return step size for a blockwise iterator.
-    """
+    """Given an nnz goal, and n_features, return step size for a blockwise iterator."""
     nnz_goal = max(nnz_goal, MAX_NNZ_GOAL)
     return cast(int, 2 ** round(math.log2((nnz_goal) / n_features)))
 
 
-def soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> soma.options.SOMATileDBContext:
+def soma_context(tiledb_config: dict[str, Any] | None = None) -> soma.options.SOMATileDBContext:
     """Return soma context with default config."""
     tiledb_config = tiledb_config or {}
     return soma.options.SOMATileDBContext().replace(
@@ -67,13 +65,13 @@ class EagerIterator(Iterator[_T]):
     def __init__(
         self,
         iterator: Iterator[_T],
-        pool: Optional[ThreadPoolExecutor] = None,
+        pool: ThreadPoolExecutor | None = None,
     ):
         super().__init__()
         self.iterator = iterator
         self._pool = pool or ThreadPoolExecutor()
         self._own_pool = pool is None
-        self._future: Optional[Future[_T]] = None
+        self._future: Future[_T] | None = None
         self._fetch_next()
 
     def _fetch_next(self) -> None:
@@ -113,9 +111,9 @@ def blockwise_axis0_tables(
     A: soma.SparseNDArray,
     coords: soma.options.SparseNDCoords = (),
     result_order: soma.options.ResultOrderStr = soma.ResultOrder.AUTO,
-    size: Optional[Union[int, Sequence[int]]] = None,
-    reindex_disable_on_axis: Optional[Union[int, Sequence[int]]] = None,
-) -> Generator[Tuple[pa.Table, Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]]], None, None]:
+    size: int | Sequence[int] | None = None,
+    reindex_disable_on_axis: int | Sequence[int] | None = None,
+) -> Generator[tuple[pa.Table, tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]]], None, None]:
     assert A.ndim == 2
     coords, size, reindex_disable_on_axis = _validate_args(A.shape, coords, size, reindex_disable_on_axis)
     minor_joinids = pa.array(np.concatenate(list(_coords_strider(coords[1], A.shape[1], A.shape[1]))))
@@ -144,9 +142,9 @@ def blockwise_axis0_scipy_csr(
     A: soma.SparseNDArray,
     coords: soma.options.SparseNDCoords = (),
     result_order: soma.options.ResultOrderStr = soma.ResultOrder.AUTO,
-    size: Optional[Union[int, Sequence[int]]] = None,
-    reindex_disable_on_axis: Optional[Union[int, Sequence[int]]] = None,
-) -> Generator[Tuple[sp.csr_matrix, Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]]], None, None]:
+    size: int | Sequence[int] | None = None,
+    reindex_disable_on_axis: int | Sequence[int] | None = None,
+) -> Generator[tuple[sp.csr_matrix, tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]]], None, None]:
     assert A.ndim == 2
     coords, size, reindex_disable_on_axis = _validate_args(A.shape, coords, size, reindex_disable_on_axis)
 
@@ -170,17 +168,17 @@ def blockwise_axis0_scipy_csr(
 _ElemT = TypeVar("_ElemT")
 
 
-def _pad_with_none(s: Sequence[_ElemT], to_length: int) -> Tuple[Optional[_ElemT], ...]:
-    """Given a sequence, pad length to a user-specified length, with None values"""
+def _pad_with_none(s: Sequence[_ElemT], to_length: int) -> tuple[_ElemT | None, ...]:
+    """Given a sequence, pad length to a user-specified length, with None values."""
     return tuple(s[i] if i < len(s) else None for i in range(to_length))
 
 
 def _validate_args(
-    shape: Tuple[int, ...],
+    shape: tuple[int, ...],
     coords: soma.options.SparseNDCoords,
-    size: Optional[Union[int, Sequence[int]]] = None,
-    reindex_disable_on_axis: Optional[Union[int, Sequence[int]]] = None,
-) -> Tuple[Tuple[Any, Any], Sequence[int], Sequence[int]]:
+    size: int | Sequence[int] | None = None,
+    reindex_disable_on_axis: int | Sequence[int] | None = None,
+) -> tuple[tuple[Any, Any], Sequence[int], Sequence[int]]:
     ndim = len(shape)
     axis = [0]
 
@@ -209,15 +207,13 @@ def _validate_args(
 
 
 def _coords_strider(coords: soma.options.SparseNDCoord, length: int, stride: int) -> Iterator[npt.NDArray[np.int64]]:
-    """
-    Private.
+    """Private.
 
     Iterate over major coordinates, in stride sized steps, materializing each step as an
     ndarray of coordinate values. Will be sorted in ascending order.
 
     NB: SOMA slices are _closed_ (i.e., inclusive of both range start and stop)
     """
-
     # normalize coord to either a slice or ndarray
 
     # NB: type check on slice is to handle the case where coords is an NDArray,
@@ -228,9 +224,9 @@ def _coords_strider(coords: soma.options.SparseNDCoord, length: int, stride: int
         coords = np.array([coords], dtype=np.int64)
     elif isinstance(coords, Sequence):
         coords = np.array(coords).astype(np.int64)
-    elif isinstance(coords, (pa.Array, pa.ChunkedArray)):
+    elif isinstance(coords, (pa.Array, pa.ChunkedArray)):  # noqa: UP038
         coords = coords.to_numpy()
-    elif not isinstance(coords, (np.ndarray, slice)):
+    elif not isinstance(coords, (np.ndarray, slice)):  # noqa: UP038
         raise TypeError("Unsupported slice coordinate type")
 
     if isinstance(coords, slice):

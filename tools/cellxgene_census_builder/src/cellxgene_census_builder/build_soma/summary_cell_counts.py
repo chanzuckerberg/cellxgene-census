@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 def create_census_summary_cell_counts(
     info_collection: soma.Collection, per_experiment_summary: Sequence[pd.DataFrame]
 ) -> None:
-    """
-    Save per-category counts as the census_summary_cell_counts SOMA dataframe
-    """
+    """Save per-category counts as the census_summary_cell_counts SOMA dataframe."""
     logger.info("Creating census_summary_cell_counts")
     df = (
         pd.concat(per_experiment_summary, ignore_index=True)
@@ -49,9 +47,7 @@ def init_summary_counts_accumulator() -> pd.DataFrame:
 
 
 def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add summary counts to the census_summary_cell_counts dataframe
-    """
+    """Add summary counts to the census_summary_cell_counts dataframe."""
     assert "dataset_id" in obs_df
 
     if len(obs_df) == 0:
@@ -68,6 +64,8 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
         ("tissue_general_ontology_term_id", "tissue_general"),
         (None, "suspension_type"),
     ]
+
+    dataset_id = obs_df.iloc[0].dataset_id
 
     dfs = []
     for term_id, term_label in CATEGORIES:
@@ -109,12 +107,13 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
         counts["category"] = term_label if term_label is not None else term_id
         counts["unique_cell_count"] = counts[True]
         counts["total_cell_count"] = counts[True] + counts[False]
+        counts["dataset_id"] = dataset_id
         counts = counts.drop(columns=[True, False]).reset_index()
         dfs.append(counts)
 
     all = pd.DataFrame(
         data={
-            "dataset_id": [obs_df.iloc[0].dataset_id],
+            "dataset_id": [dataset_id],
             "organism": [obs_df.iloc[0].organism],
             "ontology_term_id": ["na"],
             "label": ["na"],
@@ -123,4 +122,5 @@ def accumulate_summary_counts(current: pd.DataFrame, obs_df: pd.DataFrame) -> pd
             "total_cell_count": [dfs[0].total_cell_count.sum()],
         }
     )
+
     return pd.concat([current, all, *dfs], ignore_index=True)

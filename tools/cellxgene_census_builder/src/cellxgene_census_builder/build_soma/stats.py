@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 
 import numba
 import numpy as np
@@ -10,10 +10,9 @@ from .globals import CENSUS_OBS_TABLE_SPEC, CENSUS_VAR_TABLE_SPEC
 
 
 def get_obs_stats(
-    raw_X: Union[sparse.csr_matrix, sparse.csc_matrix],
+    raw_X: sparse.csr_matrix | sparse.csc_matrix,
 ) -> pd.DataFrame:
     """Compute summary stats for obs axis, and return as a dataframe."""
-
     if not isinstance(raw_X, sparse.csr_matrix) and not isinstance(raw_X, sparse.csc_matrix):
         raise NotImplementedError(f"get_obs_stats: unsupported type {type(raw_X)}")
 
@@ -24,7 +23,7 @@ def get_obs_stats(
     raw_mean_nnz[~np.isfinite(raw_mean_nnz)] = 0.0
     raw_variance_nnz = _var(raw_X, axis=1, ddof=1)
 
-    return pd.DataFrame(
+    obs_stats = pd.DataFrame(
         data={
             "raw_sum": raw_sum.astype(CENSUS_OBS_TABLE_SPEC.field("raw_sum").to_pandas_dtype()),
             "nnz": nnz.astype(CENSUS_OBS_TABLE_SPEC.field("nnz").to_pandas_dtype()),
@@ -32,13 +31,15 @@ def get_obs_stats(
             "raw_variance_nnz": raw_variance_nnz.astype(
                 CENSUS_OBS_TABLE_SPEC.field("raw_variance_nnz").to_pandas_dtype()
             ),
-            "n_measured_vars": -1,  # placeholder - actual stat calculated from presence matrix
+            "n_measured_vars": -1,  # placeholder
         }
     )
+    assert len(obs_stats) == raw_X.shape[0]
+    return obs_stats
 
 
 def get_var_stats(
-    raw_X: Union[sparse.csr_matrix, sparse.csc_matrix, npt.NDArray[np.float32]],
+    raw_X: sparse.csr_matrix | sparse.csc_matrix | npt.NDArray[np.float32],
 ) -> pd.DataFrame:
     if isinstance(raw_X, sparse.csr_matrix) or isinstance(raw_X, sparse.csc_matrix):
         nnz = raw_X.getnnz(axis=0)
@@ -49,11 +50,14 @@ def get_var_stats(
     else:
         raise NotImplementedError(f"get_var_stats: unsupported array type {type(raw_X)}")
 
-    return pd.DataFrame(
+    var_stats = pd.DataFrame(
         data={
             "nnz": nnz.astype(CENSUS_VAR_TABLE_SPEC.field("nnz").to_pandas_dtype()),
+            "n_measured_obs": 0,  # placeholder
         }
     )
+    assert len(var_stats) == raw_X.shape[1]
+    return var_stats
 
 
 @numba.jit(
@@ -62,9 +66,9 @@ def get_var_stats(
     nopython=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _var_ndarray(data: npt.NDArray[np.float32], ddof: int) -> float:
-    """
-    Return variance of an ndarray. Computed as variance of shifted distribution,
-    https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    """Return variance of an ndarray.
+
+    Computed as variance of shifted distribution, https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance.
     """
     n = len(data)
     if n < 2:
@@ -111,7 +115,7 @@ def _var_matrix(
 
 
 def _var(
-    matrix: Union[sparse.csr_matrix, sparse.csc_matrix],
+    matrix: sparse.csr_matrix | sparse.csc_matrix,
     axis: int = 0,
     ddof: int = 1,
 ) -> npt.NDArray[np.float64]:

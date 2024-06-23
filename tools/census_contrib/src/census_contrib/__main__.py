@@ -5,7 +5,7 @@ import shutil
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import numpy as np
 import pyarrow as pa
@@ -14,10 +14,10 @@ import scipy.sparse as sp
 import tiledbsoma as soma
 
 from .args import Arguments
-from .census_util import get_obs_soma_joinids, open_census
+from .census_util import get_axis_soma_joinids, open_census
 from .config import Config
 from .metadata import EmbeddingMetadata, load_metadata, validate_metadata
-from .save import consolidate_array, consolidate_group, create_obsm_like_array, reduce_float_precision
+from .save import consolidate_array, consolidate_group, create_sparse_array, reduce_float_precision
 from .util import (
     EagerIterator,
     blocksize,
@@ -124,8 +124,8 @@ def ingest(config: Config) -> None:
         args.error("SOMA output path already exists")
     save_to.mkdir(parents=True, exist_ok=True)
 
-    obs_joinids, obs_shape = get_obs_soma_joinids(config)
-    assert obs_joinids[0] == 0 and obs_joinids[-1] == (obs_shape[0] - 1), "Census coordinates are unexpected"
+    axis_joinids, axis_shape = get_axis_soma_joinids(config)
+    assert axis_joinids[0] == 0 and axis_joinids[-1] == (axis_shape[0] - 1), "Census coordinates are unexpected"
 
     with args.ingestor(config) as emb_pipe:
         assert emb_pipe.type == pa.float32()
@@ -134,19 +134,19 @@ def ingest(config: Config) -> None:
         domains = emb_pipe.domains
         if domains["i"][0] < 0 or domains["j"][0] < 0:
             args.error("Coordinate values in embedding are negative")
-        if domains["i"][1] > obs_shape[0]:
-            args.error("Coordinate values in embedding dim 0 are outside obs joinid range")
+        if domains["i"][1] > axis_shape[0]:
+            args.error("Coordinate values in embedding dim 0 are outside axis joinid range")
         if domains["j"] != (0, metadata.n_features - 1):
             args.error("Coordinate values in embedding dim 1 are not (0, n_features)")
 
-        if domains["i"][0] > 0 or domains["i"][1] < (obs_shape[0] - 1):
-            logger.warning("Embedding is a subset of cells.")
+        if domains["i"][0] > 0 or domains["i"][1] < (axis_shape[0] - 1):
+            logger.warning("Embedding is a subset of axis.")
 
         assert 0 == domains["j"][0] and (metadata.n_features - 1) == domains["j"][1]
-        assert domains["i"][0] <= domains["i"][1] < obs_shape[0]
-        shape = (obs_shape[0], metadata.n_features)
+        assert domains["i"][0] <= domains["i"][1] < axis_shape[0]
+        shape = (axis_shape[0], metadata.n_features)
 
-        with create_obsm_like_array(
+        with create_sparse_array(
             save_to.as_posix(),
             value_range=domains["d"],
             shape=shape,
@@ -163,9 +163,8 @@ def ingest(config: Config) -> None:
                     A.write(block.rename_columns(["soma_dim_0", "soma_dim_1", "soma_data"]))
 
 
-def validate_contrib_embedding(uri: Union[str, Path], config: Config, skip_storage_version_check: bool = False) -> None:
-    """
-    Validate embedding where embedding metadata is encoded in the array.
+def validate_contrib_embedding(uri: str | Path, config: Config, skip_storage_version_check: bool = False) -> None:
+    """Validate embedding where embedding metadata is encoded in the array.
 
     Raises upon invalid result
     """
@@ -187,10 +186,10 @@ def load_qc_anndata(
     config: Config,
     embedding: Path,
     obs_value_filter: str,
-    obs_columns: List[str],
+    obs_columns: list[str],
     emb_name: str,
-) -> Optional[sc.AnnData]:
-    """Returns None if the value filter excludes all cells"""
+) -> sc.AnnData | None:
+    """Returns None if the value filter excludes all cells."""
     if "soma_joinid" not in obs_columns:
         obs_columns = ["soma_joinid"] + obs_columns
 
@@ -236,10 +235,14 @@ def load_qc_anndata(
 
 
 def create_qc_plots(config: Config, embedding: Path) -> None:
+    if config.metadata.data_type == "var_embedding":
+        logger.info("Skipping QC plots for var embedding")
+        return
+
     sc._settings.settings.autoshow = False
     sc._settings.settings.figdir = (config.args.cwd / "figures").as_posix()
 
-    def make_random_palette(n_colors: int) -> List[str]:
+    def make_random_palette(n_colors: int) -> list[str]:
         rng = np.random.default_rng()
         colors = rng.integers(0, 0xFFFFFF, size=n_colors, dtype=np.uint32)
         return [f"#{c:06X}" for c in colors]
@@ -270,7 +273,7 @@ def create_qc_plots(config: Config, embedding: Path) -> None:
         logger.info(f"Saving UMAP plots for {k}")
         for color_by in color_by_columns:
             n_categories = len(adata.obs[color_by].astype(str).astype("category").cat.categories)
-            plot_color_kwargs: Dict[str, Any] = dict(color=color_by)
+            plot_color_kwargs: dict[str, Any] = {"color": color_by}
             # scanpy does a good job until category counts > 102
             if n_categories > len(sc.plotting.palettes.default_102):
                 plot_color_kwargs["palette"] = make_random_palette(n_categories)
@@ -278,8 +281,8 @@ def create_qc_plots(config: Config, embedding: Path) -> None:
 
 
 def inject_embedding_into_census_build(config: Config, embedding_src_path: Path) -> None:
-    """
-    Inject an existing embedding (ingested via this tool) into its corresponding Census build.
+    """Inject an existing embedding (ingested via this tool) into its corresponding Census build.
+
     Presumed workflow:
         * build census
         * create embedding(s)
@@ -299,6 +302,10 @@ def inject_embedding_into_census_build(config: Config, embedding_src_path: Path)
     6. validate that group edits worked, etc.
     """
     metadata = config.metadata
+
+    if metadata.data_type == "var_embedding":
+        raise ValueError("var embedding injection not implemented")
+
     census_write_path = config.args.census_write_path
     obsm_key = config.args.obsm_key
     obsm_layer_name = obsm_key or metadata.id

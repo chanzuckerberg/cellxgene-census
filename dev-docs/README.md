@@ -9,7 +9,7 @@ A docsite rebuild can be [triggered manually through `workflow_dispatch`](https:
 In order to test docsite changes locally, first install the necessary requirements:
 
 ```shell
-pip install -r docs/requirements.txt
+pip install -e "api/python/cellxgene_census[experimental,doc]"
 brew install pandoc # Mac OS
 ```
 

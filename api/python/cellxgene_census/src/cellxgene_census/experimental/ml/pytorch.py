@@ -32,14 +32,13 @@ pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 
 # TODO: Rename to reflect the correct order of the Tensors within the tuple: (X, obs)
 ObsAndXDatum = Tuple[Tensor, Tensor]
-"""Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s). 
+"""Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s).
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
 
 
 @define
 class _SOMAChunk:
-    """
-    Return type of ``_ObsAndXSOMAIterator`` that pairs a chunk of ``obs`` rows with the respective rows from the ``X``
+    """Return type of ``_ObsAndXSOMAIterator`` that pairs a chunk of ``obs`` rows with the respective rows from the ``X``
     matrix.
 
     Lifecycle:
@@ -60,8 +59,7 @@ Encoders = Dict[str, LabelEncoder]
 
 @define
 class Stats:
-    """
-    Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API. This is useful for assessing the read
+    """Statistics about the data retrieved by ``ExperimentDataPipe`` via SOMA API. This is useful for assessing the read
     throughput of SOMA data.
 
     Lifecycle:
@@ -97,7 +95,6 @@ def _open_experiment(
     aws_region: Optional[str] = None,
 ) -> soma.Experiment:
     """Internal method for opening a SOMA ``Experiment`` as a context manager."""
-
     context = get_default_soma_context().replace(tiledb_config={"vfs.s3.region": aws_region} if aws_region else {})
 
     with soma.Experiment.open(uri, context=context) as exp:
@@ -106,7 +103,8 @@ def _open_experiment(
 
 class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
     """Iterates the SOMA chunks of corresponding ``obs`` and ``X`` data. This is an internal class,
-    not intended for public use."""
+    not intended for public use.
+    """
 
     X: soma.SparseNDArray
     """A handle to the full X data of the SOMA ``Experiment``"""
@@ -123,22 +121,30 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         obs_column_names: Sequence[str],
         obs_joinids_chunked: List[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
+        shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
     ):
         self.obs = obs
         self.X = X
         self.obs_column_names = obs_column_names
-        self.obs_joinids_chunks_iter = self._maybe_local_shuffle_obs_joinids(obs_joinids_chunked, shuffle_rng)
-        self.var_joinids = var_joinids
+        if shuffle_chunk_count:
+            assert shuffle_rng is not None
 
-    @staticmethod
-    def _maybe_local_shuffle_obs_joinids(
-        obs_joinids_chunked: List[npt.NDArray[np.int64]], shuffle_rng: Optional[Generator] = None
-    ) -> Iterator[npt.NDArray[np.int64]]:
-        return (
-            shuffle_rng.permutation(obs_joinid_chunk) if shuffle_rng else obs_joinid_chunk
-            for obs_joinid_chunk in obs_joinids_chunked
-        )
+            # At the start of this step, `obs_joinids_chunked` is a list of one dimensional
+            # numpy arrays. Each numpy array corresponds to a chunk of contiguous rows in `obs`.
+            # Critically, `obs_joinids_chunked` is randomly ordered where each chunk is
+            # from a random section of `obs`.
+            # We then take `shuffle_chunk_count` of these in order, concatenate them into
+            # a larger numpy array and shuffle this larger numpy array.
+            # The result is again a list of numpy arrays.
+            self.obs_joinids_chunks_iter = (
+                shuffle_rng.permutation(np.concatenate(grouped_chunks))
+                for grouped_chunks in list_split(obs_joinids_chunked, shuffle_chunk_count)
+            )
+        else:
+            self.obs_joinids_chunks_iter = iter(obs_joinids_chunked)
+        self.var_joinids = var_joinids
+        self.shuffle_chunk_count = shuffle_chunk_count
 
     def __next__(self) -> _SOMAChunk:
         pytorch_logger.debug("Retrieving next SOMA chunk...")
@@ -185,7 +191,24 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         return _SOMAChunk(obs=obs_batch, X=X_batch, stats=stats)
 
 
-def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:
+def list_split(arr_list: List[Any], sublist_len: int) -> List[List[Any]]:
+    """Splits a python list into a list of sublists where each sublist is of size `sublist_len`.
+    TODO: Replace with `itertools.batched` when Python 3.12 becomes the minimum supported version.
+    """
+    i = 0
+    result = []
+    while i < len(arr_list):
+        if (i + sublist_len) >= len(arr_list):
+            result.append(arr_list[i:])
+        else:
+            result.append(arr_list[i : i + sublist_len])
+
+        i += sublist_len
+
+    return result
+
+
+def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:  # noqa: D103
     proc = psutil.Process(os.getpid())
 
     pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
@@ -199,8 +222,7 @@ def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:
 
 
 class _ObsAndXIterator(Iterator[ObsAndXDatum]):
-    """
-    Iterates through a set of ``obs`` and corresponding ``X`` rows, where the rows to be returned are specified by
+    """Iterates through a set of ``obs`` and corresponding ``X`` rows, where the rows to be returned are specified by
     the ``obs_tables_iter`` argument. For the specified ``obs` rows, the corresponding ``X`` data is loaded and
     joined together. It is returned from this iterator as 2-tuples of ``X`` and obs Tensors.
 
@@ -230,10 +252,11 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         stats: Stats,
         return_sparse_X: bool,
         use_eager_fetch: bool,
+        shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
     ) -> None:
         self.soma_chunk_iter = _ObsAndXSOMAIterator(
-            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_rng
+            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_chunk_count, shuffle_rng
         )
         if use_eager_fetch:
             self.soma_chunk_iter = _EagerIterator(self.soma_chunk_iter)
@@ -247,8 +270,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.X_dtype = X.schema[2].type.to_pandas_dtype()
 
     def __next__(self) -> ObsAndXDatum:
-        """Read the next torch batch, possibly across multiple soma chunks"""
-
+        """Read the next torch batch, possibly across multiple soma chunks."""
         obs: pd.DataFrame = pd.DataFrame()
         X: sparse.csr_matrix = sparse.csr_matrix((0, len(self.var_joinids)), dtype=self.X_dtype)
 
@@ -264,7 +286,9 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
             raise StopIteration
 
         obs_encoded = pd.DataFrame(
-            data={"soma_joinid": obs.index}, columns=["soma_joinid"] + obs.columns.tolist(), dtype=np.int64
+            data={"soma_joinid": obs.index},
+            columns=["soma_joinid"] + obs.columns.tolist(),
+            dtype=np.int64,
         )
         # TODO: Encode the entire SOMA chunk at once in _read_partial_torch_batch()
         for col, enc in self.encoders.items():
@@ -294,8 +318,8 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     def _read_partial_torch_batch(self, batch_size: int) -> ObsAndXDatum:
         """Reads a torch-size batch of data from the current SOMA chunk, returning a torch-size batch whose size may
         contain fewer rows than the requested ``batch_size``. This can happen when the remaining rows in the current
-        SOMA chunk are fewer than the requested ``batch_size``."""
-
+        SOMA chunk are fewer than the requested ``batch_size``.
+        """
         if self.soma_chunk is None or not (0 <= self.i < len(self.soma_chunk)):
             # GC memory from previous soma_chunk
             self.soma_chunk = None
@@ -328,10 +352,9 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
 
 class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ignore
-    """
-    An iterable-style PyTorch ``DataPipe`` that reads ``obs`` and ``X`` data from a SOMA ``Experiment``, based upon the
-    specified queries along the ``obs`` and ``var`` axes. Provides an iterator over these data when the object is
-    passed to Python's built-in ``iter`` function:
+    r"""An :class:`torchdata.datapipes.iter.IterDataPipe` that reads ``obs`` and ``X`` data from a
+    :class:`tiledbsoma.Experiment`, based upon the specified queries along the ``obs`` and ``var`` axes. Provides an
+    iterator over these data when the object is passed to Python's built-in ``iter`` function.
 
     >>> for batch in iter(ExperimentDataPipe(...)):
             X_batch, y_batch = batch
@@ -352,14 +375,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                  [2416,    0,    4],
                  [2417,    0,    3]], dtype=torch.int64))
 
-    The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse Tensor.  If the
-    model supports use of sparse Tensors, this will reduce memory usage.
+    The ``return_sparse_X`` parameter controls whether the ``X`` data is returned as a dense or sparse
+    :class:`torch.Tensor`. If the model supports use of sparse :class:`torch.Tensor`\ s, this will reduce memory usage.
 
     The ``obs_column_names`` parameter determines the data columns that are returned in the ``obs`` Tensor. The first
-    element is always the ``soma_joinid`` of the ``obs`` DataFrame (or, equiavalently, the ``soma_dim_0`` of the ``X``
-    matrix). The remaining elements are the ``obs`` columns specified by ``obs_column_names``, and string-typed
-    columns are encoded as integer values. If needed, these values can be decoded by obtaining the encoder for a
-    given ``obs`` column name and calling its ``inverse_transform`` method:
+    element is always the ``soma_joinid`` of the ``obs`` :class:`pandas.DataFrame` (or, equivalently, the
+    ``soma_dim_0`` of the ``X`` matrix). The remaining elements are the ``obs`` columns specified by
+    ``obs_column_names``, and string-typed columns are encoded as integer values. If needed, these values can be decoded
+    by obtaining the encoder for a given ``obs`` column name and calling its ``inverse_transform`` method:
 
     >>> exp_data_pipe.obs_encoders["<obs_attr_name>"].inverse_transform(encoded_values)
 
@@ -384,28 +407,28 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     def __init__(
         self,
         experiment: soma.Experiment,
-        measurement_name: str = "raw",
-        X_name: str = "X",
+        measurement_name: str = "RNA",
+        X_name: str = "raw",
         obs_query: Optional[soma.AxisQuery] = None,
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
-        shuffle: bool = False,
+        shuffle: bool = True,
         seed: Optional[int] = None,
         return_sparse_X: bool = False,
-        soma_chunk_size: Optional[int] = None,
+        soma_chunk_size: Optional[int] = 64,
         use_eager_fetch: bool = True,
+        shuffle_chunk_count: Optional[int] = 2000,
     ) -> None:
-        """
-        Construct a new ``ExperimentDataPipe``.
+        r"""Construct a new ``ExperimentDataPipe``.
 
         Args:
             experiment:
-                The SOMA ``Experiment`` from which to read data.
+                The :class:`tiledbsoma.Experiment` from which to read data.
             measurement_name:
-                The name of the SOMA ``Measurement`` to read. Defaults to "raw".
+                The name of the :class:`tiledbsoma.Measurement` to read. Defaults to ``"RNA"``.
             X_name:
-                The name of the X layer to read. Defaults to "X".
+                The name of the X layer to read. Defaults to ``"raw"``.
             obs_query:
                 The query used to filter along the ``obs`` axis. If not specified, all ``obs`` and ``X`` data will
                 be returned, which can be very large.
@@ -416,44 +439,43 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The names of the ``obs`` columns to return. The ``soma_joinid`` index "column" does not need to be
                 specified and will always be returned. If not specified, only the ``soma_joinid`` will be returned.
             batch_size:
-                The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to 1. A value of 1
-                will result in Tensors of rank 1 being returns (a single row); larger values will result in Tensors of
-                rank 2 (multiple rows).
+                The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to ``1``. A value of
+                ``1`` will result in :class:`torch.Tensor` of rank 1 being returns (a single row); larger values will
+                result in :class:`torch.Tensor`\ s of rank 2 (multiple rows).
             shuffle:
-                Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``False`` (no shuffling).
-                For performance reasons, shuffling is performed in two steps: 1) a global shuffling, where contiguous
-                rows are grouped into chunks and the order of the chunks is randomized, and then 2) a local
-                shuffling, where the rows within each chunk are shuffled. Since ExperimentDataPipe must retrieve data
-                in chunks (to keep memory requirements to a fixed size), global shuffling ensures that a given row in
-                the shuffled result can originate from any position in the non-shuffled result ordering. If shuffling
-                only occurred within each chunk (i.e. "local" shuffling), the first chunk's rows would always be
-                returned first, the second chunk's rows would always be returned second, and so on. The chunk size is
-                determined by the ``soma_chunk_size`` parameter. Note that rows within a chunk will maintain
-                proximity, even after shuffling, so some experimentation may be required to ensure the shuffling is
-                sufficient for the model training process. To this end, the ``soma_chunk_size`` can be treated as a
-                hyperparameter that can be tuned.
+                Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``True``.
+                For performance reasons, shuffling is not performed globally across all rows, but rather in chunks.
+                More specifically, we select ``shuffle_chunk_count`` non-contiguous chunks across all the observations
+                in the query, concatenate the chunks and shuffle the associated observations.
+                The randomness of the shuffling is therefore determined by the
+                (``soma_chunk_size``, ``shuffle_chunk_count``) selection. The default values have been determined
+                to yield a good trade-off between randomness and performance. Further tuning may be required for
+                different type of models. Note that memory usage is correlated to the product
+                ``soma_chunk_size * shuffle_chunk_count``.
             seed:
                 The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
-                ``DistributedDataParallel`` to ensure data partitions are disjoint across worker processes.
+                :class:`torch.nn.parallel.DistributedDataParallel` to ensure data partitions are disjoint across worker
+                processes.
             return_sparse_X:
-                Controls whether the ``X`` data is returned as a dense or sparse Tensor. As ``X`` data is very sparse,
-                setting this to ``True`` will reduce memory usage, if the model supports use of sparse Tensors. Defaults
-                to ``False``, since sparse Tensors are still experimental in PyTorch.
+                Controls whether the ``X`` data is returned as a dense or sparse :class:`torch.Tensor`. As ``X`` data is
+                very sparse, setting this to ``True`` will reduce memory usage, if the model supports use of sparse
+                :class:`torch.Tensor`\ s. Defaults to ``False``, since sparse :class:`torch.Tensor`\ s are still
+                experimental in PyTorch.
             soma_chunk_size:
-                The number of obs/X rows to retrieve when reading data from SOMA. This impacts two aspects of
-                ``ExperimentDataPipe`` behavior: 1) The maximum memory utilization, with larger values providing
+                The number of ``obs``/``X`` rows to retrieve when reading data from SOMA. This impacts two aspects of
+                this class's behavior: 1) The maximum memory utilization, with larger values providing
                 better read performance, but also requiring more memory; 2) The granularity of the global shuffling
-                step (see ``shuffle`` parameter for details). If not specified, the value is set to utilize ~1 GiB of
-                RAM per SOMA chunk read, based upon the number of ``var`` columns (cells/features) being requested
-                and assuming X data sparsity of 95%; the number of rows per chunk will depend on the number of
-                ``var`` columns being read.
+                step (see ``shuffle`` parameter for details). The default value of 64 works well in conjunction
+                with the default ``shuffle_chunk_count`` value.
             use_eager_fetch:
                 Fetch the next SOMA chunk of ``obs`` and ``X`` data immediately after a previously fetched SOMA chunk is made
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
                 parallel with client-side processing of the SOMA data, potentially improving overall performance at the
                 cost of doubling memory utilization. Defaults to ``True``.
-        Returns:
-            The constructed ``ExperimentDataPipe``.
+            shuffle_chunk_count:
+                The number of contiguous blocks (chunks) of rows sampled to then concatenate and shuffle.
+                Larger numbers correspond to more randomness per training batch.
+                If ``shuffle == False``, this parameter is ignored. Defaults to ``2000``.
 
         Lifecycle:
             experimental
@@ -473,6 +495,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._encoders = None
         self._obs_joinids = None
         self._var_joinids = None
+        self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
 
@@ -503,11 +526,13 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @staticmethod
     def _subset_ids_to_partition(
-        ids_chunked: List[npt.NDArray[np.int64]], partition_index: int, num_partitions: int
+        ids_chunked: List[npt.NDArray[np.int64]],
+        partition_index: int,
+        num_partitions: int,
     ) -> List[npt.NDArray[np.int64]]:
         """Returns a single partition of the obs_joinids_chunked (a 2D ndarray), based upon the current process's distributed rank and world
-        size."""
-
+        size.
+        """
         # subset to a single partition
         # typing does not reflect that is actually a List of 2D NDArrays
         partition_indices = np.array_split(range(len(ids_chunked)), num_partitions)
@@ -523,7 +548,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @staticmethod
     def _compute_partitions(
-        loader_partition: int, loader_partitions: int, dist_partition: int, num_dist_partitions: int
+        loader_partition: int,
+        loader_partitions: int,
+        dist_partition: int,
+        num_dist_partitions: int,
     ) -> Tuple[int, int]:
         # NOTE: Can alternately use a `worker_init_fn` to split among workers split workload
         total_partitions = num_dist_partitions * loader_partitions
@@ -584,10 +612,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
                 shuffle_rng=self._shuffle_rng,
+                shuffle_chunk_count=self._shuffle_chunk_count,
             )
 
-            for datum_ in obs_and_x_iter:
-                yield datum_
+            yield from obs_and_x_iter
 
             pytorch_logger.debug(
                 "max process memory usage=" f"{obs_and_x_iter.max_process_mem_usage_bytes / (1024 ** 3):.3f} GiB"
@@ -623,11 +651,11 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     # TODO: This does not work in multiprocessing mode, as child process's stats are not collected
     def stats(self) -> Stats:
-        """
-        Get data loading stats for this ``ExperimentDataPipe``.
+        """Get data loading stats for this :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
 
         Returns:
-            The ``Stats`` object for this ``ExperimentDataPipe``.
+            The :class:`cellxgene_census.experimental.ml.pytorch.Stats` object for this
+            :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
 
         Lifecycle:
             experimental
@@ -636,11 +664,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @property
     def shape(self) -> Tuple[int, int]:
-        """
-        Get the shape of the data that will be returned by this ``ExperimentDataPipe``. This is the number of
-        obs (cell) and var (feature) counts in the returned data. If used in multiprocessing mode
-        (i.e. DataLoader instantiated with num_workers > 0), the obs (cell) count will reflect the size of the
-        partition of the data assigned to the active process.
+        """Get the shape of the data that will be returned by this :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
+        This is the number of obs (cell) and var (feature) counts in the returned data. If used in multiprocessing mode
+        (i.e. :class:`torch.utils.data.DataLoader` instantiated with num_workers > 0), the obs (cell) count will reflect
+        the size of the partition of the data assigned to the active process.
 
         Returns:
             A 2-tuple of ``int``s, for obs and var counts, respectively.
@@ -656,17 +683,15 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @property
     def obs_encoders(self) -> Encoders:
-        """
-        Returns a dictionary of ``sklearn.preprocessing.LabelEncoder`` objects, keyed on ``obs`` column names,
-        which were used to encode the ``obs`` column values. These encoders can be used to decode the encoded values as
-        follows:
+        """Returns a dictionary of :class:`sklearn.preprocessing.LabelEncoder` objects, keyed on ``obs`` column names,
+        which were used to encode the ``obs`` column values.
+
+        These encoders can be used to decode the encoded values as follows:
 
         >>> exp_data_pipe.obs_encoders["<obs_attr_name>"].inverse_transform(encoded_values)
 
-        See https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html.
-
         Returns:
-            A ``Dict[str, LabelEncoder]``, mapping column names to ``LabelEncoder``s.
+            A ``Dict[str, LabelEncoder]``, mapping column names to :class:`sklearn.preprocessing.LabelEncoder` objects.
         """
         self._init()
         assert self._encoders is not None
@@ -685,37 +710,42 @@ def experiment_dataloader(
     num_workers: int = 0,
     **dataloader_kwargs: Any,
 ) -> DataLoader:
-    """
-    Factory method for PyTorch ``DataLoader``. This method can be used to safely instantiate a
-    ``DataLoader`` that works with the ``ExperimentDataPipe``, since some of the ``DataLoader`` constructor params
-    are not applicable when using a ``IterDataPipe`` (``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``,
+    """Factory method for :class:`torch.utils.data.DataLoader`. This method can be used to safely instantiate a
+    :class:`torch.utils.data.DataLoader` that works with :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`,
+    since some of the :class:`torch.utils.data.DataLoader` constructor parameters are not applicable when using a
+    :class:`torchdata.datapipes.iter.IterDataPipe` (``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``,
     ``collate_fn``).
 
     Args:
         datapipe:
-            A PyTorch ``IterDataPipe``, which can be an ``ExperimentDataPipe`` or any other ``IterDataPipe`` that has
-            been chained to the ``ExperimentDataPipe``.
+            An :class:`torchdata.datapipes.iter.IterDataPipe`, which can be an
+            :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe` or any other
+            :class:`torchdata.datapipes.iter.IterDataPipe` that has been chained to the
+            :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
         num_workers:
-            Number of worker processes to use for data loading. If 0, data will be loaded in the main process.
+            Number of worker processes to use for data loading. If ``0``, data will be loaded in the main process.
         **dataloader_kwargs:
-            Additional keyword arguments to pass to the ``torch.utils.data.DataLoader`` constructor,
+            Additional keyword arguments to pass to the :class:`torch.utils.data.DataLoader` constructor,
             except for ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, and ``collate_fn``, which are not
-            supported when using ``ExperimentDataPipe``.
-            See https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader.
+            supported when using :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
 
     Returns:
-        A ``torch.utils.data.DataLoader``.
+        A :class:`torch.utils.data.DataLoader`.
 
     Raises:
         ValueError: if any of the ``shuffle``, ``batch_size``, ``sampler``, ``batch_sampler``, or ``collate_fn`` params
-        are passed as keyword arguments.
-
+            are passed as keyword arguments.
 
     Lifecycle:
         experimental
     """
-
-    unsupported_dataloader_args = ["shuffle", "batch_size", "sampler", "batch_sampler", "collate_fn"]
+    unsupported_dataloader_args = [
+        "shuffle",
+        "batch_size",
+        "sampler",
+        "batch_sampler",
+        "collate_fn",
+    ]
     if set(unsupported_dataloader_args).intersection(dataloader_kwargs.keys()):
         raise ValueError(f"The {','.join(unsupported_dataloader_args)} DataLoader params are not supported")
 
@@ -736,6 +766,7 @@ def experiment_dataloader(
 
 def _init_multiprocessing() -> None:
     """Ensures use of "spawn" for starting child processes with multiprocessing.
+
     Forked processes are known to be problematic:
       https://pytorch.org/docs/stable/notes/multiprocessing.html#avoiding-and-fighting-deadlocks
     Also, CUDA does not support forked child processes:

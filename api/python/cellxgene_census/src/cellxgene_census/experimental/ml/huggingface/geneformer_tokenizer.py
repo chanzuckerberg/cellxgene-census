@@ -10,8 +10,7 @@ from .cell_dataset_builder import CellDatasetBuilder
 
 
 class GeneformerTokenizer(CellDatasetBuilder):
-    """
-    Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
+    """Generate a Hugging Face `Dataset` containing Geneformer token sequences for each
     cell in CELLxGENE Census ExperimentAxisQuery results (human).
 
     This class requires the Geneformer package to be installed separately with:
@@ -62,8 +61,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         gene_median_file: str = "",
         **kwargs: Any,
     ) -> None:
-        """
-        - `experiment`: Census Experiment to query
+        """- `experiment`: Census Experiment to query
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
         - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
            of each Dataset item
@@ -86,12 +84,14 @@ class GeneformerTokenizer(CellDatasetBuilder):
         )
 
     def _load_geneformer_data(
-        self, experiment: tiledbsoma.Experiment, token_dictionary_file: str, gene_median_file: str
+        self,
+        experiment: tiledbsoma.Experiment,
+        token_dictionary_file: str,
+        gene_median_file: str,
     ) -> None:
-        """
-        Load (1) the experiment's genes dataframe and (2) Geneformer's static data
+        """Load (1) the experiment's genes dataframe and (2) Geneformer's static data
         files for gene tokens and median expression; then, intersect them to compute
-        self.model_gene_{ids,tokens,medians}
+        self.model_gene_{ids,tokens,medians}.
         """
         # TODO: this work could be reused for all queries on this experiment
 
@@ -153,8 +153,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         return self
 
     def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
-        """
-        Given the expression vector for one cell, compute the Dataset item providing
+        """Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
         # project cell_Xrow onto model_gene_ids and normalize by row sum.

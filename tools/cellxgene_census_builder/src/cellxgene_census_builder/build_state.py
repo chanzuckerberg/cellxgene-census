@@ -1,19 +1,15 @@
-"""
-Manage the configuration and dynamic build state for the Census build.
-
-"""
+"""Manage the configuration and dynamic build state for the Census build."""
 
 import functools
 import io
 import os
 import pathlib
+from collections.abc import Iterator, Mapping
 from datetime import datetime
-from typing import Any, Iterator, Mapping, Union
+from typing import Any, Self
 
-import psutil
 import yaml
 from attrs import define, field, fields, validators
-from typing_extensions import Self
 
 """
 Defaults for Census configuration.
@@ -26,11 +22,11 @@ CENSUS_BUILD_STATE = "state.yaml"
 @define
 class CensusBuildConfig:
     verbose: int = field(converter=int, default=1)
+    dashboard = field(converter=bool, default=False)
     log_dir: str = field(default="logs")
     log_file: str = field(default="build.log")
     reports_dir: str = field(default="reports")
     consolidate = field(converter=bool, default=True)
-    disable_dirty_git_check = field(converter=bool, default=True)
     dryrun: bool = field(
         converter=bool, default=False
     )  # if True, will disable copy of data/logs/reports/release.json to S3 buckets. Will NOT disable local build, etc.
@@ -46,18 +42,18 @@ class CensusBuildConfig:
     logs_S3_path: str = field(default="s3://cellxgene-data-public-logs/builder")
     build_tag: str = field(default=datetime.now().astimezone().date().isoformat())
     #
-    # Default multi-process. Memory scaling based on empirical tests.
-    multi_process: bool = field(converter=bool, default=True)
-    #
-    # The memory budget used to determine appropriate parallelism in many steps of build.
-    # Only set to a smaller number if you want to not use all available RAM.
-    memory_budget: int = field(converter=int, default=psutil.virtual_memory().total)
-    #
     # 'max_worker_processes' sets a limit on the number of worker processes to avoid running into
-    # the max VM map kernel limit and other hard resource limits. The value specified here was
-    # determined by empirical testing on 128 and 192 CPU boxes (e.g., r6a.48xlarge, r6i.32xlarge,
-    # etc) using the default kernel config for Ubuntu 22.04
-    max_worker_processes: int = field(converter=int, default=192)
+    # the max VM map kernel limit and other hard resource limits.
+    #
+    # The current value is significantly reduced to accommodate high thread use in TileDB-SOMA
+    # https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    #
+    # Current value tested on hosts up to 192 cpus worked fine on hosts with CPU count up to 192 using
+    # the default AWS Linux 2 and Ubuntu 22 kernel default config. This could be raised once
+    # TileDB has reduced thread allocation, if that helps overall throughput. See also the
+    # DEFAULT_TILEDB_CONFIG in globals.py which also hard-caps threads to a reduced number
+    # for the same reason. FMI: https://github.com/single-cell-data/TileDB-SOMA/issues/2149
+    max_worker_processes: int = field(converter=int, default=48)
     #
     # Host minimum resource validation
     host_validation_disable: int = field(
@@ -83,8 +79,8 @@ class CensusBuildConfig:
     test_first_n: int = field(converter=int, default=0)
 
     @classmethod
-    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
-        if isinstance(file, (str, os.PathLike)):
+    def load(cls, file: str | os.PathLike[str] | io.TextIOBase) -> Self:
+        if isinstance(file, str | os.PathLike):
             with open(file) as f:
                 user_config = yaml.safe_load(f)
         else:
@@ -111,7 +107,7 @@ class CensusBuildConfig:
 
 
 class Namespace(Mapping[str, Any]):
-    """Readonly namespace"""
+    """Readonly namespace."""
 
     def __init__(self, **kwargs: Any):
         self._state = dict(kwargs)
@@ -148,7 +144,7 @@ class Namespace(Mapping[str, Any]):
 
 
 class MutableNamespace(Namespace):
-    """Mutable namespace"""
+    """Mutable namespace."""
 
     def __setitem__(self, key: str, value: Any) -> None:
         if not isinstance(key, str):
@@ -171,8 +167,8 @@ class CensusBuildState(MutableNamespace):
         self.__dirty_keys.add(key)
 
     @classmethod
-    def load(cls, file: Union[str, os.PathLike[str], io.TextIOBase]) -> Self:
-        if isinstance(file, (str, os.PathLike)):
+    def load(cls, file: str | os.PathLike[str] | io.TextIOBase) -> Self:
+        if isinstance(file, str | os.PathLike):
             with open(file) as state_log:
                 documents = list(yaml.safe_load_all(state_log))
         else:
@@ -182,7 +178,7 @@ class CensusBuildState(MutableNamespace):
         state.__dirty_keys.clear()
         return state
 
-    def commit(self, file: Union[str, os.PathLike[str]]) -> None:
+    def commit(self, file: str | os.PathLike[str]) -> None:
         # append dirty elements (atomic on Posix)
         if self.__dirty_keys:
             dirty = {k: self[k] for k in self.__dirty_keys}
@@ -197,7 +193,8 @@ class CensusBuildArgs:
     working_dir: pathlib.PosixPath = field(validator=validators.instance_of(pathlib.PosixPath))
     config: CensusBuildConfig = field(validator=validators.instance_of(CensusBuildConfig))
     state: CensusBuildState = field(
-        factory=CensusBuildState, validator=validators.instance_of(CensusBuildState)  # default: empty state
+        factory=CensusBuildState,
+        validator=validators.instance_of(CensusBuildState),  # default: empty state
     )
 
     @property

@@ -1,5 +1,5 @@
 import pathlib
-from typing import List, Optional
+from typing import Literal
 
 import anndata
 import attrs
@@ -7,13 +7,16 @@ import numpy as np
 import pandas as pd
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from scipy import sparse
+
 from cellxgene_census_builder.build_soma.datasets import Dataset
 from cellxgene_census_builder.build_soma.globals import (
     CENSUS_X_LAYERS_PLATFORM_CONFIG,
 )
 from cellxgene_census_builder.build_state import CensusBuildArgs, CensusBuildConfig
-from cellxgene_census_builder.util import process_init
-from scipy import sparse
+from cellxgene_census_builder.process_init import process_init
+
+MATRIX_FORMAT = Literal["csr", "csc", "dense"]
 
 
 @attrs.define(frozen=True)
@@ -23,12 +26,18 @@ class Organism:
 
 
 ORGANISMS = [Organism("homo_sapiens", "NCBITaxon:9606"), Organism("mus_musculus", "NCBITaxon:10090")]
-GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"]]
-NUM_DATASET = 2
+GENE_IDS = [["a", "b", "c", "d"], ["a", "b", "e"], ["a", "b", "c"], ["e", "b", "c", "a"]]
+ASSAY_IDS = ["EFO:0009922", "EFO:0008931", "EFO:0009922", "EFO:0008931"]
+X_FORMAT: list[MATRIX_FORMAT] = ["csr", "csc", "csr", "dense"]
+NUM_DATASET = 4
 
 
 def get_anndata(
-    organism: Organism, gene_ids: Optional[List[str]] = None, no_zero_counts: bool = False
+    organism: Organism,
+    gene_ids: list[str] | None = None,
+    no_zero_counts: bool = False,
+    X_format: MATRIX_FORMAT = "csr",
+    assay_ontology_term_id: str = "EFO:0009922",
 ) -> anndata.AnnData:
     gene_ids = gene_ids or GENE_IDS[0]
     n_cells = 4
@@ -43,15 +52,22 @@ def get_anndata(
     X[X.sum(axis=1) == 0, rng.integers(X.shape[1])] = 6.0
     assert np.all(X.sum(axis=1) > 0.0)
 
-    # The builder only supports sparse matrices
-    X = sparse.csr_matrix(X)
+    match X_format:
+        case "csr":
+            X = sparse.csr_matrix(X)
+        case "csc":
+            X = sparse.csc_matrix(X)
+        case "dense":
+            pass
+        case _:
+            raise NotImplementedError("unsupported X format")
 
     # Create obs
     obs_dataframe = pd.DataFrame(
         data={
             "cell_idx": pd.Series([1, 2, 3, 4]),
             "cell_type_ontology_term_id": "CL:0000192",
-            "assay_ontology_term_id": "EFO:0008720",
+            "assay_ontology_term_id": assay_ontology_term_id,
             "disease_ontology_term_id": "PATO:0000461",
             "organism_ontology_term_id": organism.organism_ontology_term_id,
             "sex_ontology_term_id": "unknown",
@@ -69,7 +85,7 @@ def get_anndata(
             "sex": "test",
             "tissue": "test",
             "organism": "test",
-            "tissue_type": "test",
+            "tissue_type": "tissue",
             "observation_joinid": "test",
         },
         index=["1", "2", "3", "4"],
@@ -100,7 +116,7 @@ def get_anndata(
     uns["batch_condition"] = np.array(["a", "b"], dtype="object")
 
     # Need to carefully set the corpora schema versions in order for tests to pass.
-    uns["schema_version"] = "4.0.0"  # type: ignore
+    uns["schema_version"] = "5.0.0"  # type: ignore
 
     return anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm, uns=uns)
 
@@ -124,13 +140,15 @@ def census_build_args(request: pytest.FixtureRequest, tmp_path: pathlib.Path) ->
 
 
 @pytest.fixture
-def datasets(census_build_args: CensusBuildArgs) -> List[Dataset]:
+def datasets(census_build_args: CensusBuildArgs) -> list[Dataset]:
     census_build_args.h5ads_path.mkdir(parents=True, exist_ok=True)
     assets_path = census_build_args.h5ads_path.as_posix()
     datasets = []
     for organism in ORGANISMS:
         for i in range(NUM_DATASET):
-            h5ad = get_anndata(organism, GENE_IDS[i], no_zero_counts=True)
+            h5ad = get_anndata(
+                organism, GENE_IDS[i], no_zero_counts=True, assay_ontology_term_id=ASSAY_IDS[i], X_format=X_FORMAT[i]
+            )
             h5ad_path = f"{assets_path}/{organism.name}_{i}.h5ad"
             h5ad.write_h5ad(h5ad_path)
             datasets.append(

@@ -1,36 +1,42 @@
 exclude: (^doc/)|(.*/venv/)
 default_stages: [commit]
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black-jupyter
-        name: black-notebooks
-        files: ^api/python/notebooks
-        args: ["--config", "./api/python/notebooks/pyproject.toml"]
-      - id: black
-        name: black-cellxgene-census
-        files: ^api/python/cellxgene_census
-        args: ["--config", "./api/python/cellxgene_census/pyproject.toml"]
-      - id: black
-        name: black-tools
-        files: ^tools
-        args: ["--config", "./tools/pyproject.toml"]
-
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.15
+    rev: v0.3.5
     hooks:
       - id: ruff
         name: ruff-cellxgene-census
         files: ^api/python/cellxgene_census
+        types_or: [python, pyi, jupyter]
         args: ["--config=./api/python/cellxgene_census/pyproject.toml", "--fix"]
       - id: ruff
         name: ruff-tools
         files: ^tools
-        args: [ "--config=./tools/pyproject.toml", "--fix" ]
+        types_or: [python, pyi, jupyter]
+        args: ["--config=./tools/pyproject.toml", "--fix" ]
+      - id: ruff
+        name: ruff-notebooks
+        files: ^api/python/notebooks
+        types_or: [python, pyi, jupyter]
+        args: ["--config=./api/python/notebooks/pyproject.toml", "--fix"]
+      - id: ruff-format
+        name: ruff-format-cellxgene-census
+        files: ^api/python/cellxgene_census
+        types_or: [python, pyi, jupyter]
+        args: ["--config=./api/python/cellxgene_census/pyproject.toml"]
+      - id: ruff-format
+        name: ruff-format-tools
+        files: ^tools
+        types_or: [python, pyi, jupyter]
+        args: ["--config=./tools/pyproject.toml"]
+      - id: ruff-format
+        name: ruff-format-notebooks
+        files: ^api/python/notebooks
+        types_or: [python, pyi, jupyter]
+        args: ["--config=./api/python/notebooks/pyproject.toml"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.9.0
     hooks:
       - id: mypy
         name: mypy-cellxgene-census
@@ -80,12 +86,6 @@ repos:
           - pandas-stubs
           - typing_extensions
           - types-PyYAML
-
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.1
-    hooks:
-      - id: nbqa-black
-        files: ^api/python/notebooks
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.39.0

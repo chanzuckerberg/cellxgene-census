@@ -2,7 +2,7 @@
 label_feature: cell_subclass
 # Specific labels to exclude from training and evaluation
 label_blocklist:
-  - native cell
+  - unknown
   - abnormal cell
   - animal cell
   - eukaryotic cell

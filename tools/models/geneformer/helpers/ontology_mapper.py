@@ -1,6 +1,5 @@
 # mypy: ignore-errors
-"""
-Provides classes to recreate cell type and tissue mappings as used in CELLxGENE Discover
+"""Provides classes to recreate cell type and tissue mappings as used in CELLxGENE Discover.
 
 - OntologyMapper abstract class to create other mappers
 - SystemMapper to map any tissue to a System
@@ -15,7 +14,6 @@ import gzip
 import os
 import tempfile
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union
 
 import owlready2
 
@@ -33,8 +31,8 @@ class OntologyMapper(ABC):
 
     def __init__(
         self,
-        high_level_ontology_term_ids: List[str],
-        ontology_owl_path: Union[str, os.PathLike],
+        high_level_ontology_term_ids: list[str],
+        ontology_owl_path: str | os.PathLike,
         root_ontology_term_id: str,
     ):
         self._cached_high_level_terms = {}
@@ -52,11 +50,8 @@ class OntologyMapper(ABC):
         except TypeError:
             self._ontology = owlready2.get_ontology(ontology_owl_path).load()
 
-    def get_high_level_terms(self, ontology_term_id: str) -> List[Optional[str]]:
-        """
-        Returns the associated high-level ontology term IDs from any other ID
-        """
-
+    def get_high_level_terms(self, ontology_term_id: str) -> list[str | None]:
+        """Returns the associated high-level ontology term IDs from any other I."""
         ontology_term_id = self.reformat_ontology_term_id(ontology_term_id, to_writable=False)
 
         if ontology_term_id in self._cached_high_level_terms:
@@ -95,27 +90,24 @@ class OntologyMapper(ABC):
 
         return resulting_high_level_terms
 
-    def get_top_high_level_term(self, ontology_term_id: str) -> Optional[str]:
-        """
-        Return the top high level term
-        """
-
+    def get_top_high_level_term(self, ontology_term_id: str) -> str | None:
+        """Return the top high level term."""
         return self.get_high_level_terms(ontology_term_id)[0]
 
     @abstractmethod
     def _get_branch_ancestors(self, owl_entity):
-        """
-        Gets ALL ancestors from an owl entity. What's defined as an ancestor depends on the mapper type, for
-        example CL ancestors are likely to just include is_a relationship
+        """Gets ALL ancestors from an owl entity.
+
+        What's defined as an ancestor depends on the mapper type, for
+        example CL ancestors are likely to just include is_a relationship.
         """
 
     def get_label_from_id(self, ontology_term_id: str):
-        """
-        Returns the label from and ontology term id that is in writable form
+        """Returns the label from and ontology term id that is in writable form.
+
         Example: "UBERON:0002048" returns "lung"
         Example: "UBERON_0002048" raises ValueError because the ID is not in writable form
         """
-
         if ontology_term_id in self._cached_labels:
             return self._cached_labels[ontology_term_id]
 
@@ -133,12 +125,12 @@ class OntologyMapper(ABC):
 
     @staticmethod
     def reformat_ontology_term_id(ontology_term_id: str, to_writable: bool = True):
-        """
-        Converts ontology term id string between two formats:
-            - `to_writable == True`: from "UBERON_0002048" to "UBERON:0002048"
-            - `to_writable == False`: from "UBERON:0002048" to "UBERON_0002048"
-        """
+        """Reformats ontology term ID string.
 
+        Converts ontology term id string between two formats.
+        - `to_writable == True`: from "UBERON_0002048" to "UBERON:0002048"
+        - `to_writable == False`: from "UBERON:0002048" to "UBERON_0002048"
+        """
         if ontology_term_id is None:
             return None
 
@@ -151,9 +143,8 @@ class OntologyMapper(ABC):
                 raise ValueError(f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one ':'")
             return ontology_term_id.replace(":", "_")
 
-    def _list_ancestors(self, entity: owlready2.entity.ThingClass, ancestors: Optional[List[str]] = None) -> List[str]:
-        """
-        Recursive function that given an entity of an ontology, it traverses the ontology and returns
+    def _list_ancestors(self, entity: owlready2.entity.ThingClass, ancestors: list[str] | None = None) -> list[str]:
+        """Recursive function that given an entity of an ontology, it traverses the ontology and returns
         a list of all ancestors associated with the entity.
         """
         ancestors = ancestors or []
@@ -184,9 +175,7 @@ class OntologyMapper(ABC):
             return ancestors
 
     def _get_entity_from_id(self, ontology_term_id: str) -> owlready2.entity.ThingClass:
-        """
-        Given a readable ontology term id (e.g. "UBERON_0002048"), it returns the associated ontology entity
-        """
+        """Given a readable ontology term id (e.g. "UBERON_0002048"), it returns the associated ontology entity."""
         return self._ontology.search_one(iri=f"http://purl.obolibrary.org/obo/{ontology_term_id}")
 
     @staticmethod
@@ -214,7 +203,7 @@ class CellMapper(OntologyMapper):
             with gzip.open(self.CXG_CL_ONTOLOGY_PATH, "rb") as f:
                 owl.write(f.read())
             owl.flush()
-            super(CellMapper, self).__init__(
+            super(CellMapper, self).__init__(  # noqa: UP008
                 high_level_ontology_term_ids=cell_type_high_level_ontology_term_ids,
                 ontology_owl_path=owl.name,
                 root_ontology_term_id=self.ROOT_NODE,
@@ -249,13 +238,13 @@ class TissueMapper(OntologyMapper):
     # Only look up ancestors under anatomical entity
     ROOT_NODE = "UBERON_0001062"
 
-    def __init__(self, tissue_high_level_ontology_term_ids: List[str]):
+    def __init__(self, tissue_high_level_ontology_term_ids: list[str]):
         self.cell_type_high_level_ontology_term_ids = tissue_high_level_ontology_term_ids
         with tempfile.NamedTemporaryFile() as owl:
             with gzip.open(self.CXG_UBERON_ONTOLOGY_PATH, "rb") as f:
                 owl.write(f.read())
             owl.flush()
-            super(TissueMapper, self).__init__(
+            super(TissueMapper, self).__init__(  # noqa: UP008
                 high_level_ontology_term_ids=tissue_high_level_ontology_term_ids,
                 ontology_owl_path=owl.name,
                 root_ontology_term_id=self.ROOT_NODE,

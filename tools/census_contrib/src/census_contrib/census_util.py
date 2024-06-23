@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Optional, Tuple, cast
+from typing import cast
 
 import cellxgene_census
 import numpy as np
@@ -14,9 +14,8 @@ from .util import get_logger
 logger = get_logger()
 
 
-def open_census(census_version: Optional[str], census_uri: Optional[str]) -> soma.Collection:
+def open_census(census_version: str | None, census_uri: str | None) -> soma.Collection:
     """Open and return the Census top-level handle."""
-
     if census_uri:
         return cellxgene_census.open_soma(uri=census_uri)
 
@@ -24,20 +23,28 @@ def open_census(census_version: Optional[str], census_uri: Optional[str]) -> som
 
 
 @functools.cache
-def get_obs_soma_joinids(config: Config) -> Tuple[npt.NDArray[np.int64], Tuple[int, ...]]:
+def get_axis_soma_joinids(config: Config) -> tuple[npt.NDArray[np.int64], tuple[int, ...]]:
+    """Return experiment axis (obs, var) soma_joind values and axis shape appropriate for the
+    Census version specified in the metadata and the axis specified in embedding metadata.
     """
-    Return experiment obs soma_joind values and obs shape appropriate for the
-    Census version specified in the metadata.
-    """
+    axis: str = config.metadata.data_type
+    assert axis in [
+        "obs_embedding",
+        "var_embedding",
+    ], "Unknown embedding type - must be one of obs_embedding or var_embedding"
+
     with open_census(census_uri=config.args.census_uri, census_version=config.metadata.census_version) as census:
         exp = census["census_data"][config.metadata.experiment_name]
-        tbl = exp.obs.read(column_names=["soma_joinid"]).concat()
+        if axis == "obs_embedding":
+            tbl = exp.obs.read(column_names=["soma_joinid"]).concat()
+        else:
+            tbl = exp.ms["RNA"].var.read(column_names=["soma_joinid"]).concat()
 
         joinids = cast(npt.NDArray[np.int64], tbl.column("soma_joinid").to_numpy())
         return joinids, (joinids.max() + 1,)
 
 
-def get_census_obs_uri_region(config: Config) -> Tuple[str, str]:
+def get_census_obs_uri_region(config: Config) -> tuple[str, str]:
     with open_census(census_uri=config.args.census_uri, census_version=config.metadata.census_version) as census:
         exp = census["census_data"][config.metadata.experiment_name]
         uri = exp.obs.uri

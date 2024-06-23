@@ -1,8 +1,17 @@
+from unittest import mock
+
 import numpy as np
-import pytest
-from cellxgene_census_builder.build_soma.util import array_chunker, is_nonnegative_integral
-from cellxgene_census_builder.util import urlcat, urljoin
-from scipy.sparse import coo_matrix, csr_matrix, triu
+from scipy.sparse import csr_matrix
+
+from cellxgene_census_builder.build_soma.util import is_nonnegative_integral
+from cellxgene_census_builder.util import (
+    clamp,
+    cpu_count,
+    log_process_resource_status,
+    log_system_memory_status,
+    urlcat,
+    urljoin,
+)
 
 
 def test_is_nonnegative_integral() -> None:
@@ -43,83 +52,6 @@ def test_is_nonnegative_integral() -> None:
     assert is_nonnegative_integral(X)
 
 
-def test_array_chunker() -> None:
-    # Case 1: dense matrix (np.ndarray)
-    X = np.ones(1200).reshape(30, 40)
-    # If nnz_chunk_size is less than the number of cols, the number of cols is used (40 in this example)
-    chunked = list(array_chunker(X, nnz_chunk_size=10))
-    assert len(chunked) == 30
-    for i, s in enumerate(chunked):
-        assert isinstance(s, coo_matrix)
-        assert s.nnz == 40
-        assert s.shape == (30, 40)
-        # The i-th row of the matrix should have 40 nonzeros (which implies the rest are zeros)
-        csr = s.tocsr()
-        assert csr.getrow(i).nnz == 40
-
-    # If nnz_chunk_size is less than
-    chunked = list(array_chunker(X, nnz_chunk_size=600))
-    assert len(chunked) == 2
-    for s in chunked:
-        assert isinstance(s, coo_matrix)
-        assert s.nnz == 600
-        assert s.shape == (30, 40)
-
-    chunked = list(array_chunker(X, nnz_chunk_size=2400))
-    assert len(chunked) == 1
-
-    # Case 2: compressed row sparse matrix (csr_matrix)
-    # we'll use an upper triangular matrix with all ones (avg 5 nnz per row)
-    # [
-    #     [1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
-    #     [0., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
-    #     [0., 0., 1., 1., 1., 1., 1., 1., 1., 1.],
-    #     [0., 0., 0., 1., 1., 1., 1., 1., 1., 1.],
-    #     [0., 0., 0., 0., 1., 1., 1., 1., 1., 1.],
-    #     [0., 0., 0., 0., 0., 1., 1., 1., 1., 1.],
-    #     [0., 0., 0., 0., 0., 0., 1., 1., 1., 1.],
-    #     [0., 0., 0., 0., 0., 0., 0., 1., 1., 1.],
-    #     [0., 0., 0., 0., 0., 0., 0., 0., 1., 1.],
-    #     [0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
-    # ]
-
-    X = triu(np.ones(100).reshape(10, 10)).tocsr()
-    # In this case, chunks will be 2 rows x 10 column (since on average each row contains 5 nonzeros)
-    chunked = list(array_chunker(X, nnz_chunk_size=10))
-    assert len(chunked) == 5
-    assert chunked[0].nnz == 19
-    assert chunked[1].nnz == 15
-    assert chunked[2].nnz == 11
-    assert chunked[3].nnz == 7
-    assert chunked[4].nnz == 3
-
-    # Verify chunking is done by row
-    for i in range(0, 5):
-        assert np.array_equal(chunked[i].todense()[2 * i : 2 * (i + 1), :], X.todense()[2 * i : 2 * (i + 1), :])  # type: ignore
-
-    # Case 3: compressed column sparse matrix (csc_matrix)
-    # We'll use the same example as for csr, but note that chunking is done by column and not by row.
-
-    X = triu(np.ones(100).reshape(10, 10)).tocsc()
-    # In this case, chunks will be 10 rows x 2 column (since on average each row contains 5 nonzeros)
-    chunked = list(array_chunker(X, nnz_chunk_size=10))
-    assert len(chunked) == 5
-    assert chunked[0].nnz == 3
-    assert chunked[1].nnz == 7
-    assert chunked[2].nnz == 11
-    assert chunked[3].nnz == 15
-    assert chunked[4].nnz == 19
-
-    # Verify chunks (chunking is done by column)
-    for i in range(0, 5):
-        assert np.array_equal(chunked[i].todense()[:, 2 * i : 2 * (i + 1)], X.todense()[:, 2 * i : 2 * (i + 1)])  # type: ignore
-
-    # Other formats are rejected by the method
-    X = triu(np.ones(100).reshape(10, 10)).tolil()
-    with pytest.raises(NotImplementedError):
-        list(array_chunker(X))
-
-
 def test_urljoin() -> None:
     assert urljoin("path", "to") == "to"
     assert urljoin("path/", "to") == "path/to"
@@ -150,3 +82,33 @@ def test_urlcat() -> None:
     assert urlcat("s3://foo", "bar", "baz") == "s3://foo/bar/baz"
     assert urlcat("s3://foo", "bar/", "baz") == "s3://foo/bar/baz"
     assert urlcat("s3://foo", "bar/", "baz/") == "s3://foo/bar/baz/"
+
+
+def test_cpu_count() -> None:
+    import os
+
+    assert cpu_count() > 0
+    assert cpu_count() == (os.cpu_count() or 1)
+
+    with mock.patch("os.cpu_count", return_value=None):
+        assert cpu_count() == 1
+
+
+def test_clamp() -> None:
+    assert clamp(0, 1, 100) == 1
+    assert clamp(1, 1, 100) == 1
+    assert clamp(10, 1, 100) == 10
+    assert clamp(100, 1, 100) == 100
+    assert clamp(101, 1, 100) == 100
+
+
+def test_log_process_resource_status() -> None:
+    with mock.patch("cellxgene_census_builder.util.logger.log") as mocked_logger:
+        log_process_resource_status()
+    mocked_logger.assert_called_once()
+
+
+def test_log_system_memory_status() -> None:
+    with mock.patch("cellxgene_census_builder.util.logger.log") as mocked_logger:
+        log_system_memory_status()
+    mocked_logger.assert_called_once()

@@ -6,8 +6,7 @@ import numpy.typing as npt
 
 
 class MeanVarianceAccumulator:
-    """
-    Online mean/variance for n_variables over n_samples, where the samples are
+    """Online mean/variance for n_variables over n_samples, where the samples are
     divided into n_batches (n_batches << n_samples). Accumulates each batch separately.
 
     Batches implemented using Chan's parallel adaptation of Welford's online algorithm.
@@ -55,7 +54,12 @@ class MeanVarianceAccumulator:
 
     def finalize(
         self,
-    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    ) -> Tuple[
+        npt.NDArray[np.float64],
+        npt.NDArray[np.float64],
+        npt.NDArray[np.float64],
+        npt.NDArray[np.float64],
+    ]:
         # correct each batch to account for sparsity.
         # if nnz_only, the correction is not needed as we only do mean/average over nonzero values
         if not self.nnz_only:
@@ -125,11 +129,22 @@ class CountsAccumulator:
     ) -> None:
         if self.n_batches == 1:
             assert batch_vec is None
-            _accum_clipped_counts(self.counts_sum[0], self.squared_counts_sum[0], var_vec, val_vec, self.clip_val[0])
+            _accum_clipped_counts(
+                self.counts_sum[0],
+                self.squared_counts_sum[0],
+                var_vec,
+                val_vec,
+                self.clip_val[0],
+            )
         else:
             assert batch_vec is not None
             _accum_clipped_counts_by_batch(
-                self.counts_sum, self.squared_counts_sum, batch_vec, var_vec, val_vec, self.clip_val
+                self.counts_sum,
+                self.squared_counts_sum,
+                batch_vec,
+                var_vec,
+                val_vec,
+                self.clip_val,
             )
 
     def finalize(self) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
@@ -174,8 +189,7 @@ def _mbomv_update_by_batch(
     u: npt.NDArray[np.float64],
     M2: npt.NDArray[np.float64],
 ) -> None:
-    """
-    Incrementally accumulate mean and sum of square of distance from mean using
+    """Incrementally accumulate mean and sum of square of distance from mean using
     Welford's online method.
     """
     for batch, col, val in zip(batch_vec, var_vec, val_vec):
@@ -213,8 +227,7 @@ def _mbomv_update_single_batch(
     u: npt.NDArray[np.float64],
     M2: npt.NDArray[np.float64],
 ) -> None:
-    """
-    Incrementally accumulate mean and sum of square of distance from mean using
+    """Incrementally accumulate mean and sum of square of distance from mean using
     Welford's online method.
     """
     for col, val in zip(var_vec, val_vec):
@@ -226,7 +239,13 @@ def _mbomv_update_single_batch(
 
 
 @numba.jit(
-    numba.void(numba.int64, numba.int64[:], numba.int32[:, :], numba.float64[:, :], numba.float64[:, :]),
+    numba.void(
+        numba.int64,
+        numba.int64[:],
+        numba.int32[:, :],
+        numba.float64[:, :],
+        numba.float64[:, :],
+    ),
     nopython=True,
     nogil=True,
 )  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
@@ -237,8 +256,7 @@ def _mbomv_sparse_correct_batches(
     u: npt.NDArray[np.float64],
     M2: npt.NDArray[np.float64],
 ) -> None:
-    """
-    Finalize incremental accumulators to account for missing elements (due to sparse
+    """Finalize incremental accumulators to account for missing elements (due to sparse
     input). Non-sparse and sparse combined using Chan's parallel adaptation of Welford's.
     The code assumes the sparse elements are all zero.
     """
@@ -265,8 +283,7 @@ def _mbomv_combine_batches(
     u: npt.NDArray[np.float64],
     M2: npt.NDArray[np.float64],
 ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """
-    Combine all batches using Chan's parallel adaptation of Welford's.
+    """Combine all batches using Chan's parallel adaptation of Welford's.
 
     Returns tuple of (u, M2).
     """
