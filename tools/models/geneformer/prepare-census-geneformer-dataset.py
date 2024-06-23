@@ -55,7 +55,7 @@ def main(argv):
             (obs_dfs[i], os.path.join(args.output_dir, "shard-" + str(i).zfill(digits))) for i in range(len(obs_dfs))
         ]
     with multiprocessing.Pool(processes=4) as pool:  # NOTE: keep processes small due to memory usage
-        pool.map(functools.partial(build_dataset, census_uri, args.obs_columns), tasks)
+        pool.map(functools.partial(build_dataset, census_uri, args.obs_columns, args.tokenizer_kwargs), tasks)
 
     logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())
 
@@ -91,6 +91,9 @@ def parse_arguments(argv):
     )
     parser.add_argument(
         "-N", type=int, help="further downsample to no more than N examples per distinct value of sampling_column"
+    )
+    parser.add_argument(
+        "--tokenizer-kwargs", type=json.loads, default={}, help="additional kwargs to pass to GeneformerTokenizer"
     )
     parser.add_argument("--shards", type=int, default=1, help="output dataset shards (default: 1)")
     parser.add_argument(
@@ -159,7 +162,7 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     return obs_df
 
 
-def build_dataset(census_uri, obs_columns, task):
+def build_dataset(census_uri, obs_columns, tokenizer_kwargs, task):
     """Given obs_df from select_cells (or subset thereof), build the Geneformer dataset and save to output_dir."""
     obs_df = task[0]
     output_dir = task[1]
@@ -177,6 +180,7 @@ def build_dataset(census_uri, obs_columns, task):
                 for it in obs_columns
                 if it not in ("cell_subclass", "cell_subclass_ontology_term_id")
             ],
+            **tokenizer_kwargs,
         ) as tokenizer:
             dataset = tokenizer.build()
 
