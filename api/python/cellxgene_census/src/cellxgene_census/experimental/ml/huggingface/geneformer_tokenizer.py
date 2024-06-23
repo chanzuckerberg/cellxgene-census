@@ -44,11 +44,14 @@ class GeneformerTokenizer(CellDatasetBuilder):
 
     obs_column_names: Set[str]
     max_input_tokens: int
+    special_token: bool
 
     # set of gene soma_joinids corresponding to genes modeled by Geneformer:
     model_gene_ids: npt.NDArray[np.int64]
     model_gene_tokens: npt.NDArray[np.int64]  # token for each model_gene_id
     model_gene_medians: npt.NDArray[np.float64]  # float for each model_gene_id
+    model_cls_token: Optional[np.int64] = None
+    model_sep_token: Optional[np.int64] = None
 
     def __init__(
         self,
@@ -57,8 +60,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
         obs_column_names: Optional[Sequence[str]] = None,
         obs_attributes: Optional[Sequence[str]] = None,
         max_input_tokens: int = 2048,
+        special_token: bool = False,
         token_dictionary_file: str = "",
         gene_median_file: str = "",
+        gene_mapping_file: str = "",
         **kwargs: Any,
     ) -> None:
         """- `experiment`: Census Experiment to query
@@ -66,16 +71,19 @@ class GeneformerTokenizer(CellDatasetBuilder):
         - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
            of each Dataset item
         - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
+        - `special_token`: whether to affix separator tokens to the sequence (default False)
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
+        - `gene_mapping_file`: optional pickle file with mapping for Census gene IDs to model's
         """
         if obs_attributes:  # old name of obs_column_names
             obs_column_names = obs_attributes
 
         self.max_input_tokens = max_input_tokens
+        self.special_token = special_token
         self.obs_column_names = set(obs_column_names) if obs_column_names else set()
-        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
+        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file, gene_mapping_file)
         super().__init__(
             experiment,
             measurement_name="RNA",
@@ -88,6 +96,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         experiment: tiledbsoma.Experiment,
         token_dictionary_file: str,
         gene_median_file: str,
+        gene_mapping_file: str,
     ) -> None:
         """Load (1) the experiment's genes dataframe and (2) Geneformer's static data
         files for gene tokens and median expression; then, intersect them to compute
@@ -115,6 +124,11 @@ class GeneformerTokenizer(CellDatasetBuilder):
         with open(gene_median_file, "rb") as f:
             gene_median_dict = pickle.load(f)
 
+        gene_mapping = None
+        if gene_mapping_file:
+            with open(gene_mapping_file, "rb") as f:
+                gene_mapping = pickle.load(f)
+
         # compute model_gene_{ids,tokens,medians} by joining genes_df with Geneformer's
         # dicts
         model_gene_ids = []
@@ -122,6 +136,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         model_gene_medians = []
         for gene_id, row in genes_df.iterrows():
             ensg = row["feature_id"]  # ENSG... gene id, which keys Geneformer's dicts
+            if gene_mapping is not None:
+                ensg = gene_mapping.get(ensg, ensg)
             if ensg in gene_token_dict:
                 model_gene_ids.append(gene_id)
                 model_gene_tokens.append(gene_token_dict[ensg])
@@ -142,6 +158,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
         # The numerator 10K factor follows Geneformer's tokenizer; theoretically it doesn't affect
         # affect the rank order, but is probably intended to help with numerical precision.
         self.model_gene_medians_factor = 10_000.0 / self.model_gene_medians
+
+        if self.special_token:
+            self.model_cls_token = gene_token_dict["<cls>"]
+            self.model_sep_token = gene_token_dict["<sep>"]
 
     def __enter__(self) -> "GeneformerTokenizer":
         super().__enter__()
@@ -170,6 +190,17 @@ class GeneformerTokenizer(CellDatasetBuilder):
         # (use sparse model_expr.{col,data} to naturally exclude undetected genes)
         token_order = model_expr.col[np.argsort(-model_expr.data)[: self.max_input_tokens]]
         input_ids = self.model_gene_tokens[token_order]
+
+        if self.special_token:
+            # affix special tokens, dropping the last two gene tokens if necessary
+            if len(input_ids) == self.max_input_tokens:
+                input_ids = input_ids[:-1]
+            assert self.model_cls_token is not None
+            input_ids = np.insert(input_ids, 0, self.model_cls_token)
+            if len(input_ids) == self.max_input_tokens:
+                input_ids = input_ids[:-1]
+            assert self.model_sep_token is not None
+            input_ids = np.append(input_ids, self.model_sep_token)
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
         # add the requested obs attributes
