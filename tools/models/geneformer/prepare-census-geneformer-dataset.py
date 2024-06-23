@@ -160,9 +160,7 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
 
 
 def build_dataset(census_uri, obs_columns, task):
-    """
-    Given obs_df from select_cells (or subset thereof), build the Geneformer dataset and save to output_dir.
-    """
+    """Given obs_df from select_cells (or subset thereof), build the Geneformer dataset and save to output_dir."""
     obs_df = task[0]
     output_dir = task[1]
 
@@ -172,13 +170,13 @@ def build_dataset(census_uri, obs_columns, task):
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
             obs_query=tiledbsoma.AxisQuery(coords=(np.array(obs_df.index),)),
-            obs_attributes=list(
+            obs_attributes=[
                 # cell_subclass isn't yet in Census (select_cells() added it to obs_df for us), so
                 # exclude from the experiment axis query
                 it
                 for it in obs_columns
                 if it not in ("cell_subclass", "cell_subclass_ontology_term_id")
-            ),
+            ],
         ) as tokenizer:
             dataset = tokenizer.build()
 
