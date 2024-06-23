@@ -197,7 +197,7 @@ class CellMapper(OntologyMapper):
     # Only look up ancestors under Cell
     ROOT_NODE = "CL_0000000"
 
-    def __init__(self, cell_type_high_level_ontology_term_ids: List[str]):
+    def __init__(self, cell_type_high_level_ontology_term_ids: list[str]):
         # with a temporary file of gunzipped CXG_CL_ONTOLOGY_PATH:
         with tempfile.NamedTemporaryFile() as owl:
             with gzip.open(self.CXG_CL_ONTOLOGY_PATH, "rb") as f:
