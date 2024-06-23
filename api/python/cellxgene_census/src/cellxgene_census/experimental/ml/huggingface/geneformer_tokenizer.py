@@ -66,8 +66,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         gene_mapping_file: str = "",
         **kwargs: Any,
     ) -> None:
-        """
-        Args:
+        """Args:
         - `experiment`: Census Experiment to query
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
         - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
