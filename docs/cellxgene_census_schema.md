@@ -870,6 +870,10 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ## Changelog
 
+### Version 2.0.1
+
+* Updates accepted assays for Census based on guidance from curators.
+
 ### Version 2.0.0
 
 * Update to require [CELLxGENE schema version 5.0.0](https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md)
