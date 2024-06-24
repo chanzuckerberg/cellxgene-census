@@ -139,8 +139,12 @@ class GeneformerTokenizer(CellDatasetBuilder):
         model_gene_medians = []
         for gene_id, row in genes_df.iterrows():
             ensg = row["feature_id"]  # ENSG... gene id, which keys Geneformer's dicts
-            if gene_mapping is not None:
-                ensg = gene_mapping.get(ensg, ensg)
+            # if gene_mapping is not None:
+            #    ensg = gene_mapping.get(ensg, ensg)
+            if gene_mapping is not None and ensg != gene_mapping.get(ensg, None):
+                # TODO: scheme to sum up the expression of multiple Census genes mapping to the
+                # same Geneformer gene. The sparse operations for that are tricky to get right!
+                continue
             if ensg in gene_token_dict:
                 model_gene_ids.append(gene_id)
                 model_gene_tokens.append(gene_token_dict[ensg])

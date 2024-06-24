@@ -8,8 +8,8 @@ FROM nvcr.io/nvidia/cuda:11.8.0-runtime-ubuntu22.04
 # Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
 # compatibility with the Census embeddings curator
 ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
-ARG GENEFORMER_VERSION=471eefc
 ARG CELLXGENE_CENSUS_VERSION=main
+ARG GENEFORMER_VERSION=471eefc
 
 RUN apt update && apt install -y build-essential python3-pip python3-venv git-lfs pigz libcurl4-openssl-dev
 RUN git lfs install
