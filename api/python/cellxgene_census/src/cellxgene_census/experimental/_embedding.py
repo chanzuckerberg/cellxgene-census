@@ -18,7 +18,12 @@ import requests
 import tiledbsoma as soma
 
 from .._open import get_default_soma_context, open_soma
-from .._release_directory import CensusVersionDescription, CensusVersionName, get_census_version_directory
+from .._release_directory import (
+    CensusVersionDescription,
+    CensusVersionName,
+    get_census_version_description,
+    get_census_version_directory,
+)
 
 CELL_CENSUS_EMBEDDINGS_MANIFEST_URL = "https://contrib.cellxgene.cziscience.com/contrib/cell-census/contributions.json"
 
@@ -224,13 +229,16 @@ def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
         }]
 
     """
+    # Validate census_version
+    census_version_description = get_census_version_description(census_version)
+
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
     response.raise_for_status()
 
     embeddings = []
     manifest = response.json()
     for _, obj in manifest.items():
-        if obj["census_version"] == census_version:
+        if obj["census_version"] == census_version_description["release_build"]:
             embeddings.append(obj)
 
     return embeddings

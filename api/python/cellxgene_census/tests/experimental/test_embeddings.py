@@ -1,6 +1,7 @@
 import pytest
 import requests_mock as rm
 
+import cellxgene_census
 from cellxgene_census.experimental import (
     get_all_available_embeddings,
     get_all_census_versions_with_embedding,
@@ -108,8 +109,8 @@ def test_get_all_available_embeddings(requests_mock: rm.Mocker) -> None:
     assert embeddings is not None
     assert len(embeddings) == 2
 
-    # Query for a non existing version of the Census
-    embeddings = get_all_available_embeddings("2024-12-15")
+    # Query for a version of the census that doesn't have embeddings
+    embeddings = get_all_available_embeddings("2023-05-15")
     assert len(embeddings) == 0
 
 
@@ -175,3 +176,18 @@ def test_get_all_census_versions_with_embedding(requests_mock: rm.Mocker) -> Non
 
     versions = get_all_census_versions_with_embedding("emb_2", organism="mus_musculus", embedding_type="var_embedding")
     assert versions == ["2023-12-15"]
+
+
+@pytest.mark.parametrize("version", ["stable", "latest"])
+def test_get_all_available_embeddings_w_version_aliases(version: str) -> None:
+    """https://github.com/chanzuckerberg/cellxgene-census/issues/1202"""
+    resolved_version = cellxgene_census.get_census_version_description(version)["release_build"]
+
+    assert get_all_available_embeddings(version) == get_all_available_embeddings(resolved_version)
+
+
+def test_get_all_available_embeddings_non_existing_version() -> None:
+    false_version = "not a real version"
+
+    with pytest.raises(ValueError, match=f"Unable to locate Census version: {false_version}"):
+        get_all_available_embeddings(false_version)
