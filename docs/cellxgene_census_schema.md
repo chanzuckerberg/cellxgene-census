@@ -872,7 +872,7 @@ Cell metadata MUST be encoded as a `SOMADataFrame` with the following columns:
 
 ### Version 2.0.1
 
-* Updates accepted assays for Census based on guidance from curators.
+* Update accepted assays for Census based on guidance from curators.
 
 ### Version 2.0.0
 
