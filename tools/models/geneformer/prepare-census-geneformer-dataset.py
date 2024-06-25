@@ -210,7 +210,8 @@ def build_dataset(census_uri, obs_columns, tokenizer_kwargs, task):
             ans["cell_subclass"] = obs_df.loc[it["soma_joinid"]]["cell_subclass"]
         return ans
 
-    dataset = dataset.map(add_cell_subclass)
+    if "cell_subclass" in obs_df and "cell_subclass_ontology_term_id" in obs_df:
+        dataset = dataset.map(add_cell_subclass)
 
     # save to output_dir
     dataset.save_to_disk(output_dir)
