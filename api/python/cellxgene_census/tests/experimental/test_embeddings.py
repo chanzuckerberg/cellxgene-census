@@ -1,3 +1,5 @@
+from functools import partial
+
 import pytest
 import requests_mock as rm
 
@@ -73,6 +75,28 @@ def test_get_embedding_metadata_by_name(requests_mock: rm.Mocker) -> None:
         get_embedding_metadata_by_name(
             "emb_1", organism="mus_musculus", census_version="2023-12-15", embedding_type="var_embedding"
         )
+
+
+def test_get_embedding_by_name_w_version_aliases() -> None:
+    """https://github.com/chanzuckerberg/cellxgene-census/issues/1202"""
+    # Only testing "stable" as "latest" doesn't have embeddings
+    version = "stable"
+    resolved_version = cellxgene_census.get_census_version_description(version)["release_build"]
+
+    metadata = get_all_available_embeddings(version)[0]
+
+    _get_metadata = partial(
+        get_embedding_metadata_by_name,
+        embedding_name=metadata["embedding_name"],
+        organism=metadata["experiment_name"],
+        embedding_type=metadata["data_type"],
+    )
+
+    w_alias = _get_metadata(census_version=version)
+    w_resolved = _get_metadata(census_version=resolved_version)
+
+    assert w_resolved == w_alias
+    assert metadata == w_alias
 
 
 def test_get_all_available_embeddings(requests_mock: rm.Mocker) -> None:
