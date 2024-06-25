@@ -6,8 +6,11 @@ phases:
     - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 699936264352.dkr.ecr.us-west-2.amazonaws.com
   build:
     commands:
-    - IMAGE_TAG=699936264352.dkr.ecr.us-west-2.amazonaws.com/omics:census-geneformer
-    - docker build --build-arg CELLXGENE_CENSUS_VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION -t $IMAGE_TAG tools/models/geneformer
+    - IMAGE_TAG=
+    - docker build \
+        --build-arg CELLXGENE_CENSUS_VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION \
+        -t 699936264352.dkr.ecr.us-west-2.amazonaws.com/omics:census-geneformer \
+        tools/models/geneformer
   post_build:
     commands:
-    - docker push $IMAGE_TAG
+    - docker push 699936264352.dkr.ecr.us-west-2.amazonaws.com/omics:census-geneformer
