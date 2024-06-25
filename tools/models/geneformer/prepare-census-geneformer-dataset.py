@@ -54,7 +54,11 @@ def main(argv):
         tasks = [
             (obs_dfs[i], os.path.join(args.output_dir, "shard-" + str(i).zfill(digits))) for i in range(len(obs_dfs))
         ]
-    with multiprocessing.Pool(processes=4) as pool:  # NOTE: keep processes small due to memory usage
+    multiprocessing.freeze_support()
+    multiprocessing.set_start_method("spawn", force=True)
+    with multiprocessing.Pool(
+        processes=4, initializer=init_worker
+    ) as pool:  # NOTE: keep processes= small due to memory usage
         pool.map(functools.partial(build_dataset, census_uri, args.obs_columns, args.tokenizer_kwargs), tasks)
 
     logger.info(subprocess.run(["du", "-sh", args.output_dir], stdout=subprocess.PIPE).stdout.decode().strip())
@@ -167,13 +171,21 @@ def select_cells(census_human, value_filter, percentage_data, sampling_column, N
     return obs_df
 
 
+worker_soma_context = None
+
+
+def init_worker():
+    global worker_soma_context
+    worker_soma_context = tiledbsoma.SOMATileDBContext()
+
+
 def build_dataset(census_uri, obs_columns, tokenizer_kwargs, task):
     """Given obs_df from select_cells (or subset thereof), build the Geneformer dataset and save to output_dir."""
     obs_df = task[0]
     output_dir = task[1]
 
     # open human census
-    with cellxgene_census.open_soma(uri=census_uri) as census:
+    with cellxgene_census.open_soma(uri=census_uri, context=worker_soma_context) as census:
         # use GeneformerTokenizer to build dataset of those cells
         with GeneformerTokenizer(
             census["census_data"]["homo_sapiens"],
