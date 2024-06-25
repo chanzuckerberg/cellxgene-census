@@ -9,7 +9,7 @@ RUN apt update && apt install -y build-essential python3-pip python3-venv git-lf
 RUN git lfs install
 
 ENV GIT_SSL_NO_VERIFY=true
-RUN pip install --upgrade pip setuptools setuptools_scm awscliv2
+RUN pip install --upgrade pip setuptools setuptools_scm awscli
 RUN pip install torch torchdata --index-url https://download.pytorch.org/whl/cu118
                                                                              # ^^^ match the base image CUDA version!
 RUN pip install owlready2 boto3 transformers[torch]
