@@ -461,6 +461,7 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
             measurement_name="RNA",
             X_name="raw",
             obs_column_names=["label"],
+            encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
             soma_chunk_size=2,
             shuffle=False,
         )
@@ -487,6 +488,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eag
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
         shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
@@ -510,6 +512,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
         batch_size=3,
         shuffle=False,
         use_eager_fetch=use_eager_fetch,
@@ -568,6 +571,7 @@ def test__shuffle(soma_experiment: Experiment) -> None:
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
         shuffle=True,
     )
 

@@ -361,6 +361,9 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
         obs_encoded = pd.DataFrame()
 
+        # Add the soma_joinid to the original obs, in case that is requested by the encoders.
+        obs["soma_joinid"] = obs.index
+
         for enc in self.encoders:
             obs_encoded[enc.name] = enc.transform(obs)
 
