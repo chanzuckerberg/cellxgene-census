@@ -99,7 +99,9 @@ Open this data release by specifying `census_version = "2024-07-01"` in future c
 
 #### Embbedings
 
-Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding)
+Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
+
+Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding), or by specifying the `obs_embeddings`/`var_embeddings` field in [`cellxgene_census.get_anndata()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata).
 
 ##### Cells
 
@@ -148,7 +150,7 @@ Open this data release by specifying `census_version = "2023-12-15"` in future c
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
-Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding)
+Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding), or by specifying the `obs_embeddings`/`var_embeddings` field in [`cellxgene_census.get_anndata()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata).
 
 ##### Cells
 
