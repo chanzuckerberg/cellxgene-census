@@ -110,7 +110,6 @@ Available embeddings can be accessed via [`cellxgene_census.experimental.get_emb
 | scVI                      | `scvi`         | `scvi`         |
 | Geneformer                | `geneformer`   | _NA_           |
 
-
 ### LTS 2023-12-15
 
 Open this data release by specifying `census_version = "2023-12-15"` in future calls to `open_soma()`.
@@ -164,11 +163,9 @@ Available embeddings can be accessed via [`cellxgene_census.experimental.get_emb
 
 ##### Features
 
-
 | Method                    | _Homo sapiens_ | _Mus musculus_ |
 |---------------------------|----------------|----------------|
 | NMF                       | `nmf`          | _NA_           |
-
 
 ### LTS 2023-07-25
 
