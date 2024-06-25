@@ -71,7 +71,7 @@ Open this data release by specifying `census_version = "2024-07-01"` in future c
 | Information                       | Value      |
 |-----------------------------------|------------|
 | Census schema version             | [2.0.1](https://github.com/chanzuckerberg/cellxgene-census/blob/fad674674e5070b735a29bc069d1d3dc21d2e5e8/docs/cellxgene_census_schema.md) |
-| Census build date                 | 2024-07-01 |
+| Census build date                 | 2024-05-20 |
 | Dataset schema version            | [5.0.0](https://github.com/chanzuckerberg/cellxgene-census/blob/fad674674e5070b735a29bc069d1d3dc21d2e5e8/docs/cellxgene_census_schema.md)      |
 | Number of datasets                | 812        |
 
