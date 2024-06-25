@@ -11,7 +11,7 @@ RUN apt update && \
   add-apt-repository -y ppa:deadsnakes/ppa && \
   apt update && \
   apt -y full-upgrade && \
-  apt -y install python3.11 python3.11-venv python3-pip awscli && \
+  apt -y install python3.11 python3.11-venv python3.11-dev python3-pip awscli pkg-config && \
   apt-get clean
 
 # set python3.11 as default

@@ -41,7 +41,7 @@ class Encoder(abc.ABC):
 
     To define a custom encoder, four methods must be implemented:
 
-    - ``register``: defines how the encoder will be fitted to the data.
+    - ``fit``: defines how the encoder will be fitted to the data.
     - ``transform``: defines how the encoder will be applied to the data
       in order to create an obs_tensor.
     - ``inverse_transform``: defines how to decode the encoded values back
@@ -53,8 +53,8 @@ class Encoder(abc.ABC):
     """
 
     @abc.abstractmethod
-    def register(self, obs: pd.DataFrame) -> None:
-        """Register the encoder with obs."""
+    def fit(self, obs: pd.DataFrame) -> None:
+        """Fit the encoder with obs."""
         pass
 
     @abc.abstractmethod
@@ -67,8 +67,8 @@ class Encoder(abc.ABC):
         """Inverse transform the encoded values back to the original values."""
         pass
 
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def name(self) -> str:
         """Name of the encoder."""
         pass
@@ -81,8 +81,8 @@ class DefaultEncoder(Encoder):
         self._encoder = LabelEncoder()
         self.col = col
 
-    def register(self, obs: pd.DataFrame) -> None:
-        """Register the encoder with obs."""
+    def fit(self, obs: pd.DataFrame) -> None:
+        """Fit the encoder with obs."""
         self._encoder.fit(obs[self.col].unique())
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -719,16 +719,16 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         obs = query.obs(column_names=self.obs_column_names).concat().to_pandas()
 
         if self._custom_encoders:
-            # Register all the custom encoders with obs
+            # Fit all the custom encoders with obs
             for enc in self._custom_encoders:
-                enc.register(obs)
+                enc.fit(obs)
                 encoders.append(enc)
         else:
-            # Create one DefaultEncoder for each column, and register it with obs
+            # Create one DefaultEncoder for each column, and fit it with obs
             for col in self.obs_column_names:
                 if obs[col].dtype in [object]:
                     enc = DefaultEncoder(col)
-                    enc.register(obs)
+                    enc.fit(obs)
                     encoders.append(enc)
 
         return encoders
