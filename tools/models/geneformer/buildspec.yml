@@ -4,9 +4,9 @@ phases:
   pre_build:
     commands:
     - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 699936264352.dkr.ecr.us-west-2.amazonaws.com
-    - aws s3 cp s3://mlin-census-scratch/geneformer/gf-95m/ gf-95m/ --recursive
   build:
     commands:
+    - aws s3 cp s3://mlin-census-scratch/geneformer/gf-95m/ gf-95m/ --recursive
     - docker build -t 699936264352.dkr.ecr.us-west-2.amazonaws.com/omics:census-geneformer --build-arg CELLXGENE_CENSUS_VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION tools/models/geneformer
   post_build:
     commands:
