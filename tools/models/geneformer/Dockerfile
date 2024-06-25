@@ -5,12 +5,6 @@
 # - our Census-Geneformer training scripts
 FROM nvcr.io/nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
-# Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
-# compatibility with the Census embeddings curator
-ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
-ARG CELLXGENE_CENSUS_VERSION=main
-ARG GENEFORMER_VERSION=471eefc
-
 RUN apt update && apt install -y build-essential python3-pip python3-venv git-lfs pigz libcurl4-openssl-dev
 RUN git lfs install
 
@@ -22,6 +16,12 @@ RUN pip install owlready2 boto3 transformers[torch]
 # workaround for unknown problem blocking `import geneformer`:
 #   https://github.com/microsoft/TaskMatrix/issues/116#issuecomment-1565431850
 RUN pip uninstall -y transformer-engine
+
+# Set the tiledbsoma version used to write the embeddings SparseNDArray, to ensure
+# compatibility with the Census embeddings curator
+ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
+ARG CELLXGENE_CENSUS_VERSION=main
+ARG GENEFORMER_VERSION=471eefc
 
 RUN mkdir /census-geneformer
 WORKDIR /census-geneformer
