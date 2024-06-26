@@ -1,5 +1,6 @@
 import abc
 import gc
+import itertools
 import logging
 import os
 from contextlib import contextmanager
@@ -39,7 +40,7 @@ The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2.
 class Encoder(abc.ABC):
     """Base class for obs encoders.
 
-    To define a custom encoder, four methods must be implemented:
+    To define a custom encoder, five methods must be implemented:
 
     - ``fit``: defines how the encoder will be fitted to the data.
     - ``transform``: defines how the encoder will be applied to the data
@@ -48,6 +49,8 @@ class Encoder(abc.ABC):
       to the original values.
     - ``name``: The name of the encoder. This will be used as the key in the
       dictionary of encoders.
+    - ``columns``: List of columns in `obs` that the encoder will be applied to.
+      This will be used to
 
     See the implementation of ``DefaultEncoder`` for an example.
     """
@@ -71,6 +74,12 @@ class Encoder(abc.ABC):
     @abc.abstractmethod
     def name(self) -> str:
         """Name of the encoder."""
+        pass
+
+    @property
+    @abc.abstractmethod
+    def columns(self) -> list[str]:
+        """Columns in `obs` that the encoder will be applied to."""
         pass
 
 
@@ -97,6 +106,11 @@ class DefaultEncoder(Encoder):
     def name(self) -> str:
         """Name of the encoder."""
         return self.col
+
+    @property
+    def columns(self) -> list[str]:
+        """Columns in `obs` that the encoder will be applied to."""
+        return [self.col]
 
     @property
     def classes_(self):  # type: ignore
@@ -512,6 +526,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             obs_column_names:
                 The names of the ``obs`` columns to return. The ``soma_joinid`` index "column" does not need to be
                 specified and will always be returned. If not specified, only the ``soma_joinid`` will be returned.
+                If custom encoders are passed, this parameter must not be used, since the columns will be inferred
+                automatically from the encoders.
             batch_size:
                 The number of rows of ``obs`` and ``X`` data to return in each iteration. Defaults to ``1``. A value of
                 ``1`` will result in :class:`torch.Tensor` of rank 1 being returns (a single row); larger values will
@@ -553,7 +569,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             encoders:
                 Specify custom encoders to be used. If not specified, a LabelEncoder will be created and
                 used for each column in ``obs_column_names``. If specified, only columns for which an encoder
-                has been registered will be returned in the ``obs`` tensor.
+                has been registered will be returned in the ``obs`` tensor. If this parameter is specified, the
+                ``obs_column_names`` parameter must not be used, since the columns will be inferred automatically
+                from the encoders.
 
         Lifecycle:
             experimental
@@ -577,6 +595,14 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
+
+        if obs_column_names and encoders:
+            raise ValueError(
+                "Cannot specify both `obs_column_names` and `encoders`. If `encoders` are specified, columns will be inferred automatically."
+            )
+
+        if encoders:
+            self.obs_column_names = list(itertools.chain(*[enc.columns for enc in encoders]))
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
