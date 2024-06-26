@@ -1,7 +1,7 @@
 """Nearest-neighbor search based on vector index of Census embeddings."""
 
 from contextlib import ExitStack
-from typing import Any, Dict, List, NamedTuple, Optional, Sequence
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, cast
 
 import anndata as ad
 import numpy as np
@@ -11,11 +11,8 @@ import tiledb.vector_search as vs
 import tiledbsoma as soma
 
 from .._open import DEFAULT_TILEDB_CONFIGURATION, open_soma
-
-CENSUS_EMBEDDINGS_INDEX_URI_FSTR = (
-    "s3://cellxgene-contrib-public/contrib/cell-census/soma/{census_version}/indexes/{embedding_id}"
-)
-CENSUS_EMBEDDINGS_INDEX_REGION = "us-west-2"
+from .._release_directory import CensusMirror, _get_census_mirrors
+from .._util import _uri_join
 
 
 class NeighborObs(NamedTuple):
@@ -40,6 +37,7 @@ def find_nearest_obs(
     k: int = 10,
     nprobe: int = 100,
     memory_GiB: int = 4,
+    mirror: Optional[str] = None,
     **kwargs: Dict[str, Any],
 ) -> NeighborObs:
     """Search Census for similar obs (cells) based on nearest neighbors in embedding space.
@@ -72,16 +70,33 @@ def find_nearest_obs(
         )
 
     # formulate index URI and run query
-    index_uri = CENSUS_EMBEDDINGS_INDEX_URI_FSTR.format(
-        census_version=embedding_metadata["census_version"], embedding_id=embedding_metadata["id"]
-    )
+    resolved_index = _resolve_embedding_index(embedding_metadata, mirror=mirror)
+    if not resolved_index:
+        raise ValueError("No suitable embedding index found for " + embedding_name)
+    index_uri, index_region = resolved_index
     config = {k: str(v) for k, v in DEFAULT_TILEDB_CONFIGURATION.items()}
-    config["vfs.s3.region"] = CENSUS_EMBEDDINGS_INDEX_REGION
+    config["vfs.s3.region"] = index_region
     memory_vectors = memory_GiB * (2**30) // (4 * n_features)  # number of float32 vectors
     index = vs.ivf_flat_index.IVFFlatIndex(uri=index_uri, config=config, memory_budget=memory_vectors)
     distances, neighbor_ids = index.query(query.obsm[embedding_name], k=k, nprobe=nprobe, **kwargs)
 
     return NeighborObs(distances=distances, neighbor_ids=neighbor_ids)
+
+
+def _resolve_embedding_index(
+    embedding_metadata: Dict[str, Any],
+    mirror: Optional[str] = None,
+) -> Optional[Tuple[str, str]]:
+    index_metadata = embedding_metadata.get("indexes", None)
+    if not index_metadata:
+        return None
+    # TODO (future): support multiple index [types]
+    assert index_metadata[0]["type"] == "IVFFlat", "Only IVFFlat index is supported (update cellxgene_census)"
+    mirrors = _get_census_mirrors()
+    mirror = mirror or cast(str, mirrors["default"])
+    mirror_info = cast(CensusMirror, mirrors[mirror])
+    uri = _uri_join(mirror_info["embeddings_base_uri"], index_metadata[0]["relative_uri"])
+    return uri, cast(str, mirror_info["region"])
 
 
 def predict_obs_metadata(

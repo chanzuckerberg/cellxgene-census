@@ -44,10 +44,10 @@ def test_embeddings_search(true_neighbors: Dict[str, Any], query_result: Neighbo
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_embeddings_search_errors(emb_metadata: Dict[str, Any], query_anndata: ad.AnnData) -> None:
-    # bogus embedding metadata
+    # no index for the embedding
     emb_metadata2 = emb_metadata.copy()
-    emb_metadata2["id"] = "BOGUS123"
-    with pytest.raises(tiledb.TileDBError):
+    emb_metadata2["indexes"] = []
+    with pytest.raises(ValueError, match="No suitable embedding index"):
         find_nearest_obs(emb_metadata2, query_anndata)
     # query anndata missing the embedding layer
     bogus_ad = query_anndata.copy()

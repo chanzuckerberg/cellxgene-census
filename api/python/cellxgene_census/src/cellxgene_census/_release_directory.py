@@ -131,6 +131,7 @@ class CensusMirror(TypedDict):
     provider: Provider
     base_uri: str
     region: Optional[str]
+    embeddings_base_uri: str
 
 
 CensusMirrors = Dict[CensusMirrorName, Union[CensusMirrorName, CensusMirror]]
