@@ -1,3 +1,5 @@
+# This CodeBuild spec is used to build the docker image and push it to ECR.
+# (The image is >10GB so can be painful to push from outside AWS.)
 version: 0.2
 
 phases:

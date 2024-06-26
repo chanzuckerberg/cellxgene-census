@@ -44,4 +44,6 @@ RUN python3 -m venv --system-site-packages embeddings_tiledbsoma_venv && \
 COPY helpers ./helpers
 COPY *.py ./
 COPY finetune-geneformer.config.yml .
+
+# FIXME: eliminate once model is published in Geneformer repo
 COPY gf-95m/ ./gf-95m/
