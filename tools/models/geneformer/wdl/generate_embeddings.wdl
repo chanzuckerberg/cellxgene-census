@@ -5,7 +5,9 @@ workflow scatter_generate_embeddings {
         Array[Directory] dataset_shards
         Directory model
         String output_uri
+        String? model_type
         Int? emb_layer
+        String? features
 
         String s3_region = "us-west-2"
         String docker
@@ -25,7 +27,7 @@ workflow scatter_generate_embeddings {
     scatter (shard in dataset_shards) {
         call generate_embeddings after init_embeddings_array {
             input:
-            dataset = shard, output_uri = output_uri2, model, emb_layer, s3_region, docker
+            dataset = shard, output_uri = output_uri2, model, model_type, emb_layer, features, s3_region, docker
         }
     }
 
@@ -75,7 +77,9 @@ task generate_embeddings {
         String output_uri
         String s3_region
 
+        String model_type = "CellClassifier"
         Int emb_layer = -1  # -1 or 0
+        String features = "soma_joinid,cell_type,cell_type_ontology_term_id,cell_subclass,cell_subclass_ontology_term_id"
 
         String docker
     }
@@ -90,7 +94,7 @@ task generate_embeddings {
         export AWS_DEFAULT_REGION='~{s3_region}'
         export TQDM_MININTERVAL=10
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            --emb-layer ~{emb_layer} --batch-size 10 --tiledbsoma \
+            --model-type ~{model_type} --emb-layer ~{emb_layer} --features '~{features}' --batch-size 10 --tiledbsoma \
             '~{model}' '~{dataset}' '~{output_uri}'
     >>>
 

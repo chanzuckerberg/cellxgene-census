@@ -18,6 +18,7 @@ import cellxgene_census
 import numpy as np
 import tiledbsoma
 from cellxgene_census.experimental.ml.huggingface import GeneformerTokenizer
+# TODO: switch to https://github.com/chanzuckerberg/cellxgene-ontology-guide
 from helpers.ontology_mapper import CellSubclassMapper
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(module)s [%(levelname)s] %(message)s")
