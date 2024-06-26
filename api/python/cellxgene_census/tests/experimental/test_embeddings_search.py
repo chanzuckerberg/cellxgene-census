@@ -4,7 +4,6 @@ from typing import Any, Dict, List
 import anndata as ad
 import numpy as np
 import pytest
-import tiledb
 
 import cellxgene_census
 from cellxgene_census.experimental import (
