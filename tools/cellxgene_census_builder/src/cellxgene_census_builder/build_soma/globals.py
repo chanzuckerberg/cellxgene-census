@@ -23,6 +23,7 @@ CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
         ("collection_id", pa.large_string()),
         ("collection_name", pa.large_string()),
         ("collection_doi", pa.large_string()),
+        ("collection_doi_label", pa.large_string()),
         ("dataset_id", pa.large_string()),
         ("dataset_version_id", pa.large_string()),
         ("dataset_title", pa.large_string()),
