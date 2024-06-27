@@ -1,5 +1,5 @@
 import pickle
-from typing import Any, Dict, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Sequence, Set
 
 import numpy as np
 import numpy.typing as npt
@@ -46,9 +46,11 @@ class GeneformerTokenizer(CellDatasetBuilder):
     max_input_tokens: int
     special_token: bool
 
-    # set of gene soma_joinids corresponding to genes modeled by Geneformer:
-    model_gene_ids: npt.NDArray[np.int64]
-    model_gene_tokens: npt.NDArray[np.int64]  # token for each model_gene_id
+    # for each Geneformer-modeled gene that matches to at least one Census gene, the list of
+    # matching Census gene/var soma_joinids. (one Geneformer-modeled gene may match several
+    # Census genes based on gene_mapping_file.)
+    model_gene_ids: List[List[int]]
+    model_gene_tokens: npt.NDArray[np.int64]  # Geneformer token number for each model_gene_id
     model_gene_medians: npt.NDArray[np.float64]  # float for each model_gene_id
     model_cls_token: Optional[np.int64] = None
     model_sep_token: Optional[np.int64] = None
@@ -107,7 +109,13 @@ class GeneformerTokenizer(CellDatasetBuilder):
         """
         # TODO: this work could be reused for all queries on this experiment
 
-        genes_df = experiment.ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
+        genes_df = (
+            experiment.ms["RNA"]
+            .var.read(column_names=["soma_joinid", "feature_id"])
+            .concat()
+            .to_pandas()
+            .set_index("soma_joinid")
+        )
 
         if not (token_dictionary_file and gene_median_file):
             try:
@@ -134,9 +142,10 @@ class GeneformerTokenizer(CellDatasetBuilder):
 
         # compute model_gene_{ids,tokens,medians} by joining genes_df with Geneformer's
         # dicts
-        model_gene_ids = []
-        model_gene_tokens = []
-        model_gene_medians = []
+        model_gene_id_by_ensg: Dict[str, int] = {}
+        model_gene_ids: List[List[int]] = []
+        model_gene_tokens: List[np.int64] = []
+        model_gene_medians: List[np.float64] = []
         for gene_id, row in genes_df.iterrows():
             ensg = row["feature_id"]  # ENSG... gene id, which keys Geneformer's dicts
             # if gene_mapping is not None:
@@ -146,14 +155,19 @@ class GeneformerTokenizer(CellDatasetBuilder):
                 # same Geneformer gene. The sparse operations for that are tricky to get right!
                 continue
             if ensg in gene_token_dict:
-                model_gene_ids.append(gene_id)
-                model_gene_tokens.append(gene_token_dict[ensg])
-                model_gene_medians.append(gene_median_dict[ensg])
-        self.model_gene_ids = np.array(model_gene_ids, dtype=np.int64)
+                if ensg not in model_gene_id_by_ensg:
+                    model_gene_id_by_ensg[ensg] = len(model_gene_ids)
+                    model_gene_ids.append([])
+                    model_gene_tokens.append(gene_token_dict[ensg])
+                    model_gene_medians.append(gene_median_dict[ensg])
+                model_gene_ids[model_gene_id_by_ensg[ensg]].append(gene_id)
+
+        self.model_gene_ids = model_gene_ids
         self.model_gene_tokens = np.array(model_gene_tokens, dtype=np.int64)
         self.model_gene_medians = np.array(model_gene_medians, dtype=np.float64)
 
-        assert len(np.unique(self.model_gene_ids)) == len(self.model_gene_ids)
+        assert len(self.model_gene_ids) == len(self.model_gene_tokens)
+        assert len(self.model_gene_ids) == len(self.model_gene_medians)
         assert len(np.unique(self.model_gene_tokens)) == len(self.model_gene_tokens)
         assert np.all(self.model_gene_medians > 0)
         # Geneformer models protein-coding and miRNA genes, so the intersection should
@@ -181,19 +195,26 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self.obs_df = self.obs(column_names=obs_column_names).concat().to_pandas().set_index("soma_joinid")
         return self
 
+    def _map_block(
+        self, block_cell_joinids: npt.NDArray[np.int64], Xblock: scipy.sparse.csr_matrix
+    ) -> scipy.sparse.csr_matrix:
+        model_gene_counts = [
+            scipy.sparse.csc_matrix(Xblock[:, cols].sum(axis=1)) if len(cols) > 1 else Xblock[:, cols[0]].tocsc()
+            for cols in self.model_gene_ids
+        ]
+        return scipy.sparse.hstack(model_gene_counts, format="csr")
+
     def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
         """Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
-        # project cell_Xrow onto model_gene_ids and normalize by row sum.
+        # project cell_Xrow onto model_gene_ids and normalize with row sum & gene medians
         # notice we divide by the total count of the complete row (not only of the projected
         # values); this follows Geneformer's internal tokenizer.
-        model_counts = cell_Xrow[:, self.model_gene_ids].multiply(1.0 / cell_Xrow.sum())
-        assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
-        # assert len(model_counts.data) == np.count_nonzero(model_counts.data)
-        model_expr = model_counts.multiply(self.model_gene_medians_factor)
-        assert isinstance(model_expr, scipy.sparse.coo_matrix), type(model_expr)
-        # assert len(model_expr.data) == np.count_nonzero(model_expr.data)
+        assert cell_Xrow.shape == (1, len(self.model_gene_ids))
+        model_expr = cell_Xrow.multiply(self.model_gene_medians_factor / cell_Xrow.sum())
+        assert isinstance(model_expr, scipy.sparse.coo_matrix)
+        assert model_expr.shape == (1, len(self.model_gene_ids))
 
         # figure the resulting tokens in descending order of model_expr
         # (use sparse model_expr.{col,data} to naturally exclude undetected genes)
