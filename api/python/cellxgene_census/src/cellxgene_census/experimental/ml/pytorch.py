@@ -588,8 +588,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self.soma_chunk_size = soma_chunk_size
         self.use_eager_fetch = use_eager_fetch
         self._stats = Stats()
-        self._custom_encoders = encoders
-        self._encoders = []
+        self._encoders = encoders or []
         self._obs_joinids = None
         self._var_joinids = None
         self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
@@ -747,9 +746,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         encoders = []
         obs = query.obs(column_names=self.obs_column_names).concat().to_pandas()
 
-        if self._custom_encoders:
+        if self._encoders:
             # Fit all the custom encoders with obs
-            for enc in self._custom_encoders:
+            for enc in self._encoders:
                 enc.fit(obs)
                 encoders.append(enc)
         else:
