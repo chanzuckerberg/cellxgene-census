@@ -2,8 +2,6 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generator, Optional
 
-import numpy as np
-import numpy.typing as npt
 import scipy.sparse
 from datasets import Dataset
 from tiledbsoma import Experiment, ExperimentAxisQuery
@@ -67,7 +65,6 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
             for Xblock, (block_cell_joinids, _) in (
                 self.X(self.layer_name).blockwise(axis=0, reindex_disable_on_axis=[1], size=self.block_size).scipy()
             ):
-                Xblock = self._map_block(block_cell_joinids, Xblock)
                 assert isinstance(Xblock, scipy.sparse.csr_matrix)
                 assert Xblock.shape[0] == len(block_cell_joinids)
                 for i, cell_joinid in enumerate(block_cell_joinids):
@@ -84,17 +81,6 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
           to the `cell_joinid` row of the full `X` layer matrix.
         """
         ...
-
-    def _map_block(
-        self, block_cell_joinids: npt.NDArray[np.int64], Xblock: scipy.sparse.csr_matrix
-    ) -> scipy.sparse.csr_matrix:
-        """Apply any necessary transformations to the block of X data before further processing.
-
-        This base implementation simply returns the block unchanged. Applying transformations to
-        the whole block at once can be more efficient than applying them to each row individually
-        in `cell_item()`.
-        """
-        return Xblock
 
 
 class _DatasetGeneratorPickleHack:

@@ -18,7 +18,7 @@ except ImportError:
 CENSUS_VERSION_FOR_GENEFORMER_TESTS = "2023-12-15"
 
 
-@pytest.mark.skip("Needs to be investigated.")
+#@pytest.mark.skip("Needs to be investigated.")
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
