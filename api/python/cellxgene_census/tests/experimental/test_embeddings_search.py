@@ -9,7 +9,6 @@ import cellxgene_census
 from cellxgene_census.experimental import (
     NeighborObs,
     find_nearest_obs,
-    get_embedding_metadata_by_name,
     predict_obs_metadata,
 )
 
@@ -42,30 +41,38 @@ def test_embeddings_search(true_neighbors: Dict[str, Any], query_result: Neighbo
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-def test_embeddings_search_errors(emb_metadata: Dict[str, Any], query_anndata: ad.AnnData) -> None:
-    # no index for the embedding
-    emb_metadata2 = emb_metadata.copy()
-    emb_metadata2["indexes"] = []
-    with pytest.raises(ValueError, match="No suitable embedding index"):
-        find_nearest_obs(emb_metadata2, query_anndata)
+def test_embeddings_search_errors(query_anndata: ad.AnnData) -> None:
+    # bogus embedding name
+    with pytest.raises(ValueError, match="No embeddings found"):
+        find_nearest_obs(
+            "bogus123", TRUE_NEAREST_NEIGHBORS_ORGANISM, TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION, query_anndata
+        )
     # query anndata missing the embedding layer
     bogus_ad = query_anndata.copy()
     bogus_ad.obsm.pop(TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME)
     with pytest.raises(ValueError, match="Query does not have"):
-        find_nearest_obs(emb_metadata, bogus_ad)
+        find_nearest_obs(
+            TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME,
+            TRUE_NEAREST_NEIGHBORS_ORGANISM,
+            TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION,
+            bogus_ad,
+        )
     # embedding layer has wrong number of features
     bogus_ad = query_anndata.copy()
     bogus_ad.obsm[TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME] = np.zeros((len(bogus_ad), 42))
     with pytest.raises(ValueError, match="features, expected"):
-        find_nearest_obs(emb_metadata, bogus_ad)
+        find_nearest_obs(
+            TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME,
+            TRUE_NEAREST_NEIGHBORS_ORGANISM,
+            TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION,
+            bogus_ad,
+        )
     return
 
 
 @pytest.mark.experimental
 @pytest.mark.live_corpus
-def test_predict_obs_metadata(
-    emb_metadata: Dict[str, Any], query_anndata: ad.AnnData, query_result: NeighborObs
-) -> None:
+def test_predict_obs_metadata(query_anndata: ad.AnnData, query_result: NeighborObs) -> None:
     columns = ["cell_type", "tissue_general"]
 
     with cellxgene_census.open_soma(census_version=TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION) as census:
@@ -76,7 +83,9 @@ def test_predict_obs_metadata(
             .to_pandas()
         )
 
-    pred_df = predict_obs_metadata(emb_metadata, query_result, columns)
+    pred_df = predict_obs_metadata(
+        TRUE_NEAREST_NEIGHBORS_ORGANISM, TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION, query_result, columns
+    )
     assert len(pred_df) == len(query_anndata.obs)
 
     for col in columns:
@@ -84,16 +93,6 @@ def test_predict_obs_metadata(
         assert f"{col}_confidence" in pred_df.columns
         accuracy = (pred_df[col] == truth_df[col]).mean()
         assert accuracy > 0.75, f"Accuracy for {col} is {accuracy}"
-
-
-@pytest.fixture(scope="module")
-def emb_metadata() -> Dict[str, Any]:
-    return get_embedding_metadata_by_name(
-        TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME,
-        TRUE_NEAREST_NEIGHBORS_ORGANISM,
-        TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION,
-        "obs_embedding",
-    )
 
 
 @pytest.fixture(scope="module")
@@ -117,9 +116,11 @@ def query_anndata(true_neighbors: Dict[str, Any]) -> ad.AnnData:
 
 
 @pytest.fixture(scope="module")
-def query_result(emb_metadata: Dict[str, Any], query_anndata: ad.AnnData) -> NeighborObs:
+def query_result(query_anndata: ad.AnnData) -> NeighborObs:
     return find_nearest_obs(
-        emb_metadata,
+        TRUE_NEAREST_NEIGHBORS_EMBEDDING_NAME,
+        TRUE_NEAREST_NEIGHBORS_ORGANISM,
+        TRUE_NEAREST_NEIGHBORS_CENSUS_VERSION,
         query_anndata,
         k=TRUE_NEAREST_NEIGHBORS_K,
         nprobe=25,

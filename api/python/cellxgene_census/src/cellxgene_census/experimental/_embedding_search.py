@@ -10,9 +10,11 @@ import pandas as pd
 import tiledb.vector_search as vs
 import tiledbsoma as soma
 
+from .._experiment import _get_experiment_name
 from .._open import DEFAULT_TILEDB_CONFIGURATION, open_soma
 from .._release_directory import CensusMirror, _get_census_mirrors
 from .._util import _uri_join
+from ._embedding import get_embedding_metadata_by_name
 
 
 class NeighborObs(NamedTuple):
@@ -32,20 +34,23 @@ class NeighborObs(NamedTuple):
 
 
 def find_nearest_obs(
-    embedding_metadata: Dict[str, Any],
+    embedding_name: str,
+    organism: str,
+    census_version: str,
     query: ad.AnnData,
+    *,
     k: int = 10,
     nprobe: int = 100,
     memory_GiB: int = 4,
     mirror: Optional[str] = None,
+    embedding_metadata: Optional[Dict[str, Any]] = None,
     **kwargs: Dict[str, Any],
 ) -> NeighborObs:
     """Search Census for similar obs (cells) based on nearest neighbors in embedding space.
 
     Args:
-        embedding_metadata:
-            Information about the embedding to search, as found by
-            :func:`get_embedding_metadata_by_name`.
+        embedding_name, organism, census_version:
+            Identify the embedding to search, as in :func:`get_embedding_metadata_by_name`.
         query:
             AnnData object with an obsm layer embedding the query cells. The obsm layer name
             matches ``embedding_metadata["embedding_name"]`` (e.g. scvi, geneformer). The layer
@@ -57,8 +62,15 @@ def find_nearest_obs(
             cells) for a thorough search. Decrease for faster but less accurate search.
         memory_GiB:
             Memory budget for the search index, in gibibytes; defaults to 4 GiB.
+        mirror:
+            Name of the Census mirror to use for the search.
+        embedding_metadata:
+            The result of `get_embedding_metadata_by_name(embedding_name, organism, census_version)`.
+            Supplying this saves a network request for repeated searches.
     """
-    embedding_name = embedding_metadata["embedding_name"]
+    if embedding_metadata is None:
+        embedding_metadata = get_embedding_metadata_by_name(embedding_name, organism, census_version)
+    assert embedding_metadata["embedding_name"] == embedding_name
     n_features = embedding_metadata["n_features"]
 
     # validate query (expected obsm layer exists with the expected dimensionality)
@@ -100,7 +112,8 @@ def _resolve_embedding_index(
 
 
 def predict_obs_metadata(
-    embedding_metadata: Dict[str, Any],
+    organism: str,
+    census_version: str,
     neighbors: NeighborObs,
     column_names: Sequence[str],
     experiment: Optional[soma.Experiment] = None,
@@ -108,9 +121,8 @@ def predict_obs_metadata(
     """Predict obs metadata attributes for the query cells based on the embedding nearest neighbors.
 
     Args:
-        embedding_metadata:
-            Information about the embedding searched, as found by
-            :func:`get_embedding_metadata_by_name`.
+        organism, census_version:
+            Embedding information as supplied to :func:`find_nearest_obs`.
         neighbors:
             Results of a :func:`find_nearest_obs` search.
         column_names:
@@ -129,8 +141,8 @@ def predict_obs_metadata(
     with ExitStack() as cleanup:
         if experiment is None:
             # open Census transiently
-            census = cleanup.enter_context(open_soma(census_version=embedding_metadata["census_version"]))
-            experiment = census["census_data"][embedding_metadata["experiment_name"]]
+            census = cleanup.enter_context(open_soma(census_version=census_version))
+            experiment = census["census_data"][_get_experiment_name(organism)]
 
         # fetch the desired obs metadata for all of the found neighbors
         neighbor_obs = (
