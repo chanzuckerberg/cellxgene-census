@@ -6,9 +6,12 @@ task prepare_census_geneformer_dataset {
 
         String value_filter = "is_primary_data==True"
         Array[String] obs_columns = ["soma_joinid", "cell_type", "cell_type_ontology_term_id", "cell_subclass", "cell_subclass_ontology_term_id"]
+        Int percentage_data = 100
         Int N = 0
         String sampling_column = "cell_subclass"
         String census_version = "stable"
+        String tokenizer_kwargs = "{}"
+        Int shards = 1
 
         String docker
     }
@@ -21,8 +24,11 @@ task prepare_census_geneformer_dataset {
         export TQDM_MININTERVAL=10
         python3 /census-geneformer/prepare-census-geneformer-dataset.py \
             -c '~{sep(",",obs_columns)}' \
-            --value-filter '~{value_filter}' -N ~{N} --sampling-column '~{sampling_column}' \
+            --value-filter '~{value_filter}' \
+            -p ~{percentage_data} -N ~{N} --sampling-column '~{sampling_column}' \
             -v ~{census_version} \
+            --tokenizer-kwargs '~{tokenizer_kwargs}' \
+            --shards ~{shards} \
             ~{output_name}
     >>>
 
@@ -33,7 +39,7 @@ task prepare_census_geneformer_dataset {
 
     runtime {
         cpu: 8
-        memory: "90G"
+        memory: "120G"
         docker: docker
     }
 }

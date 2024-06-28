@@ -66,6 +66,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
                 self.X(self.layer_name).blockwise(axis=0, reindex_disable_on_axis=[1], size=self.block_size).scipy()
             ):
                 assert isinstance(Xblock, scipy.sparse.csr_matrix)
+                assert Xblock.shape[0] == len(block_cell_joinids)
                 for i, cell_joinid in enumerate(block_cell_joinids):
                     yield self.cell_item(cell_joinid, Xblock.getrow(i))
 
