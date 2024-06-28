@@ -1,4 +1,8 @@
-"""This module defines a plugin class that logs each request to a logfile."""
+"""This module defines a plugin class that logs each request to a logfile.
+
+This class needs to be importable by the proxy server which runs in a separate process.
+See the user agent tests for usage.
+"""
 
 import json
 import traceback
