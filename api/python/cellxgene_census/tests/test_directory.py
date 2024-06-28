@@ -186,3 +186,17 @@ def test_live_directory_contents() -> None:
 
         assert fs.exists(version_description["soma"]["uri"])
         assert fs.exists(version_description["h5ads"]["uri"])
+
+
+def test_census_version_types() -> None:
+    """Do a little bit of runtime type checking on the results of census version functions.
+
+    Part of solving: https://github.com/chanzuckerberg/cellxgene-census/issues/1204
+    """
+    from cellxgene_census._release_directory import CensusVersionDescription
+
+    directory = cellxgene_census.get_census_version_directory()
+    for k, v in directory.items():
+        assert set(v).issubset(CensusVersionDescription.__annotations__)
+        desc = cellxgene_census.get_census_version_description(k)
+        assert set(desc).issubset(CensusVersionDescription.__annotations__)
