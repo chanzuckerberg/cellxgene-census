@@ -29,9 +29,9 @@ And a tokenized dataset for all of Census (>300GiB, sharded):
 ```bash
 miniwdl-omics-run wdl/prepare_datasets.wdl \
     docker=$DOCKER_TAG \
-    census_version=s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/ \
+    census_version=s3://cellxgene-census-public-us-west-2/cell-census/2024-05-20/soma/ \
     value_filter='is_primary_data==True or is_primary_data==False' \
-    output_name=census-2023-12-15 shards=256 \
+    output_name=2024-05-20 shards=256 \
     --role poweromics --output-uri s3://MYBUCKET/geneformer/datasets/
 ```
 
@@ -51,13 +51,14 @@ Generating cell embeddings (takes 8-12h on up to 256 g5.2xlarge, generates 130Gi
 
 ```bash
 seq 0 255 \
-    | xargs -n 1 printf 'dataset_shards=s3://MYBUCKET/geneformer/datasets/census-2023-12-15/shard-%03d\n' \
-    | MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 MINIWDL__AWS__SUBMIT_PERIOD=60 xargs -n 9999 miniwdl-omics-run wdl/generate_embeddings.wdl \
+    | xargs -n 1 printf 'dataset_shards=s3://MYBUCKET/geneformer/datasets/census-2024-05-20/shard-%03d/\n' \
+    | xargs -n 9999 miniwdl-omics-run \
+    --role poweromics --output-uri s3://MYBUCKET/geneformer/embs \
+    wdl/generate_embeddings.wdl \
     docker=$DOCKER_TAG \
-    emb_layer=0 \
-    model=s3://MYBUCKET/geneformer/models/2500_per_cell_type_8epochs/model/2500_per_cell_type_8epochs \
-    output_uri=s3_//MYBUCKET/geneformer/embs/census-2023-10-23 \
-    --role poweromics --output-uri s3://MYBUCKET/geneformer/embs
+    emb_layer=0 model_type=Pretrained \
+    model=s3://MYBUCKET/geneformer/gf-95m/fine_tuned_model/ \
+    output_uri=s3_//MYBUCKET/geneformer/embs/$(date '+%s')/census-2024-05-20/
 ```
 
 (The `s3_//MYBUCKET` is a workaround for the workflow service rejecting our submission if the specified S3 output folder doesn't yet exist; this workflow has TileDB create it.)
