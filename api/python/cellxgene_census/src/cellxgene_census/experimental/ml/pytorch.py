@@ -78,7 +78,7 @@ class Encoder(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def columns(self) -> list[str]:
+    def columns(self) -> List[str]:
         """Columns in `obs` that the encoder will be applied to."""
         pass
 
@@ -108,7 +108,7 @@ class DefaultEncoder(Encoder):
         return self.col
 
     @property
-    def columns(self) -> list[str]:
+    def columns(self) -> List[str]:
         """Columns in `obs` that the encoder will be applied to."""
         return [self.col]
 
