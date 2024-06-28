@@ -82,10 +82,14 @@ repos:
         exclude: ^tools/(cellxgene_census_builder|census_contrib)
         args: ["--config", "./tools/pyproject.toml"]
         additional_dependencies:
+          - attrs
           - numpy
           - pandas-stubs
           - typing_extensions
           - types-PyYAML
+          - pytest
+          - types-click
+
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.39.0

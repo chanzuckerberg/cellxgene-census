@@ -1,0 +1,6 @@
+pandas
+pyarrow
+tiledbsoma~=1.6.0
+click
+numpy
+psutil
