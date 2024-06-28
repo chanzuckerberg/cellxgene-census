@@ -372,6 +372,37 @@ def test_encoders(soma_experiment: Experiment) -> None:
 
 
 @pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
+def test_custom_encoders_fail_if_duplicate(soma_experiment: Experiment) -> None:
+    with pytest.raises(ValueError):
+        ExperimentDataPipe(
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            encoders=[DefaultEncoder("label"), DefaultEncoder("label")],
+            shuffle=False,
+            batch_size=3,
+        )
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
+def test_custom_encoders_fail_if_columns_defined(soma_experiment: Experiment) -> None:
+    with pytest.raises(ValueError):
+        ExperimentDataPipe(
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            obs_column_names=["label"],
+            encoders=[DefaultEncoder("label")],
+            shuffle=False,
+            batch_size=3,
+        )
+
+
+@pytest.mark.experimental
 @pytest.mark.skipif(
     (sys.version_info.major, sys.version_info.minor) == (3, 9),
     reason="fails intermittently with OOM error for 3.9",

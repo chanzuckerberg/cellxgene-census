@@ -48,7 +48,7 @@ class Encoder(abc.ABC):
     - ``inverse_transform``: defines how to decode the encoded values back
       to the original values.
     - ``name``: The name of the encoder. This will be used as the key in the
-      dictionary of encoders.
+      dictionary of encoders. This should be unique across all encoders.
     - ``columns``: List of columns in `obs` that the encoder will be applied to.
       This will be used to
 
@@ -601,6 +601,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             )
 
         if encoders:
+            # Check if names are unique
+            if len(encoders) != len({enc.name for enc in encoders}):
+                raise ValueError("Encoders must have unique names")
+
             self.obs_column_names = list(itertools.chain(*[enc.columns for enc in encoders]))
 
         if "soma_joinid" not in self.obs_column_names:
