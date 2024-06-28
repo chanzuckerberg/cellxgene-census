@@ -9,7 +9,7 @@ Methods to retrieve information about versions of the publicly hosted Census obj
 
 import typing
 from collections import OrderedDict
-from typing import Dict, Literal, Optional, Union, cast
+from typing import Any, Dict, Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import NotRequired, TypedDict
@@ -353,7 +353,7 @@ def get_census_version_directory(
     response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
     response.raise_for_status()
 
-    directory: CensusDirectory = cast(CensusDirectory, response.json())
+    directory: dict[str, str | dict[str, Any]] = response.json()
     directory_out: CensusDirectory = {}
     aliases: typing.Set[CensusVersionName] = set()
 
@@ -378,6 +378,11 @@ def get_census_version_directory(
         # exclude aliases
         if not isinstance(directory_value, dict):
             continue
+
+        # Filter fields
+        directory_value = {
+            k: directory_value[k] for k in CensusVersionDescription.__annotations__ if k in directory_value
+        }
 
         # filter by release flags
         census_version_description = cast(CensusVersionDescription, directory_value)

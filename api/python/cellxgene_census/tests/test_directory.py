@@ -34,7 +34,6 @@ DIRECTORY_JSON = {
         "release_date": "2022-09-30",
         "release_build": "2022-09-01",
         "flags": {"lts": True, "retracted": True},
-        "do_not_delete": True,
         "retraction": {
             "date": "2022-11-15",
             "reason": "mistakes happen",
@@ -53,7 +52,6 @@ DIRECTORY_JSON = {
     "2022-11-01": {
         "release_date": "2022-11-30",
         "release_build": "2022-11-01",
-        "do_not_delete": True,
         "soma": {
             "uri": "s3://cellxgene-data-public/cell-census/2022-11-01/soma/",
             "s3_region": "us-west-2",
