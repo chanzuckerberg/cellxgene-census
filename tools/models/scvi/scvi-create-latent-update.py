@@ -14,11 +14,12 @@ if __name__ == "__main__":
     with open(file) as f:
         config = yaml.safe_load(f)
 
-    census = cellxgene_census.open_soma(census_version="2023-12-15")
-
     census_config = config.get("census")
     experiment_name = census_config.get("organism")
     obs_value_filter = census_config.get("obs_query")
+
+    version = census_config.get("version")
+    census = cellxgene_census.open_soma(census_version=version)
 
     hv = pd.read_pickle("hv_genes.pkl")
     hv_idx = hv[hv].index
@@ -44,7 +45,7 @@ if __name__ == "__main__":
 
     adata.var.set_index("feature_id", inplace=True)
 
-    idx = query.obs(column_names=["soma_joinid"]).concat().to_pandas().index.to_numpy()
+    idx = query.obs(column_names=["soma_joinid"]).concat().to_pandas().to_numpy()
 
     del census, query, hv, hv_idx
     gc.collect()
