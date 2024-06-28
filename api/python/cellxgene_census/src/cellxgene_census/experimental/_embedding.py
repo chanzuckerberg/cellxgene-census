@@ -20,7 +20,12 @@ import tiledbsoma as soma
 from cellxgene_census._util import _user_agent
 
 from .._open import get_default_soma_context, open_soma
-from .._release_directory import CensusVersionDescription, CensusVersionName, get_census_version_directory
+from .._release_directory import (
+    CensusVersionDescription,
+    CensusVersionName,
+    get_census_version_description,
+    get_census_version_directory,
+)
 
 CELL_CENSUS_EMBEDDINGS_MANIFEST_URL = "https://contrib.cellxgene.cziscience.com/contrib/cell-census/contributions.json"
 
@@ -183,6 +188,9 @@ def get_embedding_metadata_by_name(
         ValueError: if no embeddings are found for the specified query parameters.
 
     """
+    census_version_description = get_census_version_description(census_version)
+    resolved_census_version = census_version_description["release_build"]
+
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
@@ -193,12 +201,14 @@ def get_embedding_metadata_by_name(
             obj["embedding_name"] == embedding_name
             and obj["experiment_name"] == organism
             and obj["data_type"] == embedding_type
-            and obj["census_version"] == census_version
+            and obj["census_version"] == resolved_census_version
         ):
             embeddings.append(obj)
 
     if len(embeddings) == 0:
-        raise ValueError(f"No embeddings found for {embedding_name}, {organism}, {census_version}, {embedding_type}")
+        raise ValueError(
+            f"No embeddings found for {embedding_name}, {organism}, {resolved_census_version}, {embedding_type}"
+        )
 
     return sorted(embeddings, key=lambda x: x["submission_date"])[-1]
 
@@ -226,13 +236,16 @@ def get_all_available_embeddings(census_version: str) -> list[dict[str, Any]]:
         }]
 
     """
+    # Validate census_version
+    census_version_description = get_census_version_description(census_version)
+
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
     embeddings = []
     manifest = response.json()
     for _, obj in manifest.items():
-        if obj["census_version"] == census_version:
+        if obj["census_version"] == census_version_description["release_build"]:
             embeddings.append(obj)
 
     return embeddings
