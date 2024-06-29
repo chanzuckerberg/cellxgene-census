@@ -1,5 +1,6 @@
 import functools
 
+import numpy as np
 import pandas as pd
 import torch
 from lightning.pytorch import LightningDataModule
@@ -10,10 +11,11 @@ from .pytorch import Encoder, ExperimentDataPipe, experiment_dataloader
 class BatchEncoder(Encoder):
     """An encoder that concatenates and encodes several obs columns."""
 
-    def __init__(self, cols: list[str]):
+    def __init__(self, cols: list[str], name: str = "batch"):
         self.cols = cols
         from sklearn.preprocessing import LabelEncoder
 
+        self._name = name
         self._encoder = LabelEncoder()
 
     def _join_cols(self, df: pd.DataFrame):
@@ -23,13 +25,20 @@ class BatchEncoder(Encoder):
         arr = self._join_cols(df)
         return self._encoder.transform(arr)
 
-    def register(self, obs: pd.DataFrame):
+    def inverse_transform(self, encoded_values: np.ndarray) -> np.ndarray:
+        return self._encoder.inverse_transform(encoded_values)
+
+    def fit(self, obs: pd.DataFrame):
         arr = self._join_cols(obs)
         self._encoder.fit(arr.unique())
 
     @property
+    def columns(self):
+        return self.cols
+
+    @property
     def name(self) -> str:
-        return "batch"
+        return self._name
 
     @property
     def classes_(self):
@@ -156,7 +165,6 @@ class CensusSCVIDataModule(LightningDataModule):
             encoder = BatchEncoder(self.obs_column_names)
             self._datapipe = ExperimentDataPipe(
                 *self.datapipe_args,
-                obs_column_names=self.obs_column_names,
                 encoders=[encoder],
                 **self.datapipe_kwargs,
             )
