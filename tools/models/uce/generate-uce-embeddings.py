@@ -53,7 +53,7 @@ def main(argv):
     logger.info("Generating anndata slice from Census")
     dataset_filename = f"anndata_uce_{args.part}.h5ad"
     dataset_path = (os.path.join(args.output_dir_census, dataset_filename))
-    with cellxgene_census.open_soma(census_version=args.census_version) as census:
+    with cellxgene_census.open_soma(uri="s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/") as census:
 
         # select the cell id's to include
         coords = get_soma_joinid_slice(census["census_data"]["homo_sapiens"], args.part, args.parts)
@@ -88,6 +88,10 @@ def main(argv):
     # Move adata to final location and clean up other output files
     shutil.move(os.path.join(uce_dir, dataset_path_uce), os.path.join(args.output_dir, dataset_filename))
     shutil.rmtree(os.path.join(uce_dir, dataset_filename))
+
+    if args.remove_h5ads:
+        logger.info("Removing Census H5AD")
+        os.remove(dataset_path)
     
     logger.info("Writing embeddings")
     adata = anndata.read_h5ad(os.path.join(args.output_dir, dataset_filename))
@@ -109,6 +113,10 @@ def main(argv):
         # TODO implement to csv, for Census LTS this is not needed. Leaving it as an option for
         # consistency with Geneformer pipeline.
         raise NotImplementedError("only tiledbsoma output is supported, please add --tiledbsoma flag to call.")
+    
+    if args.remove_h5ads:
+        logger.info("Removing Census H5AD with UCE")
+        os.remove(os.path.join(args.output_dir, dataset_filename))
     
     logger.info("SUCCESS")
 
@@ -146,6 +154,11 @@ def parse_arguments(argv):
         "--tiledbsoma",
         action="store_true",
         help="output_file is URI to an existing tiledbsoma.SparseNDArray to write into (instead of TSV file)",
+    )
+    parser.add_argument(
+        "--remove-h5ads",
+        action="store_true",
+        help="removes intermediate H5AD files",
     )
     parser.add_argument(
         "--output-dir-census",
