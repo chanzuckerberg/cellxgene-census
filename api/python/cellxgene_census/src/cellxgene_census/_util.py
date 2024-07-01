@@ -2,6 +2,9 @@ import urllib.parse
 
 import tiledbsoma as soma
 
+USER_AGENT_ENVVAR = "CELLXGENE_CENSUS_USERAGENT"
+"""Environment variable used to add more information into the user-agent."""
+
 
 def _uri_join(base: str, url: str) -> str:
     """Like urllib.parse.urljoin, but doesn't get confused by s3://."""
@@ -30,3 +33,14 @@ def _extract_census_version(census: soma.Collection) -> str:
         raise ValueError("Unable to extract Census version.") from None
 
     return version
+
+
+def _user_agent() -> str:
+    import os
+
+    import cellxgene_census
+
+    if env_specifier := os.environ.get(USER_AGENT_ENVVAR, None):
+        return f"cellxgene-census-python/{cellxgene_census.__version__} {env_specifier}"
+    else:
+        return f"cellxgene-census-python/{cellxgene_census.__version__}"
