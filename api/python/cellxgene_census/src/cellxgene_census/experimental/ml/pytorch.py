@@ -48,7 +48,7 @@ class Encoder(abc.ABC):
     - ``inverse_transform``: defines how to decode the encoded values back
       to the original values.
     - ``name``: The name of the encoder. This will be used as the key in the
-      dictionary of encoders. This should be unique across all encoders.
+      dictionary of encoders. Each encoder passed to a `ExperimentDataPipe` must have a unique name.
     - ``columns``: List of columns in `obs` that the encoder will be applied to.
       This will be used to
 
