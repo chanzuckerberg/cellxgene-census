@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
+
 from cellxgene_census_builder.build_soma.schema_util import FieldSpec, TableSpec
 
 
@@ -21,7 +22,7 @@ def test_create_spec() -> None:
     assert not ts.use_arrow_dictionaries  # default is False
     assert len(ts.fields) == len(fields)
     assert all(isinstance(f, FieldSpec) for f in ts.fields)
-    assert all((a.type == (b[1] if isinstance(b, tuple) else b.type)) for a, b in zip(ts.fields, fields))
+    assert all((a.type == (b[1] if isinstance(b, tuple) else b.type)) for a, b in zip(ts.fields, fields, strict=False))
     assert list(ts.field_names()) == [f[0] if isinstance(f, tuple) else f.name for f in fields]
     assert ts.field("soma_joinid").name == "soma_joinid"
     assert ts.field("d").name == "d"

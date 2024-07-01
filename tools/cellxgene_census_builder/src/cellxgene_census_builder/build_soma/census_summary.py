@@ -1,12 +1,12 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 import pandas as pd
 import pyarrow as pa
 import tiledbsoma as soma
 
 from .experiment_builder import ExperimentBuilder, get_summary_stats
-from .globals import CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, CXG_SCHEMA_VERSION
+from .globals import CENSUS_INFO_ORGANISMS_NAME, CENSUS_SCHEMA_VERSION, CENSUS_SUMMARY_NAME, CXG_SCHEMA_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -33,5 +33,29 @@ def create_census_summary(
     # write to a SOMA dataframe
     with info_collection.add_new_dataframe(
         CENSUS_SUMMARY_NAME, schema=pa.Schema.from_pandas(df, preserve_index=False), index_column_names=["soma_joinid"]
+    ) as summary:
+        summary.write(pa.Table.from_pandas(df, preserve_index=False))
+
+
+def create_census_info_organisms(
+    info_collection: soma.Collection, experiment_builders: Sequence[ExperimentBuilder]
+) -> None:
+    logger.info("Create census organisms dataframe")
+
+    df = pd.DataFrame.from_records(
+        [
+            {
+                "organism_ontology_term_id": eb.specification.organism_ontology_term_id,
+                "organism_label": eb.specification.label,
+                "organism": eb.specification.name,
+            }
+            for eb in experiment_builders
+        ]
+    )
+    df["soma_joinid"] = range(len(df))
+    with info_collection.add_new_dataframe(
+        CENSUS_INFO_ORGANISMS_NAME,
+        schema=pa.Schema.from_pandas(df, preserve_index=False),
+        index_column_names=["soma_joinid"],
     ) as summary:
         summary.write(pa.Table.from_pandas(df, preserve_index=False))

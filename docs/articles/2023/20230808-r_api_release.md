@@ -2,7 +2,7 @@
 
 *Published:* *August 7th, 2023*
 
-*By:* *[Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
+*By:* *[Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)*
 
 The Census team is pleased to announce the release of the R package `cellxgene.census`. 🎉 🎉
 

@@ -4,7 +4,11 @@ import numpy.typing as npt
 import pytest
 from scipy import sparse
 
-from cellxgene_census.experimental.pp._online import CountsAccumulator, MeanAccumulator, MeanVarianceAccumulator
+from cellxgene_census.experimental.pp._online import (
+    CountsAccumulator,
+    MeanAccumulator,
+    MeanVarianceAccumulator,
+)
 
 
 def allclose(a: npt.NDArray[np.float64], b: npt.NDArray[np.float64]) -> bool:
@@ -13,7 +17,14 @@ def allclose(a: npt.NDArray[np.float64], b: npt.NDArray[np.float64]) -> bool:
 
 @pytest.fixture
 def matrix(m: int, n: int) -> sparse.coo_matrix:
-    m = 100 * sparse.random(m, n, density=0.1, format="coo", dtype=np.float32, random_state=np.random.default_rng())
+    m = 100 * sparse.random(
+        m,
+        n,
+        density=0.1,
+        format="coo",
+        dtype=np.float32,
+        random_state=np.random.default_rng(),
+    )
     m.row.flags.writeable = False  # type: ignore[attr-defined]
     m.col.flags.writeable = False  # type: ignore[attr-defined]
     m.data.flags.writeable = False  # type: ignore[attr-defined]
@@ -83,6 +94,7 @@ def test_meanvar(matrix: sparse.coo_matrix, n_batches: int, stride: int, ddof: i
             assert allclose(batches_var[batch], dense.var(axis=0, ddof=ddof, dtype=np.float64))
 
 
+@pytest.mark.experimental
 @pytest.mark.parametrize("m,n", [(1200, 511), (100001, 57)])
 def test_meanvar_nnz_only_batches_fails(matrix: sparse.coo_matrix) -> None:
     n_batches = 10
@@ -144,7 +156,10 @@ def test_counts(matrix: sparse.coo_matrix, n_batches: int, stride: int) -> None:
     for batch in range(n_batches):
         dense = matrix[batches == batch, :].toarray()
         assert allclose(counts_sum[batch], np.minimum(dense, clip_val[batch]).sum(axis=0))
-        assert allclose(counts_squared_sum[batch], (np.minimum(dense, clip_val[batch]) ** 2).sum(axis=0))
+        assert allclose(
+            counts_squared_sum[batch],
+            (np.minimum(dense, clip_val[batch]) ** 2).sum(axis=0),
+        )
 
 
 @pytest.mark.experimental

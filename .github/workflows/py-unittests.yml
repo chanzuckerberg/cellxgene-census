@@ -7,12 +7,21 @@ on:
   push:
     branches: [main]
 
+# If a new commit is pushed, cancel the jobs from previous commits.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit_tests_python_api:
     strategy:
+      fail-fast: false  # Don't stop the workflow if one of the jobs fails
       matrix:
         os: [single-cell-8c64g-runner, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.8"
 
     runs-on: ${{matrix.os}}
 
@@ -30,8 +39,10 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
-          pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
+          GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -e './api/python/cellxgene_census/[experimental]'
+      - name: Report Dependency Versions
+        run: pip list
       - name: Test with pytest (API, main tests)
         run: |
           PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP --durations=20 ./api/python/cellxgene_census/tests/
@@ -69,7 +80,9 @@ jobs:
           pip install -r ./tools/scripts/requirements-dev.txt
       - name: Test with pytest (builder)
         run: |
-          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -rP ./tools/cellxgene_census_builder/tests/
+          # Run with and without Numba JIT. This gives a more accurate representation of code coverage
+          PYTHONPATH=. coverage run --parallel-mode -m pytest -v -s -rP ./tools/cellxgene_census_builder/tests/
+          PYTHONPATH=. NUMBA_DISABLE_JIT=1 coverage run --parallel-mode -m pytest -v -s -rP ./tools/cellxgene_census_builder/tests/
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-builder-${{ matrix.os }}-${{ matrix.python-version }}

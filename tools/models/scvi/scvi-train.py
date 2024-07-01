@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     print("Configure model")
 
-    model = scvi.model.SCVI(adata, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb", encode_covariates=True)
+    model = scvi.model.SCVI(adata, n_layers=n_layers, n_latent=n_latent, gene_likelihood="nb", encode_covariates=False)
 
     train_config = config.get("train")
     max_epochs = train_config.get("max_epochs")
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     devices = train_config.get("devices")
     multi_gpu = train_config.get("multi_gpu", False)
 
-    trainer_config = train_config.get("trainer")
+    trainer_config = train_config.get("trainer") or {}
 
     training_plan_config = config.get("training_plan")
 
@@ -54,6 +54,7 @@ if __name__ == "__main__":
         devices = 1
 
     print("Start training model")
+    print("Training plan:", training_plan_config)
 
     logger = TensorBoardLogger("tb_logs", name="my_model")
 

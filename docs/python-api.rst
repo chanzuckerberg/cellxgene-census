@@ -25,6 +25,8 @@ Get slice as AnnData
     :nosignatures:
 
     cellxgene_census.get_anndata
+    cellxgene_census.get_obs
+    cellxgene_census.get_var
 
 Feature presence matrix
 -----------------------
@@ -52,6 +54,8 @@ Experimental: Machine Learning
     cellxgene_census.experimental.ml.pytorch.experiment_dataloader
     cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
     cellxgene_census.experimental.ml.pytorch.Stats
+    cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder
+    cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer
 
 Experimental: Processing
 --------------------------------
@@ -62,11 +66,16 @@ Experimental: Processing
     cellxgene_census.experimental.pp.get_highly_variable_genes
     cellxgene_census.experimental.pp.highly_variable_genes
     cellxgene_census.experimental.pp.mean_variance
-    
-Experimental: Utility
+
+Experimental: Embeddings
 --------------------------------
 .. autosummary::
     :toctree: _autosummary/
     :nosignatures:
 
-    cellxgene_census.experimental.util.X_sparse_iter
+    cellxgene_census.experimental.get_embedding
+    cellxgene_census.experimental.get_embedding_metadata
+    cellxgene_census.experimental.get_embedding_metadata_by_name
+    cellxgene_census.experimental.get_all_available_embeddings
+    cellxgene_census.experimental.get_all_census_versions_with_embedding
+

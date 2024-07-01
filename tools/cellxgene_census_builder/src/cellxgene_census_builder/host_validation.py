@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-from typing import Union
 
 import psutil
 
@@ -12,24 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 def _check(condition: bool, message: str) -> bool:
-    """Like assert, but logs"""
+    """Like assert, but logs."""
     if not condition:
         logger.critical(message)
     return condition
 
 
 def check_os() -> bool:
-    """
-    Check that we run on Posix (Linux, MacOS), as we rely on
+    """Check that we run on Posix (Linux, MacOS), as we rely on
     Posix semantics for a few things.
     """
     return _check(os.name == "posix" and psutil.POSIX, "Census builder requires Posix OS")
 
 
 def check_physical_memory(min_physical_memory: int) -> bool:
-    """
-    Check for sufficient physical and virtual memory.
-    """
+    """Check for sufficient physical and virtual memory."""
     svmem = psutil.virtual_memory()
     logger.debug(f"Host: {hr_binary_unit(svmem.total)} memory found")
     return _check(
@@ -39,9 +35,7 @@ def check_physical_memory(min_physical_memory: int) -> bool:
 
 
 def check_swap_memory(min_swap_memory: int) -> bool:
-    """
-    Check for sufficient physical and virtual memory.
-    """
+    """Check for sufficient physical and virtual memory."""
     svswap = psutil.swap_memory()
     logger.debug(f"Host: {hr_binary_unit(svswap.total)} swap found")
     return _check(
@@ -51,10 +45,8 @@ def check_swap_memory(min_swap_memory: int) -> bool:
     )
 
 
-def check_free_disk(working_dir: Union[str, os.PathLike[str]], min_free_disk_space: int) -> bool:
-    """
-    Check for sufficient free disk space.
-    """
+def check_free_disk(working_dir: str | os.PathLike[str], min_free_disk_space: int) -> bool:
+    """Check for sufficient free disk space."""
     working_dir_fspath = working_dir.__fspath__() if isinstance(working_dir, os.PathLike) else working_dir
     skdiskusage = psutil.disk_usage(working_dir_fspath)
     logger.debug(f"Host: {hr_decimal_unit(skdiskusage.free)} free disk space found")
@@ -66,7 +58,7 @@ def check_free_disk(working_dir: Union[str, os.PathLike[str]], min_free_disk_spa
 
 
 def check_host(args: CensusBuildArgs) -> bool:
-    """Verify all host requirments. Return True if OK, False if conditions not met"""
+    """Verify all host requirments. Return True if OK, False if conditions not met."""
     if args.config.host_validation_disable:
         return True
 

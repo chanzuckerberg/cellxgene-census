@@ -1,10 +1,10 @@
-"""
-Validate an embedding
-"""
+"""Validate an embedding."""
+
 from __future__ import annotations
 
 import concurrent.futures
-from typing import Any, Generator, Tuple, TypeVar, Union, cast
+from collections.abc import Generator
+from typing import Any, TypeVar, cast
 
 import numba as nb
 import numpy as np
@@ -12,7 +12,7 @@ import numpy.typing as npt
 import pyarrow as pa
 import tiledbsoma as soma
 
-from .census_util import get_census_obs_uri_region, get_obs_soma_joinids
+from .census_util import get_axis_soma_joinids, get_census_obs_uri_region
 from .config import Config
 from .util import EagerIterator, blocksize, blockwise_axis0_tables, get_logger, has_blockwise_iterator, soma_context
 
@@ -24,8 +24,9 @@ Multiple implementations of embedding validation. All require metadata as well t
 it matches the embedding. Tests performed:
 
 1. Embedding shape must be (O, M), where O is the domain of the associated Census experiment
-obs dataframe, and M is user defined (e.g., for a 2D UMAP, M would be 2).
-2. All dim0 values in the embedding must be a legal obs soma_joinid in the corresponding Census experiment
+axis (obs or var) dataframe, and M is user defined (e.g., for a 2D UMAP, M would be 2).
+2. All dim0 values in the embedding must be a legal soma_joinid in the corresponding Census
+experiment axis
 3. An embedding must have at least one (1) cell embedded
 4. Embedding data type must be float32 and coordinates must be int64
 5. Storage format version must match associated Census
@@ -36,7 +37,7 @@ logger = get_logger()
 
 
 def validate_compatible_tiledb_storage_format(uri: str, config: Config) -> None:
-    """Verify Census build and Embedding TileDB formats are identical"""
+    """Verify Census build and Embedding TileDB formats are identical."""
     import tiledb
 
     # Fetch embedding storage version
@@ -51,12 +52,10 @@ def validate_compatible_tiledb_storage_format(uri: str, config: Config) -> None:
 
 
 def validate_embedding(config: Config, uri: str) -> None:
-    """
-    Validate an embedding saved as a SOMASparseNDArray, e.g., obsm-like. Raises on invalid
-    """
+    """Validate an embedding saved as a SOMASparseNDArray, e.g., obsm-like. Raises on invalid."""
     logger.info(f"Validating {uri}")
     metadata = config.metadata
-    obs_joinids, _ = get_obs_soma_joinids(config)
+    axis_joinids, _ = get_axis_soma_joinids(config)
 
     with soma.open(uri, context=soma_context()) as A:
         shape = A.shape
@@ -88,7 +87,7 @@ def validate_embedding(config: Config, uri: str) -> None:
                 i = tbl.column("soma_dim_0")
                 j = tbl.column("soma_dim_1")
 
-                _in_all = tp.submit(isin_all, i, obs_joinids)
+                _in_all = tp.submit(isin_all, i, axis_joinids)
                 _in_range = tp.submit(is_in_range_all, j, 0, metadata.n_features - 1)
 
                 # Keep count of dim0 coordinates seen
@@ -99,9 +98,9 @@ def validate_embedding(config: Config, uri: str) -> None:
                 if not no_dups:
                     raise ValueError("Embedding must not contain duplicate coordinates")
 
-                # verify all dim0 values are legit obs soma_joinid values
+                # verify all dim0 values are legit soma_joinid values
                 if not _in_all.result():
-                    raise ValueError("Embedding contains joinids not present in experiment obs")
+                    raise ValueError("Embedding contains joinids not present in experiment axis")
 
                 # Verify all dim1 values are in expected domain
                 if not _in_range.result():
@@ -113,14 +112,14 @@ def validate_embedding(config: Config, uri: str) -> None:
             )
 
 
-def _validate_shape(shape: Tuple[int, ...], config: Config) -> None:
-    _, obs_shape = get_obs_soma_joinids(config)
+def _validate_shape(shape: tuple[int, ...], config: Config) -> None:
+    _, axis_shape = get_axis_soma_joinids(config)
 
     if len(shape) != 2:
         raise ValueError("Embedding must be 2D")
 
-    if shape[0] != obs_shape[0]:
-        raise ValueError(f"Shapes differ: embedding {shape[0]},  obs shape {obs_shape[0]}.")
+    if shape[0] != axis_shape[0]:
+        raise ValueError(f"Shapes differ: embedding {shape[0]},  axis shape {axis_shape[0]}.")
 
     if shape[1] != config.metadata.n_features:
         raise ValueError(
@@ -130,8 +129,7 @@ def _validate_shape(shape: Tuple[int, ...], config: Config) -> None:
 
 @nb.njit()  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _isin_all(elmts: _NPT, test_elmts: _NPT) -> bool:
-    """
-    Return equivalent of numpy.isin(elmts, test_elmts).all() without the
+    """Return equivalent of numpy.isin(elmts, test_elmts).all() without the
     memory allocation and extra reduction required by the numpy expression.
     """
     test = set(test_elmts)
@@ -141,7 +139,7 @@ def _isin_all(elmts: _NPT, test_elmts: _NPT) -> bool:
     return True
 
 
-def isin_all(elmts: Union[pa.ChunkedArray, pa.Array, _NPT], test_elmts: _NPT) -> bool:
+def isin_all(elmts: pa.ChunkedArray | pa.Array | _NPT, test_elmts: _NPT) -> bool:
     if isinstance(elmts, pa.ChunkedArray):
         return all(_isin_all(chunk.to_numpy(), test_elmts) for chunk in elmts.iterchunks())
     elif isinstance(elmts, pa.Array):
@@ -152,8 +150,7 @@ def isin_all(elmts: Union[pa.ChunkedArray, pa.Array, _NPT], test_elmts: _NPT) ->
 
 @nb.njit()  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _is_in_range_all(elmts: _NPT, min: float, max: float) -> bool:
-    """
-    Return equivalent of np.logical_or((elmts < min), (elmts > max)).any()
+    """Return equivalent of np.logical_or((elmts < min), (elmts > max)).any()
     without the memory allocation and extra reduction required by the numpy expression.
     """
     for i in range(len(elmts)):
@@ -162,7 +159,7 @@ def _is_in_range_all(elmts: _NPT, min: float, max: float) -> bool:
     return True
 
 
-def is_in_range_all(elmts: Union[pa.ChunkedArray, pa.Array, _NPT], min: float, max: float) -> bool:
+def is_in_range_all(elmts: pa.ChunkedArray | pa.Array | _NPT, min: float, max: float) -> bool:
     if isinstance(elmts, pa.ChunkedArray):
         return all(_is_in_range_all(chunk.to_numpy(), min, max) for chunk in elmts.iterchunks())
     elif isinstance(elmts, pa.Array):
@@ -174,7 +171,7 @@ def is_in_range_all(elmts: Union[pa.ChunkedArray, pa.Array, _NPT], min: float, m
 @nb.njit()  # type: ignore[misc]  # See https://github.com/numba/numba/issues/7424
 def _is_sorted_unique(
     i: npt.NDArray[np.int64], j: npt.NDArray[np.int64], j_shape: int, last_coord: int
-) -> Tuple[bool, int]:
+) -> tuple[bool, int]:
     for n in range(len(i)):
         c_coord = i[n] * j_shape + j[n]
         if c_coord <= last_coord:
@@ -184,7 +181,7 @@ def _is_sorted_unique(
 
 
 def is_sorted_unique(i: npt.NDArray[np.int64], j: npt.NDArray[np.int64], j_shape: int) -> bool:
-    ok, _ = cast(Tuple[bool, int], _is_sorted_unique(i, j, j_shape, -1))
+    ok, _ = cast(tuple[bool, int], _is_sorted_unique(i, j, j_shape, -1))
     return ok
 
 

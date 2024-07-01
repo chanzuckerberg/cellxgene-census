@@ -1,3 +1,5 @@
+<span style="background-color: #f3bfcb; color; font-size: 18px"> 🚨 Census now supports categoricals, using less memory but potentially breaking existing pipelines. [Find out more](https://chanzuckerberg.github.io/cellxgene-census/articles/2024/20240404-categoricals.html)!
+
 <span style="background-color: #f3bfcb; color; font-size: 18px"> 🚀 New to the Census: we’ve created a **centralized hub of models and embeddings** using Census data. [Check it out](https://cellxgene.cziscience.com/census-models)!
 
  </span>

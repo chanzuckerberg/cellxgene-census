@@ -3,14 +3,13 @@ import logging
 import pathlib
 import subprocess
 import sys
-from typing import Union
 
 from .logging import logging_init_params
 
 logger = logging.getLogger(__name__)
 
 
-def sync_to_S3(from_path: Union[str, pathlib.PosixPath], to_path: str, dryrun: bool = False) -> None:
+def sync_to_S3(from_path: str | pathlib.PosixPath, to_path: str, dryrun: bool = False) -> None:
     """Copy (sync) local directory to S3.
 
     Equivalent of `aws s3 sync local_directory_path S3_path`.

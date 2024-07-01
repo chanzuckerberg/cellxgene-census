@@ -1,5 +1,4 @@
-"""
-An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at `CELLxGENE Discover`_.
+"""An API to facilitate use of the CZI Science CELLxGENE Census. The Census is a versioned container of single-cell data hosted at `CELLxGENE Discover`_.
 
 The API is built on the `tiledbsoma` SOMA API, and provides a number of helper functions including:
 
@@ -22,8 +21,13 @@ For more information on the API, visit the `cellxgene_census repo`_. For more in
 
 from importlib import metadata
 
-from ._get_anndata import get_anndata
-from ._open import download_source_h5ad, get_default_soma_context, get_source_h5ad_uri, open_soma
+from ._get_anndata import get_anndata, get_obs, get_var
+from ._open import (
+    download_source_h5ad,
+    get_default_soma_context,
+    get_source_h5ad_uri,
+    open_soma,
+)
 from ._presence_matrix import get_presence_matrix
 from ._release_directory import (
     get_census_mirror_directory,
@@ -40,6 +44,8 @@ except metadata.PackageNotFoundError:
 __all__ = [
     "download_source_h5ad",
     "get_anndata",
+    "get_obs",
+    "get_var",
     "get_census_version_description",
     "get_census_version_directory",
     "get_census_mirror_directory",

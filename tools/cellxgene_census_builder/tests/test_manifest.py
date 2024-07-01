@@ -5,14 +5,13 @@ from unittest.mock import patch
 
 import fsspec
 import pytest
+
 from cellxgene_census_builder.build_soma.manifest import load_manifest
 from cellxgene_census_builder.build_state import CensusBuildConfig
 
 
 def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empty_blocklist: str) -> None:
-    """
-    If specified a parameter, `load_manifest` should load the dataset manifest from such file.
-    """
+    """If specified a parameter, `load_manifest` should load the dataset manifest from such file."""
     manifest = load_manifest(manifest_csv, empty_blocklist)
     assert len(manifest) == 2
     assert manifest[0].dataset_id == "dataset_id_1"
@@ -30,9 +29,7 @@ def test_load_manifest_from_file(tmp_path: pathlib.Path, manifest_csv: str, empt
 
 
 def test_load_manifest_does_dedup(manifest_csv_with_duplicates: str, empty_blocklist: str) -> None:
-    """
-    `load_manifest` should not include duplicate datasets from the manifest
-    """
+    """`load_manifest` should not include duplicate datasets from the manifest"""
     manifest = load_manifest(manifest_csv_with_duplicates, empty_blocklist)
     assert len(manifest) == 2
 
@@ -57,9 +54,7 @@ def test_manifest_dataset_block(tmp_path: pathlib.Path, manifest_csv: str, empty
 
 
 def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
-    """
-    If no parameters are specified, `load_manifest` should load the dataset list from Discover API.
-    """
+    """If no parameters are specified, `load_manifest` should load the dataset list from Discover API."""
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
         m.return_value = [
             {
@@ -67,9 +62,10 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "collection_id": "collection_1",
                 "collection_name": "1",
                 "collection_doi": None,
+                "collection_doi_label": "Publication 1",
                 "citation": "citation",
                 "title": "dataset #1",
-                "schema_version": "4.0.0",
+                "schema_version": "5.0.0",
                 "assets": [
                     {
                         "filesize": 123,
@@ -91,9 +87,10 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
                 "collection_id": "collection_1",
                 "collection_name": "1",
                 "collection_doi": None,
+                "collection_doi_label": "Publication 2",
                 "citation": "citation",
                 "title": "dataset #2",
-                "schema_version": "4.0.0",
+                "schema_version": "5.0.0",
                 "assets": [{"filesize": 456, "filetype": "H5AD", "url": "https://fake.url/dataset_id_2.h5ad"}],
                 "dataset_version_id": "dataset_id_2",
                 "cell_count": 11,
@@ -114,9 +111,7 @@ def test_load_manifest_from_cxg(empty_blocklist: str) -> None:
 def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
     caplog: pytest.LogCaptureFixture, empty_blocklist: str
 ) -> None:
-    """
-    `load_manifest` should exclude datasets that do not have a current schema version.
-    """
+    """`load_manifest` should exclude datasets that do not have a current schema version."""
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
         m.return_value = [
             {
@@ -124,9 +119,10 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
                 "collection_id": "collection_1",
                 "collection_name": "1",
                 "collection_doi": None,
+                "collection_doi_label": "Publication 1",
                 "citation": "citation",
                 "title": "dataset #1",
-                "schema_version": "4.0.0",
+                "schema_version": "5.0.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
                 "cell_count": 10,
@@ -137,6 +133,7 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
                 "collection_id": "collection_1",
                 "collection_name": "1",
                 "collection_doi": None,
+                "collection_doi_label": "Publication 2",
                 "citation": "citation",
                 "title": "dataset #2",
                 "schema_version": "2.0.0",  # Old schema version
@@ -159,9 +156,7 @@ def test_load_manifest_from_cxg_errors_on_datasets_with_old_schema(
 def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
     caplog: pytest.LogCaptureFixture, empty_blocklist: str
 ) -> None:
-    """
-    `load_manifest` should raise error if it finds datasets without assets
-    """
+    """`load_manifest` should raise error if it finds datasets without assets"""
     with patch("cellxgene_census_builder.build_soma.manifest.fetch_json") as m:
         m.return_value = [
             {
@@ -171,7 +166,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
                 "collection_doi": None,
                 "citation": "citation",
                 "title": "dataset #1",
-                "schema_version": "4.0.0",
+                "schema_version": "5.0.0",
                 "assets": [{"filesize": 123, "filetype": "H5AD", "url": "https://fake.url/dataset_id_1.h5ad"}],
                 "dataset_version_id": "dataset_id_1",
                 "cell_count": 10,
@@ -184,7 +179,7 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
                 "collection_doi": None,
                 "citation": "citation",
                 "title": "dataset #2",
-                "schema_version": "4.0.0",
+                "schema_version": "5.0.0",
                 "assets": [],
                 "dataset_version_id": "dataset_id_2",
                 "cell_count": 10,
@@ -202,13 +197,11 @@ def test_load_manifest_from_cxg_excludes_datasets_with_no_assets(
 
 
 def test_blocklist_alive_and_well() -> None:
-    """
-    Perform three checks:
+    """Perform three checks:
     1. Block list is specified in the default configuration
     2. The file exists at the specified location
     3. The file "looks like" a block list
     """
-
     config = CensusBuildConfig()
 
     assert config.dataset_id_blocklist_uri

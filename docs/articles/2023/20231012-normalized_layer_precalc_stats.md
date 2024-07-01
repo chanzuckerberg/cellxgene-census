@@ -3,7 +3,7 @@
 <!-- markdownlint-disable MD036 -->
 *Published: October 12, 2023*
 
-*By: [Maximilian Lombardo](mlombardo@chanzuckerberg.com) and [Pablo Garcia-Nieto](pgarcia-nieto@chanzuckerberg.com)*
+*By: [Maximilian Lombardo](mailto:mlombardo@chanzuckerberg.com) and [Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)*
 <!-- markdownlint-enable MD036 -->
 
 The Census team is happy to announce the introduction of two new data features, tailored to empower your single-cell research: a library-size, normalized expression layer and pre-calculated cell and gene statistics. This work is reflected in changes introduced in the [Census schema V1.1.0](https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md).

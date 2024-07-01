@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cellxgene_census"
+name = "cellxgene-census"
 dynamic = ["version"]
 description = "API to facilitate the use of the CZ CELLxGENE Discover Census. For more information about the API and the project visit https://github.com/chanzuckerberg/cellxgene-census/"
 authors = [
@@ -31,9 +31,9 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma~=1.6.0",
+    "tiledbsoma~=1.11.4",
     "anndata",
-    "numpy>=1.21,<1.25",  # numpy is constrained by numba and the old pip solver
+    "numpy>=1.21,<2.0",
     "requests",
     "typing_extensions",
     "s3fs>=2021.06.1",
@@ -41,16 +41,23 @@ dependencies= [
 
 [project.optional-dependencies]
 experimental = [
-    "torch==2.0.1",
-    "torchdata==0.6.1",
-    "scikit-learn==1.3.1",
-    "scikit-misc==0.2.0",
-    "psutil==5.9.5",
-    "datasets~=2.14",
+    "torch",
+    "torchdata~=0.7",
+    "scikit-learn~=1.0",
+    "scikit-misc>=0.2,<0.4",  # scikit-misc 0.3 dropped Python 3.8 support, and 0.4 doesn't have MacOS/ARM wheels
+    "psutil~=5.0",
+    "datasets~=2.0",
     "tdigest~=0.5",
     # Not expressible in pyproject.toml:
     #"git+https://huggingface.co/ctheodoris/Geneformer",
     # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
+]
+doc = [
+    "nbsphinx",
+    "myst-parser",
+    "sphinx-rtd-theme",
+    "gitpython",
+    "sphinx<7.0.0",
 ]
 
 [project.urls]
@@ -68,9 +75,75 @@ exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by 
 [tool.setuptools_scm]
 root = "../../.."
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-target_version = ['py39']
+src = ["api/python/cellxgene_census/src"]
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "F",  # Errors detected by Pyflakes
+    "E",  # Error detected by Pycodestyle
+    "W",  # Warning detected by Pycodestyle
+    "I",  # isort
+    "D",  # pydocstyle
+    "B",  # flake8-bugbear
+    "TID",  # flake8-tidy-imports
+    "C4",  # flake8-comprehensions
+    "BLE",  # flake8-blind-except
+    "UP",  # pyupgrade
+    "RUF100",  # Report unused noqa directives
+]
+ignore = [
+    # line too long -> we accept long comment lines; formatter gets rid of long code lines
+    "E501",
+    # Do not assign a lambda expression, use a def -> lambda expression assignments are convenient
+    "E731",
+    # allow I, O, l as variable names -> I is the identity matrix
+    "E741",
+    # Missing docstring in public package
+    "D104",
+    # Missing docstring in public module
+    "D100",
+    # Missing docstring in __init__
+    "D107",
+    # Errors from function calls in argument defaults. These are fine when the result is immutable.
+    "B008",
+    # __magic__ methods are are often self-explanatory, allow missing docstrings
+    "D105",
+    # first line should end with a period [Bug: doesn't work with single-line docstrings]
+    "D400",
+    # First line should be in imperative mood; try rephrasing
+    "D401",
+    ## Disable one in each pair of mutually incompatible rules
+    # We don’t want a blank line before a class docstring
+    "D203",
+    # We want docstrings to start immediately after the opening triple quote
+    "D213",
+    # Missing argument description in the docstring TODO: enable
+    "D417",
+    # Blank line required between summary line and description TODO: enable
+    "D205",
+    # Prefer absolute imports over relative imports from parent modules TODO: enable
+    "TID252",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["D"]
+"*/__init__.py" = ["F401"]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
 
 [tool.mypy]
 show_error_codes = true
@@ -86,12 +159,3 @@ markers = [
     "experimental: tests for the `experimental` package",
     "lts_compat_check: check for compatibility with an LTS build",
 ]
-
-[tool.ruff]
-select = ["E", "F", "B", "I"]
-ignore = ["E501", "E402", "C408", ]
-line-length = 120
-target-version = "py39"
-
-[tool.ruff.isort]
-known-first-party =["cellxgene_census"]

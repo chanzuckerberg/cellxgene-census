@@ -5,10 +5,11 @@ a named LTS release. Primarilly intended to be driven by a periodic GHA.
 Where there are known and accepted incompatibilities, use `pytest.skip`
 to codify them.
 """
+
 from __future__ import annotations
 
 from collections import deque
-from typing import Iterator, Literal, Optional, Sequence, Union, get_args
+from typing import Iterator, Literal, Sequence, Union, get_args
 
 import pyarrow as pa
 import pytest
@@ -17,17 +18,27 @@ import tiledbsoma as soma
 import cellxgene_census
 
 SOMATypeNames = Literal[
-    "SOMACollection", "SOMAExperiment", "SOMAMeasurement", "SOMADataFrame", "SOMASparseNDArray", "SOMADenseNDArray"
+    "SOMACollection",
+    "SOMAExperiment",
+    "SOMAMeasurement",
+    "SOMADataFrame",
+    "SOMASparseNDArray",
+    "SOMADenseNDArray",
 ]
 CollectionTypeNames = ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]
 
 SOMATypes = Union[
-    soma.Collection, soma.DataFrame, soma.SparseNDArray, soma.DenseNDArray, soma.Experiment, soma.Measurement
+    soma.Collection,
+    soma.DataFrame,
+    soma.SparseNDArray,
+    soma.DenseNDArray,
+    soma.Experiment,
+    soma.Measurement,
 ]
 
 
 def walk_census(
-    census: soma.Collection, filter_types: Optional[Sequence[SOMATypeNames]] = None
+    census: soma.Collection, filter_types: Sequence[SOMATypeNames] | None = None
 ) -> Iterator[tuple[str, SOMATypes]]:
     assert census.soma_type == "SOMACollection"
     filter_types = filter_types or get_args(SOMATypeNames)

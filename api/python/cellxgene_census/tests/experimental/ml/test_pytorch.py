@@ -12,15 +12,16 @@ from scipy.sparse import coo_matrix, spmatrix
 from somacore import AxisQuery
 from tiledbsoma import Experiment, _factory
 from tiledbsoma._collection import CollectionBase
-from torch.utils.data._utils.worker import WorkerInfo
 
 # conditionally import torch, as it will not be available in all test environments
 try:
     from torch import Tensor, float32
+    from torch.utils.data._utils.worker import WorkerInfo
 
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
         experiment_dataloader,
+        list_split,
     )
 except ImportError:
     # this should only occur when not running `experimental`-marked tests
@@ -28,7 +29,10 @@ except ImportError:
 
 
 def pytorch_x_value_gen(obs_range: range, var_range: range) -> spmatrix:
-    occupied_shape = (obs_range.stop - obs_range.start, var_range.stop - var_range.start)
+    occupied_shape = (
+        obs_range.stop - obs_range.start,
+        var_range.stop - var_range.start,
+    )
     checkerboard_of_ones = coo_matrix(np.indices(occupied_shape).sum(axis=0) % 2)
     checkerboard_of_ones.row += obs_range.start
     checkerboard_of_ones.col += var_range.start
@@ -138,6 +142,7 @@ def test_non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     row_iter = iter(exp_data_pipe)
@@ -160,6 +165,7 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment, use_eager_
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -210,6 +216,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment, use_eag
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -235,6 +242,7 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment, use_eager_fetc
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -282,6 +290,7 @@ def test_sparse_output__non_batched(soma_experiment: Experiment, use_eager_fetch
         X_name="raw",
         obs_column_names=["label"],
         return_sparse_X=True,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -305,6 +314,7 @@ def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bo
         obs_column_names=["label"],
         batch_size=3,
         return_sparse_X=True,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -346,6 +356,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        shuffle=False,
         batch_size=3,
     )
     batch_iter = iter(exp_data_pipe)
@@ -360,7 +371,8 @@ def test_encoders(soma_experiment: Experiment) -> None:
 
 @pytest.mark.experimental
 @pytest.mark.skipif(
-    (sys.version_info.major, sys.version_info.minor) == (3, 9), reason="fails intermittently with OOM error for 3.9"
+    (sys.version_info.major, sys.version_info.minor) == (3, 9),
+    reason="fails intermittently with OOM error for 3.9",
 )
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
@@ -387,7 +399,9 @@ def test_multiprocessing__returns_full_result(soma_experiment: Experiment) -> No
 @pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(6, 3, pytorch_x_value_gen)])
-def test_distributed__returns_data_partition_for_rank(soma_experiment: Experiment) -> None:
+def test_distributed__returns_data_partition_for_rank(
+    soma_experiment: Experiment,
+) -> None:
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode,
     using mocks to avoid having to do real PyTorch distributed setup."""
 
@@ -401,7 +415,12 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
         mock_dist_get_world_size.return_value = 3
 
         dp = ExperimentDataPipe(
-            soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], soma_chunk_size=2
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            obs_column_names=["label"],
+            soma_chunk_size=2,
+            shuffle=False,
         )
         full_result = list(iter(dp))
 
@@ -415,7 +434,9 @@ def test_distributed__returns_data_partition_for_rank(soma_experiment: Experimen
 @pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(12, 3, pytorch_x_value_gen)])
-def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_experiment: Experiment) -> None:
+def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
+    soma_experiment: Experiment,
+) -> None:
     """Tests pytorch._partition_obs_joinids() behavior in a simulated PyTorch distributed processing mode and
     DataLoader multiprocessing mode, using mocks to avoid having to do distributed pytorch
     setup or real DataLoader multiprocessing."""
@@ -433,7 +454,12 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(soma_e
         mock_dist_get_world_size.return_value = 3
 
         dp = ExperimentDataPipe(
-            soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], soma_chunk_size=2
+            soma_experiment,
+            measurement_name="RNA",
+            X_name="raw",
+            obs_column_names=["label"],
+            soma_chunk_size=2,
+            shuffle=False,
         )
 
         full_result = list(iter(dp))
@@ -458,10 +484,11 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eag
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
-    torch_data = [row for row in dl]
+    torch_data = [row for row in dl]  # noqa: C416
 
     row = torch_data[0]
     assert row[0].to_dense().tolist() == [0, 1, 0]
@@ -481,10 +508,11 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
-    torch_data = [row for row in dl]
+    torch_data = [row for row in dl]  # noqa: C416
 
     batch = torch_data[0]
     assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
@@ -515,7 +543,12 @@ def test__X_tensor_dtype_matches_X_matrix(soma_experiment: Experiment, use_eager
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(10, 1, pytorch_x_value_gen)])
 def test__pytorch_splitting(soma_experiment: Experiment) -> None:
-    dp = ExperimentDataPipe(soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"])
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+    )
     dp_train, dp_test = dp.random_split(weights={"train": 0.7, "test": 0.3}, seed=1234)
     dl = experiment_dataloader(dp_train)
 
@@ -528,7 +561,11 @@ def test__pytorch_splitting(soma_experiment: Experiment) -> None:
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(16, 1, pytorch_seq_x_value_gen)])
 def test__shuffle(soma_experiment: Experiment) -> None:
     dp = ExperimentDataPipe(
-        soma_experiment, measurement_name="RNA", X_name="raw", obs_column_names=["label"], shuffle=True
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        shuffle=True,
     )
 
     all_rows = list(iter(dp))
@@ -558,15 +595,26 @@ def test_experiment_dataloader__multiprocess_dense_matrix__ok() -> None:
 
 
 @pytest.mark.experimental
-@patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe")
-def test_experiment_dataloader__unsupported_params__fails(dummy_exp_data_pipe: ExperimentDataPipe) -> None:
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, sampler=[])
-    with pytest.raises(ValueError):
-        experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
+def test_experiment_dataloader__unsupported_params__fails() -> None:
+    with patch("cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe") as dummy_exp_data_pipe:
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, shuffle=True)
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, batch_size=3)
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, batch_sampler=[])
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, sampler=[])
+        with pytest.raises(ValueError):
+            experiment_dataloader(dummy_exp_data_pipe, collate_fn=lambda x: x)
+
+
+@pytest.mark.experimental
+def test_list_split() -> None:
+    data = list(range(10))
+    chunks = list_split(data, 3)
+    assert len(chunks) == 4
+    assert len(chunks[0]) == 3
+    assert len(chunks[1]) == 3
+    assert len(chunks[2]) == 3
+    assert len(chunks[3]) == 1

@@ -31,8 +31,18 @@ def var(X: Union[sparse.csc_matrix, sparse.csr_matrix], axis: int = 0, ddof: int
     [
         ("mus_musculus", 'tissue_general == "liver" and is_primary_data == True', ()),
         ("mus_musculus", 'is_primary_data == True and tissue_general == "heart"', ()),
-        pytest.param("mus_musculus", "is_primary_data == True", (slice(0, 400_000),), marks=pytest.mark.expensive),
-        pytest.param("homo_sapiens", "is_primary_data == True", (slice(0, 400_000),), marks=pytest.mark.expensive),
+        pytest.param(
+            "mus_musculus",
+            "is_primary_data == True",
+            (slice(0, 400_000),),
+            marks=pytest.mark.expensive,
+        ),
+        pytest.param(
+            "homo_sapiens",
+            "is_primary_data == True",
+            (slice(0, 400_000),),
+            marks=pytest.mark.expensive,
+        ),
     ],
 )
 def test_mean_variance(
@@ -46,10 +56,14 @@ def test_mean_variance(
 ) -> None:
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords)
+            measurement_name="RNA",
+            obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
         ) as query:
             mean_variance = pp.mean_variance(
-                query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis
+                query,
+                calculate_mean=calc_mean,
+                calculate_variance=calc_variance,
+                axis=axis,
             )
             assert isinstance(mean_variance, pd.DataFrame)
             if calc_mean:
@@ -114,7 +128,12 @@ def test_mean_variance_nnz_only(
             measurement_name="RNA", obs_query=soma.AxisQuery(coords=obs_coords)
         ) as query:
             mean_variance = pp.mean_variance(
-                query, calculate_mean=calc_mean, calculate_variance=calc_variance, axis=axis, nnz_only=True, ddof=0
+                query,
+                calculate_mean=calc_mean,
+                calculate_variance=calc_variance,
+                axis=axis,
+                nnz_only=True,
+                ddof=0,
             )
 
             table = query.X("raw").tables().concat()
@@ -142,6 +161,7 @@ def test_mean_variance_nnz_only(
                 assert np.allclose(variance, va, atol=1e-5, rtol=1e-2, equal_nan=True)
 
 
+@pytest.mark.experimental
 def test_mean_variance_no_flags() -> None:
     with pytest.raises(ValueError):
         pp.mean_variance(soma.AxisQuery(), calculate_mean=False, calculate_variance=False)
@@ -151,12 +171,14 @@ def test_mean_variance_no_flags() -> None:
 def test_mean_variance_empty_query(experiment_name: str, small_mem_context: soma.SOMATileDBContext) -> None:
     with cellxgene_census.open_soma(census_version="latest", context=small_mem_context) as census:
         with census["census_data"][experiment_name].axis_query(
-            measurement_name="RNA", obs_query=soma.AxisQuery(value_filter='tissue_general == "foo"')
+            measurement_name="RNA",
+            obs_query=soma.AxisQuery(value_filter='tissue_general == "foo"'),
         ) as query:
             with pytest.raises(ValueError):
                 pp.mean_variance(query, calculate_mean=True, calculate_variance=True)
 
 
+@pytest.mark.experimental
 def test_mean_variance_wrong_axis() -> None:
     with pytest.raises(ValueError):
         pp.mean_variance(soma.AxisQuery(), calculate_mean=True, calculate_variance=True, axis=2)
