@@ -8,9 +8,12 @@ embeddings:
     [scvi, geneformer]
 metrics:
   tissues:
-    ["adipose tissue", "spinal cord"]
+    - name: "adipose tissue"
+    - name: "spinal cord"
+    - name: "heart"
+      query: 'tissue in ["cardiac ventricle", "heart left ventricle", "heart right ventricle"] and datasets in ["53d208b0-2cfd-4366-9866-c3c6114081bc", "d567b692-c374-4628-a508-8008f6778f22", "f15e263b-6544-46cb-a46e-e33ab7ce8347", "d4e69e01-3ba2-4d6b-a15d-e7048f78f22e"] and is_primary_data==True'
   bio: 
-    ["leiden_nmi", "leiden_ari", "silhouette_label"]
+    ["leiden_nmi", "leiden_ari", "silhouette_label", "classifier"]
   batch: 
-    ["silhouette_batch", "ilisi_knn_batch"]
+    ["silhouette_batch", "ilisi_knn_batch", "classifier"]
 

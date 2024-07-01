@@ -14,7 +14,60 @@ import scib_metrics
 import tiledbsoma as soma
 import yaml
 
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.metrics import accuracy_score, roc_auc_score
+
 warnings.filterwarnings("ignore")
+
+class CensusClassifierMetrics:
+
+    def __init__(self):
+        self._default_metric = "accuracy"
+
+    def lr_labels(self, X, labels, metric = None):
+        return self._base_accuracy(X, labels, LogisticRegression, metric=metric)
+
+    def svm_svc_labels(self, X, labels, metric = None):
+        return self._base_accuracy(X, labels, svm.SVC, metric=metric)
+
+    def random_forest_labels(self, X, labels, metric = None, n_jobs=8):
+        return self._base_accuracy(X, labels, RandomForestClassifier, metric=metric, n_jobs=n_jobs)
+
+    def lr_batch(self, X, batch, metric = None):
+        return 1-self._base_accuracy(X, batch, LogisticRegression, metric=metric)
+
+    def svm_svc_batch(self, X, batch, metric = None):
+        return 1-self._base_accuracy(X, batch, svm.SVC, metric=metric)
+
+    def random_forest_batch(self, X, batch, metric = None, n_jobs=8):
+        return 1-self._base_accuracy(X, batch, RandomForestClassifier, metric=metric, n_jobs=n_jobs)
+
+    def _base_accuracy(self, X, y, model, metric, test_size=0.4, **kwargs):
+        """
+        Train LogisticRegression on X with labels y and return classifier accuracy score
+        """
+        y_encoded = LabelEncoder().fit_transform(y)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y_encoded, test_size=test_size, random_state=42
+        )
+        model = model(**kwargs).fit(X_train, y_train)
+
+        if metric == None:
+            metric = self._default_metric
+        
+        if metric == "roc_auc":  
+            #return y_test
+            #return model.predict_proba(X_test)
+            return roc_auc_score(y_test, model.predict_proba(X_test), multi_class="ovo", average="macro")
+        elif metric == "accuracy":
+            return accuracy_score(y_test, model.predict(X_test))
+        else:
+            raise ValueError("Only {'accuracy', 'roc_auc'} are supported as a metric")
 
 if __name__ == "__main__":
     try:
@@ -33,13 +86,13 @@ if __name__ == "__main__":
     experiment_name = census_config.get("organism")
 
     # These are embeddings hosted in the Census
-    embeddings_census = embedding_config.get("census") or dict()
+    embeddings_census = embedding_config.get("census") or []
 
     # Raw embeddings (external)
     embeddings_raw = embedding_config.get("raw") or dict()
 
     # All embedding names
-    embs = list(embeddings_census.keys()) + list(embeddings_raw.keys())
+    embs = list(embeddings_census) + list(embeddings_raw.keys())
 
     print("Embeddings to use: ", embs)
 
@@ -73,7 +126,6 @@ if __name__ == "__main__":
     subclass_dict = subclass_mapper()
 
     def build_anndata_with_embeddings(
-        embedding_uris: dict,
         embedding_names: List[str],
         embeddings_raw: dict,
         coords: List[int] = None,
@@ -87,7 +139,6 @@ if __name__ == "__main__":
         fetch embeddings with TileDBSoma and return the corresponding
         AnnData with embeddings slotted in.
 
-        `embedding_uris` is a dict with community embedding names as the keys and S3 URI as the values.
         `embedding_names` is a list with embedding names included in Census.
         `embeddings_raw` are embeddings provided in raw format (npy) on a local drive
 
@@ -165,14 +216,18 @@ if __name__ == "__main__":
     bio_metrics = metrics_config["bio"]
     batch_metrics = metrics_config["batch"]
 
-    for tissue in tissues:
+    for tissue_node in tissues:
+
+        tissue = tissue_node["name"]
+        query = tissue_node.get("query") or f"tissue_general == '{tissue}' and is_primary_data == True"
+
         print("Tissue", tissue, " getting Anndata")
 
         # Getting anddata
         adata_metrics = build_anndata_with_embeddings(
             embedding_names=embeddings_census,
             embeddings_raw=embeddings_raw,
-            obs_value_filter=f"tissue_general == '{tissue}' and is_primary_data == True",
+            obs_value_filter=query,
             census_version=census_version,
             experiment_name="homo_sapiens",
             column_names=column_names,
@@ -269,6 +324,16 @@ if __name__ == "__main__":
                 )
                 metric_bio_results["silhouette_label"].append(this_metric)
 
+            if "classifier" in bio_metrics:
+                metrics = CensusClassifierMetrics()
+
+                m1 = metrics.lr_labels(X=adata_metrics.obsm[emb], labels = adata_metrics.obs["cell_type"])
+                m2 = metrics.svm_svc_labels(X=adata_metrics.obsm[emb], labels = adata_metrics.obs["cell_type"])
+                m3 = metrics.random_forest_labels(X=adata_metrics.obsm[emb], labels = adata_metrics.obs["cell_type"])
+
+                metric_bio_results["classifier"].append({"lr": m1, "svm": m2, "random_forest": m3})
+
+
         for batch_label, emb in itertools.product(batch_labels, embs):
             print("\n\nSTART", batch_label, emb)
 
@@ -298,11 +363,17 @@ if __name__ == "__main__":
 
                 metric_batch_results["ilisi_knn_batch"].append(ilisi_metric)
 
+            if "classifier" in batch_metrics:
+                metrics = CensusClassifierMetrics()
+
+                m4 = metrics.lr_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs["batch"])
+                m5 = metrics.random_forest_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs["batch"])
+                m6 = metrics.svm_svc_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs["batch"])
+                metric_batch_results["classifier"].append({"lr": m4, "random_forest": m5, "svm": m6})
+
+
         all_bio[tissue] = metric_bio_results
         all_batch[tissue] = metric_batch_results
 
-    with open("metrics_bio.pickle", "wb") as fp:
-        pickle.dump(all_bio, fp, protocol=pickle.HIGHEST_PROTOCOL)
-
-    with open("metrics_batch.pickle", "wb") as fp:
-        pickle.dump(all_batch, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    with open("metrics.pickle", "wb") as fp:
+        pickle.dump({"all_bio": all_bio, "all_batch": all_batch}, fp, protocol=pickle.HIGHEST_PROTOCOL)

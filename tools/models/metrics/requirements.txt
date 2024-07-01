@@ -1,2 +1,3 @@
 owlready2
 scib-metrics==0.5.1
+pyyaml
