@@ -1,6 +1,8 @@
+# type: ignore
 import functools
+from typing import List
 
-import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import torch
 from lightning.pytorch import LightningDataModule
@@ -18,30 +20,36 @@ class BatchEncoder(Encoder):
         self._name = name
         self._encoder = LabelEncoder()
 
-    def _join_cols(self, df: pd.DataFrame):
+    def _join_cols(self, df: pd.DataFrame) -> pd.Series[str]:
         return functools.reduce(lambda a, b: a + b, [df[c].astype(str) for c in self.cols])
 
-    def transform(self, df: pd.DataFrame):
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Transform the obs DataFrame into a DataFrame of encoded values."""
         arr = self._join_cols(df)
-        return self._encoder.transform(arr)
+        return self._encoder.transform(arr)  # type: ignore
 
-    def inverse_transform(self, encoded_values: np.ndarray) -> np.ndarray:
-        return self._encoder.inverse_transform(encoded_values)
+    def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
+        """Inverse transform the encoded values back to the original values."""
+        return self._encoder.inverse_transform(encoded_values)  # type: ignore
 
-    def fit(self, obs: pd.DataFrame):
+    def fit(self, obs: pd.DataFrame) -> None:
+        """Fit the encoder with obs."""
         arr = self._join_cols(obs)
         self._encoder.fit(arr.unique())
 
     @property
-    def columns(self):
+    def columns(self) -> List[str]:
+        """Columns in `obs` that the encoder will be applied to."""
         return self.cols
 
     @property
     def name(self) -> str:
+        """Name of the encoder."""
         return self._name
 
     @property
-    def classes_(self):
+    def classes_(self) -> List[str]:
+        """Classes of the encoder."""
         return self._encoder.classes_
 
 
