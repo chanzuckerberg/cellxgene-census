@@ -26,6 +26,7 @@ class OntologyMapper(ABC):
         "CARO_0000003",
         "NCBITaxon_6072",
         "Thing",
+        "unknown",
     ]
 
     def __init__(

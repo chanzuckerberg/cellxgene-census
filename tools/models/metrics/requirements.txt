@@ -1,2 +1,2 @@
 owlready2
-scib-metrics==0.4.0
+scib-metrics==0.5.1

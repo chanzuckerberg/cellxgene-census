@@ -13,7 +13,6 @@ import scanpy as sc
 import scib_metrics
 import tiledbsoma as soma
 import yaml
-from cellxgene_census.experimental import get_embedding
 
 warnings.filterwarnings("ignore")
 
@@ -33,21 +32,14 @@ if __name__ == "__main__":
     census_version = census_config.get("version")
     experiment_name = census_config.get("organism")
 
-    embedding_uris_community = embedding_config.get("hosted") or dict()
+    # These are embeddings hosted in the Census
+    embeddings_census = embedding_config.get("census") or dict()
 
-    # These are embeddings contributed by the community hosted in S3
-    # embedding_uris_community = {
-    #     "scgpt": f"s3://cellxgene-contrib-public/contrib/cell-census/soma/{CENSUS_VERSION}/CxG-contrib-1/",
-    #     "uce": f"s3://cellxgene-contrib-public/contrib/cell-census/soma/{CENSUS_VERSION}/CxG-contrib-2/",
-    # }
-
-    # These are embeddings included in the Census data
-    embedding_names_census = embedding_config.get("collaboration") or dict()
-
+    # Raw embeddings (external)
     embeddings_raw = embedding_config.get("raw") or dict()
 
     # All embedding names
-    embs = list(embedding_uris_community.keys()) + embedding_names_census + list(embeddings_raw.keys())
+    embs = list(embeddings_census.keys()) + list(embeddings_raw.keys())
 
     print("Embeddings to use: ", embs)
 
@@ -112,16 +104,11 @@ if __name__ == "__main__":
                 measurement_name="RNA",
                 obs_value_filter=obs_value_filter,
                 obs_coords=coords,
-                obsm_layers=embedding_names,
+                obs_embeddings=embedding_names,
                 column_names=column_names,
             )
 
             obs_soma_joinids = ad.obs["soma_joinid"].to_numpy()
-
-            for key, val in embedding_uris.items():
-                print("Getting community embedding:", key)
-                embedding_uri = val["uri"]
-                ad.obsm[key] = get_embedding(census_version, embedding_uri, obs_soma_joinids)
 
             # For these, we need to extract the right cells via soma_joinid
             for key, val in embeddings_raw.items():
@@ -175,13 +162,15 @@ if __name__ == "__main__":
 
     tissues = metrics_config.get("tissues")
 
+    bio_metrics = metrics_config["bio"]
+    batch_metrics = metrics_config["batch"]
+
     for tissue in tissues:
         print("Tissue", tissue, " getting Anndata")
 
         # Getting anddata
         adata_metrics = build_anndata_with_embeddings(
-            embedding_uris=embedding_uris_community,
-            embedding_names=embedding_names_census,
+            embedding_names=embeddings_census,
             embeddings_raw=embeddings_raw,
             obs_value_filter=f"tissue_general == '{tissue}' and is_primary_data == True",
             census_version=census_version,
@@ -211,7 +200,9 @@ if __name__ == "__main__":
         for emb_name in embs:
             print(datetime.datetime.now(), "Getting neighbors", emb_name)
             sc.pp.neighbors(adata_metrics, use_rep=emb_name, key_added=emb_name)
-            sc.pp.neighbors(adata_metrics, n_neighbors=90, use_rep=emb_name, key_added=emb_name + "_90")
+            # Only necessary
+            if "ilisi_knn_batch" in metrics_config["batch"]:
+                sc.pp.neighbors(adata_metrics, n_neighbors=90, use_rep=emb_name, key_added=emb_name + "_90")
             sc.tl.umap(adata_metrics, neighbors_key=emb_name)
             adata_metrics.obsm["X_umap_" + emb_name] = adata_metrics.obsm["X_umap"].copy()
             del adata_metrics.obsm["X_umap"]
@@ -226,22 +217,25 @@ if __name__ == "__main__":
                 )
 
         bio_labels = ["cell_subclass", "cell_class"]
+        batch_labels = ["batch", "assay", "dataset_id", "suspension_type"]
+
+        # Initialize results
         metric_bio_results = {
             "embedding": [],
             "bio_label": [],
-            "leiden_nmi": [],
-            "leiden_ari": [],
-            "silhouette_label": [],
         }
-
-        batch_labels = ["batch", "assay", "dataset_id", "suspension_type"]
         metric_batch_results = {
             "embedding": [],
             "batch_label": [],
-            "silhouette_batch": [],
-            "ilisi_knn_batch": [],
         }
 
+        for metric in bio_metrics:
+            metric_bio_results[metric] = []
+
+        for metric in batch_metrics:
+            metric_batch_results[metric] = []
+
+        # Calculate metrics
         for bio_label, emb in itertools.product(bio_labels, embs):
             print("\n\nSTART", bio_label, emb)
 
@@ -249,22 +243,31 @@ if __name__ == "__main__":
             metric_bio_results["bio_label"].append(bio_label)
 
             print(datetime.datetime.now(), "Calculating ARI Leiden")
-            this_metric = scib_metrics.nmi_ari_cluster_labels_leiden(
-                X=adata_metrics.obsp[emb + "_connectivities"],
-                labels=adata_metrics.obs[bio_label],
-                optimize_resolution=True,
-                resolution=1.0,
-                n_jobs=64,
-            )
-            metric_bio_results["leiden_nmi"].append(this_metric["nmi"])
-            metric_bio_results["leiden_ari"].append(this_metric["ari"])
 
-            print(datetime.datetime.now(), "Calculating silhouette labels")
+            class NN:
+                def __init__(self, conn):
+                    self.knn_graph_connectivities = conn
 
-            this_metric = scib_metrics.silhouette_label(
-                X=adata_metrics.obsm[emb], labels=adata_metrics.obs[bio_label], rescale=True, chunk_size=512
-            )
-            metric_bio_results["silhouette_label"].append(this_metric)
+            X = NN(adata_metrics.obsp[emb + "_connectivities"])
+
+            if "leiden_nmi" in bio_metrics and "leiden_ari" in bio_metrics:
+                this_metric = scib_metrics.nmi_ari_cluster_labels_leiden(
+                    X=X,
+                    labels=adata_metrics.obs[bio_label],
+                    optimize_resolution=True,
+                    resolution=1.0,
+                    n_jobs=64,
+                )
+                metric_bio_results["leiden_nmi"].append(this_metric["nmi"])
+                metric_bio_results["leiden_ari"].append(this_metric["ari"])
+
+            if "silhouette_label" in bio_metrics:
+                print(datetime.datetime.now(), "Calculating silhouette labels")
+
+                this_metric = scib_metrics.silhouette_label(
+                    X=adata_metrics.obsm[emb], labels=adata_metrics.obs[bio_label], rescale=True, chunk_size=512
+                )
+                metric_bio_results["silhouette_label"].append(this_metric)
 
         for batch_label, emb in itertools.product(batch_labels, embs):
             print("\n\nSTART", batch_label, emb)
@@ -272,24 +275,28 @@ if __name__ == "__main__":
             metric_batch_results["embedding"].append(emb)
             metric_batch_results["batch_label"].append(batch_label)
 
-            print(datetime.datetime.now(), "Calculating silhouette batch")
+            if "silhouette_batch" in batch_metrics:
+                print(datetime.datetime.now(), "Calculating silhouette batch")
 
-            this_metric = scib_metrics.silhouette_batch(
-                X=adata_metrics.obsm[emb],
-                labels=adata_metrics.obs[bio_label],
-                batch=adata_metrics.obs[batch_label],
-                rescale=True,
-                chunk_size=512,
-            )
-            metric_batch_results["silhouette_batch"].append(this_metric)
+                this_metric = scib_metrics.silhouette_batch(
+                    X=adata_metrics.obsm[emb],
+                    labels=adata_metrics.obs[bio_label],
+                    batch=adata_metrics.obs[batch_label],
+                    rescale=True,
+                    chunk_size=512,
+                )
+                metric_batch_results["silhouette_batch"].append(this_metric)
 
-            ilisi_metric = scib_metrics.ilisi_knn(
-                X=adata_metrics.obsp[f"{emb}_90_distances"],
-                batches=adata_metrics.obs[batch_label],
-                scale=True,
-            )
+            if "ilisi_knn_batch" in batch_metrics:
+                print(datetime.datetime.now(), "Calculating ilisi knn batch")
 
-            metric_batch_results["ilisi_knn_batch"].append(ilisi_metric)
+                ilisi_metric = scib_metrics.ilisi_knn(
+                    X=adata_metrics.obsp[f"{emb}_90_distances"],
+                    batches=adata_metrics.obs[batch_label],
+                    scale=True,
+                )
+
+                metric_batch_results["ilisi_knn_batch"].append(ilisi_metric)
 
         all_bio[tissue] = metric_bio_results
         all_batch[tissue] = metric_batch_results
