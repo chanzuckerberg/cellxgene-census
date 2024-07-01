@@ -569,9 +569,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             encoders:
                 Specify custom encoders to be used. If not specified, a LabelEncoder will be created and
                 used for each column in ``obs_column_names``. If specified, only columns for which an encoder
-                has been registered will be returned in the ``obs`` tensor. If this parameter is specified, the
-                ``obs_column_names`` parameter must not be used, since the columns will be inferred automatically
-                from the encoders.
+                has been registered will be returned in the ``obs`` tensor. Each encoder needs to have a unique name.
+                If this parameter is specified, the ``obs_column_names`` parameter must not be used,
+                since the columns will be inferred automatically from the encoders.
 
         Lifecycle:
             experimental
@@ -605,7 +605,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             if len(encoders) != len({enc.name for enc in encoders}):
                 raise ValueError("Encoders must have unique names")
 
-            self.obs_column_names = list(itertools.chain(*[enc.columns for enc in encoders]))
+            self.obs_column_names = list(set(itertools.chain(*[enc.columns for enc in encoders])))
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
