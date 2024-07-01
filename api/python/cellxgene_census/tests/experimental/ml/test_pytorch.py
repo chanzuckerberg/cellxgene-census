@@ -390,7 +390,7 @@ def test_custom_encoders_fail_if_duplicate(soma_experiment: Experiment) -> None:
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
 def test_custom_encoders_fail_if_columns_defined(soma_experiment: Experiment) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Cannot specify both `obs_column_names` and `encoders`"):
         ExperimentDataPipe(
             soma_experiment,
             measurement_name="RNA",
