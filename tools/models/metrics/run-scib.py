@@ -14,6 +14,11 @@ import scib_metrics
 import tiledbsoma as soma
 import yaml
 
+import numpy as np
+import scipy as sp
+import cellxgene_census
+import functools
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -68,6 +73,37 @@ class CensusClassifierMetrics:
             return accuracy_score(y_test, model.predict(X_test))
         else:
             raise ValueError("Only {'accuracy', 'roc_auc'} are supported as a metric")
+        
+def safelog(a):
+    return np.log(a, out=np.zeros_like(a), where=(a!=0))
+
+def nearest_neighbors_hnsw(x, ef=200, M=48, n_neighbors = 100):
+    import hnswlib
+    labels = np.arange(x.shape[0])
+    p = hnswlib.Index(space = 'l2', dim = x.shape[1])
+    p.init_index(max_elements = x.shape[0], ef_construction = ef, M = M)
+    p.add_items(x, labels)
+    p.set_ef(ef)
+    idx, dist = p.knn_query(x, k = n_neighbors)
+    return idx,dist
+
+def compute_entropy_per_cell(adata, obsm_key):
+
+    batch_keys = ["donor_id", "dataset_id", "assay", "suspension_type"]
+    adata.obs["batch"] = functools.reduce(lambda a, b: a+b, [adata.obs[c].astype(str) for c in batch_keys])
+
+    indices, dist = nearest_neighbors_hnsw(adata.obsm[obsm_key], n_neighbors = 200)
+
+    BATCH_KEY = 'batch'
+
+    batch_labels = np.array(list(adata.obs[BATCH_KEY]))
+    unique_batch_labels = np.unique(batch_labels)
+
+    indices_batch = batch_labels[indices]
+
+    label_counts_per_cell = np.vstack([(indices_batch == label).sum(1) for label in unique_batch_labels]).T
+    label_counts_per_cell_normed = label_counts_per_cell / label_counts_per_cell.sum(1)[:,None]
+    return (-label_counts_per_cell_normed*safelog(label_counts_per_cell_normed)).sum(1)
 
 if __name__ == "__main__":
     try:
@@ -366,11 +402,17 @@ if __name__ == "__main__":
             if "classifier" in batch_metrics:
                 metrics = CensusClassifierMetrics()
 
-                m4 = metrics.lr_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs["batch"])
-                m5 = metrics.random_forest_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs["batch"])
-                m6 = metrics.svm_svc_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs["batch"])
+                m4 = metrics.lr_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs[batch_label])
+                m5 = metrics.random_forest_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs[batch_label])
+                m6 = metrics.svm_svc_batch(X=adata_metrics.obsm[emb], batch = adata_metrics.obs[batch_label])
                 metric_batch_results["classifier"].append({"lr": m4, "random_forest": m5, "svm": m6})
 
+            if "entropy" in batch_metrics:
+                print(datetime.datetime.now(), "Calculating entropy")
+
+                entropy = compute_entropy_per_cell(adata_metrics, emb)
+                e_mean = entropy.mean()
+                metric_batch_results["entropy"].append(e_mean)
 
         all_bio[tissue] = metric_bio_results
         all_batch[tissue] = metric_batch_results
