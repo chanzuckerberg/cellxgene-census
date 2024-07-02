@@ -91,7 +91,7 @@ class DefaultEncoder(Encoder):
 class BatchEncoder(Encoder):
     """An encoder that concatenates and encodes several obs columns."""
 
-    def __init__(self, cols: list[str], name: str = "batch"):
+    def __init__(self, cols: List[str], name: str = "batch"):
         self.cols = cols
         from sklearn.preprocessing import LabelEncoder
 

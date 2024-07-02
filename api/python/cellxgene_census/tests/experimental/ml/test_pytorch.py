@@ -18,7 +18,7 @@ try:
     from torch import Tensor, float32
     from torch.utils.data._utils.worker import WorkerInfo
 
-    from cellxgene_census.experimental.ml.encoders import DefaultEncoder
+    from cellxgene_census.experimental.ml.encoders import BatchEncoder, DefaultEncoder
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
         experiment_dataloader,
@@ -71,6 +71,7 @@ def add_dataframe(coll: CollectionBase, key: str, value_range: range) -> None:
             [
                 ("soma_joinid", pa.int64()),
                 ("label", pa.large_string()),
+                ("label2", pa.large_string()),
             ]
         ),
         index_column_names=["soma_joinid"],
@@ -80,6 +81,7 @@ def add_dataframe(coll: CollectionBase, key: str, value_range: range) -> None:
             {
                 "soma_joinid": list(value_range),
                 "label": [str(i) for i in value_range],
+                "label2": ["c" for i in value_range],
             }
         )
     )
@@ -351,7 +353,7 @@ def test_batching__partial_soma_batches_are_concatenated(soma_experiment: Experi
 @pytest.mark.experimental
 # noinspection PyTestParametrized
 @pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
-def test_encoders(soma_experiment: Experiment) -> None:
+def test_default_encoders_implicit(soma_experiment: Experiment) -> None:
     exp_data_pipe = ExperimentDataPipe(
         soma_experiment,
         measurement_name="RNA",
@@ -364,11 +366,60 @@ def test_encoders(soma_experiment: Experiment) -> None:
 
     batch = next(batch_iter)
     assert isinstance(batch[1], Tensor)
+    assert batch[0].to_dense().tolist() == [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
 
     labels_encoded = batch[1]
 
     labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
     assert labels_decoded.tolist() == ["0", "1", "2"]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
+def test_default_encoders_explicit(soma_experiment: Experiment) -> None:
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        encoders=[DefaultEncoder("label")],
+        shuffle=False,
+        batch_size=3,
+    )
+    batch_iter = iter(exp_data_pipe)
+
+    batch = next(batch_iter)
+    assert isinstance(batch[1], Tensor)
+
+    labels_encoded = batch[1]
+
+    labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
+    assert labels_decoded.tolist() == ["0", "1", "2"]
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized
+@pytest.mark.parametrize("obs_range,var_range,X_value_gen", [(3, 3, pytorch_x_value_gen)])
+def test_batch_encoder(soma_experiment: Experiment) -> None:
+    exp_data_pipe = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        encoders=[BatchEncoder(["label", "label2"])],
+        shuffle=False,
+        batch_size=3,
+    )
+    batch_iter = iter(exp_data_pipe)
+
+    batch = next(batch_iter)
+    assert isinstance(batch[1], Tensor)
+
+    print(batch)
+
+    labels_encoded = batch[1]
+
+    labels_decoded = exp_data_pipe.obs_encoders["batch"].inverse_transform(labels_encoded)
+    assert labels_decoded.tolist() == ["0c", "1c", "2c"]
 
 
 @pytest.mark.experimental
