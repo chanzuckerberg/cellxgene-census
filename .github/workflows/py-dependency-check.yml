@@ -14,6 +14,9 @@ on:
     - cron: "30 1 * * *"
   workflow_dispatch: # used for debugging or manual validation
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   python-dependency-check:
     name: python-dependency-check
