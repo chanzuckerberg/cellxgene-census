@@ -89,7 +89,7 @@ def nearest_neighbors_hnsw(x, ef=200, M=48, n_neighbors = 100):
 
 def compute_entropy_per_cell(adata, obsm_key):
 
-    batch_keys = ["donor_id", "dataset_id", "assay", "suspension_type"]
+    batch_keys = ["dataset_id", "assay", "suspension_type"]
     adata.obs["batch"] = functools.reduce(lambda a, b: a+b, [adata.obs[c].astype(str) for c in batch_keys])
 
     indices, dist = nearest_neighbors_hnsw(adata.obsm[obsm_key], n_neighbors = 200)
