@@ -141,6 +141,7 @@ def test_non_batched(soma_experiment: Experiment, use_eager_fetch: bool) -> None
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     row_iter = iter(exp_data_pipe)
@@ -163,6 +164,7 @@ def test_batching__all_batches_full_size(soma_experiment: Experiment, use_eager_
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -213,6 +215,7 @@ def test_batching__partial_final_batch_size(soma_experiment: Experiment, use_eag
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -238,6 +241,7 @@ def test_batching__exactly_one_batch(soma_experiment: Experiment, use_eager_fetc
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -285,6 +289,7 @@ def test_sparse_output__non_batched(soma_experiment: Experiment, use_eager_fetch
         X_name="raw",
         obs_column_names=["label"],
         return_sparse_X=True,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -308,6 +313,7 @@ def test_sparse_output__batched(soma_experiment: Experiment, use_eager_fetch: bo
         obs_column_names=["label"],
         batch_size=3,
         return_sparse_X=True,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     batch_iter = iter(exp_data_pipe)
@@ -349,6 +355,7 @@ def test_encoders(soma_experiment: Experiment) -> None:
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        shuffle=False,
         batch_size=3,
     )
     batch_iter = iter(exp_data_pipe)
@@ -408,6 +415,7 @@ def test_distributed__returns_data_partition_for_rank(
             X_name="raw",
             obs_column_names=["label"],
             soma_chunk_size=2,
+            shuffle=False,
         )
         full_result = list(iter(dp))
 
@@ -445,6 +453,7 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
             X_name="raw",
             obs_column_names=["label"],
             soma_chunk_size=2,
+            shuffle=False,
         )
 
         full_result = list(iter(dp))
@@ -469,6 +478,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eag
         measurement_name="RNA",
         X_name="raw",
         obs_column_names=["label"],
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
@@ -492,6 +502,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
         X_name="raw",
         obs_column_names=["label"],
         batch_size=3,
+        shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
