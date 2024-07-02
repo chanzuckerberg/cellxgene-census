@@ -524,7 +524,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             if len(encoders) != len({enc.name for enc in encoders}):
                 raise ValueError("Encoders must have unique names")
 
-            self.obs_column_names = list(set(itertools.chain(*[enc.columns for enc in encoders])))
+            self.obs_column_names = list(dict.fromkeys(itertools.chain(*[enc.columns for enc in encoders])))
 
         if "soma_joinid" not in self.obs_column_names:
             self.obs_column_names = ["soma_joinid", *self.obs_column_names]
