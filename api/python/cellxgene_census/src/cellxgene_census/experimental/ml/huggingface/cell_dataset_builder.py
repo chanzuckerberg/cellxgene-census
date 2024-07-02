@@ -1,6 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generator, Optional
+from collections.abc import Generator
+from typing import Any
 
 import scipy.sparse
 from datasets import Dataset
@@ -37,7 +38,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         measurement_name: str = "RNA",
         layer_name: str = "raw",
         *,
-        block_size: Optional[int] = None,
+        block_size: int | None = None,
         **kwargs: Any,
     ):
         """Initialize the CellDatasetBuilder to process the results of a Census
@@ -55,13 +56,13 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         self.layer_name = layer_name
         self.block_size = block_size
 
-    def build(self, from_generator_kwargs: Optional[Dict[str, Any]] = None) -> Dataset:
+    def build(self, from_generator_kwargs: dict[str, Any] | None = None) -> Dataset:
         """Build the dataset from query results.
 
         - `from_generator_kwargs`: kwargs passed through to `Dataset.from_generator()`
         """
 
-        def gen() -> Generator[Dict[str, Any], None, None]:
+        def gen() -> Generator[dict[str, Any], None, None]:
             for Xblock, (block_cell_joinids, _) in (
                 self.X(self.layer_name).blockwise(axis=0, reindex_disable_on_axis=[1], size=self.block_size).scipy()
             ):
@@ -72,7 +73,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
         return Dataset.from_generator(_DatasetGeneratorPickleHack(gen), **(from_generator_kwargs or {}))
 
     @abstractmethod
-    def cell_item(self, cell_joinid: int, Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
+    def cell_item(self, cell_joinid: int, Xrow: scipy.sparse.csr_matrix) -> dict[str, Any]:
         """Abstract method to process the X row for one cell into a Dataset item.
 
         - `cell_joinid`: The cell `soma_joinid`.
@@ -85,7 +86,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
 class _DatasetGeneratorPickleHack:
     """SEE: https://github.com/huggingface/datasets/issues/6194."""
 
-    def __init__(self, generator: Any, generator_id: Optional[str] = None) -> None:
+    def __init__(self, generator: Any, generator_id: str | None = None) -> None:
         self.generator = generator
         self.generator_id = generator_id if generator_id is not None else str(uuid.uuid4())
 

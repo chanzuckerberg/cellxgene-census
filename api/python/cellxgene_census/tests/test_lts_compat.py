@@ -9,7 +9,8 @@ to codify them.
 from __future__ import annotations
 
 from collections import deque
-from typing import Iterator, Literal, Sequence, Union, get_args
+from collections.abc import Iterator, Sequence
+from typing import Literal, Union, get_args
 
 import pyarrow as pa
 import pytest

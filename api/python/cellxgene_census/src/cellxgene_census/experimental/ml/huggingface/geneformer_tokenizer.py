@@ -1,5 +1,6 @@
 import pickle
-from typing import Any, Dict, Optional, Sequence, Set
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -42,7 +43,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     - and the specified `obs_column_names` (cell metadata from the experiment obs dataframe)
     """
 
-    obs_column_names: Set[str]
+    obs_column_names: set[str]
     max_input_tokens: int
 
     # set of gene soma_joinids corresponding to genes modeled by Geneformer:
@@ -54,8 +55,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self,
         experiment: tiledbsoma.Experiment,
         *,
-        obs_column_names: Optional[Sequence[str]] = None,
-        obs_attributes: Optional[Sequence[str]] = None,
+        obs_column_names: Sequence[str] | None = None,
+        obs_attributes: Sequence[str] | None = None,
         max_input_tokens: int = 2048,
         token_dictionary_file: str = "",
         gene_median_file: str = "",
@@ -152,7 +153,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         self.obs_df = self.obs(column_names=obs_column_names).concat().to_pandas().set_index("soma_joinid")
         return self
 
-    def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> Dict[str, Any]:
+    def cell_item(self, cell_joinid: int, cell_Xrow: scipy.sparse.csr_matrix) -> dict[str, Any]:
         """Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """

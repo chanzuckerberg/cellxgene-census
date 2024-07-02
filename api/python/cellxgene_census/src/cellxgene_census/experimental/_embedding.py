@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import warnings
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -53,7 +53,7 @@ def get_embedding_metadata(embedding_uri: str, context: soma.options.SOMATileDBC
         embedding_metadata = json.loads(E.metadata["CxG_embedding_info"])
         assert isinstance(embedding_metadata, dict)
 
-    return cast(Dict[str, Any], embedding_metadata)
+    return cast(dict[str, Any], embedding_metadata)
 
 
 def _get_embedding(
@@ -192,7 +192,7 @@ def get_embedding_metadata_by_name(
     response = requests.get(CELL_CENSUS_EMBEDDINGS_MANIFEST_URL)
     response.raise_for_status()
 
-    manifest = cast(Dict[str, Dict[str, Any]], response.json())
+    manifest = cast(dict[str, dict[str, Any]], response.json())
     embeddings = []
     for _, obj in manifest.items():
         if (

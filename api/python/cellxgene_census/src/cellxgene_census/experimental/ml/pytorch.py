@@ -1,11 +1,12 @@
 import gc
 import logging
 import os
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -31,7 +32,7 @@ from ..util._eager_iter import _EagerIterator
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 
 # TODO: Rename to reflect the correct order of the Tensors within the tuple: (X, obs)
-ObsAndXDatum = Tuple[Tensor, Tensor]
+ObsAndXDatum = tuple[Tensor, Tensor]
 """Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s).
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
 
@@ -53,7 +54,7 @@ class _SOMAChunk:
         return len(self.obs)
 
 
-Encoders = Dict[str, LabelEncoder]
+Encoders = dict[str, LabelEncoder]
 """A dictionary of ``LabelEncoder``s keyed by the ``obs`` column name."""
 
 
@@ -92,7 +93,7 @@ class Stats:
 @contextmanager
 def _open_experiment(
     uri: str,
-    aws_region: Optional[str] = None,
+    aws_region: str | None = None,
 ) -> soma.Experiment:
     """Internal method for opening a SOMA ``Experiment`` as a context manager."""
     context = get_default_soma_context().replace(tiledb_config={"vfs.s3.region": aws_region} if aws_region else {})
@@ -119,10 +120,10 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         obs: soma.DataFrame,
         X: soma.SparseNDArray,
         obs_column_names: Sequence[str],
-        obs_joinids_chunked: List[npt.NDArray[np.int64]],
+        obs_joinids_chunked: list[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
-        shuffle_chunk_count: Optional[int] = None,
-        shuffle_rng: Optional[Generator] = None,
+        shuffle_chunk_count: int | None = None,
+        shuffle_rng: Generator | None = None,
     ):
         self.obs = obs
         self.X = X
@@ -191,7 +192,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         return _SOMAChunk(obs=obs_batch, X=X_batch, stats=stats)
 
 
-def list_split(arr_list: List[Any], sublist_len: int) -> List[List[Any]]:
+def list_split(arr_list: list[Any], sublist_len: int) -> list[list[Any]]:
     """Splits a python list into a list of sublists where each sublist is of size `sublist_len`.
     TODO: Replace with `itertools.batched` when Python 3.12 becomes the minimum supported version.
     """
@@ -208,7 +209,7 @@ def list_split(arr_list: List[Any], sublist_len: int) -> List[List[Any]]:
     return result
 
 
-def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:  # noqa: D103
+def run_gc() -> tuple[tuple[Any, Any, Any], tuple[Any, Any, Any]]:  # noqa: D103
     proc = psutil.Process(os.getpid())
 
     pre_gc = proc.memory_full_info(), psutil.virtual_memory(), psutil.swap_memory()
@@ -234,7 +235,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
     soma_chunk_iter: Iterator[_SOMAChunk]
     """The iterator for SOMA chunks of paired obs and X data"""
 
-    soma_chunk: Optional[_SOMAChunk]
+    soma_chunk: _SOMAChunk | None
     """The current SOMA chunk of obs and X data"""
 
     i: int = -1
@@ -245,15 +246,15 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         obs: soma.DataFrame,
         X: soma.SparseNDArray,
         obs_column_names: Sequence[str],
-        obs_joinids_chunked: List[npt.NDArray[np.int64]],
+        obs_joinids_chunked: list[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
         batch_size: int,
-        encoders: Dict[str, LabelEncoder],
+        encoders: dict[str, LabelEncoder],
         stats: Stats,
         return_sparse_X: bool,
         use_eager_fetch: bool,
-        shuffle_chunk_count: Optional[int] = None,
-        shuffle_rng: Optional[Generator] = None,
+        shuffle_chunk_count: int | None = None,
+        shuffle_rng: Generator | None = None,
     ) -> None:
         self.soma_chunk_iter = _ObsAndXSOMAIterator(
             obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_chunk_count, shuffle_rng
@@ -392,15 +393,15 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     _initialized: bool
 
-    _obs_joinids: Optional[npt.NDArray[np.int64]]
+    _obs_joinids: npt.NDArray[np.int64] | None
 
-    _var_joinids: Optional[npt.NDArray[np.int64]]
+    _var_joinids: npt.NDArray[np.int64] | None
 
-    _encoders: Optional[Encoders]
+    _encoders: Encoders | None
 
     _stats: Stats
 
-    _shuffle_rng: Optional[Generator]
+    _shuffle_rng: Generator | None
 
     # TODO: Consider adding another convenience method wrapper to construct this object whose signature is more closely
     #  aligned with get_anndata() params (i.e. "exploded" AxisQuery params).
@@ -409,16 +410,16 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         experiment: soma.Experiment,
         measurement_name: str = "RNA",
         X_name: str = "raw",
-        obs_query: Optional[soma.AxisQuery] = None,
-        var_query: Optional[soma.AxisQuery] = None,
+        obs_query: soma.AxisQuery | None = None,
+        var_query: soma.AxisQuery | None = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
         shuffle: bool = True,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         return_sparse_X: bool = False,
-        soma_chunk_size: Optional[int] = 64,
+        soma_chunk_size: int | None = 64,
         use_eager_fetch: bool = True,
-        shuffle_chunk_count: Optional[int] = 2000,
+        shuffle_chunk_count: int | None = 2000,
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -526,10 +527,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
     @staticmethod
     def _subset_ids_to_partition(
-        ids_chunked: List[npt.NDArray[np.int64]],
+        ids_chunked: list[npt.NDArray[np.int64]],
         partition_index: int,
         num_partitions: int,
-    ) -> List[npt.NDArray[np.int64]]:
+    ) -> list[npt.NDArray[np.int64]]:
         """Returns a single partition of the obs_joinids_chunked (a 2D ndarray), based upon the current process's distributed rank and world
         size.
         """
@@ -552,7 +553,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         loader_partitions: int,
         dist_partition: int,
         num_dist_partitions: int,
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         # NOTE: Can alternately use a `worker_init_fn` to split among workers split workload
         total_partitions = num_dist_partitions * loader_partitions
         partition = dist_partition * loader_partitions + loader_partition
@@ -595,7 +596,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             dist_partition=dist.get_rank() if dist.is_initialized() else 0,
             num_dist_partitions=dist.get_world_size() if dist.is_initialized() else 1,
         )
-        obs_joinids_chunked_partition: List[npt.NDArray[np.int64]] = self._subset_ids_to_partition(
+        obs_joinids_chunked_partition: list[npt.NDArray[np.int64]] = self._subset_ids_to_partition(
             obs_joinids_chunked, partition, partitions
         )
 
@@ -622,7 +623,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             )
 
     @staticmethod
-    def _chunk_ids(ids: npt.NDArray[np.int64], chunk_size: int) -> List[npt.NDArray[np.int64]]:
+    def _chunk_ids(ids: npt.NDArray[np.int64], chunk_size: int) -> list[npt.NDArray[np.int64]]:
         num_chunks = max(1, ceil(len(ids) / chunk_size))
         pytorch_logger.debug(f"Shuffling {len(ids)} obs joinids into {num_chunks} chunks of {chunk_size}")
         return np.array_split(ids, num_chunks)
@@ -663,7 +664,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         return self._stats
 
     @property
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """Get the shape of the data that will be returned by this :class:`cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe`.
         This is the number of obs (cell) and var (feature) counts in the returned data. If used in multiprocessing mode
         (i.e. :class:`torch.utils.data.DataLoader` instantiated with num_workers > 0), the obs (cell) count will reflect
