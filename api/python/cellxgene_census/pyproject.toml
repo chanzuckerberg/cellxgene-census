@@ -123,6 +123,8 @@ ignore = [
     "D205",
     # Prefer absolute imports over relative imports from parent modules TODO: enable
     "TID252",
+    # It's okay to use zip without the strict kwarg. In fact, numba doesn't like it when you use it
+    "B905",
 ]
 
 [tool.ruff.lint.pydocstyle]
