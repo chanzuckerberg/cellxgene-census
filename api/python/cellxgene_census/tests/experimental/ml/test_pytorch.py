@@ -18,8 +18,8 @@ try:
     from torch import Tensor, float32
     from torch.utils.data._utils.worker import WorkerInfo
 
+    from cellxgene_census.experimental.ml.encoders import DefaultEncoder
     from cellxgene_census.experimental.ml.pytorch import (
-        DefaultEncoder,
         ExperimentDataPipe,
         experiment_dataloader,
         list_split,
