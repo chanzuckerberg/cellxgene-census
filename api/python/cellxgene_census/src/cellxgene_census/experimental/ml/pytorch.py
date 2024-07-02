@@ -1,4 +1,3 @@
-import abc
 import gc
 import itertools
 import logging
@@ -28,6 +27,7 @@ from torch.utils.data.dataset import Dataset
 
 from ... import get_default_soma_context
 from ..util._eager_iter import _EagerIterator
+from .encoders import DefaultEncoder, Encoder
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 
@@ -35,87 +35,6 @@ pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 ObsAndXDatum = Tuple[Tensor, Tensor]
 """Return type of ``ExperimentDataPipe`` that pairs a Tensor of ``obs`` row(s) with a Tensor of ``X`` matrix row(s).
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
-
-
-class Encoder(abc.ABC):
-    """Base class for obs encoders.
-
-    To define a custom encoder, five methods must be implemented:
-
-    - ``fit``: defines how the encoder will be fitted to the data.
-    - ``transform``: defines how the encoder will be applied to the data
-      in order to create an obs_tensor.
-    - ``inverse_transform``: defines how to decode the encoded values back
-      to the original values.
-    - ``name``: The name of the encoder. This will be used as the key in the
-      dictionary of encoders. Each encoder passed to a `ExperimentDataPipe` must have a unique name.
-    - ``columns``: List of columns in `obs` that the encoder will be applied to.
-      This will be used to
-
-    See the implementation of ``DefaultEncoder`` for an example.
-    """
-
-    @abc.abstractmethod
-    def fit(self, obs: pd.DataFrame) -> None:
-        """Fit the encoder with obs."""
-        pass
-
-    @abc.abstractmethod
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs DataFrame into a DataFrame of encoded values."""
-        pass
-
-    @abc.abstractmethod
-    def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
-        """Inverse transform the encoded values back to the original values."""
-        pass
-
-    @property
-    @abc.abstractmethod
-    def name(self) -> str:
-        """Name of the encoder."""
-        pass
-
-    @property
-    @abc.abstractmethod
-    def columns(self) -> List[str]:
-        """Columns in `obs` that the encoder will be applied to."""
-        pass
-
-
-class DefaultEncoder(Encoder):
-    """Default encoder based on LabelEncoder."""
-
-    def __init__(self, col: str) -> None:
-        self._encoder = LabelEncoder()
-        self.col = col
-
-    def fit(self, obs: pd.DataFrame) -> None:
-        """Fit the encoder with obs."""
-        self._encoder.fit(obs[self.col].unique())
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs DataFrame into a DataFrame of encoded values."""
-        return self._encoder.transform(df[self.col])  # type: ignore
-
-    def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
-        """Inverse transform the encoded values back to the original values."""
-        return self._encoder.inverse_transform(encoded_values)  # type: ignore
-
-    @property
-    def name(self) -> str:
-        """Name of the encoder."""
-        return self.col
-
-    @property
-    def columns(self) -> List[str]:
-        """Columns in `obs` that the encoder will be applied to."""
-        return [self.col]
-
-    @property
-    def classes_(self):  # type: ignore
-        """Classes of the encoder."""
-        return self._encoder.classes_
 
 
 @define
