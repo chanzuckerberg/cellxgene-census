@@ -65,7 +65,7 @@ def _get_embedding(
     context: soma.options.SOMATileDBContext | None = None,
 ) -> npt.NDArray[np.float32]:
     """Private. Like get_embedding, but accepts a Census object and a Census directory."""
-    if isinstance(obs_soma_joinids, (pa.Array, pa.ChunkedArray, pd.Series)):
+    if isinstance(obs_soma_joinids, pa.Array | pa.ChunkedArray | pd.Series):
         obs_soma_joinids = obs_soma_joinids.to_numpy()
     assert isinstance(obs_soma_joinids, np.ndarray)
     if obs_soma_joinids.dtype != np.int64:

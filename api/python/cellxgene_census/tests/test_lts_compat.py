@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Iterator, Sequence
-from typing import Literal, Union, get_args
+from typing import Literal, TypeAlias, get_args
 
 import pyarrow as pa
 import pytest
@@ -28,14 +28,9 @@ SOMATypeNames = Literal[
 ]
 CollectionTypeNames = ["SOMACollection", "SOMAExperiment", "SOMAMeasurement"]
 
-SOMATypes = Union[
-    soma.Collection,
-    soma.DataFrame,
-    soma.SparseNDArray,
-    soma.DenseNDArray,
-    soma.Experiment,
-    soma.Measurement,
-]
+SOMATypes: TypeAlias = (
+    soma.Collection | soma.DataFrame | soma.SparseNDArray | soma.DenseNDArray | soma.Experiment | soma.Measurement
+)
 
 
 def walk_census(
