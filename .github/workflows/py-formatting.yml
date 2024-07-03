@@ -7,6 +7,9 @@ on:
   push:
     branches: [main]
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   pre_commit_checks:
     name: pre-commit checks

@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   unit_tests_python_api:
     strategy:
