@@ -565,7 +565,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
-        self.method = method
         self.max_process_mem_usage_bytes = 0
 
         if "soma_joinid" not in self.obs_column_names:
