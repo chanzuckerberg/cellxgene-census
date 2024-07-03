@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from datetime import timedelta
 from math import ceil
 from time import time
-from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -38,13 +38,8 @@ ObsAndXDatum = Tuple[Tensor, Tensor]
 The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2."""
 
 
-# Various "methods" for converting from TileDB COO (on disk) to `torch.Tensor`
-Method = Literal["np.array", "scipy.csr"]
-METHODS = ["np.array", "scipy.csr"]
-
-
 # "Chunk" of X data, returned by each `Method` above
-ChunkX = Union[np.array, csr_matrix]
+ChunkX = Union[npt.NDArray[Any], csr_matrix]
 
 
 @define
@@ -112,9 +107,9 @@ def _open_experiment(
         yield exp
 
 
-def tables_to_np(
-    tables: Iterator[Tuple[Table, any]], shape: Tuple[int, int]
-) -> typing.Generator[Tuple[np.ndarray, any, int], None, None]:
+def _tables_to_np(
+    tables: Iterator[Tuple[Table, Any]], shape: Tuple[int, int]
+) -> typing.Generator[Tuple[npt.NDArray[Any], Any, int], None, None]:
     for tbl, indices in tables:
         row_indices_np = np.array(tbl.columns[0])
         col_indices_np = np.array(tbl.columns[1])
@@ -204,7 +199,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         )
 
         if not self.return_sparse_X:
-            batch_iter = tables_to_np(blockwise_iter.tables(), shape=(obs_batch.shape[0], len(self.var_joinids)))
+            batch_iter = _tables_to_np(blockwise_iter.tables(), shape=(obs_batch.shape[0], len(self.var_joinids)))
         else:
             batch_iter = blockwise_iter.scipy(compress=True)
 
@@ -311,7 +306,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         self.return_sparse_X = return_sparse_X
         self.encoders = encoders
         self.stats = stats
-        self.gc_elapsed = 0
+        self.gc_elapsed = 0.0
         self.max_process_mem_usage_bytes = 0
         self.X_dtype = X.schema[2].type.to_pandas_dtype()
 
@@ -354,7 +349,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
                 X = X.todense()
             X_tensor = torch.from_numpy(X)
         else:
-            coo = X.tocoo()
+            coo = X.tocoo()  # type: ignore
 
             X_tensor = torch.sparse_coo_tensor(
                 # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
