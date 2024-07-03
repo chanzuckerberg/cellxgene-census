@@ -24,10 +24,14 @@ from ._release_directory import (
     _get_census_mirrors,
     get_census_version_description,
 )
-from ._util import _uri_join
+from ._util import _uri_join, _user_agent
 
 DEFAULT_CENSUS_VERSION = "stable"
 
+DEFAULT_S3FS_KWARGS = {
+    "anon": True,
+    "cache_regions": True,
+}
 DEFAULT_TILEDB_CONFIGURATION: dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
@@ -120,7 +124,9 @@ def get_default_soma_context(tiledb_config: dict[str, Any] | None = None) -> som
     Lifecycle:
         experimental
     """
-    tiledb_config = dict(DEFAULT_TILEDB_CONFIGURATION, **(tiledb_config or {}))
+    tiledb_config = dict(
+        DEFAULT_TILEDB_CONFIGURATION, **{"vfs.s3.custom_headers.User-Agent": _user_agent()}, **(tiledb_config or {})
+    )
     return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
 
 
@@ -343,8 +349,8 @@ def download_source_h5ad(
     assert protocol == "s3"
 
     fs = s3fs.S3FileSystem(
-        anon=True,
-        cache_regions=True,
+        config_kwargs={"user_agent": _user_agent()},
+        **DEFAULT_S3FS_KWARGS,
     )
     fs.get_file(
         locator["uri"],
