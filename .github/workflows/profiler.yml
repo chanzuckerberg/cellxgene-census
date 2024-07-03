@@ -1,5 +1,8 @@
 name: Profiler
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 on:
   pull_request:
     paths:

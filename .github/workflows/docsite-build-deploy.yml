@@ -6,6 +6,10 @@ on:
   workflow_dispatch: # Used to make post-release docfixes
 permissions:
   contents: write
+
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
