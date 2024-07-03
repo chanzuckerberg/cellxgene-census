@@ -523,6 +523,26 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
 # noinspection PyTestParametrized,DuplicatedCode
 @pytest.mark.parametrize(
     "obs_range,var_range,X_value_gen,use_eager_fetch",
+    [(10, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
+)
+def test_experiment_dataloader__batched_length(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
+    dp = ExperimentDataPipe(
+        soma_experiment,
+        measurement_name="RNA",
+        X_name="raw",
+        obs_column_names=["label"],
+        batch_size=3,
+        shuffle=False,
+        use_eager_fetch=use_eager_fetch,
+    )
+    dl = experiment_dataloader(dp)
+    assert len(dl) == 4
+
+
+@pytest.mark.experimental
+# noinspection PyTestParametrized,DuplicatedCode
+@pytest.mark.parametrize(
+    "obs_range,var_range,X_value_gen,use_eager_fetch",
     [(6, 3, pytorch_x_value_gen, use_eager_fetch) for use_eager_fetch in (True, False)],
 )
 def test__X_tensor_dtype_matches_X_matrix(soma_experiment: Experiment, use_eager_fetch: bool) -> None:
