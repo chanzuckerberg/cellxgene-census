@@ -152,7 +152,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         self.obs = obs
         self.X = X
         self.obs_column_names = obs_column_names
-        if shuffle_chunk_count > 1:
+        if shuffle_chunk_count is not None:
             assert shuffle_rng is not None
 
             # At the start of this step, `obs_joinids_chunked` is a list of one dimensional
