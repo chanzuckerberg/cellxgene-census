@@ -30,6 +30,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Log concurrency group
+        run: |
+          echo "Concurrency group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
