@@ -631,7 +631,8 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._init()
         assert self._obs_joinids is not None
 
-        return ceil(len(self._obs_joinids) / self.batch_size)
+        div, rem = divmod(len(self._obs_joinids), self.batch_size)
+        return div + bool(rem)
 
     def __getitem__(self, index: int) -> ObsAndXDatum:
         raise NotImplementedError("IterDataPipe can only be iterated")
