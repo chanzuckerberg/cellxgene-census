@@ -153,10 +153,15 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         # If no more chunks to iterate through, raise StopIteration, as all iterators do when at end
         obs_joinids_chunk = next(self.obs_joinids_chunks_iter)
 
+        if "soma_joinid" not in self.obs_column_names:
+            cols = ["soma_joinid", *self.obs_column_names]
+        else:
+            cols = list(self.obs_column_names)
+
         obs_batch = (
             self.obs.read(
                 coords=(obs_joinids_chunk,),
-                column_names=self.obs_column_names,
+                column_names=cols,
             )
             .concat()
             .to_pandas()
@@ -525,9 +530,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
 
             self.obs_column_names = list(dict.fromkeys(itertools.chain(*[enc.columns for enc in encoders])))
 
-        if "soma_joinid" not in self.obs_column_names:
-            self.obs_column_names = ["soma_joinid", *self.obs_column_names]
-
     def _init(self) -> None:
         if self._initialized:
             return
@@ -666,7 +668,13 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         pytorch_logger.debug("Initializing encoders")
 
         encoders = []
-        obs = query.obs(column_names=self.obs_column_names).concat().to_pandas()
+
+        if "soma_joinid" not in self.obs_column_names:
+            cols = ["soma_joinid", *self.obs_column_names]
+        else:
+            cols = list(self.obs_column_names)
+
+        obs = query.obs(column_names=cols).concat().to_pandas()
 
         if self._encoders:
             # Fit all the custom encoders with obs
@@ -676,10 +684,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         else:
             # Create one LabelEncoder for each column, and fit it with obs
             for col in self.obs_column_names:
-                if obs[col].dtype in [object]:
-                    enc = LabelEncoder(col)
-                    enc.fit(obs)
-                    encoders.append(enc)
+                enc = LabelEncoder(col)
+                enc.fit(obs)
+                encoders.append(enc)
 
         return encoders
 
