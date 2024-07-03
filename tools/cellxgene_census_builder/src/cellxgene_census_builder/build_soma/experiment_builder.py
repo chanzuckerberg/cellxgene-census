@@ -282,7 +282,7 @@ def accumulate_axes_dataframes(
             obs_column_names=CXG_OBS_COLUMNS_READ,
             var_column_names=CXG_VAR_COLUMNS_READ,
         ) as adata:
-            logging.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
+            logger.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
 
             # Skip this dataset if there are not cells after filtering
             if adata.n_obs == 0:

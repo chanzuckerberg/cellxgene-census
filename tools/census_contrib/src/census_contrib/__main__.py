@@ -236,7 +236,7 @@ def load_qc_anndata(
 
 def create_qc_plots(config: Config, embedding: Path) -> None:
     if config.metadata.data_type == "var_embedding":
-        logging.info("Skipping QC plots for var embedding")
+        logger.info("Skipping QC plots for var embedding")
         return
 
     sc._settings.settings.autoshow = False

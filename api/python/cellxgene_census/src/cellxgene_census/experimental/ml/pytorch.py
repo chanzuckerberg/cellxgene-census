@@ -121,23 +121,30 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         obs_column_names: Sequence[str],
         obs_joinids_chunked: List[npt.NDArray[np.int64]],
         var_joinids: npt.NDArray[np.int64],
+        shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
     ):
         self.obs = obs
         self.X = X
         self.obs_column_names = obs_column_names
-        self.obs_joinids_chunks_iter = self._maybe_local_shuffle_obs_joinids(obs_joinids_chunked, shuffle_rng)
-        self.var_joinids = var_joinids
+        if shuffle_chunk_count:
+            assert shuffle_rng is not None
 
-    @staticmethod
-    def _maybe_local_shuffle_obs_joinids(
-        obs_joinids_chunked: List[npt.NDArray[np.int64]],
-        shuffle_rng: Optional[Generator] = None,
-    ) -> Iterator[npt.NDArray[np.int64]]:
-        return (
-            shuffle_rng.permutation(obs_joinid_chunk) if shuffle_rng else obs_joinid_chunk
-            for obs_joinid_chunk in obs_joinids_chunked
-        )
+            # At the start of this step, `obs_joinids_chunked` is a list of one dimensional
+            # numpy arrays. Each numpy array corresponds to a chunk of contiguous rows in `obs`.
+            # Critically, `obs_joinids_chunked` is randomly ordered where each chunk is
+            # from a random section of `obs`.
+            # We then take `shuffle_chunk_count` of these in order, concatenate them into
+            # a larger numpy array and shuffle this larger numpy array.
+            # The result is again a list of numpy arrays.
+            self.obs_joinids_chunks_iter = (
+                shuffle_rng.permutation(np.concatenate(grouped_chunks))
+                for grouped_chunks in list_split(obs_joinids_chunked, shuffle_chunk_count)
+            )
+        else:
+            self.obs_joinids_chunks_iter = iter(obs_joinids_chunked)
+        self.var_joinids = var_joinids
+        self.shuffle_chunk_count = shuffle_chunk_count
 
     def __next__(self) -> _SOMAChunk:
         pytorch_logger.debug("Retrieving next SOMA chunk...")
@@ -184,6 +191,23 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         return _SOMAChunk(obs=obs_batch, X=X_batch, stats=stats)
 
 
+def list_split(arr_list: List[Any], sublist_len: int) -> List[List[Any]]:
+    """Splits a python list into a list of sublists where each sublist is of size `sublist_len`.
+    TODO: Replace with `itertools.batched` when Python 3.12 becomes the minimum supported version.
+    """
+    i = 0
+    result = []
+    while i < len(arr_list):
+        if (i + sublist_len) >= len(arr_list):
+            result.append(arr_list[i:])
+        else:
+            result.append(arr_list[i : i + sublist_len])
+
+        i += sublist_len
+
+    return result
+
+
 def run_gc() -> Tuple[Tuple[Any, Any, Any], Tuple[Any, Any, Any]]:  # noqa: D103
     proc = psutil.Process(os.getpid())
 
@@ -228,10 +252,11 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         stats: Stats,
         return_sparse_X: bool,
         use_eager_fetch: bool,
+        shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
     ) -> None:
         self.soma_chunk_iter = _ObsAndXSOMAIterator(
-            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_rng
+            obs, X, obs_column_names, obs_joinids_chunked, var_joinids, shuffle_chunk_count, shuffle_rng
         )
         if use_eager_fetch:
             self.soma_chunk_iter = _EagerIterator(self.soma_chunk_iter)
@@ -382,17 +407,18 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
     def __init__(
         self,
         experiment: soma.Experiment,
-        measurement_name: str = "raw",
-        X_name: str = "X",
+        measurement_name: str = "RNA",
+        X_name: str = "raw",
         obs_query: Optional[soma.AxisQuery] = None,
         var_query: Optional[soma.AxisQuery] = None,
         obs_column_names: Sequence[str] = (),
         batch_size: int = 1,
-        shuffle: bool = False,
+        shuffle: bool = True,
         seed: Optional[int] = None,
         return_sparse_X: bool = False,
-        soma_chunk_size: Optional[int] = None,
+        soma_chunk_size: Optional[int] = 64,
         use_eager_fetch: bool = True,
+        shuffle_chunk_count: Optional[int] = 2000,
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -400,9 +426,9 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             experiment:
                 The :class:`tiledbsoma.Experiment` from which to read data.
             measurement_name:
-                The name of the :class:`tiledbsoma.Measurement` to read. Defaults to ``"raw"``.
+                The name of the :class:`tiledbsoma.Measurement` to read. Defaults to ``"RNA"``.
             X_name:
-                The name of the X layer to read. Defaults to ``"X"``.
+                The name of the X layer to read. Defaults to ``"raw"``.
             obs_query:
                 The query used to filter along the ``obs`` axis. If not specified, all ``obs`` and ``X`` data will
                 be returned, which can be very large.
@@ -417,18 +443,15 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 ``1`` will result in :class:`torch.Tensor` of rank 1 being returns (a single row); larger values will
                 result in :class:`torch.Tensor`\ s of rank 2 (multiple rows).
             shuffle:
-                Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``False`` (no shuffling).
-                For performance reasons, shuffling is performed in two steps: 1) a global shuffling, where contiguous
-                rows are grouped into chunks and the order of the chunks is randomized, and then 2) a local
-                shuffling, where the rows within each chunk are shuffled. Since this class must retrieve data
-                in chunks (to keep memory requirements to a fixed size), global shuffling ensures that a given row in
-                the shuffled result can originate from any position in the non-shuffled result ordering. If shuffling
-                only occurred within each chunk (i.e. "local" shuffling), the first chunk's rows would always be
-                returned first, the second chunk's rows would always be returned second, and so on. The chunk size is
-                determined by the ``soma_chunk_size`` parameter. Note that rows within a chunk will maintain
-                proximity, even after shuffling, so some experimentation may be required to ensure the shuffling is
-                sufficient for the model training process. To this end, the ``soma_chunk_size`` can be treated as a
-                hyperparameter that can be tuned.
+                Whether to shuffle the ``obs`` and ``X`` data being returned. Defaults to ``True``.
+                For performance reasons, shuffling is not performed globally across all rows, but rather in chunks.
+                More specifically, we select ``shuffle_chunk_count`` non-contiguous chunks across all the observations
+                in the query, concatenate the chunks and shuffle the associated observations.
+                The randomness of the shuffling is therefore determined by the
+                (``soma_chunk_size``, ``shuffle_chunk_count``) selection. The default values have been determined
+                to yield a good trade-off between randomness and performance. Further tuning may be required for
+                different type of models. Note that memory usage is correlated to the product
+                ``soma_chunk_size * shuffle_chunk_count``.
             seed:
                 The random seed used for shuffling. Defaults to ``None`` (no seed). This *must* be specified when using
                 :class:`torch.nn.parallel.DistributedDataParallel` to ensure data partitions are disjoint across worker
@@ -442,15 +465,17 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 The number of ``obs``/``X`` rows to retrieve when reading data from SOMA. This impacts two aspects of
                 this class's behavior: 1) The maximum memory utilization, with larger values providing
                 better read performance, but also requiring more memory; 2) The granularity of the global shuffling
-                step (see ``shuffle`` parameter for details). If not specified, the value is set to utilize ~1 GiB of
-                RAM per SOMA chunk read, based upon the number of ``var`` columns (cells/features) being requested
-                and assuming X data sparsity of 95%; the number of rows per chunk will depend on the number of
-                ``var`` columns being read.
+                step (see ``shuffle`` parameter for details). The default value of 64 works well in conjunction
+                with the default ``shuffle_chunk_count`` value.
             use_eager_fetch:
                 Fetch the next SOMA chunk of ``obs`` and ``X`` data immediately after a previously fetched SOMA chunk is made
                 available for processing via the iterator. This allows network (or filesystem) requests to be made in
                 parallel with client-side processing of the SOMA data, potentially improving overall performance at the
                 cost of doubling memory utilization. Defaults to ``True``.
+            shuffle_chunk_count:
+                The number of contiguous blocks (chunks) of rows sampled to then concatenate and shuffle.
+                Larger numbers correspond to more randomness per training batch.
+                If ``shuffle == False``, this parameter is ignored. Defaults to ``2000``.
 
         Lifecycle:
             experimental
@@ -470,6 +495,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         self._encoders = None
         self._obs_joinids = None
         self._var_joinids = None
+        self._shuffle_chunk_count = shuffle_chunk_count if shuffle else None
         self._shuffle_rng = np.random.default_rng(seed) if shuffle else None
         self._initialized = False
 
@@ -586,6 +612,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 return_sparse_X=self.return_sparse_X,
                 use_eager_fetch=self.use_eager_fetch,
                 shuffle_rng=self._shuffle_rng,
+                shuffle_chunk_count=self._shuffle_chunk_count,
             )
 
             yield from obs_and_x_iter

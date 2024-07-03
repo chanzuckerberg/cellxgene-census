@@ -31,7 +31,7 @@ dependencies= [
     # NOTE: the tiledbsoma version must be >= to the version used in the Census builder, to
     # ensure that the assets are readable (tiledbsoma supports backward compatible reading).
     # Make sure this version does not fall behind the builder's tiledbsoma version.
-    "tiledbsoma==1.11.3",
+    "tiledbsoma~=1.11.4",
     "anndata",
     "numpy>=1.21,<2.0",
     "requests",
@@ -41,16 +41,23 @@ dependencies= [
 
 [project.optional-dependencies]
 experimental = [
-    "torch~=2.2.0",
+    "torch",
     "torchdata~=0.7",
     "scikit-learn~=1.0",
-    "scikit-misc>=0.2",  # scikit-misc 0.3 dropped Python 3.8 support
+    "scikit-misc>=0.2,<0.4",  # scikit-misc 0.3 dropped Python 3.8 support, and 0.4 doesn't have MacOS/ARM wheels
     "psutil~=5.0",
     "datasets~=2.0",
     "tdigest~=0.5",
     # Not expressible in pyproject.toml:
     #"git+https://huggingface.co/ctheodoris/Geneformer",
     # instead, experimental/ml/geneformer_tokenizer.py catches ImportError to ask user to install that.
+]
+doc = [
+    "nbsphinx",
+    "myst-parser",
+    "sphinx-rtd-theme",
+    "gitpython",
+    "sphinx<7.0.0",
 ]
 
 [project.urls]
