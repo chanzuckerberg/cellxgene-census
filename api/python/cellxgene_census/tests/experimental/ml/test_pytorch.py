@@ -414,8 +414,6 @@ def test_batch_encoder(soma_experiment: Experiment) -> None:
     batch = next(batch_iter)
     assert isinstance(batch[1], Tensor)
 
-    print(batch)
-
     labels_encoded = batch[1]
 
     labels_decoded = exp_data_pipe.obs_encoders["batch"].inverse_transform(labels_encoded)
