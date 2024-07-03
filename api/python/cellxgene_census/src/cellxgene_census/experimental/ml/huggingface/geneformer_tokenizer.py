@@ -14,7 +14,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     cell in CELLxGENE Census ExperimentAxisQuery results (human).
 
     This class requires the Geneformer package to be installed separately with:
-    `pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1`
+    `pip install git+https://huggingface.co/ctheodoris/Geneformer@471eefc`
 
     Example usage:
 
@@ -126,7 +126,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
                 # pyproject.toml can't express Geneformer git+https dependency
                 raise ImportError(
                     "Please install Geneformer with: "
-                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1"
+                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@471eefc"
                 ) from None
             if not token_dictionary_file:
                 token_dictionary_file = geneformer.tokenizer.TOKEN_DICTIONARY_FILE
