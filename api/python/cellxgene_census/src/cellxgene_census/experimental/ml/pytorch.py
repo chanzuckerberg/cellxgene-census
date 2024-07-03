@@ -147,7 +147,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
         var_joinids: npt.NDArray[np.int64],
         shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
-        method: Method = "scipy.csr",
+        return_sparse_X: bool = False,
     ):
         self.obs = obs
         self.X = X
@@ -170,7 +170,7 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
             self.obs_joinids_chunks_iter = iter(obs_joinids_chunked)
         self.var_joinids = var_joinids
         self.shuffle_chunk_count = shuffle_chunk_count
-        self.method = method
+        self.return_sparse_X = return_sparse_X
 
     def __next__(self) -> _SOMAChunk:
         pytorch_logger.debug("Retrieving next SOMA chunk...")
@@ -203,13 +203,10 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
             axis=0, size=len(obs_joinids_chunk), eager=False
         )
 
-        method = self.method
-        if method == "np.array":
+        if not self.return_sparse_X:
             batch_iter = tables_to_np(blockwise_iter.tables(), shape=(obs_batch.shape[0], len(self.var_joinids)))
-        elif method == "scipy.csr":
-            batch_iter = blockwise_iter.scipy(compress=True)
         else:
-            raise ValueError(f"Invalid format: {method}")
+            batch_iter = blockwise_iter.scipy(compress=True)
 
         res = next(batch_iter)
         X_batch: ChunkX = res[0]
@@ -295,7 +292,6 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         use_eager_fetch: bool,
         shuffle_chunk_count: Optional[int] = None,
         shuffle_rng: Optional[Generator] = None,
-        method: Method = "scipy.csr",
     ) -> None:
         self.soma_chunk_iter = _ObsAndXSOMAIterator(
             obs,
@@ -305,7 +301,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
             var_joinids,
             shuffle_chunk_count,
             shuffle_rng,
-            method=method,
+            return_sparse_X=return_sparse_X,
         )
         if use_eager_fetch:
             self.soma_chunk_iter = _EagerIterator(self.soma_chunk_iter)
@@ -490,7 +486,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
         soma_chunk_size: Optional[int] = 64,
         use_eager_fetch: bool = True,
         shuffle_chunk_count: Optional[int] = 2000,
-        method: Method = "scipy.csr",
     ) -> None:
         r"""Construct a new ``ExperimentDataPipe``.
 
@@ -687,7 +682,6 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 use_eager_fetch=self.use_eager_fetch,
                 shuffle_rng=self._shuffle_rng,
                 shuffle_chunk_count=self._shuffle_chunk_count,
-                method=self.method,
             )
 
             yield from obs_and_x_iter
