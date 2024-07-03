@@ -209,21 +209,14 @@ if __name__ == "__main__":
                     idx = obs_indexer.get_indexer(obs_soma_joinids)
                     ad.obsm[key] = emb[idx]
                 except Exception:
+                    from scipy.sparse import vstack
                     # Assume it's a TileDBSoma URI
+                    all_embs = []
                     with soma.open(val["uri"]) as E:
-                        embedding_shape = (len(obs_soma_joinids), E.shape[1])
-                        embedding = np.full(embedding_shape, np.NaN, dtype=np.float32, order="C")
-
-                        obs_indexer = pd.Index(obs_soma_joinids)
-                        for tbl in E.read(coords=(obs_soma_joinids,)).tables():
-                            obs_idx = obs_indexer.get_indexer(tbl.column("soma_dim_0").to_numpy())  # type: ignore[no-untyped-call]
-                            feat_idx = tbl.column("soma_dim_1").to_numpy()
-                            emb = tbl.column("soma_data")
-
-                            indices = obs_idx * E.shape[1] + feat_idx
-                            np.put(embedding.reshape(-1), indices, emb)
-
-                        ad.obsm[key] = embedding
+                        for mat in E.read(coords=(obs_soma_joinids,)).blockwise(axis=0).scipy():
+                            all_embs.append(mat[0])
+                        ad.obsm[key] = vstack(all_embs).toarray()
+                        print("DIM:", ad.obsm[key].shape)
 
         # Embeddings with missing data contain all NaN,
         # so we must find the intersection of non-NaN rows in the fetched embeddings
@@ -242,7 +235,7 @@ if __name__ == "__main__":
     }
     umap_plot_labels = ["cell_subclass", "cell_class", "cell_type", "dataset_id"]
 
-    block_cell_types = ["native cell", "animal cell", "eukaryotic cell"]
+    block_cell_types = ["native cell", "animal cell", "eukaryotic cell", "unknown"]
 
     all_bio = {}
     all_batch = {}
@@ -268,6 +261,10 @@ if __name__ == "__main__":
             experiment_name="homo_sapiens",
             column_names=column_names,
         )
+
+        for column in adata_metrics.obs.columns:
+            if adata_metrics.obs[column].dtype.name == "category":
+                adata_metrics.obs[column] = adata_metrics.obs[column].astype(str)
 
         # Create batch variable
         adata_metrics.obs["batch"] = (
