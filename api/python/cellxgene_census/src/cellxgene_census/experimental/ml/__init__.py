@@ -1,6 +1,6 @@
 """An API to facilitate use of PyTorch ML training with data from the CZI Science CELLxGENE Census."""
 
-from .encoders import BatchEncoder, DefaultEncoder, Encoder
+from .encoders import BatchEncoder, Encoder, LabelEncoder
 from .pytorch import ExperimentDataPipe, Stats, experiment_dataloader
 
 __all__ = [
@@ -8,6 +8,6 @@ __all__ = [
     "ExperimentDataPipe",
     "experiment_dataloader",
     "Encoder",
-    "DefaultEncoder",
+    "LabelEncoder",
     "BatchEncoder",
 ]

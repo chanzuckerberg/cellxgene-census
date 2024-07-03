@@ -4,7 +4,7 @@ from typing import List
 
 import numpy.typing as npt
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder as SklearnLabelEncoder
 
 
 class Encoder(abc.ABC):
@@ -21,7 +21,7 @@ class Encoder(abc.ABC):
       dictionary of encoders. Each encoder passed to a :class:`.pytorch.ExperimentDataPipe` must have a unique name.
     - ``columns``: List of columns in ``obs`` that the encoder will be applied to.
 
-    See the implementation of :class:`DefaultEncoder` for an example.
+    See the implementation of :class:`LabelEncoder` for an example.
     """
 
     @abc.abstractmethod
@@ -52,11 +52,11 @@ class Encoder(abc.ABC):
         pass
 
 
-class DefaultEncoder(Encoder):
+class LabelEncoder(Encoder):
     """Default encoder based on :class:`sklearn.preprocessing.LabelEncoder`."""
 
     def __init__(self, col: str) -> None:
-        self._encoder = LabelEncoder()
+        self._encoder = SklearnLabelEncoder()
         self.col = col
 
     def fit(self, obs: pd.DataFrame) -> None:

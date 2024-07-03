@@ -18,7 +18,7 @@ try:
     from torch import Tensor, float32
     from torch.utils.data._utils.worker import WorkerInfo
 
-    from cellxgene_census.experimental.ml.encoders import BatchEncoder, DefaultEncoder
+    from cellxgene_census.experimental.ml.encoders import BatchEncoder, LabelEncoder
     from cellxgene_census.experimental.ml.pytorch import (
         ExperimentDataPipe,
         experiment_dataloader,
@@ -371,7 +371,7 @@ def test_default_encoders_implicit(soma_experiment: Experiment) -> None:
     labels_encoded = batch[1]
 
     labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
-    assert labels_decoded.tolist() == ["0", "1", "2"]
+    assert labels_decoded.tolist() == ["0", "1", "2"]  # type: ignore
 
 
 @pytest.mark.experimental
@@ -382,7 +382,7 @@ def test_default_encoders_explicit(soma_experiment: Experiment) -> None:
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("label")],
+        encoders=[LabelEncoder("label")],
         shuffle=False,
         batch_size=3,
     )
@@ -394,7 +394,7 @@ def test_default_encoders_explicit(soma_experiment: Experiment) -> None:
     labels_encoded = batch[1]
 
     labels_decoded = exp_data_pipe.obs_encoders["label"].inverse_transform(labels_encoded)
-    assert labels_decoded.tolist() == ["0", "1", "2"]
+    assert labels_decoded.tolist() == ["0", "1", "2"]  # type: ignore
 
 
 @pytest.mark.experimental
@@ -417,7 +417,7 @@ def test_batch_encoder(soma_experiment: Experiment) -> None:
     labels_encoded = batch[1]
 
     labels_decoded = exp_data_pipe.obs_encoders["batch"].inverse_transform(labels_encoded)
-    assert labels_decoded.tolist() == ["0c", "1c", "2c"]
+    assert labels_decoded.tolist() == ["0c", "1c", "2c"]  # type: ignore
 
 
 @pytest.mark.experimental
@@ -429,7 +429,7 @@ def test_custom_encoders_fail_if_duplicate(soma_experiment: Experiment) -> None:
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
-            encoders=[DefaultEncoder("label"), DefaultEncoder("label")],
+            encoders=[LabelEncoder("label"), LabelEncoder("label")],
             shuffle=False,
             batch_size=3,
         )
@@ -445,7 +445,7 @@ def test_custom_encoders_fail_if_columns_defined(soma_experiment: Experiment) ->
             measurement_name="RNA",
             X_name="raw",
             obs_column_names=["label"],
-            encoders=[DefaultEncoder("label")],
+            encoders=[LabelEncoder("label")],
             shuffle=False,
             batch_size=3,
         )
@@ -500,7 +500,7 @@ def test_distributed__returns_data_partition_for_rank(
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
-            encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+            encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
             soma_chunk_size=2,
             shuffle=False,
         )
@@ -539,7 +539,7 @@ def test_distributed_and_multiprocessing__returns_data_partition_for_rank(
             soma_experiment,
             measurement_name="RNA",
             X_name="raw",
-            encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+            encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
             soma_chunk_size=2,
             shuffle=False,
         )
@@ -565,7 +565,7 @@ def test_experiment_dataloader__non_batched(soma_experiment: Experiment, use_eag
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+        encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
         shuffle=False,
         use_eager_fetch=use_eager_fetch,
     )
@@ -588,7 +588,7 @@ def test_experiment_dataloader__batched(soma_experiment: Experiment, use_eager_f
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+        encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
         batch_size=3,
         shuffle=False,
         use_eager_fetch=use_eager_fetch,
@@ -646,7 +646,7 @@ def test__shuffle(soma_experiment: Experiment) -> None:
         soma_experiment,
         measurement_name="RNA",
         X_name="raw",
-        encoders=[DefaultEncoder("soma_joinid"), DefaultEncoder("label")],
+        encoders=[LabelEncoder("soma_joinid"), LabelEncoder("label")],
         shuffle=True,
     )
 

@@ -55,7 +55,7 @@ Experimental: Machine Learning
     cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
     cellxgene_census.experimental.ml.pytorch.Stats
     cellxgene_census.experimental.ml.encoders.Encoder
-    cellxgene_census.experimental.ml.encoders.DefaultEncoder
+    cellxgene_census.experimental.ml.encoders.LabelEncoder
     cellxgene_census.experimental.ml.encoders.BatchEncoder
     cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder
     cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer

@@ -19,7 +19,6 @@ import torchdata.datapipes.iter as pipes
 from attr import define
 from numpy.random import Generator
 from scipy import sparse
-from sklearn.preprocessing import LabelEncoder
 from torch import Tensor
 from torch import distributed as dist
 from torch.utils.data import DataLoader
@@ -27,7 +26,7 @@ from torch.utils.data.dataset import Dataset
 
 from ... import get_default_soma_context
 from ..util._eager_iter import _EagerIterator
-from .encoders import DefaultEncoder, Encoder
+from .encoders import Encoder, LabelEncoder
 
 pytorch_logger = logging.getLogger("cellxgene_census.experimental.pytorch")
 
@@ -54,8 +53,8 @@ class _SOMAChunk:
         return len(self.obs)
 
 
-Encoders = Dict[str, LabelEncoder]
-"""A dictionary of ``LabelEncoder``s keyed by the ``obs`` column name."""
+Encoders = Dict[str, Encoder]
+"""A dictionary of ``Encoder``s keyed by the ``obs`` column name."""
 
 
 @define
@@ -675,10 +674,10 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
                 enc.fit(obs)
                 encoders.append(enc)
         else:
-            # Create one DefaultEncoder for each column, and fit it with obs
+            # Create one LabelEncoder for each column, and fit it with obs
             for col in self.obs_column_names:
                 if obs[col].dtype in [object]:
-                    enc = DefaultEncoder(col)
+                    enc = LabelEncoder(col)
                     enc.fit(obs)
                     encoders.append(enc)
 
