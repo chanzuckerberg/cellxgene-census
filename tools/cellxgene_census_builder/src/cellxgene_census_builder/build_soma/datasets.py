@@ -29,6 +29,7 @@ class Dataset:
     collection_id: str = ""  # CELLxGENE collection id
     collection_name: str = ""  # CELLxGENE collection name
     collection_doi: str = ""  # CELLxGENE collection doi
+    collection_doi_label: str = ""  # CELLxGENE collection doi label
     asset_h5ad_filesize: int = -1
     cell_count: int = -1
     mean_genes_per_cell: float = -1.0

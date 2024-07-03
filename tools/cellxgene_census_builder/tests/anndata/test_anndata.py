@@ -265,7 +265,7 @@ def test_empty_estimated_density(tmp_path: pathlib.Path) -> None:
     adata = anndata.AnnData(
         obs=pd.DataFrame(), var=pd.DataFrame({"feature_id": [0, 1, 2]}), X=sparse.csr_matrix((0, 3), dtype=np.float32)
     )
-    adata.uns["schema_version"] = "5.0.0"
+    adata.uns["schema_version"] = "5.1.0"
     adata.write_h5ad(path)
 
     with open_anndata(path) as ad:
@@ -297,7 +297,7 @@ def test_open_anndata_raw_X(tmp_path: pathlib.Path) -> None:
         var=pd.DataFrame({"feature_id": [0, 1, 2]}),
         X=sparse.csr_matrix((2, 3), dtype=np.float32),
         raw={"X": sparse.csr_matrix((2, 4), dtype=np.float32)},
-        uns={"schema_version": "5.0.0"},
+        uns={"schema_version": "5.1.0"},
     )
     adata.write_h5ad(path)
 
@@ -410,7 +410,7 @@ def test_multi_species_filter(
             index=[f"feature_{i}" for i in range(n_vars)],
         ),
         X=sparse.random(n_obs, n_vars, format="csr", dtype=np.float32),
-        uns={"schema_version": "5.0.0"},
+        uns={"schema_version": "5.1.0"},
     )
     path = (tmp_path / "species.h5ad").as_posix()
     adata.write_h5ad(path)
