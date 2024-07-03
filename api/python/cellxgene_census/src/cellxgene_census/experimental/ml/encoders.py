@@ -8,21 +8,20 @@ from sklearn.preprocessing import LabelEncoder
 
 
 class Encoder(abc.ABC):
-    """Base class for obs encoders.
+    """Base class for ``obs`` encoders.
 
     To define a custom encoder, five methods must be implemented:
 
     - ``fit``: defines how the encoder will be fitted to the data.
     - ``transform``: defines how the encoder will be applied to the data
-      in order to create an obs_tensor.
+      in order to create an ``obs`` tensor.
     - ``inverse_transform``: defines how to decode the encoded values back
       to the original values.
     - ``name``: The name of the encoder. This will be used as the key in the
-      dictionary of encoders. Each encoder passed to a `ExperimentDataPipe` must have a unique name.
-    - ``columns``: List of columns in `obs` that the encoder will be applied to.
-      This will be used to
+      dictionary of encoders. Each encoder passed to a :class:`.pytorch.ExperimentDataPipe` must have a unique name.
+    - ``columns``: List of columns in ``obs`` that the encoder will be applied to.
 
-    See the implementation of ``DefaultEncoder`` for an example.
+    See the implementation of :class:`DefaultEncoder` for an example.
     """
 
     @abc.abstractmethod
@@ -32,7 +31,7 @@ class Encoder(abc.ABC):
 
     @abc.abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs DataFrame into a DataFrame of encoded values."""
+        """Transform the obs :class:`pandas.DataFrame` into a :class:`pandas.DataFrame` of encoded values."""
         pass
 
     @abc.abstractmethod
@@ -49,23 +48,23 @@ class Encoder(abc.ABC):
     @property
     @abc.abstractmethod
     def columns(self) -> List[str]:
-        """Columns in `obs` that the encoder will be applied to."""
+        """Columns in ``obs`` that the encoder will be applied to."""
         pass
 
 
 class DefaultEncoder(Encoder):
-    """Default encoder based on LabelEncoder."""
+    """Default encoder based on :class:`sklearn.preprocessing.LabelEncoder`."""
 
     def __init__(self, col: str) -> None:
         self._encoder = LabelEncoder()
         self.col = col
 
     def fit(self, obs: pd.DataFrame) -> None:
-        """Fit the encoder with obs."""
+        """Fit the encoder with ``obs``."""
         self._encoder.fit(obs[self.col].unique())
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs DataFrame into a DataFrame of encoded values."""
+        """Transform the obs :class:`pandas.DataFrame` into a :class:`pandas.DataFrame` of encoded values."""
         return self._encoder.transform(df[self.col])  # type: ignore
 
     def inverse_transform(self, encoded_values: npt.ArrayLike) -> npt.ArrayLike:
@@ -79,7 +78,7 @@ class DefaultEncoder(Encoder):
 
     @property
     def columns(self) -> List[str]:
-        """Columns in `obs` that the encoder will be applied to."""
+        """Columns in ``obs`` that the encoder will be applied to."""
         return [self.col]
 
     @property
@@ -89,7 +88,7 @@ class DefaultEncoder(Encoder):
 
 
 class BatchEncoder(Encoder):
-    """An encoder that concatenates and encodes several obs columns."""
+    """An encoder that concatenates and encodes several ``obs`` columns."""
 
     def __init__(self, cols: List[str], name: str = "batch"):
         self.cols = cols
@@ -102,7 +101,7 @@ class BatchEncoder(Encoder):
         return functools.reduce(lambda a, b: a + b, [df[c].astype(str) for c in self.cols])
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform the obs DataFrame into a DataFrame of encoded values."""
+        """Transform the obs :class:`pandas.DataFrame` into a :class:`pandas.DataFrame` of encoded values."""
         arr = self._join_cols(df)
         return self._encoder.transform(arr)  # type: ignore
 
@@ -111,13 +110,13 @@ class BatchEncoder(Encoder):
         return self._encoder.inverse_transform(encoded_values)  # type: ignore
 
     def fit(self, obs: pd.DataFrame) -> None:
-        """Fit the encoder with obs."""
+        """Fit the encoder with ``obs``."""
         arr = self._join_cols(obs)
         self._encoder.fit(arr.unique())
 
     @property
     def columns(self) -> List[str]:
-        """Columns in `obs` that the encoder will be applied to."""
+        """Columns in ``obs`` that the encoder will be applied to."""
         return self.cols
 
     @property
