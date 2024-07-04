@@ -347,8 +347,6 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         obs_tensor = torch.from_numpy(obs_encoded.to_numpy())
 
         if not self.return_sparse_X:
-            if isinstance(X, csr_matrix):
-                X = X.todense()
             X_tensor = torch.from_numpy(X)
         else:
             coo = X.tocoo()
