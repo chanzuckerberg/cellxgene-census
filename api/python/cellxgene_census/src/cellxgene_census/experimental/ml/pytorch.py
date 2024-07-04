@@ -20,7 +20,6 @@ from attr import define
 from numpy.random import Generator
 from pyarrow import Table
 from scipy import sparse
-from scipy.sparse import coo_matrix, csr_matrix
 from sklearn.preprocessing import LabelEncoder
 from torch import Tensor
 from torch import distributed as dist
@@ -39,7 +38,7 @@ The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2.
 
 
 # "Chunk" of X data, returned by each `Method` above
-ChunkX = Union[npt.NDArray[Any], csr_matrix]
+ChunkX = Union[npt.NDArray[Any], sparse.csr_matrix]
 
 
 @define
@@ -395,16 +394,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
         assert obs_rows.index.is_unique
         assert safe_batch_size == obs_rows.shape[0]
 
-        if isinstance(X_chunk, coo_matrix):
-            start = np.searchsorted(X_chunk.row, slice_.start)
-            stop = np.searchsorted(X_chunk.row, slice_.stop)
-            data = X_chunk.data[start:stop]
-            row = X_chunk.row[start:stop] - slice_.start
-            col = X_chunk.col[start:stop]
-            shape = (slice_.stop - slice_.start, X_chunk.shape[1])
-            X_batch = coo_matrix((data, (row, col)), shape=shape)
-        else:
-            X_batch = X_chunk[slice_]
+        X_batch = X_chunk[slice_]
 
         assert obs_rows.shape[0] == X_batch.shape[0]
 
