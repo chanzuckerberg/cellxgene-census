@@ -312,25 +312,27 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
 
     def __next__(self) -> ObsAndXDatum:
         """Read the next torch batch, possibly across multiple soma chunks."""
-        obs: pd.DataFrame = pd.DataFrame()
-        X: ChunkX = csr_matrix((0, len(self.var_joinids)), dtype=self.X_dtype)
-        first = True
+        obss: list[pd.DataFrame] = []
+        Xs: list[ChunkX] = []
+        n_obs = 0
 
-        while len(obs) < self.batch_size:
+        while n_obs < self.batch_size:
             try:
-                obs_partial, X_partial = self._read_partial_torch_batch(self.batch_size - len(obs))
-                if first:
-                    obs = obs_partial
-                    X = X_partial
-                    first = False
-                else:
-                    obs = pd.concat([obs, obs_partial], axis=0)
-                    X = sparse.vstack([X, X_partial])
+                obs_partial, X_partial = self._read_partial_torch_batch(self.batch_size - n_obs)
+                n_obs += len(obs_partial)
+                obss.append(obs_partial)
+                Xs.append(X_partial)
             except StopIteration:
                 break
 
-        if len(obs) == 0:
+        if len(Xs) == 0:  # If we ran out of data
             raise StopIteration
+        else:
+            if self.return_sparse_X:
+                X = sparse.vstack(Xs)
+            else:
+                X = np.concatenate(Xs, axis=0)
+            obs = pd.concat(obss, axis=0)
 
         obs_encoded = pd.DataFrame(
             data={"soma_joinid": obs.index},
@@ -349,7 +351,7 @@ class _ObsAndXIterator(Iterator[ObsAndXDatum]):
                 X = X.todense()
             X_tensor = torch.from_numpy(X)
         else:
-            coo = X.tocoo()  # type: ignore
+            coo = X.tocoo()
 
             X_tensor = torch.sparse_coo_tensor(
                 # Note: The `np.array` seems unnecessary, but PyTorch warns bare array is "extremely slow"
