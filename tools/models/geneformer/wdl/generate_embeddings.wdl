@@ -2,25 +2,32 @@ version development
 
 workflow scatter_generate_embeddings {
     input {
-        Directory dataset
+        Array[Directory] dataset_shards
         Directory model
         String output_uri
+        String? model_type
         Int? emb_layer
-        Int parts = 10
+        String? features
 
         String s3_region = "us-west-2"
         String docker
     }
 
+    # work around any tooling that might try to verify pre-existence of the output URI when
+    # launching the workflow:
+    String output_uri2 = sub(output_uri, "s3_//", "s3://")
+
+    # create the output TileDB array
     call init_embeddings_array {
         input:
-        uri = output_uri, s3_region, docker
+        uri = output_uri2, s3_region, docker
     }
 
-    scatter (part in range(parts)) {
+    # generate each shard's embeddings and write them into the above-created array
+    scatter (shard in dataset_shards) {
         call generate_embeddings after init_embeddings_array {
             input:
-            dataset, model, emb_layer, output_uri, s3_region, part, parts, docker
+            dataset = shard, output_uri = output_uri2, model, model_type, emb_layer, features, s3_region, docker
         }
     }
 
@@ -70,11 +77,9 @@ task generate_embeddings {
         String output_uri
         String s3_region
 
+        String model_type = "CellClassifier"
         Int emb_layer = -1  # -1 or 0
-
-        # for scattering over partitions: process only part# of parts
-        Int? part
-        Int parts = 1
+        String features = "soma_joinid,cell_type,cell_type_ontology_term_id,cell_subclass,cell_subclass_ontology_term_id"
 
         String docker
     }
@@ -89,7 +94,7 @@ task generate_embeddings {
         export AWS_DEFAULT_REGION='~{s3_region}'
         export TQDM_MININTERVAL=10
         python3 /census-geneformer/generate-geneformer-embeddings.py \
-            --emb-layer ~{emb_layer} ~{"--part " + part} --parts ~{parts} --batch-size 10 --tiledbsoma \
+            --model-type ~{model_type} --emb-layer ~{emb_layer} --features '~{features}' --batch-size 10 --tiledbsoma \
             '~{model}' '~{dataset}' '~{output_uri}'
     >>>
 
@@ -98,6 +103,8 @@ task generate_embeddings {
         cpu: 8
         memory: "30G"
         gpu: true
+        acceleratorCount: 1
+        acceleratorType: "nvidia-tesla-a10g"
         docker: docker
         # for robustness to sporadic errors e.g.
         # https://github.com/pytorch/pytorch/issues/21819

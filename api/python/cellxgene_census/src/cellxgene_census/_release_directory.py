@@ -9,10 +9,12 @@ Methods to retrieve information about versions of the publicly hosted Census obj
 
 import typing
 from collections import OrderedDict
-from typing import Dict, Literal, Optional, Union, cast
+from typing import Any, Dict, Literal, Optional, Union, cast
 
 import requests
 from typing_extensions import NotRequired, TypedDict
+
+from cellxgene_census._util import _user_agent
 
 """
 The following types describe the expected directory of Census builds, used
@@ -351,10 +353,10 @@ def get_census_version_directory(
                 }
             }
     """
-    response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL)
+    response = requests.get(CELL_CENSUS_RELEASE_DIRECTORY_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
 
-    directory: CensusDirectory = cast(CensusDirectory, response.json())
+    directory: dict[str, str | dict[str, Any]] = response.json()
     directory_out: CensusDirectory = {}
     aliases: typing.Set[CensusVersionName] = set()
 
@@ -379,6 +381,11 @@ def get_census_version_directory(
         # exclude aliases
         if not isinstance(directory_value, dict):
             continue
+
+        # Filter fields
+        directory_value = {
+            k: directory_value[k] for k in CensusVersionDescription.__annotations__ if k in directory_value
+        }
 
         # filter by release flags
         census_version_description = cast(CensusVersionDescription, directory_value)
@@ -426,6 +433,6 @@ def get_census_mirror_directory() -> Dict[CensusMirrorName, CensusMirror]:
 
 
 def _get_census_mirrors() -> CensusMirrors:
-    response = requests.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL)
+    response = requests.get(CELL_CENSUS_MIRRORS_DIRECTORY_URL, headers={"User-Agent": _user_agent()})
     response.raise_for_status()
     return cast(CensusMirrors, response.json())
