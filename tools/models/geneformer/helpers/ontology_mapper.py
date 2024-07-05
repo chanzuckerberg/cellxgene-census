@@ -10,7 +10,9 @@
 
 """
 
+import gzip
 import os
+import tempfile
 from abc import ABC, abstractmethod
 
 import owlready2
@@ -191,16 +193,21 @@ class OntologyMapper(ABC):
 
 class CellMapper(OntologyMapper):
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
-    CXG_CL_ONTOLOGY_URL = "https://github.com/obophenotype/cell-ontology/releases/download/v2023-07-20/cl.owl"
+    CXG_CL_ONTOLOGY_PATH = os.path.join(os.path.dirname(__file__), "cl.v2024-04-05.owl.gz")
     # Only look up ancestors under Cell
     ROOT_NODE = "CL_0000000"
 
     def __init__(self, cell_type_high_level_ontology_term_ids: list[str]):
-        super(CellMapper, self).__init__(  # noqa: UP008
-            high_level_ontology_term_ids=cell_type_high_level_ontology_term_ids,
-            ontology_owl_path=self.CXG_CL_ONTOLOGY_URL,
-            root_ontology_term_id=self.ROOT_NODE,
-        )
+        # with a temporary file of gunzipped CXG_CL_ONTOLOGY_PATH:
+        with tempfile.NamedTemporaryFile() as owl:
+            with gzip.open(self.CXG_CL_ONTOLOGY_PATH, "rb") as f:
+                owl.write(f.read())
+            owl.flush()
+            super(CellMapper, self).__init__(  # noqa: UP008
+                high_level_ontology_term_ids=cell_type_high_level_ontology_term_ids,
+                ontology_owl_path=owl.name,
+                root_ontology_term_id=self.ROOT_NODE,
+            )
 
     def _get_branch_ancestors(self, owl_entity):
         branch_ancestors = []
@@ -226,18 +233,22 @@ class CellMapper(OntologyMapper):
 
 class TissueMapper(OntologyMapper):
     # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
-    CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
+    CXG_UBERON_ONTOLOGY_PATH = os.path.join(os.path.dirname(__file__), "uberon.v2024-03-22.owl.gz")
 
     # Only look up ancestors under anatomical entity
     ROOT_NODE = "UBERON_0001062"
 
     def __init__(self, tissue_high_level_ontology_term_ids: list[str]):
         self.cell_type_high_level_ontology_term_ids = tissue_high_level_ontology_term_ids
-        super(TissueMapper, self).__init__(  # noqa: UP008
-            high_level_ontology_term_ids=tissue_high_level_ontology_term_ids,
-            ontology_owl_path=self.CXG_UBERON_ONTOLOGY_URL,
-            root_ontology_term_id=self.ROOT_NODE,
-        )
+        with tempfile.NamedTemporaryFile() as owl:
+            with gzip.open(self.CXG_UBERON_ONTOLOGY_PATH, "rb") as f:
+                owl.write(f.read())
+            owl.flush()
+            super(TissueMapper, self).__init__(  # noqa: UP008
+                high_level_ontology_term_ids=tissue_high_level_ontology_term_ids,
+                ontology_owl_path=owl.name,
+                root_ontology_term_id=self.ROOT_NODE,
+            )
 
     def _get_branch_ancestors(self, owl_entity):
         branch_ancestors = []

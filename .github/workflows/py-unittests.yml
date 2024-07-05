@@ -44,6 +44,9 @@ jobs:
           pip install --use-pep517 accumulation-tree # Geneformer dependency needs --use-pep517 for Cython
           GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -e './api/python/cellxgene_census/[experimental]'
+      - name: Install Geneformer (python >=3.10 only)
+        run: pip install git+https://huggingface.co/ctheodoris/Geneformer@471eefc
+        if: matrix.python-version != '3.8' && matrix.python-version != '3.9'
       - name: Report Dependency Versions
         run: pip list
       - name: Test with pytest (API, main tests)
