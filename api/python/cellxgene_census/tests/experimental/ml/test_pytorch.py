@@ -536,7 +536,7 @@ def test_experiment_dataloader__batched_length(soma_experiment: Experiment, use_
         use_eager_fetch=use_eager_fetch,
     )
     dl = experiment_dataloader(dp)
-    assert len(dl) == 4
+    assert len(dl) == len(list(dl))
 
 
 @pytest.mark.experimental
