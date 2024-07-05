@@ -1,3 +1,4 @@
+import sys
 import datasets
 import pytest
 import tiledbsoma
@@ -88,6 +89,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:

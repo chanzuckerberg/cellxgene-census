@@ -5,5 +5,4 @@ twine
 coverage
 nbqa
 transformers[torch]
-git+https://huggingface.co/ctheodoris/Geneformer@471eefc
 owlready2
