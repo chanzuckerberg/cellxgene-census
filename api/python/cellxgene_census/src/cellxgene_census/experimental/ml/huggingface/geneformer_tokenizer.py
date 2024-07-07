@@ -55,7 +55,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     model_gene_tokens: npt.NDArray[np.int64]  # Geneformer token for each column of model_gene_map
     model_gene_medians: npt.NDArray[np.float64]  # float for each column of model_gene_map
     model_cls_token: Optional[np.int64] = None
-    model_sep_token: Optional[np.int64] = None
+    model_eos_token: Optional[np.int64] = None
 
     def __init__(
         self,
@@ -187,7 +187,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
 
         if self.special_token:
             self.model_cls_token = gene_token_dict["<cls>"]
-            self.model_sep_token = gene_token_dict["<sep>"]
+            self.model_eos_token = gene_token_dict["<eos>"]
 
     def __enter__(self) -> "GeneformerTokenizer":
         super().__enter__()
@@ -222,8 +222,8 @@ class GeneformerTokenizer(CellDatasetBuilder):
             input_ids = np.insert(input_ids, 0, self.model_cls_token)
             if len(input_ids) == self.max_input_tokens:
                 input_ids = input_ids[:-1]
-            assert self.model_sep_token is not None
-            input_ids = np.append(input_ids, self.model_sep_token)
+            assert self.model_eos_token is not None
+            input_ids = np.append(input_ids, self.model_eos_token)
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
         # add the requested obs attributes
