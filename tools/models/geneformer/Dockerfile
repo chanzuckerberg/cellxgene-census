@@ -21,7 +21,7 @@ RUN pip uninstall -y transformer-engine
 # compatibility with the Census embeddings curator
 ARG EMBEDDINGS_TILEDBSOMA_VERSION=1.9.5
 ARG CELLXGENE_CENSUS_VERSION=main
-ARG GENEFORMER_VERSION=471eefc
+ARG GENEFORMER_VERSION=eb038a6
 
 RUN mkdir /census-geneformer
 WORKDIR /census-geneformer
