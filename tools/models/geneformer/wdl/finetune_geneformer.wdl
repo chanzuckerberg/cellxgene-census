@@ -32,6 +32,8 @@ task finetune_geneformer {
         cpu: 48
         memory: "160G"
         gpu: true
+        acceleratorType: "nvidia-tesla-a10g"
+        acceleratorCount: 8
         docker: docker
     }
 }
