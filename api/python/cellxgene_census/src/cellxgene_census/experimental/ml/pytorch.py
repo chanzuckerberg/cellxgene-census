@@ -110,12 +110,10 @@ def _tables_to_np(
     tables: Iterator[Tuple[Table, Any]], shape: Tuple[int, int]
 ) -> typing.Generator[Tuple[npt.NDArray[Any], Any, int], None, None]:
     for tbl, indices in tables:
-        row_indices_np = np.array(tbl.columns[0])
-        col_indices_np = np.array(tbl.columns[1])
-        data_np = np.array(tbl.columns[2])
-        nnz = len(data_np)
-        dense_matrix = np.zeros(shape, dtype=data_np.dtype)
-        dense_matrix[row_indices_np, col_indices_np] = data_np
+        row_indices, col_indices, data = (x.to_numpy() for x in tbl.columns)
+        nnz = len(data)
+        dense_matrix = np.zeros(shape, dtype=data.dtype)
+        dense_matrix[row_indices, col_indices] = data
         yield dense_matrix, indices, nnz
 
 
