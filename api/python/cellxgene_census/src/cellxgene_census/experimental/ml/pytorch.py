@@ -38,7 +38,7 @@ The Tensors are rank 1 if ``batch_size`` is 1, otherwise the Tensors are rank 2.
 
 
 # "Chunk" of X data, returned by each `Method` above
-ChunkX = Union[npt.NDArray[Any], sparse.csr_matrix]
+ChunkX = Union[npt.NDArray[np.number[Any]], sparse.csr_matrix]
 
 
 @define
