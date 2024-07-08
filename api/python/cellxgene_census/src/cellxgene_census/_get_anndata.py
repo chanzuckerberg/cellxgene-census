@@ -7,7 +7,8 @@
 Methods to retrieve slices of the census as AnnData objects.
 """
 
-from typing import Literal, Optional, Sequence
+from collections.abc import Sequence
+from typing import Literal
 from warnings import warn
 
 import anndata
@@ -27,20 +28,20 @@ def get_anndata(
     organism: str,
     measurement_name: str = "RNA",
     X_name: str = "raw",
-    X_layers: Optional[Sequence[str]] = (),
-    obsm_layers: Optional[Sequence[str]] = (),
-    obsp_layers: Optional[Sequence[str]] = (),
-    varm_layers: Optional[Sequence[str]] = (),
-    varp_layers: Optional[Sequence[str]] = (),
-    obs_value_filter: Optional[str] = None,
-    obs_coords: Optional[SparseDFCoord] = None,
-    var_value_filter: Optional[str] = None,
-    var_coords: Optional[SparseDFCoord] = None,
-    column_names: Optional[soma.AxisColumnNames] = None,
-    obs_embeddings: Optional[Sequence[str]] = (),
-    var_embeddings: Optional[Sequence[str]] = (),
-    obs_column_names: Optional[Sequence[str]] = None,
-    var_column_names: Optional[Sequence[str]] = None,
+    X_layers: Sequence[str] | None = (),
+    obsm_layers: Sequence[str] | None = (),
+    obsp_layers: Sequence[str] | None = (),
+    varm_layers: Sequence[str] | None = (),
+    varp_layers: Sequence[str] | None = (),
+    obs_value_filter: str | None = None,
+    obs_coords: SparseDFCoord | None = None,
+    var_value_filter: str | None = None,
+    var_coords: SparseDFCoord | None = None,
+    column_names: soma.AxisColumnNames | None = None,
+    obs_embeddings: Sequence[str] | None = (),
+    var_embeddings: Sequence[str] | None = (),
+    obs_column_names: Sequence[str] | None = None,
+    var_column_names: Sequence[str] | None = None,
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
@@ -176,9 +177,9 @@ def _get_axis_metadata(
     axis: Literal["obs", "var"],
     organism: str,
     *,
-    value_filter: Optional[str] = None,
-    coords: Optional[SparseDFCoord] = slice(None),
-    column_names: Optional[Sequence[str]] = None,
+    value_filter: str | None = None,
+    coords: SparseDFCoord | None = slice(None),
+    column_names: Sequence[str] | None = None,
 ) -> pd.DataFrame:
     exp = _get_experiment(census, organism)
     coords = (slice(None),) if coords is None else (coords,)
@@ -198,9 +199,9 @@ def get_obs(
     census: soma.Collection,
     organism: str,
     *,
-    value_filter: Optional[str] = None,
-    coords: Optional[SparseDFCoord] = slice(None),
-    column_names: Optional[Sequence[str]] = None,
+    value_filter: str | None = None,
+    coords: SparseDFCoord | None = slice(None),
+    column_names: Sequence[str] | None = None,
 ) -> pd.DataFrame:
     """Get the observation metadata for a query on the census.
 
@@ -230,9 +231,9 @@ def get_var(
     census: soma.Collection,
     organism: str,
     *,
-    value_filter: Optional[str] = None,
-    coords: Optional[SparseDFCoord] = slice(None),
-    column_names: Optional[Sequence[str]] = None,
+    value_filter: str | None = None,
+    coords: SparseDFCoord | None = slice(None),
+    column_names: Sequence[str] | None = None,
 ) -> pd.DataFrame:
     """Get the variable metadata for a query on the census.
 

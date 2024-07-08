@@ -1,6 +1,5 @@
 import abc
 import functools
-from typing import List
 
 import numpy.typing as npt
 import pandas as pd
@@ -47,7 +46,7 @@ class Encoder(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def columns(self) -> List[str]:
+    def columns(self) -> list[str]:
         """Columns in ``obs`` that the encoder will be applied to."""
         pass
 
@@ -77,7 +76,7 @@ class LabelEncoder(Encoder):
         return self.col
 
     @property
-    def columns(self) -> List[str]:
+    def columns(self) -> list[str]:
         """Columns in ``obs`` that the encoder will be applied to."""
         return [self.col]
 
@@ -90,7 +89,7 @@ class LabelEncoder(Encoder):
 class BatchEncoder(Encoder):
     """An encoder that concatenates and encodes several ``obs`` columns."""
 
-    def __init__(self, cols: List[str], name: str = "batch"):
+    def __init__(self, cols: list[str], name: str = "batch"):
         self.cols = cols
         from sklearn.preprocessing import LabelEncoder
 
@@ -115,7 +114,7 @@ class BatchEncoder(Encoder):
         self._encoder.fit(arr.unique())
 
     @property
-    def columns(self) -> List[str]:
+    def columns(self) -> list[str]:
         """Columns in ``obs`` that the encoder will be applied to."""
         return self.cols
 
