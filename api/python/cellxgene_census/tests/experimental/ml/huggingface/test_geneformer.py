@@ -1,3 +1,5 @@
+import sys
+
 import datasets
 import pytest
 import tiledbsoma
@@ -67,7 +69,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         ad.write_h5ad(h5ad_dir.join("tokenizeme.h5ad"))
         # run geneformer.TranscriptomeTokenizer to get "true" tokenizations
         # see: https://huggingface.co/ctheodoris/Geneformer/blob/main/geneformer/tokenizer.py
-        TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, tmpdir, "tk", file_format="h5ad")
+        TranscriptomeTokenizer({}).tokenize_data(h5ad_dir, str(tmpdir), "tk", file_format="h5ad")
         true_tokens = [it["input_ids"] for it in datasets.load_from_disk(tmpdir.join("tk.dataset"))]
 
         # check GeneformerTokenizer sequences against geneformer.TranscriptomeTokenizer's
@@ -88,6 +90,7 @@ def test_GeneformerTokenizer_correctness(tmpdir: Path) -> None:
         assert identical / len(cell_ids) >= EXACT_THRESHOLD
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.experimental
 @pytest.mark.live_corpus
 def test_GeneformerTokenizer_docstring_example() -> None:

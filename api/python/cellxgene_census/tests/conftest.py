@@ -1,7 +1,12 @@
+import multiprocessing
+
 import pytest
 import tiledbsoma as soma
 
 TEST_MARKERS_SKIPPED_BY_DEFAULT = ["expensive", "experimental"]
+
+# tiledb will complain if this isn't set and a process is spawned. May cause segfaults on the proxy test if this isn't set.
+multiprocessing.set_start_method("spawn", force=True)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -51,9 +56,6 @@ def small_mem_context() -> soma.SOMATileDBContext:
     return get_default_soma_context(tiledb_config={"soma.init_buffer_bytes": 32 * 1024**2})
 
 
-# Fixtures for census objects
-
-
 @pytest.fixture(scope="session")
 def census() -> soma.Collection:
     import cellxgene_census
@@ -65,4 +67,4 @@ def census() -> soma.Collection:
 def lts_census() -> soma.Collection:
     import cellxgene_census
 
-    return cellxgene_census.open_soma(census_version="stable")
+    return cellxgene_census.open_soma(census_version="2023-12-15")

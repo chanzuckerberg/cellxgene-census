@@ -1,5 +1,5 @@
 import pickle
-from typing import Any, Dict, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Sequence, Set
 
 import numpy as np
 import numpy.typing as npt
@@ -14,7 +14,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
     cell in CELLxGENE Census ExperimentAxisQuery results (human).
 
     This class requires the Geneformer package to be installed separately with:
-    `pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1`
+    `pip install git+https://huggingface.co/ctheodoris/Geneformer@471eefc`
 
     Example usage:
 
@@ -44,11 +44,18 @@ class GeneformerTokenizer(CellDatasetBuilder):
 
     obs_column_names: Set[str]
     max_input_tokens: int
+    special_token: bool
 
-    # set of gene soma_joinids corresponding to genes modeled by Geneformer:
-    model_gene_ids: npt.NDArray[np.int64]
-    model_gene_tokens: npt.NDArray[np.int64]  # token for each model_gene_id
-    model_gene_medians: npt.NDArray[np.float64]  # float for each model_gene_id
+    # Newer versions of Geneformer has a consolidated gene list (gene_mapping_file), meaning the
+    # counts for one or more Census genes are to be summed to get the count for one Geneformer
+    # gene. model_gene_map is a sparse binary matrix to map a cell vector (or multi-cell matrix) of
+    # Census gene counts onto Geneformer gene counts. model_gene_map[i,j] is 1 iff the i'th Census
+    # gene count contributes to the j'th Geneformer gene count.
+    model_gene_map: scipy.sparse.coo_matrix
+    model_gene_tokens: npt.NDArray[np.int64]  # Geneformer token for each column of model_gene_map
+    model_gene_medians: npt.NDArray[np.float64]  # float for each column of model_gene_map
+    model_cls_token: Optional[np.int64] = None
+    model_sep_token: Optional[np.int64] = None
 
     def __init__(
         self,
@@ -57,25 +64,33 @@ class GeneformerTokenizer(CellDatasetBuilder):
         obs_column_names: Optional[Sequence[str]] = None,
         obs_attributes: Optional[Sequence[str]] = None,
         max_input_tokens: int = 2048,
+        special_token: bool = False,
         token_dictionary_file: str = "",
         gene_median_file: str = "",
+        gene_mapping_file: str = "",
         **kwargs: Any,
     ) -> None:
-        """- `experiment`: Census Experiment to query
+        """Initialize GeneformerTokenizer.
+
+        Args:
+        - `experiment`: Census Experiment to query
         - `obs_query`: obs AxisQuery defining the set of Census cells to process (default all)
         - `obs_column_names`: obs dataframe columns (cell metadata) to propagate into attributes
            of each Dataset item
         - `max_input_tokens`: maximum length of Geneformer input token sequence (default 2048)
+        - `special_token`: whether to affix separator tokens to the sequence (default False)
         - `token_dictionary_file`, `gene_median_file`: pickle files supplying the mapping of
           Ensembl human gene IDs onto Geneformer token numbers and median expression values.
           By default, these will be loaded from the Geneformer package.
+        - `gene_mapping_file`: optional pickle file with mapping for Census gene IDs to model's
         """
         if obs_attributes:  # old name of obs_column_names
             obs_column_names = obs_attributes
 
         self.max_input_tokens = max_input_tokens
+        self.special_token = special_token
         self.obs_column_names = set(obs_column_names) if obs_column_names else set()
-        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file)
+        self._load_geneformer_data(experiment, token_dictionary_file, gene_median_file, gene_mapping_file)
         super().__init__(
             experiment,
             measurement_name="RNA",
@@ -88,6 +103,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
         experiment: tiledbsoma.Experiment,
         token_dictionary_file: str,
         gene_median_file: str,
+        gene_mapping_file: str,
     ) -> None:
         """Load (1) the experiment's genes dataframe and (2) Geneformer's static data
         files for gene tokens and median expression; then, intersect them to compute
@@ -95,7 +111,13 @@ class GeneformerTokenizer(CellDatasetBuilder):
         """
         # TODO: this work could be reused for all queries on this experiment
 
-        genes_df = experiment.ms["RNA"].var.read(column_names=["soma_joinid", "feature_id"]).concat().to_pandas()
+        genes_df = (
+            experiment.ms["RNA"]
+            .var.read(column_names=["soma_joinid", "feature_id"])
+            .concat()
+            .to_pandas()
+            .set_index("soma_joinid")
+        )
 
         if not (token_dictionary_file and gene_median_file):
             try:
@@ -104,7 +126,7 @@ class GeneformerTokenizer(CellDatasetBuilder):
                 # pyproject.toml can't express Geneformer git+https dependency
                 raise ImportError(
                     "Please install Geneformer with: "
-                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@8df5dc1"
+                    "pip install git+https://huggingface.co/ctheodoris/Geneformer@471eefc"
                 ) from None
             if not token_dictionary_file:
                 token_dictionary_file = geneformer.tokenizer.TOKEN_DICTIONARY_FILE
@@ -115,33 +137,57 @@ class GeneformerTokenizer(CellDatasetBuilder):
         with open(gene_median_file, "rb") as f:
             gene_median_dict = pickle.load(f)
 
+        gene_mapping = None
+        if gene_mapping_file:
+            with open(gene_mapping_file, "rb") as f:
+                gene_mapping = pickle.load(f)
+
         # compute model_gene_{ids,tokens,medians} by joining genes_df with Geneformer's
         # dicts
-        model_gene_ids = []
-        model_gene_tokens = []
-        model_gene_medians = []
+        map_data = []
+        map_i = []
+        map_j = []
+        model_gene_id_by_ensg: Dict[str, int] = {}
+        model_gene_count = 0
+        model_gene_tokens: List[np.int64] = []
+        model_gene_medians: List[np.float64] = []
         for gene_id, row in genes_df.iterrows():
             ensg = row["feature_id"]  # ENSG... gene id, which keys Geneformer's dicts
+            if gene_mapping is not None:
+                ensg = gene_mapping.get(ensg, ensg)
             if ensg in gene_token_dict:
-                model_gene_ids.append(gene_id)
-                model_gene_tokens.append(gene_token_dict[ensg])
-                model_gene_medians.append(gene_median_dict[ensg])
-        self.model_gene_ids = np.array(model_gene_ids, dtype=np.int64)
+                if ensg not in model_gene_id_by_ensg:
+                    model_gene_id_by_ensg[ensg] = model_gene_count
+                    model_gene_count += 1
+                    model_gene_tokens.append(gene_token_dict[ensg])
+                    model_gene_medians.append(gene_median_dict[ensg])
+                map_data.append(1)
+                map_i.append(gene_id)
+                map_j.append(model_gene_id_by_ensg[ensg])
+
+        self.model_gene_map = scipy.sparse.coo_matrix(
+            (map_data, (map_i, map_j)), shape=(genes_df.index.max() + 1, model_gene_count), dtype=bool
+        )
         self.model_gene_tokens = np.array(model_gene_tokens, dtype=np.int64)
         self.model_gene_medians = np.array(model_gene_medians, dtype=np.float64)
 
-        assert len(np.unique(self.model_gene_ids)) == len(self.model_gene_ids)
         assert len(np.unique(self.model_gene_tokens)) == len(self.model_gene_tokens)
         assert np.all(self.model_gene_medians > 0)
         # Geneformer models protein-coding and miRNA genes, so the intersection should
-        # be somewhere a little north of 20K.
-        assert len(self.model_gene_ids) > 20_000
+        # be north of 18K.
+        assert (
+            model_gene_count > 18_000
+        ), f"Mismatch between Census gene IDs and Geneformer token dicts (only {model_gene_count} common genes)"
 
         # Precompute a vector by which we'll multiply each cell's expression vector.
         # The denominator normalizes by Geneformer's median expression values.
         # The numerator 10K factor follows Geneformer's tokenizer; theoretically it doesn't affect
         # affect the rank order, but is probably intended to help with numerical precision.
         self.model_gene_medians_factor = 10_000.0 / self.model_gene_medians
+
+        if self.special_token:
+            self.model_cls_token = gene_token_dict["<cls>"]
+            self.model_sep_token = gene_token_dict["<sep>"]
 
     def __enter__(self) -> "GeneformerTokenizer":
         super().__enter__()
@@ -156,20 +202,28 @@ class GeneformerTokenizer(CellDatasetBuilder):
         """Given the expression vector for one cell, compute the Dataset item providing
         the Geneformer inputs (token sequence and metadata).
         """
-        # project cell_Xrow onto model_gene_ids and normalize by row sum.
-        # notice we divide by the total count of the complete row (not only of the projected
+        # Apply model_gene_map to cell_Xrow and normalize with row sum & gene medians.
+        # Notice we divide by the total count of the complete row (not only of the projected
         # values); this follows Geneformer's internal tokenizer.
-        model_counts = cell_Xrow[:, self.model_gene_ids].multiply(1.0 / cell_Xrow.sum())
-        assert isinstance(model_counts, scipy.sparse.csr_matrix), type(model_counts)
-        # assert len(model_counts.data) == np.count_nonzero(model_counts.data)
-        model_expr = model_counts.multiply(self.model_gene_medians_factor)
+        model_expr = (cell_Xrow * self.model_gene_map).multiply(self.model_gene_medians_factor / cell_Xrow.sum())
         assert isinstance(model_expr, scipy.sparse.coo_matrix), type(model_expr)
-        # assert len(model_expr.data) == np.count_nonzero(model_expr.data)
+        assert model_expr.shape == (1, self.model_gene_map.shape[1])
 
         # figure the resulting tokens in descending order of model_expr
         # (use sparse model_expr.{col,data} to naturally exclude undetected genes)
         token_order = model_expr.col[np.argsort(-model_expr.data)[: self.max_input_tokens]]
         input_ids = self.model_gene_tokens[token_order]
+
+        if self.special_token:
+            # affix special tokens, dropping the last two gene tokens if necessary
+            if len(input_ids) == self.max_input_tokens:
+                input_ids = input_ids[:-1]
+            assert self.model_cls_token is not None
+            input_ids = np.insert(input_ids, 0, self.model_cls_token)
+            if len(input_ids) == self.max_input_tokens:
+                input_ids = input_ids[:-1]
+            assert self.model_sep_token is not None
+            input_ids = np.append(input_ids, self.model_sep_token)
 
         ans = {"input_ids": input_ids, "length": len(input_ids)}
         # add the requested obs attributes

@@ -1,6 +1,9 @@
+from functools import partial
+
 import pytest
 import requests_mock as rm
 
+import cellxgene_census
 from cellxgene_census.experimental import (
     get_all_available_embeddings,
     get_all_census_versions_with_embedding,
@@ -74,6 +77,32 @@ def test_get_embedding_metadata_by_name(requests_mock: rm.Mocker) -> None:
         )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="Current stable release doesn't have embeddings available. This xfail should be removed once that's resolved.",
+)
+def test_get_embedding_by_name_w_version_aliases() -> None:
+    """https://github.com/chanzuckerberg/cellxgene-census/issues/1202"""
+    # Only testing "stable" as "latest" doesn't have embeddings
+    version = "stable"
+    resolved_version = cellxgene_census.get_census_version_description(version)["release_build"]
+
+    metadata = get_all_available_embeddings(version)[0]
+
+    _get_metadata = partial(
+        get_embedding_metadata_by_name,
+        embedding_name=metadata["embedding_name"],
+        organism=metadata["experiment_name"],
+        embedding_type=metadata["data_type"],
+    )
+
+    w_alias = _get_metadata(census_version=version)
+    w_resolved = _get_metadata(census_version=resolved_version)
+
+    assert w_resolved == w_alias
+    assert metadata == w_alias
+
+
 def test_get_all_available_embeddings(requests_mock: rm.Mocker) -> None:
     mock_embeddings = {
         "embedding-id-1": {
@@ -108,8 +137,8 @@ def test_get_all_available_embeddings(requests_mock: rm.Mocker) -> None:
     assert embeddings is not None
     assert len(embeddings) == 2
 
-    # Query for a non existing version of the Census
-    embeddings = get_all_available_embeddings("2024-12-15")
+    # Query for a version of the census that doesn't have embeddings
+    embeddings = get_all_available_embeddings("2023-05-15")
     assert len(embeddings) == 0
 
 
@@ -175,3 +204,18 @@ def test_get_all_census_versions_with_embedding(requests_mock: rm.Mocker) -> Non
 
     versions = get_all_census_versions_with_embedding("emb_2", organism="mus_musculus", embedding_type="var_embedding")
     assert versions == ["2023-12-15"]
+
+
+@pytest.mark.parametrize("version", ["stable", "latest"])
+def test_get_all_available_embeddings_w_version_aliases(version: str) -> None:
+    """https://github.com/chanzuckerberg/cellxgene-census/issues/1202"""
+    resolved_version = cellxgene_census.get_census_version_description(version)["release_build"]
+
+    assert get_all_available_embeddings(version) == get_all_available_embeddings(resolved_version)
+
+
+def test_get_all_available_embeddings_non_existing_version() -> None:
+    false_version = "not a real version"
+
+    with pytest.raises(ValueError, match=f"Unable to locate Census version: {false_version}"):
+        get_all_available_embeddings(false_version)

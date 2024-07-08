@@ -50,6 +50,7 @@ intersphinx_mapping = {
     'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
     'torchdata': ('https://pytorch.org/data/beta/', None),
+    'sklearn': ('http://scikit-learn.org/stable', None),
 }
 
 templates_path = ['_templates']
