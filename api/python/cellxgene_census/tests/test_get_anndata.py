@@ -8,16 +8,6 @@ import tiledbsoma as soma
 import cellxgene_census
 
 
-@pytest.fixture(scope="session")
-def census() -> soma.Collection:
-    return cellxgene_census.open_soma(census_version="latest")
-
-
-@pytest.fixture(scope="session")
-def lts_census() -> soma.Collection:
-    return cellxgene_census.open_soma(census_version="stable")
-
-
 @pytest.mark.live_corpus
 def test_get_anndata_value_filter(census: soma.Collection) -> None:
     ad = cellxgene_census.get_anndata(
