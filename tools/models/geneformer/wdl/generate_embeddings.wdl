@@ -10,6 +10,7 @@ workflow scatter_generate_embeddings {
         Int? emb_layer
         File? token_dictionary
         String? features
+        Int? batch_size
 
         String s3_region = "us-west-2"
         String docker
@@ -30,7 +31,7 @@ workflow scatter_generate_embeddings {
         call generate_embeddings after init_embeddings_array {
             input:
             dataset = shard, output_uri = output_uri2,
-            model, model_type, emb_mode, emb_layer, token_dictionary, features,
+            model, model_type, emb_mode, emb_layer, token_dictionary, features, batch_size,
             s3_region, docker
         }
     }
@@ -86,6 +87,7 @@ task generate_embeddings {
         Int emb_layer = -1  # -1 or 0
         File? token_dictionary
         String features = "soma_joinid,cell_type,cell_type_ontology_term_id,cell_subclass,cell_subclass_ontology_term_id"
+        Int batch_size = 10
 
         String docker
     }
@@ -101,7 +103,7 @@ task generate_embeddings {
         export TQDM_MININTERVAL=10
         python3 /census-geneformer/generate-geneformer-embeddings.py \
             --model-type ~{model_type} --emb-mode ~{emb_mode} --emb-layer ~{emb_layer} ~{"--token-dictionary " + token_dictionary} \
-            --features '~{features}' --batch-size 10 --tiledbsoma \
+            --features '~{features}' --batch-size ~{batch_size} --tiledbsoma \
             '~{model}' '~{dataset}' '~{output_uri}'
     >>>
 
