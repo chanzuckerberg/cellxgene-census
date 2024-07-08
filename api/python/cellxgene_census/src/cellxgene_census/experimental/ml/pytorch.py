@@ -195,17 +195,14 @@ class _ObsAndXSOMAIterator(Iterator[_SOMAChunk]):
             axis=0, size=len(obs_joinids_chunk), eager=False
         )
 
+        X_batch: ChunkX
         if not self.return_sparse_X:
-            batch_iter = _tables_to_np(blockwise_iter.tables(), shape=(obs_batch.shape[0], len(self.var_joinids)))
+            res = next(_tables_to_np(blockwise_iter.tables(), shape=(obs_batch.shape[0], len(self.var_joinids))))
+            X_batch, nnz = res[0], res[2]
         else:
-            batch_iter = blockwise_iter.scipy(compress=True)
-
-        res = next(batch_iter)
-        X_batch: ChunkX = res[0]
-        if isinstance(X_batch, np.ndarray):
-            nnz = res[2]
-        else:
+            X_batch = next(blockwise_iter.scipy(compress=True))[0]
             nnz = X_batch.nnz
+
         assert obs_batch.shape[0] == X_batch.shape[0]
 
         end_time = time()
