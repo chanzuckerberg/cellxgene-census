@@ -1,3 +1,6 @@
+# ruff: noqa
+# type: ignore
+
 import datetime
 import functools
 import itertools
