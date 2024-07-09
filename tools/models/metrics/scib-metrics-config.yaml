@@ -15,5 +15,4 @@ metrics:
   bio: 
     ["leiden_nmi", "leiden_ari", "silhouette_label", "classifier"]
   batch: 
-    ["silhouette_batch", "ilisi_knn_batch", "classifier"]
-
+    ["silhouette_batch", "ilisi_knn_batch", "classifier", "entropy"]

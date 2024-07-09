@@ -1,3 +1,6 @@
+# ruff: noqa
+# type: ignore
+
 """
 Provides classes to recreate cell type and tissue mappings as used in CELLxGENE Discover
 
