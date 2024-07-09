@@ -58,6 +58,9 @@ class OntologyMapper(ABC):
         Returns the associated high-level ontology term IDs from any other ID
         """
 
+        if ontology_term_id == "unknown":
+            return ["unknown"]
+
         ontology_term_id = self.reformat_ontology_term_id(ontology_term_id, to_writable=False)
 
         if ontology_term_id in self._cached_high_level_terms:
@@ -116,6 +119,9 @@ class OntologyMapper(ABC):
         Example: "UBERON:0002048" returns "lung"
         Example: "UBERON_0002048" raises ValueError because the ID is not in writable form
         """
+
+        if ontology_term_id == "unknown":
+            return "unknown"
 
         if ontology_term_id in self._cached_labels:
             return self._cached_labels[ontology_term_id]
@@ -203,8 +209,8 @@ class OntologyMapper(ABC):
 
 
 class CellMapper(OntologyMapper):
-    # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
-    CXG_CL_ONTOLOGY_URL = "https://github.com/obophenotype/cell-ontology/releases/download/v2023-07-20/cl.owl"
+    # From schema 5.0.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md
+    CXG_CL_ONTOLOGY_URL = "https://github.com/obophenotype/cell-ontology/releases/download/v2024-01-04/cl.owl"
     # Only look up ancestors under Cell
     ROOT_NODE = "CL_0000000"
 
@@ -238,8 +244,8 @@ class CellMapper(OntologyMapper):
 
 
 class TissueMapper(OntologyMapper):
-    # From schema 3.1.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.1.0/schema.md
-    CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2023-06-28/uberon.owl"
+    # From schema 5.0.0 https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md
+    CXG_UBERON_ONTOLOGY_URL = "https://github.com/obophenotype/uberon/releases/download/v2024-01-18/uberon.owl"
 
     # Only look up ancestors under anatomical entity
     ROOT_NODE = "UBERON_0001062"
