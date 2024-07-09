@@ -199,6 +199,7 @@ if __name__ == "__main__":
                     ad.obsm[key] = emb[idx]
                 except Exception:
                     from scipy.sparse import vstack
+
                     # Assume it's a TileDBSoma URI
                     all_embs = []
                     with soma.open(val["uri"]) as E:
