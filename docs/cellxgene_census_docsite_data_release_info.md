@@ -62,6 +62,54 @@ census <- open_soma(census_version = "latest")
 
 ## List of LTS Census data releases
 
+### LTS 2024-07-01
+
+Open this data release by specifying `census_version = "2024-07-01"` in future calls to `open_soma()`.
+
+#### Version information
+
+| Information                       | Value      |
+|-----------------------------------|------------|
+| Census schema version             | [2.0.1](https://github.com/chanzuckerberg/cellxgene-census/blob/fad674674e5070b735a29bc069d1d3dc21d2e5e8/docs/cellxgene_census_schema.md) |
+| Census build date                 | 2024-05-20 |
+| Dataset schema version            | [5.0.0](https://github.com/chanzuckerberg/cellxgene-census/blob/fad674674e5070b735a29bc069d1d3dc21d2e5e8/docs/cellxgene_census_schema.md)      |
+| Number of datasets                | 812        |
+
+#### Cell and donor counts
+
+| Type              | _Homo sapiens_ | _Mus musculus_ |
+|-------------------|----------------|----------------|
+| Total cells       | 74,322,510     | 41,233,630     |
+| Unique cells      | 44,265,932     | 16,332,034     |
+| Number of donors  | 17,651         | 4,216          |
+
+#### Cell metadata
+
+| Category                | _Homo sapiens_ | _Mus musculus_ |
+|-------------------------|----------------|----------------|
+| Assay                   | 24             | 11             |
+| Cell type               | 698            | 364            |
+| Development stage       | 176            | 48             |
+| Disease                 | 109            | 7              |
+| Self-reported ethnicity | 31             | _NA_           |
+| Sex                     | 3              | 3              |
+| Suspension type         | 2              | 2              |
+| Tissue                  | 267            | 84             |
+| Tissue general          | 55             | 29             |
+
+#### Embbedings
+
+Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
+
+Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding), or by specifying the `obs_embeddings`/`var_embeddings` field in [`cellxgene_census.get_anndata()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata).
+
+##### Cells
+
+| Method                    | _Homo sapiens_ | _Mus musculus_ |
+|---------------------------|----------------|----------------|
+| scVI                      | `scvi`         | `scvi`         |
+| Geneformer                | `geneformer`   | _NA_           |
+
 ### LTS 2023-12-15
 
 Open this data release by specifying `census_version = "2023-12-15"` in future calls to `open_soma()`.
@@ -97,16 +145,27 @@ Open this data release by specifying `census_version = "2023-12-15"` in future c
 | Tissue                  | 230            | 74             |
 | Tissue general          | 53             | 27             |
 
-#### Cell embbedings
+#### Embbedings
 
 Find out more in the [Census model page](https://cellxgene.cziscience.com/census-models).
 
-Available `obsm` slots:
+Available embeddings can be accessed via [`cellxgene_census.experimental.get_embedding()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.get_embedding.html#cellxgene_census.experimental.get_embedding), or by specifying the `obs_embeddings`/`var_embeddings` field in [`cellxgene_census.get_anndata()`](https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.get_anndata.html#cellxgene_census.get_anndata).
 
-| Method                  | _Homo sapiens_ | _Mus musculus_ |
-|-------------------------|----------------|----------------|
-| scVI                    | `scvi`         | `scvi`         |
-| Fine-tuned Geneformer   | `geneformer`   | _NA_           |
+##### Cells
+
+| Method                    | _Homo sapiens_ | _Mus musculus_ |
+|---------------------------|----------------|----------------|
+| scVI                      | `scvi`         | `scvi`         |
+| Fine-tuned Geneformer     | `geneformer`   | _NA_           |
+| scGPT                     | `scgpt`        | _NA_           |
+| Universal Cell Embeddings | `uce`          | _NA_           |
+| NMF                       | `nmf`          | _NA_           |
+
+##### Features
+
+| Method                    | _Homo sapiens_ | _Mus musculus_ |
+|---------------------------|----------------|----------------|
+| NMF                       | `nmf`          | _NA_           |
 
 ### LTS 2023-07-25
 
