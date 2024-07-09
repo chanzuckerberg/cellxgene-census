@@ -44,8 +44,8 @@ BiocManager::install("SingleCellExperiment")
 
 Check out the vignettes in the "Articles" section of the navigation bar on this site. We highly recommend the following vignettes as a starting point:
 
-* [Querying and fetching the single-cell data and cell/gene metadata](./articles/census_query_extract.html)
-* [Learning about the CZ CELLxGENE Discover Census](./articles/comp_bio_census_info.html)
+* [Querying and fetching the single-cell data and cell/gene metadata](https://chanzuckerberg.github.io/cellxgene-census/r/articles/census_query_extract.html)
+* [Learning about the CZ CELLxGENE Discover Census](https://chanzuckerberg.github.io/cellxgene-census/r/articles/comp_bio_census_info.html)
 
 You can also check out out the [quick start guide](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_quick_start.html) in the main Census site.
 
