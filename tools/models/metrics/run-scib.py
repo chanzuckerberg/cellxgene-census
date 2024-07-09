@@ -83,15 +83,10 @@ def nearest_neighbors_hnsw(x, ef=200, M=48, n_neighbors=100):
     return idx, dist
 
 
-def compute_entropy_per_cell(adata, obsm_key):
-    batch_keys = ["dataset_id", "assay", "suspension_type"]
-    adata.obs["batch"] = functools.reduce(lambda a, b: a + b, [adata.obs[c].astype(str) for c in batch_keys])
-
+def compute_entropy_per_cell(adata, obsm_key, batch_key):
     indices, dist = nearest_neighbors_hnsw(adata.obsm[obsm_key], n_neighbors=200)
 
-    BATCH_KEY = "batch"
-
-    batch_labels = np.array(list(adata.obs[BATCH_KEY]))
+    batch_labels = np.array(list(adata.obs[batch_key]))
     unique_batch_labels = np.unique(batch_labels)
 
     indices_batch = batch_labels[indices]
@@ -402,7 +397,7 @@ if __name__ == "__main__":
             if "entropy" in batch_metrics:
                 print(datetime.datetime.now(), "Calculating entropy")
 
-                entropy = compute_entropy_per_cell(adata_metrics, emb)
+                entropy = compute_entropy_per_cell(adata_metrics, emb, batch_label)
                 e_mean = entropy.mean()
                 metric_batch_results["entropy"].append(e_mean)
 
