@@ -67,4 +67,4 @@ def census() -> soma.Collection:
 def lts_census() -> soma.Collection:
     import cellxgene_census
 
-    return cellxgene_census.open_soma(census_version="2023-12-15")
+    return cellxgene_census.open_soma(census_version="stable")

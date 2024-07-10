@@ -77,10 +77,6 @@ def test_get_embedding_metadata_by_name(requests_mock: rm.Mocker) -> None:
         )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Current stable release doesn't have embeddings available. This xfail should be removed once that's resolved.",
-)
 def test_get_embedding_by_name_w_version_aliases() -> None:
     """https://github.com/chanzuckerberg/cellxgene-census/issues/1202"""
     # Only testing "stable" as "latest" doesn't have embeddings
