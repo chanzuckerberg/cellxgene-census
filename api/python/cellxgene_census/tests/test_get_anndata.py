@@ -195,7 +195,7 @@ def test_get_anndata_obs_embeddings(lts_census: soma.Collection, obs_embeddings:
         obs_embeddings=obs_embeddings,
     )
 
-    assert len(ad.obsm.keys()) == 3
+    assert len(ad.obsm.keys()) == 2
     assert len(ad.varm.keys()) == 0
     for obsm_layer in obs_embeddings:
         assert obsm_layer in ad.obsm.keys()
