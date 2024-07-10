@@ -175,7 +175,8 @@ The batch-correction metrics were run the in following batch labels in a Census 
 :align: center
 :figwidth: 90%
 
-**Figure 3. Batch-correction metrics on the embedding space.** Higher values signify better performance, max value for `silhouette_batch` is 1, `entropy` values should only be compared within the tissue/label combination and not across. ```
+**Figure 3. Batch-correction metrics on the embedding space.** Higher values signify better performance, max value for `silhouette_batch` is 1, `entropy` values should only be compared within the tissue/label combination and not across. 
+```
 
 ```{figure} ./20240710_metrics_4_batch_classifier.png
 :alt: Batch-correction single-cell Census benchmark
