@@ -4,9 +4,9 @@
 
 *By:* *[Emanuele Bezzi](mailto:ebezzi@chanzuckerberg.com), [Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)*
 
-In 2023, the census team released a series of cells embeddings (available at the [Census Model page](https://cellxgene.cziscience.com/census-models)) compatible with the [Census LTS version `census_version="2023-12-01"`](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_data_release_info.html#lts-2023-12-15), so that users can access and download for any slice of Census data.
+In 2023, the Census team released a series of cells embeddings (available at the [Census Model page](https://cellxgene.cziscience.com/census-models)) compatible with the [Census LTS version `census_version="2023-12-15"`](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_data_release_info.html#lts-2023-12-15), so that users can access and download for any slice of Census data.
 
-These embeddings were generated via different large-scale models, in this article we present the results of light benchmarking of them. We hope that these benchmarks provide an initial picture to users on, 1) the strength of biological signal captured by these embeddings and, 2) the level of batch correction they exert.
+These embeddings were generated via different large-scale models; in this article we present the results of light benchmarking of them. We hope that these benchmarks provide an initial picture to users on, 1) the strength of biological signal captured by these embeddings and, 2) the level of batch correction they exert.
 
 We advise our users to consider these benchmarks as first-pass information and we recommend further benchmarking for a more comprehensive view of the embeddings and for task-oriented applications.
 
@@ -21,7 +21,7 @@ For more details on each model please see the [Census Model page](https://cellxg
 
 ## Accessing the embeddings included in the benchmark
 
-Please the [Census Model page](https://cellxgene.cziscience.com/census-models) for full details. Shortly, you can see the embeddings available for the Census LTS version `census_version="2023-12-01"` using the Census API as follows.
+Please the [Census Model page](https://cellxgene.cziscience.com/census-models) for full details. Shortly, you can see the embeddings available for the Census LTS version `census_version="2023-12-15"` using the Census API as follows.
 
 ```python
 import cellxgene_census.experimental.get_all_available_embeddings
@@ -223,7 +223,7 @@ for tissue in val_filters:
 
 ### Batch label counts
 
-The following shows the batch label counts per tissue
+The following shows the batch label counts per tissue:
 
 **Adipose tissue**
  
