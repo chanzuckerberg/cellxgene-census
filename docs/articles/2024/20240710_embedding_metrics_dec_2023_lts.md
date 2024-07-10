@@ -175,7 +175,7 @@ The batch-correction metrics were run the in following batch labels in a Census 
 :align: center
 :figwidth: 90%
 
-**Figure 3. Batch-correction metrics on the embedding space.** Higher values signify better performance, max value for `silhouette_batch` is 1, `entropy` values should only be compared within the tissue/label combination and not across. 
+**Figure 4. Batch-correction metrics on the embedding space.** Higher values signify better performance, max value for `silhouette_batch` is 1, `entropy` values should only be compared within the tissue/label combination and not across. 
 ```
 
 ```{figure} ./20240710_metrics_4_batch_classifier.png
@@ -183,7 +183,7 @@ The batch-correction metrics were run the in following batch labels in a Census 
 :align: center
 :figwidth: 90%
 
-**Figure 4. Batch-correction metrics based on label classifiers.** Values represent **1 - label prediction accuracy**. In theory higher values signify better performance indicating that prediction of batch labels is not accurate. However foundation models may be designed to learn *all* information including technical variation, please refer to the original publications of the models to learn more about them. 
+**Figure 5. Batch-correction metrics based on label classifiers.** Values represent **1 - label prediction accuracy**. In theory higher values signify better performance indicating that prediction of batch labels is not accurate. However foundation models may be designed to learn *all* information including technical variation, please refer to the original publications of the models to learn more about them. 
 ```
 
 ## Source data
