@@ -45,7 +45,8 @@ jobs:
           GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
           pip install -e './api/python/cellxgene_census/[experimental]'
       - name: Install Geneformer (python >=3.10 only)
-        run: pip install git+https://huggingface.co/ctheodoris/Geneformer@471eefc
+        # Geneformer version should match that specified in api/python/cellxgene_census/src/cellxgene_census/experimental/ml/huggingface/geneformer_tokenizer.py
+        run: pip install git+https://huggingface.co/ctheodoris/Geneformer@57f02a4
         if: matrix.python-version != '3.8' && matrix.python-version != '3.9'
       - name: Report Dependency Versions
         run: pip list

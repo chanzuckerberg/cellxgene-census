@@ -59,7 +59,7 @@ def main(argv):
     multiprocessing.freeze_support()
     multiprocessing.set_start_method("spawn", force=True)
     with multiprocessing.Pool(
-        processes=4, initializer=init_worker
+        processes=8, initializer=init_worker
     ) as pool:  # NOTE: keep processes= small due to memory usage
         pool.map(functools.partial(build_dataset, census_uri, args.obs_columns, args.tokenizer_kwargs), tasks)
 
