@@ -185,7 +185,7 @@ The batch-correction metrics were run the in following batch labels in a Census 
 **Figure 4. Batch-correction metrics based on label classifiers.** Values represent **1 - label prediction accuracy**. In theory higher values signify better performance indicating that prediction of batch labels is not accurate. However foundation models may be designed to learn *all* information including technical variation, please refer to the original publications of the models to learn more about them. 
 ```
 
-### Source data
+## Source data
 
 
 All data was obtained from the Census API, to fetch the data used in this report you can execute the following in Python. To get the cell subclass and cell class please refer to the [CellxGene Ontology Guide API](https://github.com/chanzuckerberg/cellxgene-ontology-guide/tree/main).
@@ -221,7 +221,7 @@ for tissue in val_filters:
 	)
 ```
 
-#### Batch label counts
+### Batch label counts
 
 The following shows the batch label counts per tissue
 
