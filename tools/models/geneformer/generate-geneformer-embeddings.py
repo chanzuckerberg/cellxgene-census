@@ -36,13 +36,11 @@ def main(argv):
         except Exception:  # noqa: BLE001
             pass
         tiledbsoma_context = tiledbsoma.options.SOMATileDBContext(
-            tiledb_ctx=tiledb.Ctx(
-                {
-                    "py.init_buffer_bytes": 4 * 1024**3,
-                    "soma.init_buffer_bytes": 4 * 1024**3,
-                    "vfs.s3.region": aws_region,
-                }
-            )
+            tiledb_config={
+                "py.init_buffer_bytes": 4 * 1024**3,
+                "soma.init_buffer_bytes": 4 * 1024**3,
+                "vfs.s3.region": aws_region,
+            }
         )
 
         with tiledbsoma.SparseNDArray.open(args.outfile, "r", context=tiledbsoma_context):
