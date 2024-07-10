@@ -54,64 +54,64 @@ The table below shows a breakdown of the benchmarks we used in this report.
 
 <table class="custom-table">
   <thead>
-	  <tr>
-	    <th>Type</th>
-	    <th>Mode</th>
-	    <th>Metric</th>
-	    <th>Description</th>
-	  </tr>
+      <tr>
+        <th>Type</th>
+        <th>Mode</th>
+        <th>Metric</th>
+        <th>Description</th>
+      </tr>
   </thead>
   <tbody>
-	  <tr>
-	    <td rowspan="6">Bio-conservation</td>
-	    <td rowspan="3">Embedding<br>Space</td>
-	    <td><code>leiden_nmi</code></td>
-	    <td>Normalized Mutual Information of biological labels and leiden clusters. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">scib-metrics.</a></td>
-	  </tr>
-	  <tr>
-	    <td><code>leiden_ari</code></td>
-	    <td>Adjusted Rand Index of biological labels and leiden clusters. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">scib-metrics.</a></td>
-	  </tr>
-	  <tr>
-	    <td><code>silhouette_label</code></td>
-	    <td>Silhouette score with respect to biological labels. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.silhouette_label.html">scib-metrics.</a></td>
-	  </tr>
-	  <tr>
-	  	 <td rowspan="3">Label<br>Classifier</td>
-	    <td><code>classifier_svm</code></td>
-	    <td>Accuracy of biological label prediction using a SVM (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L36">here</a>.</td>
-	  </tr>
-	  <tr>
+      <tr>
+        <td rowspan="6">Bio-conservation</td>
+        <td rowspan="3">Embedding<br>Space</td>
+        <td><code>leiden_nmi</code></td>
+        <td>Normalized Mutual Information of biological labels and leiden clusters. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">scib-metrics.</a></td>
+      </tr>
+      <tr>
+        <td><code>leiden_ari</code></td>
+        <td>Adjusted Rand Index of biological labels and leiden clusters. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">scib-metrics.</a></td>
+      </tr>
+      <tr>
+        <td><code>silhouette_label</code></td>
+        <td>Silhouette score with respect to biological labels. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.silhouette_label.html">scib-metrics.</a></td>
+      </tr>
+      <tr>
+           <td rowspan="3">Label<br>Classifier</td>
+        <td><code>classifier_svm</code></td>
+        <td>Accuracy of biological label prediction using a SVM (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L36">here</a>.</td>
+      </tr>
+      <tr>
 <td><code>classifier_forest</code></td>
-	    <td>Accuracy of biological label prediction using a Random Forest classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L39">here</a>.</td>
-	  </tr>
-	  <tr>
+        <td>Accuracy of biological label prediction using a Random Forest classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L39">here</a>.</td>
+      </tr>
+      <tr>
 <td><code>classifier_lr</code></td>
-	    <td>Accuracy of biological label prediction using a Logistic regression classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L39">here</a>.</td>
-	  </tr>
-	  <tr>
-	    <td rowspan="5">Batch-correction</td>
-	    <td rowspan="2">Embedding<br>Space</td>
-	    <td><code>silhouette_batch</code></td>
-	    <td>1- silhouette score with respect to biological labels. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">scib-metrics.</a></td>
-	  </tr>
-	  <tr>
-	    <td><code>entropy</code></td>
-	    <td>Average of neighborhood entropy of batch labels per cell. Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L86">here</a>.</td>
-	  </tr>
-	  <tr>
-	  	 <td rowspan="3">Label<br>Classifier</td>
-	    <td><code>classifier_svm</code></td>
-	    <td>1 - accuracy of batch label prediction using a SVM (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L45">here</a>.</td>
-	  </tr>
-	  <tr>
+        <td>Accuracy of biological label prediction using a Logistic regression classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L39">here</a>.</td>
+      </tr>
+      <tr>
+        <td rowspan="5">Batch-correction</td>
+        <td rowspan="2">Embedding<br>Space</td>
+        <td><code>silhouette_batch</code></td>
+        <td>1- silhouette score with respect to biological labels. Described in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">Luecken et al.</a> and implemented in <a href="https://scib-metrics.readthedocs.io/en/stable/generated/scib_metrics.nmi_ari_cluster_labels_leiden.html">scib-metrics.</a></td>
+      </tr>
+      <tr>
+        <td><code>entropy</code></td>
+        <td>Average of neighborhood entropy of batch labels per cell. Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L86">here</a>.</td>
+      </tr>
+      <tr>
+           <td rowspan="3">Label<br>Classifier</td>
+        <td><code>classifier_svm</code></td>
+        <td>1 - accuracy of batch label prediction using a SVM (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L45">here</a>.</td>
+      </tr>
+      <tr>
 <td><code>classifier_forest</code></td>
-	    <td>1 - accuracy of batch label prediction using a Random Forest classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L48">here</a>.</td>
-	  </tr>
-	  <tr>
+        <td>1 - accuracy of batch label prediction using a Random Forest classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L48">here</a>.</td>
+      </tr>
+      <tr>
 <td><code>classifier_lr</code></td>
-	    <td>1 - accuracy of batch label prediction using a Logistic regression classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L42">here</a>.</td>
-	  </tr>
+        <td>1 - accuracy of batch label prediction using a Logistic regression classifier (60/40 train/test split). Implemented <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/f44637ba33567400820407f4f7b9984e52966156/tools/models/metrics/run-scib.py#L42">here</a>.</td>
+      </tr>
   </tbody>
 </table>
 
@@ -187,9 +187,7 @@ The batch-correction metrics were run the in following batch labels in a Census 
 
 ## Source data
 
-
 All data was obtained from the Census API, to fetch the data used in this report you can execute the following in Python. To get the cell subclass and cell class please refer to the [CellxGene Ontology Guide API](https://github.com/chanzuckerberg/cellxgene-ontology-guide/tree/main).
-
 
 ```python
 import cellxgene_census
@@ -209,121 +207,120 @@ census = cellxgene_census.open_soma(census_version="2023-12-15")
 
 adatas = []
 for tissue in val_filters:
-	adatas.append(
-	   cellxgene_census.get_anndata(
-		   census,
-		   organism="homo_sapiens",
-		   measurement_name="RNA",
-		   obs_value_filter= val_filters[tissue],
-		   obs_embeddings=embedding_names,
-		   column_names=column_names,
-		)
-	)
+    adatas.append(
+       cellxgene_census.get_anndata(
+           census,
+           organism="homo_sapiens",
+           measurement_name="RNA",
+           obs_value_filter= val_filters[tissue],
+           obs_embeddings=embedding_names,
+           column_names=column_names,
+        )
+    )
 ```
 
 ### Batch label counts
 
 The following shows the batch label counts per tissue:
 
-**Adipose tissue**
- 
+#### Adipose tissue
+
 <table class="custom-table">
   <thead>
-	  <tr>
-	    <th>Type</th>
-	    <th>Label</th>
-	    <th>Count</th>
-	  </tr>
+      <tr>
+        <th>Type</th>
+        <th>Label</th>
+        <th>Count</th>
+      </tr>
   </thead>
   <tbody>
-	  <tr>
-		  <td rowspan="4">Assay</td>
-		  <td>10x 3' v3</td>
-		  <td>91947</td>
-	  </tr>
-	  <tr>
-		  <td>10x 5' transcription profiling</td>
-		  <td>2121</td>
-	  </tr>
-	  <tr>
-		  <td>microwell-seq</td>
-		  <td>5916</td>
-	  </tr>
-	  <tr>
-		  <td>Smart-seq2</td>
-		  <td>651</td>
-	  </tr>
-	  <tr>
-		  <td rowspan="2">Suspension Type</td>
-		  <td>nucleus</td>
-		  <td>72335</td>
-	  </tr>
-	  <tr>
-		  <td>cell</td>
-		  <td>23756</td>
-	  </tr>
-	  <tr>
-		  <td rowspan="4">Dataset</td>
-		  <td>9d8e5dca-03a3-457d-b7fb-844c75735c83</td>
-		  <td>72335</td>
-	  </tr>
-	  <tr>
-		  <td>53d208b0-2cfd-4366-9866-c3c6114081bc</td>
-		  <td>20263</td>
-	  </tr>
-	  <tr>
-		  <td>5af90777-6760-4003-9dba-8f945fec6fdf/td>
-		  <td>2121</td>
-	  </tr>
-	  <tr>
-		  <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf/td>
-		  <td>1372</td>
-	  </tr>
+      <tr>
+          <td rowspan="4">Assay</td>
+          <td>10x 3' v3</td>
+          <td>91947</td>
+      </tr>
+      <tr>
+          <td>10x 5' transcription profiling</td>
+          <td>2121</td>
+      </tr>
+      <tr>
+          <td>microwell-seq</td>
+          <td>5916</td>
+      </tr>
+      <tr>
+          <td>Smart-seq2</td>
+          <td>651</td>
+      </tr>
+      <tr>
+          <td rowspan="2">Suspension Type</td>
+          <td>nucleus</td>
+          <td>72335</td>
+      </tr>
+      <tr>
+          <td>cell</td>
+          <td>23756</td>
+      </tr>
+      <tr>
+          <td rowspan="4">Dataset</td>
+          <td>9d8e5dca-03a3-457d-b7fb-844c75735c83</td>
+          <td>72335</td>
+      </tr>
+      <tr>
+          <td>53d208b0-2cfd-4366-9866-c3c6114081bc</td>
+          <td>20263</td>
+      </tr>
+      <tr>
+          <td>5af90777-6760-4003-9dba-8f945fec6fdf</td>
+          <td>2121</td>
+      </tr>
+      <tr>
+          <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+          <td>1372</td>
+      </tr>
    </tbody>
 </table>
 
-**Spinal cord**
- 
+#### Spinal cord
+
 <table class="custom-table">
   <thead>
-	  <tr>
-	    <th>Type</th>
-	    <th>Label</th>
-	    <th>Count</th>
-	  </tr>
+      <tr>
+        <th>Type</th>
+        <th>Label</th>
+        <th>Count</th>
+      </tr>
   </thead>
   <tbody>
-	  <tr>
-		  <td rowspan="2">Assay</td>
-		  <td>10x 3' v3</td>
-		  <td>43840</td>
-	  </tr>
-	  <tr>
-		  <td>microwell-seq</td>
-		  <td>5916</td>
-	  </tr>
-	  <tr>
-		  <td rowspan="2">Suspension Type</td>
-		  <td>nucleus</td>
-		  <td>43840</td>
-	  </tr>
-	  <tr>
-		  <td>cell</td>
-		  <td>5916</td>
-	  </tr>
-	  <tr>
-		  <td rowspan="3">Dataset</td>
-		  <td>090da8ea-46e8-40df-bffc-1f78e1538d27</td>
-		  <td>24190</td>
-	  </tr>
-	  <tr>
-		  <td>c05e6940-729c-47bd-a2a6-6ce3730c4919</td>
-		  <td>19650</td>
-	  </tr>
-	  <tr>
-		  <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
-		  <td>5916</td>
-	  </tr>
+      <tr>
+          <td rowspan="2">Assay</td>
+          <td>10x 3' v3</td>
+          <td>43840</td>
+      </tr>
+      <tr>
+          <td>microwell-seq</td>
+          <td>5916</td>
+      </tr>
+      <tr>
+          <td rowspan="2">Suspension Type</td>
+          <td>nucleus</td>
+          <td>43840</td>
+      </tr>
+      <tr>
+          <td>cell</td>
+          <td>5916</td>
+      </tr>
+      <tr>
+          <td rowspan="3">Dataset</td>
+          <td>090da8ea-46e8-40df-bffc-1f78e1538d27</td>
+          <td>24190</td>
+      </tr>
+      <tr>
+          <td>c05e6940-729c-47bd-a2a6-6ce3730c4919</td>
+          <td>19650</td>
+      </tr>
+      <tr>
+          <td>2adb1f8a-a6b1-4909-8ee8-484814e2d4bf</td>
+          <td>5916</td>
+      </tr>
    </tbody>
 </table>
-
