@@ -1,6 +1,6 @@
 # Benchmarks of single-cell Census models
 
-*Published:* *July 10th, 2024*
+*Published:* *July 11th, 2024*
 
 *By:* *[Emanuele Bezzi](mailto:ebezzi@chanzuckerberg.com), [Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)*
 
