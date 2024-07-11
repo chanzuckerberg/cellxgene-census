@@ -529,10 +529,29 @@ body {
     height: 16px !important;
   }
   
-  table.custom-table,
+  table.custom-table {
+    border-collapse: collapse;
+    min-width: 400px;
+  }
+  
   table.custom-table td,
   table.custom-table th {
+    padding: 10px;
+    border: 1px solid #dddddd;
     vertical-align: middle;
-    border: 1px solid #ddd;
-    padding: 5px;
   }
+  
+  table.custom-table thead tr{
+    background-color: #3170f4;
+    color: #ffffff;
+    text-align: center;
+  }
+  
+  table.custom-table tbody td {
+    text-align: left;
+  }
+  
+  table.custom-table tbody tr:nth-of-type(even) {
+    background-color: #f6f8fA;
+  }
+  
