@@ -224,7 +224,7 @@ def test_get_highly_variable_genes(
     small_mem_context: soma.SOMATileDBContext,
     obs_coords: slice | None,
 ) -> None:
-    with cellxgene_census.open_soma(census_version="stable", context=small_mem_context) as census:
+    with cellxgene_census.open_soma(census_version="2023-12-15", context=small_mem_context) as census:
         hvg = get_highly_variable_genes(
             census,
             organism=organism,
@@ -246,7 +246,7 @@ def test_hvg_error_cases(small_mem_context: soma.SOMATileDBContext) -> None:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
             # Only flavor="seurat_v3" is supported
             with pytest.raises(ValueError):
-                highly_variable_genes(query, flavor="oopsie")  # type: ignore[arg-type]
+                highly_variable_genes(query, flavor="oopsie")
 
 
 @pytest.mark.experimental
