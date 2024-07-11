@@ -246,7 +246,7 @@ def test_hvg_error_cases(small_mem_context: soma.SOMATileDBContext) -> None:
         with census["census_data"]["mus_musculus"].axis_query(measurement_name="RNA") as query:
             # Only flavor="seurat_v3" is supported
             with pytest.raises(ValueError):
-                highly_variable_genes(query, flavor="oopsie")
+                highly_variable_genes(query, flavor="oopsie")  # type: ignore[arg-type]
 
 
 @pytest.mark.experimental
