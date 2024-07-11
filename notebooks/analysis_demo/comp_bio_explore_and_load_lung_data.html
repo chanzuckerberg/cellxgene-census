@@ -329,11 +329,8 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;lung&#39; and is_primary_data == True&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_obs</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;lung&#39; and is_primary_data == True&quot;</span>
 <span class="p">)</span>
 <span class="n">lung_obs</span>
 </pre></div>
@@ -1224,7 +1221,7 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_var</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lung_var</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_var</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">)</span>
 <span class="n">lung_var</span>
 </pre></div>
 </div>

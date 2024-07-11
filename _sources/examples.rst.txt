@@ -53,11 +53,11 @@ Gain a better understanding on the nature of the Census data and how it's organi
     
     notebooks/api_demo/census_duplicated_cells.ipynb
     notebooks/analysis_demo/comp_bio_census_info.ipynb
+    notebooks/api_demo/census_and_cell_guide_example.ipynb
     notebooks/analysis_demo/comp_bio_explore_and_load_lung_data.ipynb
     notebooks/api_demo/census_datasets.ipynb
     notebooks/api_demo/census_dataset_presence.ipynb
     notebooks/api_demo/census_summary_cell_counts.ipynb
-    notebooks/api_demo/census_and_cell_guide_example.ipynb
    
 Analyzing Census data
 ---------------------

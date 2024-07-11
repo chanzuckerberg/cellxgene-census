@@ -259,7 +259,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <p>A convenient way to query and fetch expression data is to use the <code class="docutils literal notranslate"><span class="pre">get_anndata</span></code> method of the <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> API. This is a method that combines the column selection and value filtering we described above to obtain slices of the expression data based on metadata queries.</p>
 <p>The method will return an <code class="docutils literal notranslate"><span class="pre">anndata.AnnData</span></code> object, it takes as an input a census object, the string for an organism, and for both cell and gene metadata we can specify filters and column selection as described above but with the following arguments:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">column_names</span></code> — a dictionary with two keys <code class="docutils literal notranslate"><span class="pre">obs</span></code> and <code class="docutils literal notranslate"><span class="pre">var</span></code> whose values are lists of strings indicating the columns to select for cell and gene metadata respectively.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> and <code class="docutils literal notranslate"><span class="pre">var_column_names</span></code> — a pair of arguments whose values are lists of strings indicating the columns to select for cell (<code class="docutils literal notranslate"><span class="pre">obs</span></code>) and gene (<code class="docutils literal notranslate"><span class="pre">var</span></code>) metadata respectively.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">obs_value_filter</span></code> — python expression with selection conditions to fetch <strong>cells</strong> meeting a criteria. For full details see <a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">tiledb.QueryCondition</a>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">var_value_filter</span></code> — python expression with selection conditions to fetch <strong>genes</strong> meeting a criteria. Details as above. For full details see <a class="reference external" href="https://tiledb-inc-tiledb.readthedocs-hosted.com/projects/tiledb-py/en/stable/python-api.html#query-condition">tiledb.QueryCondition</a>.</p></li>
 </ul>
@@ -278,7 +278,7 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
     <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
     <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
     <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and disease == &#39;COVID-19&#39; and is_primary_data == True&quot;</span><span class="p">,</span>
-    <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">]},</span>
+    <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">],</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -496,7 +496,7 @@ AnnData object with n_obs × n_vars = 2313 × 2
 </section>
 <section id="Querying-cell-metadata-(obs)">
 <h2>Querying cell metadata (obs)<a class="headerlink" href="#Querying-cell-metadata-(obs)" title="Permalink to this heading"></a></h2>
-<p>The human gene metadata of the Census, for RNA assays, is located at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].obs</span></code>. This is a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> and as such it can be materialized as a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> via the methods <code class="docutils literal notranslate"><span class="pre">read().concat().to_pandas()</span></code>.</p>
+<p>The human gene metadata of the Census, for RNA assays, is located at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;homo_sapiens&quot;].obs</span></code>. This is a <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code> and as such it can be materialized as a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> via the methods <code class="docutils literal notranslate"><span class="pre">read().concat().to_pandas()</span></code>. See also, the helper function <code class="docutils literal notranslate"><span class="pre">cellxgene_census.get_obs</span></code> which removes some boiler plate.</p>
 <p>The mouse cell metadata is at <code class="docutils literal notranslate"><span class="pre">census[&quot;census_data&quot;][&quot;mus_musculus&quot;].obs</span></code>.</p>
 <p>For slicing the cell metadata there are two relevant arguments that can be passed through <code class="docutils literal notranslate"><span class="pre">read()</span></code>:</p>
 <ul class="simple">
@@ -557,7 +557,7 @@ AnnData object with n_obs × n_vars = 2313 × 2
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sex_cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sex_cell_metadata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">])</span>
 
 <span class="n">sex_cell_metadata</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
 </pre></div>
@@ -612,9 +612,7 @@ AnnData object with n_obs × n_vars = 2313 × 2
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_all_unknown_sex</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;sex == &#39;unknown&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_all_unknown_sex</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;sex == &#39;unknown&#39;&quot;</span><span class="p">)</span>
 
 <span class="n">cell_metadata_all_unknown_sex</span>
 </pre></div>
@@ -941,14 +939,11 @@ AnnData object with n_obs × n_vars = 2313 × 2
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_b_cell</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-    <span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and is_primary_data==True&quot;</span><span class="p">,</span>
-        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disease&quot;</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_metadata_b_cell</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;B cell&#39; and tissue_general == &#39;lung&#39; and is_primary_data==True&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disease&quot;</span><span class="p">],</span>
 <span class="p">)</span>
 
 <span class="n">cell_metadata_b_cell</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
@@ -1010,15 +1005,11 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_metadata</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-    <span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span>
-    <span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
-        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_length&quot;</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gene_metadata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_var</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;feature_id in [&#39;ENSG00000161798&#39;, &#39;ENSG00000188229&#39;]&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;feature_name&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_length&quot;</span><span class="p">],</span>
 <span class="p">)</span>
 
 <span class="n">gene_metadata</span>

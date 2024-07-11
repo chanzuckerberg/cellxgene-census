@@ -236,7 +236,7 @@
 <h2>Open the Census<a class="headerlink" href="#Open-the-Census" title="Permalink to this heading"></a></h2>
 <p>First, obtain a handle to the Census data, in the usual manner:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
@@ -250,15 +250,15 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_version=&#34;2023-07-25&#34;&#39; in future calls to open_soma() to ensure data consistency.
+The &#34;stable&#34; release is currently 2024-07-01. Specify &#39;census_version=&#34;2024-07-01&#34;&#39; in future calls to open_soma() to ensure data consistency.
 </pre></div></div>
 </div>
 </section>
 <section id="Create-an-ExperimentDataPipe">
 <h2>Create an ExperimentDataPipe<a class="headerlink" href="#Create-an-ExperimentDataPipe" title="Permalink to this heading"></a></h2>
 <p>To train a model in PyTorch using this <code class="docutils literal notranslate"><span class="pre">census</span></code> data object, first instantiate an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> as follows:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census.experimental.ml</span> <span class="k">as</span> <span class="nn">census_ml</span>
@@ -279,6 +279,15 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/cellxgene-census/venv/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
+</pre></div></div>
+</div>
 <section id="ExperimentDataPipe-class-explained">
 <h3><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class explained<a class="headerlink" href="#ExperimentDataPipe-class-explained" title="Permalink to this heading"></a></h3>
 <p>This class provides an implementation of PyTorch’s <a class="reference external" href="https://pytorch.org/data/main/torchdata.datapipes.iter.html">DataPipe interface</a>, which defines a common mechanism for wrapping and accessing training data from any underlying source. The <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> class encapsulates the details of querying and retrieving Census data from a single SOMA <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> and returning it to the caller as PyTorch Tensors. Most importantly, it retrieves the data lazily from the Census in batches,
@@ -296,7 +305,7 @@ avoiding having to load the entire training dataset into memory at once. (Note: 
 This parameter also affects the granularity of the “global” shuffling step when <code class="docutils literal notranslate"><span class="pre">shuffle=True</span></code> (see <code class="docutils literal notranslate"><span class="pre">shuffle</span></code> parameter API docs for details).</p>
 <p>You can inspect the shape of the full dataset, without causing the full dataset to be loaded:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">shape</span>
@@ -304,12 +313,12 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(15020, 60664)
+(15020, 60530)
 </pre></div></div>
 </div>
 </section>
@@ -318,7 +327,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <h2>Split the dataset<a class="headerlink" href="#Split-the-dataset" title="Permalink to this heading"></a></h2>
 <p>You may split the overall dataset into the typical training, validation, and test sets by using the PyTorch <a class="reference external" href="https://pytorch.org/data/main/generated/torchdata.datapipes.iter.RandomSplitter.html#torchdata.datapipes.iter.RandomSplitter">RandomSplitter</a> <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>. Using PyTorch’s functional form for chaining <code class="docutils literal notranslate"><span class="pre">DataPipe</span></code>s, this is done as follows:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_datapipe</span><span class="p">,</span> <span class="n">test_datapipe</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -330,7 +339,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <h2>Create the DataLoader<a class="headerlink" href="#Create-the-DataLoader" title="Permalink to this heading"></a></h2>
 <p>With the full set of DataPipe operations chained together, we can now instantiate a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> on the training data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">train_datapipe</span><span class="p">)</span>
@@ -343,7 +352,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <h2>Define the model<a class="headerlink" href="#Define-the-model" title="Permalink to this heading"></a></h2>
 <p>With the training data retrieval code now in place, we can move on to defining a simple logistic regression model, using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.nn.Linear</span></code> class:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
@@ -362,7 +371,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 <p>Next, we define a function to train the model for a single epoch:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
@@ -386,8 +395,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 
         <span class="c1"># Compute the loss and perform back propagation</span>
 
-        <span class="c1"># Exclude the cell_type labels, which are in the second column</span>
-        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
         <span class="n">train_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">==</span> <span class="n">y_batch</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -418,17 +426,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([0., 0., 0.,  ..., 1., 0., 0.])
 </pre></div>
 </div>
-<p>Secondly, note the line, <code class="docutils literal notranslate"><span class="pre">y_batch</span> <span class="pre">=</span> <span class="pre">y_batch[:,</span> <span class="pre">1]</span></code>. This line is extracting the user-specified <code class="docutils literal notranslate"><span class="pre">obs</span></code> <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> training labels from the second column of the <code class="docutils literal notranslate"><span class="pre">y_batch</span></code> rank 2 Tensor. For example, this would take a <code class="docutils literal notranslate"><span class="pre">y_batch</span></code> tensor that looks like:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[42496620,        1],
-        [42496621,        1],
-        [42496622,        3],
-        ...,
-        [42496633,        2],
-        [42496634,        1],
-        [42496635,        4]], dtype=torch.int32)
-</pre></div>
-</div>
-<p>and return:</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">y_batch</span></code>, this will contain the user-specified <code class="docutils literal notranslate"><span class="pre">obs</span></code> <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> training labels. By default, these are encoded using a LabelEncoder and it will be a matrix where each column represents the encoded values of each column specified in <code class="docutils literal notranslate"><span class="pre">obs_column_names</span></code> when creating the datapipe (in this case, only the cell type). It will look like this:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([1, 1, 3, ..., 2, 1, 4])
 </pre></div>
 </div>
@@ -438,7 +436,7 @@ This parameter also affects the granularity of the “global” shuffling step w
 <h2>Train the model<a class="headerlink" href="#Train-the-model" title="Permalink to this heading"></a></h2>
 <p>Finally, we are ready to train the model. Here we instantiate the model, a loss function, and an optimization method and then iterate through the desired number of training epochs. Note how the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> is passed into <code class="docutils literal notranslate"><span class="pre">train_epoch</span></code>, where for each epoch it will provide a new iterator through the training dataset.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
@@ -465,16 +463,16 @@ This parameter also affects the granularity of the “global” shuffling step w
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 1: Train Loss: 0.0167253 Accuracy 0.4856
-Epoch 2: Train Loss: 0.0156710 Accuracy 0.4943
-Epoch 3: Train Loss: 0.0149408 Accuracy 0.4813
-Epoch 4: Train Loss: 0.0144469 Accuracy 0.5040
-Epoch 5: Train Loss: 0.0141749 Accuracy 0.5669
-Epoch 6: Train Loss: 0.0139776 Accuracy 0.6672
-Epoch 7: Train Loss: 0.0138565 Accuracy 0.7920
-Epoch 8: Train Loss: 0.0138094 Accuracy 0.8088
-Epoch 9: Train Loss: 0.0136689 Accuracy 0.8757
-Epoch 10: Train Loss: 0.0136101 Accuracy 0.8923
+Epoch 1: Train Loss: 0.0164523 Accuracy 0.3699
+Epoch 2: Train Loss: 0.0145778 Accuracy 0.4928
+Epoch 3: Train Loss: 0.0142274 Accuracy 0.4965
+Epoch 4: Train Loss: 0.0140366 Accuracy 0.5423
+Epoch 5: Train Loss: 0.0139020 Accuracy 0.6057
+Epoch 6: Train Loss: 0.0137726 Accuracy 0.7272
+Epoch 7: Train Loss: 0.0136123 Accuracy 0.8630
+Epoch 8: Train Loss: 0.0134781 Accuracy 0.9024
+Epoch 9: Train Loss: 0.0133959 Accuracy 0.9071
+Epoch 10: Train Loss: 0.0133454 Accuracy 0.9126
 </pre></div></div>
 </div>
 </section>
@@ -482,7 +480,7 @@ Epoch 10: Train Loss: 0.0136101 Accuracy 0.8923
 <h2>Make predictions with the model<a class="headerlink" href="#Make-predictions-with-the-model" title="Permalink to this heading"></a></h2>
 <p>To make predictions with the model, we first create a new <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> using the <code class="docutils literal notranslate"><span class="pre">test_datapipe</span></code>, which provides the “test” split of the original dataset. For this example, we will only make predictions on a single batch of data from the test split.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">test_datapipe</span><span class="p">)</span>
@@ -492,7 +490,7 @@ Epoch 10: Train Loss: 0.0136101 Accuracy 0.8923
 </div>
 <p>Next, we invoke the model on the <code class="docutils literal notranslate"><span class="pre">X_batch</span></code> input data and extract the predictions:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
@@ -512,20 +510,20 @@ Epoch 10: Train Loss: 0.0136101 Accuracy 0.8923
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([ 1, 11,  1,  1,  5,  1,  1,  1,  1,  5,  1,  5,  1,  5,  5,  8,  1,  1,
-         7,  1,  5,  5,  8,  5,  5,  1,  1,  1,  1,  8,  9,  1,  1,  8,  1,  1,
-         1, 11,  5,  1,  8,  5,  5,  1,  5,  1,  5,  5,  1,  5,  9,  8,  1,  1,
-         1,  5,  5,  5,  1,  5,  1,  5,  1,  1,  5,  8,  1,  1,  1,  1,  7,  1,
-         5,  1,  1,  5,  5,  1,  1,  8,  5,  5,  8,  1,  1,  1,  5,  5,  5,  1,
-         5,  1,  5,  5,  1,  1,  5,  1,  5,  1,  1,  1,  5,  1,  1,  1,  9,  5,
-         1,  1,  7,  1,  1,  1,  1,  8,  1,  1,  5,  5,  1,  5,  1,  1,  1,  5,
-         8,  1])
+tensor([ 8,  1,  1,  8,  7,  7,  1,  8,  1,  8,  5,  1,  7,  1,  1,  1,  1,  7,
+         1,  7,  1,  1,  1,  1,  1,  7,  6,  8,  1,  1,  8,  8,  5,  5,  1,  1,
+         8,  7,  1,  7,  1,  1,  1,  1,  7,  1,  8,  5,  8,  1,  1,  1,  8,  2,
+         8,  1,  1,  7,  7,  1,  1,  1,  7,  1,  7,  7,  5,  7,  1,  5,  5,  7,
+         8,  1,  1,  1, 11,  5,  1,  1,  1,  8,  1,  1,  7,  7,  1,  7,  8,  1,
+         1,  5,  1,  1,  5,  1,  8,  5,  5,  1,  1,  7,  7,  7,  5,  1,  7,  7,
+         1,  7,  5,  7,  1,  8,  1,  5,  7,  1,  1,  1,  1,  5,  8,  5,  1,  1,
+         1,  7])
 </pre></div></div>
 </div>
 <p>The predictions are returned as the encoded values of <code class="docutils literal notranslate"><span class="pre">cell_type</span></code> label. To recover the original cell type labels as strings, we decode using the encoders from <code class="docutils literal notranslate"><span class="pre">experiment_datapipe.obs_encoders</span></code>.</p>
 <p>At inference time, if the model inputs are not obtained via an <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>, one could pickle the encoder at training time and save it along with the model. Then, at inference time it can be unpickled and used as shown below.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_type_encoder</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">obs_encoders</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
@@ -541,44 +539,44 @@ tensor([ 1, 11,  1,  1,  5,  1,  1,  1,  1,  5,  1,  5,  1,  5,  5,  8,  1,  1,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([&#39;basal cell&#39;, &#39;vein endothelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;leukocyte&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;leukocyte&#39;,
-       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;pericyte&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;vein endothelial cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
-       &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;pericyte&#39;,
-       &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;leukocyte&#39;,
+array([&#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;,
+       &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;,
+       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;,
        &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
+       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;fibroblast&#39;, &#39;leukocyte&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;leukocyte&#39;,
+       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;leukocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;,
+       &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;,
+       &#39;capillary endothelial cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
+       &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;epithelial cell&#39;, &#39;keratinocyte&#39;,
+       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;keratinocyte&#39;,
        &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
-       &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;pericyte&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;vein endothelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
        &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;,
-       &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;,
+       &#39;keratinocyte&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;,
+       &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;epithelial cell&#39;, &#39;epithelial cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;keratinocyte&#39;,
+       &#39;keratinocyte&#39;, &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;,
+       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;keratinocyte&#39;, &#39;epithelial cell&#39;,
+       &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;,
+       &#39;epithelial cell&#39;, &#39;keratinocyte&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
+       &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;epithelial cell&#39;, &#39;leukocyte&#39;,
        &#39;epithelial cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;, &#39;basal cell&#39;,
-       &#39;epithelial cell&#39;, &#39;leukocyte&#39;, &#39;basal cell&#39;], dtype=object)
+       &#39;keratinocyte&#39;], dtype=object)
 </pre></div></div>
 </div>
 <p>Finally, we create a Pandas DataFrame to examine the predictions:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -586,7 +584,7 @@ array([&#39;basal cell&#39;, &#39;vein endothelial cell&#39;, &#39;basal cell&#3
 <span class="n">display</span><span class="p">(</span>
     <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;actual cell type&quot;</span><span class="p">:</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y_batch</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()),</span>
+            <span class="s2">&quot;actual cell type&quot;</span><span class="p">:</span> <span class="n">cell_type_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y_batch</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()),</span>
             <span class="s2">&quot;predicted cell type&quot;</span><span class="p">:</span> <span class="n">predicted_cell_types</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
@@ -623,28 +621,28 @@ array([&#39;basal cell&#39;, &#39;vein endothelial cell&#39;, &#39;basal cell&#3
   <tbody>
     <tr>
       <th>0</th>
-      <td>basal cell</td>
-      <td>basal cell</td>
+      <td>leukocyte</td>
+      <td>leukocyte</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>vein endothelial cell</td>
-      <td>vein endothelial cell</td>
+      <td>leukocyte</td>
+      <td>basal cell</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>basal cell</td>
+      <td>keratinocyte</td>
       <td>basal cell</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>basal cell</td>
-      <td>basal cell</td>
+      <td>leukocyte</td>
+      <td>leukocyte</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>epithelial cell</td>
-      <td>epithelial cell</td>
+      <td>keratinocyte</td>
+      <td>keratinocyte</td>
     </tr>
     <tr>
       <th>...</th>
@@ -653,8 +651,8 @@ array([&#39;basal cell&#39;, &#39;vein endothelial cell&#39;, &#39;basal cell&#3
     </tr>
     <tr>
       <th>123</th>
-      <td>basal cell</td>
-      <td>basal cell</td>
+      <td>epithelial cell</td>
+      <td>epithelial cell</td>
     </tr>
     <tr>
       <th>124</th>
@@ -663,23 +661,31 @@ array([&#39;basal cell&#39;, &#39;vein endothelial cell&#39;, &#39;basal cell&#3
     </tr>
     <tr>
       <th>125</th>
-      <td>epithelial cell</td>
-      <td>epithelial cell</td>
+      <td>basal cell</td>
+      <td>basal cell</td>
     </tr>
     <tr>
       <th>126</th>
-      <td>leukocyte</td>
-      <td>leukocyte</td>
+      <td>basal cell</td>
+      <td>basal cell</td>
     </tr>
     <tr>
       <th>127</th>
-      <td>basal cell</td>
-      <td>basal cell</td>
+      <td>keratinocyte</td>
+      <td>keratinocyte</td>
     </tr>
   </tbody>
 </table>
 <p>128 rows × 2 columns</p>
 </div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>

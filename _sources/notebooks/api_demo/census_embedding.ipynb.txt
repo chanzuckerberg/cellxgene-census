@@ -59,9 +59,9 @@
    "source": [
     "from cellxgene_census.experimental import get_all_available_embeddings\n",
     "\n",
-    "census_version = \"2023-12-15\"\n",
+    "CENSUS_VERSION = \"2023-12-15\"\n",
     "\n",
-    "for e in get_all_available_embeddings(census_version):\n",
+    "for e in get_all_available_embeddings(CENSUS_VERSION):\n",
     "    print(f\"{e['embedding_name']:15} {e['experiment_name']:15} {e['data_type']:15}\")"
    ]
   },
@@ -243,7 +243,7 @@
     "        organism=EXPERIMENT_NAME,\n",
     "        measurement_name=MEASUREMENT_NAME,\n",
     "        obs_value_filter=\"tissue_general == 'central nervous system'\",\n",
-    "        column_names={\"obs\": [\"cell_type\", \"soma_joinid\"]},\n",
+    "        obs_column_names=[\"cell_type\", \"soma_joinid\"],\n",
     "        obs_embeddings=[\"scgpt\"],\n",
     "    )"
    ]
@@ -450,12 +450,12 @@
    "source": [
     "census = cellxgene_census.open_soma(census_version=CENSUS_VERSION)\n",
     "\n",
-    "obs_df = census[\"census_data\"][EXPERIMENT_NAME].obs.read(\n",
+    "obs_df = cellxgene_census.get_obs(\n",
+    "    census,\n",
+    "    EXPERIMENT_NAME,\n",
     "    value_filter=\"tissue_general == 'exocrine gland'\",\n",
     "    column_names=[\"soma_joinid\", \"cell_type\"],\n",
-    ")\n",
-    "\n",
-    "obs_df = obs_df.concat().to_pandas()"
+    ")"
    ]
   },
   {

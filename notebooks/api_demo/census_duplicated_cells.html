@@ -268,13 +268,14 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census</span>
 
 <span class="n">tabula_muris_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;48b37086-25f7-4ecd-be66-f5bb378e3aea&quot;</span>
+<span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span>
 
-<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id == &#39;</span><span class="si">{</span><span class="n">tabula_muris_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">tabula_muris_obs</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">tabula_muris_obs</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id == &#39;</span><span class="si">{</span><span class="n">tabula_muris_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">],</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -329,12 +330,12 @@ Name: count, dtype: int64
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tabula_muris_liver_dataset_id</span> <span class="o">=</span> <span class="s2">&quot;6202a243-b713-4e12-9ced-c387f8483dea&quot;</span>
 
-<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">tabula_muris_liver_obs</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id == &#39;</span><span class="si">{</span><span class="n">tabula_muris_liver_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">tabula_muris_liver_obs</span> <span class="o">=</span> <span class="n">tabula_muris_liver_obs</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">tabula_muris_liver_obs</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dataset_id == &#39;</span><span class="si">{</span><span class="n">tabula_muris_liver_dataset_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary_data&quot;</span><span class="p">],</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -385,15 +386,14 @@ Name: count, dtype: int64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">nk_cells</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
-        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
-        <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
-        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
-    <span class="p">)</span>
-
-    <span class="n">nk_cells</span> <span class="o">=</span> <span class="n">nk_cells</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nk_cells</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+    <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+    <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
+    <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -427,16 +427,15 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
-        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
-        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
-        <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
-        <span class="s2">&quot;and is_primary_data == True&quot;</span>
-    <span class="p">)</span>
-
-    <span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">nk_cells_primary</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nk_cells_primary</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;mus_musculus&quot;</span><span class="p">,</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+    <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+    <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
+    <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
+    <span class="s2">&quot;and is_primary_data == True&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -475,16 +474,15 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
-        <span class="n">census</span><span class="p">,</span>
-        <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
-        <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;AQP5&#39;&quot;</span><span class="p">,</span>
-        <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
-        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
-        <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
-        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+    <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;AQP5&#39;&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+    <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+    <span class="s2">&quot;and sex == &#39;female&#39;&quot;</span>
+    <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -518,17 +516,16 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">adata_primary</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
-        <span class="n">census</span><span class="p">,</span>
-        <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
-        <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;AQP5&#39;&quot;</span><span class="p">,</span>
-        <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
-        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
-        <span class="s2">&quot;and sex == &#39;female&#39; &quot;</span>
-        <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
-        <span class="s2">&quot;and is_primary_data == True&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_primary</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+    <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;AQP5&#39;&quot;</span><span class="p">,</span>
+    <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+    <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+    <span class="s2">&quot;and sex == &#39;female&#39; &quot;</span>
+    <span class="s2">&quot;and tissue_general == &#39;blood&#39;&quot;</span>
+    <span class="s2">&quot;and is_primary_data == True&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -568,30 +565,29 @@ The &#34;stable&#34; release is currently 2023-05-15. Specify &#39;census_versio
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tiledbsoma</span>
 
-<span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">()</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
-    <span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+<span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
 
-    <span class="c1"># initialize lazy query</span>
-    <span class="n">query</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
-        <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
-        <span class="n">obs_query</span><span class="o">=</span><span class="n">tiledbsoma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span>
-            <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
-            <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
-            <span class="s2">&quot;and tissue_general == &#39;blood&#39; &quot;</span>
-            <span class="s2">&quot;and sex == &#39;female&#39; &quot;</span>
-            <span class="s2">&quot;and is_primary_data == True&quot;</span>
-        <span class="p">),</span>
-    <span class="p">)</span>
+<span class="c1"># initialize lazy query</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">axis_query</span><span class="p">(</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">obs_query</span><span class="o">=</span><span class="n">tiledbsoma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span>
+        <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;cell_type == &#39;natural killer cell&#39; &quot;</span>
+        <span class="s2">&quot;and disease == &#39;COVID-19&#39; &quot;</span>
+        <span class="s2">&quot;and tissue_general == &#39;blood&#39; &quot;</span>
+        <span class="s2">&quot;and sex == &#39;female&#39; &quot;</span>
+        <span class="s2">&quot;and is_primary_data == True&quot;</span>
+    <span class="p">),</span>
+<span class="p">)</span>
 
-    <span class="c1"># get iterator for X</span>
-    <span class="n">iterator</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">()</span>
+<span class="c1"># get iterator for X</span>
+<span class="n">iterator</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tables</span><span class="p">()</span>
 
-    <span class="c1"># iterate in chunks</span>
-    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+<span class="c1"># iterate in chunks</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
-        <span class="c1"># since this is a demo we stop right away</span>
-        <span class="k">break</span>
+    <span class="c1"># since this is a demo we stop right away</span>
+    <span class="k">break</span>
 </pre></div>
 </div>
 </div>

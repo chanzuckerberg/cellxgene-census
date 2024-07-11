@@ -257,9 +257,9 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cellxgene_census.experimental</span> <span class="kn">import</span> <span class="n">get_all_available_embeddings</span>
 
-<span class="n">census_version</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">CENSUS_VERSION</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
 
-<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">get_all_available_embeddings</span><span class="p">(</span><span class="n">census_version</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">get_all_available_embeddings</span><span class="p">(</span><span class="n">CENSUS_VERSION</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;embedding_name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;data_type&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -409,7 +409,7 @@ AxisArrays with keys: scgpt
         <span class="n">organism</span><span class="o">=</span><span class="n">EXPERIMENT_NAME</span><span class="p">,</span>
         <span class="n">measurement_name</span><span class="o">=</span><span class="n">MEASUREMENT_NAME</span><span class="p">,</span>
         <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;central nervous system&#39;&quot;</span><span class="p">,</span>
-        <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;soma_joinid&quot;</span><span class="p">]},</span>
+        <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;soma_joinid&quot;</span><span class="p">],</span>
         <span class="n">obs_embeddings</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;scgpt&quot;</span><span class="p">],</span>
     <span class="p">)</span>
 </pre></div>
@@ -545,12 +545,12 @@ AnnData object with n_obs × n_vars = 31780 × 60664
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span>
 
-<span class="n">obs_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="n">EXPERIMENT_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="n">EXPERIMENT_NAME</span><span class="p">,</span>
     <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;exocrine gland&#39;&quot;</span><span class="p">,</span>
     <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
 <span class="p">)</span>
-
-<span class="n">obs_df</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

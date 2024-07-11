@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="cellxgene.census">
 <title>Census Datasets example • cellxgene.census</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
@@ -15,75 +14,62 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Census Datasets example">
-<meta property="og:description" content="cellxgene.census">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]--><script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Census Datasets example">
+<script defer data-domain="chanzuckerberg.github.io/cellxgene-census" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">cellxgene.census</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.14.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.0</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="external-link nav-link" href="https://chanzuckerberg.github.io/cellxgene-census/">Main Census Site</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6>
-    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
-    <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6>
-    <a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a>
-    <a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a>
-    <a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a>
-    <a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a>
-    <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6>
-    <a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a>
-    <a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a>
-    <a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a>
-    <a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a>
-    <a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a>
-    <a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Use Census embeddings</h6></li>
+    <li><a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Explore and analyze the data</h6></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_census_info.html">Learning about the CZ CELLxGENE Census</a></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_summarize_axis_query.html">Summarizing cell and gene metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_data_integration.html">Integrating multi-dataset slices of data with Seurat</a></li>
+    <li><a class="dropdown-item" href="../articles/comp_bio_normalizing_full_gene_sequencing.html">Normalizing full-length gene sequencing data</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>cellxgene.census capabilities</h6></li>
+    <li><a class="dropdown-item" href="../articles/census_query_extract.html">Querying and fetching the single-cell data and cell/gene metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/census_citation_generation.html">Generating citations for Census slices</a></li>
+    <li><a class="dropdown-item" href="../articles/census_datasets.html">Census Datasets example</a></li>
+    <li><a class="dropdown-item" href="../articles/census_dataset_presence.html">Genes measured in each cell (dataset presence matrix)</a></li>
+    <li><a class="dropdown-item" href="../articles/census_compute_over_X.html">Computing on X using online (incremental) algorithms</a></li>
+    <li><a class="dropdown-item" href="../articles/census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+  </ul>
 </li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/chanzuckerberg/cellxgene-census/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/chanzuckerberg/cellxgene-census/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -91,7 +77,8 @@
 
 <script src="census_datasets_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Census Datasets example</h1>
+
+      <h1>Census Datasets example</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/chanzuckerberg/cellxgene-census/tree/main/api/r/cellxgene.census/vignettes/census_datasets.Rmd" class="external-link"><code>vignettes/census_datasets.Rmd</code></a></small>
@@ -121,8 +108,9 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">census_datasets</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_info"</span><span class="op">)</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"datasets"</span><span class="op">)</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">concat</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Table</span></span>
-<span><span class="co">#&gt; 651 rows x 9 columns</span></span>
+<span><span class="co">#&gt; 812 rows x 10 columns</span></span>
 <span><span class="co">#&gt; $soma_joinid &lt;int64 not null&gt;</span></span>
+<span><span class="co">#&gt; $citation &lt;large_string not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_id &lt;large_string not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_name &lt;large_string not null&gt;</span></span>
 <span><span class="co">#&gt; $collection_doi &lt;large_string not null&gt;</span></span>
@@ -140,264 +128,264 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span>  <span class="st">"dataset_total_cell_count"</span></span>
 <span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                              dataset_id</span></span>
-<span><span class="co">#&gt; 1  2bdd3a2c-2ff4-4314-adf3-8a06b797a33a</span></span>
-<span><span class="co">#&gt; 2  f5b0810c-1664-4a62-ad06-be1d9964aa8b</span></span>
-<span><span class="co">#&gt; 3  e4ddac12-f48f-4455-8e8d-c2a48a683437</span></span>
-<span><span class="co">#&gt; 4  e2808a6e-e2ea-41b9-b38c-4a08f1677f02</span></span>
-<span><span class="co">#&gt; 5  d01c9dff-abd1-4825-bf30-2eb2ba74597e</span></span>
-<span><span class="co">#&gt; 6  c3aa4f95-7a18-4a7d-8dd8-ca324d714363</span></span>
-<span><span class="co">#&gt; 7  be401db3-d732-408a-b0c4-71af0458b8ab</span></span>
-<span><span class="co">#&gt; 8  a5d5c529-8a1f-40b5-bda3-35208970070d</span></span>
-<span><span class="co">#&gt; 9  9c63201d-bfd9-41a8-bbbc-18d947556f3d</span></span>
-<span><span class="co">#&gt; 10 93cb76aa-a84b-4a92-8e6c-66a914e26d4c</span></span>
-<span><span class="co">#&gt; 11 8d1dd010-5cbc-43fb-83f8-e0de8e8517da</span></span>
-<span><span class="co">#&gt; 12 716a4acc-919e-4326-9672-ebe06ede84e6</span></span>
-<span><span class="co">#&gt; 13 5bdc423a-59e6-457d-aa01-debd2c9c564f</span></span>
-<span><span class="co">#&gt; 14 5346f9c6-755e-4336-94cc-38706ec00c2f</span></span>
-<span><span class="co">#&gt; 15 015c230d-650c-4527-870d-8a805849a382</span></span>
-<span><span class="co">#&gt; 16 d567b692-c374-4628-a508-8008f6778f22</span></span>
-<span><span class="co">#&gt; 17 cf83c98a-3791-4537-bbde-a719f6d73c13</span></span>
-<span><span class="co">#&gt; 18 738942eb-ac72-44ff-a64b-8943b5ecd8d9</span></span>
-<span><span class="co">#&gt; 19 f8d8b443-bca6-4c3c-9042-669dfb7f8030</span></span>
-<span><span class="co">#&gt; 20 f5be4b96-f5a3-4c3d-84ac-6f69daf744d5</span></span>
-<span><span class="co">#&gt; 21 dea1aa78-c0a2-413f-b375-f91cce49e4d0</span></span>
-<span><span class="co">#&gt; 22 92161459-9103-4379-ae34-73a38eee1d1d</span></span>
-<span><span class="co">#&gt; 23 5829c7ba-697f-418e-8b98-d605b192dc48</span></span>
-<span><span class="co">#&gt; 24 4dd1cd23-fc4d-4fd1-9709-602540f3ca6f</span></span>
-<span><span class="co">#&gt; 25 2856d06c-0ff9-4e01-bfc9-202b74d0b60f</span></span>
-<span><span class="co">#&gt; 26 251b1a7e-d050-4486-8d50-4c2619eb0f46</span></span>
-<span><span class="co">#&gt; 27 07760522-707a-4a1c-8891-dbd1226d6b27</span></span>
-<span><span class="co">#&gt; 28 9fcb0b73-c734-40a5-be9c-ace7eea401c9</span></span>
-<span><span class="co">#&gt; 29 1a38e762-2465-418f-b81c-6a4bce261c34</span></span>
-<span><span class="co">#&gt; 30 f16a8f4d-bc97-43c5-a2f6-bbda952e4c5c</span></span>
-<span><span class="co">#&gt; 31 94c41723-b2c4-4b59-a49a-64c9b851903e</span></span>
-<span><span class="co">#&gt; 32 6ceeaa86-9ceb-4582-b390-6d4dd6ff0572</span></span>
-<span><span class="co">#&gt; 33 9a64bf99-ebe5-4276-93a8-bee9dff1cd47</span></span>
-<span><span class="co">#&gt; 34 fc0ceb80-d2d9-47c1-9d78-b0e45c64c500</span></span>
-<span><span class="co">#&gt; 35 d0ea3ec4-0f3b-4649-9146-1c0b5f303a55</span></span>
-<span><span class="co">#&gt; 36 b8920ef5-7d22-497b-abca-a7a9eb76d79a</span></span>
-<span><span class="co">#&gt; 37 b1d37bbd-9ae4-4404-b2f9-f2fe66750e4e</span></span>
-<span><span class="co">#&gt; 38 a4e89c26-e8d4-4471-9b06-16a1405880f0</span></span>
-<span><span class="co">#&gt; 39 a190b2e9-3796-4785-9a2f-013e2a9a43e6</span></span>
-<span><span class="co">#&gt; 40 9ff9f9ba-016b-4cbb-8899-45dc20860b8b</span></span>
-<span><span class="co">#&gt; 41 9940f951-3dc0-4579-bbb2-2392786e59a3</span></span>
-<span><span class="co">#&gt; 42 74d584f0-74fc-482e-b944-e76f29c1ab85</span></span>
-<span><span class="co">#&gt; 43 6f7fd0f1-a2ed-4ff1-80d3-33dde731cbc3</span></span>
-<span><span class="co">#&gt; 44 6cda07c7-5d7a-41ba-9799-5bb73da25a60</span></span>
-<span><span class="co">#&gt; 45 646e3e87-e46b-4b12-85b5-8d8589e26088</span></span>
-<span><span class="co">#&gt; 46 6437bc9c-16cb-46c8-8f79-9a7384a0212a</span></span>
-<span><span class="co">#&gt; 47 58c43cc2-e00e-43c4-94eb-8501369264e1</span></span>
-<span><span class="co">#&gt; 48 53bc5729-6202-4351-bc99-1f36139e9dc4</span></span>
-<span><span class="co">#&gt; 49 44c83972-e5d2-4858-ac58-2df9f4bf564b</span></span>
-<span><span class="co">#&gt; 50 2ecc72f8-085f-4e86-8692-771f316c54f6</span></span>
-<span><span class="co">#&gt; 51 2e5a9b5d-d31b-4e9f-a179-d5d70ba459fb</span></span>
-<span><span class="co">#&gt; 52 1c9f5c6b-73da-4d17-95de-df080ffe0df1</span></span>
-<span><span class="co">#&gt; 53 100c6145-7b0e-4ba6-81c1-ffebed0d1ac4</span></span>
-<span><span class="co">#&gt; 54 0ed60482-a34f-4268-b576-d69cc30210f6</span></span>
-<span><span class="co">#&gt; 55 0eccaf0c-19d2-4900-9962-899378adf8be</span></span>
-<span><span class="co">#&gt; 56 04c94a7d-1133-42c9-bb48-c697bd302a8d</span></span>
-<span><span class="co">#&gt; 57 0374f03c-62e2-4859-8a14-acb00b0627d5</span></span>
-<span><span class="co">#&gt; 58 03181d87-4769-41e7-8c39-d9a81835f0d2</span></span>
-<span><span class="co">#&gt; 59 f171db61-e57e-4535-a06a-35d8b6ef8f2b</span></span>
-<span><span class="co">#&gt; 60 ecf2e08e-2032-4a9e-b466-b65b395f4a02</span></span>
-<span><span class="co">#&gt; 61 74cff64f-9da9-4b2a-9b3b-8a04a1598040</span></span>
-<span><span class="co">#&gt; 62 5af90777-6760-4003-9dba-8f945fec6fdf</span></span>
-<span><span class="co">#&gt; 63 bd65a70f-b274-4133-b9dd-0d1431b6af34</span></span>
-<span><span class="co">#&gt; 64 ff45e623-7f5f-46e3-b47d-56be0341f66b</span></span>
-<span><span class="co">#&gt; 65 f01bdd17-4902-40f5-86e3-240d66dd2587</span></span>
-<span><span class="co">#&gt; 66 e6a11140-2545-46bc-929e-da243eed2cae</span></span>
-<span><span class="co">#&gt; 67 e5c63d94-593c-4338-a489-e1048599e751</span></span>
-<span><span class="co">#&gt; 68 d8732da6-8d1d-42d9-b625-f2416c30054b</span></span>
-<span><span class="co">#&gt; 69 d77ec7d6-ef2e-49d6-9e79-05b7f8881484</span></span>
-<span><span class="co">#&gt; 70 cee11228-9f0b-4e57-afe2-cfe15ee56312</span></span>
-<span><span class="co">#&gt; 71 a357414d-2042-4eb5-95f0-c58604a18bdd</span></span>
-<span><span class="co">#&gt; 72 a2d4d33e-4c62-4361-b80a-9be53d2e50e8</span></span>
-<span><span class="co">#&gt; 73 a0754256-f44b-4c4a-962c-a552e47d3fdc</span></span>
-<span><span class="co">#&gt; 74 983d5ec9-40e8-4512-9e65-a572a9c486cb</span></span>
-<span><span class="co">#&gt; 75 7357cee7-9f7f-4ab0-8cec-90de8f047e38</span></span>
-<span><span class="co">#&gt; 76 6ec405bb-4727-4c6d-ab4e-01fe489af7ea</span></span>
-<span><span class="co">#&gt; 77 6d41668c-168c-4500-b06a-4674ccf3e19d</span></span>
-<span><span class="co">#&gt; 78 5e5e7a2f-8f1c-42ac-90dc-b4f80f38e84c</span></span>
-<span><span class="co">#&gt; 79 55cf0ea3-9d2b-4294-871e-bb4b49a79fc7</span></span>
-<span><span class="co">#&gt; 80 4f1555bc-4664-46c3-a606-78d34dd10d92</span></span>
-<span><span class="co">#&gt; 81 2ba40233-8576-4dec-a5f1-2adfa115e2dc</span></span>
-<span><span class="co">#&gt; 82 2423ce2c-3149-4cca-a2ff-cf682ea29b5f</span></span>
-<span><span class="co">#&gt; 83 1c9eb291-6d31-47e1-96b2-129b5e1ae64f</span></span>
-<span><span class="co">#&gt; 84 18eb630b-a754-4111-8cd4-c24ec80aa5ec</span></span>
-<span><span class="co">#&gt; 85 0d2ee4ac-05ee-40b2-afb6-ebb584caa867</span></span>
-<span><span class="co">#&gt;                                                                                                                               dataset_title</span></span>
-<span><span class="co">#&gt; 1                                                                                                                   Human: Great apes study</span></span>
-<span><span class="co">#&gt; 2                                                                                                           Dissection: Angular gyrus (AnG)</span></span>
-<span><span class="co">#&gt; 3                                                                                                    Supercluster: CGE-derived interneurons</span></span>
-<span><span class="co">#&gt; 4                                                                                                   Dissection: Primary auditory cortex(A1)</span></span>
-<span><span class="co">#&gt; 5                                                                                      Supercluster: Deep layer (non-IT) excitatory neurons</span></span>
-<span><span class="co">#&gt; 6                                                                                            Supercluster: IT-projecting excitatory neurons</span></span>
-<span><span class="co">#&gt; 7                                                                                               Dissection: Anterior cingulate cortex (ACC)</span></span>
-<span><span class="co">#&gt; 8                                                                                                   Human Multiple Cortical Areas SMART-seq</span></span>
-<span><span class="co">#&gt; 9                                                                                                    Supercluster: MGE-derived interneurons</span></span>
-<span><span class="co">#&gt; 10                                                                                            Dissection: Primary somatosensory cortex (S1)</span></span>
-<span><span class="co">#&gt; 11                                                                                                    Dissection: Primary visual cortex(V1)</span></span>
-<span><span class="co">#&gt; 12                                                                                         Dissection: Dorsolateral prefrontal cortex (DFC)</span></span>
-<span><span class="co">#&gt; 13                                                                                                    Dissection: Primary motor cortex (M1)</span></span>
-<span><span class="co">#&gt; 14                                                                                                         Supercluster: Non-neuronal cells</span></span>
-<span><span class="co">#&gt; 15                                                                                                  Dissection: Middle temporal gyrus (MTG)</span></span>
-<span><span class="co">#&gt; 16                                                                       Combined single cell and single nuclei RNA-Seq data - Heart Global</span></span>
-<span><span class="co">#&gt; 17                                                                                                    Global dataset of infant KMT2Ar B-ALL</span></span>
-<span><span class="co">#&gt; 18                                                                                     Normal immune cells landscape of infant KMT2Ar B-ALL</span></span>
-<span><span class="co">#&gt; 19                                                                                                      Human Human Microglia 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 20                                                                                                    Human Endothelial cells 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 21                                                                                                 Human Nurr-Negative Nuclei 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 22                                                                                                 Human Nurr-Positive Nuclei 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 23                                                                                                     Human Oligodendrocytes 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 24                                                                                                            Human OPC Cells 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 25                                                                                                           Human DA Neurons 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 26                                                                                                       Human Non-DA Neurons 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 27                                                                                                           Human Astrocytes 10x scRNA-seq</span></span>
-<span><span class="co">#&gt; 28                                                                              An Integrated Single Cell Meta-atlas of Human Periodontitis</span></span>
-<span><span class="co">#&gt; 29                                                                Single-cell analysis of prenatal and postnatal human cortical development</span></span>
-<span><span class="co">#&gt; 30                                                       All - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse</span></span>
-<span><span class="co">#&gt; 31                                                                                    snRNA-seq of human anterior and posterior hippocampus</span></span>
-<span><span class="co">#&gt; 32                                                                                                                        3-prime FGID data</span></span>
-<span><span class="co">#&gt; 33                                                      Single-Cell RNA Sequencing of Breast Tissues: Cell Subtypes and Cancer Risk Factors</span></span>
-<span><span class="co">#&gt; 34                                                                            Sst Chodl - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 35                                                                                  L6b - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 36                                                                              L5/6 NP - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 37                                                                                 Sncg - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 38                                                                                L6 CT - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 39                                                                           Lamp5 Lhx6 - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 40                                                                                L4 IT - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 41                                                                      Oligodendrocyte - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 42                                                                            Astrocyte - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 43                                                                       Whole Taxonomy - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 44                                                                                L5 ET - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 45                                                                              L2/3 IT - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 46                                                                                L6 IT - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 47                                                                                  OPC - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 48                                                                                  Vip - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 49                                                                                L5 IT - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 50                                                                          Endothelial - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 51                                                                                 VLMC - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 52                                                                           L6 IT Car3 - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 53                                                                        Microglia-PVM - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 54                                                                                Lamp5 - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 55                                                                                 Pax6 - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 56                                                                                Pvalb - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 57                                                                           Chandelier - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 58                                                                                  Sst - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
-<span><span class="co">#&gt; 59                                                                                                                   donor_p13_trophoblasts</span></span>
-<span><span class="co">#&gt; 60                                                                                                                  All donors trophoblasts</span></span>
-<span><span class="co">#&gt; 61                                                                                                     All donors all cell states (in vivo)</span></span>
-<span><span class="co">#&gt; 62                                                                     Single-cell transcriptomic datasets of Renal cell carcinoma patients</span></span>
-<span><span class="co">#&gt; 63 Single-cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy</span></span>
-<span><span class="co">#&gt; 64                                                                                                                Tabula Sapiens - Pancreas</span></span>
-<span><span class="co">#&gt; 65                                                                                                          Tabula Sapiens - Salivary_Gland</span></span>
-<span><span class="co">#&gt; 66                                                                                                                   Tabula Sapiens - Heart</span></span>
-<span><span class="co">#&gt; 67                                                                                                                 Tabula Sapiens - Bladder</span></span>
-<span><span class="co">#&gt; 68                                                                                                                 Tabula Sapiens - Trachea</span></span>
-<span><span class="co">#&gt; 69                                                                                                                Tabula Sapiens - Prostate</span></span>
-<span><span class="co">#&gt; 70                                                                                                                  Tabula Sapiens - Spleen</span></span>
-<span><span class="co">#&gt; 71                                                                                                         Tabula Sapiens - Small_Intestine</span></span>
-<span><span class="co">#&gt; 72                                                                                                             Tabula Sapiens - Vasculature</span></span>
-<span><span class="co">#&gt; 73                                                                                                                     Tabula Sapiens - Eye</span></span>
-<span><span class="co">#&gt; 74                                                                                                                   Tabula Sapiens - Blood</span></span>
-<span><span class="co">#&gt; 75                                                                                                         Tabula Sapiens - Large_Intestine</span></span>
-<span><span class="co">#&gt; 76                                                                                                                  Tabula Sapiens - Uterus</span></span>
-<span><span class="co">#&gt; 77                                                                                                                   Tabula Sapiens - Liver</span></span>
-<span><span class="co">#&gt; 78                                                                                                                     Tabula Sapiens - Fat</span></span>
-<span><span class="co">#&gt; 79                                                                                                                  Tabula Sapiens - Tongue</span></span>
-<span><span class="co">#&gt; 80                                                                                                             Tabula Sapiens - Bone_Marrow</span></span>
-<span><span class="co">#&gt; 81                                                                                                                 Tabula Sapiens - Mammary</span></span>
-<span><span class="co">#&gt; 82                                                                                                                  Tabula Sapiens - Kidney</span></span>
-<span><span class="co">#&gt; 83                                                                                                                  Tabula Sapiens - Muscle</span></span>
-<span><span class="co">#&gt; 84                                                                                                              Tabula Sapiens - Lymph_Node</span></span>
-<span><span class="co">#&gt; 85                                                                                                                    Tabula Sapiens - Lung</span></span>
+<span><span class="co">#&gt; 1  0895c838-e550-48a3-a777-dbcd35d30272</span></span>
+<span><span class="co">#&gt; 2  00ff600e-6e2e-4d76-846f-0eec4f0ae417</span></span>
+<span><span class="co">#&gt; 3  bdacc907-7c26-419f-8808-969eab3ca2e8</span></span>
+<span><span class="co">#&gt; 4  a5d95a42-0137-496f-8a60-101e17f263c8</span></span>
+<span><span class="co">#&gt; 5  d3566d6a-a455-4a15-980f-45eb29114cab</span></span>
+<span><span class="co">#&gt; 6  de17ac25-550a-4018-be75-bbb485a0636e</span></span>
+<span><span class="co">#&gt; 7  9f1049ac-f8b7-45ad-8e31-6e96c3e5058f</span></span>
+<span><span class="co">#&gt; 8  703f00e6-b996-48e5-bc34-00c41b9876f4</span></span>
+<span><span class="co">#&gt; 9  e347396c-a7ff-4691-9f7a-99a43555ca18</span></span>
+<span><span class="co">#&gt; 10 524e045e-e74c-4e00-9884-d5c3bef3d862</span></span>
+<span><span class="co">#&gt; 11 a49d9109-1d0c-4b36-8139-19aa9a83428c</span></span>
+<span><span class="co">#&gt; 12 0c9a8cfb-6649-4d52-b418-6d8e56bd7afe</span></span>
+<span><span class="co">#&gt; 13 06b91002-4d3d-4d2e-8484-20c3b31e232c</span></span>
+<span><span class="co">#&gt; 14 4993d61c-1d04-4630-9c61-8d9431f39adc</span></span>
+<span><span class="co">#&gt; 15 b94e3bdf-a385-49cc-b312-7a63cc28b77a</span></span>
+<span><span class="co">#&gt; 16 df287f8d-f50d-4620-ab96-489d559e6adc</span></span>
+<span><span class="co">#&gt; 17 eec804b9-2ae5-44f0-a1b5-d721e21257de</span></span>
+<span><span class="co">#&gt; 18 f9ad5649-f372-43e1-a3a8-423383e5a8a2</span></span>
+<span><span class="co">#&gt; 19 a810e511-c18b-4b2a-8fdf-98a6a0d433a7</span></span>
+<span><span class="co">#&gt; 20 ea426edb-4e86-4c53-ab17-5b952d94a31e</span></span>
+<span><span class="co">#&gt; 21 04d87de6-c20a-4186-8884-f47dba20b0a4</span></span>
+<span><span class="co">#&gt; 22 b25f3834-69b3-4d87-a272-3938432d1f30</span></span>
+<span><span class="co">#&gt; 23 94423ec1-21f8-40e8-b5c9-c3ea82350ca4</span></span>
+<span><span class="co">#&gt; 24 2f6a20f1-173d-4b8d-860b-c47ffea120fa</span></span>
+<span><span class="co">#&gt; 25 da684768-fb01-455b-9f0f-b63a3e2f844f</span></span>
+<span><span class="co">#&gt; 26 a65bcc2d-4243-44c1-a262-ab7dcddfcf86</span></span>
+<span><span class="co">#&gt; 27 75a881cf-5d88-46e2-bf9b-97e5cbc1bd56</span></span>
+<span><span class="co">#&gt; 28 0c86f0de-ddcb-454c-b00b-37feb69e7da1</span></span>
+<span><span class="co">#&gt; 29 9f049476-2431-4645-a2d6-f6e85892b603</span></span>
+<span><span class="co">#&gt; 30 0380ddce-c31b-422a-88fe-34a1945bd949</span></span>
+<span><span class="co">#&gt; 31 1009f384-b12d-448e-ba9f-1b7d2ecfbb4e</span></span>
+<span><span class="co">#&gt; 32 3b6ed41e-10a1-47dd-b995-8cde7d041fd6</span></span>
+<span><span class="co">#&gt; 33 e763ed0d-0e5a-4b8e-9514-6da3d9e47956</span></span>
+<span><span class="co">#&gt; 34 d95ab381-2b7c-4885-b168-0097ed4e397f</span></span>
+<span><span class="co">#&gt; 35 b3a5a10f-b1cb-4e8e-abce-bf345448625b</span></span>
+<span><span class="co">#&gt; 36 e5f5d954-cf0e-4bd8-9346-8d1ddf15a08b</span></span>
+<span><span class="co">#&gt; 37 62de80d7-e6c4-4ff0-ad4c-d3d36f57cb93</span></span>
+<span><span class="co">#&gt; 38 9cfee1e6-b24f-433d-a269-f01841655d6a</span></span>
+<span><span class="co">#&gt; 39 4269074c-f2c1-4d88-b2c3-0946f59d5449</span></span>
+<span><span class="co">#&gt; 40 7d98cc44-b090-4dc8-804f-2750c84fe9d7</span></span>
+<span><span class="co">#&gt; 41 c3d381b2-3104-444e-8ad5-d3524407bbb6</span></span>
+<span><span class="co">#&gt; 42 66d15835-5dc8-4e96-b0eb-f48971cb65e8</span></span>
+<span><span class="co">#&gt; 43 8a554710-08bc-4005-87cd-da9675bdc2e7</span></span>
+<span><span class="co">#&gt; 44 ce009dc1-ac57-4386-b72f-5c575701c253</span></span>
+<span><span class="co">#&gt; 45 dbf0bd35-87f8-4b25-bc90-a3c54f379907</span></span>
+<span><span class="co">#&gt; 46 6de332e1-465e-4243-9412-6fdc7497e99d</span></span>
+<span><span class="co">#&gt; 47 faed4f71-6b50-4fc7-bd1c-8f385dccfdce</span></span>
+<span><span class="co">#&gt; 48 c8f83821-a242-4ed7-86e9-7da077f5d348</span></span>
+<span><span class="co">#&gt; 49 731e6380-879f-4b0b-9a1f-2150208852ef</span></span>
+<span><span class="co">#&gt; 50 774c18c5-efa1-4dc5-9e5e-2c824bab2e34</span></span>
+<span><span class="co">#&gt; 51 ea786a06-5855-48b7-80d7-0313a21a2044</span></span>
+<span><span class="co">#&gt; 52 524179b0-b406-4723-9c46-293ffa77ca81</span></span>
+<span><span class="co">#&gt; 53 cbd62079-bed8-4aa1-9659-670f9cb51f9d</span></span>
+<span><span class="co">#&gt; 54 3e87b1fa-472a-401c-8fa8-f31c10437d5f</span></span>
+<span><span class="co">#&gt; 55 f16f4108-7873-4035-9989-3748da1a7ff1</span></span>
+<span><span class="co">#&gt; 56 58679288-9ecc-4647-9781-12a3a8f8c6fd</span></span>
+<span><span class="co">#&gt; 57 cdefb878-7f00-4b9d-9eda-b3652cfac0c8</span></span>
+<span><span class="co">#&gt; 58 1492eb6b-7d50-4c4d-94ac-c801a7d5555c</span></span>
+<span><span class="co">#&gt; 59 bdf69f8d-5a96-4d6f-a9f5-9ee0e33597b7</span></span>
+<span><span class="co">#&gt; 60 ee195b7d-184d-4dfa-9b1c-51a7e601ac11</span></span>
+<span><span class="co">#&gt; 61 9b188f26-c8e1-4a78-af15-622a35a371fc</span></span>
+<span><span class="co">#&gt; 62 f6dafdd1-d746-407e-8019-4470e02d4cbd</span></span>
+<span><span class="co">#&gt; 63 24066994-8183-488d-b037-ef6bb524af39</span></span>
+<span><span class="co">#&gt; 64 84242d25-f656-4ca6-8e8d-f3d2beeba11f</span></span>
+<span><span class="co">#&gt; 65 8f1bc86b-7976-4826-8602-f5266160ad86</span></span>
+<span><span class="co">#&gt; 66 2fc9c59f-3cfd-48d9-9b23-e369ea31bff3</span></span>
+<span><span class="co">#&gt; 67 470565f2-5afc-456a-b617-18e4496c04fd</span></span>
+<span><span class="co">#&gt; 68 4c6f9f26-5470-455b-8933-c408232fbf56</span></span>
+<span><span class="co">#&gt; 69 b07e5164-baf6-43d2-bdba-5a249d0da879</span></span>
+<span><span class="co">#&gt; 70 bf176af2-4432-4391-9b35-e21bd86ca4f8</span></span>
+<span><span class="co">#&gt; 71 7b3368a5-c1a0-4973-9e75-d95b4150c7da</span></span>
+<span><span class="co">#&gt; 72 f75f2ff4-2884-4c2d-b375-70de37a34507</span></span>
+<span><span class="co">#&gt; 73 2ecc72f8-085f-4e86-8692-771f316c54f6</span></span>
+<span><span class="co">#&gt; 74 cec9f9a5-8832-437d-99af-fb8237cde54b</span></span>
+<span><span class="co">#&gt; 75 de4e7a0c-91b2-44e4-b382-87da74c9efb6</span></span>
+<span><span class="co">#&gt; 76 20d87640-4be8-487f-93d4-dce38378d00f</span></span>
+<span><span class="co">#&gt; 77 81e91ff8-f619-4ad1-a0c3-b45e1dc63f68</span></span>
+<span><span class="co">#&gt; 78 03d5794d-cde9-4769-a1a9-b3899d2b1d87</span></span>
+<span><span class="co">#&gt; 79 e2529f66-d051-4670-b34a-7dca4e474f9f</span></span>
+<span><span class="co">#&gt; 80 dc30c3ec-46d6-4cd8-8ec1-b544a3d0f503</span></span>
+<span><span class="co">#&gt; 81 389b1fd4-2b65-4f60-baba-feeb17507665</span></span>
+<span><span class="co">#&gt; 82 cd77258f-b08b-4c89-b93f-6e6f146b1a4d</span></span>
+<span><span class="co">#&gt; 83 04b0eb97-d816-44bb-93a5-8b2968791aa0</span></span>
+<span><span class="co">#&gt; 84 51f476f7-b24d-42f3-8871-7dab3fa35e96</span></span>
+<span><span class="co">#&gt; 85 6dafb698-7a53-4699-ad13-1b5e2c164be7</span></span>
+<span><span class="co">#&gt;                                                                                                                           dataset_title</span></span>
+<span><span class="co">#&gt; 1                                                                                                          Healthy human liver: B cells</span></span>
+<span><span class="co">#&gt; 2                                                                                                  Human tonsil nonlymphoid cells scRNA</span></span>
+<span><span class="co">#&gt; 3                             Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: SFG microglia</span></span>
+<span><span class="co">#&gt; 4                                                                                                      Steady-state B cells - scRNA-seq</span></span>
+<span><span class="co">#&gt; 5                                                                                      blood and bone marrow from a healthy young donor</span></span>
+<span><span class="co">#&gt; 6                                                                                                            Myeloid cells of human eye</span></span>
+<span><span class="co">#&gt; 7                              Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: EC microglia</span></span>
+<span><span class="co">#&gt; 8                                                                                                                                   PNS</span></span>
+<span><span class="co">#&gt; 9                                                                                 Stellate cells from human healthy donor liver samples</span></span>
+<span><span class="co">#&gt; 10                                                                                          Healthy human liver: hepatic stellate cells</span></span>
+<span><span class="co">#&gt; 11                                                                                                     Healthy human liver: lymphocytes</span></span>
+<span><span class="co">#&gt; 12                                                                                Cholangiocytes from human healthy donor liver samples</span></span>
+<span><span class="co">#&gt; 13                            Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: EC astrocytes</span></span>
+<span><span class="co">#&gt; 14                                                                                       B cells from human healthy donor liver samples</span></span>
+<span><span class="co">#&gt; 15                           Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: SFG astrocytes</span></span>
+<span><span class="co">#&gt; 16             Urethral luminal epithelia are castration-insensitive cells of the proximal prostate - Human Fibromuscular Stromal Cells</span></span>
+<span><span class="co">#&gt; 17                                                                           74 years old female - Airway Wash (5 days post-intubation)</span></span>
+<span><span class="co">#&gt; 18                       Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: EC oligodendrocyte</span></span>
+<span><span class="co">#&gt; 19             Urethral luminal epithelia are castration-insensitive cells of the proximal prostate - Mouse Fibromuscular Stromal Cells</span></span>
+<span><span class="co">#&gt; 20                      A Cellular Anatomy of the Normal Adult Human Prostate and Prostatic Urethra - Human Fibromuscular Stromal Cells</span></span>
+<span><span class="co">#&gt; 21                                                         A single-cell and spatially-resolved atlas of human breast cancers - B_cells</span></span>
+<span><span class="co">#&gt; 22                                                                            82 years old female - Airway Wash (1 day post-intubation)</span></span>
+<span><span class="co">#&gt; 23                                                                                                                UMAP of Myeloid cells</span></span>
+<span><span class="co">#&gt; 24                                                                            Horizontal cells of the human fovea and peripheral retina</span></span>
+<span><span class="co">#&gt; 25                                                                                         UMAP visualization of fibroblast subclusters</span></span>
+<span><span class="co">#&gt; 26                                                                           74 years old female - Airway Wash (7 days post-intubation)</span></span>
+<span><span class="co">#&gt; 27                    Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: EC inhibitory neurons</span></span>
+<span><span class="co">#&gt; 28                                                    A single-cell and spatially-resolved atlas of human breast cancers - Plasmablasts</span></span>
+<span><span class="co">#&gt; 29                                                                                                  Healthy human liver: cholangiocytes</span></span>
+<span><span class="co">#&gt; 30                                          Aorta &lt;U+2014&gt; A single-cell transcriptomic atlas characterizes ageing tissues in the mouse</span></span>
+<span><span class="co">#&gt; 31                                                                                     Neuronal &lt;U+2014&gt; Cells of the adult human heart</span></span>
+<span><span class="co">#&gt; 32                                                                                                     Healthy human liver: macrophages</span></span>
+<span><span class="co">#&gt; 33                           Platelet sub_clusters of COVID-19 Immune Altas: Integration of 5 public COVID-19 PBMC single-cell datasets</span></span>
+<span><span class="co">#&gt; 34                                                                                                              Cone cells of human eye</span></span>
+<span><span class="co">#&gt; 35                                                                                                       15 leukemic bone marrow donors</span></span>
+<span><span class="co">#&gt; 36                                                                             49 years old male - Airway Wash (3 days post-intubation)</span></span>
+<span><span class="co">#&gt; 37                                                                           66 years old female - Airway Wash (4 days post-intubation)</span></span>
+<span><span class="co">#&gt; 38                                                                                        Retinal pigment epithelial cells of human eye</span></span>
+<span><span class="co">#&gt; 39                                            Spatiotemporal analysis of human intestinal development at single-cell resolution: Immune</span></span>
+<span><span class="co">#&gt; 40                                                                              49 years old male - Airway Wash (1 day post-intubation)</span></span>
+<span><span class="co">#&gt; 41                                                                                                        Horizontal cells of human eye</span></span>
+<span><span class="co">#&gt; 42       Single cell transcriptome analysis of human pancreas reveals transcriptional signatures of aging and somatic mutation patterns</span></span>
+<span><span class="co">#&gt; 43                                                                            82 years old female - Fresh PBMCs (1 day post-intubation)</span></span>
+<span><span class="co">#&gt; 44                                                                           74 years old female - Airway Wash (6 days post-intubation)</span></span>
+<span><span class="co">#&gt; 45                                                                           66 years old female - Airway Wash (3 days post-intubation)</span></span>
+<span><span class="co">#&gt; 46                                                                                                           e12.5 thalamic progenitors</span></span>
+<span><span class="co">#&gt; 47                                                                                                            UMAP of Endothelial cells</span></span>
+<span><span class="co">#&gt; 48                                                                                                            white matter - astrocytes</span></span>
+<span><span class="co">#&gt; 49                                                                           74 years old female - Airway Wash (8 days post-intubation)</span></span>
+<span><span class="co">#&gt; 50                                                                                     Infiltrating Neoplastic Cells Human Glioblastoma</span></span>
+<span><span class="co">#&gt; 51                                                                           66 years old female - Fresh PBMCs (3 days post-intubation)</span></span>
+<span><span class="co">#&gt; 52                                   Kidney - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
+<span><span class="co">#&gt; 53                                      Diaphragm &lt;U+2014&gt; A single-cell transcriptomic atlas characterizes ageing tissues in the mouse</span></span>
+<span><span class="co">#&gt; 54                                                                        Endothelial - MTG: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
+<span><span class="co">#&gt; 55                                                                                    Supercluster: Committed oligodendrocyte precursor</span></span>
+<span><span class="co">#&gt; 56                    Spatiotemporal analysis of human intestinal development at single-cell resolution: Myofibroblasts and Mesothelium</span></span>
+<span><span class="co">#&gt; 57                                                                                                                               Cilium</span></span>
+<span><span class="co">#&gt; 58                   Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: SFG inhibitory neurons</span></span>
+<span><span class="co">#&gt; 59                                                                                                 DCM/ACM heart cell atlas: Adipocytes</span></span>
+<span><span class="co">#&gt; 60                                                                                                                       Adult duodenum</span></span>
+<span><span class="co">#&gt; 61                                                                                                            UMAP of Fibroblasts cells</span></span>
+<span><span class="co">#&gt; 62                                                                                                                              B cells</span></span>
+<span><span class="co">#&gt; 63                      Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: SFG oligodendrocyte</span></span>
+<span><span class="co">#&gt; 64                                                                                                             white matter - microglia</span></span>
+<span><span class="co">#&gt; 65                           Brown adipose tissue &lt;U+2014&gt; A single-cell transcriptomic atlas characterizes ageing tissues in the mouse</span></span>
+<span><span class="co">#&gt; 66                                                                                             Mature kidney dataset: non PT parenchyma</span></span>
+<span><span class="co">#&gt; 67                                                                                         Dissection: Midbrain (RN) - Red Nucleus - RN</span></span>
+<span><span class="co">#&gt; 68 chRCC - Single-cell analyses of renal cell cancers reveal insights into tumor microenvironment, cell of origin, and therapy response</span></span>
+<span><span class="co">#&gt; 69                                                                              A Single-Cell Transcriptome Atlas of the Human Pancreas</span></span>
+<span><span class="co">#&gt; 70                                                                              Healthy human liver: liver sinusoidal endothelial cells</span></span>
+<span><span class="co">#&gt; 71                                                                                                                              B cells</span></span>
+<span><span class="co">#&gt; 72                                                                                   Adipocytes &lt;U+2014&gt; Cells of the adult human heart</span></span>
+<span><span class="co">#&gt; 73                                                                      Endothelial - DLPFC: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
+<span><span class="co">#&gt; 74                                                                                                  Retinal ganglion cells of human eye</span></span>
+<span><span class="co">#&gt; 75                          Large intestine - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - Smart-seq2</span></span>
+<span><span class="co">#&gt; 76                                                                                                        Mature kidney dataset: immune</span></span>
+<span><span class="co">#&gt; 77                                                                          Sst Chodl - MTG: Seattle Alzheimer's Disease Atlas (SEA-AD)</span></span>
+<span><span class="co">#&gt; 78                                                                                                     UMAP of Plasma and B-Cells cells</span></span>
+<span><span class="co">#&gt; 79                                                             A Single-Cell Atlas of Mouse White Adipose Tissue - Mouse vascular cells</span></span>
+<span><span class="co">#&gt; 80                                                                                                               Oligodendrocytes in MS</span></span>
+<span><span class="co">#&gt; 81                                                                                                                          vasculature</span></span>
+<span><span class="co">#&gt; 82                    Molecular characterization of selectively vulnerable neurons in Alzheimer&lt;U+2019&gt;s Disease: EC excitatory neurons</span></span>
+<span><span class="co">#&gt; 83                                         Spatiotemporal analysis of human intestinal development at single-cell resolution: Pericytes</span></span>
+<span><span class="co">#&gt; 84                                                                           74 years old female - Airway Wash (4 days post-intubation)</span></span>
+<span><span class="co">#&gt; 85                                                                                                              Supercluster: Ependymal</span></span>
 <span><span class="co">#&gt;    dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 1                    156285</span></span>
-<span><span class="co">#&gt; 2                    110752</span></span>
-<span><span class="co">#&gt; 3                    129495</span></span>
-<span><span class="co">#&gt; 4                    139054</span></span>
-<span><span class="co">#&gt; 5                     92969</span></span>
-<span><span class="co">#&gt; 6                    638941</span></span>
-<span><span class="co">#&gt; 7                    135462</span></span>
-<span><span class="co">#&gt; 8                     49417</span></span>
-<span><span class="co">#&gt; 9                    185477</span></span>
-<span><span class="co">#&gt; 10                   153159</span></span>
-<span><span class="co">#&gt; 11                   241077</span></span>
-<span><span class="co">#&gt; 12                   113339</span></span>
-<span><span class="co">#&gt; 13                   114605</span></span>
-<span><span class="co">#&gt; 14                   108940</span></span>
-<span><span class="co">#&gt; 15                   148374</span></span>
-<span><span class="co">#&gt; 16                   493236</span></span>
-<span><span class="co">#&gt; 17                   128588</span></span>
-<span><span class="co">#&gt; 18                    36313</span></span>
-<span><span class="co">#&gt; 19                    33041</span></span>
-<span><span class="co">#&gt; 20                    14903</span></span>
-<span><span class="co">#&gt; 21                   104097</span></span>
-<span><span class="co">#&gt; 22                    80576</span></span>
-<span><span class="co">#&gt; 23                   178815</span></span>
-<span><span class="co">#&gt; 24                    13691</span></span>
-<span><span class="co">#&gt; 25                    22048</span></span>
-<span><span class="co">#&gt; 26                    91479</span></span>
-<span><span class="co">#&gt; 27                    33506</span></span>
-<span><span class="co">#&gt; 28                   105918</span></span>
-<span><span class="co">#&gt; 29                   700391</span></span>
-<span><span class="co">#&gt; 30                   356213</span></span>
-<span><span class="co">#&gt; 31                   129905</span></span>
-<span><span class="co">#&gt; 32                    89849</span></span>
-<span><span class="co">#&gt; 33                    52681</span></span>
-<span><span class="co">#&gt; 34                     1772</span></span>
-<span><span class="co">#&gt; 35                    17996</span></span>
-<span><span class="co">#&gt; 36                    18154</span></span>
-<span><span class="co">#&gt; 37                    23640</span></span>
-<span><span class="co">#&gt; 38                    27454</span></span>
-<span><span class="co">#&gt; 39                    21603</span></span>
-<span><span class="co">#&gt; 40                    76195</span></span>
-<span><span class="co">#&gt; 41                   136076</span></span>
-<span><span class="co">#&gt; 42                    82936</span></span>
-<span><span class="co">#&gt; 43                  1309414</span></span>
-<span><span class="co">#&gt; 44                     3848</span></span>
-<span><span class="co">#&gt; 45                   317116</span></span>
-<span><span class="co">#&gt; 46                    44174</span></span>
-<span><span class="co">#&gt; 47                    27670</span></span>
-<span><span class="co">#&gt; 48                    95014</span></span>
-<span><span class="co">#&gt; 49                    97173</span></span>
-<span><span class="co">#&gt; 50                     2496</span></span>
-<span><span class="co">#&gt; 51                     4619</span></span>
-<span><span class="co">#&gt; 52                    13007</span></span>
-<span><span class="co">#&gt; 53                    40625</span></span>
-<span><span class="co">#&gt; 54                    52828</span></span>
-<span><span class="co">#&gt; 55                     8984</span></span>
-<span><span class="co">#&gt; 56                   109618</span></span>
-<span><span class="co">#&gt; 57                    14871</span></span>
-<span><span class="co">#&gt; 58                    71545</span></span>
-<span><span class="co">#&gt; 59                    31497</span></span>
-<span><span class="co">#&gt; 60                    67070</span></span>
-<span><span class="co">#&gt; 61                   286326</span></span>
-<span><span class="co">#&gt; 62                   270855</span></span>
-<span><span class="co">#&gt; 63                   167283</span></span>
-<span><span class="co">#&gt; 64                    13497</span></span>
-<span><span class="co">#&gt; 65                    27199</span></span>
-<span><span class="co">#&gt; 66                    11505</span></span>
-<span><span class="co">#&gt; 67                    24583</span></span>
-<span><span class="co">#&gt; 68                     9522</span></span>
-<span><span class="co">#&gt; 69                    16375</span></span>
-<span><span class="co">#&gt; 70                    34004</span></span>
-<span><span class="co">#&gt; 71                    12467</span></span>
-<span><span class="co">#&gt; 72                    16037</span></span>
-<span><span class="co">#&gt; 73                    10650</span></span>
-<span><span class="co">#&gt; 74                    50115</span></span>
-<span><span class="co">#&gt; 75                    13680</span></span>
-<span><span class="co">#&gt; 76                     7124</span></span>
-<span><span class="co">#&gt; 77                     5007</span></span>
-<span><span class="co">#&gt; 78                    20263</span></span>
-<span><span class="co">#&gt; 79                    15020</span></span>
-<span><span class="co">#&gt; 80                    12297</span></span>
-<span><span class="co">#&gt; 81                    11375</span></span>
-<span><span class="co">#&gt; 82                     9641</span></span>
-<span><span class="co">#&gt; 83                    30746</span></span>
-<span><span class="co">#&gt; 84                    53275</span></span>
-<span><span class="co">#&gt; 85                    35682</span></span>
-<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 566 rows ]</span></span></code></pre></div>
+<span><span class="co">#&gt; 1                       146</span></span>
+<span><span class="co">#&gt; 2                       363</span></span>
+<span><span class="co">#&gt; 3                      3799</span></span>
+<span><span class="co">#&gt; 4                      1324</span></span>
+<span><span class="co">#&gt; 5                     15502</span></span>
+<span><span class="co">#&gt; 6                       395</span></span>
+<span><span class="co">#&gt; 7                      5572</span></span>
+<span><span class="co">#&gt; 8                       649</span></span>
+<span><span class="co">#&gt; 9                      1417</span></span>
+<span><span class="co">#&gt; 10                     1374</span></span>
+<span><span class="co">#&gt; 11                     2346</span></span>
+<span><span class="co">#&gt; 12                     1011</span></span>
+<span><span class="co">#&gt; 13                     5500</span></span>
+<span><span class="co">#&gt; 14                     1250</span></span>
+<span><span class="co">#&gt; 15                     5970</span></span>
+<span><span class="co">#&gt; 16                     1295</span></span>
+<span><span class="co">#&gt; 17                     1324</span></span>
+<span><span class="co">#&gt; 18                     8168</span></span>
+<span><span class="co">#&gt; 19                     1647</span></span>
+<span><span class="co">#&gt; 20                     2113</span></span>
+<span><span class="co">#&gt; 21                     3206</span></span>
+<span><span class="co">#&gt; 22                     1074</span></span>
+<span><span class="co">#&gt; 23                     3282</span></span>
+<span><span class="co">#&gt; 24                     2868</span></span>
+<span><span class="co">#&gt; 25                     2303</span></span>
+<span><span class="co">#&gt; 26                      810</span></span>
+<span><span class="co">#&gt; 27                     5331</span></span>
+<span><span class="co">#&gt; 28                     3524</span></span>
+<span><span class="co">#&gt; 29                     1861</span></span>
+<span><span class="co">#&gt; 30                      906</span></span>
+<span><span class="co">#&gt; 31                     3961</span></span>
+<span><span class="co">#&gt; 32                     3977</span></span>
+<span><span class="co">#&gt; 33                     7274</span></span>
+<span><span class="co">#&gt; 34                     1378</span></span>
+<span><span class="co">#&gt; 35                    31586</span></span>
+<span><span class="co">#&gt; 36                     2487</span></span>
+<span><span class="co">#&gt; 37                     2598</span></span>
+<span><span class="co">#&gt; 38                     1635</span></span>
+<span><span class="co">#&gt; 39                     2199</span></span>
+<span><span class="co">#&gt; 40                     2489</span></span>
+<span><span class="co">#&gt; 41                     1875</span></span>
+<span><span class="co">#&gt; 42                     2544</span></span>
+<span><span class="co">#&gt; 43                     4232</span></span>
+<span><span class="co">#&gt; 44                     2834</span></span>
+<span><span class="co">#&gt; 45                     3434</span></span>
+<span><span class="co">#&gt; 46                     1789</span></span>
+<span><span class="co">#&gt; 47                     3951</span></span>
+<span><span class="co">#&gt; 48                     3596</span></span>
+<span><span class="co">#&gt; 49                     2065</span></span>
+<span><span class="co">#&gt; 50                     3589</span></span>
+<span><span class="co">#&gt; 51                     4792</span></span>
+<span><span class="co">#&gt; 52                     1833</span></span>
+<span><span class="co">#&gt; 53                     1858</span></span>
+<span><span class="co">#&gt; 54                     1973</span></span>
+<span><span class="co">#&gt; 55                     4720</span></span>
+<span><span class="co">#&gt; 56                     2833</span></span>
+<span><span class="co">#&gt; 57                     1641</span></span>
+<span><span class="co">#&gt; 58                     7506</span></span>
+<span><span class="co">#&gt; 59                     2576</span></span>
+<span><span class="co">#&gt; 60                     5200</span></span>
+<span><span class="co">#&gt; 61                     5754</span></span>
+<span><span class="co">#&gt; 62                     3699</span></span>
+<span><span class="co">#&gt; 63                    15772</span></span>
+<span><span class="co">#&gt; 64                     3851</span></span>
+<span><span class="co">#&gt; 65                     2223</span></span>
+<span><span class="co">#&gt; 66                     4620</span></span>
+<span><span class="co">#&gt; 67                     4714</span></span>
+<span><span class="co">#&gt; 68                     2576</span></span>
+<span><span class="co">#&gt; 69                     2126</span></span>
+<span><span class="co">#&gt; 70                     6289</span></span>
+<span><span class="co">#&gt; 71                     4138</span></span>
+<span><span class="co">#&gt; 72                     3799</span></span>
+<span><span class="co">#&gt; 73                     2496</span></span>
+<span><span class="co">#&gt; 74                     1777</span></span>
+<span><span class="co">#&gt; 75                     1887</span></span>
+<span><span class="co">#&gt; 76                     7803</span></span>
+<span><span class="co">#&gt; 77                     1310</span></span>
+<span><span class="co">#&gt; 78                     9015</span></span>
+<span><span class="co">#&gt; 79                     7632</span></span>
+<span><span class="co">#&gt; 80                    17799</span></span>
+<span><span class="co">#&gt; 81                      959</span></span>
+<span><span class="co">#&gt; 82                     8362</span></span>
+<span><span class="co">#&gt; 83                     4163</span></span>
+<span><span class="co">#&gt; 84                     4147</span></span>
+<span><span class="co">#&gt; 85                     5882</span></span>
+<span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 727 rows ]</span></span></code></pre></div>
 <p>The sum of cell counts across all datasets should match the number of cells across all SOMA experiments (human, mouse).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_data</span> <span class="op">&lt;-</span> <span class="va">census</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"census_data"</span><span class="op">)</span></span>
@@ -405,13 +393,13 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_experiments</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $homo_sapiens</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
-<span><span class="co">#&gt;   uri: s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/census_data/homo_sapiens </span></span>
+<span><span class="co">#&gt;   uri: s3://cellxgene-census-public-us-west-2/cell-census/2024-07-01/soma/census_data/homo_sapiens </span></span>
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms* </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $mus_musculus</span></span>
 <span><span class="co">#&gt; &lt;SOMAExperiment&gt;</span></span>
-<span><span class="co">#&gt;   uri: s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/census_data/mus_musculus </span></span>
+<span><span class="co">#&gt;   uri: s3://cellxgene-census-public-us-west-2/cell-census/2024-07-01/soma/census_data/mus_musculus </span></span>
 <span><span class="co">#&gt;   arrays: obs* </span></span>
 <span><span class="co">#&gt;   groups: ms*</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -420,32 +408,33 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Found"</span>, <span class="va">experiments_total_cells</span>, <span class="st">"cells in all experiments."</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Found 68683222 cells in all experiments."</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
+<span><span class="co">#&gt; [1] "Found 115556140 cells in all experiments."</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Found"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_total_cell_count</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="st">"cells in all datasets."</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Found 68683222 cells in all datasets."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Found 115556140 cells in all datasets."</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fetching-the-expression-data-from-a-single-dataset">Fetching the expression data from a single dataset<a class="anchor" aria-label="anchor" href="#fetching-the-expression-data-from-a-single-dataset"></a>
 </h2>
 <p>Let’s pick one dataset to slice out of the census, and turn into a Seurat in-memory object. (This requires the <code>Seurat</code> package to have been installed beforehand.)</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census_datasets</span><span class="op">[</span><span class="va">census_datasets</span><span class="op">$</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;     soma_joinid                        collection_id    collection_name</span></span>
-<span><span class="co">#&gt; 581         580 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis</span></span>
-<span><span class="co">#&gt;                collection_doi                           dataset_id</span></span>
-<span><span class="co">#&gt; 581 10.1038/s41586-020-2496-1 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149</span></span>
-<span><span class="co">#&gt;                       dataset_version_id</span></span>
-<span><span class="co">#&gt; 581 ff352f35-58a2-4962-b716-649d1f9e9f44</span></span>
+<span><span class="co">#&gt;     soma_joinid</span></span>
+<span><span class="co">#&gt; 514         513</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                          citation</span></span>
+<span><span class="co">#&gt; 514 Publication: https://doi.org/10.1038/s41586-020-2496-1 Dataset Version: https://datasets.cellxgene.cziscience.com/64d581c0-2683-44f4-b65b-019e679a33e8.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/0b9d8a04-bb9d-44da-aa27-705bb65b54eb</span></span>
+<span><span class="co">#&gt;                            collection_id    collection_name            collection_doi</span></span>
+<span><span class="co">#&gt; 514 0b9d8a04-bb9d-44da-aa27-705bb65b54eb Tabula Muris Senis 10.1038/s41586-020-2496-1</span></span>
+<span><span class="co">#&gt;                               dataset_id                   dataset_version_id</span></span>
+<span><span class="co">#&gt; 514 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149 64d581c0-2683-44f4-b65b-019e679a33e8</span></span>
 <span><span class="co">#&gt;                                                                                        dataset_title</span></span>
-<span><span class="co">#&gt; 581 Bone marrow - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
+<span><span class="co">#&gt; 514 Bone marrow - A single-cell transcriptomic atlas characterizes ageing tissues in the mouse - 10x</span></span>
 <span><span class="co">#&gt;                             dataset_h5ad_path dataset_total_cell_count</span></span>
-<span><span class="co">#&gt; 581 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad                    40220</span></span></code></pre></div>
+<span><span class="co">#&gt; 514 0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad                    40220</span></span></code></pre></div>
 <p>Create a query on the mouse experiment, “RNA” measurement, for the <code>dataset_id</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/single-cell-data/TileDB-SOMA" class="external-link">"tiledbsoma"</a></span><span class="op">)</span></span>
 <span><span class="va">obs_query</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/tiledbsoma/man/SOMAAxisQuery.html" class="external-link">SOMAAxisQuery</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  value_filter <span class="op">=</span> <span class="st">"dataset_id == '0bd1a1de-3aee-40e0-b2ec-86c7a30c7149'"</span></span>
@@ -457,28 +446,27 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <span><span class="va">dataset_seurat</span> <span class="op">&lt;-</span> <span class="va">expt_query</span><span class="op">$</span><span class="fu">to_seurat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dataset_seurat</span><span class="op">)</span></span>
 <span><span class="co">#&gt; An object of class Seurat </span></span>
-<span><span class="co">#&gt; 52417 features across 40220 samples within 1 assay </span></span>
-<span><span class="co">#&gt; Active assay: RNA (52417 features, 0 variable features)</span></span>
-<span><span class="co">#&gt;  2 layers present: counts, data</span></span>
-<span><span class="co">#&gt;  1 dimensional reduction calculated: scvi</span></span></code></pre></div>
+<span><span class="co">#&gt; 52437 features across 40220 samples within 1 assay </span></span>
+<span><span class="co">#&gt; Active assay: RNA (52437 features, 0 variable features)</span></span>
+<span><span class="co">#&gt;  2 layers present: counts, data</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="downloading-the-original-source-h5ad-file-of-a-dataset">Downloading the original source H5AD file of a dataset<a class="anchor" aria-label="anchor" href="#downloading-the-original-source-h5ad-file-of-a-dataset"></a>
 </h2>
 <p>You can use the <code><a href="../reference/get_source_h5ad_uri.html">cellxgene.census::get_source_h5ad_uri()</a></code> API to fetch a URI pointing to the H5AD associated with this <code>dataset_id</code>. This is the same H5AD you can download from <a href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebooks/api_demo/census_datasets.ipynb" class="external-link">CZ CELLxGENE Discover</a>, and may contain additional data-submitter provided information which was not included in the Census.</p>
 <p>To do this you can fetch the location in the cloud or directly download to your system.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Option 1: Direct download</span></span>
 <span><span class="fu"><a href="../reference/download_source_h5ad.html">download_source_h5ad</a></span><span class="op">(</span></span>
 <span>  dataset_id <span class="op">=</span> <span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span>,</span>
 <span>  file <span class="op">=</span> <span class="st">"/tmp/Tabula_Muris_Senis-bone_marrow.h5ad"</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Option 2: Get location and download via preferred method</span></span>
 <span><span class="fu"><a href="../reference/get_source_h5ad_uri.html">get_source_h5ad_uri</a></span><span class="op">(</span><span class="st">"0bd1a1de-3aee-40e0-b2ec-86c7a30c7149"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $uri</span></span>
-<span><span class="co">#&gt; [1] "s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
+<span><span class="co">#&gt; [1] "s3://cellxgene-census-public-us-west-2/cell-census/2024-07-01/h5ads/0bd1a1de-3aee-40e0-b2ec-86c7a30c7149.h5ad"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $s3_region</span></span>
 <span><span class="co">#&gt; [1] "us-west-2"</span></span></code></pre></div>
@@ -487,12 +475,12 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 <h3 id="close-the-census">Close the census<a class="anchor" aria-label="anchor" href="#close-the-census"></a>
 </h3>
 <p>After use, the census object should be closed to release memory and other resources.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">census</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>This also closes all SOMA objects accessed via the top-level <code>census</code>. Closing can be automated using <code>on.exit(census$close(), add = TRUE)</code> immediately after <code>census &lt;- open_soma()</code>.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -503,15 +491,15 @@ https://github.com/chanzuckerberg/cellxgene-census/blob/main/api/python/notebook
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

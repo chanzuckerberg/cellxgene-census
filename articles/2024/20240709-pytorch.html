@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>First stable iteration of Census (SOMA) PyTorch loaders &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Benchmarks of single-cell Census models" href="20240710_embedding_metrics_dec_2023_lts.html" />
+    <link rel="prev" title="Census supports categoricals for cell metadata" href="20240404-categoricals.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.14.1
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../articles.html">What’s new?</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../articles.html#id1">2023</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../articles.html#id2">2024</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="20240404-categoricals.html">Census supports categoricals for cell metadata</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">First stable iteration of Census (SOMA) PyTorch loaders</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#census-pytorch-loaders-usage">Census PyTorch loaders usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#census-pytorch-loaders-main-features">Census PyTorch loaders main features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="20240710_embedding_metrics_dec_2023_lts.html">Benchmarks of single-cell Census models</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../articles.html">What’s new?</a></li>
+      <li class="breadcrumb-item active">First stable iteration of Census (SOMA) PyTorch loaders</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/articles/2024/20240709-pytorch.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="first-stable-iteration-of-census-soma-pytorch-loaders">
+<h1>First stable iteration of Census (SOMA) PyTorch loaders<a class="headerlink" href="#first-stable-iteration-of-census-soma-pytorch-loaders" title="Permalink to this heading"></a></h1>
+<p><em>Published:</em> <em>July 11th, 2024</em></p>
+<p><em>By:</em> <em><a class="reference external" href="mailto:ebezzi&#37;&#52;&#48;chanzuckerberg&#46;com">Emanuele Bezzi</a>, <a class="reference external" href="mailto:pgarcia-nieto&#37;&#52;&#48;chanzuckerberg&#46;com">Pablo Garcia-Nieto</a>, <a class="reference external" href="mailto:psridharan&#37;&#52;&#48;chanzuckerberg&#46;com">Prathap Sridharan</a>, <a class="reference external" href="mailto:ryan&#46;williams&#37;&#52;&#48;tiledb&#46;com">Ryan Williams</a></em></p>
+<p>The Census team is excited to share the release of Census PyTorch loaders that work out-of-the-box for memory-efficient training across any slice of the &gt;70M cells in Census.</p>
+<p>In 2023, we released a beta version of the loaders and we have observed interest from users to utilize them with Census or their own data. For example <a class="reference external" href="https://lamin.ai/blog/arrayloader-benchmarks">Wolf et al.</a> performed comparisons across different training approaches and found our loaders to be ideal for <em>uncached</em> training of Census data, albeit with some caveats.</p>
+<p>We have continued the development of the loaders in collaboration with our partners at TileDB, and we are happy to announce this release as the first stable iteration. We hope the loaders can accelerate the development of large-scale models of single-cell data by leveraging the following main features:</p>
+<ul class="simple">
+<li><p><strong>Out-of-the-box training on all or any slice of Census data.</strong></p></li>
+<li><p><strong>Efficient memory usage with out-of-core training.</strong></p></li>
+<li><p><strong>Calibrated shuffling of observations (cells).</strong></p></li>
+<li><p><strong>Cloud-based or local data access.</strong></p></li>
+<li><p><strong>Increased training speed.</strong></p></li>
+<li><p><strong>Custom data encoders.</strong></p></li>
+</ul>
+<p>Keep on reading for usage and more details on the main loader features.</p>
+<section id="census-pytorch-loaders-usage">
+<h2>Census PyTorch loaders usage<a class="headerlink" href="#census-pytorch-loaders-usage" title="Permalink to this heading"></a></h2>
+<p>The loaders are ready to use for PyTorch modeling via the specialized Data Pipe <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html#cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe"><code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code></a>, which takes advantage of the out-of-core data access TileDB-SOMA offers.</p>
+<p>Please follow the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/notebooks/experimental/pytorch.html">Training a PyTorch Model</a> tutorial for a full reproducible example to train a logistic regression on cell type labels.</p>
+<p>In short, the following shows you how to initialize the loader to train a model on a small subset of cells. First, you can initialize a <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> to train a model on tongue cells as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cellxgene_census.experimental.ml</span> <span class="k">as</span> <span class="nn">census_ml</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">tiledbsoma</span> <span class="k">as</span> <span class="nn">soma</span>
+
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
+
+<span class="n">experiment_datapipe</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">ExperimentDataPipe</span><span class="p">(</span>
+    <span class="n">experiment</span><span class="p">,</span>
+    <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+    <span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+    <span class="n">obs_query</span><span class="o">=</span><span class="n">soma</span><span class="o">.</span><span class="n">AxisQuery</span><span class="p">(</span><span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue_general == &#39;tongue&#39; and is_primary_data == True&quot;</span><span class="p">),</span>
+    <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you can perform any PyTorch operations and training.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Splitting training and test sets</span>
+<span class="n">train_datapipe</span><span class="p">,</span> <span class="n">test_datapipe</span> <span class="o">=</span> <span class="n">experiment_datapipe</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Creating data loader</span>
+<span class="n">experiment_dataloader</span> <span class="o">=</span> <span class="n">census_ml</span><span class="o">.</span><span class="n">experiment_dataloader</span><span class="p">(</span><span class="n">train_datapipe</span><span class="p">)</span>
+
+<span class="c1"># Training a PyTorch model</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MODEL</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="census-pytorch-loaders-main-features">
+<h2>Census PyTorch loaders main features<a class="headerlink" href="#census-pytorch-loaders-main-features" title="Permalink to this heading"></a></h2>
+<section id="out-of-the-box-training-on-all-or-any-slice-of-census-data">
+<h3>Out-of-the-box training on all or any slice of Census data<a class="headerlink" href="#out-of-the-box-training-on-all-or-any-slice-of-census-data" title="Permalink to this heading"></a></h3>
+<p>Since the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> inherits from the <a class="reference external" href="https://pytorch.org/data/main/torchdata.datapipes.iter.html">PyTorch Iterable-style DataPipe</a> it can be readily used with PyTorch models.</p>
+<p>The single-cell expression data is encoded in numerical tensors, and for supervised training the cell metadata can be automatically transformed with a default encoder, or with custom user-defined encoders (see below).</p>
+</section>
+<section id="efficient-memory-usage-with-out-of-core-training">
+<h3>Efficient memory usage with out-of-core training<a class="headerlink" href="#efficient-memory-usage-with-out-of-core-training" title="Permalink to this heading"></a></h3>
+<p>Thanks to the underlying backend of Census — TileDB-SOMA — the PyTorch loaders take advantage of incremental data materialization of fixed and small size to keep memory usage constant throughout training.</p>
+<p>In addition, data is eagerly fetched while batches go through training so that compute is never idle or waiting for data to be loaded. This feature is particularly useful when fetching Census data directly from the cloud.</p>
+<p>Memory usage is defined by the parameters <code class="docutils literal notranslate"><span class="pre">soma_chunk_size</span></code> and <code class="docutils literal notranslate"><span class="pre">shuffle_chunk_count</span></code> - see below for a full description on how these should be tuned.</p>
+</section>
+<section id="calibrated-shuffling-of-observations-cells">
+<h3>Calibrated shuffling of observations (cells)<a class="headerlink" href="#calibrated-shuffling-of-observations-cells" title="Permalink to this heading"></a></h3>
+<p>Shuffling along efficient out-of-core data fetching is a challenge. In general, increasing randomness of shuffling leads to slower data fetching.</p>
+<p>In the first iteration of the loaders, shuffling was done through large blocks of data of user-defined size. This shuffling strategy led to non-random distribution of observations per training batch, becasue Census has a non-random data structure (observations from the same datasets are adjacent to one another) thus training loss was unstable (Figure 1).</p>
+<p><strong>Now we have implemented a scatter-gather approach</strong>, whereby multiple chunks of data are fetched randomly from Census, then a number of chunks are concatenated into a block and all observations within the block are randomly shuffled. Adjusting the size and number of chunks per block leads to well-calibrated shuffling with stable training loss (Figure 2) while maintaining efficient data fetching (Figure 3).</p>
+<p>The balance between memory usage, efficiency, and level of randomness can be adjusted with the parameters <code class="docutils literal notranslate"><span class="pre">soma_chunk_size</span></code> and <code class="docutils literal notranslate"><span class="pre">shuffle_chunk_count</span></code>. Increasing <code class="docutils literal notranslate"><span class="pre">shuffle_chunk_count</span></code> will improve randomness, as more scattered chunks will be collected before the pool is randomized. Increasing <code class="docutils literal notranslate"><span class="pre">soma_chunk_size</span></code> will improve I/O efficiency while decreasing it will improve memory usage. We recommend a default of <code class="docutils literal notranslate"><span class="pre">soma_chunk_size=64,</span> <span class="pre">shuffle_chunk_count=2000</span></code> as we determined this configuration yields a good balance.</p>
+<figure class="align-center" id="id1" style="width: 80%">
+<img alt="Census PyTorch loaders shuffling" src="../../_images/20240709-pytorch-fig-loss-before.png" />
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1. Training loss was unstable with the previous shuffling strategy</strong>. Based on a trial scVI run on 64K Census cells.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id2" style="width: 80%">
+<img alt="Census PyTorch loaders callibrated shuffling" src="../../_images/20240709-pytorch-fig-loss-after.png" />
+<figcaption>
+<p><span class="caption-text"><strong>Figure 2. Training loss is well-calibrated with the current scatter-gather shuffling strategy.</strong> Based on a trial scVI run on 250K Census cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="increased-training-speed">
+<h3>Increased training speed<a class="headerlink" href="#increased-training-speed" title="Permalink to this heading"></a></h3>
+<p>We have made improvements to the loaders to reduce the amount of data transformations required from data fetching to model training. One such important change is to encode the expression data as a dense matrix immediately after the data is retrieved from disk/cloud.</p>
+<p>In our benchmarks, we found that densifying data increases training speed ~3X while maintaining relatively constant memory usage (Figure 3). For this reason, we have disable the intermediate data processing in sparse format unless Torch Sparse Tensors are requested via the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code> parameter <code class="docutils literal notranslate"><span class="pre">return_sparse_X</span></code>.</p>
+<figure class="align-center" id="id3" style="width: 80%">
+<img alt="Census PyTorch loaders benchmark" src="../../_images/20240709-pytorch-fig-benchmark.png" />
+<figcaption>
+<p><span class="caption-text"><strong>Figure 3. Benchmark of memory usage and speed of data processing during modeling, default parameters lead to 3K+ samples/sec with 27GB of memory.</strong> The benchmark was done processing 4M cells out of a 10M-cell Census, data was fetched from the cloud (S3). “Method” indicates the expression matrix encoding, circles are dense (np.array) and squares are sparse (scipy.csr). Size indicates the total number of cells per processing block (max cells materialized at any given time) and color is the number of individual randomly grabbed chunks composing a processing block, higher chunks per block lead to better shuffling. Data was fetched until modeling step, but no model was trained.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>We repeated the benchmark in Figure 3 in different conditions encompassing varying number of total cells and multiple epochs, please <a class="reference external" href="https://github.com/ryan-williams/arrayloader-benchmarks">follow this link for the full benchmark report and code.</a>.</p>
+<p>When comparing dense vs sparse processing in an end-to-end training exercise with scVI, we also observed slight increased speed with the dense approach and comparable memory usage to sparse processing (Figure 4). However in this full training example the differences were less substantial, highlighting that other model-specific factors during the training phase will contribute to memory and speed performance.</p>
+<figure class="align-center" id="id4" style="width: 80%">
+<img alt="Census scVI PyTorch run" src="../../_images/20240709-pytorch-fig-scvi.png" />
+<figcaption>
+<p><span class="caption-text"><strong>Figure 4. Trial scVI training run with default parameters of the Census Pytorch loaders, highlighting increased speed of dense vs sparse data processing.</strong> Training was done on 5684805 mouse cells for 1 epoch on a g4dn.16xlarge EC2 machine.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="custom-data-encoders">
+<h3>Custom data encoders<a class="headerlink" href="#custom-data-encoders" title="Permalink to this heading"></a></h3>
+<p>For maximum flexibility, users can provide custom encoders for the cell metadata enabling custom transformations or interactions between different metadata variables.</p>
+<p>To use custom encoders you need to instantiate the desired encoder via the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/_autosummary/cellxgene_census.experimental.ml.encoders.Encoder.html#cellxgene_census.experimental.ml.encoders.Encoder">Encoder</a> class and pass it to the <code class="docutils literal notranslate"><span class="pre">encoders</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">ExperimentDataPipe</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="20240404-categoricals.html" class="btn btn-neutral float-left" title="Census supports categoricals for cell metadata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="20240710_embedding_metrics_dec_2023_lts.html" class="btn btn-neutral float-right" title="Benchmarks of single-cell Census models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+
+  
+
+  
+  
+    
+   
+
+</body>
+</html>

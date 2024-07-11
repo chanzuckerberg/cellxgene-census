@@ -254,6 +254,15 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/anaconda3/envs/census_latest/lib/python3.10/site-packages/tiledb/cloud/config.py:96: UserWarning: You must first login before you can run commands. Please run tiledb.cloud.login.
+  warnings.warn(
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -287,43 +296,43 @@
       <th>0</th>
       <td>0</td>
       <td>census_schema_version</td>
-      <td>1.3.0</td>
+      <td>2.1.0</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1</td>
       <td>census_build_date</td>
-      <td>2024-01-01</td>
+      <td>2024-06-21</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2</td>
       <td>dataset_schema_version</td>
-      <td>4.0.0</td>
+      <td>5.1.0</td>
     </tr>
     <tr>
       <th>3</th>
       <td>3</td>
       <td>total_cell_count</td>
-      <td>75694072</td>
+      <td>117056090</td>
     </tr>
     <tr>
       <th>4</th>
       <td>4</td>
       <td>unique_cell_count</td>
-      <td>45846761</td>
+      <td>61555904</td>
     </tr>
     <tr>
       <th>5</th>
       <td>5</td>
       <td>number_donors_homo_sapiens</td>
-      <td>16292</td>
+      <td>17978</td>
     </tr>
     <tr>
       <th>6</th>
       <td>6</td>
       <td>number_donors_mus_musculus</td>
-      <td>2153</td>
+      <td>4255</td>
     </tr>
   </tbody>
 </table>
@@ -345,36 +354,64 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0      Dataset Version: https://datasets.cellxgene.cz...
-1      Dataset Version: https://datasets.cellxgene.cz...
-2      Dataset Version: https://datasets.cellxgene.cz...
-3      Dataset Version: https://datasets.cellxgene.cz...
-4      Publication: https://doi.org/10.1002/ctm2.1356...
+0      Publication: https://doi.org/10.1002/hep4.1854...
+1      Publication: https://doi.org/10.1126/sciimmuno...
+2      Publication: https://doi.org/10.1038/s41593-02...
+3      Publication: https://doi.org/10.1038/s41467-02...
+4      Publication: https://doi.org/10.1038/s41590-02...
                              ...
-695    Publication: https://doi.org/10.1038/s41586-02...
-696    Publication: https://doi.org/10.1038/s41586-02...
-697    Publication: https://doi.org/10.1016/j.isci.20...
-698    Publication: https://doi.org/10.1371/journal.p...
-699    Publication: https://doi.org/10.1016/j.isci.20...
-Name: citation, Length: 700, dtype: object
+826    Publication: https://doi.org/10.1038/s41586-02...
+827    Publication: https://doi.org/10.1101/2023.05.0...
+828    Publication: https://doi.org/10.1101/2023.05.0...
+829    Publication: https://doi.org/10.1038/s41586-02...
+830    Publication: https://doi.org/10.1038/s41586-02...
+Name: citation, Length: 831, dtype: object
+</pre></div></div>
+</div>
+<p>For cross-ref style citations you can look at the column <code class="docutils literal notranslate"><span class="pre">&quot;collection_doi_label&quot;</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">datasets</span><span class="p">[</span><span class="s2">&quot;collection_doi_label&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0      Andrews et al. (2022) Hepatology Communications
+1                     King et al. (2021) Sci. Immunol.
+2                      Leng et al. (2021) Nat Neurosci
+3            Rodríguez-Ubreva et al. (2022) Nat Commun
+4                     Triana et al. (2021) Nat Immunol
+                            ...
+826                           Qiu et al. (2024) Nature
+827                      Gabitto et al. (2023) bioRxiv
+828                      Gabitto et al. (2023) bioRxiv
+829                           Qiu et al. (2024) Nature
+830                           Qiu et al. (2024) Nature
+Name: collection_doi_label, Length: 831, dtype: object
 </pre></div></div>
 </div>
 <p>And now we can use the column <code class="docutils literal notranslate"><span class="pre">&quot;dataset_id&quot;</span></code> present in both the dataset table and the Census cell metadata to create citation strings for any Census slice.</p>
 <section id="Via-cell-metadata-query">
 <h3>Via cell metadata query<a class="headerlink" href="#Via-cell-metadata-query" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Query cell metadata</span>
-<span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-    <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue == &#39;cardiac atrium&#39;&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
+<span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">value_filter</span><span class="o">=</span><span class="s2">&quot;tissue == &#39;cardiac atrium&#39;&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">cell_metadata</span> <span class="o">=</span> <span class="n">cell_metadata</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
 
 <span class="c1"># Get a citation string for the slice</span>
 <span class="n">slice_datasets</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="n">datasets</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">cell_metadata</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">])]</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">slice_datasets</span><span class="p">[</span><span class="s2">&quot;citation&quot;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">slice_datasets</span><span class="p">[</span><span class="s2">&quot;citation&quot;</span><span class="p">]),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -383,24 +420,40 @@ Name: citation, Length: 700, dtype: object
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/4866a804-37eb-436f-8c87-9cd585260061.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/981bcf57-30cb-4a85-b905-e04373432fef.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/bfd80f12-725c-4482-ad7f-1ed2b4909b0d.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/07900e47-7ab4-48d4-a26e-abdd010f4bbf.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/e6df8a57-f54f-413a-9d4d-dee03294d778.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/50a18e6a-797b-40bd-aa07-6ed50a1f2cf6.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/8d599205-5c51-4b50-9d48-3dec31238587.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/cb872c2c-64a4-405f-96c3-03124405cc6c.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/f6065c51-bd26-4aa5-a05d-2805aeea48d9.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/3149e7d3-1ae4-4b59-a54b-73e9f591b699.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/8cdbf790-4d29-4f46-9aef-21adfb2e21da.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/dbcbe0a6-918a-4440-9a56-6d03f0f22df5.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">slice_datasets</span><span class="p">[</span><span class="s2">&quot;collection_doi_label&quot;</span><span class="p">]),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The Tabula Sapiens Consortium* et al. (2022) Science
 </pre></div></div>
 </div>
 </section>
 <section id="Via-AnnData-query">
 <h3>Via AnnData query<a class="headerlink" href="#Via-AnnData-query" title="Permalink to this heading"></a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fetch an AnnData object</span>
@@ -410,12 +463,12 @@ Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://da
     <span class="n">measurement_name</span><span class="o">=</span><span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
     <span class="n">obs_value_filter</span><span class="o">=</span><span class="s2">&quot;tissue == &#39;cardiac atrium&#39;&quot;</span><span class="p">,</span>
     <span class="n">var_value_filter</span><span class="o">=</span><span class="s2">&quot;feature_name == &#39;MYBPC3&#39;&quot;</span><span class="p">,</span>
-    <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]},</span>
+    <span class="n">obs_column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">],</span>
 <span class="p">)</span>
 
 <span class="c1"># Get a citation string for the slice</span>
 <span class="n">slice_datasets</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="n">datasets</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">])]</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">slice_datasets</span><span class="p">[</span><span class="s2">&quot;citation&quot;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">slice_datasets</span><span class="p">[</span><span class="s2">&quot;citation&quot;</span><span class="p">]),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -424,22 +477,38 @@ Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://da
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/4866a804-37eb-436f-8c87-9cd585260061.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/981bcf57-30cb-4a85-b905-e04373432fef.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/bfd80f12-725c-4482-ad7f-1ed2b4909b0d.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/07900e47-7ab4-48d4-a26e-abdd010f4bbf.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/e6df8a57-f54f-413a-9d4d-dee03294d778.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/50a18e6a-797b-40bd-aa07-6ed50a1f2cf6.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/8d599205-5c51-4b50-9d48-3dec31238587.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/cb872c2c-64a4-405f-96c3-03124405cc6c.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/f6065c51-bd26-4aa5-a05d-2805aeea48d9.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/3149e7d3-1ae4-4b59-a54b-73e9f591b699.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
 
-Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/8cdbf790-4d29-4f46-9aef-21adfb2e21da.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+Publication: https://doi.org/10.1126/science.abl4896 Dataset Version: https://datasets.cellxgene.cziscience.com/dbcbe0a6-918a-4440-9a56-6d03f0f22df5.h5ad curated and distributed by CZ CELLxGENE Discover in Collection: https://cellxgene.cziscience.com/collections/e5f58829-1a66-40b5-a624-9046778e74f5
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">slice_datasets</span><span class="p">[</span><span class="s2">&quot;collection_doi_label&quot;</span><span class="p">]),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The Tabula Sapiens Consortium* et al. (2022) Science
 </pre></div></div>
 </div>
 <p>And don’t forget to close the Census handle</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">census</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>

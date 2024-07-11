@@ -1,0 +1,33 @@
+﻿cellxgene\_census.experimental.ml.encoders.BatchEncoder
+=======================================================
+
+.. currentmodule:: cellxgene_census.experimental.ml.encoders
+
+.. autoclass:: BatchEncoder
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BatchEncoder.__init__
+      ~BatchEncoder.fit
+      ~BatchEncoder.inverse_transform
+      ~BatchEncoder.transform
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BatchEncoder.classes_
+      ~BatchEncoder.columns
+      ~BatchEncoder.name
+   
+   

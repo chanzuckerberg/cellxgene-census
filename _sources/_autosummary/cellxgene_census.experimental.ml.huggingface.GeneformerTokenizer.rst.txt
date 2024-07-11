@@ -37,11 +37,14 @@
    .. autosummary::
    
       ~GeneformerTokenizer.indexer
+      ~GeneformerTokenizer.model_cls_token
+      ~GeneformerTokenizer.model_eos_token
       ~GeneformerTokenizer.n_obs
       ~GeneformerTokenizer.n_vars
       ~GeneformerTokenizer.obs_column_names
       ~GeneformerTokenizer.max_input_tokens
-      ~GeneformerTokenizer.model_gene_ids
+      ~GeneformerTokenizer.special_token
+      ~GeneformerTokenizer.model_gene_map
       ~GeneformerTokenizer.model_gene_tokens
       ~GeneformerTokenizer.model_gene_medians
    

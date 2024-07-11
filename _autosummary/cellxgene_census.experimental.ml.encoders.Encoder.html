@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cellxgene_census.experimental.ml.encoders.Encoder &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cellxgene_census.experimental.ml.encoders.LabelEncoder" href="cellxgene_census.experimental.ml.encoders.LabelEncoder.html" />
+    <link rel="prev" title="cellxgene_census.experimental.ml.pytorch.Stats" href="cellxgene_census.experimental.ml.pytorch.Stats.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    v1.14.1
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../python-api.html">Python API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#open-retrieve-cell-census-data">Open/retrieve Cell Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#get-slice-as-anndata">Get slice as AnnData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#feature-presence-matrix">Feature presence matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#versioning-of-cell-census-builds">Versioning of Cell Census builds</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../python-api.html#experimental-machine-learning">Experimental: Machine Learning</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.pytorch.experiment_dataloader.html">cellxgene_census.experimental.ml.pytorch.experiment_dataloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html">cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.pytorch.Stats.html">cellxgene_census.experimental.ml.pytorch.Stats</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cellxgene_census.experimental.ml.encoders.Encoder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cellxgene_census.experimental.ml.encoders.Encoder"><code class="docutils literal notranslate"><span class="pre">Encoder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.encoders.LabelEncoder.html">cellxgene_census.experimental.ml.encoders.LabelEncoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.encoders.BatchEncoder.html">cellxgene_census.experimental.ml.encoders.BatchEncoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder.html">cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer.html">cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-processing">Experimental: Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python-api.html#experimental-embeddings">Experimental: Embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Python tutorials</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../python-api.html">Python API</a></li>
+      <li class="breadcrumb-item active">cellxgene_census.experimental.ml.encoders.Encoder</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/cellxgene_census.experimental.ml.encoders.Encoder.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="cellxgene-census-experimental-ml-encoders-encoder">
+<h1>cellxgene_census.experimental.ml.encoders.Encoder<a class="headerlink" href="#cellxgene-census-experimental-ml-encoders-encoder" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="cellxgene_census.experimental.ml.encoders.Encoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cellxgene_census.experimental.ml.encoders.</span></span><span class="sig-name descname"><span class="pre">Encoder</span></span><a class="headerlink" href="#cellxgene_census.experimental.ml.encoders.Encoder" title="Permalink to this definition"></a></dt>
+<dd><p>Base class for <code class="docutils literal notranslate"><span class="pre">obs</span></code> encoders.</p>
+<p>To define a custom encoder, five methods must be implemented:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fit</span></code>: defines how the encoder will be fitted to the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transform</span></code>: defines how the encoder will be applied to the data
+in order to create an <code class="docutils literal notranslate"><span class="pre">obs</span></code> tensor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inverse_transform</span></code>: defines how to decode the encoded values back
+to the original values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: The name of the encoder. This will be used as the key in the
+dictionary of encoders. Each encoder passed to a <a class="reference internal" href="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe.html#cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe" title="cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch.ExperimentDataPipe</span></code></a> must have a unique name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">columns</span></code>: List of columns in <code class="docutils literal notranslate"><span class="pre">obs</span></code> that the encoder will be applied to.</p></li>
+</ul>
+<p>See the implementation of <a class="reference internal" href="cellxgene_census.experimental.ml.encoders.LabelEncoder.html#cellxgene_census.experimental.ml.encoders.LabelEncoder" title="cellxgene_census.experimental.ml.encoders.LabelEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">LabelEncoder</span></code></a> for an example.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cellxgene_census.experimental.ml.encoders.Encoder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cellxgene_census.experimental.ml.encoders.Encoder.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cellxgene_census.experimental.ml.encoders.Encoder.__init__" title="cellxgene_census.experimental.ml.encoders.Encoder.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(obs)</p></td>
+<td><p>Fit the encoder with obs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_transform</span></code>(encoded_values)</p></td>
+<td><p>Inverse transform the encoded values back to the original values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(df)</p></td>
+<td><p>Transform the obs <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> into a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> of encoded values.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">columns</span></code></p></td>
+<td><p>Columns in <code class="docutils literal notranslate"><span class="pre">obs</span></code> that the encoder will be applied to.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Name of the encoder.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cellxgene_census.experimental.ml.pytorch.Stats.html" class="btn btn-neutral float-left" title="cellxgene_census.experimental.ml.pytorch.Stats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cellxgene_census.experimental.ml.encoders.LabelEncoder.html" class="btn btn-neutral float-right" title="cellxgene_census.experimental.ml.encoders.LabelEncoder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+
+  
+
+  
+  
+    
+   
+
+</body>
+</html>

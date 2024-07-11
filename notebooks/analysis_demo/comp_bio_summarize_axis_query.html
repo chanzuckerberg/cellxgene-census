@@ -279,10 +279,8 @@ The &#34;stable&#34; release is currently 2023-07-25. Specify &#39;census_versio
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-
-<span class="c1"># Read entire _obs_ into a pandas dataframe.</span>
-<span class="n">obs_df</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read entire _obs_ into a pandas dataframe.</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">])</span>
 
 <span class="c1"># Use Pandas API to find all unique values in the `cell_type_ontology_term_id` column.</span>
 <span class="n">unique_cell_type_ontology_term_id</span> <span class="o">=</span> <span class="n">obs_df</span><span class="o">.</span><span class="n">cell_type_ontology_term_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
@@ -331,18 +329,15 @@ Name: count, dtype: int64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Count cell_type occurrences for cells with tissue == &#39;lung&#39;</span>
-<span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
 
 <span class="c1"># Read cell_type terms for cells which have a specific tissue term</span>
 <span class="n">LUNG_TISSUE</span> <span class="o">=</span> <span class="s2">&quot;UBERON:0002048&quot;</span>
 
-<span class="n">obs_df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">human</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tissue_ontology_term_id == &#39;</span><span class="si">{</span><span class="n">LUNG_TISSUE</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tissue_ontology_term_id == &#39;</span><span class="si">{</span><span class="n">LUNG_TISSUE</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Use Pandas API to find all unique values in the `cell_type_ontology_term_id` column.</span>
@@ -392,17 +387,13 @@ Name: count, dtype: int64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># You can also do more complex queries, such as testing for inclusion in a list of values and &quot;and&quot; operations</span>
-<span class="n">human</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;homo_sapiens&quot;</span><span class="p">]</span>
-
 <span class="n">VENTRICLES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;UBERON:0002082&quot;</span><span class="p">,</span> <span class="s2">&quot;UBERON:OOO2084&quot;</span><span class="p">,</span> <span class="s2">&quot;UBERON:0002080&quot;</span><span class="p">]</span>
 
-<span class="n">obs_df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">human</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span>
-        <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tissue_ontology_term_id in </span><span class="si">{</span><span class="n">VENTRICLES</span><span class="si">}</span><span class="s2"> and is_primary_data == True&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">concat</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="n">obs_df</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span>
+    <span class="n">census</span><span class="p">,</span>
+    <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span>
+    <span class="n">value_filter</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tissue_ontology_term_id in </span><span class="si">{</span><span class="n">VENTRICLES</span><span class="si">}</span><span class="s2"> and is_primary_data == True&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Use Pandas API to summarize</span>
@@ -446,8 +437,7 @@ Name: count, dtype: int64
 <span class="p">]</span>
 
 <span class="n">obs_df</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">name</span><span class="p">:</span> <span class="n">experiment</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="n">COLS_TO_QUERY</span><span class="p">)</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="n">COLS_TO_QUERY</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="c1"># Use Pandas API to summarize each organism</span>

@@ -196,20 +196,20 @@
                 
   <section id="cz-cellxgene-discover-census-schema">
 <h1>CZ CELLxGENE Discover Census Schema<a class="headerlink" href="#cz-cellxgene-discover-census-schema" title="Permalink to this heading"></a></h1>
-<p><strong>Version</strong>: 2.0.1</p>
-<p><strong>Last edited</strong>: March, 2024.</p>
+<p><strong>Version</strong>: 2.1.0</p>
+<p><strong>Last edited</strong>: June, 2024.</p>
 <p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED” “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <a class="reference external" href="https://tools.ietf.org/html/bcp14">BCP 14</a>, <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc2119.txt">RFC2119</a>, and <a class="reference external" href="https://www.rfc-editor.org/rfc/rfc8174.txt">RFC8174</a> when, and only when, they appear in all capitals, as shown here.</p>
 <section id="census-overview">
 <h2>Census overview<a class="headerlink" href="#census-overview" title="Permalink to this heading"></a></h2>
 <p>The CZ CELLxGENE Discover Census, hereafter referred as Census, is a versioned data object and API for most of the single-cell data hosted at <a class="reference external" href="https://cellxgene.cziscience.com/">CZ CELLxGENE Discover</a>. To learn more about the Census visit the <code class="docutils literal notranslate"><span class="pre">chanzuckerberg/cellxgene-census</span></code> <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census">github repository</a></p>
-<p>To better understand this document the reader should be familiar with the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md">CELLxGENE dataset schema</a> and <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md">SOMA</a>.</p>
+<p>To better understand this document the reader should be familiar with the <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md">CELLxGENE dataset schema</a> and <a class="reference external" href="https://github.com/single-cell-data/SOMA/blob/main/abstract_specification.md">SOMA</a>.</p>
 </section>
 <section id="definitions">
 <h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this heading"></a></h2>
 <p>The following terms are used throughout this document:</p>
 <ul class="simple">
 <li><p>adata – generic variable name that refers to an <a class="reference external" href="https://anndata.readthedocs.io/"><code class="docutils literal notranslate"><span class="pre">AnnData</span></code></a> object.</p></li>
-<li><p>CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md">CELLxGENE dataset schema version is 5.0.0</a></p></li>
+<li><p>CELLxGENE dataset schema – the data schema for h5ad files served by CELLxGENE Discover, for this Census schema: <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md">CELLxGENE dataset schema version is 5.1.0</a></p></li>
 <li><p>census_obj – the Census root object, a SOMACollection.</p></li>
 <li><p>Census data release – a versioned Census object deposited in a public bucket and accessible by APIs.</p></li>
 <li><p>tissue – original tissue annotation.</p></li>
@@ -245,20 +245,20 @@
 <h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading"></a></h2>
 <section id="data-included">
 <h3>Data included<a class="headerlink" href="#data-included" title="Permalink to this heading"></a></h3>
-<p>All datasets included in the Census MUST be of <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md">CELLxGENE dataset schema version 5.0.0</a>. The following data constraints are imposed on top of the CELLxGENE dataset schema.</p>
+<p>All datasets included in the Census MUST be of <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md">CELLxGENE dataset schema version 5.1.0</a>. The following data constraints are imposed on top of the CELLxGENE dataset schema.</p>
 <section id="species">
 <h4>Species<a class="headerlink" href="#species" title="Permalink to this heading"></a></h4>
-<p>The Census MUST only contain observations (cells) with an  <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included.</p>
-<p>The Census MUST only contain features (genes) with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included</p>
+<p>The Census MUST only contain observations (cells) with an  <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included.</p>
+<p>The Census MUST only contain features (genes) with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> value of either “NCBITaxon:10090” for <em>Mus musculus</em> or “NCBITaxon:9606” for <em>Homo sapiens</em> MUST be included</p>
 </section>
 <section id="multi-species-data-constraints">
 <h4>Multi-species data constraints<a class="headerlink" href="#multi-species-data-constraints" title="Permalink to this heading"></a></h4>
-<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#general-requirements">multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one</a>, as defined in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> and <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> respectively.</p>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#general-requirements">multi-species datasets MAY contain observations (cells) of a given organism and features (genes) of a different one</a>, as defined in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#organism_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">organism_ontology_term_id</span></code></a> and <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#feature_reference"><code class="docutils literal notranslate"><span class="pre">feature_reference</span></code></a> respectively.</p>
 <p>For any given multi-species dataset, observation and features from the dataset are included in the Census as defined by the following:</p>
 <ul class="simple">
 <li><p>Where a dataset includes observations and features from a single species, all observations and features from the dataset are included in the Census.</p></li>
 <li><p>Where a dataset includes observations from a single species <code class="docutils literal notranslate"><span class="pre">S</span></code>, and includes features from multiple species <em>including</em> the species <code class="docutils literal notranslate"><span class="pre">S</span></code>, all dataset observations and all features from <code class="docutils literal notranslate"><span class="pre">S</span></code> will be included in the Census.</p></li>
-<li><p>Where a dataset includes features from a single species <code class="docutils literal notranslate"><span class="pre">S</span></code>, and observations from multiple species <em>including</em> the species <code class="docutils literal notranslate"><span class="pre">S</span></code>, all dataset features and all observations from speices <code class="docutils literal notranslate"><span class="pre">S</span></code> are included in the Census.</p></li>
+<li><p>Where a dataset includes features from a single species <code class="docutils literal notranslate"><span class="pre">S</span></code>, and observations from multiple species <em>including</em> the species <code class="docutils literal notranslate"><span class="pre">S</span></code>, all dataset features and all observations from species <code class="docutils literal notranslate"><span class="pre">S</span></code> are included in the Census.</p></li>
 <li><p>Where a species has observations <em>AND</em> features from multiple species, the dataset will be excluded from the Census.</p></li>
 </ul>
 <p>The table below shows all possible combinations of organisms for both observations and features, assuming a Census comprised of Homo sapiens and Mus musculus. For each combination, inclusion criteria for the Census is provided.</p>
@@ -311,7 +311,7 @@
 </section>
 <section id="assays">
 <h4>Assays<a class="headerlink" href="#assays" title="Permalink to this heading"></a></h4>
-<p>Assays are defined in the CELLxGENE dataset schema in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#assay_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code></a>.</p>
+<p>Assays are defined in the CELLxGENE dataset schema in <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#assay_ontology_term_id"><code class="docutils literal notranslate"><span class="pre">assay_ontology_term_id</span></code></a>.</p>
 <p>The Census MUST include all cells from the list of <a class="reference download internal" download="" href="_downloads/f9b6165098dce7ee3609e936dcfee0fa/census_accepted_assays.csv"><span class="xref download myst">accepted assays</span></a>.</p>
 <p>These assays were selected with the following criteria:</p>
 <blockquote>
@@ -339,15 +339,15 @@
 </section>
 <section id="data-matrix-types">
 <h4>Data matrix types<a class="headerlink" href="#data-matrix-types" title="Permalink to this heading"></a></h4>
-<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. Author-normalized data layers <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#x-matrix-layers">as defined in the CELLxGENE dataset schema</a> MUST NOT be included in the Census.</p>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. Author-normalized data layers <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#x-matrix-layers">as defined in the CELLxGENE dataset schema</a> MUST NOT be included in the Census.</p>
 </section>
 <section id="sample-types">
 <h4>Sample types<a class="headerlink" href="#sample-types" title="Permalink to this heading"></a></h4>
-<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#tissue_type"><code class="docutils literal notranslate"><span class="pre">tissue_type</span></code></a> value equal to “tissue” MUST be included; other values of <code class="docutils literal notranslate"><span class="pre">tissue_type</span></code> MUST NOT be included.</p>
+<p>Only observations (cells) from primary tissue MUST be included in the Census. Thus, ONLY those observations with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#tissue_type"><code class="docutils literal notranslate"><span class="pre">tissue_type</span></code></a> value equal to “tissue” MUST be included; other values of <code class="docutils literal notranslate"><span class="pre">tissue_type</span></code> MUST NOT be included.</p>
 </section>
 <section id="repeated-data">
 <h4>Repeated data<a class="headerlink" href="#repeated-data" title="Permalink to this heading"></a></h4>
-<p>When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#is_primary_data"><code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code></a>. This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.</p>
+<p>When a cell is represented multiple times in CELLxGENE Discover, only one is marked as the primary cell. This is defined in the CELLxGENE dataset schema under <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#is_primary_data"><code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code></a>. This information MUST be included in the Census cell metadata to enable queries that retrieve datasets (see cell metadata below), and all cells MUST be included in the Census.</p>
 </section>
 </section>
 <section id="data-encoding-and-organization">
@@ -444,7 +444,7 @@
   </tr>
   <tr>
     <td>dataset_schema_version </td>
-    <td>5.0.0</td>
+    <td>5.1.0</td>
   </tr>
   <tr>
     <td>total_cell_count</td>
@@ -494,6 +494,10 @@
   </tr>
   <tr>
     <td>collection_doi</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>collection_doi_label</td>
     <td>string</td>
   </tr>
   <tr>
@@ -573,7 +577,7 @@
   <tr>
     <td>unique_cell_count</td>
     <td>int</td>
-    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
+    <td>Unique number of cells for the combination of values of all other fields above. Unique number of cells refers to the cell count, for this group, when <code><a href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#is_primary_data">is_primary_data == True</a></code> </td>
   </tr>
 </tbody>
 </table>
@@ -868,7 +872,7 @@
 </ul>
 <section id="matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray">
 <h4>Matrix Data, count (raw) matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;raw&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-count-raw-matrix-census-obj-census-data-organism-ms-rna-x-raw-somasparsendarray" title="Permalink to this heading"></a></h4>
-<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. These counts MUST be encoded as <code class="docutils literal notranslate"><span class="pre">float32</span></code> in this <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code> with a fill value of zero (0), and no explicitly stored zero values.</p>
+<p>Per the CELLxGENE dataset schema, <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#x-matrix-layers">all RNA assays MUST include UMI or read counts</a>. These counts MUST be encoded as <code class="docutils literal notranslate"><span class="pre">float32</span></code> in this <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code> with a fill value of zero (0), and no explicitly stored zero values.</p>
 </section>
 <section id="matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray">
 <h4>Matrix Data, normalized count matrix – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].X[&quot;normalized&quot;]</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMASparseNDArray</span></code><a class="headerlink" href="#matrix-data-normalized-count-matrix-census-obj-census-data-organism-ms-rna-x-normalized-somasparsendarray" title="Permalink to this heading"></a></h4>
@@ -881,8 +885,8 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
 </section>
 <section id="feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe">
 <h4>Feature metadata – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_data&quot;][organism].ms[&quot;RNA&quot;].var</span></code> – <code class="docutils literal notranslate"><span class="pre">SOMADataFrame</span></code><a class="headerlink" href="#feature-metadata-census-obj-census-data-organism-ms-rna-var-somadataframe" title="Permalink to this heading"></a></h4>
-<p>The Census MUST only contain features with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#feature_biotype"><code class="docutils literal notranslate"><span class="pre">feature_biotype</span></code></a> value of “gene”.</p>
-<p>The <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.0.0/schema.md#required-gene-annotations">gene references are pinned</a> as defined in the CELLxGENE dataset schema.</p>
+<p>The Census MUST only contain features with a <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#feature_biotype"><code class="docutils literal notranslate"><span class="pre">feature_biotype</span></code></a> value of “gene”.</p>
+<p>The <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md#required-gene-annotations">gene references are pinned</a> as defined in the CELLxGENE dataset schema.</p>
 <p>The following columns MUST be included:</p>
 <table>
 <thead>
@@ -1075,6 +1079,19 @@ as <code class="docutils literal notranslate"><span class="pre">normalized[i,j]<
 </section>
 <section id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading"></a></h2>
+<section id="version-2-1-0">
+<h3>Version 2.1.0<a class="headerlink" href="#version-2-1-0" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Update to require <a class="reference external" href="https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/5.1.0/schema.md">CELLxGENE schema version 5.1.0</a></p></li>
+<li><p>Adds <code class="docutils literal notranslate"><span class="pre">collection_doi_label</span></code> to “Census table of CELLxGENE Discover datasets – <code class="docutils literal notranslate"><span class="pre">census_obj[&quot;census_info&quot;][&quot;datasets&quot;]</span></code>”</p></li>
+</ul>
+</section>
+<section id="version-2-0-1">
+<h3>Version 2.0.1<a class="headerlink" href="#version-2-0-1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Update accepted assays for Census based on guidance from curators.</p></li>
+</ul>
+</section>
 <section id="version-2-0-0">
 <h3>Version 2.0.0<a class="headerlink" href="#version-2-0-0" title="Permalink to this heading"></a></h3>
 <ul class="simple">

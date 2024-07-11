@@ -268,7 +268,7 @@
     <span class="p">)</span>
 
     <span class="c1"># while the Census is open, also grab the var dataframe for the mouse</span>
-    <span class="n">var_df</span> <span class="o">=</span> <span class="n">census</span><span class="p">[</span><span class="s2">&quot;census_data&quot;</span><span class="p">][</span><span class="s2">&quot;mus_musculus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="s2">&quot;RNA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+    <span class="n">var_df</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_var</span><span class="p">(</span><span class="n">census</span><span class="p">,</span> <span class="s2">&quot;mus_musculus&quot;</span><span class="p">)</span>
 
 <span class="n">hvgs_df</span>
 </pre></div>
