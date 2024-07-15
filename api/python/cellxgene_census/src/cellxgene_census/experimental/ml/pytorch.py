@@ -541,7 +541,7 @@ class ExperimentDataPipe(pipes.IterDataPipe[Dataset[ObsAndXDatum]]):  # type: ig
             experimental
         """
         self.exp_uri = experiment.uri
-        self.aws_region = experiment.context.tiledb_ctx.config().get("vfs.s3.region")
+        self.aws_region = experiment.context.tiledb_config.get("vfs.s3.region")
         self.measurement_name = measurement_name
         self.layer_name = X_name
         self.obs_query = obs_query
