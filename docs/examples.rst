@@ -27,6 +27,7 @@ Access Census embeddings.
    
     notebooks/api_demo/census_access_maintained_embeddings.ipynb
     notebooks/api_demo/census_embedding.ipynb
+    notebooks/api_demo/census_embedding_search.ipynb
     
 Use the Census trained models.
 
