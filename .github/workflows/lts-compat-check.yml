@@ -45,7 +45,7 @@ jobs:
           python -m pip install -U pip setuptools wheel
           GIT_CLONE_PROTECTION_ACTIVE=false pip install -r ./api/python/cellxgene_census/scripts/requirements-dev.txt
 
-          if [ {{matrix.py-pkg-version}} == "head-of-main" ]; then
+          if [ ${{matrix.py-pkg-version}} == "head-of-main" ]; then
             pip install -e ./api/python/cellxgene_census/
           else
             pip install -U cellxgene_census${{ matrix.py-pkg-version }}
