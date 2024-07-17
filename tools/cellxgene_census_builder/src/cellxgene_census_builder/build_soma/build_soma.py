@@ -106,6 +106,8 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
             root_collection, experiment_builders, filtered_datasets, args.config.build_tag
         )
 
+        # build_step4a_add_spatial(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
+
         # Temporary work-around. Can be removed when single-cell-data/TileDB-SOMA#1969 fixed.
         tiledb_soma_1969_work_around(root_collection.uri)
 
@@ -283,6 +285,112 @@ def build_step4_populate_X_layers(
         eb.populate_presence_matrix(filtered_datasets)
 
     logger.info("Build step 4 - Populate X layers - finished")
+
+def build_step4a_add_spatial(
+    assets_path: str,
+    filtered_datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+    args: CensusBuildArgs,
+) -> None:
+    """Populate spatial info"""
+    logger.info("Build step 4a - Populate spatial info - started")
+    from anndata.experimental import read_elem
+    from tiledbsoma import (
+        Axis,
+        CompositeTransform,
+        CoordinateSystem,
+    )
+
+    # Add images
+    for eb in reopen_experiment_builders(experiment_builders):
+        if not eb.specification.is_exclusivley_spatial():
+            continue
+
+        datasets = [d for d in datasets if d.dataset_id in eb.dataset_obs_joinid_start]
+
+        print(eb.dataset_obs_joinid_start)
+
+        spatial_collection = eb.experiment["spatial"]
+
+        for d in datasets:
+            scene = spatial_collection.add_new_collection(d.dataset_id)
+
+            with h5py.File(d.dataset_h5ad_path) as f:
+                obs = read_elem(f["obs"])
+                tissue_pos = read_elem(f["obsm/spatial"])
+                spatial_dict = read_elem(f["uns/spatial"])
+
+            assert len(spatial_dict) == 2, f"Found {list(spatial_collection)} in {d.dataset_h5ad_path}"
+            _keys = list(spatial_dict)
+            # This flag seems wholly uneccesary since you can tell by the number of keys
+            _keys.remove("is_single")
+            library_id = _keys[0]
+            del _keys
+
+            scale_factors = spatial_dict[library_id]["scalefactors"]
+            # tissue_pos_df = pd.DataFrame(
+            #     tissue_pos,
+            #     index=obs.index.rename("barcode"),
+            #     columns=["pxl_col_in_fullres", "pxl_row_in_fullres"]
+            # )
+
+            pixels_per_spot_radius = 0.5 * scale_factors["spot_diameter_fullres"]
+            fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
+
+            # Create axes and transformations
+            coordinate_system = CoordinateSystem(
+                (
+                    Axis(axis_name="y", axis_type="space", axis_unit="micrometer"),
+                    Axis(axis_name="x", axis_type="space", axis_unit="micrometer"),
+                )
+            )
+
+            spots_to_coords = CompositeTransform(
+                (ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale)),)
+            )
+
+            scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
+
+            img_collection = scene.add_new_collection("img")
+            img_metadata = {}
+            axes_metadata = [
+                {"name": "c", "type": "channel"},
+                {"name": "y", "type": "space", "unit": "micrometer"},
+                {"name": "x", "type": "space", "unit": "micrometer"},
+            ]
+            
+            image_dict = spatial_dict[library_id]["images"]
+
+            for k, v in image_dict.items():
+                if k == "fullres":
+                    scale = (1., 1., 1.)
+                elif k == "hires":
+                    scale = tuple(scale_factors["tissue_hires_scalef"])
+                elif k == "lowres":
+                    scale = tuple(scale_factors["tissue_lowres_scalef"])
+                else:
+                    raise ValueError(f"Unexpected image name: {k}")
+
+
+                img_metadata[f"soma_asset_transform_{k}"] = CompositeTransform(
+                    (ScaleTransform(scale),)
+                ).to_json()
+                image_uri = f"{img_collection.uri}/{k}"
+                im = np.transpose(v, (2, 0, 1))
+                image_array = DenseNDArray.create(
+                    image_uri,
+                    type=pa.from_numpy_dtype(im.dtype),
+                    shape=im.shape,
+                    # platform_config=platform_config,
+                    context=context,
+                )
+                tensor = pa.Tensor.from_numpy(im)
+                image_array.write(
+                    (slice(None), slice(None), slice(None)),
+                    tensor,
+                )
+            img_collection.metadata.update(img_metadata)
+            
 
 
 def build_step5_save_axis_and_summary_info(
