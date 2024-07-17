@@ -8,16 +8,6 @@ import tiledbsoma as soma
 import cellxgene_census
 
 
-@pytest.fixture(scope="session")
-def census() -> soma.Collection:
-    return cellxgene_census.open_soma(census_version="latest")
-
-
-@pytest.fixture(scope="session")
-def lts_census() -> soma.Collection:
-    return cellxgene_census.open_soma(census_version="stable")
-
-
 @pytest.mark.live_corpus
 def test_get_anndata_value_filter(census: soma.Collection) -> None:
     ad = cellxgene_census.get_anndata(
@@ -25,16 +15,14 @@ def test_get_anndata_value_filter(census: soma.Collection) -> None:
         organism="Mus musculus",
         obs_value_filter="tissue_general == 'vasculature'",
         var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
-        column_names={
-            "obs": [
-                "soma_joinid",
-                "cell_type",
-                "tissue",
-                "tissue_general",
-                "assay",
-            ],
-            "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
-        },
+        obs_column_names=[
+            "soma_joinid",
+            "cell_type",
+            "tissue",
+            "tissue_general",
+            "assay",
+        ],
+        var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
     )
 
     assert ad is not None
@@ -158,11 +146,11 @@ def test_get_anndata_wrong_layer_names(census: soma.Collection) -> None:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("obsm_layer", ["scvi", "geneformer"])
-def test_get_anndata_obsm_one_layer(lts_census: soma.Collection, obsm_layer: str) -> None:
-    # NOTE: this test will break after next LTS release (>2023-12-15), since scvi and geneformer
-    # won't be distributed as part of `obsm_layers` anymore. Delete this test when it happens.
+def test_get_anndata_obsm_one_layer(dec_lts_census: soma.Collection, obsm_layer: str) -> None:
+    # NOTE: This test only works on the 2023-12-15 LTS Census, since in newer releases
+    # the embeddings aren't distributed via the `obsm_layer` parameter.
     ad = cellxgene_census.get_anndata(
-        lts_census,
+        dec_lts_census,
         organism="Homo sapiens",
         X_name="raw",
         obs_coords=slice(100),
@@ -177,11 +165,11 @@ def test_get_anndata_obsm_one_layer(lts_census: soma.Collection, obsm_layer: str
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("obsm_layers", [["scvi", "geneformer"]])
-def test_get_anndata_obsm_two_layers(lts_census: soma.Collection, obsm_layers: List[str]) -> None:
-    # NOTE: this test will break after next LTS release (>2023-12-15), since scvi and geneformer
-    # won't be distributed as part of `obsm_layers` anymore. Delete this test when it happens.
+def test_get_anndata_obsm_two_layers(dec_lts_census: soma.Collection, obsm_layers: List[str]) -> None:
+    # NOTE: This test only works on the 2023-12-15 LTS Census, since in newer releases
+    # the embeddings aren't distributed via the `obsm_layer` parameter.
     ad = cellxgene_census.get_anndata(
-        lts_census,
+        dec_lts_census,
         organism="Homo sapiens",
         X_name="raw",
         obs_coords=slice(100),
@@ -196,10 +184,8 @@ def test_get_anndata_obsm_two_layers(lts_census: soma.Collection, obsm_layers: L
 
 
 @pytest.mark.live_corpus
-@pytest.mark.parametrize("obs_embeddings", [["scvi", "geneformer", "uce"]])
+@pytest.mark.parametrize("obs_embeddings", [["scvi", "scgpt"]])
 def test_get_anndata_obs_embeddings(lts_census: soma.Collection, obs_embeddings: List[str]) -> None:
-    # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
-    # so this test could require adjustments.
     ad = cellxgene_census.get_anndata(
         lts_census,
         organism="Homo sapiens",
@@ -209,7 +195,7 @@ def test_get_anndata_obs_embeddings(lts_census: soma.Collection, obs_embeddings:
         obs_embeddings=obs_embeddings,
     )
 
-    assert len(ad.obsm.keys()) == 3
+    assert len(ad.obsm.keys()) == 2
     assert len(ad.varm.keys()) == 0
     for obsm_layer in obs_embeddings:
         assert obsm_layer in ad.obsm.keys()
@@ -218,12 +204,12 @@ def test_get_anndata_obs_embeddings(lts_census: soma.Collection, obs_embeddings:
 
 @pytest.mark.live_corpus
 @pytest.mark.parametrize("var_embeddings", [["nmf"]])
-def test_get_anndata_var_embeddings(lts_census: soma.Collection, var_embeddings: List[str]) -> None:
-    # NOTE: when the next LTS gets released (>2023-12-15), embeddings may or may not be available,
-    # so this test could require adjustments.
+def test_get_anndata_var_embeddings(dec_lts_census: soma.Collection, var_embeddings: List[str]) -> None:
+    # NOTE: this test only works on the 2023-12-15 LTS Census, since var embeddings
+    # aren't available in the newer releases.
 
     ad = cellxgene_census.get_anndata(
-        lts_census,
+        dec_lts_census,
         organism="Homo sapiens",
         X_name="raw",
         obs_coords=slice(100),
@@ -251,6 +237,66 @@ def test_get_anndata_obsm_layers_and_add_obs_embedding_fails(lts_census: soma.Co
             obsm_layers=["scvi"],
             obs_embeddings=["scvi"],
         )
+
+
+@pytest.mark.live_corpus
+def test_deprecated_column_api(census: soma.Collection) -> None:
+    """Testing for previous `column_names` argument.
+
+    See: https://github.com/chanzuckerberg/cellxgene-census/issues/1035
+    """
+    ad_curr = cellxgene_census.get_anndata(
+        census,
+        organism="Mus musculus",
+        obs_value_filter="tissue_general == 'vasculature'",
+        var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+        obs_column_names=[
+            "soma_joinid",
+            "cell_type",
+            "tissue",
+            "tissue_general",
+            "assay",
+        ],
+        var_column_names=["soma_joinid", "feature_id", "feature_name", "feature_length"],
+    )
+    with pytest.warns(FutureWarning):
+        ad_prev = cellxgene_census.get_anndata(
+            census,
+            organism="Mus musculus",
+            obs_value_filter="tissue_general == 'vasculature'",
+            var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+            column_names={
+                "obs": [
+                    "soma_joinid",
+                    "cell_type",
+                    "tissue",
+                    "tissue_general",
+                    "assay",
+                ],
+                "var": ["soma_joinid", "feature_id", "feature_name", "feature_length"],
+            },
+        )
+    with pytest.raises(
+        ValueError, match=r"Both the deprecated 'column_names' argument and its replacements were used."
+    ):
+        cellxgene_census.get_anndata(
+            census,
+            organism="Mus musculus",
+            obs_value_filter="tissue_general == 'vasculature'",
+            var_value_filter="feature_name in ['Gm53058', '0610010K14Rik']",
+            obs_column_names=[
+                "soma_joinid",
+                "cell_type",
+            ],
+            column_names={
+                "obs": [
+                    "soma_joinid",
+                    "cell_type",
+                ],
+            },
+        )
+    pd.testing.assert_frame_equal(ad_curr.obs, ad_prev.obs)
+    pd.testing.assert_frame_equal(ad_curr.var, ad_prev.var)
 
 
 def _map_to_get_anndata_args(query: Dict[str, Any], axis: Literal["obs", "var"]) -> Dict[str, Any]:

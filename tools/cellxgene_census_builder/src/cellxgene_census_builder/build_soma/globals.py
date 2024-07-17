@@ -11,9 +11,9 @@ from .schema_util import FieldSpec, TableSpec
 # DataFrame columns. True is enabled, False is disabled.
 USE_ARROW_DICTIONARY = True
 
-CENSUS_SCHEMA_VERSION = "2.0.1"
+CENSUS_SCHEMA_VERSION = "2.1.0"
 
-CXG_SCHEMA_VERSION = "5.0.0"  # the CELLxGENE schema version supported
+CXG_SCHEMA_VERSION = "5.1.0"  # the CELLxGENE schema version supported
 
 # Columns expected in the census_datasets dataframe
 CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
@@ -23,6 +23,7 @@ CENSUS_DATASETS_TABLE_SPEC = TableSpec.create(
         ("collection_id", pa.large_string()),
         ("collection_name", pa.large_string()),
         ("collection_doi", pa.large_string()),
+        ("collection_doi_label", pa.large_string()),
         ("dataset_id", pa.large_string()),
         ("dataset_version_id", pa.large_string()),
         ("dataset_title", pa.large_string()),

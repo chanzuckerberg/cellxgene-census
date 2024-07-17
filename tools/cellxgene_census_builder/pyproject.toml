@@ -40,7 +40,7 @@ dependencies= [
     "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@spatial#egg=tiledbsoma&subdirectory=apis/python/",
     # TODO (spatial): Uncomment line below to install "cellxgene-census" at an appropriate version when tiledbsoma spatial code has been released 
     # "cellxgene-census==1.12.0",
-    "cellxgene-ontology-guide==0.6.1",
+    "cellxgene-ontology-guide==1.0.0",,
     "scipy==1.12.0",
     "fsspec[http]==2024.3.1",
     "s3fs==2024.3.1",

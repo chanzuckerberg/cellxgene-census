@@ -37,6 +37,9 @@ on:
         default: ""
         type: string
 
+env:
+  CELLXGENE_CENSUS_USERAGENT: "CZI-test"
+
 jobs:
   py_unit_tests:
     runs-on: single-cell-1tb-runner

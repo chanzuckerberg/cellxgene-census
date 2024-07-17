@@ -12,48 +12,53 @@ The `Dockerfile` provides the recipe for the docker image used by the WDLs, whic
 
 ## Example invocations
 
-Using a [miniwdl-aws](https://github.com/miniwdl-ext/miniwdl-aws) deployment with suitable GPU instance types enabled on the underlying AWS Batch compute environment, and assuming the docker image has been built and pushed to a suitable repository like ECR (tagged `$DOCKER_TAG`).
+Using [miniwdl-omics-run](https://github.com/miniwdl-ext/miniwdl-omics-run) for the Amazon HealthOmics workflow service, and assuming the docker image has been built and pushed to a suitable repository like ECR (tagged `$DOCKER_TAG`).
 
 Preparing a tokenized training dataset with 2,500 primary cells per human cell type:
 
 ```bash
-miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
-    wdl/prepare_datasets.wdl docker=$DOCKER_TAG \
-    census_version=2023-10-23 N=2500 sampling_column=cell_type output_name=2500_per_cell_type \
-    --s3upload s3://MYBUCKET/geneformer/datasets/2500_per_cell_type/
+miniwdl-omics-run wdl/prepare_datasets.wdl \
+    docker=$DOCKER_TAG \
+    census_version=s3://cellxgene-census-public-us-west-2/cell-census/2023-12-15/soma/ \
+    N=2500 sampling_column=cell_type output_name=2500_per_cell_type \
+    --role poweromics --output-uri s3://MYBUCKET/geneformer/datasets/
 ```
 
-And a tokenized dataset for all of Census (371GiB!):
+And a tokenized dataset for all of Census (>300GiB, sharded):
 
 ```bash
-miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
-    wdl/prepare_datasets.wdl docker=$DOCKER_TAG \
-    census_version=2023-10-23 output_name=census-2023-10-23 value_filter='is_primary_data==True or is_primary_data==False' \
-    --s3upload s3://MYBUCKET/geneformer/datasets/census-2023-10-23/
+miniwdl-omics-run wdl/prepare_datasets.wdl \
+    docker=$DOCKER_TAG \
+    census_version=s3://cellxgene-census-public-us-west-2/cell-census/2024-05-20/soma/ \
+    value_filter='is_primary_data==True or is_primary_data==False' \
+    output_name=2024-05-20 shards=256 \
+    --role poweromics --output-uri s3://MYBUCKET/geneformer/datasets/
 ```
+
+(We set `census_version` to the SOMACollection URI because the HealthOmics workers don't have internet access to the Census release directory endpoint.)
 
 Fine-tuning for 8 epochs (takes ~36h on g5.8xlarge):
 
 ```bash
-MINIWDL__AWS__GPU_VALUE=8 \
-MINIWDL__AWS__CONTAINER_PROPERTIES='{"linuxParameters":{"sharedMemorySize":4096}}' \
-miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
-    wdl/finetune_geneformer.wdl docker=$DOCKER_TAG \
+miniwdl-omics-run wdl/finetune_geneformer.wdl \
+    docker=$DOCKER_TAG \
     dataset=s3://MYBUCKET/geneformer/datasets/2500_per_cell_type/dataset/2500_per_cell_type \
     epochs=8 output_name=2500_per_cell_type_8epochs \
-    --s3upload s3://MYBUCKET/geneformer/models/2500_per_cell_type_8epochs/
+    --role poweromics --output-uri s3://MYBUCKET/geneformer/models/
 ```
 
 Generating cell embeddings (takes 8-12h on up to 256 g5.2xlarge, generates 130GiB `tiledbsoma.SparseNDArray` on S3):
 
 ```bash
-MINIWDL__SCHEDULER__CALL_CONCURRENCY=256 \
-MINIWDL__AWS__SUBMIT_PERIOD=60 \
-miniwdl-aws-submit --verbose --follow --workflow-queue miniwdl-workflow \
-    wdl/generate_embeddings.wdl docker=$DOCKER_TAG \
-    emb_layer=0 \
-    dataset=s3://MYBUCKET/geneformer/datasets/census-2023-10-23/dataset/census-2023-10-23 \
-    model=s3://MYBUCKET/geneformer/models/2500_per_cell_type_8epochs/model/2500_per_cell_type_8epochs \
-    output_uri=s3://MYBUCKET/geneformer/embs/census-2023-10-23 parts=256 \
-    --s3upload s3://MYBUCKET/geneformer/embs
+seq 0 255 \
+    | xargs -n 1 printf 'dataset_shards=s3://MYBUCKET/geneformer/datasets/census-2024-05-20/shard-%03d/\n' \
+    | xargs -n 9999 miniwdl-omics-run \
+    --role poweromics --output-uri s3://MYBUCKET/geneformer/embs \
+    wdl/generate_embeddings.wdl \
+    docker=$DOCKER_TAG \
+    emb_layer=0 model_type=Pretrained \
+    model=s3://MYBUCKET/geneformer/gf-95m/fine_tuned_model/ \
+    output_uri=s3_//MYBUCKET/geneformer/embs/$(date '+%s')/census-2024-05-20/
 ```
+
+(The `s3_//MYBUCKET` is a workaround for the workflow service rejecting our submission if the specified S3 output folder doesn't yet exist; this workflow has TileDB create it.)
