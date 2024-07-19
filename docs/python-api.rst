@@ -25,6 +25,8 @@ Get slice as AnnData
     :nosignatures:
 
     cellxgene_census.get_anndata
+    cellxgene_census.get_obs
+    cellxgene_census.get_var
 
 Feature presence matrix
 -----------------------
@@ -52,6 +54,9 @@ Experimental: Machine Learning
     cellxgene_census.experimental.ml.pytorch.experiment_dataloader
     cellxgene_census.experimental.ml.pytorch.ExperimentDataPipe
     cellxgene_census.experimental.ml.pytorch.Stats
+    cellxgene_census.experimental.ml.encoders.Encoder
+    cellxgene_census.experimental.ml.encoders.LabelEncoder
+    cellxgene_census.experimental.ml.encoders.BatchEncoder
     cellxgene_census.experimental.ml.huggingface.CellDatasetBuilder
     cellxgene_census.experimental.ml.huggingface.GeneformerTokenizer
 

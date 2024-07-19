@@ -10,13 +10,13 @@ project = 'cellxgene-census'
 copyright = '2022, Chan Zuckerberg Initiative'
 author = 'Chan Zuckerberg Initiative'
 
+from packaging.version import Version
 import git
-repo = git.Repo(search_parent_directories=True)
-tags = [t for t in repo.tags if t.tag is not None]
-tags = sorted(tags, key=lambda t: t.tag.tagged_date)
-latest_tag = tags[-1]
 
-version = str(latest_tag)
+repo = git.Repo(search_parent_directories=True)
+all_versions = sorted([Version(t.name) for t in repo.tags])
+
+version = str(all_versions[-1])
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -28,7 +28,7 @@ extensions = [
     'sphinx.ext.napoleon', 
     'sphinx.ext.autosummary', 
     'myst_parser'
-    ]
+]
 
 autosummary_generate = True
 
@@ -50,6 +50,7 @@ intersphinx_mapping = {
     'scanpy': ('https://scanpy.readthedocs.io/en/stable/', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
     'torchdata': ('https://pytorch.org/data/beta/', None),
+    'sklearn': ('http://scikit-learn.org/stable', None),
 }
 
 templates_path = ['_templates']
@@ -66,9 +67,7 @@ source_suffix = ['.rst', '.md']
 # Inject custom css files in `/_static/css/*`
 html_static_path = ['_static']
 
-import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 html_js_files = [
     ('https://plausible.io/js/script.js', {"data-domain": "chanzuckerberg.github.io/cellxgene-census", "defer": "defer"}),

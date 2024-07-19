@@ -2,6 +2,7 @@ import os
 import pathlib
 import re
 import time
+from typing import TYPE_CHECKING
 from unittest.mock import ANY, patch
 
 import anndata
@@ -20,6 +21,10 @@ from cellxgene_census._release_directory import (
     CensusLocator,
 )
 
+if TYPE_CHECKING:
+    # You're not supposed to import this, but mypy demands it
+    pass
+
 
 @pytest.mark.live_corpus
 def test_open_soma_stable() -> None:
@@ -32,7 +37,7 @@ def test_open_soma_stable() -> None:
     with cellxgene_census.open_soma() as default_census:
         assert default_census.uri == census.uri
         for k, v in DEFAULT_TILEDB_CONFIGURATION.items():
-            assert census.context.tiledb_ctx.config()[k] == str(v)
+            assert census.context.tiledb_config[k] == str(v)
 
 
 @pytest.fixture(scope="module")
@@ -63,7 +68,7 @@ def test_open_soma_with_customized_tiledb_config(latest_locator: CensusLocator) 
     with cellxgene_census.open_soma(uri=latest_locator["uri"], tiledb_config=tiledb_config) as census:
         assert census.uri == latest_locator["uri"]
         # Verify that user-provided custom config is passed through correctly
-        assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
+        assert census.context.tiledb_config["soma.init_buffer_bytes"] == soma_init_buffer_bytes
 
 
 @pytest.mark.live_corpus
@@ -85,7 +90,7 @@ def test_open_soma_with_customized_plain_soma_context(
     context = soma.SOMATileDBContext().replace(**cfg)
     with cellxgene_census.open_soma(uri=latest_locator["uri"], context=context) as census:
         # Verify that the user-provided config settings are set correctly in the TileDB context object.
-        assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
+        assert census.context.tiledb_config["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
 
 
@@ -103,12 +108,12 @@ def test_open_soma_with_customized_default_soma_context(
 
     with cellxgene_census.open_soma(census_version="latest", context=custom_context) as census:
         # Verify the non-overriden soma context defaults are set correctly in the TileDB context object.
-        assert census.context.tiledb_ctx.config()["vfs.s3.no_sign_request"] == "true"
-        assert census.context.tiledb_ctx.config()["vfs.s3.region"] == latest_locator.get("s3_region")
-        assert census.context.tiledb_ctx.config()["py.init_buffer_bytes"] == f"{1 * 1024 ** 3}"
+        assert census.context.tiledb_config["vfs.s3.no_sign_request"] == "true"
+        assert census.context.tiledb_config["vfs.s3.region"] == latest_locator.get("s3_region")
+        assert census.context.tiledb_config["py.init_buffer_bytes"] == f"{1 * 1024 ** 3}"
 
         # Verify that the user-overridden config settings are set correctly in the TileDB context object.
-        assert census.context.tiledb_ctx.config()["soma.init_buffer_bytes"] == soma_init_buffer_bytes
+        assert census.context.tiledb_config["soma.init_buffer_bytes"] == soma_init_buffer_bytes
         assert census.context.timestamp_ms == timestamp_ms
 
 
@@ -410,6 +415,25 @@ def test_download_source_h5ad_errors(tmp_path: pathlib.Path, small_dataset_id: s
 
     with pytest.raises(ValueError):
         cellxgene_census.download_source_h5ad(small_dataset_id, "/tmp/dirname/", census_version="latest")
+
+
+@pytest.mark.parametrize("progress_bar", [True, False])
+def test_download_h5ad_progress_bar(  # type: ignore[no-untyped-def]
+    capsys,
+    tmp_path: pathlib.Path,
+    small_dataset_id: str,
+    progress_bar: bool,
+) -> None:
+    adata_path = tmp_path / "adata.h5ad"
+    _ = capsys.readouterr()  # Clearing any previously captured output
+    cellxgene_census.download_source_h5ad(
+        small_dataset_id, adata_path.as_posix(), census_version="latest", progress_bar=progress_bar
+    )
+    captured = capsys.readouterr()
+    if progress_bar:
+        assert ("Downloading" in captured.err) and ("100%" in captured.err)
+    else:
+        assert captured.err == ""
 
 
 @pytest.mark.live_corpus

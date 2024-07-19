@@ -282,7 +282,7 @@ def accumulate_axes_dataframes(
             obs_column_names=CXG_OBS_COLUMNS_READ,
             var_column_names=CXG_VAR_COLUMNS_READ,
         ) as adata:
-            logging.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
+            logger.debug(f"{dataset.dataset_id}/{spec.name} - found {adata.n_obs} cells")
 
             # Skip this dataset if there are not cells after filtering
             if adata.n_obs == 0:
@@ -608,10 +608,7 @@ def _reduce_X_matrices(
     datasets: list[Dataset],
     experiment_builders: list[ExperimentBuilder],
 ) -> dict[str, list[tuple[str, XReduction]]]:
-    """Helper function for populate_X_layers. Create Dask delayed that will save and reduce all X data.
-
-    This function does not perform the compute - it just creates the graph. Caller must dispatch the graph.
-    """
+    """Helper function for populate_X_layers."""
 
     def read_and_dispatch_partial_h5ad(
         dataset_id: str,

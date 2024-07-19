@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional, get_args
 
 import s3fs
 import tiledbsoma as soma
+from fsspec.callbacks import NoOpCallback, TqdmCallback
 
 from ._release_directory import (
     CensusLocator,
@@ -23,10 +24,14 @@ from ._release_directory import (
     _get_census_mirrors,
     get_census_version_description,
 )
-from ._util import _uri_join
+from ._util import _uri_join, _user_agent
 
 DEFAULT_CENSUS_VERSION = "stable"
 
+DEFAULT_S3FS_KWARGS = {
+    "anon": True,
+    "cache_regions": True,
+}
 DEFAULT_TILEDB_CONFIGURATION: Dict[str, Any] = {
     # https://docs.tiledb.com/main/how-to/configuration#configuration-parameters
     "py.init_buffer_bytes": 1 * 1024**3,
@@ -119,7 +124,9 @@ def get_default_soma_context(tiledb_config: Optional[Dict[str, Any]] = None) -> 
     Lifecycle:
         experimental
     """
-    tiledb_config = dict(DEFAULT_TILEDB_CONFIGURATION, **(tiledb_config or {}))
+    tiledb_config = dict(
+        DEFAULT_TILEDB_CONFIGURATION, **{"vfs.s3.custom_headers.User-Agent": _user_agent()}, **(tiledb_config or {})
+    )
     return soma.options.SOMATileDBContext().replace(tiledb_config=tiledb_config)
 
 
@@ -297,7 +304,9 @@ def get_source_h5ad_uri(dataset_id: str, *, census_version: str = DEFAULT_CENSUS
     return locator
 
 
-def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION) -> None:
+def download_source_h5ad(
+    dataset_id: str, to_path: str, *, census_version: str = DEFAULT_CENSUS_VERSION, progress_bar: bool = True
+) -> None:
     """Download the source H5AD dataset, for the given `dataset_id`, to the user-specified
     file name.
 
@@ -308,6 +317,8 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
             The file name where the downloaded H5AD will be written. Must not already exist.
         census_version:
             The census version name. Defaults to ``"stable"``.
+        progress_bar:
+            Whether to display a progress bar. Defaults to ``True``.
 
     Raises:
         ValueError: if the path already exists (i.e., will not overwrite an existing file), or is not a file.
@@ -326,12 +337,23 @@ def download_source_h5ad(dataset_id: str, to_path: str, *, census_version: str =
     if to_path.endswith("/"):
         raise ValueError("Specify to_path as a file name, not a directory name.")
 
+    if progress_bar:
+        callback = TqdmCallback(
+            tqdm_kwargs={"unit": "B", "unit_scale": True, "unit_divisor": 1024, "desc": "Downloading"}
+        )
+    else:
+        callback = NoOpCallback()
+
     locator = get_source_h5ad_uri(dataset_id, census_version=census_version)
     protocol = urllib.parse.urlparse(locator["uri"]).scheme
     assert protocol == "s3"
 
     fs = s3fs.S3FileSystem(
-        anon=True,
-        cache_regions=True,
+        config_kwargs={"user_agent": _user_agent()},
+        **DEFAULT_S3FS_KWARGS,
     )
-    fs.get_file(locator["uri"], to_path)
+    fs.get_file(
+        locator["uri"],
+        to_path,
+        callback=callback,
+    )

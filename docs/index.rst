@@ -15,3 +15,4 @@
    examples
    R API & tutorials <https://chanzuckerberg.github.io/cellxgene-census/r/index.html>
    cellxgene_census_docsite_FAQ.md
+   Release notes <https://github.com/chanzuckerberg/cellxgene-census/releases>

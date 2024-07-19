@@ -7,9 +7,11 @@
 Methods to retrieve slices of the census as AnnData objects.
 """
 
-from typing import Optional, Sequence
+from typing import Literal, Optional, Sequence
+from warnings import warn
 
 import anndata
+import pandas as pd
 import tiledbsoma as soma
 from somacore.options import SparseDFCoord
 
@@ -37,6 +39,8 @@ def get_anndata(
     column_names: Optional[soma.AxisColumnNames] = None,
     obs_embeddings: Optional[Sequence[str]] = (),
     var_embeddings: Optional[Sequence[str]] = (),
+    obs_column_names: Optional[Sequence[str]] = None,
+    var_column_names: Optional[Sequence[str]] = None,
 ) -> anndata.AnnData:
     """Convenience wrapper around :class:`tiledbsoma.Experiment` query, to build and execute a query,
     and return it as an :class:`anndata.AnnData` object.
@@ -64,8 +68,6 @@ def get_anndata(
         var_coords:
             Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
             May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
-        column_names:
-            Columns to fetch for ``obs`` and ``var`` dataframes.
         obsm_layers:
             Additional obsm layers to read and return in the ``obsm`` slot.
         obsp_layers:
@@ -82,6 +84,10 @@ def get_anndata(
             Additional embeddings to be returned as part of the ``varm`` slot.
             Use :func:`get_all_available_embeddings` to retrieve available embeddings
             for this Census version and organism.
+        obs_column_names:
+            Columns to fetch for ``obs`` dataframe.
+        var_column_names:
+            Columns to fetch for ``var`` dataframe.
 
     Returns:
         An :class:`anndata.AnnData` object containing the census slice.
@@ -92,7 +98,7 @@ def get_anndata(
     Examples:
         >>> get_anndata(census, "Mus musculus", obs_value_filter="tissue_general in ['brain', 'lung']")
 
-        >>> get_anndata(census, "Homo sapiens", column_names={"obs": ["tissue"]})
+        >>> get_anndata(census, "Homo sapiens", obs_column_names=["tissue"])
 
         >>> get_anndata(census, "Homo sapiens", obs_coords=slice(0, 1000))
     """
@@ -106,6 +112,23 @@ def get_anndata(
     if varm_layers and var_embeddings and set(varm_layers) & set(var_embeddings):
         raise ValueError("Cannot request both `varm_layers` and `var_embeddings` for the same embedding name")
 
+    # Backwards compat for old column_names argument
+    if column_names is not None:
+        if obs_column_names is not None or var_column_names is not None:
+            raise ValueError(
+                "Both the deprecated 'column_names' argument and its replacements were used. Please use 'obs_column_names' and 'var_column_names' only."
+            )
+        else:
+            warn(
+                "The argument `column_names` is deprecated and will be removed in a future release. Please use `obs_column_names` and `var_column_names` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+        if "obs" in column_names:
+            obs_column_names = column_names["obs"]
+        if "var" in column_names:
+            var_column_names = column_names["var"]
+
     with exp.axis_query(
         measurement_name,
         obs_query=soma.AxisQuery(value_filter=obs_value_filter, coords=obs_coords),
@@ -113,7 +136,7 @@ def get_anndata(
     ) as query:
         adata = query.to_anndata(
             X_name=X_name,
-            column_names=column_names,
+            column_names={"obs": obs_column_names, "var": var_column_names},
             X_layers=X_layers,
             obsm_layers=obsm_layers,
             varm_layers=varm_layers,
@@ -146,3 +169,90 @@ def get_anndata(
                     adata.varm[emb] = embedding
 
         return adata
+
+
+def _get_axis_metadata(
+    census: soma.Collection,
+    axis: Literal["obs", "var"],
+    organism: str,
+    *,
+    value_filter: Optional[str] = None,
+    coords: Optional[SparseDFCoord] = slice(None),
+    column_names: Optional[Sequence[str]] = None,
+) -> pd.DataFrame:
+    exp = _get_experiment(census, organism)
+    coords = (slice(None),) if coords is None else (coords,)
+    if axis == "obs":
+        df = exp.obs
+    elif axis == "var":
+        df = exp.ms["RNA"].var
+    else:
+        raise ValueError(f"axis should be either 'obs' or 'var', but '{axis}' was passed")
+    result: pd.DataFrame = (
+        df.read(coords=coords, column_names=column_names, value_filter=value_filter).concat().to_pandas()
+    )
+    return result
+
+
+def get_obs(
+    census: soma.Collection,
+    organism: str,
+    *,
+    value_filter: Optional[str] = None,
+    coords: Optional[SparseDFCoord] = slice(None),
+    column_names: Optional[Sequence[str]] = None,
+) -> pd.DataFrame:
+    """Get the observation metadata for a query on the census.
+
+    Args:
+        census:
+            The census object, usually returned by :func:`open_soma`.
+        organism:
+            The organism to query, usually one of ``"Homo sapiens`` or ``"Mus musculus"``
+        value_filter:
+            Value filter for the ``obs`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+        coords:
+            Coordinates for the ``obs`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+        column_names:
+            Columns to fetch.
+
+    Returns:
+        A :class:`pandas.DataFrame` object containing metadata for the queried slice.
+    """
+    return _get_axis_metadata(
+        census, "obs", organism, value_filter=value_filter, coords=coords, column_names=column_names
+    )
+
+
+def get_var(
+    census: soma.Collection,
+    organism: str,
+    *,
+    value_filter: Optional[str] = None,
+    coords: Optional[SparseDFCoord] = slice(None),
+    column_names: Optional[Sequence[str]] = None,
+) -> pd.DataFrame:
+    """Get the variable metadata for a query on the census.
+
+    Args:
+        census:
+            The census object, usually returned by :func:`open_soma`.
+        organism:
+            The organism to query, usually one of ``"Homo sapiens`` or ``"Mus musculus"``
+        value_filter:
+            Value filter for the ``var`` metadata. Value is a filter query written in the
+            SOMA ``value_filter`` syntax.
+        coords:
+            Coordinates for the ``var`` axis, which is indexed by the ``soma_joinid`` value.
+            May be an ``int``, a list of ``int``, or a slice. The default, ``None``, selects all.
+        column_names:
+            Columns to fetch.
+
+    Returns:
+        A :class:`pandas.DataFrame` object containing metadata for the queried slice.
+    """
+    return _get_axis_metadata(
+        census, "var", organism, value_filter=value_filter, coords=coords, column_names=column_names
+    )

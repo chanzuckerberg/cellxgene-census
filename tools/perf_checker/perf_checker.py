@@ -42,18 +42,18 @@ if len(command_profiles) >= 2:
     formatted_first_profile = json.dumps(format_string(str(attr.asdict(first_profile))))
     formatted_curr_profile = json.dumps(format_string(str(attr.asdict(curr_profile))))
 
-    logging.info("****************************")
-    logging.info(f"Current time {curr_time} vs first time {first_time}")
-    logging.info("****************************")
-    logging.info(f"First profile: {formatted_first_profile}")
-    logging.info("****************************")
-    logging.info(f"Current profile: {formatted_curr_profile}")
-    logging.info("****************************")
-    logging.info(
+    logger.info("****************************")
+    logger.info(f"Current time {curr_time} vs first time {first_time}")
+    logger.info("****************************")
+    logger.info(f"First profile: {formatted_first_profile}")
+    logger.info("****************************")
+    logger.info(f"Current profile: {formatted_curr_profile}")
+    logger.info("****************************")
+    logger.info(
         f"TileDB version ver = first: {first_profile.tiledbsoma_version} curr: {curr_profile.tiledbsoma_version}"
     )
     if float(curr_time) > threshold * float(first_time):
         raise SystemExit(f"Major performance degradation detected on {args.command}")
 
     if threshold * float(curr_time) < float(first_time):
-        logging.info(f"Major performance increase detected on {args.command}")
+        logger.info(f"Major performance increase detected on {args.command}")
