@@ -13,7 +13,7 @@ env:
 jobs:
   pre_commit_checks:
     name: pre-commit checks
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [sc-dev-64g-runner]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
