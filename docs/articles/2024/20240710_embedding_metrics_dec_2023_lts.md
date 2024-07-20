@@ -2,6 +2,8 @@
 
 *Published:* *July 11th, 2024*
 
+*Updated:* *July 19th, 2024*. Model names fixed.
+
 *By:* *[Emanuele Bezzi](mailto:ebezzi@chanzuckerberg.com), [Pablo Garcia-Nieto](mailto:pgarcia-nieto@chanzuckerberg.com)*
 
 In 2023, the Census team released a series of cells embeddings (available at the [Census Model page](https://cellxgene.cziscience.com/census-models)) compatible with the [Census LTS version `census_version="2023-12-15"`](https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_data_release_info.html#lts-2023-12-15), so that users can access and download for any slice of Census data.
@@ -14,8 +16,8 @@ The benchmarks were run on the following embeddings:
 
 - scVI latent spaces from a model trained on all Census data.
 - Fine-tuned Geneformer.
-- Zero-shot scGPT.
-- Zero-shot Universal Cell Embeddings (UCE).
+- scGPT.
+- Universal Cell Embeddings (UCE).
 
 For more details on each model please see the [Census Model page](https://cellxgene.cziscience.com/census-models).
 
@@ -123,8 +125,8 @@ As reminder the benchmarks were run on the following embeddings:
 
 - scVI latent spaces from a model trained on all Census data.
 - Fine-tuned Geneformer.
-- Zero-shot scGPT.
-- Zero-shot Universal Cell Embeddings (UCE).
+- scGPT.
+- Universal Cell Embeddings (UCE).
 
 #### Summary
 
