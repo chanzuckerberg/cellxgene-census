@@ -215,6 +215,7 @@
   <section id="benchmarks-of-single-cell-census-models">
 <h1>Benchmarks of single-cell Census models<a class="headerlink" href="#benchmarks-of-single-cell-census-models" title="Permalink to this heading"></a></h1>
 <p><em>Published:</em> <em>July 11th, 2024</em></p>
+<p><em>Updated:</em> <em>July 19th, 2024</em>. Model names fixed.</p>
 <p><em>By:</em> <em><a class="reference external" href="mailto:ebezzi&#37;&#52;&#48;chanzuckerberg&#46;com">Emanuele Bezzi</a>, <a class="reference external" href="mailto:pgarcia-nieto&#37;&#52;&#48;chanzuckerberg&#46;com">Pablo Garcia-Nieto</a></em></p>
 <p>In 2023, the Census team released a series of cells embeddings (available at the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census Model page</a>) compatible with the <a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/cellxgene_census_docsite_data_release_info.html#lts-2023-12-15">Census LTS version <code class="docutils literal notranslate"><span class="pre">census_version=&quot;2023-12-15&quot;</span></code></a>, so that users can access and download for any slice of Census data.</p>
 <p>These embeddings were generated via different large-scale models; in this article we present the results of light benchmarking of them. We hope that these benchmarks provide an initial picture to users on, 1) the strength of biological signal captured by these embeddings and, 2) the level of batch correction they exert.</p>
@@ -223,8 +224,8 @@
 <ul class="simple">
 <li><p>scVI latent spaces from a model trained on all Census data.</p></li>
 <li><p>Fine-tuned Geneformer.</p></li>
-<li><p>Zero-shot scGPT.</p></li>
-<li><p>Zero-shot Universal Cell Embeddings (UCE).</p></li>
+<li><p>scGPT.</p></li>
+<li><p>Universal Cell Embeddings (UCE).</p></li>
 </ul>
 <p>For more details on each model please see the <a class="reference external" href="https://cellxgene.cziscience.com/census-models">Census Model page</a>.</p>
 <section id="accessing-the-embeddings-included-in-the-benchmark">
@@ -324,8 +325,8 @@
 <ul class="simple">
 <li><p>scVI latent spaces from a model trained on all Census data.</p></li>
 <li><p>Fine-tuned Geneformer.</p></li>
-<li><p>Zero-shot scGPT.</p></li>
-<li><p>Zero-shot Universal Cell Embeddings (UCE).</p></li>
+<li><p>scGPT.</p></li>
+<li><p>Universal Cell Embeddings (UCE).</p></li>
 </ul>
 <section id="summary">
 <h4>Summary<a class="headerlink" href="#summary" title="Permalink to this heading"></a></h4>

@@ -1,0 +1,693 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Find the most similar Census cells in any other data with embeddings vector search &mdash; cellxgene-census  documentation</title>
+  
+
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon_32x32_v2.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon_16x16_v2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script data-domain="chanzuckerberg.github.io/cellxgene-census" defer="defer" src="https://plausible.io/js/script.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="scVI for cell type prediction and data projection" href="../analysis_demo/comp_bio_scvi_model_use.html" />
+    <link rel="prev" title="Access CELLxGENE-hosted embeddings" href="census_embedding.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div style="height: 100vh; overflow: hidden;">
+     
+    <!-- top 56px for navbar height -->
+    <div class="navbar-cxg">
+        <div style="padding: 0 16px; display: flex; height: inherit; align-items: center; justify-content: space-between;">
+            <span style="display:flex; gap: 32px; align-items: center;">
+                <a href="https://cellxgene.cziscience.com/">
+                  <img src="../../_static/img/cellxgene-discover-logo.svg" />
+                </a>
+                <span class="navbar-cxg-nav-wrapper">
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Application</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/collections">Collections</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/datasets">Datasets</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                          <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/gene-expression">Gene Expression</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/cellguide">Cell Guide</a>
+                        <div style="height: 16px!important; display: flex;">
+                          <span class="beta">BETA</span>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                  <hr class="navbar-divider"/>
+                  <span class="navbar-cxg-section">
+                    <span class="navbar-cxg-nav-section-title">Census</span>
+                    <span class="navbar-cxg-nav-item-container">
+                      <span class="navbar-cxg-link active-link">
+                        <a class="navbar-cxg-anchor" href="/cellxgene-census/index.html">API</a>
+                      </span>
+                      <span class="navbar-cxg-link">
+                        <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/census-models">Models</a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+            </span>
+
+            <span class="navbar-cxg-link">
+              <a class="navbar-cxg-anchor" href="https://cellxgene.cziscience.com/docs">Help & Documentation</a>
+            </span>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100%; overflow: auto; padding-top: 56px;">
+        
+        <!-- top 56px for navbar height -->
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side" style="top: 56px;" >
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search" >
+            
+
+            
+                <a href="../../index.html" class="icon icon-home"> cellxgene-census
+            
+
+            
+            </a>
+
+            
+                
+                
+                <div class="version">
+                    1.15.0
+                </div>
+                
+            
+
+            
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+            </div>
+
+            
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+                
+                
+                
+                
+                
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_quick_start.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../articles.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_aws_open_data.html">Census in AWS ☁️</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_schema.html">Census data and schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_data_release_info.html">Census data releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Python tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#exporting-data">Exporting data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html#new-using-integrated-embeddings-and-models">[NEW! 🚀] Using integrated embeddings and models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="census_access_maintained_embeddings.html">Access CELLxGENE collaboration embeddings (scVI, Geneformer)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="census_embedding.html">Access CELLxGENE-hosted embeddings</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Find the most similar Census cells in any other data with embeddings vector search</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Loading-and-embedding-pbmc3k-cells">Loading and embedding pbmc3k cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Search-for-similar-Census-cells">Search for similar Census cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Predicting-cell-metadata">Predicting cell metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_scvi_model_use.html">scVI for cell type prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_geneformer_prediction.html">Geneformer for cell class prediction and data projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis_demo/comp_bio_embedding_exploration.html">Exploring biologically relevant clusters in Census embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#understanding-census-data">Understanding Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#analyzing-census-data">Analyzing Census data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-computing">Scalable computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples.html#scalable-machine-learning">Scalable machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://chanzuckerberg.github.io/cellxgene-census/r/index.html">R API &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cellxgene_census_docsite_FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/releases">Release notes</a></li>
+</ul>
+
+                
+            
+            </div>
+            
+        </div>
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+        
+        <nav class="wy-nav-top" aria-label="top navigation">
+            
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="../../index.html">cellxgene-census</a>
+            
+        </nav>
+
+
+        <div class="wy-nav-content">
+            
+            <div class="rst-content">
+            
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Python tutorials</a></li>
+      <li class="breadcrumb-item active">Find the most similar Census cells in any other data with embeddings vector search</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/api_demo/census_embedding_search.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+            <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+                
+  <section id="Find-the-most-similar-Census-cells-in-any-other-data-with-embeddings-vector-search">
+<h1>Find the most similar Census cells in any other data with embeddings vector search<a class="headerlink" href="#Find-the-most-similar-Census-cells-in-any-other-data-with-embeddings-vector-search" title="Permalink to this heading"></a></h1>
+<p>This tutorial demonstrates the experimental API in the Python <code class="docutils literal notranslate"><span class="pre">cellxgene_census</span></code> package to search Census embeddings using <a class="reference external" href="https://github.com/TileDB-Inc/TileDB-Vector-Search">TileDB-Vector-Search</a> indexes. We will generate <a class="reference external" href="https://docs.scvi-tools.org/en/1.0.0/tutorials/notebooks/api_overview.html">scVI embeddings</a> for some test cells, search the Census scVI embeddings for nearest neighbors, and use them to predict cell type and tissue of the test cells.</p>
+<p>To reproduce this notebook, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'cellxgene_census[experimental]'</span> <span class="pre">scvi-tools</span></code> and obtain the <a class="reference external" href="https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html">pbmc3k blood cells data</a> and scVI model:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>mkdir<span class="w"> </span>-p<span class="w"> </span>data
+<span class="o">!</span>wget<span class="w"> </span>--no-check-certificate<span class="w"> </span>-q<span class="w"> </span>-O<span class="w"> </span>data/pbmc3k_filtered_gene_bc_matrices.tar.gz<span class="w"> </span>http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz
+<span class="o">!</span>tar<span class="w"> </span>-xzf<span class="w"> </span>data/pbmc3k_filtered_gene_bc_matrices.tar.gz<span class="w"> </span>-C<span class="w"> </span>data/
+
+<span class="o">!</span>mkdir<span class="w"> </span>-p<span class="w"> </span>scvi-human-2024-02-12
+<span class="o">!</span>wget<span class="w"> </span>--no-check-certificate<span class="w"> </span>-q<span class="w"> </span>-O<span class="w"> </span>scvi-human-2024-02-12/model.pt<span class="w"> </span>https://cellxgene-contrib-public.s3.us-west-2.amazonaws.com/models/scvi/2024-02-12/homo_sapiens/model.pt
+</pre></div>
+</div>
+</div>
+<p><strong>Contents</strong></p>
+<ol class="arabic simple">
+<li><p>Loading and embedding pbmc3k cells.</p></li>
+<li><p>Search for similar Census cells.</p></li>
+<li><p>Predicting cell metadata.</p></li>
+</ol>
+<p>⚠️ Note that the Census RNA data includes duplicate cells present across multiple datasets. Duplicate cells can be filtered in or out using the cell metadata variable <code class="docutils literal notranslate"><span class="pre">is_primary_data</span></code> which is described in the <a class="reference external" href="https://github.com/chanzuckerberg/cellxgene-census/blob/main/docs/cellxgene_census_schema.md#repeated-data">Census schema</a>.</p>
+<section id="Loading-and-embedding-pbmc3k-cells">
+<h2>Loading and embedding pbmc3k cells<a class="headerlink" href="#Loading-and-embedding-pbmc3k-cells" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census</span>
+<span class="kn">import</span> <span class="nn">cellxgene_census.experimental</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">scvi</span>
+</pre></div>
+</div>
+</div>
+<p>Load the pmbc3k cell data into an AnnData:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_10x_mtx</span><span class="p">(</span><span class="s2">&quot;data/filtered_gene_bc_matrices/hg19/&quot;</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">&quot;gene_ids&quot;</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;ensembl_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;n_counts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;joinid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">n_obs</span><span class="p">))</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;batch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unassigned&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>Run them through the scVI forward pass and extract their latent representation (embedding):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scvi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SCVI</span><span class="o">.</span><span class="n">prepare_query_anndata</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="s2">&quot;scvi-human-2024-02-12&quot;</span><span class="p">)</span>
+<span class="n">vae_q</span> <span class="o">=</span> <span class="n">scvi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SCVI</span><span class="o">.</span><span class="n">load_query_data</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="s2">&quot;scvi-human-2024-02-12&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># This allows for a simple forward pass</span>
+<span class="n">vae_q</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">latent</span> <span class="o">=</span> <span class="n">vae_q</span><span class="o">.</span><span class="n">get_latent_representation</span><span class="p">()</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">latent</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-blue-fg">INFO    </span> File scvi-human-<span class="ansi-cyan-intense-fg ansi-bold">2024</span>-<span class="ansi-cyan-intense-fg ansi-bold">02</span>-<span class="ansi-cyan-intense-fg ansi-bold">12</span>/model.pt already downloaded
+<span class="ansi-blue-fg">INFO    </span> Found <span class="ansi-cyan-intense-fg ansi-bold">62.2</span>% reference vars in query data.
+<span class="ansi-blue-fg">INFO    </span> File scvi-human-<span class="ansi-cyan-intense-fg ansi-bold">2024</span>-<span class="ansi-cyan-intense-fg ansi-bold">02</span>-<span class="ansi-cyan-intense-fg ansi-bold">12</span>/model.pt already downloaded
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+</pre></div></div>
+</div>
+<p>The scVI embedding vectors for each cell are now stored in the <code class="docutils literal notranslate"><span class="pre">scvi</span></code> obsm layer. Lastly, clean up the AnnData a little:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># filter out missing features</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;gene_symbols&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;gene_symbols&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># assign placeholder cell_type and tissue_general labels</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;ensembl_id&quot;</span><span class="p">]</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Query - PBMC 10X&quot;</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_general&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Query - PBMC 10X&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>And for visualization, compute leiden clusters on the scVI embeddings. These will come at handy later on.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;leiden&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_embedding_search_13_0.png" src="../../_images/notebooks_api_demo_census_embedding_search_13_0.png" />
+</div>
+</div>
+</section>
+<section id="Search-for-similar-Census-cells">
+<h2>Search for similar Census cells<a class="headerlink" href="#Search-for-similar-Census-cells" title="Permalink to this heading"></a></h2>
+<p>Use the CELLxGENE Census experimental API to search the vector index of scVI embeddings.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">CENSUS_VERSION</span> <span class="o">=</span> <span class="s2">&quot;2023-12-15&quot;</span>
+<span class="n">neighbors</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">find_nearest_obs</span><span class="p">(</span>
+    <span class="s2">&quot;scvi&quot;</span><span class="p">,</span> <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">CENSUS_VERSION</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">adata</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">memory_GiB</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">nprobe</span><span class="o">=</span><span class="mi">20</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 58.5 s, sys: 51.6 s, total: 1min 50s
+Wall time: 31.1 s
+</pre></div></div>
+</div>
+<p>This accessed the cell embeddings in the <code class="docutils literal notranslate"><span class="pre">scvi</span></code> obsm layer and searched the latent space for the <em>k</em> nearest neighbors (by Euclidean distance) among the Census cell embeddings, returning the distances and obs <code class="docutils literal notranslate"><span class="pre">soma_joinid</span></code>s (<em>k</em> for each query cell).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">neighbors</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+NeighborObs(distances=array([[0.20243207, 0.24619222, 0.24626343, ..., 0.35771364, 0.35771364,
+        0.3578529 ],
+       [0.39633602, 0.44447878, 0.44447878, ..., 0.6018935 , 0.6035782 ,
+        0.6044336 ],
+       [0.2957943 , 0.30667636, 0.30825144, ..., 0.5521871 , 0.55521137,
+        0.55521137],
+       ...,
+       [0.13282368, 0.16312651, 0.17102817, ..., 0.34356815, 0.34431863,
+        0.34656486],
+       [0.19027619, 0.21736583, 0.22700316, ..., 0.35072052, 0.3570805 ,
+        0.35889837],
+       [0.30894524, 0.30962527, 0.33180258, ..., 0.43980873, 0.4401079 ,
+        0.4412804 ]], dtype=float32), neighbor_ids=array([[44401673, 43906736, 43372133, ..., 51544031, 51427234, 51203542],
+       [49811746, 33854211, 34746507, ..., 54523264, 50217492, 54367325],
+       [45204189, 21218542, 48424603, ..., 48028212, 53333940, 45891611],
+       ...,
+       [45215753, 15715003, 45274933, ..., 45250148, 50295473, 54128750],
+       [45149373, 48391702, 49371377, ..., 45093626, 50244751, 50243731],
+       [48417568, 45184183, 48355249, ..., 46195802, 45304896, 46134865]],
+      dtype=uint64))
+</pre></div></div>
+</div>
+<p>To explore these results, fetch an AnnData with each query cell’s (single) nearest neighbor in scVI’s latent space, including their embedding vectors:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">open_soma</span><span class="p">(</span><span class="n">census_version</span><span class="o">=</span><span class="n">CENSUS_VERSION</span><span class="p">)</span> <span class="k">as</span> <span class="n">census</span><span class="p">:</span>
+    <span class="n">neighbors_adata</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">get_anndata</span><span class="p">(</span>
+        <span class="n">census</span><span class="p">,</span>
+        <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;RNA&quot;</span><span class="p">,</span>
+        <span class="n">obs_coords</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">neighbors</span><span class="o">.</span><span class="n">neighbor_ids</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span>
+        <span class="n">obs_embeddings</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;scvi&quot;</span><span class="p">],</span>
+        <span class="n">X_name</span><span class="o">=</span><span class="s2">&quot;normalized&quot;</span><span class="p">,</span>
+        <span class="n">column_names</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;soma_joinid&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue&quot;</span><span class="p">,</span> <span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]},</span>
+    <span class="p">)</span>
+<span class="n">neighbors_adata</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">neighbors_adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;feature_id&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Make a UMAP visualization of these nearest neighbors:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">neighbors_adata</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">neighbors_adata</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">neighbors_adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tissue_general&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_embedding_search_21_0.png" src="../../_images/notebooks_api_demo_census_embedding_search_21_0.png" />
+</div>
+</div>
+<p>As expected, the nearest neighbors are largely Census blood cells, with some distinct cell type clusters.</p>
+<p>Now display the pbmc3k query cells together with their Census nearest neighbors:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata_concat</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">adata</span><span class="p">,</span> <span class="n">neighbors_adata</span><span class="p">])</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata_concat</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;scvi&quot;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_concat</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata_concat</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tissue_general&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_embedding_search_23_0.png" src="../../_images/notebooks_api_demo_census_embedding_search_23_0.png" />
+</div>
+</div>
+<p>The neighbor clusters appear to correspond to cell type heterogeneity also present in the query.</p>
+</section>
+<section id="Predicting-cell-metadata">
+<h2>Predicting cell metadata<a class="headerlink" href="#Predicting-cell-metadata" title="Permalink to this heading"></a></h2>
+<p>The experimental API also has a method to predict metadata attributes of the query cells, like <code class="docutils literal notranslate"><span class="pre">tissue_general</span></code> and <code class="docutils literal notranslate"><span class="pre">cell_type</span></code>, based on the Census nearest neighbors.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">cellxgene_census</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">predict_obs_metadata</span><span class="p">(</span>
+    <span class="s2">&quot;homo_sapiens&quot;</span><span class="p">,</span> <span class="n">CENSUS_VERSION</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;tissue_general&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_type&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">predictions</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>tissue_general</th>
+      <th>tissue_general_confidence</th>
+      <th>cell_type</th>
+      <th>cell_type_confidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>blood</td>
+      <td>0.900000</td>
+      <td>effector memory CD8-positive, alpha-beta T cell</td>
+      <td>0.266667</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>blood</td>
+      <td>0.566667</td>
+      <td>B cell</td>
+      <td>0.733333</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>blood</td>
+      <td>0.633333</td>
+      <td>CD4-positive helper T cell</td>
+      <td>0.266667</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>blood</td>
+      <td>0.766667</td>
+      <td>classical monocyte</td>
+      <td>0.633333</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>blood</td>
+      <td>1.000000</td>
+      <td>natural killer cell</td>
+      <td>0.600000</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2695</th>
+      <td>blood</td>
+      <td>0.600000</td>
+      <td>macrophage</td>
+      <td>0.300000</td>
+    </tr>
+    <tr>
+      <th>2696</th>
+      <td>blood</td>
+      <td>0.766667</td>
+      <td>plasmablast</td>
+      <td>0.500000</td>
+    </tr>
+    <tr>
+      <th>2697</th>
+      <td>blood</td>
+      <td>0.966667</td>
+      <td>B cell</td>
+      <td>0.566667</td>
+    </tr>
+    <tr>
+      <th>2698</th>
+      <td>blood</td>
+      <td>1.000000</td>
+      <td>naive B cell</td>
+      <td>0.600000</td>
+    </tr>
+    <tr>
+      <th>2699</th>
+      <td>blood</td>
+      <td>0.933333</td>
+      <td>naive thymus-derived CD4-positive, alpha-beta ...</td>
+      <td>0.466667</td>
+    </tr>
+  </tbody>
+</table>
+<p>2700 rows × 4 columns</p>
+</div></div>
+</div>
+<p>Unlike the above visualizations of <em>single</em> nearest neighbors, these predictions are informed by each query cell’s <em>k</em>=30 neighbors, with an attached confidence score.</p>
+<p>These predictions can be added to the original AnnData object for visualization.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cell_type&quot;</span><span class="p">:</span> <span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">})</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">predictions</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_embedding_search_28_0.png" src="../../_images/notebooks_api_demo_census_embedding_search_28_0.png" />
+</div>
+</div>
+<p>Now the leiden clusters calculated at the beginning can be annotated by popular vote, whereby each cluster gets assigned the most common predicted cell type from the previous step.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;predicted_consolidated_cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="k">for</span> <span class="n">leiden_cluster</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">():</span>
+    <span class="n">most_popular_type</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">leiden_cluster</span><span class="p">,]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="s2">&quot;predicted_cell_type&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">leiden_cluster</span><span class="p">,</span> <span class="s2">&quot;predicted_consolidated_cell_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">most_popular_type</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;predicted_consolidated_cell_type&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_api_demo_census_embedding_search_31_0.png" src="../../_images/notebooks_api_demo_census_embedding_search_31_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+            </div>
+            
+            </div>
+            <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="census_embedding.html" class="btn btn-neutral float-left" title="Access CELLxGENE-hosted embeddings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../analysis_demo/comp_bio_scvi_model_use.html" class="btn btn-neutral float-right" title="scVI for cell type prediction and data projection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Chan Zuckerberg Initiative.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+            </div>
+        </div>
+
+        </section>
+
+    </div>
+
+  
+
+  
+  
+    
+   
+
+</body>
+</html>
