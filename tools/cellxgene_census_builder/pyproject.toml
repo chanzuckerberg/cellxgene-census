@@ -1,6 +1,12 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
+# TODO: I've updated the build system so I can install the local version of cellxgene_census using hatch's context formatting._format_
+# This is a little half-assed, and should be either reverted or improved as we approach a release.
+# Right now the wheels/ sdists being produces may include a different set of files since there are no include/ exclude configuration values set
+# https://hatch.pypa.io/dev/config/context/ 
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+# requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+# build-backend = "setuptools.build_meta"
 
 [project]
 name = "cellxgene_census_builder"
@@ -38,8 +44,8 @@ dependencies= [
     # "tiledbsoma==1.9.3",
     # TODO (spatial): Pin tiledbsoma dependency to an actual released version after tiledbsoma spatial code has been released
     "tiledbsoma @ git+https://github.com/single-cell-data/TileDB-SOMA.git@spatial#egg=tiledbsoma&subdirectory=apis/python/",
-    # TODO (spatial): Uncomment line below to install "cellxgene-census" at an appropriate version when tiledbsoma spatial code has been released 
-    # "cellxgene-census==1.12.0",
+    # TODO (spatial): Deal with the following line before release
+    "cellxgene-census @ {root:parent:parent:uri}/api/python/cellxgene_census",
     "cellxgene-ontology-guide==1.0.0",
     "scipy==1.12.0",
     "fsspec[http]==2024.3.1",
@@ -61,6 +67,13 @@ dependencies= [
 [project.urls]
 homepage = "https://github.com/chanzuckerberg/cellxgene-census"
 repository = "https://github.com/chanzuckerberg/cellxgene-census"
+
+[tool.hatch.metadata]
+allow-direct-references = true  # This allows us to pin dependencies to specific commits during development, e.g. tiledbsoma @ git+...
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { root = "../.." }
 
 [tool.setuptools.packages.find]
 where = ["src"]
