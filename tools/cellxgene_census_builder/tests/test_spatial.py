@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import cellxgene_census
+import pandas as pd
 import pooch
 import pytest
+import tiledbsoma
 from filelock import FileLock
 
 from cellxgene_census_builder.build_soma.manifest import load_manifest
@@ -101,3 +103,20 @@ def test_spatial_build(spatial_build):
     census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
     obs = census["census_spatial"]["homo_sapiens"].obs.read().concat().to_pandas()
     assert set(obs["dataset_id"].unique()) == {d.dataset_id for d in manifest}
+
+
+def _to_df(somadf: tiledbsoma.DataFrame) -> pd.DataFrame:
+    return somadf.read().concat().to_pandas()
+
+
+def test_locations(spatial_build):
+    census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
+    spatial = census["census_spatial"]["homo_sapiens"]
+    obs_scene = _to_df(spatial["obs_scene"])
+
+    # Test that the obs_scene join id + dataset work with locations
+    for scene_id, subdf in obs_scene.groupby("scene_id"):
+        locations = _to_df(spatial["spatial"][scene_id]["obsl"]["loc"])
+        assert locations["soma_joinid"].isin(subdf["soma_joinid"]).all()
+
+    # TODO: Test that locations match the anndata

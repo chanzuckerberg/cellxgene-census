@@ -315,7 +315,13 @@ def build_step4a_add_spatial(
 
         datasets = [d for d in filtered_datasets if d.dataset_id in eb.dataset_obs_joinid_start]
 
+        # TODO: figure out how to remove this cast
         spatial_collection = cast(soma.Experiment, eb.experiment)["spatial"]
+        # Starting with an empty dataframe for the missing case
+        # obs_scenes: list[pd.DataFrame] = [
+        #     pd.DataFrame({"soma_joinid": np.array([], dtype=np.int64), "scene_id": np.array([], dtype=object)})
+        # ]
+        obs_scenes: list[pd.DataFrame] = []
 
         for d in datasets:
             logger.debug(f"Writing spatial info from {d.dataset_id}")
@@ -405,6 +411,21 @@ def build_step4a_add_spatial(
                 index_column_names=["soma_joinid"],
             ) as loc_sink:
                 loc_sink.write(loc_pa)
+
+            obs_scenes.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
+
+        if len(obs_scenes) == 0:
+            logger.warn(f"No scenes found for spatial experiment at {eb.experiment_uri}")
+            continue
+
+        logger.debug(f"Creating obs_scene table for {len(obs_scenes)} scenes")
+        obs_scene = pa.Table.from_pandas(pd.concat(obs_scenes, ignore_index=True).reset_index(drop=True))
+
+        with cast(soma.Experiment, eb.experiment).add_new_dataframe(
+            "obs_scene",
+            schema=obs_scene.schema,
+        ) as df_store:
+            df_store.write(obs_scene)
 
 
 def build_step5_save_axis_and_summary_info(
