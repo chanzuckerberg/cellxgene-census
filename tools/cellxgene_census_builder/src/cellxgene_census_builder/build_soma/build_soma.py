@@ -315,16 +315,16 @@ def build_step4a_add_spatial(
 
         datasets = [d for d in filtered_datasets if d.dataset_id in eb.dataset_obs_joinid_start]
 
-        spatial_collection = eb.experiment["spatial"]
+        spatial_collection = cast(soma.Experiment, eb.experiment)["spatial"]
 
         for d in datasets:
             logger.debug(f"Writing spatial info from {d.dataset_id}")
             scene = spatial_collection.add_new_collection(d.dataset_id)
 
             with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
-                # obs = read_elem(f["obs"])
-                # tissue_pos = read_elem(f["obsm/spatial"])
+                tissue_pos = read_elem(f["obsm/spatial"])
                 spatial_dict = read_elem(f["uns/spatial"])
+            obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
             assert len(spatial_dict) == 2, f"Found {list(spatial_collection)} in {d.dataset_h5ad_path}"
             _keys = list(spatial_dict)
@@ -361,7 +361,7 @@ def build_step4a_add_spatial(
             #     {"name": "y", "type": "space", "unit": "micrometer"},
             #     {"name": "x", "type": "space", "unit": "micrometer"},
             # ]
-
+            # Images
             image_dict = spatial_dict[library_id]["images"]
             logger.debug(f"Writing images {list(image_dict)}")
             for k, v in image_dict.items():
@@ -391,6 +391,20 @@ def build_step4a_add_spatial(
                 )
                 img_collection.set(k, image_array, use_relative_uri=True)
             img_collection.metadata.update(img_metadata)
+
+            # Locations
+            logger.debug("Writing locations")
+
+            loc = pd.DataFrame(tissue_pos, columns=["x", "y"])
+            loc["soma_joinid"] = obs["soma_joinid"].array
+            loc_pa = pa.Table.from_pandas(loc, preserve_index=False)
+            obsl = scene.add_new_collection("obsl")
+            with obsl.add_new_dataframe(
+                "loc",
+                schema=loc_pa.schema,
+                index_column_names=["soma_joinid"],
+            ) as loc_sink:
+                loc_sink.write(loc_pa)
 
 
 def build_step5_save_axis_and_summary_info(
