@@ -45,7 +45,9 @@ def validate_compatible_tiledb_storage_format(uri: str, config: Config) -> None:
 
     # Fetch associated Census array URI and its associated storage version
     census_obs_uri, census_region = get_census_obs_uri_region(config)
-    census_storage_version = tiledb.open(census_obs_uri, config={"vfs.s3.region": census_region}).schema.version
+    census_storage_version = tiledb.open(
+        census_obs_uri, config={"vfs.s3.region": census_region, "vfs.s3.no_sign_request": "true"}
+    ).schema.version
 
     if emb_storage_version != census_storage_version:
         raise ValueError("tiledb storage versions for embedding and Census are mismatched")

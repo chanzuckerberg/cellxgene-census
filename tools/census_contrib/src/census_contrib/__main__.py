@@ -95,19 +95,11 @@ def qcplots_cmd(config: Config, embedding_path: Path) -> None:
 
 
 def ingest_cmd(config: Config, embedding_path: Path) -> None:
-    args = config.args
-
     logger.info("Ingesting")
     ingest(config)
 
     logger.info("Consolidating")
     consolidate_array(embedding_path)
-
-    logger.info("Validating SOMA array")
-    validate_contrib_embedding(embedding_path, config, skip_storage_version_check=args.skip_storage_version_check)
-
-    logger.info("Creating QC umaps")
-    create_qc_plots(config, embedding_path)
 
 
 def inject_cmd(config: Config, embedding_path: Path) -> None:
