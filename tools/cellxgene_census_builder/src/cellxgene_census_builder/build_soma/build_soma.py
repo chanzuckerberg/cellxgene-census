@@ -332,7 +332,7 @@ def build_step4a_add_spatial(
                 spatial_dict = read_elem(f["uns/spatial"])
             obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
 
-            assert len(spatial_dict) == 2, f"Found {list(spatial_collection)} in {d.dataset_h5ad_path}"
+            assert len(spatial_dict) == 2, f"Found {list(spatial_dict)} in {d.dataset_h5ad_path}"
             _keys = list(spatial_dict)
             # This flag seems wholly uneccesary since you can tell by the number of keys
             _keys.remove("is_single")
