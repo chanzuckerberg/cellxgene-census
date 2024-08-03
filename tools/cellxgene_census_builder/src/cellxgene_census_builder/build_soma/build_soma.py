@@ -419,7 +419,9 @@ def build_step4a_add_spatial(
             continue
 
         logger.debug(f"Creating obs_scene table for {len(obs_scenes)} scenes")
-        obs_scene = pa.Table.from_pandas(pd.concat(obs_scenes, ignore_index=True).reset_index(drop=True))
+        obs_scene = pa.Table.from_pandas(
+            pd.concat(obs_scenes, ignore_index=True).reset_index(drop=True).astype({"scene_id": "category"})
+        )
 
         with cast(soma.Experiment, eb.experiment).add_new_dataframe(
             "obs_scene",

@@ -5,10 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import cellxgene_census
+import h5py
+import numpy as np
 import pandas as pd
 import pooch
 import pytest
 import tiledbsoma
+from anndata.experimental import read_elem
 from filelock import FileLock
 
 from cellxgene_census_builder.build_soma.manifest import load_manifest
@@ -121,3 +124,37 @@ def test_locations(spatial_build):
         assert locations["soma_joinid"].isin(subdf["soma_joinid"]).all()
 
     # TODO: Test that locations match the anndata
+
+
+def test_images(spatial_build):
+    # TODO: check the metadata of the images
+    census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
+    manifest = load_manifest(str(spatial_build.manifest_path), str(spatial_build.blocklist))
+
+    h5ads = {d.dataset_id: Path(d.dataset_asset_h5ad_uri) for d in manifest}
+    spatial = census["census_spatial"]["homo_sapiens"]["spatial"]
+
+    for dataset_id, h5ad_path in h5ads.items():
+        image_collection = spatial[dataset_id]["img"]
+        with h5py.File(h5ad_path) as f:
+            library_id = list(filter(lambda x: x != "is_single", f["uns/spatial"].keys()))[0]
+            spatial_dict = read_elem(f[f"uns/spatial/{library_id}"])
+        for k in image_collection.keys():
+            from_census = image_collection[k].read().to_numpy()
+            from_h5ad = np.transpose(spatial_dict["images"][k], (2, 0, 1))  ## TODO figure out why we do this
+            np.testing.assert_array_equal(from_h5ad, from_census)
+
+
+def test_obs_scene(spatial_build):
+    census = cellxgene_census.open_soma(uri=str(spatial_build.soma_path))
+
+    experiment = census["census_spatial"]["homo_sapiens"]
+
+    obs = _to_df(experiment.obs)
+    obs_scene = _to_df(experiment["obs_scene"])
+
+    # For Visium specifically, each observation should show up once and only once in a scene
+    assert len(obs_scene) == len(obs)
+    pd.testing.assert_frame_equal(
+        obs[["soma_joinid", "dataset_id"]], obs_scene.rename(columns={"scene_id": "dataset_id"})
+    )
