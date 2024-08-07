@@ -13,7 +13,7 @@ env:
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
-    runs-on: single-cell-8c64g-runner
+    runs-on: sc-dev-64g-runner
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
