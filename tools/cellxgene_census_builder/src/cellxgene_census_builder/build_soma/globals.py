@@ -360,6 +360,7 @@ RNA_SEQ = [
 # define the inclusive filter applied to obs.assay_ontology_term_id. All other
 ALLOWED_SPATIAL_ASSAYS = [
     "EFO:0010961",  # Visium Spatial Gene Expression
+    "EFO:0030062",  # Slide-seqV2
 ]
 
 # Full-gene assays have special handling in the "normalized" X layers
