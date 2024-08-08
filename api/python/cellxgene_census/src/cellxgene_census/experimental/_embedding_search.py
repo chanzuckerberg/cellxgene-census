@@ -179,6 +179,6 @@ def predict_obs_metadata(
             counts = g @ joinid2category
             rel_counts = counts / counts.sum(axis=1)
             out[col] = col_categorical.cat.categories[rel_counts.argmax(axis=1).A.flatten()].astype(object)
-            out[f"{col}_confidence"] = rel_counts.max(axis=1).toarray().flatten()
+            out[f"{col}_confidence"] = rel_counts.max(axis=1).A.flatten()
 
     return pd.DataFrame.from_dict(out)
