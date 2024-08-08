@@ -25,6 +25,7 @@ from .experiment_specs import make_experiment_builders
 from .globals import (
     CENSUS_DATA_NAME,
     CENSUS_INFO_NAME,
+    CENSUS_SPATIAL_NAME,
     SOMA_TileDB_Context,
 )
 from .manifest import load_manifest
@@ -99,6 +100,7 @@ def build(args: CensusBuildArgs, *, validate: bool = True) -> int:
 
         # Prune datasets that we will not use, and do not want to include in the build
         prune_unused_datasets(args.h5ads_path, datasets, filtered_datasets)
+        build_step4a_add_spatial(args.h5ads_path.as_posix(), filtered_datasets, experiment_builders, args)
 
         # Step 5- write out dataset manifest and summary information
         build_step5_save_axis_and_summary_info(
@@ -153,7 +155,7 @@ def populate_root_collection(root_collection: soma.Collection) -> soma.Collectio
     root_collection.metadata["git_commit_sha"] = sha
 
     # Create sub-collections for experiments, etc.
-    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME]:
+    for n in [CENSUS_INFO_NAME, CENSUS_DATA_NAME, CENSUS_SPATIAL_NAME]:
         root_collection.add_new_collection(n)
 
     return root_collection
@@ -198,7 +200,14 @@ def build_step2_create_root_collection(soma_path: str, experiment_builders: list
         populate_root_collection(root_collection)
 
         for e in experiment_builders:
-            e.create(census_data=root_collection[CENSUS_DATA_NAME])
+            # TODO (spatial): Confirm the decision that we are clearly separating
+            # experiments containing spatial assays from experiments not containing
+            # spatial assays. That is, an experiment should never contain assays from
+            # spatial and non-spatial modalities
+            if e.specification.is_exclusively_spatial():
+                e.create(census_data=root_collection[CENSUS_SPATIAL_NAME])
+            else:
+                e.create(census_data=root_collection[CENSUS_DATA_NAME])
 
         logger.info("Build step 2 - Create root collection - finished")
         return root_collection
@@ -275,6 +284,150 @@ def build_step4_populate_X_layers(
         eb.populate_presence_matrix(filtered_datasets)
 
     logger.info("Build step 4 - Populate X layers - finished")
+
+
+def build_step4a_add_spatial(
+    assets_path: str,
+    filtered_datasets: list[Dataset],
+    experiment_builders: list[ExperimentBuilder],
+    args: CensusBuildArgs,
+) -> None:
+    """Populate spatial info."""
+    logger.info("Build step 4a - Populate spatial info - started")
+    import h5py
+    import numpy as np
+    import pyarrow as pa
+    from anndata.experimental import read_elem
+    from tiledbsoma import (
+        Axis,
+        CompositeTransform,
+        CoordinateSystem,
+        DenseNDArray,
+        ScaleTransform,
+    )
+
+    h5ad_path = args.h5ads_path
+
+    # Add images
+    for eb in reopen_experiment_builders(experiment_builders):
+        if not eb.specification.is_exclusively_spatial():
+            continue
+
+        datasets = [d for d in filtered_datasets if d.dataset_id in eb.dataset_obs_joinid_start]
+
+        # TODO: figure out how to remove this cast
+        spatial_collection = cast(soma.Experiment, eb.experiment)["spatial"]
+        # Starting with an empty dataframe for the missing case
+        # obs_scenes: list[pd.DataFrame] = [
+        #     pd.DataFrame({"soma_joinid": np.array([], dtype=np.int64), "scene_id": np.array([], dtype=object)})
+        # ]
+        obs_scenes: list[pd.DataFrame] = []
+
+        for d in datasets:
+            logger.debug(f"Writing spatial info from {d.dataset_id}")
+            scene = spatial_collection.add_new_collection(d.dataset_id)
+
+            with h5py.File(h5ad_path / d.dataset_h5ad_path) as f:
+                tissue_pos = read_elem(f["obsm/spatial"])
+                spatial_dict = read_elem(f["uns/spatial"])
+            obs = cast(pd.DataFrame, eb.obs_df).query(f"dataset_id == '{d.dataset_id}'")
+
+            assert len(spatial_dict) == 2, f"Found {list(spatial_dict)} in {d.dataset_h5ad_path}"
+            _keys = list(spatial_dict)
+            # This flag seems wholly uneccesary since you can tell by the number of keys
+            _keys.remove("is_single")
+            library_id = _keys[0]
+            del _keys
+
+            scale_factors = spatial_dict[library_id]["scalefactors"]
+            # tissue_pos_df = pd.DataFrame(
+            #     tissue_pos,
+            #     index=obs.index.rename("barcode"),
+            #     columns=["pxl_col_in_fullres", "pxl_row_in_fullres"]
+            # )
+
+            # pixels_per_spot_radius = 0.5 * scale_factors["spot_diameter_fullres"]
+            fullres_to_coords_scale = 65 / scale_factors["spot_diameter_fullres"]
+
+            # Create axes and transformations
+            coordinate_system = CoordinateSystem(
+                (
+                    Axis(axis_name="y", axis_type="space", axis_unit="micrometer"),
+                    Axis(axis_name="x", axis_type="space", axis_unit="micrometer"),
+                )
+            )
+
+            spots_to_coords = CompositeTransform((ScaleTransform((fullres_to_coords_scale, fullres_to_coords_scale)),))
+
+            scene.metadata["soma_scene_coordinates"] = coordinate_system.to_json()
+            img_collection = scene.add_new_collection("img")
+            img_metadata = {"soma_scene_coords": spots_to_coords.to_json()}
+            # axes_metadata = [
+            #     {"name": "c", "type": "channel"},
+            #     {"name": "y", "type": "space", "unit": "micrometer"},
+            #     {"name": "x", "type": "space", "unit": "micrometer"},
+            # ]
+            # Images
+            image_dict = spatial_dict[library_id]["images"]
+            logger.debug(f"Writing images {list(image_dict)}")
+            for k, v in image_dict.items():
+                if k == "fullres":
+                    scale = (1.0, 1.0, 1.0)
+                elif k == "hires":
+                    scale = (1.0, scale_factors["tissue_hires_scalef"], scale_factors["tissue_hires_scalef"])
+                elif k == "lowres":
+                    scale = (1.0, scale_factors["tissue_lowres_scalef"], scale_factors["tissue_lowres_scalef"])
+                else:
+                    raise ValueError(f"Unexpected image name: {k}")
+
+                img_metadata[f"soma_asset_transform_{k}"] = CompositeTransform((ScaleTransform(scale),)).to_json()
+                image_uri = f"{img_collection.uri}/{k}"
+                im = np.transpose(v, (2, 0, 1))
+                image_array = DenseNDArray.create(
+                    image_uri,
+                    type=pa.from_numpy_dtype(im.dtype),
+                    shape=im.shape,
+                    # platform_config=platform_config,
+                    # context=context,
+                )
+                tensor = pa.Tensor.from_numpy(im)
+                image_array.write(
+                    (slice(None), slice(None), slice(None)),
+                    tensor,
+                )
+                img_collection.set(k, image_array, use_relative_uri=True)
+            img_collection.metadata.update(img_metadata)
+
+            # Locations
+            logger.debug("Writing locations")
+
+            loc = pd.DataFrame(tissue_pos, columns=["x", "y"])
+            loc["soma_joinid"] = obs["soma_joinid"].array
+            loc_pa = pa.Table.from_pandas(loc, preserve_index=False)
+            obsl = scene.add_new_collection("obsl")
+            with obsl.add_new_dataframe(
+                "loc",
+                schema=loc_pa.schema,
+                index_column_names=["soma_joinid"],
+            ) as loc_sink:
+                loc_sink.write(loc_pa)
+
+            obs_scenes.append(obs[["soma_joinid", "dataset_id"]].rename(columns={"dataset_id": "scene_id"}))
+
+        if len(obs_scenes) == 0:
+            logger.warn(f"No scenes found for spatial experiment at {eb.experiment_uri}")
+            continue
+
+        logger.debug(f"Creating obs_scene table for {len(obs_scenes)} scenes")
+        obs_scene = pa.Table.from_pandas(
+            pd.concat(obs_scenes, ignore_index=True).reset_index(drop=True).astype({"scene_id": "category"})
+        )
+
+        with cast(soma.Experiment, eb.experiment).add_new_dataframe(
+            "obs_scene",
+            schema=obs_scene.schema,
+        ) as df_store:
+            df_store.write(obs_scene)
 
 
 def build_step5_save_axis_and_summary_info(

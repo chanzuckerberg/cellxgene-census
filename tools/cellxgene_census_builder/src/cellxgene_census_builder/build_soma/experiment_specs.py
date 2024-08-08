@@ -1,7 +1,7 @@
 import functools
 
 from .experiment_builder import ExperimentBuilder, ExperimentSpecification
-from .globals import RNA_SEQ
+from .globals import ALLOWED_SPATIAL_ASSAYS, RNA_SEQ
 
 
 @functools.cache
@@ -27,6 +27,25 @@ def make_experiment_specs() -> list[ExperimentSpecification]:
             anndata_cell_filter_spec={
                 "organism_ontology_term_id": "NCBITaxon:10090",
                 "assay_ontology_term_ids": RNA_SEQ,
+            },
+            organism_ontology_term_id="NCBITaxon:10090",
+        ),
+        # Experiments for spatial assays
+        ExperimentSpecification.create(
+            name="homo_sapiens",
+            label="Homo sapiens",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:9606",
+                "assay_ontology_term_ids": ALLOWED_SPATIAL_ASSAYS,
+            },
+            organism_ontology_term_id="NCBITaxon:9606",
+        ),
+        ExperimentSpecification.create(
+            name="mus_musculus",
+            label="Mus musculus",
+            anndata_cell_filter_spec={
+                "organism_ontology_term_id": "NCBITaxon:10090",
+                "assay_ontology_term_ids": ALLOWED_SPATIAL_ASSAYS,
             },
             organism_ontology_term_id="NCBITaxon:10090",
         ),
