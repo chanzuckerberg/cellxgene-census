@@ -62,7 +62,7 @@ task init_embeddings_array {
             type=pa.float32(),
             shape=(2**31-2, ~{embedding_dim}),
             context = tiledbsoma.options.SOMATileDBContext(
-                tiledb_ctx=tiledb.Ctx({"vfs.s3.region": '~{s3_region}'})
+                tiledb_config={"vfs.s3.region": '~{s3_region}'}
             )
         ).close()
         EOF

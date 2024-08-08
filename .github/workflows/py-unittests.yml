@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't stop the workflow if one of the jobs fails
       matrix:
-        os: [single-cell-8c64g-runner, macos-latest]
+        os: [sc-dev-64g-runner, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           - os: macos-latest
@@ -61,7 +61,7 @@ jobs:
   unit_tests_builder:
     strategy:
       matrix:
-        os: [single-cell-8c64g-runner]
+        os: [sc-dev-64g-runner]
         python-version: ["3.11"]
 
     runs-on: ${{matrix.os}}
